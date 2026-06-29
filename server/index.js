@@ -85,7 +85,7 @@ app.set("trust proxy", 1);
 app.use((req, res, next) => {
   res.setHeader(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' http://localhost:* ws://localhost:* https://serianaserver.omnisuite-erp.com wss://serianaserver.omnisuite-erp.com https://serianamart.omnisuite-erp.com;"
+    "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' http://localhost:* ws://localhost:* https://demoserver.omnisuite-erp.com wss://demoserver.omnisuite-erp.com https://demo.omnisuite-erp.com;",
   );
   next();
 });
@@ -116,7 +116,8 @@ const allowedOrigins = (() => {
     "http://127.0.0.1:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5174",
-    "https://serianamart.omnisuite-erp.com",
+    // "https://demo.omnisuite-erp.com",
+    "https://demo.omnisuite-erp.com",
   ];
 })();
 
@@ -150,7 +151,10 @@ const apiLimiter = rateLimit({
   max: 300,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "TOO_MANY_REQUESTS", message: "Too many requests, please try again later" },
+  message: {
+    error: "TOO_MANY_REQUESTS",
+    message: "Too many requests, please try again later",
+  },
   skip: (req) => req.path === "/api/health" || req.path === "/api/ping",
 });
 app.use("/api", apiLimiter);
@@ -379,7 +383,7 @@ app.get("/api/ping", (_req, res) => res.json({ ok: true }));
           KEY idx_visit_date (visit_date),
           KEY idx_status (status),
           KEY idx_department (department_visited)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
       );
       console.log("svc_visitors_log table ensured");
     } catch (e) {
@@ -622,16 +626,20 @@ const server = http.createServer(app);
 
 // Timeouts to avoid long-hanging connections in managed hosting
 try {
-  const keepAliveMs = process.env.KEEP_ALIVE_TIMEOUT_MS ? Number(process.env.KEEP_ALIVE_TIMEOUT_MS) : 0;
+  const keepAliveMs = process.env.KEEP_ALIVE_TIMEOUT_MS
+    ? Number(process.env.KEEP_ALIVE_TIMEOUT_MS)
+    : 0;
   const headersMs = Number(process.env.HEADERS_TIMEOUT_MS || 65000);
-  const requestMs = process.env.REQUEST_TIMEOUT_MS ? Number(process.env.REQUEST_TIMEOUT_MS) : undefined;
-  
+  const requestMs = process.env.REQUEST_TIMEOUT_MS
+    ? Number(process.env.REQUEST_TIMEOUT_MS)
+    : undefined;
+
   // This is CRITICAL for Plesk HTTP/2 + Nginx + Passenger environments.
   // Setting this to 0 forces Node to send Connection: close,
   // preventing Nginx from passing keep-alive to HTTP/2 clients which causes ERR_HTTP2_PROTOCOL_ERROR.
   server.keepAliveTimeout = keepAliveMs;
   server.headersTimeout = headersMs;
-  
+
   if (requestMs !== undefined && Number.isFinite(requestMs)) {
     server.requestTimeout = requestMs;
   }
@@ -666,7 +674,9 @@ if (process.env.NODE_ENV !== "test") {
         console.log(`Mailer verified: ${ok ? "yes" : "no"}`);
       })
       .catch((error) => {
-        console.error(`[Mailer] verification failed: ${error?.message || error}`);
+        console.error(
+          `[Mailer] verification failed: ${error?.message || error}`,
+        );
       });
     (async () => {
       try {
@@ -881,18 +891,24 @@ if (process.env.NODE_ENV !== "test") {
       try {
         await runLowStockAlerts();
         lastLowStockSlotKey = slotKey;
-        console.log(`[LowStockScheduler] Completed scheduled run at ${slotKey}:00`);
+        console.log(
+          `[LowStockScheduler] Completed scheduled run at ${slotKey}:00`,
+        );
       } finally {
         lowStockRunInProgress = false;
       }
     }
     setInterval(() => {
       runLowStockAlertsOnSchedule().catch((e) =>
-        console.log(`[LowStockScheduler] Schedule check failed: ${e?.message || e}`),
+        console.log(
+          `[LowStockScheduler] Schedule check failed: ${e?.message || e}`,
+        ),
       );
     }, 30 * 1000);
     runLowStockAlertsOnSchedule().catch((e) =>
-      console.log(`[LowStockScheduler] Initial schedule check failed: ${e?.message || e}`),
+      console.log(
+        `[LowStockScheduler] Initial schedule check failed: ${e?.message || e}`,
+      ),
     );
   });
 }
