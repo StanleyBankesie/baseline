@@ -1,5 +1,11 @@
+/**
+ * @fileoverview QuotationForm component.
+ * Provides functionality for QuotationForm.
+ */
+
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import { api } from "api/client";
 import { useAuth } from "../../../../auth/AuthContext.jsx";
 import {
@@ -71,6 +77,11 @@ const COUNTRIES = [
   "Other",
 ];
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function QuotationForm() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -1122,7 +1133,7 @@ export default function QuotationForm() {
         await api.post("/sales/quotations", cleanedPayload);
       }
 
-      setSuccessMessage(
+      toast.success(
         isEditMode
           ? "Quotation updated successfully."
           : "Quotation created successfully.",

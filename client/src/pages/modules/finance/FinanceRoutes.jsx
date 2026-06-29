@@ -1,3 +1,8 @@
+/**
+ * @fileoverview FinanceRoutes component.
+ * Provides functionality for FinanceRoutes.
+ */
+
 import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
@@ -18,6 +23,7 @@ import DebitNoteList from "./vouchers/DebitNoteList.jsx";
 import DebitNoteForm from "./vouchers/DebitNoteForm.jsx";
 import CreditNoteList from "./vouchers/CreditNoteList.jsx";
 import CreditNoteForm from "./vouchers/CreditNoteForm.jsx";
+import VoucherImportPage from "./vouchers/VoucherImportPage.jsx";
 import VoucherRegisterReportPage from "./reports/VoucherRegisterReportPage.jsx";
 import TrialBalanceReportPage from "./reports/TrialBalanceReportPage.jsx";
 import JournalReportPage from "./reports/JournalReportPage.jsx";
@@ -50,6 +56,11 @@ import FinanceDashboardPage from "./FinanceDashboardPage.jsx";
 import BankReconciliationsReportPage from "./banking/reports/BankReconciliationsReportPage.jsx";
 import BankReconciliationTransactionReportPage from "./banking/reports/BankReconciliationTransactionReportPage.jsx";
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function FinanceRoutes() {
   return (
     <Routes>
@@ -189,6 +200,8 @@ export default function FinanceRoutes() {
         path="credit-note/:id"
         element={<CreditNoteForm />}
       />
+
+      <Route path="import" element={<VoucherImportPage />} />
 
       <Route path="account-groups" element={<AccountGroupsPage />} />
       <Route path="accounts" element={<AccountsPage />} />

@@ -1371,11 +1371,10 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
       const html =
         typeof resp.data === "string" ? resp.data : String(resp.data || "");
       const iframe = document.createElement("iframe");
-      iframe.style.position = "fixed";
-      iframe.style.right = "0";
-      iframe.style.bottom = "0";
-      iframe.style.width = "0";
-      iframe.style.height = "0";
+      iframe.style.position = "absolute";
+      iframe.style.left = "-9999px";
+      iframe.style.width = "800px";
+      iframe.style.height = "600px";
       iframe.style.border = "0";
       document.body.appendChild(iframe);
       const doc =
@@ -1399,7 +1398,17 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
           document.body.removeChild(iframe);
         }, 100);
       };
-      setTimeout(doPrint, 200);
+      const waitForImages = () => {
+        const images = doc.querySelectorAll("img");
+        if (images.length === 0) { doPrint(); return; }
+        let loaded = 0;
+        images.forEach((img) => {
+          if (img.complete) { loaded++; if (loaded === images.length) doPrint(); return; }
+          img.onload = () => { loaded++; if (loaded === images.length) doPrint(); };
+          img.onerror = () => { loaded++; if (loaded === images.length) doPrint(); };
+        });
+      };
+      setTimeout(waitForImages, 200);
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to print voucher");
     }
@@ -3017,19 +3026,7 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
                     disabled={readOnly}
                   />
                 </div>
-                {isJV && (
-                  <div className="md:col-span-3">
-                    <label className="label">Narration</label>
-                    <input
-                      className="input"
-                      value={narration}
-                      onChange={(e) => setNarration(e.target.value)}
-                      placeholder="Optional narration"
-                      disabled={readOnly}
-                    />
-                  </div>
-                )}
-                {(isPAYV || isRV || isCV || isSV || isPAYV) && (
+                {(isPAYV || isRV || isCV) && (
                   <div className="md:col-span-3">
                     <label className="label font-bold text-brand">
                       Narration *
@@ -3471,7 +3468,7 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
         </form>
         {showForwardModal ? (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg w-[640px] max-w-[95%]">
+            <div className="bg-white rounded-lg shadow-erp w-full max-w-md">
               <div className="p-4 border-b flex justify-between items-center bg-brand text-white rounded-t-lg">
                 <div className="font-semibold">
                   Forward Receipt Voucher for Approval
@@ -4553,7 +4550,7 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
         </form>
         {showForwardModal ? (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg w-[640px] max-w-[95%]">
+            <div className="bg-white rounded-lg shadow-erp w-full max-w-md">
               <div className="p-4 border-b flex justify-between items-center bg-brand text-white rounded-t-lg">
                 <div className="font-semibold">
                   Forward Contra Voucher for Approval
@@ -4780,7 +4777,7 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
                     disabled={readOnly}
                   />
                 </div>
-                {!(isPAYV || isRV || isCV) && (
+                {(isDN || isCN) && (
                   <div className="md:col-span-3">
                     <label className="label font-bold text-brand">
                       Description *
@@ -5661,7 +5658,7 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
         </form>
         {showForwardModal ? (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg w-[640px] max-w-[95%]">
+            <div className="bg-white rounded-lg shadow-erp w-full max-w-md">
               <div className="p-4 border-b flex justify-between items-center bg-brand text-white rounded-t-lg">
                 <div className="font-semibold">
                   Forward Payment Voucher for Approval
@@ -6136,7 +6133,7 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
         </form>
         {showForwardModal ? (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg w-[640px] max-w-[95%]">
+            <div className="bg-white rounded-lg shadow-erp w-full max-w-md">
               <div className="p-4 border-b flex justify-between items-center bg-brand text-white rounded-t-lg">
                 <div className="font-semibold">
                   Forward Contra Voucher for Approval

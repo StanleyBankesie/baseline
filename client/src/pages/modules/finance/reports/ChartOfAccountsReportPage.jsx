@@ -1,3 +1,8 @@
+/**
+ * @fileoverview ChartOfAccountsReportPage component.
+ * Provides functionality for ChartOfAccountsReportPage.
+ */
+
 import React, { useEffect, useMemo, useState } from "react";
 import { api } from "../../../../api/client.js";
 import * as XLSX from "xlsx";
@@ -5,6 +10,11 @@ import { autosizeWorksheetColumns } from "../../../../utils/xlsxUtils.js";
 import { Guard } from "../../../../hooks/usePermissions.jsx";
 import { Link } from "react-router-dom";
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function ChartOfAccountsReportPage() {
   const [items, setItems] = useState([]);
   const [search, setSearch] = useState("");
@@ -68,7 +78,7 @@ export default function ChartOfAccountsReportPage() {
               Visual table of accounts grouped by parent groups. Export to Excel.
             </p>
           </div>
-          <Link to="/finance" className="btn-secondary text-sm">
+          <Link to="/finance" className="font-sans btn-secondary text-sm">
             Back to Finance
           </Link>
         </div>

@@ -1,4 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
+/**
+ * @fileoverview StockAdjustmentForm component.
+ * Provides functionality for StockAdjustmentForm.
+ */
+
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Link,
   useNavigate,
@@ -12,6 +17,11 @@ import { useUoms } from "@/hooks/useUoms";
 import UnitConversionModal from "@/components/UnitConversionModal";
 import { filterByPrefix } from "@/utils/searchUtils.js";
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function StockAdjustmentForm() {
   const { uoms, loading: uomsLoading } = useUoms();
   const { id } = useParams();
@@ -108,6 +118,9 @@ export default function StockAdjustmentForm() {
         // ignore; server will still auto-generate on save
       });
   }, [isNew]);
+
+  const skipStockRefresh = useRef(false);
+
   useEffect(() => {
     if (isNew) {
       const id = Date.now();
@@ -136,6 +149,7 @@ export default function StockAdjustmentForm() {
       .get(`/inventory/stock-adjustments/${id}`)
       .then((res) => {
         if (!mounted) return;
+        skipStockRefresh.current = true;
         const a = res.data?.item;
         const details = Array.isArray(res.data?.details)
           ? res.data.details
@@ -170,7 +184,7 @@ export default function StockAdjustmentForm() {
         setItems(mappedItems);
         const initQueries = {};
         mappedItems.forEach((i) => {
-          initQueries[i.id] = "";
+          initQueries[i.id] = i.itemName || i.itemCode || "";
         });
         setItemQueries(initQueries);
       })
@@ -311,6 +325,10 @@ export default function StockAdjustmentForm() {
 
   // Refresh all stocks when warehouseId changes
   useEffect(() => {
+    if (skipStockRefresh.current) {
+      skipStockRefresh.current = false;
+      return;
+    }
     if (!formData.warehouseId || !items.length) return;
 
     const refreshAllStocks = async () => {

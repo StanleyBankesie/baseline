@@ -1,7 +1,14 @@
-import React, { useMemo, useState, useEffect } from "react";
+/**
+ * @fileoverview ServiceOrderForm component.
+ * Provides functionality for ServiceOrderForm.
+ */
+
+import React, { useState, useEffect } from "react";
 import { api } from "../../../../api/client";
+import { useAuth } from "../../../../auth/AuthContext.jsx";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { Trash2 } from "lucide-react";
 
 function toYmd(date) {
   try {
@@ -14,15 +21,14 @@ function toYmd(date) {
     return "";
   }
 }
-function SummaryBox({ html }) {
-  return (
-    <div className="card">
-      <div className="card-body" dangerouslySetInnerHTML={{ __html: html }} />
-    </div>
-  );
-}
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function ServiceOrderForm() {
+
   const navigate = useNavigate();
   const params = useParams();
   const editId = params.id ? String(params.id) : "";
@@ -44,6 +50,7 @@ export default function ServiceOrderForm() {
   });
   const [intService, setIntService] = useState({
     servCat: "",
+    servType: "",
     items: [],
   });
   const [intSchedule, setIntSchedule] = useState({
@@ -59,6 +66,16 @@ export default function ServiceOrderForm() {
     email: "",
     phone: "",
   });
+
+  const { user } = useAuth();
+  React.useEffect(() => {
+    if (user) {
+      setExtRequestor((p) => ({
+        ...p,
+        name: p.name || user.full_name || user.username || "",
+      }));
+    }
+  }, [user]);
   const [extContractor, setExtContractor] = useState({
     name: "",
     id: "",
@@ -70,8 +87,47 @@ export default function ServiceOrderForm() {
   const [selectedServiceRequisitionId, setSelectedServiceRequisitionId] =
     useState("");
   const [contractors, setContractors] = useState([]);
+  
+  const [extService, setExtService] = useState({ items: [] });
+  function addExtServiceItem() {
+    setExtService((p) => ({
+      ...p,
+      items: [
+        ...p.items,
+        { id: crypto.randomUUID(), item_id: "", desc: "", qty: 1, price: 0, sub: 0 },
+      ],
+    }));
+  }
+  function updateExtItem(id, key, value) {
+    setExtService((p) => {
+      const items = p.items.map((it) => {
+        if (it.id === id) {
+          const next = { ...it, [key]: value };
+          if (key === "item_id") {
+            const selected = serviceItems.find((s) => String(s.id) === String(value)) || null;
+            if (selected) {
+              next.desc = selected.item_name || next.desc;
+              const sp = Number(selected.selling_price || 0);
+              if (Number.isFinite(sp)) next.price = sp;
+            }
+          }
+          const qty = parseFloat(next.qty || 0);
+          const price = parseFloat(next.price || 0);
+          next.sub = qty * price;
+          return next;
+        }
+        return it;
+      });
+      return { ...p, items };
+    });
+  }
+  function removeExtItem(id) {
+    setExtService((p) => ({ ...p, items: p.items.filter((it) => it.id !== id) }));
+  }
+
   const [extReqs, setExtReqs] = useState({
     cat: "",
+    type: "",
     scope: "",
   });
   const [extTimeline, setExtTimeline] = useState({
@@ -88,6 +144,9 @@ export default function ServiceOrderForm() {
   const [currencies, setCurrencies] = useState([]);
   const [serviceCategories, setServiceCategories] = useState([]);
   const [workLocations, setWorkLocations] = useState([]);
+  const [timeSlots, setTimeSlots] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [customerSearch, setCustomerSearch] = useState("");
 
   const [permissions, setPermissions] = useState({});
 
@@ -208,6 +267,16 @@ export default function ServiceOrderForm() {
     fetchServiceCategories();
     fetchWorkLocations();
     fetchCurrencies();
+    async function fetchTimeSlots() {
+      try {
+        const resp = await api.get("/purchase/service-setup/time-slots");
+        const rows = Array.isArray(resp.data?.items) ? resp.data.items : [];
+        if (mounted) setTimeSlots(rows);
+      } catch {
+        if (mounted) setTimeSlots([]);
+      }
+    }
+    fetchTimeSlots();
     async function fetchSupervisors() {
       try {
         const resp = await api.get("/purchase/service-setup/supervisors");
@@ -218,6 +287,16 @@ export default function ServiceOrderForm() {
       }
     }
     fetchSupervisors();
+    async function fetchCustomers() {
+      try {
+        const resp = await api.get("/sales/customers");
+        const rows = Array.isArray(resp.data?.items) ? resp.data.items : [];
+        if (mounted) setCustomers(rows);
+      } catch {
+        if (mounted) setCustomers([]);
+      }
+    }
+    fetchCustomers();
     async function fetchForEdit() {
       if (!editId) return;
       try {
@@ -235,6 +314,7 @@ export default function ServiceOrderForm() {
           });
           setIntService({
             servCat: item.service_category || "",
+            servType: item.service_type || "",
             items: lines.map((ln) => ({
               id: crypto.randomUUID(),
               item_id: ln.item_id || "",
@@ -337,12 +417,13 @@ export default function ServiceOrderForm() {
       setIntService((p) => ({
         ...p,
         servCat: catMap[catRaw] || p.servCat || "",
+        servType: it.service_type || "",
       }));
-      setIntSchedule({
-        addr: it.requester_address || "",
+      setIntSchedule((p) => ({
+        ...p,
         date: it.preferred_date || "",
         time: it.preferred_time || "",
-      });
+      }));
     } catch {
       // ignore
     }
@@ -397,49 +478,11 @@ export default function ServiceOrderForm() {
     }));
   }
 
-  const intSummaryHtml = useMemo(() => {
-    let total = 0;
-    const baseSymbol =
-      currencies.find((c) => Number(c.is_base) === 1)?.symbol ||
-      currencies.find((c) => String(c.code).toUpperCase() === "GHS")?.symbol ||
-      "₵" ||
-      "₵";
-    let html = '<div class="sum-item"><strong>Services</strong></div>';
-    for (const it of intService.items) {
-      const desc = String(it.desc || "Service");
-      const qty = parseFloat(it.qty || 0);
-      const price = parseFloat(it.price || 0);
-      const sub = qty * price;
-      if (sub > 0) {
-        html += `<div class="sum-item"><span>${desc} (x${qty})</span><span>${baseSymbol}${sub.toFixed(
-          2,
-        )}</span></div>`;
-      }
-      total += sub;
-    }
-    if (intCustType === "existing") {
-      const disc = total * 0.1;
-      html += `<div class="sum-item"><span>Discount (10%)</span><span style="color:#27ae60">-${baseSymbol}${disc.toFixed(
-        2,
-      )}</span></div>`;
-      total -= disc;
-    }
-    if (total > 0) {
-      html += `<div class="sum-total"><span>Total</span><span>${baseSymbol}${total.toFixed(
-        2,
-      )}</span></div>`;
-    } else {
-      html =
-        '<p style="text-align:center;color:#7f8c8d;padding:20px">Add services to see summary</p>';
-    }
-    return html;
-  }, [intService.items, intCustType, currencies]);
-
   function resetInternal() {
     setIntCustType("");
     setIntExisting({ custId: "", accEmail: "" });
     setIntPerson({ customer: "", email: "", phone: "" });
-    setIntService({ servCat: "", items: [] });
+    setIntService({ servCat: "", servType: "", items: [] });
     setIntSchedule({ addr: "", date: "", time: "" });
   }
 
@@ -475,6 +518,7 @@ export default function ServiceOrderForm() {
       customer_email: intPerson.email || null,
       customer_phone: intPerson.phone || null,
       service_category: intService.servCat || null,
+      service_type: intService.servType || null,
       schedule_address: intSchedule.addr || null,
       schedule_date: intSchedule.date || null,
       schedule_time: intSchedule.time || null,
@@ -507,13 +551,27 @@ export default function ServiceOrderForm() {
         navigate("/service-management/service-orders");
       })
       .catch(() => {
-        alert("Failed to submit service order");
+        toast.error("Failed to submit service order");
       });
   }
 
   function submitExternal(e) {
-    e.preventDefault();
-    const payload = {
+      e.preventDefault();
+      const lines = (extService.items || []).map((it) => {
+        const qty = parseFloat(it.qty || 0);
+        const price = parseFloat(it.price || 0);
+        return {
+          item_id: it.item_id || null,
+          item_name: serviceItems.find((s) => String(s.id) === String(it.item_id))?.item_name || null,
+          description: it.desc || null,
+          qty,
+          unit_price: price,
+          line_total: qty * price,
+        };
+      });
+      const total = lines.reduce((sum, l) => sum + Number(l.line_total || 0), 0);
+      const payload = {
+        lines,
       order_type: "EXTERNAL",
       department: extDept.dept || null,
       cost_center: extDept.cost || null,
@@ -524,15 +582,19 @@ export default function ServiceOrderForm() {
       contractor_name: extContractor.name || null,
       contractor_code: extContractor.id || null,
       contractor_email: extContractor.email || null,
+        customer_name: extContractor.name || null,
+        customer_email: extContractor.email || null,
+        service_category: extReqs.cat || null,
       contractor_phone: extContractor.phone || null,
       ext_category: extReqs.cat || null,
+        service_type: extReqs.type || null,
       scope_of_work: extReqs.scope || null,
       work_location: extTimeline.loc || null,
       start_date: extTimeline.start || null,
       end_date: extTimeline.end || null,
       estimated_cost: extBudget.estCost || null,
       currency_code: extBudget.currency || null,
-      total_amount: Number(extBudget.estCost || 0),
+      total_amount: total || Number(extBudget.estCost || 0),
       assigned_supervisor_user_id: selectedSupervisorId
         ? Number(selectedSupervisorId)
         : null,
@@ -549,12 +611,16 @@ export default function ServiceOrderForm() {
       .then((resp) => {
         const createdId = resp?.data?.id || null;
         if (createdId && selectedServiceRequisitionId) {
-          api
-            .post(
-              `/purchase/general-requisitions/${selectedServiceRequisitionId}/link`,
-              { ref_type: "SERVICE_ORDER", ref_id: Number(createdId) },
-            )
-            .catch(() => {});
+          const [src, rid] = String(selectedServiceRequisitionId).split(":");
+          const numId = Number(rid);
+          if (src === "gr" && Number.isFinite(numId) && numId > 0) {
+            api
+              .post(
+                `/purchase/general-requisitions/${numId}/link`,
+                { ref_type: "SERVICE_ORDER", ref_id: Number(createdId) },
+              )
+              .catch(() => {});
+          }
         }
         const num =
           resp?.data?.order_no ||
@@ -569,7 +635,7 @@ export default function ServiceOrderForm() {
         navigate("/service-management/service-orders");
       })
       .catch(() => {
-        alert("Failed to submit service order");
+        toast.error("Failed to submit service order");
       });
   }
 
@@ -602,76 +668,144 @@ export default function ServiceOrderForm() {
                 Internal services and external contractor orders
               </p>
             </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                className={
-                  activeTab === "internal" ? "btn-primary" : "btn-secondary"
-                }
-                onClick={() => setActiveTab("internal")}
-              >
-                Internal
-              </button>
-              <button
-                type="button"
-                className={
-                  activeTab === "external" ? "btn-primary" : "btn-secondary"
-                }
-                onClick={() => setActiveTab("external")}
-              >
-                External
-              </button>
-            </div>
           </div>
         </div>
 
         <div className="card-body">
-          {activeTab === "internal" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <form onSubmit={submitInternal}>
-                  <div className="group">
-                    <label>
-                      Link Service Request <span className="req">*</span>
-                    </label>
-                    <select
-                      className="input"
-                      onChange={(e) => loadServiceRequest(e.target.value)}
-                    >
-                      <option value="">-- Select Service Request --</option>
-                      {serviceRequests.map((sr) => (
-                        <option key={sr.id} value={sr.id}>
-                          {sr.request_no} • {sr.requester_full_name} •{" "}
-                          {sr.service_type}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <button
+              type="button"
+              className={`p-4 rounded-lg border-2 text-left transition ${
+                activeTab === "internal"
+                  ? "border-brand-500 bg-brand-50 dark:bg-brand-900/20"
+                  : "border-slate-200 hover:border-brand-300 dark:border-slate-700"
+              }`}
+              onClick={() => setActiveTab("internal")}
+            >
+              <div className="font-semibold text-lg text-slate-800 dark:text-slate-200">
+                Internal Service
+              </div>
+              <div className="text-sm text-slate-500 mt-1">
+                Process an order for internal services and operations.
+              </div>
+            </button>
+            <button
+              type="button"
+              className={`p-4 rounded-lg border-2 text-left transition ${
+                activeTab === "external"
+                  ? "border-brand-500 bg-brand-50 dark:bg-brand-900/20"
+                  : "border-slate-200 hover:border-brand-300 dark:border-slate-700"
+              }`}
+              onClick={() => setActiveTab("external")}
+            >
+              <div className="font-semibold text-lg text-slate-800 dark:text-slate-200">
+                External Contractor
+              </div>
+              <div className="text-sm text-slate-500 mt-1">
+                Process an order for an external contractor or vendor.
+              </div>
+            </button>
+          </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                    <div className="group md:col-span-2">
-                      <label>
+          {activeTab === "internal" && (
+            <div className="flex flex-col gap-6">
+              <div className="w-full">
+                <form onSubmit={submitInternal}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div className="group">
+                      <label className="label">
+                        Link Service Request <span className="req">*</span>
+                      </label>
+                      <select
+                        className="input w-full"
+                        onChange={(e) => loadServiceRequest(e.target.value)}
+                      >
+                        <option value="">-- Select Service Request --</option>
+                        {serviceRequests.map((sr) => (
+                          <option key={sr.id} value={sr.id}>
+                            {sr.request_no} • {sr.requester_full_name} •{" "}
+                            {sr.service_type}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="group">
+                      <label className="label">
                         Customer <span className="req">*</span>
                       </label>
-                      <input
-                        className="input"
-                        value={intPerson.customer}
-                        onChange={(e) =>
-                          setIntPerson((p) => ({
-                            ...p,
-                            customer: e.target.value,
-                          }))
-                        }
-                        placeholder="Company / Customer name"
-                        required
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          className="input w-full"
+                          placeholder="Search customer..."
+                          value={intPerson.customer || customerSearch}
+                          onChange={(e) => {
+                            setCustomerSearch(e.target.value);
+                            setIntPerson((p) => ({
+                              ...p,
+                              customer: "",
+                              email: "",
+                              phone: "",
+                            }));
+                          }}
+                          required
+                        />
+                        {customerSearch && !intPerson.customer && (
+                          (() => {
+                            const q = customerSearch.toLowerCase();
+                            const matched = customers.filter(
+                              (c) =>
+                                String(c.customer_name || "").toLowerCase().includes(q) ||
+                                String(c.customer_code || "").toLowerCase().includes(q)
+                            ).slice(0, 10);
+                            return matched.length > 0 ? (
+                              <div className="absolute z-30 w-full bg-white border border-slate-300 rounded-lg shadow-lg mt-1 max-h-52 overflow-y-auto">
+                                {matched.map((c) => (
+                                  <button
+                                    key={c.id}
+                                    type="button"
+                                    className="w-full text-left px-3 py-2 hover:bg-slate-100 border-b border-slate-100 last:border-b-0"
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onClick={() => {
+                                      setIntPerson((p) => ({
+                                        ...p,
+                                        customer: c.customer_name || "",
+                                        email: c.email || c.customer_email || "",
+                                        phone: c.phone || c.customer_phone || "",
+                                      }));
+                                      setCustomerSearch("");
+                                    }}
+                                  >
+                                    <div className="font-medium text-slate-800 text-sm">{c.customer_name}</div>
+                                    {c.customer_code && <div className="text-xs text-slate-500">{c.customer_code}</div>}
+                                  </button>
+                                ))}
+                              </div>
+                            ) : q.length >= 2 ? (
+                              <div className="absolute z-30 w-full bg-white border border-slate-300 rounded-lg shadow-lg mt-1">
+                                <div className="p-3 text-sm text-slate-600 text-center">
+                                  Customer not found.{" "}
+                                  <span className="text-brand-700 font-medium cursor-pointer underline" onClick={() => {
+                                    setIntPerson((p) => ({ ...p, customer: customerSearch }));
+                                    setCustomerSearch("");
+                                  }}>Use as Custom Name</span>
+                                </div>
+                              </div>
+                            ) : null;
+                          })()
+                        )}
+                      </div>
                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                     <div className="group">
-                      <label>
+                      <label className="label">
                         Email <span className="req">*</span>
                       </label>
                       <input
-                        className="input"
+                        className="input w-full"
                         type="email"
                         value={intPerson.email}
                         onChange={(e) =>
@@ -682,11 +816,11 @@ export default function ServiceOrderForm() {
                       />
                     </div>
                     <div className="group">
-                      <label>
+                      <label className="label">
                         Phone <span className="req">*</span>
                       </label>
                       <input
-                        className="input"
+                        className="input w-full"
                         value={intPerson.phone}
                         onChange={(e) =>
                           setIntPerson((p) => ({ ...p, phone: e.target.value }))
@@ -695,33 +829,49 @@ export default function ServiceOrderForm() {
                         required
                       />
                     </div>
+                    <div className="group">
+                      <label className="label">
+                        Service Type <span className="req">*</span>
+                      </label>
+                      <input
+                        className="input w-full"
+                        value={intService.servType}
+                        onChange={(e) =>
+                          setIntService((p) => ({
+                            ...p,
+                            servType: e.target.value,
+                          }))
+                        }
+                        placeholder="e.g., Installation"
+                        required
+                      />
+                    </div>
+                    <div className="group">
+                      <label className="label">
+                        Service Category <span className="req">*</span>
+                      </label>
+                      <select
+                        className="input w-full"
+                        value={intService.servCat}
+                        onChange={(e) =>
+                          setIntService((p) => ({
+                            ...p,
+                            servCat: e.target.value,
+                          }))
+                        }
+                        required
+                      >
+                        <option value="">-- Select Category --</option>
+                        {serviceCategories.map((c) => (
+                          <option key={c.id} value={c.name}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
-                  <div className="group mt-4">
-                    <label>
-                      Service Category <span className="req">*</span>
-                    </label>
-                    <select
-                      className="input"
-                      value={intService.servCat}
-                      onChange={(e) =>
-                        setIntService((p) => ({
-                          ...p,
-                          servCat: e.target.value,
-                        }))
-                      }
-                      required
-                    >
-                      <option value="">-- Select Category --</option>
-                      {serviceCategories.map((c) => (
-                        <option key={c.id} value={c.name}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="card">
+                  <div className="card md:col-span-3">
                     <div className="card-body">
                       <h4 style={{ color: "var(--primary)", marginBottom: 10 }}>
                         📋 Service Items
@@ -805,12 +955,12 @@ export default function ServiceOrderForm() {
                               ).toFixed(2)}
                             />
                             <button
-                              type="button"
-                              className="btn-danger"
-                              onClick={() => removeItem(it.id)}
-                            >
-                              ×
-                            </button>
+                                type="button"
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition-colors"
+                                onClick={() => removeItem(it.id)}
+                              >
+                                <Trash2 size={16} />
+                              </button>
                           </div>
                         ))}
                       </div>
@@ -824,8 +974,9 @@ export default function ServiceOrderForm() {
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                   <div className="group">
-                    <label>
+                    <label className="label">
                       Work Location <span className="req">*</span>
                     </label>
                     <select
@@ -844,9 +995,9 @@ export default function ServiceOrderForm() {
                       ))}
                     </select>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+
                     <div className="group">
-                      <label>
+                      <label className="label">
                         Service Date <span className="req">*</span>
                       </label>
                       <input
@@ -864,7 +1015,7 @@ export default function ServiceOrderForm() {
                       />
                     </div>
                     <div className="group">
-                      <label>
+                      <label className="label">
                         Time Slot <span className="req">*</span>
                       </label>
                       <select
@@ -879,17 +1030,17 @@ export default function ServiceOrderForm() {
                         required
                       >
                         <option value="">-- Select Time --</option>
-                        <option value="08-10">8:00 AM - 10:00 AM</option>
-                        <option value="10-12">10:00 AM - 12:00 PM</option>
-                        <option value="12-14">12:00 PM - 2:00 PM</option>
-                        <option value="14-16">2:00 PM - 4:00 PM</option>
-                        <option value="16-18">4:00 PM - 6:00 PM</option>
+                        {timeSlots.map((ts) => (
+                          <option key={ts.id} value={ts.name}>
+                            {ts.name}
+                          </option>
+                        ))}
                       </select>
                     </div>
-                  </div>
+
 
                   <div className="group">
-                    <label>Assigned Supervisor</label>
+                    <label className="label">Assigned Supervisor</label>
                     <select
                       className="input"
                       value={selectedSupervisorId}
@@ -902,6 +1053,8 @@ export default function ServiceOrderForm() {
                         </option>
                       ))}
                     </select>
+                  </div>
+
                   </div>
 
                   <div className="flex gap-2 mt-3">
@@ -918,86 +1071,142 @@ export default function ServiceOrderForm() {
                   </div>
                 </form>
               </div>
-              <div>
-                <h2 className="text-lg font-semibold mb-2">Order Summary</h2>
-                <SummaryBox html={intSummaryHtml} />
-              </div>
             </div>
           )}
 
           {activeTab === "external" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
+            <div className="flex flex-col gap-6">
+              <div className="w-full">
                 <form onSubmit={submitExternal}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div className="group">
-                      <label>Requisition</label>
+                      <label className="label">Requisition</label>
                       <select
-                        className="input"
+                        className="input w-56"
                         value={selectedServiceRequisitionId}
                         onChange={async (e) => {
                           const val = e.target.value;
                           setSelectedServiceRequisitionId(val);
-                          const rid = Number(val);
-                          if (Number.isFinite(rid) && rid > 0) {
-                            try {
-                              const res = await api.get(
-                                `/purchase/general-requisitions/${rid}`,
-                              );
-                              const gr = res.data || null;
-                              const grItems = Array.isArray(gr?.items)
-                                ? gr.items
-                                : [];
-                              const scopeText = grItems
-                                .map((ln) => {
-                                  const desc =
-                                    ln.description || ln.item_name || "Service";
-                                  const qty = Number(ln.qty || 0);
-                                  const uom = String(ln.uom || "").trim();
-                                  return `- ${desc}${qty ? ` (x${qty}${uom ? " " + uom : ""})` : ""}`;
-                                })
-                                .join("\n");
-                              const est = grItems.reduce(
-                                (acc, ln) =>
-                                  acc +
-                                  Number(ln.qty || 0) *
-                                    Number(ln.estimated_unit_cost || 0),
-                                0,
-                              );
+                          if (!val) return;
+                          const [src, rid] = String(val).split(":");
+                          const numId = Number(rid);
+                          if (!Number.isFinite(numId) || numId <= 0) return;
+                          try {
+                            let grItems = [];
+                            if (src === "sreq") {
+                              const res = await api.get(`/purchase/service-requests/${numId}`);
+                              const req = res.data?.item || res.data || {};
+                              const desc = req.description || req.request_title || "";
+                              const title = req.request_title || "";
                               setExtReqs((p) => ({
                                 ...p,
-                                scope: scopeText || p.scope,
+                                scope: desc || title || p.scope,
+                                cat: req.service_type || p.cat,
+                              }));
+                              setExtDept((p) => ({
+                                ...p,
+                                dept: req.department || p.dept,
+                              }));
+                              setExtRequestor((p) => ({
+                                ...p,
+                                name: req.created_by_name || "",
+                                email: p.email,
+                                phone: p.phone,
+                              }));
+                              setExtContractor((p) => ({
+                                ...p,
+                                name: req.requester_full_name || req.customer_name || p.name,
+                                id: req.customer_code || p.id,
+                                email: req.requester_email || p.email,
+                                phone: req.requester_phone || p.phone,
                               }));
                               setExtBudget((p) => ({
                                 ...p,
-                                estCost: est ? String(est) : p.estCost,
+                                estCost: p.estCost,
                               }));
-                            } catch {}
-                          }
+                              return;
+                            } else {
+                              const res = await api.get(`/purchase/general-requisitions/${numId}`);
+                              const req = res.data?.item || res.data || {};
+                              grItems = Array.isArray(res.data?.items) ? res.data.items : [];
+                              setExtDept((p) => ({
+                                ...p,
+                                dept: req.department || p.dept,
+                              }));
+                              setExtRequestor((p) => ({
+                                ...p,
+                                name: req.requested_by || p.name,
+                              }));
+                              if (req.work_location) {
+                                setExtTimeline((p) => ({
+                                  ...p,
+                                  loc: req.work_location || p.loc,
+                                }));
+                              }
+                              if (grItems.length > 0) {
+                                const mappedItems = grItems.map((ln) => ({
+                                  id: crypto.randomUUID(),
+                                  item_id: ln.item_id || "",
+                                  desc: ln.description || ln.item_name || "",
+                                  qty: Number(ln.qty || 1),
+                                  price: Number(ln.estimated_unit_cost || 0),
+                                  sub: Number(ln.qty || 1) * Number(ln.estimated_unit_cost || 0),
+                                }));
+                                setExtService({ items: mappedItems });
+                              }
+                            }
+                            const scopeText = grItems
+                              .map((ln) => {
+                                const desc = ln.description || ln.item_name || "Service";
+                                const qty = Number(ln.qty || 0);
+                                const uom = String(ln.uom || "").trim();
+                                return `- ${desc}${qty ? ` (x${qty}${uom ? " " + uom : ""})` : ""}`;
+                              })
+                              .join("\n");
+                            const est = grItems.reduce(
+                              (acc, ln) =>
+                                acc +
+                                Number(ln.qty || 0) *
+                                  Number(ln.estimated_unit_cost || 0),
+                              0,
+                            );
+                            setExtReqs((p) => ({
+                              ...p,
+                              scope: scopeText || p.scope,
+                            }));
+                            setExtBudget((p) => ({
+                              ...p,
+                              estCost: est ? String(est) : p.estCost,
+                            }));
+                          } catch {}
                         }}
                       >
                         <option value="">
-                          -- Select Approved Requisition --
+                          -- Select Requisition --
                         </option>
-                        {approvedServiceRequisitions.map((r) => (
-                          <option key={r.id} value={r.id}>
-                            {r.requisition_no} • {r.department || ""} •{" "}
-                            {String(r.requisition_date || "").slice(0, 10)}
-                          </option>
-                        ))}
+                        {approvedServiceRequisitions.length > 0 && (
+                          <optgroup label="Supplier Service Requests">
+                            {approvedServiceRequisitions.map((r) => (
+                              <option key={`gr:${r.id}`} value={`gr:${r.id}`}>
+                                {r.requisition_no} • {r.department || ""} •{" "}
+                                {String(r.requisition_date || "").slice(0, 10)}
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
                       </select>
                     </div>
                     <div className="group">
-                      <label>
-                        Department <span className="req">*</span>
+                      <label className="label">
+                        Department 
                       </label>
                       <select
-                        className="input"
+                        className="input w-56"
                         value={extDept.dept}
                         onChange={(e) =>
                           setExtDept((p) => ({ ...p, dept: e.target.value }))
                         }
-                        required
+                        
                       >
                         <option value="">-- Select Department --</option>
                         {departments.map((d) => (
@@ -1008,16 +1217,16 @@ export default function ServiceOrderForm() {
                       </select>
                     </div>
                     <div className="group">
-                      <label>
-                        Cost Center <span className="req">*</span>
+                      <label className="label">
+                        Cost Center 
                       </label>
                       <select
-                        className="input"
+                        className="input w-56"
                         value={extDept.cost}
                         onChange={(e) =>
                           setExtDept((p) => ({ ...p, cost: e.target.value }))
                         }
-                        required
+                        
                       >
                         <option value="">-- Select Cost Center --</option>
                         {costCenters.map((cc) => (
@@ -1029,13 +1238,13 @@ export default function ServiceOrderForm() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div className="group">
-                      <label>
-                        Requestor Name <span className="req">*</span>
+                      <label className="label">
+                        Requestor Name 
                       </label>
                       <input
-                        className="input"
+                        className="input w-56"
                         value={extRequestor.name}
                         onChange={(e) =>
                           setExtRequestor((p) => ({
@@ -1044,67 +1253,22 @@ export default function ServiceOrderForm() {
                           }))
                         }
                         placeholder="Full name"
-                        required
+                        
                       />
                     </div>
-                    <div className="group">
-                      <label>Job Title</label>
-                      <input
-                        className="input"
-                        value={extRequestor.title}
-                        onChange={(e) =>
-                          setExtRequestor((p) => ({
-                            ...p,
-                            title: e.target.value,
-                          }))
-                        }
-                        placeholder="Position"
-                      />
-                    </div>
-                    <div className="group">
-                      <label>
-                        Email <span className="req">*</span>
-                      </label>
-                      <input
-                        className="input"
-                        type="email"
-                        value={extRequestor.email}
-                        onChange={(e) =>
-                          setExtRequestor((p) => ({
-                            ...p,
-                            email: e.target.value,
-                          }))
-                        }
-                        placeholder="requestor@company.com"
-                        required
-                      />
-                    </div>
-                    <div className="group">
-                      <label>
-                        Phone <span className="req">*</span>
-                      </label>
-                      <input
-                        className="input"
-                        value={extRequestor.phone}
-                        onChange={(e) =>
-                          setExtRequestor((p) => ({
-                            ...p,
-                            phone: e.target.value,
-                          }))
-                        }
-                        placeholder="+1 (555) 123-4567"
-                        required
-                      />
-                    </div>
+                    
+                    
                   </div>
 
-                  <div className="form-grid">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    
+
                     <div className="group">
-                      <label>
-                        Contractor Name <span className="req">*</span>
+                      <label className="label">
+                        Contractor Name 
                       </label>
                       <select
-                        className="input"
+                        className="input w-56"
                         value={extContractor.name}
                         onChange={(e) => {
                           const name = e.target.value;
@@ -1130,7 +1294,7 @@ export default function ServiceOrderForm() {
                             }
                           }
                         }}
-                        required
+                        
                       >
                         <option value="">-- Select Contractor --</option>
                         {contractors.map((c) => (
@@ -1141,12 +1305,12 @@ export default function ServiceOrderForm() {
                       </select>
                     </div>
                     <div className="group">
-                      <label>
+                      <label className="label">
                         Contractor ID{" "}
                         <span className="text-slate-500">(Optional)</span>
                       </label>
                       <input
-                        className="input"
+                        className="input w-56"
                         value={extContractor.id}
                         onChange={(e) =>
                           setExtContractor((p) => ({
@@ -1159,13 +1323,14 @@ export default function ServiceOrderForm() {
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div className="group">
-                      <label>
-                        Contractor Email <span className="req">*</span>
+                      <label className="label">
+                        Contractor Email 
                       </label>
                       <input
-                        className="input"
+                        className="input w-56"
                         type="email"
                         value={extContractor.email}
                         onChange={(e) =>
@@ -1175,15 +1340,15 @@ export default function ServiceOrderForm() {
                           }))
                         }
                         placeholder="contractor@company.com"
-                        required
+                        
                       />
                     </div>
                     <div className="group">
-                      <label>
-                        Contractor Phone <span className="req">*</span>
+                      <label className="label">
+                        Contractor Phone 
                       </label>
                       <input
-                        className="input"
+                        className="input w-56"
                         value={extContractor.phone}
                         onChange={(e) =>
                           setExtContractor((p) => ({
@@ -1192,73 +1357,177 @@ export default function ServiceOrderForm() {
                           }))
                         }
                         placeholder="+1 (555) 987-6543"
-                        required
+                        
                       />
                     </div>
-                  </div>
 
-                  <div className="group">
-                    <label>
-                      Service Category <span className="req">*</span>
-                    </label>
-                    <select
-                      className="input"
-                      value={extReqs.cat}
-                      onChange={(e) =>
-                        setExtReqs((p) => ({ ...p, cat: e.target.value }))
-                      }
-                      required
-                    >
-                      <option value="">-- Select Category --</option>
-                      {serviceCategories.map((c) => (
-                        <option key={c.id} value={c.name}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="group">
+                      <label className="label">
+                        Service Category 
+                      </label>
+                      <select
+                        className="input w-56"
+                        value={extReqs.cat}
+                        onChange={(e) =>
+                          setExtReqs((p) => ({ ...p, cat: e.target.value }))
+                        }
+                        
+                      >
+                        <option value="">-- Select Category --</option>
+                        {serviceCategories.map((c) => (
+                          <option key={c.id} value={c.name}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
-                  <div className="group">
-                    <label>
-                      Scope of Work <span className="req">*</span>
+                  <div className="group mb-4">
+                    <label className="label">
+                      Scope of Work 
                     </label>
-                    <textarea
-                      className="input"
+                    <textarea rows="6"
+                      className="input w-full"
                       value={extReqs.scope}
                       onChange={(e) =>
                         setExtReqs((p) => ({ ...p, scope: e.target.value }))
                       }
                       placeholder="Detailed description of work to be performed"
-                      required
-                    />
-                  </div>
+                      
+                      />
+                    </div>
 
-                  <div className="group">
-                    <label>
-                      Work Location <span className="req">*</span>
-                    </label>
-                    <select
-                      className="input"
-                      value={extTimeline.loc}
-                      onChange={(e) =>
-                        setExtTimeline((p) => ({ ...p, loc: e.target.value }))
-                      }
-                      required
-                    >
-                      <option value="">-- Select Work Location --</option>
-                      {workLocations.map((wl) => (
-                        <option key={wl.id} value={wl.name}>
-                          {wl.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="card md:col-span-3 mb-4">
+                      <div className="card-body">
+                        <h4 style={{ color: "var(--primary)", marginBottom: 10 }}>
+                          📋 Service Items
+                        </h4>
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "2fr 1fr 100px 120px 40px",
+                            gap: 12,
+                            marginBottom: 8,
+                            padding: "4px 10px",
+                            background: "var(--white)",
+                            border: "2px solid var(--border)",
+                            borderRadius: 6,
+                            fontWeight: 600,
+                          }}
+                        >
+                          <div>Item</div>
+                          <div>Qty</div>
+                          <div>Rate</div>
+                          <div>Amount</div>
+                          <div />
+                        </div>
+                        <div>
+                          {extService.items.map((it) => (
+                            <div
+                              key={it.id}
+                              style={{
+                                display: "grid",
+                                gridTemplateColumns: "2fr 1fr 100px 120px 40px",
+                                gap: 12,
+                                marginBottom: 10,
+                                padding: 10,
+                                background: "var(--white)",
+                                border: "2px solid var(--border)",
+                                borderRadius: 6,
+                              }}
+                            >
+                              <select
+                                className="input"
+                                value={it.item_id || ""}
+                                onChange={(e) =>
+                                  updateExtItem(it.id, "item_id", e.target.value)
+                                }
+                              >
+                                <option value="">
+                                  -- Select Service Item --
+                                </option>
+                                {serviceItems.map((si) => (
+                                  <option key={si.id} value={si.id}>
+                                    {si.item_name}
+                                  </option>
+                                ))}
+                              </select>
+                              <input
+                                className="input"
+                                type="number"
+                                min="1"
+                                value={it.qty}
+                                onChange={(e) =>
+                                  updateExtItem(it.id, "qty", e.target.value)
+                                }
+                              />
+                              <input
+                                className="input"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={it.price}
+                                onChange={(e) =>
+                                  updateExtItem(it.id, "price", e.target.value)
+                                }
+                                placeholder="0.00"
+                              />
+                              <input
+                                className="input"
+                                readOnly
+                                value={(
+                                  parseFloat(it.qty || 0) *
+                                  parseFloat(it.price || 0)
+                                ).toFixed(2)}
+                              />
+                              <button
+                                  type="button"
+                                  className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition-colors"
+                                  onClick={() => removeExtItem(it.id)}
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                            </div>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          className="btn-primary mt-2"
+                          onClick={addExtServiceItem}
+                        >
+                          + Add Service Item
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="group">
+                        <label className="label">
+                          Work Location 
+                      </label>
+                      <select
+                        className="input w-56"
+                        value={extTimeline.loc}
+                        onChange={(e) =>
+                          setExtTimeline((p) => ({ ...p, loc: e.target.value }))
+                        }
+                        
+                      >
+                        <option value="">-- Select Work Location --</option>
+                        {workLocations.map((wl) => (
+                          <option key={wl.id} value={wl.name}>
+                            {wl.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
                     <div className="group">
-                      <label>
-                        Start Date <span className="req">*</span>
+                      <label className="label">
+                        Start Date 
                       </label>
                       <input
-                        className="input"
+                        className="input w-56"
                         type="date"
                         value={extTimeline.start}
                         onChange={(e) =>
@@ -1268,33 +1537,33 @@ export default function ServiceOrderForm() {
                           }))
                         }
                         min={today}
-                        required
+                        
                       />
                     </div>
                     <div className="group">
-                      <label>
-                        End Date <span className="req">*</span>
+                      <label className="label">
+                        End Date 
                       </label>
                       <input
-                        className="input"
+                        className="input w-56"
                         type="date"
                         value={extTimeline.end}
                         onChange={(e) =>
                           setExtTimeline((p) => ({ ...p, end: e.target.value }))
                         }
                         min={today}
-                        required
+                        
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div className="group">
-                      <label>
-                        Estimated Cost <span className="req">*</span>
+                      <label className="label">
+                        Estimated Cost 
                       </label>
                       <input
-                        className="input"
+                        className="input w-56"
                         type="number"
                         step="0.01"
                         min="0"
@@ -1306,15 +1575,15 @@ export default function ServiceOrderForm() {
                           }))
                         }
                         placeholder="0.00"
-                        required
+                        
                       />
                     </div>
                     <div className="group">
-                      <label>
-                        Currency <span className="req">*</span>
+                      <label className="label">
+                        Currency 
                       </label>
                       <select
-                        className="input"
+                        className="input w-56"
                         value={extBudget.currency}
                         onChange={(e) =>
                           setExtBudget((p) => ({
@@ -1322,7 +1591,7 @@ export default function ServiceOrderForm() {
                             currency: e.target.value,
                           }))
                         }
-                        required
+                        
                       >
                         <option value="">-- Select Currency --</option>
                         {currencies.map((c) => (
@@ -1332,12 +1601,11 @@ export default function ServiceOrderForm() {
                         ))}
                       </select>
                     </div>
-                  </div>
 
                   <div className="group">
-                    <label>Assigned Supervisor</label>
+                    <label className="label">Assigned Supervisor</label>
                     <select
-                      className="input"
+                      className="input w-56"
                       value={selectedSupervisorId}
                       onChange={(e) => setSelectedSupervisorId(e.target.value)}
                     >
@@ -1349,7 +1617,8 @@ export default function ServiceOrderForm() {
                       ))}
                     </select>
                   </div>
-
+                  </div>
+                  
                   <div className="flex gap-2 mt-3">
                     <button
                       type="button"
@@ -1363,14 +1632,6 @@ export default function ServiceOrderForm() {
                     </button>
                   </div>
                 </form>
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold mb-2">Order Summary</h2>
-                <SummaryBox
-                  html={
-                    '<p style="text-align:center;color:#7f8c8d;padding:20px">Fill in details to see summary</p>'
-                  }
-                />
               </div>
             </div>
           )}

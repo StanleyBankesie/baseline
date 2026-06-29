@@ -1,3 +1,8 @@
+/**
+ * @fileoverview SupplierQuotationsList component.
+ * Provides functionality for SupplierQuotationsList.
+ */
+
 import React, { useState, useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -5,7 +10,9 @@ import { api } from "../../../../api/client";
 import { usePermission } from "../../../../auth/PermissionContext.jsx";
 import useSort from "../../../../hooks/useSort.js";
 import SortableHeader from "../../../../components/SortableHeader.jsx";
-import { X } from "lucide-react";
+import { X, Eye } from "lucide-react";
+import { ListPrintIconButton, ListPdfIconButton, ListAttachmentIconButton } from "../../../../components/list/ListDocActionIconButtons.jsx";
+import DocumentAttachmentsModal from "../../../../components/attachments/DocumentAttachmentsModal.jsx";
 
 const statusColors = { DRAFT:"bg-slate-100 text-slate-600", UNDER_REVIEW:"bg-amber-100 text-amber-700", APPROVED:"bg-green-100 text-green-700", REJECTED:"bg-red-100 text-red-600", PENDING_APPROVAL:"bg-amber-100 text-amber-700" };
 function Badge({ value, colorMap }) {
@@ -13,6 +20,11 @@ function Badge({ value, colorMap }) {
   return <span className={`inline-block px-2 py-0.5 text-xs rounded font-medium ${colorMap[v] || "bg-slate-100 text-slate-600"}`}>{v}</span>;
 }
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function SupplierQuotationsList() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -33,6 +45,8 @@ export default function SupplierQuotationsList() {
   const [submittingForward, setSubmittingForward] = useState(false);
   const [workflowsCache, setWorkflowsCache] = useState(null);
   const [targetApproverId, setTargetApproverId] = useState(null);
+  const [showAttach, setShowAttach] = useState(false);
+  const [activeDocId, setActiveDocId] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -262,6 +276,10 @@ export default function SupplierQuotationsList() {
                     <td><Badge value={r.status} colorMap={statusColors} /></td>
                     <td className="whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2">
+                        <button type="button" className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded transition-colors" title="View" onClick={() => navigate(`/maintenance/supplier-quotations/${r.id}?mode=view`)}><Eye size={15} /></button>
+                        <ListPrintIconButton onClick={() => toast.info("Print coming soon")} />
+                        <ListPdfIconButton onClick={() => toast.info("PDF coming soon")} />
+                        <ListAttachmentIconButton onClick={() => { setActiveDocId(r.id); setShowAttach(true); }} />
                         <div className="min-w-[80px]">
                           <Link to={`/maintenance/supplier-quotations/${r.id}`} className="btn-secondary btn-sm w-full inline-flex items-center justify-center">Edit</Link>
                         </div>
@@ -303,6 +321,14 @@ export default function SupplierQuotationsList() {
         </div>
       </div>
 
+      {showAttach && activeDocId && (
+        <DocumentAttachmentsModal
+          open={showAttach}
+          onClose={() => { setShowAttach(false); setActiveDocId(null); }}
+          docType="maintenance"
+          docId={activeDocId}
+        />
+      )}
       {/* Forward for Approval Modal */}
       {showForwardModal && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">

@@ -1,3 +1,8 @@
+/**
+ * @fileoverview StockAdjustmentList component.
+ * Provides functionality for StockAdjustmentList.
+ */
+
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { api } from "api/client";
@@ -14,6 +19,11 @@ import { filterAndSort } from "@/utils/searchUtils.js";
 import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function StockAdjustmentList() {
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
@@ -611,15 +621,16 @@ export default function StockAdjustmentList() {
                               <span className="list-approval-forwarded-pill">
                                 Forwarded to {adj.forwarded_to_username}
                               </span>
-                            ) : (
+                            ) : ["DRAFT", "RETURNED", "REJECTED"].includes(String(adj.status || "").toUpperCase()) && adj.has_workflow ? (
                               <button
                                 type="button"
                                 className="list-approval-forward-btn"
                                 onClick={() => openForwardModal(adj)}
-                                disabled={workflowDisabled}
                               >
                                 Forward for Approval
                               </button>
+                            ) : (
+                              <div className="w-full h-9" />
                             )}
                           </div>
                         </div>

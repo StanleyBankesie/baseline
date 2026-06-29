@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Main AppShell layout component.
+ * Responsible for the overall layout, navigation sidebar, header, global state,
+ * notification polling, and service worker push integrations.
+ */
+
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Link,
@@ -12,6 +18,8 @@ import { useAuth } from "../auth/AuthContext.jsx";
 import {
   getLastActivity,
   getInactivityTimeoutMs,
+  readStoredAuth,
+  writeStoredAuth,
 } from "../auth/authStorage.js";
 import { usePermission } from "../auth/PermissionContext.jsx";
 import { useTheme } from "../theme/ThemeContext.jsx";
@@ -37,7 +45,7 @@ import RoleSetup from "../pages/admin/RoleSetup.jsx";
 import UserPermissions from "../pages/admin/UserPermissions.jsx";
 import SocialFeedNotification from "../components/CompanyFeed/SocialFeedNotification.jsx";
 import DashboardPermissions from "../pages/admin/DashboardPermissions.jsx";
-import addNotification from "react-push-notification";
+import addNotification from "../utils/addNotification.js";
 
 import logoDark from "../assets/resources/OMNISUITE_WHITE_LOGO.png";
 import logoLight from "../assets/resources/OMNISUITE_LOGO_FILL.png";
@@ -45,62 +53,90 @@ import { api } from "../api/client.js";
 import useOfflineQueue from "../offline/useOfflineQueue.js";
 import FloatingInstallButton from "../components/FloatingInstallButton.jsx";
 import { toast } from "react-toastify";
-import { Bell } from "lucide-react";
+import { Bell, Menu } from "lucide-react";
 import FloatingChat from "../components/chat/FloatingChat.jsx";
 import FloatingCreateButton from "../components/FloatingCreateButton.jsx";
 import useSocket from "../hooks/useSocket.js";
+
+const AppRoutes = React.memo(function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/administration/*" element={<AdministrationHome />} />
+      <Route path="/sales/*" element={<SalesHome />} />
+      <Route path="/inventory/*" element={<InventoryHome />} />
+      <Route path="/purchase/*" element={<PurchaseHome />} />
+      <Route path="/finance/*" element={<FinanceRoutes />} />
+      <Route path="/human-resources/*" element={<HumanResourcesHome />} />
+      <Route path="/maintenance/*" element={<MaintenanceHome />} />
+      <Route path="/project-management/*" element={<ProjectManagementHome />} />
+      <Route path="/production/*" element={<ProductionHome />} />
+      <Route path="/pos/*" element={<PosHome />} />
+      <Route path="/business-intelligence/*" element={<BusinessIntelligenceHome />} />
+      <Route path="/service-management/*" element={<ServiceManagementHome />} />
+      <Route path="/executive-overview/*" element={<ExecutiveOverviewRoutes />} />
+      <Route path="/administration/access/dashboard-permissions" element={<DashboardPermissions />} />
+      <Route path="/notifications" element={<NotificationsPage />} />
+      <Route path="/social-feed" element={<SocialFeedPage />} />
+      <Route path="/social-feed/:id" element={<SocialFeedPage />} />
+      <Route path="/admin/roles" element={<RoleSetup />} />
+      <Route path="/admin/user-permissions" element={<UserPermissions />} />
+    </Routes>
+  );
+});
 
 const modules = [
   {
     key: "administration",
     label: "Administration",
     path: "/administration",
-    icon: "⚙",
   },
-  { key: "sales", label: "Sales", path: "/sales", icon: "🧾" },
-  { key: "inventory", label: "Inventory", path: "/inventory", icon: "📦" },
-  { key: "purchase", label: "Purchase", path: "/purchase", icon: "🛒" },
-  { key: "finance", label: "Finance", path: "/finance", icon: "💳" },
+  { key: "sales", label: "Sales", path: "/sales" },
+  { key: "inventory", label: "Inventory", path: "/inventory" },
+  { key: "purchase", label: "Purchase", path: "/purchase" },
+  { key: "finance", label: "Finance", path: "/finance" },
   {
     key: "human-resources",
     label: "Human Resources",
     path: "/human-resources",
-    icon: "👥",
   },
   {
     key: "maintenance",
     label: "Maintenance",
     path: "/maintenance",
-    icon: "🛠",
   },
   {
     key: "project-management",
     label: "Project Management",
     path: "/project-management",
-    icon: "📋",
   },
-  { key: "production", label: "Production", path: "/production", icon: "🏭" },
-  { key: "pos", label: "POS", path: "/pos", icon: "🧮" },
+  { key: "production", label: "Production", path: "/production" },
+  { key: "pos", label: "POS", path: "/pos" },
   {
     key: "business-intelligence",
     label: "Business Intelligence",
     path: "/business-intelligence",
-    icon: "📈",
   },
   {
     key: "service-management",
     label: "Service Management",
     path: "/service-management",
-    icon: "🛎️",
   },
   {
     key: "executive-overview",
     label: "Executive Overview",
     path: "/executive-overview",
-    icon: "🎯",
   },
 ];
 
+/**
+ * AppShell component
+ * Acts as the primary shell around all authenticated routes.
+ * Initializes real-time sockets, manages offline queue state, and handles user session inactivity.
+ * 
+ * @returns {JSX.Element} The rendered application shell.
+ */
 export default function AppShell() {
   const { token, user, scope, setScope, logout } = useAuth();
   const {
@@ -264,7 +300,10 @@ export default function AppShell() {
   });
   const sidebarTouchStart = useRef(null);
   const handleSidebarTouchStart = (e) => {
-    sidebarTouchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    sidebarTouchStart.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+    };
   };
   const handleSidebarTouchEnd = (e) => {
     if (!sidebarTouchStart.current) return;
@@ -281,17 +320,33 @@ export default function AppShell() {
     } else {
       document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [sidebarOpen]);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef(null);
-    const [contextModalOpen, setContextModalOpen] = useState(false);
+  const [contextModalOpen, setContextModalOpen] = useState(false);
   useEffect(() => {
     if (window.innerWidth < 768) setSidebarOpen(false);
   }, [location.pathname]);
   const [lowStockPrompted, setLowStockPrompted] = useState(false);
   const [lowStockCount, setLowStockCount] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [changePwModalOpen, setChangePwModalOpen] = useState(false);
+  const [pwCurrent, setPwCurrent] = useState("");
+  const [pwNew, setPwNew] = useState("");
+  const [pwConfirm, setPwConfirm] = useState("");
+  const [pwChanging, setPwChanging] = useState(false);
+  const [showPwCurrent, setShowPwCurrent] = useState(false);
+  const [showPwNew, setShowPwNew] = useState(false);
+  const [showPwConfirm, setShowPwConfirm] = useState(false);
+  const [welcomeModalOpen, setWelcomeModalOpen] = useState(false);
+  useEffect(() => {
+    if (user?.status === "N") {
+      setWelcomeModalOpen(true);
+    }
+  }, [user?.status]);
   useEffect(() => {
     try {
       const raw =
@@ -428,18 +483,39 @@ export default function AppShell() {
     }
   }
 
+  const [branchOptions, setBranchOptions] = useState([]);
+  const [selectedBranchId, setSelectedBranchId] = useState(() => scope?.branchId || null);
+  const [companies, setCompanies] = useState([]);
+
+  useEffect(() => {
+    if (scope?.branchId) {
+      setSelectedBranchId(scope.branchId);
+    }
+  }, [scope?.branchId]);
+
   const profile = useMemo(() => {
     const username = user?.username || user?.name || "Guest";
     const role =
       user?.role ||
       (Array.isArray(user?.roles) ? user.roles[0] : null) ||
       "Developer";
+
+    // Resolve the active branch from the branchOptions list so the name
+    // reflects the currently switched branch, not the JWT default.
+    const activeBranch = Array.isArray(branchOptions)
+      ? branchOptions.find((b) => Number(b.id) === Number(scope?.branchId))
+      : null;
     const companyName =
-      user?.companyName || `Company #${scope?.companyId ?? "-"}`;
-    const branchName = user?.branchName || `Branch #${scope?.branchId ?? "-"}`;
+      activeBranch?.company_name ||
+      user?.companyName ||
+      `Company #${scope?.companyId ?? "-"}`;
+    const branchName =
+      activeBranch?.name ||
+      user?.branchName ||
+      `Branch #${scope?.branchId ?? "-"}`;
 
     return { username, role, companyName, branchName };
-  }, [scope?.branchId, scope?.companyId, user]);
+  }, [scope?.branchId, scope?.companyId, user, branchOptions]);
 
   const roleOptions = useMemo(
     () =>
@@ -707,72 +783,45 @@ export default function AppShell() {
       setSelectedRole(roles[0]);
     }
   }, [user?.roles, user?.role, selectedRole]);
-  const userIdNum = useMemo(
-    () => Number(user?.sub || user?.id),
-    [user?.sub, user?.id],
-  );
-  const [branchOptions, setBranchOptions] = useState([]);
-  const [selectedBranchId, setSelectedBranchId] = useState(null);
-  const [companies, setCompanies] = useState([]);
-  const hasAdminAccess = user?.permissions?.includes("*") || user?.id === 1;
+
   useEffect(() => {
-    if (!hasAdminAccess) return;
     let mounted = true;
     async function loadUserBranches() {
       try {
-        if (!Number.isFinite(userIdNum)) return;
-        const res = await api.get(`/admin/users/${userIdNum}/branches`);
-        const items =
-          (res.data && res.data.data && Array.isArray(res.data.data.items)
-            ? res.data.data.items
-            : Array.isArray(res.data?.items)
-              ? res.data.items
-              : []) || [];
+        const res = await api.get("/auth/user-branches");
+        const items = Array.isArray(res.data?.items) ? res.data.items : [];
         if (mounted) {
           setBranchOptions(items);
-          if (!selectedBranchId && items.length > 0) {
+          if (!selectedBranchId && !scope?.branchId && items.length > 0) {
             setSelectedBranchId(Number(items[0].id));
           }
         }
-      } catch {
-        try {
-          const res2 = await api.get("/admin/branches");
-          const items2 = Array.isArray(res2.data?.items) ? res2.data.items : [];
-          const allowedIds = Array.isArray(user?.branchIds)
-            ? user.branchIds.map(Number).filter((n) => Number.isFinite(n))
-            : [];
-          const filtered = items2.filter((b) =>
-            allowedIds.includes(Number(b.id)),
-          );
-          if (mounted) {
-            setBranchOptions(filtered);
-            if (!selectedBranchId && filtered.length > 0) {
-              setSelectedBranchId(Number(filtered[0].id));
-            }
-          }
-        } catch {}
+      } catch (err) {
+        console.error("Failed to load branches:", err);
+        setBranchOptions([]);
       }
     }
     loadUserBranches();
     return () => {
       mounted = false;
     };
-  }, [userIdNum, user?.branchIds, selectedBranchId, hasAdminAccess]);
+  }, [scope?.branchId]);
   useEffect(() => {
-    if (!hasAdminAccess) return;
     let mounted = true;
     async function loadCompanies() {
       try {
         const res = await api.get("/admin/companies");
         const items = Array.isArray(res.data?.items) ? res.data.items : [];
         if (mounted) setCompanies(items);
-      } catch {}
+      } catch {
+        if (mounted) setCompanies([]);
+      }
     }
     loadCompanies();
     return () => {
       mounted = false;
     };
-  }, [hasAdminAccess]);
+  }, []);
   const currentBranchName = useMemo(() => {
     const targetId = Number(scope?.branchId ?? selectedBranchId);
     const found =
@@ -1059,7 +1108,7 @@ export default function AppShell() {
           onClick={() => setSidebarOpen(true)}
           data-rbac-exempt="true"
         >
-          <span className="text-2xl leading-none">☰</span>
+          <Menu className="w-6 h-6" />
         </button>
       )}
       {/* Floating Social Feed Notification - Always Visible */}
@@ -1073,9 +1122,7 @@ export default function AppShell() {
             onClick={() => setSidebarOpen((v) => !v)}
             className="inline-flex items-center justify-center w-9 h-9 rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors"
           >
-            <span className="text-xl leading-none" aria-hidden="true">
-              ☰
-            </span>
+            <Menu className="w-5 h-5" />
           </button>
 
           <Link
@@ -1115,9 +1162,22 @@ export default function AppShell() {
               onClick={() => setProfileOpen((v) => !v)}
               className="inline-flex items-center gap-2 px-3 py-1 rounded-lg text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors"
             >
-              <svg className="w-5 h-5 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-              <span className="hidden sm:inline text-sm font-semibold">User Profile</span>
-              <span aria-hidden="true">▾</span>
+              <svg
+                className="w-5 h-5 sm:hidden"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+              <span className="hidden sm:inline text-sm font-semibold">
+                User Profile
+              </span>
             </button>
 
             {profileOpen && (
@@ -1130,74 +1190,75 @@ export default function AppShell() {
                 <div className="p-4 space-y-3">
                   <div className="flex items-center justify-between gap-3">
                     <div className="text-xs font-medium text-slate-600 dark:text-slate-400">
-                      Company
-                    </div>
-                    <div className="text-sm font-semibold text-slate-900 dark:text-slate-100 text-right">
-                      {currentCompanyName}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="text-xs font-medium text-slate-600 dark:text-slate-400">
                       Branch
                     </div>
-                    <div className="text-right">
-                      {branchOptions.length > 1 ? (
-                        <select
-                          className="input"
-                          value={String(
-                            scope?.branchId || selectedBranchId || "",
-                          )}
-                          onChange={(e) => {
-                            const id = Number(e.target.value);
-                            setSelectedBranchId(id);
-                            setScope((prev) => {
-                              const chosen = branchOptions.find(
-                                (b) => Number(b.id) === id,
-                              );
-                              const companyId = chosen
-                                ? Number(chosen.company_id)
-                                : prev.companyId;
-                              return { ...prev, companyId, branchId: id };
-                            });
-                            setProfileOpen(false);
-                          }}
-                        >
-                          {branchOptions.map((b) => (
-                            <option key={b.id} value={b.id}>
-                              {b.name} (
-                              {b.company_name || `Company #${b.company_id}`})
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                          {currentBranchName}
-                        </div>
-                      )}
+                    <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {currentBranchName}
                     </div>
                   </div>
                   <div className="pt-1">
                     <button
                       type="button"
                       onClick={() => setContextModalOpen(true)}
-                      className="btn-primary w-full"
+                      className="w-full text-sm font-semibold text-white px-4 py-2 rounded-lg bg-ticker-blue hover:opacity-90 transition-opacity"
                       disabled={
                         (dbRoles.length > 1 || roleOptions.length > 1) &&
                         branchOptions.length > 1
                       }
                     >
-                      Switch Context
+                      Switch Branch
                     </button>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-end">
+                  <div className="pt-3 border-t border-slate-200 dark:border-slate-700">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProfileOpen(false);
+                        setChangePwModalOpen(true);
+                        setPwCurrent("");
+                        setPwNew("");
+                        setPwConfirm("");
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold text-white bg-ticker-green hover:opacity-90 transition-opacity"
+                    >
+                      <svg
+                        className="w-4 h-4 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                        />
+                      </svg>
+                      <span className="flex-1 text-left">Change Password</span>
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="flex justify-end">
                     <button
                       type="button"
                       onClick={async () => {
                         setProfileOpen(false);
                         await logout({ redirect: true });
                       }}
-                      className="btn-secondary"
+                      className="btn-secondary text-red-500"
                     >
                       Logout
                     </button>
@@ -1222,7 +1283,7 @@ export default function AppShell() {
       {queueOpen && (
         <div className="px-6 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
           <div className="text-sm">
-            Pending {pending} • Failed {failed} • Completed {completed}
+            Pending {pending} â€¢ Failed {failed} â€¢ Completed {completed}
           </div>
           <div className="mt-3">
             <div className="grid grid-cols-1 gap-2">
@@ -1270,14 +1331,14 @@ export default function AppShell() {
                 onClick={() => setContextModalOpen(false)}
                 aria-label="Close"
               >
-                ✕
+                âœ•
               </button>
             </div>
             <div className="mt-4 space-y-4">
-              <div>
+              {/* <div>
                 <label className="label">Company</label>
                 <div className="input">{currentCompanyName}</div>
-              </div>
+              </div> */}
               <div>
                 <label className="label">Role</label>
                 {dbRoles.length > 1 || roleOptions.length > 1 ? (
@@ -1354,9 +1415,291 @@ export default function AppShell() {
                   }));
                   setContextModalOpen(false);
                   setProfileOpen(false);
+                  navigate("/");
                 }}
               >
                 Apply
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {welcomeModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 sm:p-6">
+          <div className="w-full max-w-sm sm:max-w-md card p-5 sm:p-6 shadow-erp-lg bg-white dark:bg-slate-900 text-center max-h-[90vh] overflow-y-auto">
+            <div className="mx-auto w-12 sm:w-14 h-12 sm:h-14 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mb-3 sm:mb-4">
+              <svg
+                className="w-6 sm:w-7 h-6 sm:h-7 text-blue-600 dark:text-blue-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
+              </svg>
+            </div>
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">
+              Welcome!
+            </h2>
+            <p className="mt-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              To keep your account secure, please change your password before
+              proceeding
+            </p>
+            <button
+              type="button"
+              className="btn-primary w-full mt-5 sm:mt-6"
+              onClick={() => {
+                setWelcomeModalOpen(false);
+                setChangePwModalOpen(true);
+                setPwCurrent("");
+                setPwNew("");
+                setPwConfirm("");
+              }}
+            >
+              Change Password
+            </button>
+          </div>
+        </div>
+      )}
+
+      {changePwModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 sm:p-6">
+          <div className="w-full max-w-sm sm:max-w-md card p-5 sm:p-6 shadow-erp-lg bg-white dark:bg-slate-900 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center">
+              <h2 className="text-base sm:text-lg font-bold">
+                Change Password
+              </h2>
+              <button
+                type="button"
+                className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                onClick={() => setChangePwModalOpen(false)}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="mt-4 space-y-3">
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Current Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPwCurrent ? "text" : "password"}
+                    placeholder="Enter current password"
+                    className="input w-full pr-10"
+                    value={pwCurrent}
+                    onChange={(e) => setPwCurrent(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPwCurrent((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                    tabIndex={-1}
+                  >
+                    {showPwCurrent ? (
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  New Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPwNew ? "text" : "password"}
+                    placeholder="Enter new password"
+                    className="input w-full pr-10"
+                    value={pwNew}
+                    onChange={(e) => setPwNew(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPwNew((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                    tabIndex={-1}
+                  >
+                    {showPwNew ? (
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Verify Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPwConfirm ? "text" : "password"}
+                    placeholder="Re-enter new password"
+                    className="input w-full pr-10"
+                    value={pwConfirm}
+                    onChange={(e) => setPwConfirm(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPwConfirm((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                    tabIndex={-1}
+                  >
+                    {showPwConfirm ? (
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="mt-6">
+              <button
+                type="button"
+                className="btn-primary w-full"
+                disabled={pwChanging}
+                onClick={async () => {
+                  if (!pwCurrent || !pwNew || !pwConfirm) {
+                    toast.error("Fill in all password fields");
+                    return;
+                  }
+                  if (pwNew.length < 6) {
+                    toast.error("New password must be at least 6 characters");
+                    return;
+                  }
+                  if (pwNew !== pwConfirm) {
+                    toast.error("New password and confirmation do not match");
+                    return;
+                  }
+                  setPwChanging(true);
+                  try {
+                    await api.post("/auth/change-password", {
+                      currentPassword: pwCurrent,
+                      newPassword: pwNew,
+                      confirmNewPassword: pwConfirm,
+                    });
+                    toast.success("Password changed successfully");
+                    setPwCurrent("");
+                    setPwNew("");
+                    setPwConfirm("");
+                    setChangePwModalOpen(false);
+                    const stored = readStoredAuth();
+                    if (stored?.user) {
+                      stored.user.status = "Y";
+                      writeStoredAuth(stored);
+                    }
+                  } catch (err) {
+                    const msg =
+                      err?.response?.data?.message ||
+                      err?.message ||
+                      "Failed to change password";
+                    toast.error(msg);
+                  } finally {
+                    setPwChanging(false);
+                  }
+                }}
+              >
+                {pwChanging ? "Changing..." : "Update Password"}
               </button>
             </div>
           </div>
@@ -1399,12 +1742,6 @@ export default function AppShell() {
                   : "text-brand-200 hover:bg-brand-800 hover:text-white border-l-4 border-transparent")
               }
             >
-              <span
-                className="w-6 text-lg leading-none opacity-80 group-hover:opacity-100 transition-opacity"
-                aria-hidden="true"
-              >
-                🏠
-              </span>
               Home
             </NavLink>
             {modules
@@ -1435,7 +1772,7 @@ export default function AppShell() {
           </nav>
         </aside>
 
-        <main className=" bg-slate-50 (#f8fafc)  dark:bg-slate-900">
+        <main className=" bg-slate-50 (#f8fafc)  dark:bg-slate-900 overflow-x-hidden min-w-0">
           <div className="w-full max-w-full lg:max-w-[1200px] mx-auto p-2 md:p-2 lg:p-3">
             {pushPromptVisible ? (
               <div className="mb-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 flex items-center justify-between">
@@ -1458,7 +1795,7 @@ export default function AppShell() {
             {!online && !isRootPage && !location.pathname.startsWith("/pos") ? (
               <div className="min-h-[60vh] flex items-center justify-center">
                 <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6 max-w-lg w-full text-center">
-                  <div className="text-4xl mb-2">📡</div>
+                  <div className="text-4xl mb-2">ðŸ“¡</div>
                   <div className="text-lg font-semibold mb-1">Offline</div>
                   <div className="text-sm text-slate-600 dark:text-slate-400 mb-4">
                     This module requires a network connection. Return to Home or
@@ -1472,56 +1809,7 @@ export default function AppShell() {
                 </div>
               </div>
             ) : (
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route
-                  path="/administration/*"
-                  element={<AdministrationHome />}
-                />
-                <Route path="/sales/*" element={<SalesHome />} />
-                <Route path="/inventory/*" element={<InventoryHome />} />
-                <Route path="/purchase/*" element={<PurchaseHome />} />
-                <Route path="/finance/*" element={<FinanceRoutes />} />
-                <Route
-                  path="/human-resources/*"
-                  element={<HumanResourcesHome />}
-                />
-                <Route path="/maintenance/*" element={<MaintenanceHome />} />
-                <Route
-                  path="/project-management/*"
-                  element={<ProjectManagementHome />}
-                />
-                <Route path="/production/*" element={<ProductionHome />} />
-                <Route path="/pos/*" element={<PosHome />} />
-                <Route
-                  path="/business-intelligence/*"
-                  element={<BusinessIntelligenceHome />}
-                />
-                <Route
-                  path="/service-management/*"
-                  element={<ServiceManagementHome />}
-                />
-                <Route
-                  path="/executive-overview/*"
-                  element={<ExecutiveOverviewRoutes />}
-                />
-                <Route
-                  path="/administration/access/dashboard-permissions"
-                  element={<DashboardPermissions />}
-                />
-                <Route path="/notifications" element={<NotificationsPage />} />
-                <Route path="/social-feed" element={<SocialFeedPage />} />
-                <Route path="/social-feed/:id" element={<SocialFeedPage />} />
-                {/* chat v2 renders via floating modal; legacy /chat route removed */}
-
-                {/* Admin Routes */}
-                <Route path="/admin/roles" element={<RoleSetup />} />
-                <Route
-                  path="/admin/user-permissions"
-                  element={<UserPermissions />}
-                />
-              </Routes>
+              <AppRoutes />
             )}
           </div>
         </main>

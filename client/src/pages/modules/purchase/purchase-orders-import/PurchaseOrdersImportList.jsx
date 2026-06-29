@@ -1,3 +1,8 @@
+/**
+ * @fileoverview PurchaseOrdersImportList component.
+ * Provides functionality for PurchaseOrdersImportList.
+ */
+
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
@@ -8,7 +13,7 @@ import { filterAndSort } from "@/utils/searchUtils.js";
 import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
 import { usePermission } from "../../../../auth/PermissionContext.jsx";
-import addNotification from "react-push-notification";
+import addNotification from "../../../../utils/addNotification.js";
 import DocumentAttachmentsModal from "@/components/attachments/DocumentAttachmentsModal.jsx";
 import { printDocument, downloadDocumentPdf } from "@/utils/pdfUtils.js";
 import {
@@ -17,6 +22,11 @@ import {
   ListAttachmentIconButton,
 } from "@/components/list/ListDocActionIconButtons.jsx";
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function PurchaseOrdersImportList() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -36,6 +46,8 @@ export default function PurchaseOrdersImportList() {
   const [firstApprover, setFirstApprover] = useState(null);
   const [workflowSteps, setWorkflowSteps] = useState([]);
   const [submittingForward, setSubmittingForward] = useState(false);
+  const [forwardedTo, setForwardedTo] = useState({});
+  const [selectedPO, setSelectedPO] = useState(null);
   const [workflowsCache, setWorkflowsCache] = useState(null);
   const [targetApproverId, setTargetApproverId] = useState(null);
   const [hasInactiveWorkflow, setHasInactiveWorkflow] = useState(false);
@@ -412,6 +424,7 @@ export default function PurchaseOrdersImportList() {
 
   const openForwardModal = async (doc) => {
     setSelectedDoc(doc);
+    setSelectedPO(doc);
     setShowForwardModal(true);
     setWfError("");
     if (!workflowsCache) {
@@ -605,6 +618,10 @@ export default function PurchaseOrdersImportList() {
           : r,
       ),
     );
+    setForwardedTo((prev) => ({
+      ...prev,
+      [selectedDoc.id]: optimisticApprover || "Approver",
+    }));
     setShowForwardModal(false);
     setSelectedDoc(null);
     try {
@@ -883,9 +900,9 @@ export default function PurchaseOrdersImportList() {
                                   </button>
                                 )}
                               </div>
-                            ) : po.forwarded_to_username ? (
+                            ) : po.status === "PENDING_APPROVAL" || po.forwarded_to_username || forwardedTo[po.id] ? (
                               <span className="list-approval-forwarded-pill">
-                                Forwarded to {po.forwarded_to_username}
+                                Forwarded to {po.forwarded_to_username || forwardedTo[po.id] || "Approver"}
                               </span>
                             ) : (
                               <button

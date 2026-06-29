@@ -1,14 +1,40 @@
+/**
+ * @fileoverview TransferAcceptanceList component.
+ * Provides functionality for TransferAcceptanceList.
+ */
+
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { api } from "api/client";
 import { filterAndSort } from "@/utils/searchUtils.js";
+import { toast } from "react-toastify";
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function TransferAcceptanceList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [confirmingId, setConfirmingId] = useState(null);
+
+  const handleConfirmDirect = async (id, transferNo) => {
+    setConfirmingId(id);
+    setError("");
+    try {
+      await api.put(`/inventory/transfer-acceptance/${id}`, {});
+      toast.success(`Transfer ${transferNo} confirmed successfully!`);
+      setItems(prev => prev.filter(item => item.id !== id));
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Failed to confirm transfer");
+    } finally {
+      setConfirmingId(null);
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -98,7 +124,7 @@ export default function TransferAcceptanceList() {
                 {loading ? (
                   <tr>
                     <td
-                      colSpan="6"
+                      colSpan="8"
                       className="text-center py-8 text-slate-500 dark:text-slate-400"
                     >
                       Loading...
@@ -109,7 +135,7 @@ export default function TransferAcceptanceList() {
                 {!loading && !filtered.length ? (
                   <tr>
                     <td
-                      colSpan="6"
+                      colSpan="8"
                       className="text-center py-8 text-slate-500 dark:text-slate-400"
                     >
                       No transfers available for acceptance
@@ -134,8 +160,12 @@ export default function TransferAcceptanceList() {
                     <td>
                       <span
                         className={`badge ${
-                          ["IN_TRANSIT", "IN TRANSIT"].includes(t.status)
+                          t.status === "TRANSFERRED" || t.status === "RECEIVED"
+                            ? "badge-success"
+                            : ["IN_TRANSIT", "IN TRANSIT", "PARTIALLY_RECEIVED"].includes(t.status)
                             ? "badge-warning"
+                            : t.status === "CANCELLED"
+                            ? "badge-error"
                             : "badge-info"
                         }`}
                       >
@@ -150,6 +180,16 @@ export default function TransferAcceptanceList() {
                         >
                           Open
                         </Link>
+                        {!["TRANSFERRED", "RECEIVED", "CANCELLED"].includes(t.status) && (
+                          <button
+                            type="button"
+                            onClick={() => handleConfirmDirect(t.id, t.transfer_no)}
+                            disabled={confirmingId === t.id}
+                            className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-white bg-green-600 border border-transparent rounded-full hover:bg-green-700 transition-colors disabled:opacity-50"
+                          >
+                            {confirmingId === t.id ? "Confirming..." : "Confirm"}
+                          </button>
+                        )}
                       </div>
                     </td>
                     <td>{t.created_by_name || "-"}</td>

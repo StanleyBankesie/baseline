@@ -1,3 +1,8 @@
+/**
+ * @fileoverview ReceiptVoucherForm component.
+ * Provides functionality for ReceiptVoucherForm.
+ */
+
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -19,9 +24,16 @@ function emptyLine() {
     chequeNumber: "",
     chequeDate: "",
     paymentMethod: "",
+    currencyId: "",
+    exchangeRate: "1",
   };
 }
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function ReceiptVoucherForm() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -157,6 +169,21 @@ export default function ReceiptVoucherForm() {
       )
     );
   }, [currencies]);
+  function autoFetchLineRate(cId, lineIdx) {
+    if (!cId) return;
+    const sel = (currencies || []).find((c) => String(c.id) === String(cId));
+    const fromCode = sel?.code || sel?.currency_code || "";
+    const toCode = baseCurrency?.code || baseCurrency?.currency_code || "";
+    if (fromCode && toCode) {
+      if (fromCode === toCode) {
+        updateLine(lineIdx, { exchangeRate: "1" });
+      } else {
+        getExchangeRate(fromCode, toCode).then((r) => {
+          if (r != null) updateLine(lineIdx, { exchangeRate: String(r) });
+        });
+      }
+    }
+  }
   const dncnLineCurrencyId = useMemo(() => {
     const firstLineWithAccount = lines.find((l) => String(l.accountId || ""));
     const acc = accounts.find(
@@ -524,6 +551,8 @@ export default function ReceiptVoucherForm() {
           description: it.description || "",
           debit: Number(it.debit || 0),
           credit: Number(it.credit || 0),
+          currencyId: String(it.currency_id || it.currencyId || ""),
+          exchangeRate: String(it.exchange_rate || it.exchangeRate || "1"),
         })) || [];
       setLines(mapped.length ? mapped : [emptyLine(), emptyLine()]);
       if (isRV) {
@@ -929,7 +958,12 @@ export default function ReceiptVoucherForm() {
     if (!isRV || paymentType !== "DIRECT") return;
     const key = String(rvForm.taxCodeId || "");
     if (key && !rvTaxComponentsByCode[key]) return;
-    autoPopulateRvPostingLines(0, {}, rvForm.items, key ? rvTaxComponentsByCode[key] : []);
+    autoPopulateRvPostingLines(
+      0,
+      {},
+      rvForm.items,
+      key ? rvTaxComponentsByCode[key] : [],
+    );
   }, [isRV, paymentType, rvForm.taxCodeId, rvTaxComponentsByCode]);
 
   useEffect(() => {
@@ -1384,11 +1418,10 @@ export default function ReceiptVoucherForm() {
       const html =
         typeof resp.data === "string" ? resp.data : String(resp.data || "");
       const iframe = document.createElement("iframe");
-      iframe.style.position = "fixed";
-      iframe.style.right = "0";
-      iframe.style.bottom = "0";
-      iframe.style.width = "0";
-      iframe.style.height = "0";
+      iframe.style.position = "absolute";
+      iframe.style.left = "-9999px";
+      iframe.style.width = "800px";
+      iframe.style.height = "600px";
       iframe.style.border = "0";
       document.body.appendChild(iframe);
       const doc =
@@ -1412,7 +1445,30 @@ export default function ReceiptVoucherForm() {
           document.body.removeChild(iframe);
         }, 100);
       };
-      setTimeout(doPrint, 200);
+      const waitForImages = () => {
+        const images = doc.querySelectorAll("img");
+        if (images.length === 0) {
+          doPrint();
+          return;
+        }
+        let loaded = 0;
+        images.forEach((img) => {
+          if (img.complete) {
+            loaded++;
+            if (loaded === images.length) doPrint();
+            return;
+          }
+          img.onload = () => {
+            loaded++;
+            if (loaded === images.length) doPrint();
+          };
+          img.onerror = () => {
+            loaded++;
+            if (loaded === images.length) doPrint();
+          };
+        });
+      };
+      setTimeout(waitForImages, 200);
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to print voucher");
     }
@@ -1505,6 +1561,8 @@ export default function ReceiptVoucherForm() {
           amount: Number(it.amount || 0),
           referenceNo:
             (it.referenceNo && String(it.referenceNo).trim()) || null,
+          currencyId: it.currencyId || null,
+          exchangeRate: Number(it.exchangeRate || 1) || 1,
         }))
         .filter((it) => it.accountId && it.amount > 0);
 
@@ -1531,6 +1589,8 @@ export default function ReceiptVoucherForm() {
           chequeNumber: rvForm.reference || null,
           chequeDate: rvForm.chequeDate || null,
           paymentMethod: rvForm.paymentMethod || null,
+          currencyId: null,
+          exchangeRate: Number(rvExchangeRate || 1) || 1,
         },
         ...creditItems.map((it) => ({
           accountId: it.accountId,
@@ -1541,6 +1601,9 @@ export default function ReceiptVoucherForm() {
           chequeNumber: rvForm.reference || null,
           chequeDate: rvForm.chequeDate || null,
           paymentMethod: rvForm.paymentMethod || null,
+          currencyId: it.currencyId || null,
+          exchangeRate:
+            Number(it.exchangeRate || rvForm.exchangeRate || 1) || 1,
         })),
       ];
     } else if (isPAYV && paymentType !== "DIRECT") {
@@ -1657,6 +1720,8 @@ export default function ReceiptVoucherForm() {
           chequeNumber: l.chequeNumber || null,
           chequeDate: l.chequeDate || null,
           paymentMethod: l.paymentMethod || null,
+          currencyId: l.currencyId || null,
+          exchangeRate: Number(l.exchangeRate || 1) || 1,
         }))
         .filter((l) => l.accountId && (l.debit > 0 || l.credit > 0));
     } else {
@@ -1674,6 +1739,8 @@ export default function ReceiptVoucherForm() {
           chequeNumber: l.chequeNumber || null,
           chequeDate: l.chequeDate || null,
           paymentMethod: l.paymentMethod || null,
+          currencyId: l.currencyId || null,
+          exchangeRate: Number(l.exchangeRate || 1) || 1,
         }))
         .filter((l) => l.accountId && (l.debit > 0 || l.credit > 0));
     }
@@ -3066,7 +3133,7 @@ export default function ReceiptVoucherForm() {
                 <div>
                   <label className="label">Voucher Date *</label>
                   <input
-                    className={`input md:w-64 ${disabledClass}`}
+                    className={`input w-64 ${disabledClass}`}
                     type="date"
                     value={voucherDate}
                     onChange={(e) => setVoucherDate(e.target.value)}
@@ -3286,6 +3353,12 @@ export default function ReceiptVoucherForm() {
                             {isCN || isDN ? (
                               <th className="text-right w-32">Currency</th>
                             ) : null}
+                            {isPAYV || isRV || isCV ? (
+                              <>
+                                <th className="text-right w-28">Currency</th>
+                                <th className="text-right w-28">Exch. Rate</th>
+                              </>
+                            ) : null}
                             <th
                               className="text-right"
                               style={{ minWidth: "300px" }}
@@ -3328,11 +3401,18 @@ export default function ReceiptVoucherForm() {
                                     <select
                                       className="input"
                                       value={l.accountId}
-                                      onChange={(e) =>
+                                      onChange={(e) => {
+                                        const accId = e.target.value;
+                                        const acc = accounts.find(
+                                          (a) => String(a.id) === String(accId),
+                                        );
+                                        const newCId = acc?.currency_id || "";
                                         updateLine(idx, {
-                                          accountId: e.target.value,
-                                        })
-                                      }
+                                          accountId: accId,
+                                          currencyId: newCId,
+                                        });
+                                        autoFetchLineRate(newCId, idx);
+                                      }}
                                       required
                                       disabled={readOnly}
                                     >
@@ -3377,6 +3457,65 @@ export default function ReceiptVoucherForm() {
                                       return acc?.currency_code || "";
                                     })()}
                                   </td>
+                                ) : null}
+                                {isPAYV || isRV || isCV ? (
+                                  <>
+                                    <td>
+                                      {readOnly ? (
+                                        <span className="text-slate-600 dark:text-slate-400">
+                                          {(() => {
+                                            const sel = (currencies || []).find(
+                                              (c) =>
+                                                String(c.id) ===
+                                                String(l.currencyId || ""),
+                                            );
+                                            return (
+                                              sel?.code ||
+                                              sel?.currency_code ||
+                                              "-"
+                                            );
+                                          })()}
+                                        </span>
+                                      ) : (
+                                        <select
+                                          className="input"
+                                          value={l.currencyId}
+                                          onChange={(e) => {
+                                            const cId = e.target.value;
+                                            updateLine(idx, {
+                                              currencyId: cId,
+                                            });
+                                            autoFetchLineRate(cId, idx);
+                                          }}
+                                          disabled={readOnly}
+                                        >
+                                          <option value="">
+                                            Base Currency
+                                          </option>
+                                          {currencies.map((c) => (
+                                            <option key={c.id} value={c.id}>
+                                              {c.code || c.currency_code}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      )}
+                                    </td>
+                                    <td>
+                                      <input
+                                        className="input text-right"
+                                        type="number"
+                                        min="0"
+                                        step="any"
+                                        value={l.exchangeRate}
+                                        onChange={(e) =>
+                                          updateLine(idx, {
+                                            exchangeRate: e.target.value,
+                                          })
+                                        }
+                                        disabled={readOnly}
+                                      />
+                                    </td>
+                                  </>
                                 ) : null}
                                 <td
                                   className={
@@ -3596,7 +3735,7 @@ export default function ReceiptVoucherForm() {
                 <div>
                   <label className="label">Voucher Date *</label>
                   <input
-                    className={`input ${disabledClass}`}
+                    className={`input w-64 ${disabledClass}`}
                     type="date"
                     value={voucherDate}
                     onChange={(e) => setVoucherDate(e.target.value)}
@@ -3607,12 +3746,12 @@ export default function ReceiptVoucherForm() {
                 <div>
                   <label className="label">Project</label>
                   <select
-                    className="input"
+                    className="input w-64"
                     value={projectId}
                     onChange={(e) => setProjectId(e.target.value)}
                     disabled={readOnly}
                   >
-                    <option value="">-- Select Project --</option>
+                    <option value=""> Select Project </option>
                     {projects.map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.project_name || p.name}
@@ -3646,7 +3785,7 @@ export default function ReceiptVoucherForm() {
                   <label className="label">Received From</label>
                   <div className="relative">
                     <input
-                      className={`input ${disabledClass}`}
+                      className={`input w-64 ${disabledClass}`}
                       placeholder="Type to search accounts"
                       value={receivedFromSearch || rvForm.receivedFrom || ""}
                       onChange={(e) => {
@@ -3864,7 +4003,7 @@ export default function ReceiptVoucherForm() {
                 <div>
                   <label className="label">Balance</label>
                   <input
-                    className="input bg-slate-50 dark:bg-slate-800"
+                    className="input w-64 bg-slate-50 dark:bg-slate-800"
                     value={
                       rvForm.depositAccountId
                         ? accountBalances[String(rvForm.depositAccountId)] !==

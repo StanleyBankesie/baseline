@@ -1,3 +1,8 @@
+/**
+ * @fileoverview GRNLocalList component.
+ * Provides functionality for GRNLocalList.
+ */
+
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import DocumentAttachmentsModal from "@/components/attachments/DocumentAttachmentsModal.jsx";
@@ -16,6 +21,11 @@ import { api } from "api/client";
 import FloatingCreateButton from "@/components/FloatingCreateButton.jsx";
 import { usePermission } from "@/auth/PermissionContext.jsx";
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function GRNLocalList() {
   const location = useLocation();
   const { canReverseApproval, exceptionalPerms, hasExceptional } =
@@ -766,7 +776,7 @@ export default function GRNLocalList() {
       </div>
       {showForwardModal ? (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-[640px] max-w-[95%]">
+          <div className="bg-white rounded-lg shadow-erp w-full max-w-md">
             <div className="p-4 border-b flex justify-between items-center bg-brand text-white rounded-t-lg">
               <div className="font-semibold">Forward GRN for Approval</div>
               <button

@@ -1,10 +1,13 @@
+/**
+ * @fileoverview MaintenanceHome component.
+ * Provides functionality for MaintenanceHome.
+ */
+
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 
 import AssetList from "./assets/AssetList.jsx";
 import AssetForm from "./assets/AssetForm.jsx";
-import MaintenanceWorkOrderList from "./work-orders/MaintenanceWorkOrderList.jsx";
-import MaintenanceWorkOrderForm from "./work-orders/MaintenanceWorkOrderForm.jsx";
 import PmScheduleList from "./pm-schedules/PmScheduleList.jsx";
 import PmScheduleForm from "./pm-schedules/PmScheduleForm.jsx";
 import MaintenanceReports from "./reports/MaintenanceReports.jsx";
@@ -34,6 +37,8 @@ import MaintenanceSetupPage from "./setup/MaintenanceSetupPage";
 import DowntimeLogList from "./assets/DowntimeLogList.jsx";
 import DowntimeLogForm from "./assets/DowntimeLogForm.jsx";
 import DowntimeAnalysisReport from "./reports/DowntimeAnalysisReport.jsx";
+import MaintenanceMaterialRequisitionList from "./material-requisitions/MaintenanceMaterialRequisitionList.jsx";
+import MaintenanceMaterialRequisitionForm from "./material-requisitions/MaintenanceMaterialRequisitionForm.jsx";
 
 function MaintenanceLanding() {
   const [stats, setStats] = React.useState([
@@ -143,16 +148,16 @@ function MaintenanceLanding() {
           "📝",
         ),
         buildFeature(
-          "Work Orders",
-          "/maintenance/work-orders",
-          "Plan and assign maintenance work orders",
-          "🧾",
-        ),
-        buildFeature(
           "Job Orders",
           "/maintenance/job-orders",
           "Create and track job orders",
           "🛠",
+        ),
+        buildFeature(
+          "Material Requisitions",
+          "/maintenance/material-requisitions",
+          "Request materials from warehouse",
+          "📦",
         ),
       ],
     },
@@ -243,6 +248,11 @@ function MaintenanceLanding() {
   );
 }
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function MaintenanceHome() {
   return (
     <Routes>
@@ -253,10 +263,6 @@ export default function MaintenanceHome() {
       <Route path="/assets/:id" element={<AssetForm />} />
       <Route path="/assets/downtime" element={<DowntimeLogList />} />
       <Route path="/assets/downtime/new" element={<DowntimeLogForm />} />
-
-      <Route path="/work-orders" element={<MaintenanceWorkOrderList />} />
-      <Route path="/work-orders/new" element={<MaintenanceWorkOrderForm />} />
-      <Route path="/work-orders/:id" element={<MaintenanceWorkOrderForm />} />
 
       <Route
         path="/maintenance-requests"
@@ -313,6 +319,10 @@ export default function MaintenanceHome() {
       <Route path="/contracts/new" element={<MaintenanceContractForm />} />
       <Route path="/contracts/:id" element={<MaintenanceContractForm />} />
 
+      <Route path="/material-requisitions" element={<MaintenanceMaterialRequisitionList />} />
+      <Route path="/material-requisitions/new" element={<MaintenanceMaterialRequisitionForm />} />
+      <Route path="/material-requisitions/:id" element={<MaintenanceMaterialRequisitionForm />} />
+
       <Route path="/pm-schedules" element={<PmScheduleList />} />
       <Route path="/pm-schedules/new" element={<PmScheduleForm />} />
       <Route path="/pm-schedules/:id" element={<PmScheduleForm />} />
@@ -330,12 +340,6 @@ export const maintenanceFeatures = [
     module_key: "maintenance",
     label: "Assets",
     path: "/maintenance/assets",
-    type: "feature",
-  },
-  {
-    module_key: "maintenance",
-    label: "Work Orders",
-    path: "/maintenance/work-orders",
     type: "feature",
   },
   {
@@ -408,6 +412,12 @@ export const maintenanceFeatures = [
     module_key: "maintenance",
     label: "Maintenance Contracts",
     path: "/maintenance/contracts",
+    type: "feature",
+  },
+  {
+    module_key: "maintenance",
+    label: "Material Requisitions",
+    path: "/maintenance/material-requisitions",
     type: "feature",
   },
   {

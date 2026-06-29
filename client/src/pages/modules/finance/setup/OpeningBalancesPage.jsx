@@ -1,3 +1,8 @@
+/**
+ * @fileoverview OpeningBalancesPage component.
+ * Provides functionality for OpeningBalancesPage.
+ */
+
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import * as XLSX from "xlsx";
@@ -5,6 +10,11 @@ import { api } from "api/client";
 import { Link } from "react-router-dom";
 import { filterAndSort } from "@/utils/searchUtils.js";
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function OpeningBalancesPage() {
   const [fiscalYears, setFiscalYears] = useState([]);
   const [selectedFyId, setSelectedFyId] = useState("");
@@ -134,7 +144,7 @@ export default function OpeningBalancesPage() {
       );
       const n = Number(resp?.data?.upserted || items.length || 0);
       toast.success(`Opening balances saved (${n} accounts)`);
-      await loadData();
+      setOpeningMap(new Map());
     } catch (e) {
       toast.error(e?.response?.data?.message || "Failed to save");
     } finally {
@@ -234,7 +244,7 @@ export default function OpeningBalancesPage() {
               </p>
             </div>
             <div className="flex gap-2 items-center">
-              <Link to="/finance" className="btn btn-secondary py-1.5 px-3 text-sm h-auto">
+              <Link to="/finance" className="font-sans btn btn-secondary py-1.5 px-3 text-sm h-auto">
                 Return to Menu
               </Link>
               <input

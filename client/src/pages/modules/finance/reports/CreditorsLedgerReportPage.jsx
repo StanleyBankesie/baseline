@@ -1,3 +1,8 @@
+/**
+ * @fileoverview CreditorsLedgerReportPage component.
+ * Provides functionality for CreditorsLedgerReportPage.
+ */
+
 import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
@@ -8,6 +13,11 @@ import { filterAndSort } from "../../../../utils/searchUtils.js";
 import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function CreditorsLedgerReportPage() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -91,7 +101,7 @@ export default function CreditorsLedgerReportPage() {
         <div>
           <Link
             to="/finance"
-            className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
+            className="font-sans text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
           >
             ← Back to Finance
           </Link>

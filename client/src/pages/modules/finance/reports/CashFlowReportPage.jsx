@@ -1,3 +1,8 @@
+/**
+ * @fileoverview CashFlowReportPage component.
+ * Provides functionality for CashFlowReportPage.
+ */
+
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { api } from "api/client";
@@ -7,6 +12,11 @@ import jsPDF from "jspdf";
 import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function CashFlowReportPage() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -52,7 +62,7 @@ export default function CashFlowReportPage() {
         <div>
           <Link
             to="/finance"
-            className="text-xs font-bold text-brand uppercase tracking-wider hover:text-brand-600 transition-colors"
+            className="font-sans text-xs font-bold text-brand uppercase tracking-wider hover:text-brand-600 transition-colors"
           >
             ← Back to Finance
           </Link>

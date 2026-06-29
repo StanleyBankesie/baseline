@@ -1,11 +1,19 @@
+/**
+ * @file purchase.controller.js
+ * @description Handles procurement and purchasing operations including service confirmations,
+ * shipping advices, port clearances, and supplier management.
+ */
+// Database and Utility Dependencies
 import { query, pool } from "../db/pool.js";
 import { httpError } from "../utils/httpError.js";
 
+// Utility Function: Safely convert a value to a finite number
 function toNumber(v, fallback = null) {
   const n = Number(v);
   return Number.isFinite(n) ? n : fallback;
 }
 
+// Utility Function: Generate a unique document number with a prefix and date
 function nextDocNo(prefix) {
   return `${prefix}-${new Date()
     .toISOString()
@@ -13,6 +21,7 @@ function nextDocNo(prefix) {
     .replace(/-/g, "")}-${Math.floor(Math.random() * 10000)}`;
 }
 
+// Utility Function: Check if a specific column exists in a database table
 async function hasColumn(tableName, columnName) {
   const rows = await query(
     `
@@ -27,6 +36,7 @@ async function hasColumn(tableName, columnName) {
   return Number(rows?.[0]?.c || 0) > 0;
 }
 
+// Voucher Management: Resolve voucher type ID by its code
 async function resolveVoucherTypeIdByCode(conn, { companyId, code }) {
   const [rows] = await conn.execute(
     "SELECT id FROM fin_voucher_types WHERE company_id = :companyId AND code = :code LIMIT 1",
@@ -34,6 +44,7 @@ async function resolveVoucherTypeIdByCode(conn, { companyId, code }) {
   );
   return Number(rows?.[0]?.id || 0) || 0;
 }
+// Voucher Management: Ensure Journal Voucher type exists and return its ID
 async function ensureJournalVoucherTypeIdTx(conn, { companyId }) {
   const existingId = await resolveVoucherTypeIdByCode(conn, {
     companyId,
@@ -54,6 +65,7 @@ async function ensureJournalVoucherTypeIdTx(conn, { companyId }) {
   const id = await resolveVoucherTypeIdByCode(conn, { companyId, code: "JV" });
   return id || 0;
 }
+// Voucher Management: Generate the next voucher number and increment the sequence
 async function nextVoucherNoTx(conn, { companyId, voucherTypeId }) {
   const [rows] = await conn.execute(
     "SELECT prefix, next_number FROM fin_voucher_types WHERE company_id = :companyId AND id = :voucherTypeId LIMIT 1",
@@ -68,6 +80,7 @@ async function nextVoucherNoTx(conn, { companyId, voucherTypeId }) {
   );
   return voucherNo;
 }
+// Utility Function: Format a Date object or string to YYYY-MM-DD
 function toYmd(d) {
   const dt = d instanceof Date ? d : new Date(d);
   const y = dt.getFullYear();
@@ -75,6 +88,7 @@ function toYmd(d) {
   const day = String(dt.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
 }
+// Financial Configuration: Resolve the ID of an open fiscal year, creating one if necessary
 async function resolveOpenFiscalYearId(conn, { companyId }) {
   const [rows] = await conn.execute(
     "SELECT id FROM fin_fiscal_years WHERE company_id = :companyId AND is_open = 1 ORDER BY start_date DESC LIMIT 1",
@@ -146,6 +160,7 @@ async function resolveOpenFiscalYearId(conn, { companyId }) {
   const newId = Number(ins?.insertId || 0) || 0;
   return newId;
 }
+// Financial Configuration: Auto-resolve the VAT Input account ID
 async function resolveVatInputAccountIdAuto(conn, { companyId }) {
   const [codeRows] = await conn.execute(
     `SELECT id
@@ -176,6 +191,7 @@ async function resolveVatInputAccountIdAuto(conn, { companyId }) {
   );
   return Number(rows?.[0]?.id || 0) || 0;
 }
+// Financial Configuration: Auto-resolve the Service Expense account ID
 async function resolveServiceExpenseAccountIdAuto(conn, { companyId }) {
   const [preferRows] = await conn.execute(
     `SELECT a.id
@@ -206,6 +222,7 @@ async function resolveServiceExpenseAccountIdAuto(conn, { companyId }) {
   );
   return Number(fallbackRows?.[0]?.id || 0) || 0;
 }
+// Financial Configuration: Auto-resolve the AP Trade account ID for a supplier
 async function resolveApTradeAccountIdAuto(conn, { companyId, supplierId }) {
   if (supplierId) {
     const [supRows] = await conn.execute(
@@ -238,6 +255,7 @@ async function resolveApTradeAccountIdAuto(conn, { companyId, supplierId }) {
   );
   return Number(apRows?.[0]?.id || 0) || 0;
 }
+// Database Migration: Ensure supplier_type column exists on pur_suppliers
 async function ensureSupplierTypeColumn() {
   if (!(await hasColumn("pur_suppliers", "supplier_type"))) {
     await pool.query(
@@ -246,6 +264,7 @@ async function ensureSupplierTypeColumn() {
   }
 }
 
+// Database Migration: Ensure currency_id column exists on pur_suppliers
 async function ensureSupplierCurrencyColumn() {
   if (!(await hasColumn("pur_suppliers", "currency_id"))) {
     await pool.query(
@@ -254,6 +273,7 @@ async function ensureSupplierCurrencyColumn() {
   }
 }
 
+// Database Migration: Ensure tables for service confirmations and details exist
 async function ensureServiceConfirmationTables() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS inv_service_confirmations (
@@ -273,6 +293,16 @@ async function ensureServiceConfirmationTables() {
       KEY idx_sc_scope (company_id, branch_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
+  if (!(await hasColumn("inv_service_confirmations", "order_id"))) {
+    await pool.query(
+      "ALTER TABLE inv_service_confirmations ADD COLUMN order_id BIGINT UNSIGNED NULL AFTER sc_date",
+    );
+  }
+  if (!(await hasColumn("inv_service_confirmations", "execution_id"))) {
+    await pool.query(
+      "ALTER TABLE inv_service_confirmations ADD COLUMN execution_id BIGINT UNSIGNED NULL AFTER order_id",
+    );
+  }
   await pool.query(`
     CREATE TABLE IF NOT EXISTS inv_service_confirmation_details (
       id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -288,6 +318,7 @@ async function ensureServiceConfirmationTables() {
   `);
 }
 
+// Utility Function: Generate the next sequential document number for a specific table
 async function nextSequentialNo(table, column, prefix) {
   const rows = await query(`
     SELECT ${column} AS no,
@@ -309,10 +340,17 @@ async function nextSequentialNo(table, column, prefix) {
   return `${prefix}-${String(nextNum).padStart(6, "0")}`;
 }
 
+/**
+ * Retrieves a list of all service confirmations with their corresponding supplier details.
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 export const listServiceConfirmations = async (req, res, next) => {
   try {
     await ensureServiceConfirmationTables();
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const rows = await query(
       `
       SELECT c.id,
@@ -320,6 +358,7 @@ export const listServiceConfirmations = async (req, res, next) => {
              c.sc_date,
              c.status,
              c.total_amount,
+             c.order_id,
              s.supplier_name,
           c.created_at,
           u.username AS created_by_name
@@ -327,10 +366,10 @@ export const listServiceConfirmations = async (req, res, next) => {
       JOIN pur_suppliers s ON s.id = c.supplier_id
         LEFT JOIN adm_users u ON u.id = c.created_by
          WHERE c.company_id = :companyId
-        AND c.branch_id = :branchId
+        AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
       ORDER BY c.sc_date DESC, c.id DESC
       `,
-      { companyId, branchId },
+      { companyId, branchId, branchIdsStr },
     );
     res.json({ items: rows });
   } catch (err) {
@@ -338,10 +377,17 @@ export const listServiceConfirmations = async (req, res, next) => {
   }
 };
 
+/**
+ * Retrieves a specific service confirmation and its line-item details by ID.
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 export const getServiceConfirmationById = async (req, res, next) => {
   try {
     await ensureServiceConfirmationTables();
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const id = toNumber(req.params.id);
     if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
     const rows = await query(
@@ -351,10 +397,10 @@ export const getServiceConfirmationById = async (req, res, next) => {
           u.username AS created_by_name
          FROM inv_service_confirmations c
         LEFT JOIN adm_users u ON u.id = c.created_by
-         WHERE c.id = :id AND c.company_id = :companyId AND c.branch_id = :branchId
+         WHERE c.id = :id AND c.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(c.branch_id, :branchIdsStr))
       LIMIT 1
       `,
-      { id, companyId, branchId },
+      { id, companyId, branchId, branchIdsStr },
     );
     if (!rows.length)
       throw httpError(404, "NOT_FOUND", "Service confirmation not found");
@@ -376,15 +422,24 @@ export const getServiceConfirmationById = async (req, res, next) => {
   }
 };
 
+/**
+ * Creates a new service confirmation document and its line items inside a database transaction.
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 export const createServiceConfirmation = async (req, res, next) => {
   const conn = await pool.getConnection();
   try {
     await ensureServiceConfirmationTables();
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const body = req.body || {};
     const scNo = body.sc_no || nextDocNo("SC");
     const scDate = body.sc_date;
     const supplierId = toNumber(body.supplier_id);
+    const orderId = body.order_id ? Number(body.order_id) : null;
+    const executionId = body.execution_id ? Number(body.execution_id) : null;
     const status = body.status || "DRAFT";
     const remarks = body.remarks || null;
     const createdBy = req.user?.sub ? Number(req.user.sub) : null;
@@ -414,15 +469,17 @@ export const createServiceConfirmation = async (req, res, next) => {
     const [hdr] = await conn.execute(
       `
       INSERT INTO inv_service_confirmations
-        (company_id, branch_id, sc_no, sc_date, supplier_id, total_amount, status, remarks, created_by)
+        (company_id, branch_id, sc_no, sc_date, order_id, execution_id, supplier_id, total_amount, status, remarks, created_by)
       VALUES
-        (:companyId, :branchId, :scNo, :scDate, :supplierId, :totalAmount, :status, :remarks, :createdBy)
+        (:companyId, :branchId, :scNo, :scDate, :orderId, :executionId, :supplierId, :totalAmount, :status, :remarks, :createdBy)
       `,
       {
         companyId,
-        branchId,
+        branchId, branchIdsStr,
         scNo,
         scDate,
+        orderId,
+        executionId,
         supplierId,
         totalAmount,
         status,
@@ -446,6 +503,12 @@ export const createServiceConfirmation = async (req, res, next) => {
           unitPrice: nd.unitPrice,
           lineTotal: nd.lineTotal,
         },
+      );
+    }
+    if (orderId) {
+      await conn.execute(
+        `UPDATE pur_service_orders SET status = 'DONE' WHERE id = :orderId`,
+        { orderId }
       );
     }
     await conn.commit();
@@ -527,9 +590,16 @@ async function ensurePortClearanceStatusEnum() {
   }
 }
 
+/**
+ * Computes the next sequential supplier code based on existing suppliers and financial accounts.
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 export const getNextSupplierCode = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const [supRows] = await pool.query(
       `SELECT MAX(CAST(SUBSTRING(supplier_code, 4) AS UNSIGNED)) AS maxnum,
           created_at,
@@ -562,9 +632,17 @@ export const getNextSupplierCode = async (req, res, next) => {
   }
 };
 
+/**
+ * Fetches all shipping advices, optionally filtered by status and PO type.
+ * Includes a check for associated port clearances.
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 export const listShippingAdvices = async (req, res, next) => {
   try {
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const { status, po_type } = req.query;
     if (!(await hasColumn("pur_shipping_advices", "is_active"))) {
       await query(
@@ -587,21 +665,28 @@ export const listShippingAdvices = async (req, res, next) => {
          FROM pur_shipping_advices sa
          JOIN pur_suppliers s ON s.id = sa.supplier_id
          JOIN pur_orders p ON p.id = sa.po_id
-         WHERE sa.company_id = :companyId AND sa.branch_id = :branchId
+         WHERE sa.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(sa.branch_id, :branchIdsStr))
            AND COALESCE(sa.is_active,'Y') = 'Y'`;
     if (status) sql += ` AND sa.status = :status`;
     if (po_type) sql += ` AND p.po_type = :po_type`;
     sql += ` ORDER BY sa.advice_date DESC, sa.id DESC`;
-    const rows = await query(sql, { companyId, branchId, status, po_type });
+    const rows = await query(sql, { companyId, branchId, branchIdsStr, status, po_type });
     res.json({ items: rows });
   } catch (err) {
     next(err);
   }
 };
 
+/**
+ * Generates the next sequential shipping advice document number.
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 export const getNextShippingAdviceNo = async (req, res, next) => {
   try {
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const rows = await query(
       `SELECT MAX(CAST(SUBSTRING(advice_no, 4) AS UNSIGNED)) AS maxnum,
           created_at,
@@ -609,9 +694,9 @@ export const getNextShippingAdviceNo = async (req, res, next) => {
          FROM pur_shipping_advices
         LEFT JOIN adm_users u ON u.id = created_by
          WHERE company_id = :companyId
-         AND branch_id = :branchId
+         AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
          AND advice_no REGEXP '^SA-[0-9]{6}$'`,
-      { companyId, branchId },
+      { companyId, branchId, branchIdsStr },
     );
     const maxnum = Number(rows?.[0]?.maxnum || 0);
     const next = maxnum + 1;
@@ -622,9 +707,16 @@ export const getNextShippingAdviceNo = async (req, res, next) => {
   }
 };
 
+/**
+ * Retrieves a specific shipping advice and its details by ID.
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 export const getShippingAdviceById = async (req, res, next) => {
   try {
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const id = toNumber(req.params.id);
     if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
     const rows = await query(
@@ -635,8 +727,8 @@ export const getShippingAdviceById = async (req, res, next) => {
        JOIN pur_suppliers s ON s.id = sa.supplier_id
        JOIN pur_orders p ON p.id = sa.po_id
         LEFT JOIN adm_users u ON u.id = sa.created_by
-         WHERE sa.id = :id AND sa.company_id = :companyId AND sa.branch_id = :branchId`,
-      { id, companyId, branchId },
+         WHERE sa.id = :id AND sa.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(sa.branch_id, :branchIdsStr))`,
+      { id, companyId, branchId, branchIdsStr },
     );
     if (!rows.length)
       throw httpError(404, "NOT_FOUND", "Shipping Advice not found");
@@ -656,10 +748,17 @@ export const getShippingAdviceById = async (req, res, next) => {
   }
 };
 
+/**
+ * Creates a new shipping advice along with its line items within a transaction.
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 export const createShippingAdvice = async (req, res, next) => {
   const conn = await pool.getConnection();
   try {
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const body = req.body || {};
     await ensureShippingAdviceStatusEnum();
     await ensureShippingAdviceETDColumn();
@@ -680,7 +779,7 @@ export const createShippingAdvice = async (req, res, next) => {
         :bl, :vessel, :container, :etd, :eta, :status, :remarks, :createdBy)`,
       {
         companyId,
-        branchId,
+        branchId, branchIdsStr,
         adviceNo,
         adviceDate,
         poId,
@@ -703,7 +802,7 @@ export const createShippingAdvice = async (req, res, next) => {
       await conn.execute(
         `INSERT INTO pur_shipping_advice_details (advice_id, item_id, qty_shipped, remarks)
          VALUES (:adviceId, :itemId, :qty, :remarks)`,
-        { adviceId, itemId, qty, remarks: d.remarks },
+        { adviceId, itemId, qty, remarks: d.remarks || null },
       );
     }
     await conn.commit();
@@ -716,10 +815,17 @@ export const createShippingAdvice = async (req, res, next) => {
   }
 };
 
+/**
+ * Updates an existing shipping advice and replaces all its associated line items.
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 export const updateShippingAdvice = async (req, res, next) => {
   const conn = await pool.getConnection();
   try {
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const id = toNumber(req.params.id);
     if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
     const body = req.body || {};
@@ -733,8 +839,8 @@ export const updateShippingAdvice = async (req, res, next) => {
     await conn.beginTransaction();
     const [exists] = await conn.execute(
       `SELECT id FROM pur_shipping_advices 
-       WHERE id = :id AND company_id = :companyId AND branch_id = :branchId`,
-      { id, companyId, branchId },
+       WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
+      { id, companyId, branchId, branchIdsStr },
     );
     if (!Array.isArray(exists) || !exists.length) {
       throw httpError(404, "NOT_FOUND", "Shipping Advice not found");
@@ -751,11 +857,11 @@ export const updateShippingAdvice = async (req, res, next) => {
          eta_date = :eta,
          status = :status,
          remarks = :remarks
-       WHERE id = :id AND company_id = :companyId AND branch_id = :branchId`,
+       WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
       {
         id,
         companyId,
-        branchId,
+        branchId, branchIdsStr,
         adviceDate,
         poId,
         supplierId,
@@ -793,9 +899,16 @@ export const updateShippingAdvice = async (req, res, next) => {
   }
 };
 
+/**
+ * Retrieves a list of port clearances.
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 export const listPortClearances = async (req, res, next) => {
   try {
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const { status } = req.query;
     if (!(await hasColumn("pur_port_clearances", "is_active"))) {
       await query(
@@ -819,11 +932,11 @@ export const listPortClearances = async (req, res, next) => {
          LEFT JOIN pur_shipping_advices sa ON sa.id = pc.advice_id
          LEFT JOIN pur_orders p ON p.id = sa.po_id
          LEFT JOIN pur_suppliers s ON s.id = sa.supplier_id
-         WHERE pc.company_id = :companyId AND pc.branch_id = :branchId
+         WHERE pc.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(pc.branch_id, :branchIdsStr))
            AND COALESCE(pc.is_active,'Y') = 'Y'`;
     if (status) sql += ` AND pc.status = :status`;
     sql += ` ORDER BY pc.clearance_date DESC, pc.id DESC`;
-    const rows = await query(sql, { companyId, branchId, status });
+    const rows = await query(sql, { companyId, branchId, branchIdsStr, status });
     res.json({ items: rows });
   } catch (err) {
     next(err);
@@ -832,7 +945,7 @@ export const listPortClearances = async (req, res, next) => {
 
 export const getNextPortClearanceNo = async (req, res, next) => {
   try {
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const rows = await query(
       `SELECT MAX(CAST(SUBSTRING(clearance_no, 4) AS UNSIGNED)) AS maxnum,
           created_at,
@@ -840,9 +953,9 @@ export const getNextPortClearanceNo = async (req, res, next) => {
          FROM pur_port_clearances
         LEFT JOIN adm_users u ON u.id = created_by
          WHERE company_id = :companyId
-         AND branch_id = :branchId
+         AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
          AND clearance_no REGEXP '^CC-[0-9]{6}$'`,
-      { companyId, branchId },
+      { companyId, branchId, branchIdsStr },
     );
     const maxnum = Number(rows?.[0]?.maxnum || 0);
     const next = maxnum + 1;
@@ -855,7 +968,7 @@ export const getNextPortClearanceNo = async (req, res, next) => {
 
 export const getPortClearanceById = async (req, res, next) => {
   try {
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const id = toNumber(req.params.id);
     if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
     const rows = await query(
@@ -865,8 +978,8 @@ export const getPortClearanceById = async (req, res, next) => {
          FROM pur_port_clearances pc
        LEFT JOIN pur_shipping_advices sa ON sa.id = pc.advice_id
         LEFT JOIN adm_users u ON u.id = pc.created_by
-         WHERE pc.id = :id AND pc.company_id = :companyId AND pc.branch_id = :branchId`,
-      { id, companyId, branchId },
+         WHERE pc.id = :id AND pc.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(pc.branch_id, :branchIdsStr))`,
+      { id, companyId, branchId, branchIdsStr },
     );
     if (!rows.length)
       throw httpError(404, "NOT_FOUND", "Port Clearance not found");
@@ -879,7 +992,7 @@ export const getPortClearanceById = async (req, res, next) => {
 export const createPortClearance = async (req, res, next) => {
   const conn = await pool.getConnection();
   try {
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const body = req.body || {};
     await ensurePortClearanceStatusEnum();
     let clearanceNo = body.clearance_no || null;
@@ -915,7 +1028,7 @@ export const createPortClearance = async (req, res, next) => {
         :customsEntry, :agent, :duty, :other, :status, :remarks, :createdBy)`,
       {
         companyId,
-        branchId,
+        branchId, branchIdsStr,
         clearanceNo,
         clearanceDate,
         adviceId: adviceId || null,
@@ -943,7 +1056,7 @@ export const createPortClearance = async (req, res, next) => {
 export const updatePortClearance = async (req, res, next) => {
   const conn = await pool.getConnection();
   try {
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const id = toNumber(req.params.id);
     if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
     const body = req.body || {};
@@ -952,8 +1065,8 @@ export const updatePortClearance = async (req, res, next) => {
     const adviceId = toNumber(body.advice_id ?? body.shipping_advice_id);
     const [exists] = await conn.execute(
       `SELECT id FROM pur_port_clearances 
-       WHERE id = :id AND company_id = :companyId AND branch_id = :branchId`,
-      { id, companyId, branchId },
+       WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
+      { id, companyId, branchId, branchIdsStr },
     );
     if (!Array.isArray(exists) || !exists.length) {
       throw httpError(404, "NOT_FOUND", "Port Clearance not found");
@@ -969,11 +1082,11 @@ export const updatePortClearance = async (req, res, next) => {
          other_charges = :other,
          status = :status,
          remarks = :remarks
-       WHERE id = :id AND company_id = :companyId AND branch_id = :branchId`,
+       WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
       {
         id,
         companyId,
-        branchId,
+        branchId, branchIdsStr,
         clearanceDate: (() => {
           const cd2 = body.clearance_date;
           return cd2
@@ -996,8 +1109,8 @@ export const updatePortClearance = async (req, res, next) => {
       await conn.execute(
         `UPDATE pur_shipping_advices 
            SET status = 'CLEARED' 
-         WHERE id = :adviceId AND company_id = :companyId AND branch_id = :branchId`,
-        { adviceId, companyId, branchId },
+         WHERE id = :adviceId AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
+        { adviceId, companyId, branchId, branchIdsStr },
       );
     }
     await conn.commit();
@@ -1013,12 +1126,14 @@ export const updateServiceConfirmation = async (req, res, next) => {
   const conn = await pool.getConnection();
   try {
     await ensureServiceConfirmationTables();
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const id = toNumber(req.params.id);
     if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
     const body = req.body || {};
     const scDate = body.sc_date;
     const supplierId = toNumber(body.supplier_id);
+    const orderId = body.order_id ? Number(body.order_id) : null;
+    const executionId = body.execution_id ? Number(body.execution_id) : null;
     const status = body.status || "DRAFT";
     const remarks = body.remarks || null;
     const details = Array.isArray(body.details) ? body.details : [];
@@ -1049,17 +1164,21 @@ export const updateServiceConfirmation = async (req, res, next) => {
       UPDATE inv_service_confirmations
       SET sc_date = :scDate,
           supplier_id = :supplierId,
+          order_id = :orderId,
+          execution_id = :executionId,
           total_amount = :totalAmount,
           status = :status,
           remarks = :remarks
-      WHERE id = :id AND company_id = :companyId AND branch_id = :branchId
+      WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
       `,
       {
         id,
         companyId,
-        branchId,
+        branchId, branchIdsStr,
         scDate,
         supplierId,
+        orderId,
+        executionId,
         totalAmount,
         status,
         remarks,
@@ -1185,6 +1304,26 @@ async function ensureServiceBillTables() {
       "ALTER TABLE pur_service_bills ADD COLUMN supplier_id BIGINT UNSIGNED NULL AFTER branch_id",
     );
   }
+  if (!(await hasColumn("pur_service_bills", "currency_id"))) {
+    await pool.query(
+      "ALTER TABLE pur_service_bills ADD COLUMN currency_id BIGINT UNSIGNED NULL AFTER total_amount",
+    );
+  }
+  if (!(await hasColumn("pur_service_bills", "exchange_rate"))) {
+    await pool.query(
+      "ALTER TABLE pur_service_bills ADD COLUMN exchange_rate DECIMAL(18,6) NOT NULL DEFAULT 1 AFTER currency_id",
+    );
+  }
+  if (!(await hasColumn("pur_service_bills", "freight_charges"))) {
+    await pool.query(
+      "ALTER TABLE pur_service_bills ADD COLUMN freight_charges DECIMAL(18,2) NOT NULL DEFAULT 0 AFTER exchange_rate",
+    );
+  }
+  if (!(await hasColumn("pur_service_bills", "other_charges"))) {
+    await pool.query(
+      "ALTER TABLE pur_service_bills ADD COLUMN other_charges DECIMAL(18,2) NOT NULL DEFAULT 0 AFTER freight_charges",
+    );
+  }
   try {
     await pool.query(`
       UPDATE pur_service_bills sb
@@ -1222,6 +1361,36 @@ async function ensureServiceBillTables() {
       CONSTRAINT fk_sbd_bill FOREIGN KEY (bill_id) REFERENCES pur_service_bills(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
+  if (!(await hasColumn("pur_service_bill_details", "item_id"))) {
+    await pool.query(
+      "ALTER TABLE pur_service_bill_details ADD COLUMN item_id BIGINT UNSIGNED NULL AFTER bill_id",
+    );
+  }
+  if (!(await hasColumn("pur_service_bill_details", "uom_id"))) {
+    await pool.query(
+      "ALTER TABLE pur_service_bill_details ADD COLUMN uom_id BIGINT UNSIGNED NULL AFTER category",
+    );
+  }
+  if (!(await hasColumn("pur_service_bill_details", "discount_percent"))) {
+    await pool.query(
+      "ALTER TABLE pur_service_bill_details ADD COLUMN discount_percent DECIMAL(5,2) NOT NULL DEFAULT 0 AFTER amount",
+    );
+  }
+  if (!(await hasColumn("pur_service_bill_details", "tax_code_id"))) {
+    await pool.query(
+      "ALTER TABLE pur_service_bill_details ADD COLUMN tax_code_id BIGINT UNSIGNED NULL AFTER discount_percent",
+    );
+  }
+  if (!(await hasColumn("pur_service_bill_details", "tax_amount"))) {
+    await pool.query(
+      "ALTER TABLE pur_service_bill_details ADD COLUMN tax_amount DECIMAL(18,2) NOT NULL DEFAULT 0 AFTER tax_code_id",
+    );
+  }
+  if (!(await hasColumn("pur_service_bill_details", "line_total"))) {
+    await pool.query(
+      "ALTER TABLE pur_service_bill_details ADD COLUMN line_total DECIMAL(18,2) NOT NULL DEFAULT 0 AFTER tax_amount",
+    );
+  }
 }
 
 async function ensureProspectCustomersTable() {
@@ -1255,32 +1424,32 @@ async function ensureProspectCustomersTable() {
 export const listServiceRequests = async (req, res, next) => {
   try {
     await ensureServiceRequestTables();
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const rows = await query(
       `
       SELECT r.id, r.request_no, r.request_date, r.requester_full_name, r.service_type, r.priority, r.status,
              u.username AS forwarded_to_username,
-          r.created_at,
-          u.username AS created_by_name
-         FROM pur_service_requests r
+             r.created_at,
+             uc.username AS created_by_username
+      FROM pur_service_requests r
       LEFT JOIN (
         SELECT t.document_id, t.assigned_to_user_id
         FROM adm_document_workflows t
         JOIN (
           SELECT document_id, MAX(id) AS max_id
           FROM adm_document_workflows
-        LEFT JOIN adm_users u ON u.id = r.created_by
-         WHERE company_id = :companyId
+          WHERE company_id = :companyId
             AND status = 'PENDING'
             AND (document_type = 'SERVICE_REQUEST' OR document_type = 'Service Request')
           GROUP BY document_id
         ) m ON m.max_id = t.id
       ) x ON x.document_id = r.id
       LEFT JOIN adm_users u ON u.id = x.assigned_to_user_id
-      WHERE r.company_id = :companyId AND r.branch_id = :branchId
+      LEFT JOIN adm_users uc ON uc.id = r.created_by
+      WHERE r.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(r.branch_id, :branchIdsStr))
       ORDER BY r.request_date DESC, r.id DESC
       `,
-      { companyId, branchId },
+      { companyId, branchId, branchIdsStr },
     );
     res.json({ items: rows });
   } catch (err) {
@@ -1291,7 +1460,7 @@ export const listServiceRequests = async (req, res, next) => {
 export const getServiceRequestById = async (req, res, next) => {
   try {
     await ensureServiceRequestTables();
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const id = toNumber(req.params.id);
     if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
     const rows = await query(
@@ -1301,10 +1470,10 @@ export const getServiceRequestById = async (req, res, next) => {
           u.username AS created_by_name
          FROM pur_service_requests
         LEFT JOIN adm_users u ON u.id = created_by
-         WHERE id = :id AND company_id = :companyId AND branch_id = :branchId
+         WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
       LIMIT 1
       `,
-      { id, companyId, branchId },
+      { id, companyId, branchId, branchIdsStr },
     );
     if (!rows.length)
       throw httpError(404, "NOT_FOUND", "Service request not found");
@@ -1333,7 +1502,7 @@ export const createServiceRequest = async (req, res, next) => {
   try {
     await ensureServiceRequestTables();
     await ensureProspectCustomersTable();
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const body = req.body || {};
     const requestNo =
       body.request_no ||
@@ -1381,9 +1550,7 @@ export const createServiceRequest = async (req, res, next) => {
     const createdBy = req.user?.sub ? Number(req.user.sub) : null;
 
     if (
-      !fullName ||
-      !email ||
-      !phone ||
+      (body.customer_type !== "existing" && (!fullName || !email || !phone)) ||
       !serviceType ||
       !requestTitle ||
       !description
@@ -1413,7 +1580,7 @@ export const createServiceRequest = async (req, res, next) => {
       `,
       {
         companyId,
-        branchId,
+        branchId, branchIdsStr,
         requestNo,
         requestDate,
         fullName,
@@ -1483,7 +1650,7 @@ export const updateServiceRequest = async (req, res, next) => {
   try {
     await ensureServiceRequestTables();
     await ensureProspectCustomersTable();
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const id = toNumber(req.params.id);
     if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
     const body = req.body || {};
@@ -1527,9 +1694,7 @@ export const updateServiceRequest = async (req, res, next) => {
         : null);
 
     if (
-      !fullName ||
-      !email ||
-      !phone ||
+      (body.customer_type !== "existing" && (!fullName || !email || !phone)) ||
       !serviceType ||
       !requestTitle ||
       !description
@@ -1540,10 +1705,10 @@ export const updateServiceRequest = async (req, res, next) => {
     const [exists] = await conn.execute(
       `
       SELECT id FROM pur_service_requests
-      WHERE id = :id AND company_id = :companyId AND branch_id = :branchId
+      WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
       LIMIT 1
       `,
-      { id, companyId, branchId },
+      { id, companyId, branchId, branchIdsStr },
     );
     if (!exists.length)
       throw httpError(404, "NOT_FOUND", "Service request not found");
@@ -1568,12 +1733,12 @@ export const updateServiceRequest = async (req, res, next) => {
         additional_notes = :additionalNotes,
         agreed_terms = :agreedTerms,
         attachments_json = :attachmentsJson
-      WHERE id = :id AND company_id = :companyId AND branch_id = :branchId
+      WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
       `,
       {
         id,
         companyId,
-        branchId,
+        branchId, branchIdsStr,
         fullName,
         email,
         phone,
@@ -1638,7 +1803,7 @@ export const updateServiceRequest = async (req, res, next) => {
 export const listServiceBills = async (req, res, next) => {
   try {
     await ensureServiceBillTables();
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const status = String(req.query.status || "")
       .trim()
       .toUpperCase();
@@ -1650,9 +1815,9 @@ export const listServiceBills = async (req, res, next) => {
     let sql = `
       SELECT id, bill_no, bill_date, status, payment, total_amount, amount_paid, client_name
       FROM pur_service_bills
-      WHERE company_id = :companyId AND branch_id = :branchId
+      WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
     `;
-    const params = { companyId, branchId };
+    const params = { companyId, branchId, branchIdsStr };
     if (status) {
       sql += " AND status = :status";
       params.status = status;
@@ -1702,7 +1867,7 @@ export const listServiceBills = async (req, res, next) => {
 export const getServiceBillById = async (req, res, next) => {
   try {
     await ensureServiceBillTables();
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const id = toNumber(req.params.id);
     if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
     const rows = await query(
@@ -1712,10 +1877,10 @@ export const getServiceBillById = async (req, res, next) => {
           u.username AS created_by_name
          FROM pur_service_bills
         LEFT JOIN adm_users u ON u.id = created_by
-         WHERE id = :id AND company_id = :companyId AND branch_id = :branchId
+         WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
       LIMIT 1
       `,
-      { id, companyId, branchId },
+      { id, companyId, branchId, branchIdsStr },
     );
     if (!rows.length)
       throw httpError(404, "NOT_FOUND", "Service bill not found");
@@ -1731,11 +1896,9 @@ export const getServiceBillById = async (req, res, next) => {
     }
     const details = await query(
       `
-      SELECT id, description, category, qty, rate, amount,
-          created_at,
-          u.username AS created_by_name
+      SELECT id, item_id, description, category, uom_id, qty, rate, amount,
+          discount_percent, tax_code_id, tax_amount, line_total
          FROM pur_service_bill_details
-        LEFT JOIN adm_users u ON u.id = created_by
          WHERE bill_id = :id
       ORDER BY id ASC
       `,
@@ -1750,7 +1913,7 @@ export const getServiceBillById = async (req, res, next) => {
 export const getNextServiceBillNo = async (req, res, next) => {
   try {
     await ensureServiceBillTables();
-    const nextNo = await nextSequentialNo("pur_service_bills", "bill_no", "SB");
+    const nextNo = await nextSequentialNo("pur_service_bills", "bill_no", "SVB");
     res.json({ nextNo });
   } catch (err) {
     next(err);
@@ -1761,12 +1924,12 @@ export const createServiceBill = async (req, res, next) => {
   const conn = await pool.getConnection();
   try {
     await ensureServiceBillTables();
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const body = req.body || {};
     const supplierId = body.supplier_id || body.supplierId || null;
     const billNo =
       body.bill_no ||
-      (await nextSequentialNo("pur_service_bills", "bill_no", "SB"));
+      (await nextSequentialNo("pur_service_bills", "bill_no", "SVB"));
     const billDate = body.bill_date || new Date().toISOString().slice(0, 10);
     const dueDate = body.due_date || null;
     const serviceDate = body.service_date || null;
@@ -1784,10 +1947,10 @@ export const createServiceBill = async (req, res, next) => {
       body.payment_reference || body.paymentReference || null;
     const paymentTerms = body.payment_terms || body.paymentTerms || null;
     const notes = body.notes || null;
-    const discountPercent = Number(
-      body.discount_percent ?? body.discountPercent ?? 0,
-    );
-    const taxPercent = Number(body.tax_percent ?? body.taxPercent ?? 0);
+    const currencyId = body.currency_id ? Number(body.currency_id) : null;
+    const exchangeRate = Number(body.exchange_rate) || 1;
+    const freightCharges = Number(body.freight_charges) || 0;
+    const otherCharges = Number(body.other_charges) || 0;
     const rows = Array.isArray(body.details)
       ? body.details
       : Array.isArray(body.rows)
@@ -1805,13 +1968,20 @@ export const createServiceBill = async (req, res, next) => {
       const amount = Number.isFinite(Number(r.amount))
         ? Number(r.amount)
         : qty * rate;
+      const itemId = r.item_id ? Number(r.item_id) : null;
+      const uomId = r.uom_id ? Number(r.uom_id) : null;
+      const discountPercent = Number(r.discount_percent) || 0;
+      const taxCodeId = r.tax_code_id ? Number(r.tax_code_id) : null;
+      const taxAmount = Number(r.tax_amount) || 0;
+      const lineTotal = Number(r.line_total) || amount;
       subtotal += amount;
-      normalized.push({ desc, category, qty, rate, amount });
+      normalized.push({ desc, category, qty, rate, amount, itemId, uomId, discountPercent, taxCodeId, taxAmount, lineTotal });
     }
-    const discountAmount = subtotal * (discountPercent / 100);
-    const afterDiscount = subtotal - discountAmount;
-    const taxAmount = afterDiscount * (taxPercent / 100);
-    const totalAmount = afterDiscount + taxAmount;
+
+    const subtotalFromBody = Number(body.subtotal) || subtotal;
+    const discountAmount = Number(body.discount_amount) || 0;
+    const taxAmount = Number(body.tax_amount) || 0;
+    const totalAmount = Number(body.total_amount) || (subtotalFromBody - discountAmount + taxAmount + freightCharges + otherCharges);
 
     const createdBy = req.user?.sub ? Number(req.user.sub) : null;
     const paymentInput = String(body.payment || "")
@@ -1834,18 +2004,20 @@ export const createServiceBill = async (req, res, next) => {
         client_name, client_company, client_address, client_phone, client_email,
         payment_method, payment_reference, payment_terms, notes,
         discount_percent, tax_percent, subtotal, discount_amount, tax_amount, total_amount,
+        currency_id, exchange_rate, freight_charges, other_charges,
         created_by
       ) VALUES (
         :companyId, :branchId, :supplierId, :billNo, :billDate, :dueDate, :serviceDate, :status, :payment,
         :clientName, :clientCompany, :clientAddress, :clientPhone, :clientEmail,
         :paymentMethod, :paymentReference, :paymentTerms, :notes,
         :discountPercent, :taxPercent, :subtotal, :discountAmount, :taxAmount, :totalAmount,
+        :currencyId, :exchangeRate, :freightCharges, :otherCharges,
         :createdBy
       )
       `,
       {
         companyId,
-        branchId,
+        branchId, branchIdsStr,
         supplierId,
         billNo,
         billDate,
@@ -1862,12 +2034,16 @@ export const createServiceBill = async (req, res, next) => {
         paymentReference,
         paymentTerms,
         notes,
-        discountPercent,
-        taxPercent,
-        subtotal,
+        discountPercent: 0,
+        taxPercent: 0,
+        subtotal: subtotalFromBody,
         discountAmount,
         taxAmount,
         totalAmount,
+        currencyId,
+        exchangeRate,
+        freightCharges,
+        otherCharges,
         createdBy,
       },
     );
@@ -1876,18 +2052,24 @@ export const createServiceBill = async (req, res, next) => {
       await conn.execute(
         `
         INSERT INTO pur_service_bill_details (
-          bill_id, description, category, qty, rate, amount
+          bill_id, item_id, description, category, uom_id, qty, rate, amount, discount_percent, tax_code_id, tax_amount, line_total
         ) VALUES (
-          :billId, :description, :category, :qty, :rate, :amount
+          :billId, :itemId, :description, :category, :uomId, :qty, :rate, :amount, :discountPercent, :taxCodeId, :taxAmount, :lineTotal
         )
         `,
         {
           billId,
+          itemId: r.itemId,
           description: r.desc,
           category: r.category,
+          uomId: r.uomId,
           qty: r.qty,
           rate: r.rate,
           amount: r.amount,
+          discountPercent: r.discountPercent,
+          taxCodeId: r.taxCodeId,
+          taxAmount: r.taxAmount,
+          lineTotal: r.lineTotal,
         },
       );
     }
@@ -1919,22 +2101,26 @@ export const createServiceBill = async (req, res, next) => {
       );
     }
     const totalDebit =
-      Math.round(afterDiscount * 100) / 100 +
-      (taxAmount > 0 ? Math.round(taxAmount * 100) / 100 : 0);
+      Math.round((subtotalFromBody - discountAmount) * 100) / 100 +
+      (taxAmount > 0 ? Math.round(taxAmount * 100) / 100 : 0) +
+      Math.round(freightCharges * 100) / 100 +
+      Math.round(otherCharges * 100) / 100;
     const totalCredit = Math.round(totalAmount * 100) / 100;
     const [vIns] = await conn.execute(
       `INSERT INTO fin_vouchers
         (company_id, branch_id, fiscal_year_id, voucher_type_id, voucher_no, voucher_date, narration, currency_id, exchange_rate, total_debit, total_credit, balanced_amount, status, created_by, approved_by, posted_by)
        VALUES
-        (:companyId, :branchId, :fiscalYearId, :voucherTypeId, :voucherNo, :voucherDate, :narration, NULL, 1, :totalDebit, :totalCredit, :ba, 'POSTED', :createdBy, :approvedBy, :postedBy)`,
+        (:companyId, :branchId, :fiscalYearId, :voucherTypeId, :voucherNo, :voucherDate, :narration, :currencyId, :exchangeRate, :totalDebit, :totalCredit, :ba, 'POSTED', :createdBy, :approvedBy, :postedBy)`,
       {
         companyId,
-        branchId,
+        branchId, branchIdsStr,
         fiscalYearId,
         voucherTypeId,
         voucherNo,
         voucherDate,
         narration: `Service Bill ${billNo} posting`,
+        currencyId,
+        exchangeRate,
         totalDebit,
         totalCredit,
         ba: totalDebit,
@@ -1945,6 +2131,7 @@ export const createServiceBill = async (req, res, next) => {
     );
     const voucherId = Number(vIns?.insertId || 0) || 0;
     let lineNo = 1;
+    const serviceDebit = Math.round((subtotalFromBody - discountAmount) * 100) / 100;
     await conn.execute(
       `INSERT INTO fin_voucher_lines
         (company_id, voucher_id, line_no, account_id, description, debit, credit, tax_code_id, cost_center, reference_no)
@@ -1956,7 +2143,7 @@ export const createServiceBill = async (req, res, next) => {
         lineNo: lineNo++,
         accountId: serviceExpenseAccId,
         description: `Service expense on ${billNo}`,
-        debit: Math.round(afterDiscount * 100) / 100,
+        debit: serviceDebit,
         referenceNo: billNo,
       },
     );
@@ -1996,7 +2183,7 @@ export const createServiceBill = async (req, res, next) => {
     res.status(201).json({
       id: billId,
       bill_no: billNo,
-      subtotal,
+      subtotal: subtotalFromBody,
       discount_amount: discountAmount,
       tax_amount: taxAmount,
       total_amount: totalAmount,
@@ -2015,7 +2202,7 @@ export const updateServiceBill = async (req, res, next) => {
   const conn = await pool.getConnection();
   try {
     await ensureServiceBillTables();
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const id = toNumber(req.params.id);
     if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
     const body = req.body || {};
@@ -2038,10 +2225,10 @@ export const updateServiceBill = async (req, res, next) => {
       body.payment_reference || body.paymentReference || null;
     const paymentTerms = body.payment_terms || body.paymentTerms || null;
     const notes = body.notes || null;
-    const discountPercent = Number(
-      body.discount_percent ?? body.discountPercent ?? 0,
-    );
-    const taxPercent = Number(body.tax_percent ?? body.taxPercent ?? 0);
+    const currencyId = body.currency_id ? Number(body.currency_id) : null;
+    const exchangeRate = Number(body.exchange_rate) || 1;
+    const freightCharges = Number(body.freight_charges) || 0;
+    const otherCharges = Number(body.other_charges) || 0;
     const rows = Array.isArray(body.details)
       ? body.details
       : Array.isArray(body.rows)
@@ -2058,13 +2245,19 @@ export const updateServiceBill = async (req, res, next) => {
       const amount = Number.isFinite(Number(r.amount))
         ? Number(r.amount)
         : qty * rate;
+      const itemId = r.item_id ? Number(r.item_id) : null;
+      const uomId = r.uom_id ? Number(r.uom_id) : null;
+      const discountPercent = Number(r.discount_percent) || 0;
+      const taxCodeId = r.tax_code_id ? Number(r.tax_code_id) : null;
+      const taxAmount = Number(r.tax_amount) || 0;
+      const lineTotal = Number(r.line_total) || amount;
       subtotal += amount;
-      normalized.push({ desc, category, qty, rate, amount });
+      normalized.push({ desc, category, qty, rate, amount, itemId, uomId, discountPercent, taxCodeId, taxAmount, lineTotal });
     }
-    const discountAmount = subtotal * (discountPercent / 100);
-    const afterDiscount = subtotal - discountAmount;
-    const taxAmount = afterDiscount * (taxPercent / 100);
-    const totalAmount = afterDiscount + taxAmount;
+    const subtotalFromBody = Number(body.subtotal) || subtotal;
+    const discountAmount = Number(body.discount_amount) || 0;
+    const taxAmount = Number(body.tax_amount) || 0;
+    const totalAmount = Number(body.total_amount) || (subtotalFromBody - discountAmount + taxAmount + freightCharges + otherCharges);
     const paymentInput = String(body.payment || "")
       .trim()
       .toUpperCase();
@@ -2081,10 +2274,10 @@ export const updateServiceBill = async (req, res, next) => {
       `
       SELECT id, bill_no
       FROM pur_service_bills
-      WHERE id = :id AND company_id = :companyId AND branch_id = :branchId
+      WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
       LIMIT 1
       `,
-      { id, companyId, branchId },
+      { id, companyId, branchId, branchIdsStr },
     );
     if (!(exists && exists.length)) {
       throw httpError(404, "NOT_FOUND", "Service bill not found");
@@ -2113,13 +2306,17 @@ export const updateServiceBill = async (req, res, next) => {
              subtotal = :subtotal,
              discount_amount = :discountAmount,
              tax_amount = :taxAmount,
-             total_amount = :totalAmount
-       WHERE id = :id AND company_id = :companyId AND branch_id = :branchId
+             total_amount = :totalAmount,
+             currency_id = :currencyId,
+             exchange_rate = :exchangeRate,
+             freight_charges = :freightCharges,
+             other_charges = :otherCharges
+       WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
       `,
       {
         id,
         companyId,
-        branchId,
+        branchId, branchIdsStr,
         billNo,
         billDate,
         dueDate,
@@ -2136,12 +2333,16 @@ export const updateServiceBill = async (req, res, next) => {
         paymentReference,
         paymentTerms,
         notes,
-        discountPercent,
-        taxPercent,
-        subtotal,
+        discountPercent: 0,
+        taxPercent: 0,
+        subtotal: subtotalFromBody,
         discountAmount,
         taxAmount,
         totalAmount,
+        currencyId,
+        exchangeRate,
+        freightCharges,
+        otherCharges,
       },
     );
     await conn.execute(
@@ -2152,18 +2353,24 @@ export const updateServiceBill = async (req, res, next) => {
       await conn.execute(
         `
         INSERT INTO pur_service_bill_details (
-          bill_id, description, category, qty, rate, amount
+          bill_id, item_id, description, category, uom_id, qty, rate, amount, discount_percent, tax_code_id, tax_amount, line_total
         ) VALUES (
-          :billId, :description, :category, :qty, :rate, :amount
+          :billId, :itemId, :description, :category, :uomId, :qty, :rate, :amount, :discountPercent, :taxCodeId, :taxAmount, :lineTotal
         )
         `,
         {
           billId: id,
+          itemId: r.itemId,
           description: r.desc,
           category: r.category,
+          uomId: r.uomId,
           qty: r.qty,
           rate: r.rate,
           amount: r.amount,
+          discountPercent: r.discountPercent,
+          taxCodeId: r.taxCodeId,
+          taxAmount: r.taxAmount,
+          lineTotal: r.lineTotal,
         },
       );
     }
@@ -2171,7 +2378,7 @@ export const updateServiceBill = async (req, res, next) => {
     res.json({
       id,
       bill_no: billNo || exists[0]?.bill_no,
-      subtotal,
+      subtotal: subtotalFromBody,
       discount_amount: discountAmount,
       tax_amount: taxAmount,
       total_amount: totalAmount,
@@ -2185,3 +2392,4 @@ export const updateServiceBill = async (req, res, next) => {
     conn.release();
   }
 };
+

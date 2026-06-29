@@ -1,8 +1,18 @@
+/**
+ * @fileoverview PdcPostingsList component.
+ * Provides functionality for PdcPostingsList.
+ */
+
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "api/client";
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function PdcPostingsList() {
   const [items, setItems] = useState([]);
   const [bankAccounts, setBankAccounts] = useState([]);
@@ -135,7 +145,7 @@ export default function PdcPostingsList() {
         <div className="flex gap-3">
           <Link
             to="/finance"
-            className="btn btn-sm bg-white/20 hover:bg-white/30 border-none text-white backdrop-blur-sm"
+            className="font-sans btn btn-sm bg-white/20 hover:bg-white/30 border-none text-white backdrop-blur-sm"
           >
             Return to Menu
           </Link>

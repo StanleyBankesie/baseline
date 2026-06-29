@@ -1,3 +1,8 @@
+/**
+ * @file inventory.controller.js
+ * @description Manages inventory items, stock balances, warehouses, and related configurations.
+ * Handles item creation, updates, and bulk stock adjustments.
+ */
 import { query } from "../db/pool.js";
 import { httpError } from "../utils/httpError.js";
 
@@ -272,10 +277,17 @@ async function resolveOrCreateGroupId(companyId, raw) {
   }
 }
 
+/**
+ * Retrieves a list of all inventory items for a company, including their current stock balances and categorization.
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 export const listItems = async (req, res, next) => {
   try {
     await ensureItemFlagColumns();
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const groupCol = (await hasColumn("inv_items", "group_id"))
       ? "group_id"
       : "item_group_id";
@@ -322,13 +334,13 @@ export const listItems = async (req, res, next) => {
         GROUP BY company_id, branch_id, item_id
       ) sb
         ON sb.company_id = i.company_id
-       AND sb.branch_id = :branchId
+       AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
        AND sb.item_id = i.id
         LEFT JOIN adm_users u ON u.id = i.created_by
          WHERE i.company_id = :companyId
       ORDER BY i.item_name ASC
       `,
-      { companyId, branchId },
+      { companyId, branchId, branchIdsStr },
     );
     res.json({ items: rows });
   } catch (err) {
@@ -336,19 +348,26 @@ export const listItems = async (req, res, next) => {
   }
 };
 
+/**
+ * Retrieves a list of active warehouses associated with the current company and allowed branch contexts.
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 export const listWarehouses = async (req, res, next) => {
   try {
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const rows = await query(`
       SELECT w.id, w.warehouse_code, w.warehouse_name, w.location, w.is_active, w.branch_id,
           w.created_at,
           u.username AS created_by_name
          FROM inv_warehouses w
         LEFT JOIN adm_users u ON u.id = w.created_by
-         WHERE w.company_id = :companyId AND w.branch_id = :branchId
+         WHERE w.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(w.branch_id, :branchIdsStr))
       ORDER BY w.warehouse_name ASC
       `,
-      { companyId, branchId },
+      { companyId, branchId, branchIdsStr },
     );
     res.json({ items: rows });
   } catch (err) {
@@ -356,9 +375,17 @@ export const listWarehouses = async (req, res, next) => {
   }
 };
 
+/**
+ * Updates stock balances for multiple items simultaneously in a specific warehouse and branch.
+ * Resolves item IDs dynamically via codes if explicit IDs are not provided.
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 export const bulkUpdateStockBalances = async (req, res, next) => {
   try {
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const body = req.body || {};
     const rows = Array.isArray(body.rows) ? body.rows : [];
     const warehouseId =
@@ -374,7 +401,7 @@ export const bulkUpdateStockBalances = async (req, res, next) => {
           u.username AS created_by_name
          FROM inv_warehouses
         LEFT JOIN adm_users u ON u.id = created_by
-         WHERE company_id = :companyId AND branch_id = :branchId 
+         WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) 
            AND UPPER(warehouse_code) = :code 
          LIMIT 1`,
         { companyId, branchId, code: warehouseCode.toUpperCase() },
@@ -435,7 +462,7 @@ export const bulkUpdateStockBalances = async (req, res, next) => {
            ON DUPLICATE KEY UPDATE qty = :qty`,
           {
             companyId,
-            branchId,
+            branchId, branchIdsStr,
             warehouseId: resolvedWarehouseId,
             itemId,
             qty,
@@ -452,9 +479,16 @@ export const bulkUpdateStockBalances = async (req, res, next) => {
   }
 };
 
+/**
+ * Retrieves the details of a single inventory item by its ID.
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 export const getItemById = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0)
       throw httpError(400, "VALIDATION_ERROR", "Invalid id");
@@ -476,10 +510,18 @@ export const getItemById = async (req, res, next) => {
   }
 };
 
+/**
+ * Creates a new inventory item and resolves missing related entities (like category, group, currency)
+ * on the fly if auto-creation or bulk-import modes are active.
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 export const createItem = async (req, res, next) => {
   try {
     await ensureItemFlagColumns();
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const body = req.body || {};
     const groupCol = (await hasColumn("inv_items", "group_id"))
       ? "group_id"
@@ -629,10 +671,17 @@ export const createItem = async (req, res, next) => {
   }
 };
 
+/**
+ * Updates an existing inventory item's properties, preventing naming collisions.
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 export const updateItem = async (req, res, next) => {
   try {
     await ensureItemFlagColumns();
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const id = Number(req.params.id);
     const groupCol = (await hasColumn("inv_items", "group_id"))
       ? "group_id"
@@ -747,10 +796,18 @@ export const updateItem = async (req, res, next) => {
   }
 };
 
+/**
+ * Inserts new or updates existing inventory items from an array of payloads.
+ * Automatically generates missing item codes sequentially if necessary.
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 export const bulkUpsertItems = async (req, res, next) => {
   try {
     await ensureItemFlagColumns();
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const body = req.body || {};
     const rows = Array.isArray(body.rows) ? body.rows : [];
     const autoCreate = !!body.auto_create_missing || !!body.bulk_import;
@@ -1119,7 +1176,7 @@ export const bulkUpsertItems = async (req, res, next) => {
 
 export const getWarehouseById = async (req, res, next) => {
   try {
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0)
       throw httpError(400, "VALIDATION_ERROR", "Invalid id");
@@ -1129,10 +1186,10 @@ export const getWarehouseById = async (req, res, next) => {
           u.username AS created_by_name
          FROM inv_warehouses w
         LEFT JOIN adm_users u ON u.id = w.created_by
-         WHERE w.id = :id AND w.company_id = :companyId AND w.branch_id = :branchId
+         WHERE w.id = :id AND w.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(w.branch_id, :branchIdsStr))
       LIMIT 1
       `,
-      { id, companyId, branchId },
+      { id, companyId, branchId, branchIdsStr },
     );
     if (!rows.length) throw httpError(404, "NOT_FOUND", "Warehouse not found");
     res.json({ item: rows[0] });
@@ -1143,7 +1200,7 @@ export const getWarehouseById = async (req, res, next) => {
 
 export const createWarehouse = async (req, res, next) => {
   try {
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const body = req.body || {};
     const warehouseCode = String(body.warehouse_code || "").trim();
     const warehouseName = String(body.warehouse_name || "").trim();
@@ -1162,7 +1219,7 @@ export const createWarehouse = async (req, res, next) => {
       `,
       {
         companyId,
-        branchId,
+        branchId, branchIdsStr,
         warehouseCode,
         warehouseName,
         location,
@@ -1177,7 +1234,7 @@ export const createWarehouse = async (req, res, next) => {
 
 export const updateWarehouse = async (req, res, next) => {
   try {
-    const { companyId, branchId } = req.scope;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0)
       throw httpError(400, "VALIDATION_ERROR", "Invalid id");
@@ -1199,12 +1256,12 @@ export const updateWarehouse = async (req, res, next) => {
           warehouse_name = :warehouseName,
           location = :location,
           is_active = :isActive
-      WHERE id = :id AND company_id = :companyId AND branch_id = :branchId
+      WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
       `,
       {
         id,
         companyId,
-        branchId,
+        branchId, branchIdsStr,
         warehouseCode,
         warehouseName,
         location,
@@ -1221,7 +1278,7 @@ export const updateWarehouse = async (req, res, next) => {
 
 export const linkWarehouseBranch = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0)
       throw httpError(400, "VALIDATION_ERROR", "Invalid id");
@@ -1242,7 +1299,7 @@ export const linkWarehouseBranch = async (req, res, next) => {
          WHERE id = :branchId
       LIMIT 1
       `,
-      { branchId: targetBranchId },
+      { branchId, branchIdsStr: targetBranchId },
     );
     const branch = branchRow?.[0];
     if (!branch) throw httpError(404, "NOT_FOUND", "Target branch not found");
@@ -1272,10 +1329,10 @@ export const linkWarehouseBranch = async (req, res, next) => {
       throw httpError(403, "FORBIDDEN", "Branch access denied");
     const upd = await query(`
       UPDATE inv_warehouses
-      SET branch_id = :branchId
+      SET (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
       WHERE id = :id AND company_id = :companyId
       `,
-      { id, companyId, branchId: targetBranchId },
+      { id, companyId, branchId, branchIdsStr: targetBranchId },
     );
     if (!upd.affectedRows)
       throw httpError(404, "NOT_FOUND", "Warehouse not found");
@@ -1287,7 +1344,7 @@ export const linkWarehouseBranch = async (req, res, next) => {
 
 export const getNextItemCode = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const rows = await query(`
       SELECT item_code,
           created_at,
@@ -1311,7 +1368,7 @@ export const getNextItemCode = async (req, res, next) => {
 
 export const listItemGroups = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const rows = await query(`
       SELECT g.id,
              g.group_code,
@@ -1337,7 +1394,7 @@ export const listItemGroups = async (req, res, next) => {
 
 export const getItemGroupById = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0)
       throw httpError(400, "VALIDATION_ERROR", "Invalid id");
@@ -1361,7 +1418,7 @@ export const getItemGroupById = async (req, res, next) => {
 
 export const createItemGroup = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const body = req.body || {};
     const groupCode = String(body.group_code || "").trim();
     const groupName = String(body.group_name || "").trim();
@@ -1387,7 +1444,7 @@ export const createItemGroup = async (req, res, next) => {
 
 export const updateItemGroup = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0)
       throw httpError(400, "VALIDATION_ERROR", "Invalid id");
@@ -1428,7 +1485,7 @@ export const updateItemGroup = async (req, res, next) => {
 
 export const listItemCategories = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const rows = await query(`
       SELECT c.id,
              c.category_code,
@@ -1454,7 +1511,7 @@ export const listItemCategories = async (req, res, next) => {
 
 export const getItemCategoryById = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0)
       throw httpError(400, "VALIDATION_ERROR", "Invalid id");
@@ -1479,7 +1536,7 @@ export const getItemCategoryById = async (req, res, next) => {
 
 export const createItemCategory = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const body = req.body || {};
     const categoryCode = String(body.category_code || "").trim();
     const categoryName = String(body.category_name || "").trim();
@@ -1505,7 +1562,7 @@ export const createItemCategory = async (req, res, next) => {
 
 export const updateItemCategory = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0)
       throw httpError(400, "VALIDATION_ERROR", "Invalid id");
@@ -1546,7 +1603,7 @@ export const updateItemCategory = async (req, res, next) => {
 
 export const deleteItemCategory = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0)
       throw httpError(400, "VALIDATION_ERROR", "Invalid id");
@@ -1576,7 +1633,7 @@ export const deleteItemCategory = async (req, res, next) => {
 
 export const listItemTypes = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const rows = await query(`
       SELECT t.id, t.type_code, t.type_name, t.is_active,
           t.created_at,
@@ -1596,7 +1653,7 @@ export const listItemTypes = async (req, res, next) => {
 
 export const getItemTypeById = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0)
       throw httpError(400, "VALIDATION_ERROR", "Invalid id");
@@ -1620,7 +1677,7 @@ export const getItemTypeById = async (req, res, next) => {
 
 export const createItemType = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const body = req.body || {};
     const typeCode = String(body.type_code || "").trim();
     const typeName = String(body.type_name || "").trim();
@@ -1645,7 +1702,7 @@ export const createItemType = async (req, res, next) => {
 
 export const updateItemType = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0)
       throw httpError(400, "VALIDATION_ERROR", "Invalid id");
@@ -1678,7 +1735,7 @@ export const updateItemType = async (req, res, next) => {
 
 export const deleteItemType = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0)
       throw httpError(400, "VALIDATION_ERROR", "Invalid id");
@@ -1695,7 +1752,7 @@ export const deleteItemType = async (req, res, next) => {
 
 export const listUnitConversions = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const rows = await query(`
       SELECT c.id,
              c.item_id,
@@ -1723,7 +1780,7 @@ export const listUnitConversions = async (req, res, next) => {
 
 export const getUnitConversionById = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0)
       throw httpError(400, "VALIDATION_ERROR", "Invalid id");
@@ -1748,7 +1805,7 @@ export const getUnitConversionById = async (req, res, next) => {
 
 export const createUnitConversion = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const body = req.body || {};
     const itemId = Number(body.item_id || 0);
     const fromUom = String(body.from_uom || "").trim();
@@ -1782,7 +1839,7 @@ export const createUnitConversion = async (req, res, next) => {
 
 export const updateUnitConversion = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0)
       throw httpError(400, "VALIDATION_ERROR", "Invalid id");
@@ -1826,7 +1883,7 @@ export const updateUnitConversion = async (req, res, next) => {
 
 export const listUoms = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const rows = await query(`
       SELECT u.*,
           u.created_at,
@@ -1846,7 +1903,7 @@ export const listUoms = async (req, res, next) => {
 
 export const createUom = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
+    const { companyId = null } = req.scope || {};
     const body = req.body || {};
     const uomCode = String(body.uom_code || "").trim();
     const uomName = String(body.uom_name || "").trim();
@@ -1869,3 +1926,4 @@ export const createUom = async (req, res, next) => {
     next(err);
   }
 };
+

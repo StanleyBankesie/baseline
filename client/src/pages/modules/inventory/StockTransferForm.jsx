@@ -1,9 +1,19 @@
+/**
+ * @fileoverview StockTransferForm component.
+ * Provides functionality for StockTransferForm.
+ */
+
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "api/client";
 import { useUoms } from "@/hooks/useUoms";
 import { filterByPrefix } from "@/utils/searchUtils.js";
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function StockTransferForm() {
   const { uoms, loading: uomsLoading } = useUoms();
   const { id } = useParams();
@@ -235,7 +245,7 @@ export default function StockTransferForm() {
             ];
         setItems(mappedItems);
         const initQueries = {};
-        mappedItems.forEach((i) => { initQueries[i.id] = ""; });
+        mappedItems.forEach((i) => { initQueries[i.id] = i.itemName || ""; });
         setItemQueries(initQueries);
       })
       .catch((e) => {

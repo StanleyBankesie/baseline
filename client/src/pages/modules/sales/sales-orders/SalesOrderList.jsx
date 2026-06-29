@@ -1,3 +1,8 @@
+/**
+ * @fileoverview SalesOrderList component.
+ * Provides functionality for SalesOrderList.
+ */
+
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { api } from "../../../../api/client";
@@ -7,7 +12,7 @@ import { toast } from "react-toastify";
 import { filterAndSort } from "@/utils/searchUtils.js";
 import useSort from "../../../../hooks/useSort.js";
 import SortableHeader from "../../../../components/SortableHeader.jsx";
-import addNotification from "react-push-notification";
+import addNotification from "../../../../utils/addNotification.js";
 import DocumentAttachmentsModal from "@/components/attachments/DocumentAttachmentsModal.jsx";
 import {
   ListPrintIconButton,
@@ -15,6 +20,11 @@ import {
   ListAttachmentIconButton,
 } from "@/components/list/ListDocActionIconButtons.jsx";
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function SalesOrderList() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -559,11 +569,11 @@ export default function SalesOrderList() {
       const html =
         typeof resp.data === "string" ? resp.data : String(resp.data || "");
       const iframe = document.createElement("iframe");
-      iframe.style.position = "fixed";
-      iframe.style.right = "0";
-      iframe.style.bottom = "0";
-      iframe.style.width = "0";
-      iframe.style.height = "0";
+      iframe.style.position = "absolute";
+      iframe.style.left = "-9999px";
+      iframe.style.top = "0";
+      iframe.style.width = "800px";
+      iframe.style.height = "600px";
       iframe.style.border = "0";
       document.body.appendChild(iframe);
       const doc =
@@ -586,7 +596,18 @@ export default function SalesOrderList() {
           document.body.removeChild(iframe);
         }, 100);
       };
-      setTimeout(doPrint, 200);
+      const waitForImages = () => {
+        const images = doc.images || [];
+        if (images.length === 0) { doPrint(); return; }
+        let loaded = 0;
+        for (const img of images) {
+          if (img.complete && img.naturalWidth > 0) { loaded++; continue; }
+          img.onload = () => { loaded++; if (loaded === images.length) doPrint(); };
+          img.onerror = () => { loaded++; if (loaded === images.length) doPrint(); };
+        }
+        if (loaded === images.length) doPrint();
+      };
+      waitForImages();
     } catch (e) {
       toast.error("Failed to render template for print");
     }
@@ -1132,13 +1153,6 @@ export default function SalesOrderList() {
                       onToggle={toggle}
                     />
                     <SortableHeader
-                      label="Priority"
-                      sortKey="priority"
-                      currentKey={sortKey}
-                      direction={sortDir}
-                      onToggle={toggle}
-                    />
-                    <SortableHeader
                       label="Status"
                       sortKey="status"
                       currentKey={sortKey}
@@ -1184,7 +1198,6 @@ export default function SalesOrderList() {
                       <td className="font-medium">{order.order_no}</td>
                       <td>{new Date(order.order_date).toLocaleDateString()}</td>
                       <td>{order.customer_name}</td>
-                      <td>{order.priority || "-"}</td>
                       <td>
                         {getStatusBadge(
                           displayStatus,
@@ -1246,17 +1259,7 @@ export default function SalesOrderList() {
                             />
                           </div>
 
-                          {/* Slot 5: Attachments */}
-                          <div className="min-w-[80px]">
-                            <ListAttachmentIconButton
-                              onClick={() => {
-                                setActiveDocId(order.id);
-                                setShowAttach(true);
-                              }}
-                            />
-                          </div>
-
-                          {/* Slot 6: Workflow */}
+                          {/* Slot 5: Workflow */}
                           <div className="min-w-[160px]">
                             <div className="list-approval-slot">
                               {displayStatus === "APPROVED" ? (
@@ -1294,6 +1297,16 @@ export default function SalesOrderList() {
                                 </button>
                               )}
                             </div>
+                          </div>
+
+                          {/* Slot 6: Attachments */}
+                          <div className="min-w-[80px]">
+                            <ListAttachmentIconButton
+                              onClick={() => {
+                                setActiveDocId(order.id);
+                                setShowAttach(true);
+                              }}
+                            />
                           </div>
 
                           {/* Slot 8: exceptional cancel — fixed cell */}
@@ -1353,7 +1366,7 @@ export default function SalesOrderList() {
       </div>
       {showForwardModal ? (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-erp w/full max-w-md overflow-hidden">
+          <div className="bg-white rounded-lg shadow-erp w-full max-w-md overflow-hidden">
             <div className="p-4 bg-brand text-white flex justify-between items-center">
               <h2 className="text-lg font-bold">Forward for Approval</h2>
               <button

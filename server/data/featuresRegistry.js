@@ -4,7 +4,10 @@
  * Contains all modules, features, and dashboards for RBAC system
  */
 
+// Main registry mapping module keys to their respective features and dashboards
+// This serves as the single source of truth for all system features in the backend
 export const FEATURES_REGISTRY = {
+  // Administration Module: Contains features for user, role, company, and system configuration
   administration: {
     features: [
       { feature_key: "administration:users", type: "feature", label: "User Management", path: "/administration/users" },
@@ -24,6 +27,7 @@ export const FEATURES_REGISTRY = {
     ],
   },
 
+  // Sales Module: Contains features for managing quotations, sales orders, invoices, and customer relations
   sales: {
     features: [
       { feature_key: "sales:quotations", type: "feature", label: "Quotations", path: "/sales/quotations" },
@@ -47,6 +51,7 @@ export const FEATURES_REGISTRY = {
     ],
   },
 
+  // Purchase Module: Contains features for procurement, purchase orders, RFQs, and supplier management
   purchase: {
     features: [
       { feature_key: "purchase:direct-purchase", type: "feature", label: "Direct Purchase", path: "/purchase/direct-purchase" },
@@ -71,6 +76,7 @@ export const FEATURES_REGISTRY = {
     ],
   },
 
+  // Inventory Module: Contains features for material requisitions, stock management, and warehousing
   inventory: {
     features: [
       { feature_key: "inventory:material-requisitions", type: "feature", label: "Material Requisitions", path: "/inventory/material-requisitions" },
@@ -99,6 +105,7 @@ export const FEATURES_REGISTRY = {
     ],
   },
 
+  // Finance Module: Contains features for accounting, vouchers, bank reconciliation, and budget management
   finance: {
     features: [
       { feature_key: "finance:journal-voucher", type: "feature", label: "Journal Entry", path: "/finance/journal-voucher" },
@@ -129,6 +136,7 @@ export const FEATURES_REGISTRY = {
     ],
   },
 
+  // Human Resources Module: Contains features for employee management, payroll, attendance, and leave management
   "human-resources": {
     features: [
       { feature_key: "human-resources:employees", type: "feature", label: "Employee Setup", path: "/human-resources/employees" },
@@ -162,13 +170,13 @@ export const FEATURES_REGISTRY = {
     ],
   },
 
+  // Maintenance Module: Contains features for asset management, equipment, and maintenance schedules
   maintenance: {
     features: [
       { feature_key: "maintenance:assets", type: "feature", label: "Asset Management", path: "/maintenance/assets" },
       { feature_key: "maintenance:equipment", type: "feature", label: "Equipment", path: "/maintenance/equipment" },
       { feature_key: "maintenance:contracts", type: "feature", label: "Maintenance Contracts", path: "/maintenance/contracts" },
       { feature_key: "maintenance:maintenance-requests", type: "feature", label: "Maintenance Requests", path: "/maintenance/maintenance-requests" },
-      { feature_key: "maintenance:work-orders", type: "feature", label: "Work Orders", path: "/maintenance/work-orders" },
       { feature_key: "maintenance:job-orders", type: "feature", label: "Job Orders", path: "/maintenance/job-orders" },
       { feature_key: "maintenance:pm-schedules", type: "feature", label: "PM Schedules", path: "/maintenance/pm-schedules" },
       { feature_key: "maintenance:schedules", type: "feature", label: "Maintenance Schedules", path: "/maintenance/schedules" },
@@ -182,6 +190,7 @@ export const FEATURES_REGISTRY = {
     ],
   },
 
+  // Production Module: Contains features for manufacturing processes, BOMs, routings, and work orders
   production: {
     features: [
       { feature_key: "production:boms", type: "feature", label: "Bills of Materials", path: "/production/boms" },
@@ -198,6 +207,7 @@ export const FEATURES_REGISTRY = {
     ],
   },
 
+  // Project Management Module: Contains features for project tracking, task management, and resource allocation
   "project-management": {
     features: [
       { feature_key: "project-management:projects", type: "feature", label: "Projects", path: "/project-management/projects" },
@@ -206,7 +216,16 @@ export const FEATURES_REGISTRY = {
       { feature_key: "project-management:resources", type: "feature", label: "Resource Management", path: "/project-management/resources" },
       { feature_key: "project-management:timesheets", type: "feature", label: "Timesheets", path: "/project-management/timesheets" },
       { feature_key: "project-management:expenses", type: "feature", label: "Project Expenses", path: "/project-management/expenses" },
+      { feature_key: "project-management:setup", type: "feature", label: "Project Setup", path: "/project-management/setup" },
+      { feature_key: "project-management:material-requisitions", type: "feature", label: "Material Requisitions", path: "/project-management/material-requisitions" },
+      { feature_key: "project-management:material-utilizations", type: "feature", label: "Material Utilizations", path: "/project-management/material-utilizations" },
+      { feature_key: "project-management:material-receipts", type: "feature", label: "Material Receipts", path: "/project-management/material-receipts" },
+      { feature_key: "project-management:project-orders", type: "feature", label: "Project Orders", path: "/project-management/project-orders" },
+      { feature_key: "project-management:purchase-requisition", type: "feature", label: "Purchase Requisition", path: "/project-management/purchase-requisition" },
       { feature_key: "project-management:project-reports", type: "feature", label: "Project Reports", path: "/project-management/project-reports" },
+      { feature_key: "project-management:project-status-report", type: "feature", label: "Project Status Report", path: "/project-management/reports/project-status" },
+      { feature_key: "project-management:project-income-report", type: "feature", label: "Project Income Report", path: "/project-management/reports/project-income" },
+      { feature_key: "project-management:project-expense-report", type: "feature", label: "Project Expense Report", path: "/project-management/reports/project-expense" },
     ],
     dashboards: [
       { feature_key: "project-management:project-overview", type: "dashboard", label: "Project Overview Dashboard", path: "/project-management/project-overview" },
@@ -214,6 +233,7 @@ export const FEATURES_REGISTRY = {
     ],
   },
 
+  // Point of Sale (POS) Module: Contains features for retail operations, cash collection, and day management
   pos: {
     features: [
       { feature_key: "pos:sales-entry", type: "feature", label: "Sales Entry", path: "/pos/sales-entry" },
@@ -236,6 +256,7 @@ export const FEATURES_REGISTRY = {
     ],
   },
 
+  // Business Intelligence Module: Contains features for custom reports, dashboards, and analytics
   "business-intelligence": {
     features: [
       { feature_key: "business-intelligence:dashboards", type: "feature", label: "Dashboard Management", path: "/business-intelligence/dashboards" },
@@ -250,6 +271,7 @@ export const FEATURES_REGISTRY = {
     ],
   },
 
+  // Executive Overview Module: Contains features for high-level KPIs and executive dashboards
   "executive-overview": {
     features: [
       { feature_key: "executive-overview:dashboard", type: "feature", label: "Executive Dashboard", path: "/executive-overview/dashboard" },
@@ -260,12 +282,17 @@ export const FEATURES_REGISTRY = {
     ],
   },
 
+  // Service Management Module: Contains features for customer/supplier service requests and service orders
   "service-management": {
     features: [
+      { feature_key: "service-management:customer-service-requests", type: "feature", label: "Customer Service Requests", path: "/service-management/customer-service-requests" },
+      { feature_key: "service-management:supplier-service-requests", type: "feature", label: "Supplier Service Requests", path: "/service-management/supplier-service-requests" },
       { feature_key: "service-management:service-requests", type: "feature", label: "Service Requests", path: "/service-management/service-requests" },
       { feature_key: "service-management:service-orders", type: "feature", label: "Service Orders", path: "/service-management/service-orders" },
       { feature_key: "service-management:service-executions", type: "feature", label: "Service Execution", path: "/service-management/service-executions" },
       { feature_key: "service-management:service-confirmations", type: "feature", label: "Service Confirmations", path: "/service-management/service-confirmations" },
+      { feature_key: "service-management:service-bills", type: "feature", label: "Service Bills", path: "/service-management/service-bills" },
+      { feature_key: "service-management:service-invoices", type: "feature", label: "Service Invoices", path: "/service-management/service-invoices" },
       { feature_key: "service-management:billing", type: "feature", label: "Service Billing", path: "/service-management/billing" },
       { feature_key: "service-management:service-reports", type: "feature", label: "Service Reports", path: "/service-management/service-reports" },
       { feature_key: "service-management:visitors-log", type: "feature", label: "Visitors Log Book", path: "/service-management/visitors-log" },
@@ -278,10 +305,20 @@ export const FEATURES_REGISTRY = {
   },
 };
 
+/**
+ * Utility function to extract a flat list of all normal features across all modules.
+ * Used for flattening the registry to assign permissions or list available features.
+ * 
+ * @returns {Array} A flat array of feature objects, each tagged with its parent module_key
+ */
 export function getAllFeatures() {
-  const features = [];
+  const features = []; // Array to collect all flattened features
+  
+  // Iterate over each module in the registry
   Object.entries(FEATURES_REGISTRY).forEach(([moduleKey, moduleData]) => {
+    // Check if the module has a features array, defaulting to empty array if missing
     (moduleData.features || []).forEach(feature => {
+      // Map and push the feature data, injecting the parent module_key
       features.push({
         module_key: moduleKey,
         feature_key: feature.feature_key,
@@ -291,13 +328,24 @@ export function getAllFeatures() {
       });
     });
   });
+  
   return features;
 }
 
+/**
+ * Utility function to extract a flat list of all dashboard features across all modules.
+ * Used similarly to getAllFeatures but strictly for dashboard-type elements.
+ * 
+ * @returns {Array} A flat array of dashboard objects, each tagged with its parent module_key
+ */
 export function getAllDashboardFeatures() {
-  const dashboards = [];
+  const dashboards = []; // Array to collect all flattened dashboards
+  
+  // Iterate over each module in the registry
   Object.entries(FEATURES_REGISTRY).forEach(([moduleKey, moduleData]) => {
+    // Check if the module has a dashboards array, defaulting to empty array if missing
     (moduleData.dashboards || []).forEach(d => {
+      // Map and push the dashboard data, injecting the parent module_key
       dashboards.push({
         module_key: moduleKey,
         feature_key: d.feature_key,
@@ -307,5 +355,6 @@ export function getAllDashboardFeatures() {
       });
     });
   });
+  
   return dashboards;
 }

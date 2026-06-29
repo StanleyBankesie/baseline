@@ -1,4 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
+/**
+ * @fileoverview PosDayManagement component.
+ * Provides functionality for PosDayManagement.
+ */
+
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../../../api/client.js";
@@ -29,6 +34,11 @@ function parseDenominationCounts(input) {
   });
 }
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function PosDayManagement() {
   const navigate = useNavigate();
   const { user, scope, logout } = useAuth();
@@ -107,6 +117,31 @@ export default function PosDayManagement() {
     const v = Number(closing.actualCash || 0) - Number(expectedCash || 0);
     return v;
   }, [closing.actualCash, expectedCash]);
+  const [momoOpeningMain, setMomoOpeningMain] = useState(0);
+  const [momoOpeningPay, setMomoOpeningPay] = useState(0);
+  const [momoClosingMain, setMomoClosingMain] = useState(0);
+  const [momoClosingPay, setMomoClosingPay] = useState(0);
+  const momoClosingRef = useRef({ main: 0, pay: 0 });
+  momoClosingRef.current = { main: momoClosingMain, pay: momoClosingPay };
+  const [showMomoConfirmModal, setShowMomoConfirmModal] = useState(false);
+  const momoOpeningBalance = useMemo(
+    () => momoOpeningMain + momoOpeningPay,
+    [momoOpeningMain, momoOpeningPay],
+  );
+  const momoClosingBalance = useMemo(
+    () => momoClosingMain + momoClosingPay,
+    [momoClosingMain, momoClosingPay],
+  );
+  const actualMoMo = useMemo(
+    () => momoClosingMain + momoClosingPay,
+    [momoClosingMain, momoClosingPay],
+  );
+  const expectedMoMo = useMemo(() => {
+    return momoOpeningMain + momoOpeningPay + Number(salesData.mobile.amount || 0);
+  }, [momoOpeningMain, momoOpeningPay, salesData.mobile.amount]);
+  const momoVariance = useMemo(() => {
+    return actualMoMo - expectedMoMo;
+  }, [expectedMoMo, actualMoMo]);
   const closeDenomTotals = useMemo(
     () =>
       DENOMINATIONS.map((d, idx) =>
@@ -315,6 +350,8 @@ export default function PosDayManagement() {
                 ? String(suggestedNext)
                 : prev.float,
           }));
+          setMomoOpeningMain(0);
+          setMomoOpeningPay(0);
           setSessionHistory([]);
           return;
         }
@@ -337,6 +374,10 @@ export default function PosDayManagement() {
           float: suggestedOpenFloat,
           notes: item.open_notes || "",
         });
+        if (isOpen) {
+          setMomoOpeningMain(Number(item.momo_opening_main || 0));
+          setMomoOpeningPay(Number(item.momo_opening_pay || 0));
+        }
         setCloseDenomCounts(
           parseDenominationCounts(item.close_denomination_counts),
         );
@@ -450,6 +491,8 @@ export default function PosDayManagement() {
         openingFloat: Number(openData.float || 0),
         supervisor: undefined,
         notes: openData.notes,
+        momoOpeningMain: Number(momoOpeningMain || 0),
+        momoOpeningPay: Number(momoOpeningPay || 0),
       };
       const res = await api.post("/pos/day/open", payload);
       const item = res?.data?.item;
@@ -510,9 +553,6 @@ export default function PosDayManagement() {
             detail: { terminal: terminalId, status: "OPEN" },
           }),
         );
-        setTimeout(() => {
-          navigate("/pos/sales-entry");
-        }, 800);
       } catch {}
     } catch (err) {
       const message =
@@ -534,15 +574,24 @@ export default function PosDayManagement() {
       return;
     }
     // Auto-copy denomination total into actual cash if counts were entered
-    const effectiveActualCash = closeDenomTotal > 0
-      ? closeDenomTotal
-      : Number(closing.actualCash || 0);
-    setClosing((p) => ({ ...p, actualCash: String(effectiveActualCash.toFixed(2)) }));
+    const effectiveActualCash =
+      closeDenomTotal > 0 ? closeDenomTotal : Number(closing.actualCash || 0);
+    setClosing((p) => ({
+      ...p,
+      actualCash: String(effectiveActualCash.toFixed(2)),
+    }));
     try {
+      const momoOpenTotal =
+        Number(momoOpeningMain || 0) + Number(momoOpeningPay || 0);
+      const momoCloseTotal =
+        Number(momoClosingRef.current.main || 0) + Number(momoClosingRef.current.pay || 0);
       const payload = {
         terminal: terminalId,
         closingDateTime: closing.dateTime,
         actualCash: effectiveActualCash,
+        actualMoMo: Number(actualMoMo || 0),
+        momoOpeningBalance: momoOpenTotal,
+        momoClosingBalance: momoCloseTotal,
         nextOpeningFloat: Number(closing.nextOpeningFloat || 0),
         notes: closing.notes,
         denominationCounts: closeDenomCounts,
@@ -552,13 +601,17 @@ export default function PosDayManagement() {
       const item = res?.data?.item;
       if (item) {
         setClosing({
-          dateTime: toLocalInputDateTime(item.close_datetime || new Date()),
+          dateTime: toLocalInputDateTime(new Date()),
           actualCash: "",
           nextOpeningFloat: "",
           notes: "",
         });
         setCloseDenomCounts(DENOMINATIONS.map(() => 0));
         setCoinsValue(0);
+        setMomoOpeningMain(momoClosingRef.current.main);
+        setMomoOpeningPay(momoClosingRef.current.pay);
+        setMomoClosingMain(0);
+        setMomoClosingPay(0);
         setOpenData((prev) => ({
           ...prev,
           float:
@@ -584,6 +637,10 @@ export default function PosDayManagement() {
           const actualCash = Number(
             item.actual_cash ?? closing.actualCash ?? 0,
           );
+          const momoOpenMain = Number(item.momo_opening_main ?? base.momoOpeningMain ?? momoOpeningMain ?? 0);
+          const momoOpenPay = Number(item.momo_opening_pay ?? base.momoOpeningPay ?? momoOpeningPay ?? 0);
+          const momoExpected = momoOpenMain + momoOpenPay + Number(endSummary.mobileAmount || 0);
+          const momoActual = Number(item.actual_momo ?? actualMoMo ?? 0);
           const updated = {
             ...base,
             dayStatusId: Number(item.id || base.dayStatusId || 0) || null,
@@ -609,6 +666,12 @@ export default function PosDayManagement() {
             expectedCash: expectedAtClose,
             actualCash,
             cashVariance: actualCash - expectedAtClose,
+            momoOpeningMain: momoOpenMain,
+            momoOpeningPay: momoOpenPay,
+            openingMoMo: momoCloseTotal,
+            expectedMoMo: momoExpected,
+            actualMoMo: momoActual,
+            momoVariance: momoActual - momoExpected,
             closeNotes: item.close_notes || closing.notes || "",
           };
           return [updated];
@@ -929,7 +992,7 @@ export default function PosDayManagement() {
                       required
                     />
                   </div>
-                  <div>
+                  <div className="md:ml-4">
                     <label className="label">Opening Float (₵)</label>
                     <input
                       type="number"
@@ -946,18 +1009,44 @@ export default function PosDayManagement() {
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                   <div>
-                    <label className="label">Notes</label>
-                    <textarea
+                    <label className="label">Opening Main Account (₵)</label>
+                    <input
+                      type="number"
                       className="input"
-                      rows={3}
-                      value={openData.notes}
+                      step="0.01"
+                      value={String(momoOpeningMain)}
                       onChange={(e) =>
-                        setOpenData((p) => ({ ...p, notes: e.target.value }))
+                        setMomoOpeningMain(Number(e.target.value || 0))
                       }
                     />
                   </div>
+                  <div className="md:ml-4">
+                    <label className="label">
+                      Opening MoMo Pay Account (₵)
+                    </label>
+                    <input
+                      type="number"
+                      className="input"
+                      step="0.01"
+                      value={String(momoOpeningPay)}
+                      onChange={(e) =>
+                        setMomoOpeningPay(Number(e.target.value || 0))
+                      }
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="label">Notes</label>
+                  <textarea
+                    className="input w-full"
+                    rows={4}
+                    value={openData.notes}
+                    onChange={(e) =>
+                      setOpenData((p) => ({ ...p, notes: e.target.value }))
+                    }
+                  />
                 </div>
 
                 {/* Opening Checklist removed as requested; proceed directly to Open Day */}
@@ -989,6 +1078,22 @@ export default function PosDayManagement() {
                       {fmtCurrency(openData.float)}
                     </div>
                   </div>
+                  <div className="p-3 rounded-lg border border-slate-200 bg-slate-50">
+                    <div className="text-xs text-slate-600">
+                      Opening Main Account
+                    </div>
+                    <div className="font-bold">
+                      {fmtCurrency(momoOpeningMain)}
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-lg border border-slate-200 bg-slate-50">
+                    <div className="text-xs text-slate-600">
+                      Opening MoMo Pay Account
+                    </div>
+                    <div className="font-bold">
+                      {fmtCurrency(momoOpeningPay)}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -997,65 +1102,130 @@ export default function PosDayManagement() {
 
         <div className="card">
           <div className="card-header">
-            <div className="card-title">Close Day</div>
+            <div className="card-title">
+              Close Day
+              <span className="ml-2 text-sm font-normal text-slate-500">
+                {closing.dateTime
+                  ? new Date(closing.dateTime).toLocaleString()
+                  : ""}
+              </span>
+            </div>
             <div className="text-2xl">🌙</div>
           </div>
           <div className="card-body">
-            <form onSubmit={handleCloseSubmit} className="space-y-4">
-              <div>
-                <label className="label">Closing Date & Time</label>
-                <input
-                  type="datetime-local"
-                  className="input"
-                  value={closing.dateTime}
-                  onChange={(e) =>
-                    setClosing((p) => ({ ...p, dateTime: e.target.value }))
-                  }
-                  required
-                />
+            {!dayOpen ? (
+              <div className="alert-success rounded-lg p-4 flex items-center gap-2">
+                <span>✓</span>
+                <div>Day is closed. Open a new day to start a new session.</div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {hasExceptional("POS.EXPECTED_CASH.VIEW") ? (
-                  <div className="p-3 rounded-lg border border-slate-200 bg-slate-50">
-                    <div className="text-xs text-slate-600">Total Cash Sales</div>
-                    <div className="font-bold">
-                      {fmtCurrency(salesData.cash.amount)}
+            ) : (
+              <form onSubmit={handleCloseSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {hasExceptional("POS.EXPECTED_CASH.VIEW") ? (
+                    <div className="p-3 rounded-lg border border-slate-200 bg-slate-50">
+                      <div className="text-xs text-slate-600">
+                        Total Cash Sales
+                      </div>
+                      <div className="font-bold">
+                        {fmtCurrency(salesData.cash.amount)}
+                      </div>
+                    </div>
+                  ) : null}
+                  {hasExceptional("POS.CASH_VARIANCE.VIEW") ? (
+                    <div className="p-3 rounded-lg border border-slate-200 bg-slate-50">
+                      <div className="text-xs text-slate-600">Total MoMo</div>
+                      <div className="font-bold">
+                        {fmtCurrency(salesData.mobile.amount)}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="flex gap-3">
+                  <div className="flex-1 rounded-lg border border-brand/30 bg-brand/5 p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-sm text-slate-700 dark:text-slate-200">
+                        Cash entered. Confirm with denomination count.
+                      </div>
+                      <button
+                        type="button"
+                        className="btn-primary text-xs py-1"
+                        onClick={() => setShowCashConfirmModal(true)}
+                      >
+                        Confirm Cash
+                      </button>
                     </div>
                   </div>
-                ) : null}
-                {hasExceptional("POS.CASH_VARIANCE.VIEW") ? (
-                  <div className="p-3 rounded-lg border border-slate-200 bg-slate-50">
-                    <div className="text-xs text-slate-600">Transactions</div>
-                    <div className="font-semibold">{salesData.cash.count}</div>
+                  <div className="flex-1 rounded-lg border border-brand/30 bg-brand/5 p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-sm text-slate-700 dark:text-slate-200">
+                        MoMo balance. Confirm with opening/closing.
+                      </div>
+                      <button
+                        type="button"
+                        className="btn-primary text-xs py-1"
+                        onClick={() => setShowMomoConfirmModal(true)}
+                      >
+                        Confirm MoMo
+                      </button>
+                    </div>
                   </div>
-                ) : null}
-              </div>
-
-              <div className="rounded-lg border border-brand/30 bg-brand/5 p-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="text-sm text-slate-700 dark:text-slate-200">
-                    Cash entered. Confirm with denomination count.
-                  </div>
-                  <button
-                    type="button"
-                    className="btn-primary"
-                    onClick={() => setShowCashConfirmModal(true)}
-                  >
-                    Confirm Cash
-                  </button>
                 </div>
-              </div>
-              {hasExceptional("POS.EXPECTED_CASH.VIEW") ? (
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {hasExceptional("POS.EXPECTED_CASH.VIEW") ? (
+                    <div>
+                      <label className="label">Expected Cash</label>
+                      <input
+                        type="text"
+                        className="input"
+                        disabled
+                        value={fmtCurrency(expectedCash)}
+                      />
+                    </div>
+                  ) : null}
+                  {hasExceptional("POS.CASH_VARIANCE.VIEW") ? (
+                    <div>
+                      <label className="label">Expected MoMo</label>
+                      <input
+                        type="text"
+                        className="input"
+                        disabled
+                        value={fmtCurrency(expectedMoMo)}
+                      />
+                    </div>
+                  ) : null}
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="label">Expected Cash</label>
+                    <label className="label">Actual Cash Count (₵)</label>
+                    <input
+                      type="number"
+                      className="input"
+                      step="1"
+                      value={closing.actualCash}
+                      onChange={(e) =>
+                        setClosing((p) => ({
+                          ...p,
+                          actualCash: e.target.value,
+                        }))
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="label">Actual MoMo</label>
                     <input
                       type="text"
                       className="input"
                       disabled
-                      value={fmtCurrency(expectedCash)}
+                      value={fmtCurrency(actualMoMo)}
                     />
                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {hasExceptional("POS.CASH_VARIANCE.VIEW") ? (
                     <div>
                       <label className="label">Cash Variance</label>
@@ -1071,95 +1241,82 @@ export default function PosDayManagement() {
                       />
                     </div>
                   ) : null}
+                  {hasExceptional("POS.CASH_VARIANCE.VIEW") ? (
+                    <div>
+                      <label className="label">MoMo Variance</label>
+                      <input
+                        type="text"
+                        className="input"
+                        disabled
+                        value={fmtCurrency(momoVariance)}
+                        style={{
+                          color: momoVariance >= 0 ? "#28a745" : "#dc3545",
+                          fontWeight: 700,
+                        }}
+                      />
+                    </div>
+                  ) : null}
                 </div>
-              ) : hasExceptional("POS.CASH_VARIANCE.VIEW") ? (
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="label">Cash Variance</label>
+                    <label className="label">Enter float for next sales</label>
                     <input
-                      type="text"
+                      type="number"
                       className="input"
-                      disabled
-                      value={fmtCurrency(cashVariance)}
-                      style={{
-                        color: cashVariance >= 0 ? "#28a745" : "#dc3545",
-                        fontWeight: 700,
-                      }}
+                      step="1"
+                      value={closing.nextOpeningFloat}
+                      onChange={(e) =>
+                        setClosing((p) => ({
+                          ...p,
+                          nextOpeningFloat: e.target.value,
+                        }))
+                      }
                     />
                   </div>
                 </div>
-              ) : null}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="label">Actual Cash Count (₵)</label>
-                  <input
-                    type="number"
-                    className="input"
-                    step="1"
-                    value={closing.actualCash}
+                  <label className="label">Closing Notes</label>
+                  <textarea
+                    className="input w-full"
+                    rows={4}
+                    value={closing.notes}
                     onChange={(e) =>
-                      setClosing((p) => ({ ...p, actualCash: e.target.value }))
-                    }
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="label">Enter float for next sales</label>
-                  <input
-                    type="number"
-                    className="input"
-                    step="1"
-                    value={closing.nextOpeningFloat}
-                    onChange={(e) =>
-                      setClosing((p) => ({
-                        ...p,
-                        nextOpeningFloat: e.target.value,
-                      }))
+                      setClosing((p) => ({ ...p, notes: e.target.value }))
                     }
                   />
                 </div>
-              </div>
-              <div>
-                <label className="label">Closing Notes</label>
-                <textarea
-                  className="input w-full"
-                  rows={3}
-                  value={closing.notes}
-                  onChange={(e) =>
-                    setClosing((p) => ({ ...p, notes: e.target.value }))
-                  }
-                />
-              </div>
 
-              {/* Sales Report table hidden per user request */}
+                {/* Sales Report table hidden per user request */}
 
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  className="btn-danger flex-1 px-4 py-2"
-                  onClick={async () => {
-                    if (!dayOpen) {
-                      toast.error("Open the day first");
-                      return;
-                    }
-                    if (!closing.dateTime) {
-                      toast.warn("Provide closing date/time");
-                      return;
-                    }
-                    await handleCloseSubmit({ preventDefault: () => {} });
-                  }}
-                >
-                  🌙 Close Day
-                </button>
-                <button
-                  type="button"
-                  className="btn-info flex-1 px-4 py-2"
-                  onClick={handlePrint}
-                >
-                  🖨️ Print Report
-                </button>
-              </div>
-            </form>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="btn-danger flex-1 px-4 py-2"
+                    onClick={async () => {
+                      if (!dayOpen) {
+                        toast.error("Open the day first");
+                        return;
+                      }
+                      if (!closing.dateTime) {
+                        toast.warn("Provide closing date/time");
+                        return;
+                      }
+                      await handleCloseSubmit({ preventDefault: () => {} });
+                    }}
+                  >
+                    🌙 Close Day
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-info flex-1 px-4 py-2"
+                    onClick={handlePrint}
+                  >
+                    🖨️ Print Report
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       </div>
@@ -1189,8 +1346,6 @@ export default function PosDayManagement() {
         </div>
       </div>
 
-
-
       {modal.open && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="rounded-xl bg-white dark:bg-slate-800 shadow-lg w-full max-w-lg">
@@ -1216,7 +1371,14 @@ export default function PosDayManagement() {
                 <button
                   type="button"
                   className="btn-primary"
-                  onClick={closeModal}
+                  onClick={() => {
+                    closeModal();
+                    if (modal.title === "Day Closed") {
+                      navigate("/");
+                    } else {
+                      navigate("/pos/sales-entry");
+                    }
+                  }}
                 >
                   Continue
                 </button>
@@ -1301,6 +1463,98 @@ export default function PosDayManagement() {
                   }}
                 >
                   Apply Total
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showMomoConfirmModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="rounded-xl bg-white dark:bg-slate-800 shadow-lg w-full max-w-lg">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 bg-brand text-white rounded-t-xl">
+              <div className="text-lg font-bold">MoMo Balance Confirmation</div>
+              <button
+                type="button"
+                className="text-white hover:text-slate-200 text-xl font-bold"
+                onClick={() => setShowMomoConfirmModal(false)}
+              >
+                &times;
+              </button>
+            </div>
+            <div className="p-4 rounded-b-xl">
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="label">Opening Main Account (₵)</label>
+                    <input
+                      type="number"
+                      className="input"
+                      step="0.01"
+                      value={String(momoOpeningMain)}
+                      readOnly
+                    />
+                  </div>
+                  <div>
+                    <label className="label">
+                      Opening MoMo Pay Account (₵)
+                    </label>
+                    <input
+                      type="number"
+                      className="input"
+                      step="0.01"
+                      value={String(momoOpeningPay)}
+                      readOnly
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="label">Closing Main Account (₵)</label>
+                    <input
+                      type="number"
+                      className="input"
+                      step="0.01"
+                      value={String(momoClosingMain)}
+                      onChange={(e) =>
+                        setMomoClosingMain(Number(e.target.value || 0))
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className="label">
+                      Closing MoMo Pay Account (₵)
+                    </label>
+                    <input
+                      type="number"
+                      className="input"
+                      step="0.01"
+                      value={String(momoClosingPay)}
+                      onChange={(e) =>
+                        setMomoClosingPay(Number(e.target.value || 0))
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="rounded bg-slate-100 px-3 py-3 flex items-center justify-between font-semibold">
+                  <div>Expected MoMo (Opening + Sales)</div>
+                  <div>{fmtCurrency(expectedMoMo)}</div>
+                </div>
+              </div>
+              <div className="mt-4 flex justify-end gap-2">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setShowMomoConfirmModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => setShowMomoConfirmModal(false)}
+                >
+                  Done
                 </button>
               </div>
             </div>

@@ -1,3 +1,29 @@
+/**
+ * @fileoverview Utility functions for generating, rendering, and printing PDFs.
+ * Combines html2canvas and jsPDF for client-side PDF generation from HTML strings.
+ */
+
+/**
+ * Checks if a rendered canvas page is effectively blank (mostly white).
+ * 
+ * @param {HTMLCanvasElement} canvas - The canvas element to inspect.
+ * @returns {boolean} True if the canvas is blank, false otherwise.
+ */
+function isPageBlank(canvas) {
+  const ctx = canvas.getContext("2d");
+  const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  const step = Math.max(1, Math.floor((canvas.width * canvas.height) / 2000));
+  for (let i = 0; i < data.length; i += step * 4) {
+    if (data[i] < 250 || data[i + 1] < 250 || data[i + 2] < 250) return false;
+  }
+  return true;
+}
+
+/**
+ * Waits for all images within a given DOM element to fully load.
+ * @param {HTMLElement} el - The DOM element to search for images.
+ * @returns {Promise<void>} A promise that resolves when all images are loaded or an error occurs.
+ */
 export async function waitForImagesIn(el) {
   const imgs = Array.from(el?.querySelectorAll?.("img") || []);
   if (!imgs.length) return;
@@ -14,47 +40,71 @@ export async function waitForImagesIn(el) {
   );
 }
 
+/**
+ * Renders an HTML string into a downloadable PDF document.
+ * Injects the HTML into a hidden iframe, converts it to a canvas, and saves via jsPDF.
+ * 
+ * @param {string} html - The raw HTML content to render.
+ * @param {string} filename - The name of the output PDF file.
+ */
 export async function renderHtmlToPdf(html, filename = "document.pdf") {
-  const { api } = await import("../api/client.js");
   const { toast } = await import("react-toastify");
+  const html2canvas = (await import("html2canvas")).default;
+  const { default: jsPDF } = await import("jspdf");
   const toastId = toast.loading("Generating PDF, please wait...");
 
   try {
-    const res = await api.post(
-      "/documents/raw-html-to-pdf",
-      JSON.stringify({ html }),
-      {
-        responseType: "blob",
-        headers: { "Content-Type": "application/json" },
-        transformRequest: [(data) => data],  // skip default transform, already stringified
-      },
-    );
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "absolute";
+    iframe.style.left = "-9999px";
+    iframe.style.top = "0";
+    iframe.style.width = "210mm";
+    iframe.style.height = "10000px";
+    iframe.style.border = "0";
+    document.body.appendChild(iframe);
 
-    // Verify we actually got a PDF back, not an error JSON
-    const blob = res.data;
-    if (!blob || blob.size === 0) {
-      throw new Error("Empty PDF response from server");
+    const doc = iframe.contentWindow?.document || iframe.contentDocument;
+    if (!doc) throw new Error("Could not create render context");
+
+    doc.open();
+    doc.write(html);
+    doc.close();
+
+    await waitForImagesIn(doc.body);
+
+    const bodyEl = doc.body;
+    bodyEl.style.height = "auto";
+
+    const canvas = await html2canvas(bodyEl, {
+      scale: 1.5,
+      useCORS: true,
+      logging: false,
+      backgroundColor: "#ffffff",
+    });
+
+    const pdf = new jsPDF({ unit: "mm", format: "a4", compress: true });
+    const pdfW = pdf.internal.pageSize.getWidth();
+    const pdfH = pdf.internal.pageSize.getHeight();
+    const pageH = (pdfH * canvas.width) / pdfW;
+    let srcY = 0;
+    let pg = 0;
+    while (srcY < canvas.height) {
+      const h = Math.min(canvas.height - srcY, pageH);
+      const pc = document.createElement("canvas");
+      pc.width = canvas.width;
+      pc.height = h;
+      pc.getContext("2d").drawImage(canvas, 0, srcY, canvas.width, h, 0, 0, canvas.width, h);
+      if (!isPageBlank(pc)) {
+        if (pg > 0) pdf.addPage();
+        pdf.addImage(pc.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, pdfW, (h * pdfW) / canvas.width);
+        pg++;
+      }
+      srcY += h;
     }
 
-    // Check content type - if server returned JSON error, handle it
-    if (blob.type && blob.type.includes("application/json")) {
-      const text = await blob.text();
-      const err = JSON.parse(text);
-      throw new Error(err.message || "Server returned an error");
-    }
-
-    const url = window.URL.createObjectURL(
-      new Blob([blob], { type: "application/pdf" }),
-    );
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", filename);
-    document.body.appendChild(link);
-    link.click();
-    setTimeout(() => {
-      link.parentNode.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    }, 200);
+    if (pg === 0) pdf.addPage();
+    pdf.save(filename);
+    document.body.removeChild(iframe);
 
     toast.update(toastId, {
       render: "PDF downloaded successfully!",
@@ -65,7 +115,7 @@ export async function renderHtmlToPdf(html, filename = "document.pdf") {
   } catch (err) {
     console.error("PDF generation failed:", err);
     toast.update(toastId, {
-      render: err?.response?.data?.message || err?.message || "Failed to generate PDF",
+      render: err?.message || "Failed to generate PDF",
       type: "error",
       isLoading: false,
       autoClose: 4000,
@@ -74,19 +124,15 @@ export async function renderHtmlToPdf(html, filename = "document.pdf") {
   }
 }
 
-export async function fetchReportHeaderHtml(api) {
-  // Uses the general-template preview as the report header
-  const res = await api.post(`/documents/general-template/preview`, {
-    format: "html",
-  });
-  return String(res.data || "");
-}
-
-export function joinHeaderAndBody(headerHtml, bodyHtml) {
-  // Naive join: place header above body
-  return `${headerHtml || ""}\n${bodyHtml || ""}`;
-}
-
+/**
+ * Renders the HTML template for a document by making a request to the server.
+ * @param {Object} api - The axios/api instance.
+ * @param {string} docType - The type of document to render.
+ * @param {string|number} id - The ID of the document.
+ * @param {string} [featureName] - Optional feature name.
+ * @param {Function} [fetchDataFn] - Optional function to fetch payload data before rendering.
+ * @returns {Promise<string>} The rendered HTML string.
+ */
 export async function renderDocumentHtml(api, docType, id, featureName, fetchDataFn) {
   let payload_data = null;
   if (typeof fetchDataFn === "function") {
@@ -109,6 +155,15 @@ export async function renderDocumentHtml(api, docType, id, featureName, fetchDat
   return typeof resp.data === "string" ? resp.data : String(resp.data || "");
 }
 
+/**
+ * Prints a document by rendering its HTML and opening a print dialog in a hidden iframe.
+ * @param {Object} api - The axios/api instance.
+ * @param {string} docType - The type of document to print.
+ * @param {string|number} id - The ID of the document.
+ * @param {Object} [toast] - Toast notification instance.
+ * @param {string} [featureName] - Optional feature name.
+ * @param {Function} [fetchDataFn] - Optional function to fetch payload data.
+ */
 export async function printDocument(api, docType, id, toast, featureName, fetchDataFn) {
   try {
     const html = await renderDocumentHtml(api, docType, id, featureName, fetchDataFn);
@@ -143,6 +198,16 @@ export async function printDocument(api, docType, id, toast, featureName, fetchD
   }
 }
 
+/**
+ * Downloads a document as a PDF by rendering its HTML and converting it to PDF.
+ * @param {Object} api - The axios/api instance.
+ * @param {string} docType - The type of document.
+ * @param {string|number} id - The ID of the document.
+ * @param {string} filename - The filename for the downloaded PDF.
+ * @param {Object} [toast] - Toast notification instance.
+ * @param {string} [featureName] - Optional feature name.
+ * @param {Function} [fetchDataFn] - Optional function to fetch payload data.
+ */
 export async function downloadDocumentPdf(api, docType, id, filename, toast, featureName, fetchDataFn) {
   try {
     const html = await renderDocumentHtml(api, docType, id, featureName, fetchDataFn);

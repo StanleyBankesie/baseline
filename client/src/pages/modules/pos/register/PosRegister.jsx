@@ -1,3 +1,8 @@
+/**
+ * @fileoverview PosRegister component.
+ * Provides functionality for PosRegister.
+ */
+
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../../../../api/client.js";
@@ -33,6 +38,11 @@ function FilterableSelect({
   );
 }
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function PosRegister() {
   const { user } = useAuth();
   const { canPerformAction } = usePermission();
@@ -152,9 +162,20 @@ export default function PosRegister() {
           let expectedCash = null;
           let cashVariance = null;
           if (!isOpen) {
-            expectedCash = opening;
-            cashVariance = cashSales - opening;
+            expectedCash = opening + cashSales;
+            cashVariance = actualCash !== null ? actualCash - expectedCash : null;
           }
+          const mobileSales = Number(item.mobile_amount || 0);
+          const momoOpenMain = Number(item.momo_opening_main || 0);
+          const momoOpenPay = Number(item.momo_opening_pay || 0);
+          const storedActualMoMo = item.actual_momo === null || item.actual_momo === undefined ? null : Number(item.actual_momo || 0);
+          let expectedMoMo = null;
+          let momoVariance = null;
+          if (!isOpen && storedActualMoMo !== null) {
+            expectedMoMo = momoOpenMain + momoOpenPay + mobileSales;
+            momoVariance = storedActualMoMo - expectedMoMo;
+          }
+          const momoClosingTotal = Number(item.momo_closing_balance || 0);
           return {
             dayStatusId: Number(item.id || 0) || null,
             no: `DAY-${String(item.id || "").padStart(6, "0")}`,
@@ -171,6 +192,10 @@ export default function PosRegister() {
             expectedCash,
             actualCash,
             cashVariance,
+            openingMoMo: momoClosingTotal,
+            expectedMoMo,
+            actualMoMo: storedActualMoMo,
+            momoVariance,
             closeNotes: item.close_notes || "",
             sales: Number(item.total_sales || 0),
             cashSales,
@@ -179,7 +204,7 @@ export default function PosRegister() {
               cashCount: Number(item.cash_count || 0),
               cardAmount: Number(item.card_amount || 0),
               cardCount: Number(item.card_count || 0),
-              mobileAmount: Number(item.mobile_amount || 0),
+              mobileAmount: mobileSales,
               mobileCount: Number(item.mobile_count || 0),
             },
           };
@@ -548,10 +573,14 @@ export default function PosRegister() {
                   <th>Cashier</th>
                   <th>Start Time</th>
                   <th>End Time</th>
+                  <th>Total Sales</th>
                   <th>Opening Cash</th>
                   <th>Total Cash Sales</th>
-                  <th>Total Sales</th>
+                  <th>Actual Cash</th>
                   <th>Cash Variance</th>
+                  <th>Opening MoMo</th>
+                  <th>Actual MoMo</th>
+                  <th>MoMo Variance</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -559,7 +588,7 @@ export default function PosRegister() {
               <tbody>
                 {!sessionHistory.length ? (
                   <tr>
-                    <td colSpan="11">
+                    <td colSpan="15">
                       <div className="text-center text-slate-600 py-6">
                         No session history found
                       </div>
@@ -573,13 +602,29 @@ export default function PosRegister() {
                       <td className="p-2">{h.cashier}</td>
                       <td className="p-2">{h.start}</td>
                       <td className="p-2">{h.end}</td>
+                      <td className="p-2">{fmtCurrency(Number(h.sales || 0))}</td>
                       <td className="p-2">{fmtCurrency(h.opening)}</td>
                       <td className="p-2">{fmtCurrency(Number(h.cashSales || 0))}</td>
-                      <td className="p-2">{fmtCurrency(Number(h.sales || 0))}</td>
+                      <td className="p-2">
+                        {h.actualCash !== null ? fmtCurrency(h.actualCash) : "-"}
+                      </td>
                       <td className="p-2">
                         {h.cashVariance !== null ? (
                           <span style={{ color: h.cashVariance >= 0 ? "#28a745" : "#dc3545", fontWeight: 700 }}>
                             {fmtCurrency(h.cashVariance)}
+                          </span>
+                        ) : "-"}
+                      </td>
+                      <td className="p-2">
+                        {h.openingMoMo ? fmtCurrency(h.openingMoMo) : "-"}
+                      </td>
+                      <td className="p-2">
+                        {h.actualMoMo !== null ? fmtCurrency(h.actualMoMo) : "-"}
+                      </td>
+                      <td className="p-2">
+                        {h.momoVariance !== null ? (
+                          <span style={{ color: h.momoVariance >= 0 ? "#28a745" : "#dc3545", fontWeight: 700 }}>
+                            {fmtCurrency(h.momoVariance)}
                           </span>
                         ) : "-"}
                       </td>
@@ -693,11 +738,7 @@ export default function PosRegister() {
                     </div>
                     <div className="rounded-lg border border-slate-200 overflow-hidden">
                       <div className="p-3 font-semibold bg-slate-50">Cash Reconciliation</div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
-                        <div className="p-3 rounded-lg border border-slate-200 bg-white">
-                          <div className="text-xs text-slate-600">Expected Cash</div>
-                          <div className="font-bold">{fmtCurrency(t.expectedCashAtClose)}</div>
-                        </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
                         <div className="p-3 rounded-lg border border-slate-200 bg-white">
                           <div className="text-xs text-slate-600">Actual Cash</div>
                           <div className="font-bold">{t.actualCashAtClose === null ? "-" : fmtCurrency(t.actualCashAtClose)}</div>
@@ -709,12 +750,29 @@ export default function PosRegister() {
                           </div>
                         </div>
                       </div>
-                      {(s.closeNotes || sessionModalItem?.closeNotes) && (
-                        <div className="px-4 pb-4 text-sm text-slate-700">
-                          {s.closeNotes || sessionModalItem?.closeNotes}
-                        </div>
-                      )}
                     </div>
+                    {s.actualMoMo !== null && (
+                      <div className="rounded-lg border border-slate-200 overflow-hidden">
+                        <div className="p-3 font-semibold bg-slate-50">MoMo Reconciliation</div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                          <div className="p-3 rounded-lg border border-slate-200 bg-white">
+                            <div className="text-xs text-slate-600">Actual MoMo</div>
+                            <div className="font-bold">{fmtCurrency(s.actualMoMo)}</div>
+                          </div>
+                          <div className="p-3 rounded-lg border border-slate-200 bg-white">
+                            <div className="text-xs text-slate-600">Variance</div>
+                            <div className="font-bold" style={{ color: s.momoVariance !== null && s.momoVariance >= 0 ? "#28a745" : "#dc3545" }}>
+                              {s.momoVariance !== null ? fmtCurrency(s.momoVariance) : "-"}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {(s.closeNotes || sessionModalItem?.closeNotes) && (
+                      <div className="px-4 pb-4 text-sm text-slate-700">
+                        {s.closeNotes || sessionModalItem?.closeNotes}
+                      </div>
+                    )}
                     <div className="flex justify-end">
                       <button type="button" className="btn-primary" onClick={() => setSessionDetail({ open: false, mode: "details", index: -1, item: null })}>
                         Close
@@ -813,24 +871,26 @@ export default function PosRegister() {
                           >
                             View
                           </button>
-                          <button
-                            className="btn btn-secondary"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              printTransaction(t.id);
-                            }}
-                          >
-                            Print
-                          </button>
-                          <button
-                            className={`btn btn-danger ${!canPerformAction("pos:register", "delete") ? 'invisible pointer-events-none' : ''}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteTransaction(t.id);
-                            }}
-                          >
-                            Delete
-                          </button>
+                          <div style={{ display: 'none' }}>
+                            <button
+                              className="btn btn-secondary"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                printTransaction(t.id);
+                              }}
+                            >
+                              Print
+                            </button>
+                            <button
+                              className={`btn btn-danger ${!canPerformAction("pos:register", "delete") ? 'invisible pointer-events-none' : ''}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteTransaction(t.id);
+                              }}
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
                       </td>
                     </tr>

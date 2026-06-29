@@ -1,3 +1,8 @@
+/**
+ * @fileoverview JournalVoucherList component.
+ * Provides functionality for JournalVoucherList.
+ */
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -12,6 +17,11 @@ import {
 import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function JournalVoucherList() {
   const { canPerformAction } = usePermission();
   const [vouchers, setVouchers] = useState([]);
@@ -83,7 +93,7 @@ export default function JournalVoucherList() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Link to="/finance" className="btn btn-secondary">
+            <Link to="/finance" className="font-sans btn btn-secondary">
               Return to Menu
             </Link>
             <Link to="/finance/journal-voucher/create" className="btn-success">

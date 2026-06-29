@@ -1,3 +1,8 @@
+/**
+ * @fileoverview DeliveryList component.
+ * Provides functionality for DeliveryList.
+ */
+
 import React, { useEffect, useMemo, useState } from "react";
 import { filterAndSort } from "@/utils/searchUtils.js";
 import { Link, useNavigate } from "react-router-dom";
@@ -175,6 +180,11 @@ async function waitForImages(rootEl) {
   );
 }
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function DeliveryList() {
   const { canPerformAction } = usePermission();
   const navigate = useNavigate();
@@ -496,11 +506,10 @@ export default function DeliveryList() {
       const html =
         typeof resp.data === "string" ? resp.data : String(resp.data || "");
       const iframe = document.createElement("iframe");
-      iframe.style.position = "fixed";
-      iframe.style.right = "0";
-      iframe.style.bottom = "0";
-      iframe.style.width = "0";
-      iframe.style.height = "0";
+      iframe.style.position = "absolute";
+      iframe.style.left = "-9999px";
+      iframe.style.width = "800px";
+      iframe.style.height = "600px";
       iframe.style.border = "0";
       document.body.appendChild(iframe);
       const doc =
@@ -514,16 +523,41 @@ export default function DeliveryList() {
       doc.write(patchCss + html);
       doc.close();
       const win = iframe.contentWindow || window;
-      const doPrint = () => {
+      const imgs = iframe.contentDocument?.querySelectorAll("img") || [];
+      let loaded = 0;
+      if (imgs.length === 0) {
         win.focus();
-        try {
-          win.print();
-        } catch {}
-        setTimeout(() => {
-          document.body.removeChild(iframe);
-        }, 100);
-      };
-      setTimeout(doPrint, 200);
+        try { win.print(); } catch {}
+        setTimeout(() => { document.body.removeChild(iframe); }, 100);
+      } else {
+        imgs.forEach((img) => {
+          if (img.complete) {
+            loaded++;
+            if (loaded === imgs.length) {
+              win.focus();
+              try { win.print(); } catch {}
+              setTimeout(() => { document.body.removeChild(iframe); }, 100);
+            }
+          } else {
+            img.onload = () => {
+              loaded++;
+              if (loaded === imgs.length) {
+                win.focus();
+                try { win.print(); } catch {}
+                setTimeout(() => { document.body.removeChild(iframe); }, 100);
+              }
+            };
+            img.onerror = () => {
+              loaded++;
+              if (loaded === imgs.length) {
+                win.focus();
+                try { win.print(); } catch {}
+                setTimeout(() => { document.body.removeChild(iframe); }, 100);
+              }
+            };
+          }
+        });
+      }
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to print delivery");
       console.error(err);

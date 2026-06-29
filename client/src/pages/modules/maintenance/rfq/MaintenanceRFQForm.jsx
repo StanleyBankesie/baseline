@@ -1,3 +1,8 @@
+/**
+ * @fileoverview MaintenanceRFQForm component.
+ * Provides functionality for MaintenanceRFQForm.
+ */
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -5,6 +10,11 @@ import { api } from "../../../../api/client";
 
 const STATUSES = ["DRAFT","SENT","RESPONDED","CLOSED"];
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function MaintenanceRFQForm() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -72,7 +82,6 @@ export default function MaintenanceRFQForm() {
         <div className="card">
           <div className="card-header bg-brand text-white rounded-t-lg font-semibold">RFQ Details</div>
           <div className="card-body grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div><label className="label">RFQ No</label><input className="input" value={form.rfq_no} onChange={e => update("rfq_no", e.target.value)} placeholder="Auto-generated" /></div>
             <div><label className="label">RFQ Date</label><input className="input" type="date" value={form.rfq_date} onChange={e => update("rfq_date", e.target.value)} /></div>
             <div>
               <label className="label">Linked Request</label>
@@ -83,8 +92,11 @@ export default function MaintenanceRFQForm() {
             </div>
             <div><label className="label">Response Deadline</label><input className="input" type="date" value={form.response_deadline} onChange={e => update("response_deadline", e.target.value)} /></div>
             <div><label className="label">Status</label><select className="input" value={form.status} onChange={e => update("status", e.target.value)}>{STATUSES.map(s => <option key={s} value={s}>{s}</option>)}</select></div>
-            <div className="md:col-span-2"><label className="label">Scope of Work *</label><textarea className="input" rows={4} value={form.scope_of_work} onChange={e => update("scope_of_work", e.target.value)} placeholder="Describe maintenance work required..." required /></div>
             <div className="md:col-span-2"><label className="label">Notes</label><textarea className="input" rows={2} value={form.notes} onChange={e => update("notes", e.target.value)} /></div>
+          </div>
+          <div className="card-body mt-2">
+            <label className="label">Scope of Work *</label>
+            <textarea className="input w-full" rows={5} value={form.scope_of_work} onChange={e => update("scope_of_work", e.target.value)} placeholder="Describe maintenance work required..." required />
           </div>
         </div>
         <div className="card">

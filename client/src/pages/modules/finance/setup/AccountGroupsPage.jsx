@@ -1,3 +1,8 @@
+/**
+ * @fileoverview AccountGroupsPage component.
+ * Provides functionality for AccountGroupsPage.
+ */
+
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -5,6 +10,11 @@ import { toast } from "react-toastify";
 import { api } from "api/client";
 import { filterAndSort } from "@/utils/searchUtils.js";
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function AccountGroupsPage() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -177,7 +187,7 @@ export default function AccountGroupsPage() {
               <p className="text-sm mt-1">Maintain account group hierarchy</p>
             </div>
             <div className="flex gap-2 items-center">
-              <Link to="/finance" className="btn btn-secondary">
+              <Link to="/finance" className="font-sans btn btn-secondary">
                 Return to Menu
               </Link>
               <input

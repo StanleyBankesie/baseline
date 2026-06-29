@@ -1,3 +1,8 @@
+/**
+ * @fileoverview StockUpdationList component.
+ * Provides functionality for StockUpdationList.
+ */
+
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -14,6 +19,11 @@ import {
   ListAttachmentIconButton,
 } from "@/components/list/ListDocActionIconButtons.jsx";
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function StockUpdationList() {
   const location = useLocation();
   const { canReverseApproval } = usePermission();
@@ -319,7 +329,7 @@ export default function StockUpdationList() {
                               <span className="list-approval-forwarded-pill">
                                 Forwarded to {adj.forwarded_to_username}
                               </span>
-                            ) : ["DRAFT", "RETURNED", "REJECTED"].includes(String(adj.status || "").toUpperCase()) ? (
+                            ) : ["DRAFT", "RETURNED", "REJECTED"].includes(String(adj.status || "").toUpperCase()) && adj.has_workflow ? (
                               <button
                                 type="button"
                                 className="list-approval-forward-btn"

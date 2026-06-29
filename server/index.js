@@ -45,6 +45,7 @@ import {
   ensureSystemLogsTable,
 } from "./utils/dbUtils.js";
 import { seedDefaultTemplates } from "./services/seed-defaults.js";
+import { ensureIndexes } from "./utils/ensureIndexes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -79,6 +80,7 @@ try {
 } catch {}
 
 const app = express();
+app.set("trust proxy", 1);
 
 app.use((req, res, next) => {
   res.setHeader(
@@ -680,6 +682,10 @@ if (process.env.NODE_ENV !== "test") {
         } catch {}
         try {
           await seedDefaultTemplates();
+        } catch {}
+        try {
+          const n = await ensureIndexes();
+          if (n > 0) console.log(`Created ${n} missing database index(es)`);
         } catch {}
       } catch (e) {
         logDbError("Startup check failed", e);

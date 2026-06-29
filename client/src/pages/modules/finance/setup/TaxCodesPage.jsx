@@ -1,3 +1,8 @@
+/**
+ * @fileoverview TaxCodesPage component.
+ * Provides functionality for TaxCodesPage.
+ */
+
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { api } from "api/client";
@@ -120,6 +125,11 @@ const VOUCHER_PAGES = [
   PAGE_IDS.JOURNAL_VOUCHER,
 ];
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function TaxCodesPage() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -571,7 +581,7 @@ export default function TaxCodesPage() {
             >
               + Create Tax Code
             </button>
-            <Link to="/finance" className="btn btn-secondary">
+            <Link to="/finance" className="font-sans btn btn-secondary">
               Return to Menu
             </Link>
             <button
@@ -606,7 +616,7 @@ export default function TaxCodesPage() {
                   <div>
                     <label className="label">Code *</label>
                     <input
-                      className="input"
+                      className="input w-full"
                       value={code}
                       onChange={(e) => setCode(e.target.value)}
                       required
@@ -615,7 +625,7 @@ export default function TaxCodesPage() {
                   <div className="md:col-span-2">
                     <label className="label">Name *</label>
                     <input
-                      className="input"
+                      className="input w-full"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required
@@ -624,7 +634,7 @@ export default function TaxCodesPage() {
                   <div>
                     <label className="label">Rate (%)</label>
                     <input
-                      className="input"
+                      className="input w-full"
                       type="number"
                       step="0.01"
                       min="0"
@@ -635,7 +645,7 @@ export default function TaxCodesPage() {
                   <div>
                     <label className="label">Type *</label>
                     <select
-                      className="input"
+                      className="input w-full"
                       value={type}
                       onChange={(e) => setType(e.target.value)}
                       required
@@ -1012,7 +1022,7 @@ export default function TaxCodesPage() {
                 <div className="md:col-span-3">
                   <label className="label">Component Name *</label>
                   <input
-                    className="input"
+                    className="input w-full"
                     value={compName}
                     onChange={(e) => setCompName(e.target.value)}
                     required
@@ -1036,7 +1046,7 @@ export default function TaxCodesPage() {
                 <div className="md:col-span-1">
                   <label className="label">Rate (%)</label>
                   <input
-                    className="input"
+                    className="input w-full"
                     type="number"
                     step="0.01"
                     min="0"
@@ -1047,9 +1057,9 @@ export default function TaxCodesPage() {
                 <div className="md:col-span-1">
                   <label className="label">Sort Order</label>
                   <input
-                    className="input"
+                    className="input w-full"
                     type="number"
-                    min="0"
+                    min="1"
                     value={compOrder}
                     onChange={(e) => setCompOrder(e.target.value)}
                   />

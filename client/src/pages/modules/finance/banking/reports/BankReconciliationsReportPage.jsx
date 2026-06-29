@@ -1,6 +1,17 @@
+/**
+ * @fileoverview BankReconciliationsReportPage component.
+ * Provides functionality for BankReconciliationsReportPage.
+ */
+
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "api/client";
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function BankReconciliationsReportPage() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +59,12 @@ export default function BankReconciliationsReportPage() {
     <div className="space-y-4">
       <div className="card">
         <div className="card-header bg-brand text-white rounded-t-lg">
-          <h1 className="text-2xl font-bold">Reconciled Bank Accounts</h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold">Reconciled Bank Accounts</h1>
+            <Link to="/finance" className="btn btn-sm btn-outline text-white border-white hover:bg-white hover:text-brand">
+              Back to Menu
+            </Link>
+          </div>
         </div>
       </div>
       <div className="card">

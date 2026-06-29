@@ -1,3 +1,8 @@
+/**
+ * @fileoverview PurchaseVoucherList component.
+ * Provides functionality for PurchaseVoucherList.
+ */
+
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -28,6 +33,11 @@ function StatusBadge({ status }) {
   return <span className={cls}>{status}</span>;
 }
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function PurchaseVoucherList() {
   const { canPerformAction } = usePermission();
   const location = useLocation();
@@ -1264,7 +1274,7 @@ export default function PurchaseVoucherList() {
             <p className="text-sm mt-1">List, review, and manage vouchers</p>
           </div>
           <div className="flex gap-2">
-            <Link to="/finance" className="btn btn-secondary">
+            <Link to="/finance" className="font-sans btn btn-secondary">
               Return to Menu
             </Link>
             <button
@@ -1489,7 +1499,7 @@ export default function PurchaseVoucherList() {
       </div>
       {showForwardModal ? (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-erp w/full max-w-md overflow-hidden">
+          <div className="bg-white rounded-lg shadow-erp w-full max-w-md overflow-hidden">
             <div className="p-4 bg-brand text-white flex justify-between items-center">
               <h2 className="text-lg font-bold">Forward for Approval</h2>
               <button

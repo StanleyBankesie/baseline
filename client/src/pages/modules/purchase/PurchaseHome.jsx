@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Main entry point and router for the Purchase module.
+ * Configures all sub-routes for purchase orders, requisitions, bills, and reports.
+ */
+
 import React, { useEffect, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import ModuleDashboard from "../../../components/ModuleDashboard";
@@ -145,7 +150,7 @@ function PurchaseHomeIndex() {
       title: "Procurement",
       items: [
         {
-          title: "General Requisition",
+          title: "Purchase Requisition",
           description: "Request items or services to be purchased",
           path: "/purchase/general-requisitions",
           icon: "📋",
@@ -521,7 +526,7 @@ export default function PurchaseHome() {
 export const purchaseFeatures = [
   {
     module_key: "purchase",
-    label: "General Requisition",
+    label: "Purchase Requisition",
     path: "/purchase/general-requisitions",
     type: "feature",
     icon: "📋",

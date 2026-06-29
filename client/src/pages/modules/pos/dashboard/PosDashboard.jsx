@@ -1,7 +1,14 @@
-import React, { useEffect, useMemo, useState } from "react";
+/**
+ * @fileoverview PosDashboard component.
+ * Provides functionality for PosDashboard.
+ */
+
+import React, { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import api from "../../../../api/client.js";
 import ChartPie from "@/components/charts/ChartPie.jsx";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 function shade(c, pct) {
   const n = c.replace("#", "");
@@ -333,6 +340,69 @@ function UserBarChart({
   );
 }
 
+function ChartViewerModal({ chart, onClose }) {
+  const chartRef = useRef(null);
+
+  const downloadImage = useCallback(async () => {
+    try {
+      const canvas = await html2canvas(chartRef.current, { scale: 2 });
+      const link = document.createElement("a");
+      link.download = `${chart.title.replace(/\s+/g, "_")}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (e) {
+      console.error("Download as Image failed", e);
+    }
+  }, [chart.title]);
+
+  const downloadPdf = useCallback(async () => {
+    try {
+      const canvas = await html2canvas(chartRef.current, { scale: 2 });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("l", "mm", "a4");
+      const pdfW = pdf.internal.pageSize.getWidth();
+      const pdfH = (canvas.height * pdfW) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
+      pdf.save(`${chart.title.replace(/\s+/g, "_")}.pdf`);
+    } catch (e) {
+      console.error("Download as PDF failed", e);
+    }
+  }, [chart.title]);
+
+  if (!chart) return null;
+
+  const ChartComponent = chart.component;
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex flex-col bg-black/70" onClick={onClose}>
+      <div className="flex items-center justify-between bg-white px-6 py-4 shrink-0" onClick={(e) => e.stopPropagation()}>
+        <h2 className="text-xl font-bold text-slate-900">{chart.title}</h2>
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={downloadImage} className="btn btn-sm btn-secondary">
+            Download as Image
+          </button>
+          <button type="button" onClick={downloadPdf} className="btn btn-sm btn-secondary">
+            Download as PDF
+          </button>
+          <button type="button" onClick={onClose} className="btn btn-sm btn-ghost text-xl leading-none px-2" aria-label="Close">
+            ✕
+          </button>
+        </div>
+      </div>
+      <div className="flex-1 overflow-auto p-8" onClick={(e) => e.stopPropagation()}>
+        <div ref={chartRef} className="bg-white rounded-xl p-6 inline-block min-w-full shadow-lg">
+          <ChartComponent {...chart.props} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function PosDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -343,6 +413,7 @@ export default function PosDashboard() {
   const [salesMonthly, setSalesMonthly] = useState([]);
   const [weekdaySales, setWeekdaySales] = useState([]);
   const [hourlyToday, setHourlyToday] = useState([]);
+  const [busyHours, setBusyHours] = useState([]);
   const [categoryShare, setCategoryShare] = useState([]);
   const [topItems, setTopItems] = useState([]);
   const [profitByGroup, setProfitByGroup] = useState([]);
@@ -356,6 +427,7 @@ export default function PosDashboard() {
   const [showTrendAmounts, setShowTrendAmounts] = useState(true);
   const [showMonthlyAmounts, setShowMonthlyAmounts] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState("all");
+  const [modalChart, setModalChart] = useState(null);
 
   const dateLabel = useMemo(() => {
     if (startDate && endDate) return `${startDate} – ${endDate}`;
@@ -376,6 +448,7 @@ export default function PosDashboard() {
       api.get("/pos/analytics/sales-monthly"),
       api.get("/pos/analytics/weekday-current-week"),
       api.get("/pos/analytics/hourly-today", { params: dateParams }),
+      api.get("/pos/analytics/busy-hours"),
       api.get("/pos/analytics/category-share", { params: dateParams }),
       api.get("/pos/analytics/profit-by-group", { params: dateParams }),
       api.get("/pos/analytics/profit-by-item", { params: dateParams }),
@@ -392,6 +465,7 @@ export default function PosDashboard() {
           salesMonthlyRes,
           weekdayRes,
           hourlyRes,
+          busyRes,
           categoryRes,
           profitRes,
           profitItemRes,
@@ -420,6 +494,9 @@ export default function PosDashboard() {
           );
           setHourlyToday(
             Array.isArray(hourlyRes.data?.items) ? hourlyRes.data.items : [],
+          );
+          setBusyHours(
+            Array.isArray(busyRes.data?.items) ? busyRes.data.items : [],
           );
           setCategoryShare(
             Array.isArray(categoryRes.data?.items)
@@ -589,6 +666,20 @@ export default function PosDashboard() {
     });
   }, [hourlyToday]);
 
+  const busyHourPoints = useMemo(() => {
+    const map = new Map();
+    for (const r of busyHours) {
+      map.set(Number(r.hr || 0), Number(r.total || 0));
+    }
+    return Array.from({ length: 16 }, (_, i) => {
+      const h = i + 7;
+      return {
+        x: `${String(h).padStart(2, "0")}-${String(h + 1).padStart(2, "0")}`,
+        y: Number(map.get(h) || 0),
+      };
+    });
+  }, [busyHours]);
+
   const pieData = useMemo(() => {
     const totals = new Map();
     for (const row of categoryShare) {
@@ -653,7 +744,7 @@ export default function PosDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="card shadow-sm border-slate-200/60">
+        <div className="card shadow-sm border-slate-200/60 cursor-pointer" onClick={() => setModalChart({ title: "Terminal Collection", component: PieChart, props: { data: terminalPieData, label: "Terminal Collection" } })}>
           <div className="card-header bg-slate-50/80 rounded-t-lg border-b border-slate-200/60">
             <div className="text-xl font-bold text-slate-800">
               Terminal Collection
@@ -667,7 +758,7 @@ export default function PosDashboard() {
           </div>
         </div>
 
-        <div className="card shadow-sm border-slate-200/60">
+        <div className="card shadow-sm border-slate-200/60 cursor-pointer" onClick={() => setModalChart({ title: "Users Sales", component: UserBarChart, props: { data: userBars, xLabel: "User", yLabel: "Sales (GH₵)", formatY: fmtCurrency } })}>
           <div className="card-header bg-slate-50/80 rounded-t-lg border-b border-slate-200/60">
             <div className="text-xl font-bold text-slate-800">Users Sales</div>
             <div className="text-sm text-slate-500">
@@ -686,7 +777,7 @@ export default function PosDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="card shadow-sm border-slate-200/60">
+        <div className="card shadow-sm border-slate-200/60 cursor-pointer" onClick={() => setModalChart({ title: "Sales Trend", component: LineChart, props: { points: sales30Points, xLabel: "Date", yLabel: "Sales (GH₵)", formatY: fmtCurrency, showXLabels: true, showAmounts: showTrendAmounts, scrollX: true, color: "#2563eb", areaColor: "rgba(37,99,235,0.15)", height: 400 } })}>
           <div className="card-header bg-slate-50/80 rounded-t-lg border-b border-slate-200/60 flex items-center justify-between">
             <div>
               <div className="text-xl font-bold text-slate-800">
@@ -696,7 +787,7 @@ export default function PosDashboard() {
                 Last {daysRange} days
               </div>
             </div>
-            <label className="flex items-center gap-1.5 text-sm cursor-pointer select-none font-medium text-slate-600">
+            <label className="flex items-center gap-1.5 text-sm cursor-pointer select-none font-medium text-slate-600" onClick={(e) => e.stopPropagation()}>
               <input
                 type="checkbox"
                 checked={showTrendAmounts}
@@ -718,6 +809,7 @@ export default function PosDashboard() {
                 value={daysRange}
                 onChange={(e) => setDaysRange(Number(e.target.value))}
                 className="flex-1 accent-brand"
+                onClick={(e) => e.stopPropagation()}
               />
               <span className="badge-primary text-xs px-2 py-0.5">
                 {daysRange}d
@@ -736,7 +828,7 @@ export default function PosDashboard() {
             />
           </div>
         </div>
-        <div className="card shadow-sm border-slate-200/60">
+        <div className="card shadow-sm border-slate-200/60 cursor-pointer" onClick={() => setModalChart({ title: "Month-to-Month Sales", component: LineChart, props: { points: formattedMonthlyPoints, xLabel: "Month", yLabel: "Sales (GH₵)", formatY: fmtCurrency, showXLabels: true, showAmounts: showMonthlyAmounts, scrollX: true, color: "#2563eb", areaColor: "rgba(37,99,235,0.15)", height: 400 } })}>
           <div className="card-header bg-slate-50/80 rounded-t-lg border-b border-slate-200/60 flex items-center justify-between">
             <div>
               <div className="text-xl font-bold text-slate-800">
@@ -749,6 +841,7 @@ export default function PosDashboard() {
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
                 className="input text-sm py-1 px-2 w-36 border-slate-200"
+                onClick={(e) => e.stopPropagation()}
               >
                 <option value="all">All Months</option>
                 {monthOptions.map((m) => (
@@ -757,7 +850,7 @@ export default function PosDashboard() {
                   </option>
                 ))}
               </select>
-              <label className="flex items-center gap-1.5 text-sm cursor-pointer select-none font-medium text-slate-600">
+              <label className="flex items-center gap-1.5 text-sm cursor-pointer select-none font-medium text-slate-600" onClick={(e) => e.stopPropagation()}>
                 <input
                   type="checkbox"
                   checked={showMonthlyAmounts}
@@ -785,7 +878,7 @@ export default function PosDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="card shadow-sm border-slate-200/60">
+        <div className="card shadow-sm border-slate-200/60 cursor-pointer" onClick={() => setModalChart({ title: "Weekday Sales", component: BarChart, props: { data: weekdayBars, xKey: "label", yKey: "total", xLabel: "Weekday", yLabel: "Sales (GH₵)", formatY: fmtCurrency, colors: ["#6366f1","#22c55e","#f59e0b","#06b6d4","#a855f7","#0ea5e9","#84cc16"], height: 400 } })}>
           <div className="card-header bg-slate-50/80 rounded-t-lg border-b border-slate-200/60">
             <div className="font-bold text-slate-800">Weekday Sales</div>
             <div className="text-[11px] text-slate-500">
@@ -804,7 +897,7 @@ export default function PosDashboard() {
             />
           </div>
         </div>
-        <div className="card shadow-sm border-slate-200/60">
+        <div className="card shadow-sm border-slate-200/60 cursor-pointer" onClick={() => setModalChart({ title: "Hourly Sales", component: LineChart, props: { points: hourlyPoints, xLabel: "Hour", yLabel: "Sales (GH₵)", formatY: fmtCurrency, color: "#2563eb", areaColor: "rgba(37,99,235,0.15)", showXLabels: true, scrollX: true, height: 400 } })}>
           <div className="card-header bg-slate-50/80 rounded-t-lg border-b border-slate-200/60">
             <div className="font-bold text-slate-800">Hourly Sales</div>
             <div className="text-[11px] text-slate-500">
@@ -827,18 +920,18 @@ export default function PosDashboard() {
       </div>
 
       <div className="grid grid-cols-1">
-        <div className="card shadow-sm border-slate-200/60">
+        <div className="card shadow-sm border-slate-200/60 cursor-pointer" onClick={() => setModalChart({ title: "Busy Sales Hours", component: LineChart, props: { points: busyHourPoints, xLabel: "Hour", yLabel: "Avg Sales (GH₵)", formatY: fmtCurrency, color: "#22c55e", areaColor: "rgba(34,197,94,0.2)", showXLabels: true, scrollX: true, height: 400 } })}>
           <div className="card-header bg-slate-50/80 rounded-t-lg border-b border-slate-200/60">
             <div className="font-bold text-slate-800">Busy Sales Hours</div>
             <div className="text-[11px] text-slate-500">
-              Heatmap emphasis by hour ({dateLabel})
+              Average sales by hour (all time)
             </div>
           </div>
           <div className="card-body overflow-x-auto p-4">
             <LineChart
-              points={hourlyPoints}
+              points={busyHourPoints}
               xLabel="Hour"
-              yLabel="Sales (GH₵)"
+              yLabel="Avg Sales (GH₵)"
               formatY={fmtCurrency}
               color="#22c55e"
               areaColor="rgba(34,197,94,0.2)"
@@ -850,7 +943,7 @@ export default function PosDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="card shadow-sm border-slate-200/60">
+        <div className="card shadow-sm border-slate-200/60 cursor-pointer" onClick={() => setModalChart({ title: "Sales by Item Category", component: BarChart, props: { data: pieData, xKey: "label", yKey: "value", xLabel: "Category", yLabel: "Sales (GH₵)", formatY: fmtCurrency, colors: ["#14b8a6","#f43f5e","#8b5cf6","#eab308","#0ea5e9","#ec4899","#84cc16","#f97316"], height: 400 } })}>
           <div className="card-header bg-slate-50/80 rounded-t-lg border-b border-slate-200/60 flex items-center justify-between">
             <div>
               <div className="font-bold text-slate-800">
@@ -971,7 +1064,7 @@ export default function PosDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="card shadow-sm border-slate-200/60">
+        <div className="card shadow-sm border-slate-200/60 cursor-pointer" onClick={() => setModalChart({ title: "Profitable Groups", component: BarChart, props: { data: profitByGroup, xKey: "item_group", yKey: "profit", formatY: fmtCurrency, colors: ["#22c55e","#14b8a6","#6366f1","#f59e0b","#ef4444"], horizontal: true, height: 400 } })}>
           <div className="card-header bg-slate-50/80 rounded-t-lg border-b border-slate-200/60">
             <div className="font-bold text-slate-800">Profitable Groups</div>
             <div className="text-[11px] text-slate-500">{dateLabel}</div>
@@ -989,7 +1082,7 @@ export default function PosDashboard() {
             </div>
           </div>
         </div>
-        <div className="card shadow-sm border-slate-200/60">
+        <div className="card shadow-sm border-slate-200/60 cursor-pointer" onClick={() => setModalChart({ title: "Profitable Items", component: BarChart, props: { data: profitByItem, xKey: "item", yKey: "profit", formatY: fmtCurrency, colors: ["#6366f1","#f59e0b","#ef4444","#22c55e","#14b8a6"], horizontal: true, height: 400 } })}>
           <div className="card-header bg-slate-50/80 rounded-t-lg border-b border-slate-200/60">
             <div className="font-bold text-slate-800">Profitable Items</div>
             <div className="text-[11px] text-slate-500">{dateLabel}</div>
@@ -1008,6 +1101,8 @@ export default function PosDashboard() {
           </div>
         </div>
       </div>
+
+      {modalChart && <ChartViewerModal chart={modalChart} onClose={() => setModalChart(null)} />}
     </div>
   );
 }

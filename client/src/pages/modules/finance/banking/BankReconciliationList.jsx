@@ -1,8 +1,18 @@
+/**
+ * @fileoverview BankReconciliationList component.
+ * Provides functionality for BankReconciliationList.
+ */
+
 import React, { useEffect, useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "api/client";
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function BankReconciliationList() {
   const [bankAccounts, setBankAccounts] = useState([]);
   const [recons, setRecons] = useState([]);
@@ -123,7 +133,7 @@ export default function BankReconciliationList() {
         <div className="flex gap-2">
           <Link
             to="/finance"
-            className="btn btn-sm btn-outline text-white border-white hover:bg-white/20"
+            className="font-sans btn btn-sm btn-outline text-white border-white hover:bg-white/20"
           >
             Return to Menu
           </Link>

@@ -1,6 +1,12 @@
+/**
+ * @fileoverview PosReturnForm component.
+ * Provides functionality for PosReturnForm.
+ */
+
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../../../../api/client.js";
+import { toast } from "react-toastify";
 
 function FilterableSelect({
   value,
@@ -30,6 +36,11 @@ function FilterableSelect({
   );
 }
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function PosReturnForm() {
   const [now, setNow] = useState(new Date());
   const [searchSaleId, setSearchSaleId] = useState("");
@@ -500,9 +511,10 @@ export default function PosReturnForm() {
         });
         setReturnTimestamp(ts);
         setShowModal(true);
+        toast.success("Return processed successfully");
       }
     } catch (err) {
-      alert(err.response?.data?.message || "Return failed");
+      toast.error(err.response?.data?.message || "Return failed");
     }
   }
 

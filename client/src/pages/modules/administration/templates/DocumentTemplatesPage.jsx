@@ -1,3 +1,8 @@
+/**
+ * @fileoverview DocumentTemplatesPage component.
+ * Provides functionality for DocumentTemplatesPage.
+ */
+
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "api/client";
@@ -333,6 +338,22 @@ const FEATURE_PAGES = [
       {
         "label": "PosInvoiceList",
         "value": "pos-invoice-list"
+      },
+      {
+        "label": "CustomerAccounts",
+        "value": "pos-customer-history"
+      },
+      {
+        "label": "PosReturns",
+        "value": "pos-returns"
+      },
+      {
+        "label": "PosReports",
+        "value": "pos-reports"
+      },
+      {
+        "label": "OnHoldSales",
+        "value": "pos-on-hold"
       }
     ]
   },
@@ -539,6 +560,11 @@ const FEATURE_PAGES = [
   }
 ];
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function DocumentTemplatesPage() {
   const [searchParams] = useSearchParams();
   const initialType = useMemo(() => {
@@ -1045,10 +1071,10 @@ export default function DocumentTemplatesPage() {
                     </div>
                   </div>
                 </div>
-                <div>
+                <div className="md:col-span-2">
                   <label className="label">HTML Content</label>
                   <textarea
-                    className="input min-h-[280px]"
+                    className="input min-h-[280px] w-full"
                     value={form.html_content}
                     onChange={(e) =>
                       setForm((p) => ({ ...p, html_content: e.target.value }))

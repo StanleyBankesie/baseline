@@ -1,3 +1,8 @@
+/**
+ * @fileoverview BankReconciliationTransactionReportPage component.
+ * Provides functionality for BankReconciliationTransactionReportPage.
+ */
+
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -5,6 +10,11 @@ import { api } from "api/client";
 import * as XLSX from "xlsx";
 import PrintPreviewModal from "../../../../../components/PrintPreviewModal.jsx";
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function BankReconciliationTransactionReportPage() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -155,7 +165,7 @@ export default function BankReconciliationTransactionReportPage() {
         <div className="flex gap-2">
           <Link
             to="/finance"
-            className="btn btn-sm btn-outline text-white border-white hover:bg-white/20"
+            className="font-sans btn btn-sm btn-outline text-white border-white hover:bg-white/20"
           >
             Back to Finance
           </Link>

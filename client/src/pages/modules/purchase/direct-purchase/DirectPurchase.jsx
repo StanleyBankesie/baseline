@@ -1,3 +1,8 @@
+/**
+ * @fileoverview DirectPurchase component.
+ * Provides functionality for DirectPurchase.
+ */
+
 import React, { useEffect, useMemo, useState } from "react";
 import { api } from "../../../../api/client.js";
 import { useNavigate, useLocation, useParams, Link } from "react-router-dom";
@@ -9,6 +14,11 @@ import { Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { filterByPrefix } from "@/utils/searchUtils.js";
 
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
 export default function DirectPurchase() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -69,8 +79,8 @@ export default function DirectPurchase() {
   const [newItem, setNewItem] = useState({
     item_id: "",
     qty: 1,
-    unit_price: 0,
-    discount_percent: 0,
+    unit_price: "",
+    discount_percent: "",
     tax_code_id: "",
     tax_percent: 0,
     uom: "PCS",
@@ -375,8 +385,8 @@ export default function DirectPurchase() {
     setNewItem({
       item_id: "",
       qty: 1,
-      unit_price: 0,
-      discount_percent: 0,
+      unit_price: "",
+      discount_percent: "",
       tax_code_id: "",
       tax_percent: 0,
       uom: defaultUomCode,
@@ -740,7 +750,8 @@ export default function DirectPurchase() {
                 }}
                 disabled={isViewMode}
               />
-              {!isViewMode && supplierSearch &&
+              {!isViewMode &&
+                supplierSearch &&
                 (() => {
                   const q = supplierSearch.toLowerCase();
                   const matched = suppliers
@@ -755,7 +766,10 @@ export default function DirectPurchase() {
                     )
                     .slice(0, 10);
                   return matched.length > 0 ? (
-                    <div className="absolute z-30 w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg shadow-lg mt-1 max-h-52 overflow-y-auto" style={{ top: "100%" }}>
+                    <div
+                      className="absolute z-30 w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg shadow-lg mt-1 max-h-52 overflow-y-auto"
+                      style={{ top: "100%" }}
+                    >
                       {matched.map((s) => (
                         <button
                           key={s.id}
@@ -965,35 +979,47 @@ export default function DirectPurchase() {
                     autoComplete="off"
                     className="input w-full"
                     placeholder="Scan barcode or type item name"
-                      autoFocus
-                      value={itemQueries.new || ""}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setItemQueries((prev) => ({ ...prev, new: val }));
-                        if (newItem.item_id) {
-                          setNewItem((prev) => ({
-                            ...prev,
-                            item_id: "",
-                            uom: defaultUomCode,
-                            unit_price: 0,
-                          }));
-                        }
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          const query = (itemQueries.new || "").trim();
-                          const searchResults = query
-                            ? filterByPrefix(items, {
-                                query,
-                                searchFields: ["item_code", "item_name", "barcode"],
-                              })
-                            : [];
-                          if (!query || !searchResults.length) return;
-                          handleNewItemChange({ target: { name: "item_id", value: String(searchResults[0].id) } });
-                          setItemQueries((prev) => ({ ...prev, new: searchResults[0].item_name }));
-                        }
-                      }}
+                    autoFocus
+                    value={itemQueries.new || ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setItemQueries((prev) => ({ ...prev, new: val }));
+                      if (newItem.item_id) {
+                        setNewItem((prev) => ({
+                          ...prev,
+                          item_id: "",
+                          uom: defaultUomCode,
+                          unit_price: 0,
+                        }));
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        const query = (itemQueries.new || "").trim();
+                        const searchResults = query
+                          ? filterByPrefix(items, {
+                              query,
+                              searchFields: [
+                                "item_code",
+                                "item_name",
+                                "barcode",
+                              ],
+                            })
+                          : [];
+                        if (!query || !searchResults.length) return;
+                        handleNewItemChange({
+                          target: {
+                            name: "item_id",
+                            value: String(searchResults[0].id),
+                          },
+                        });
+                        setItemQueries((prev) => ({
+                          ...prev,
+                          new: searchResults[0].item_name,
+                        }));
+                      }
+                    }}
                     disabled={isViewMode}
                   />
                   {(() => {
@@ -1012,8 +1038,16 @@ export default function DirectPurchase() {
                             key={o.id}
                             className="block w-full text-left px-3 py-2 hover:bg-slate-50 text-xs"
                             onClick={() => {
-                              handleNewItemChange({ target: { name: "item_id", value: String(o.id) } });
-                              setItemQueries((prev) => ({ ...prev, new: o.item_name }));
+                              handleNewItemChange({
+                                target: {
+                                  name: "item_id",
+                                  value: String(o.id),
+                                },
+                              });
+                              setItemQueries((prev) => ({
+                                ...prev,
+                                new: o.item_name,
+                              }));
                             }}
                           >
                             {o.item_code} - {o.item_name}
@@ -1293,26 +1327,17 @@ export default function DirectPurchase() {
 
           <div className="bg-[#f8f9fa] p-5 rounded-lg mt-5 border border-[#dee2e6]">
             <div className="flex justify-between py-2 border-b border-[#dee2e6]">
-              <span className="text-sm font-medium">Sub Total:</span>
+              <span className="text-sm font-medium">Subtotal:</span>
               <span className="font-bold">
                 {Number(totals.subtotal || 0).toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                 })}
               </span>
             </div>
-            <div className="flex justify-between py-2 border-b border-[#dee2e6] text-[#dc3545]">
-              <span className="text-sm font-medium">Discount:</span>
+            <div className="flex justify-between py-2 border-b border-[#dee2e6]">
+              <span className="text-sm font-medium">Total Discount:</span>
               <span className="font-bold">
-                -
                 {Number(totals.totalDiscount || 0).toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                })}
-              </span>
-            </div>
-            <div className="flex justify-between py-2 border-b border-[#dee2e6] text-[#0E3646]">
-              <span className="text-sm font-medium">Tax Amount:</span>
-              <span className="font-bold">
-                {Number(totals.totalTax || 0).toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                 })}
               </span>
@@ -1322,9 +1347,7 @@ export default function DirectPurchase() {
                 key={c.name}
                 className="flex justify-between py-1 text-xs text-gray-600 pl-4"
               >
-                <span>
-                  {c.name} ({c.rate}%):
-                </span>
+                <span>{c.name}</span>
                 <span>
                   {Number(c.amount || 0).toLocaleString(undefined, {
                     minimumFractionDigits: 2,
@@ -1332,8 +1355,16 @@ export default function DirectPurchase() {
                 </span>
               </div>
             ))}
+            <div className="flex justify-between py-2 border-b border-[#dee2e6]">
+              <span className="text-sm font-medium">Total Tax:</span>
+              <span className="font-bold">
+                {Number(totals.totalTax || 0).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
+              </span>
+            </div>
             <div className="flex justify-between py-3 text-lg font-bold text-[#0E3646]">
-              <span>{`Total ${selectedCurrencyCode || baseCurrencyCode}:`}</span>
+              <span>Grand Total:</span>
               <span>
                 {Number(totalInCurrentCurrency || 0).toLocaleString(undefined, {
                   minimumFractionDigits: 2,
@@ -1353,7 +1384,7 @@ export default function DirectPurchase() {
           </div>
 
           {!isViewMode ? (
-            <div className="mt-6 flex gap-3">
+            <div className="mt-6 flex justify-end gap-3">
               <button
                 className="btn btn-primary"
                 disabled={saving}
