@@ -1,0 +1,1871 @@
+import { query } from "../db/pool.js";
+import { httpError } from "../utils/httpError.js";
+
+async function hasColumn(tableName, columnName) {
+  const rows = await query(
+    `
+    SELECT COUNT(*) AS c
+    FROM information_schema.columns
+    WHERE table_schema = DATABASE()
+      AND table_name = :tableName
+      AND column_name = :columnName
+    `,
+    { tableName, columnName },
+  );
+  return Number(rows?.[0]?.c || 0) > 0;
+}
+
+async function ensureItemFlagColumns() {
+  if (!(await hasColumn("inv_items", "service_item"))) {
+    await query(
+      "ALTER TABLE inv_items ADD COLUMN service_item CHAR(1) NOT NULL DEFAULT 'N'",
+    );
+  }
+  if (!(await hasColumn("inv_items", "is_stockable"))) {
+    await query(
+      "ALTER TABLE inv_items ADD COLUMN is_stockable CHAR(1) NOT NULL DEFAULT 'N'",
+    );
+  }
+  if (!(await hasColumn("inv_items", "is_sellable"))) {
+    await query(
+      "ALTER TABLE inv_items ADD COLUMN is_sellable CHAR(1) NOT NULL DEFAULT 'N'",
+    );
+  }
+  if (!(await hasColumn("inv_items", "is_purchasable"))) {
+    await query(
+      "ALTER TABLE inv_items ADD COLUMN is_purchasable CHAR(1) NOT NULL DEFAULT 'N'",
+    );
+  }
+  if (!(await hasColumn("inv_items", "category_id"))) {
+    await query(
+      "ALTER TABLE inv_items ADD COLUMN category_id BIGINT UNSIGNED NULL",
+    );
+  }
+  if (!(await hasColumn("inv_items", "item_group_id"))) {
+    await query(
+      "ALTER TABLE inv_items ADD COLUMN item_group_id BIGINT UNSIGNED NULL",
+    );
+  }
+  if (!(await hasColumn("inv_items", "min_stock_level"))) {
+    await query(
+      "ALTER TABLE inv_items ADD COLUMN min_stock_level DECIMAL(18,3) NOT NULL DEFAULT 0",
+    );
+  }
+  if (!(await hasColumn("inv_items", "max_stock_level"))) {
+    await query(
+      "ALTER TABLE inv_items ADD COLUMN max_stock_level DECIMAL(18,3) NOT NULL DEFAULT 0",
+    );
+  }
+  if (!(await hasColumn("inv_items", "reorder_level"))) {
+    await query(
+      "ALTER TABLE inv_items ADD COLUMN reorder_level DECIMAL(18,3) NOT NULL DEFAULT 0",
+    );
+  }
+  if (!(await hasColumn("inv_items", "safety_stock"))) {
+    await query(
+      "ALTER TABLE inv_items ADD COLUMN safety_stock DECIMAL(18,3) NOT NULL DEFAULT 0",
+    );
+  }
+  if (!(await hasColumn("inv_items", "description"))) {
+    await query("ALTER TABLE inv_items ADD COLUMN description TEXT NULL");
+  }
+}
+
+async function resolveCategoryId(companyId, raw) {
+  const v = String(raw || "").trim();
+  if (!v) return null;
+  const code = v.toUpperCase();
+  const rows = await query(`
+    SELECT id,
+          created_at,
+          u.username AS created_by_name
+         FROM inv_item_categories
+        LEFT JOIN adm_users u ON u.id = created_by
+         WHERE company_id = :companyId
+      AND (UPPER(category_code) = :code OR UPPER(category_name) = :code)
+    LIMIT 1
+    `,
+    { companyId, code },
+  ).catch(() => []);
+  return Number(rows?.[0]?.id || 0) || null;
+}
+
+async function resolveGroupId(companyId, raw) {
+  const v = String(raw || "").trim();
+  if (!v) return null;
+  const code = v.toUpperCase();
+  const rows = await query(`
+    SELECT id,
+          created_at,
+          u.username AS created_by_name
+         FROM inv_item_groups
+        LEFT JOIN adm_users u ON u.id = created_by
+         WHERE company_id = :companyId
+      AND (UPPER(group_code) = :code OR UPPER(group_name) = :code)
+    LIMIT 1
+    `,
+    { companyId, code },
+  ).catch(() => []);
+  return Number(rows?.[0]?.id || 0) || null;
+}
+
+async function resolveCurrencyId(companyId, raw) {
+  const v = String(raw || "").trim();
+  if (!v) return null;
+  const code = v.toUpperCase();
+  const rows = await query(`
+    SELECT id,
+          created_at,
+          u.username AS created_by_name
+         FROM fin_currencies
+        LEFT JOIN adm_users u ON u.id = created_by
+         WHERE company_id = :companyId
+      AND (UPPER(code) = :code OR UPPER(name) = :code)
+    LIMIT 1
+    `,
+    { companyId, code },
+  ).catch(() => []);
+  return Number(rows?.[0]?.id || 0) || null;
+}
+
+async function resolvePriceTypeId(companyId, raw) {
+  const v = String(raw || "").trim();
+  if (!v) return null;
+  const name = v;
+  const rows = await query(`
+    SELECT id,
+          created_at,
+          u.username AS created_by_name
+         FROM sal_price_types
+        LEFT JOIN adm_users u ON u.id = created_by
+         WHERE company_id = :companyId
+      AND UPPER(name) = UPPER(:name)
+    LIMIT 1
+    `,
+    { companyId, name },
+  ).catch(() => []);
+  return Number(rows?.[0]?.id || 0) || null;
+}
+
+async function resolveTaxCodeId(companyId, raw) {
+  const v = String(raw || "").trim();
+  if (!v) return null;
+  const code = v.toUpperCase();
+  const rows = await query(`
+    SELECT id,
+          created_at,
+          u.username AS created_by_name
+         FROM fin_tax_codes
+        LEFT JOIN adm_users u ON u.id = created_by
+         WHERE company_id = :companyId
+      AND (UPPER(code) = :code OR UPPER(name) = :code)
+    LIMIT 1
+    `,
+    { companyId, code },
+  ).catch(() => []);
+  return Number(rows?.[0]?.id || 0) || null;
+}
+
+async function resolveAccountId(companyId, raw) {
+  const v = String(raw || "").trim();
+  if (!v) return null;
+  // Prefer code match; fallback to name
+  const asNum = Number(v);
+  if (Number.isFinite(asNum) && asNum > 0) {
+    const rows = await query(`
+      SELECT id,
+          created_at,
+          u.username AS created_by_name
+         FROM fin_accounts
+        LEFT JOIN adm_users u ON u.id = created_by
+         WHERE company_id = :companyId AND id = :id
+      LIMIT 1
+      `,
+      { companyId, id: asNum },
+    ).catch(() => []);
+    return Number(rows?.[0]?.id || 0) || null;
+  }
+  const rows = await query(`
+    SELECT id,
+          created_at,
+          u.username AS created_by_name
+         FROM fin_accounts
+        LEFT JOIN adm_users u ON u.id = created_by
+         WHERE company_id = :companyId
+      AND (UPPER(code) = UPPER(:v) OR UPPER(name) = UPPER(:v))
+    LIMIT 1
+    `,
+    { companyId, v },
+  ).catch(() => []);
+  return Number(rows?.[0]?.id || 0) || null;
+}
+
+async function resolveOrCreateCategoryId(companyId, raw) {
+  const v = String(raw || "").trim();
+  if (!v) return null;
+  const existing =
+    (await query(`
+      SELECT id,
+          created_at,
+          u.username AS created_by_name
+         FROM inv_item_categories
+        LEFT JOIN adm_users u ON u.id = created_by
+         WHERE company_id = :companyId
+        AND (UPPER(category_code) = :code OR UPPER(category_name) = :code)
+      LIMIT 1
+      `,
+      { companyId, code: v.toUpperCase() },
+    ).catch(() => [])) || [];
+  if (existing.length) return Number(existing[0].id) || null;
+  const code = v
+    .toUpperCase()
+    .replace(/\s+/g, "_")
+    .replace(/[^A-Z0-9_]/g, "_")
+    .slice(0, 30);
+  const name = v.slice(0, 150);
+  try {
+    const ins = await query(`
+      INSERT INTO inv_item_categories (company_id, category_code, category_name, is_active)
+      VALUES (:companyId, :code, :name, 1)
+      `,
+      { companyId, code, name },
+    );
+    return Number(ins.insertId) || null;
+  } catch {
+    return null;
+  }
+}
+
+async function resolveOrCreateGroupId(companyId, raw) {
+  const v = String(raw || "").trim();
+  if (!v) return null;
+  const existing =
+    (await query(`
+      SELECT id,
+          created_at,
+          u.username AS created_by_name
+         FROM inv_item_groups
+        LEFT JOIN adm_users u ON u.id = created_by
+         WHERE company_id = :companyId
+        AND (UPPER(group_code) = :code OR UPPER(group_name) = :code)
+      LIMIT 1
+      `,
+      { companyId, code: v.toUpperCase() },
+    ).catch(() => [])) || [];
+  if (existing.length) return Number(existing[0].id) || null;
+  const code = v
+    .toUpperCase()
+    .replace(/\s+/g, "_")
+    .replace(/[^A-Z0-9_]/g, "_")
+    .slice(0, 30);
+  const name = v.slice(0, 150);
+  try {
+    const ins = await query(`
+      INSERT INTO inv_item_groups (company_id, group_code, group_name, is_active)
+      VALUES (:companyId, :code, :name, 1)
+      `,
+      { companyId, code, name },
+    );
+    return Number(ins.insertId) || null;
+  } catch {
+    return null;
+  }
+}
+
+export const listItems = async (req, res, next) => {
+  try {
+    await ensureItemFlagColumns();
+    const { companyId, branchId } = req.scope;
+    const groupCol = (await hasColumn("inv_items", "group_id"))
+      ? "group_id"
+      : "item_group_id";
+    const rows = await query(`
+      SELECT i.id,
+             i.item_code,
+             i.item_name,
+             i.uom,
+             i.item_type,
+             t.type_name AS item_type_name,
+             i.barcode,
+             i.cost_price,
+             i.selling_price,
+             i.currency_id,
+             i.price_type_id,
+             i.image_url,
+             i.vat_on_purchase_id,
+             i.vat_on_sales_id,
+             i.purchase_account_id,
+             i.sales_account_id,
+             i.category_id,
+             i.${groupCol} AS item_group_id,
+             c.category_name,
+             g.group_name,
+             i.service_item,
+             i.is_stockable,
+             i.is_sellable,
+             i.is_purchasable,
+             i.is_active,
+             COALESCE(sb.qty, 0) AS avail_qty,
+          i.created_at,
+          u.username AS created_by_name
+         FROM inv_items i
+      LEFT JOIN inv_item_types t
+        ON t.company_id = i.company_id
+       AND t.type_code = i.item_type
+      LEFT JOIN inv_item_categories c
+        ON c.id = i.category_id
+      LEFT JOIN inv_item_groups g
+        ON g.id = i.${groupCol}
+      LEFT JOIN (
+        SELECT company_id, branch_id, item_id, SUM(qty) AS qty
+        FROM inv_stock_balances
+        GROUP BY company_id, branch_id, item_id
+      ) sb
+        ON sb.company_id = i.company_id
+       AND sb.branch_id = :branchId
+       AND sb.item_id = i.id
+        LEFT JOIN adm_users u ON u.id = i.created_by
+         WHERE i.company_id = :companyId
+      ORDER BY i.item_name ASC
+      `,
+      { companyId, branchId },
+    );
+    res.json({ items: rows });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const listWarehouses = async (req, res, next) => {
+  try {
+    const { companyId, branchId } = req.scope;
+    const rows = await query(`
+      SELECT w.id, w.warehouse_code, w.warehouse_name, w.location, w.is_active, w.branch_id,
+          w.created_at,
+          u.username AS created_by_name
+         FROM inv_warehouses w
+        LEFT JOIN adm_users u ON u.id = w.created_by
+         WHERE w.company_id = :companyId AND w.branch_id = :branchId
+      ORDER BY w.warehouse_name ASC
+      `,
+      { companyId, branchId },
+    );
+    res.json({ items: rows });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const bulkUpdateStockBalances = async (req, res, next) => {
+  try {
+    const { companyId, branchId } = req.scope;
+    const body = req.body || {};
+    const rows = Array.isArray(body.rows) ? body.rows : [];
+    const warehouseId =
+      Number(body.warehouseId || 0) > 0 ? Number(body.warehouseId) : null;
+    if (!rows.length) throw httpError(400, "VALIDATION_ERROR", "No rows");
+
+    // Resolve optional warehouse by code if provided
+    let resolvedWarehouseId = warehouseId;
+    const warehouseCode = String(body.warehouseCode || "").trim();
+    if (!resolvedWarehouseId && warehouseCode) {
+      const wRows = await query(`SELECT id,
+          created_at,
+          u.username AS created_by_name
+         FROM inv_warehouses
+        LEFT JOIN adm_users u ON u.id = created_by
+         WHERE company_id = :companyId AND branch_id = :branchId 
+           AND UPPER(warehouse_code) = :code 
+         LIMIT 1`,
+        { companyId, branchId, code: warehouseCode.toUpperCase() },
+      ).catch(() => []);
+      resolvedWarehouseId = Number(wRows?.[0]?.id || 0) || null;
+    }
+
+    // Build item_code -> id map for efficient resolve
+    const codes = Array.from(
+      new Set(
+        rows
+          .map((r) => String(r.item_code || r.ITEM_CODE || "").trim())
+          .filter(Boolean),
+      ),
+    );
+    const placeholders = codes.map((_, i) => `:c${i}`).join(", ");
+    const params = { companyId };
+    codes.forEach((c, i) => (params[`c${i}`] = c));
+    let codeToId = new Map();
+    if (codes.length) {
+      const items = await query(`SELECT id, item_code,
+          created_at,
+          u.username AS created_by_name
+         FROM inv_items
+        LEFT JOIN adm_users u ON u.id = created_by
+         WHERE company_id = :companyId 
+           AND item_code IN (${placeholders})`,
+        params,
+      ).catch(() => []);
+      for (const it of items || []) {
+        codeToId.set(String(it.item_code || "").trim(), Number(it.id));
+      }
+    }
+
+    let ok = 0;
+    let fail = 0;
+    for (const r of rows) {
+      const code = String(r.item_code || r.ITEM_CODE || "").trim();
+      const explicitItemId = Number(r.item_id || r.ITEM_ID || 0) || null;
+      const qty = Number(r.qty ?? r.NEW_QTY ?? r.QTY ?? 0);
+      if ((!code && !explicitItemId) || !Number.isFinite(qty)) {
+        fail += 1;
+        continue;
+      }
+      const itemId =
+        explicitItemId ||
+        codeToId.get(code) ||
+        // Try case-insensitive lookup if not found
+        null;
+      if (!itemId) {
+        fail += 1;
+        continue;
+      }
+      try {
+        // Upsert with replacement (set absolute quantity)
+        await query(`INSERT INTO inv_stock_balances (company_id, branch_id, warehouse_id, item_id, qty)
+           VALUES (:companyId, :branchId, :warehouseId, :itemId, :qty)
+           ON DUPLICATE KEY UPDATE qty = :qty`,
+          {
+            companyId,
+            branchId,
+            warehouseId: resolvedWarehouseId,
+            itemId,
+            qty,
+          },
+        );
+        ok += 1;
+      } catch {
+        fail += 1;
+      }
+    }
+    res.json({ updated: ok, failed: fail });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getItemById = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0)
+      throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    const rows = await query(`
+      SELECT i.*,
+          i.created_at,
+          u.username AS created_by_name
+         FROM inv_items i
+        LEFT JOIN adm_users u ON u.id = i.created_by
+         WHERE i.id = :id AND i.company_id = :companyId
+      LIMIT 1
+      `,
+      { id, companyId },
+    );
+    if (!rows.length) throw httpError(404, "NOT_FOUND", "Item not found");
+    res.json({ item: rows[0] });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createItem = async (req, res, next) => {
+  try {
+    await ensureItemFlagColumns();
+    const { companyId } = req.scope;
+    const body = req.body || {};
+    const groupCol = (await hasColumn("inv_items", "group_id"))
+      ? "group_id"
+      : "item_group_id";
+    const yn = (v, def = "N") => {
+      if (v === undefined || v === null) return def;
+      const s = String(v).toUpperCase();
+      if (s === "Y") return "Y";
+      if (s === "N") return "N";
+      return Boolean(v) ? "Y" : "N";
+    };
+    const itemCode = String(body.item_code || "").trim();
+    const itemName = String(body.item_name || "").trim();
+    const uom = String(body.uom || "PCS").trim() || "PCS";
+    const itemType = body.item_type ? String(body.item_type).trim() : null;
+    const barcode = body.barcode ? String(body.barcode).trim() : null;
+    const costPrice = Number(body.cost_price || 0);
+    const sellingPrice = Number(body.selling_price || 0);
+    let currencyId = Number(body.currency_id || 0) || null;
+    let priceTypeId = Number(body.price_type_id || 0) || null;
+    const imageUrl = body.image_url ? String(body.image_url).trim() : null;
+    let vatOnPurchaseId = Number(body.vat_on_purchase_id || 0) || null;
+    let vatOnSalesId = Number(body.vat_on_sales_id || 0) || null;
+    let purchaseAccountId = Number(body.purchase_account_id || 0) || null;
+    let salesAccountId = Number(body.sales_account_id || 0) || null;
+    let categoryId = Number(body.category_id || 0) || null;
+    let itemGroupId = Number(body.item_group_id || body.group_id || 0) || null;
+    // Fallback server-side resolution if IDs not provided
+    if (!categoryId) {
+      categoryId =
+        (await resolveCategoryId(companyId, body.category_label)) ||
+        (await resolveCategoryId(companyId, body.category_name)) ||
+        (await resolveCategoryId(companyId, body.category_code));
+      if (!categoryId && (body.auto_create_missing || body.bulk_import)) {
+        categoryId =
+          (await resolveOrCreateCategoryId(companyId, body.category_label)) ||
+          (await resolveOrCreateCategoryId(companyId, body.category_name)) ||
+          (await resolveOrCreateCategoryId(companyId, body.category_code));
+      }
+    }
+    if (!itemGroupId) {
+      itemGroupId =
+        (await resolveGroupId(companyId, body.group_label)) ||
+        (await resolveGroupId(companyId, body.group_name)) ||
+        (await resolveGroupId(companyId, body.group_code));
+      if (!itemGroupId && (body.auto_create_missing || body.bulk_import)) {
+        itemGroupId =
+          (await resolveOrCreateGroupId(companyId, body.group_label)) ||
+          (await resolveOrCreateGroupId(companyId, body.group_name)) ||
+          (await resolveOrCreateGroupId(companyId, body.group_code));
+      }
+    }
+    // Fallbacks for finance-related IDs
+    if (!currencyId) {
+      currencyId =
+        (await resolveCurrencyId(companyId, body.currency_code)) ||
+        (await resolveCurrencyId(companyId, body.currency_name));
+    }
+    if (!priceTypeId) {
+      priceTypeId =
+        (await resolvePriceTypeId(companyId, body.price_type)) ||
+        (await resolvePriceTypeId(companyId, body.price_type_name));
+    }
+    if (!vatOnPurchaseId) {
+      vatOnPurchaseId =
+        (await resolveTaxCodeId(companyId, body.vat_on_purchase_code)) ||
+        (await resolveTaxCodeId(companyId, body.vat_on_purchase_name)) ||
+        (await resolveTaxCodeId(companyId, body.vat_purchase)) ||
+        (await resolveTaxCodeId(companyId, body.vat_on_purchase));
+    }
+    if (!vatOnSalesId) {
+      vatOnSalesId =
+        (await resolveTaxCodeId(companyId, body.vat_on_sales_code)) ||
+        (await resolveTaxCodeId(companyId, body.vat_on_sales_name)) ||
+        (await resolveTaxCodeId(companyId, body.vat_sales)) ||
+        (await resolveTaxCodeId(companyId, body.vat_on_sales));
+    }
+    if (!purchaseAccountId) {
+      purchaseAccountId =
+        (await resolveAccountId(companyId, body.purchase_account_code)) ||
+        (await resolveAccountId(companyId, body.purchase_account_name)) ||
+        (await resolveAccountId(companyId, body.purchase_account));
+    }
+    if (!salesAccountId) {
+      salesAccountId =
+        (await resolveAccountId(companyId, body.sales_account_code)) ||
+        (await resolveAccountId(companyId, body.sales_account_name)) ||
+        (await resolveAccountId(companyId, body.sales_account));
+    }
+    const serviceItem = yn(body.service_item, "N");
+    const isStockable = yn(body.is_stockable, "N");
+    const isSellable = yn(body.is_sellable, "N");
+    const isPurchasable = yn(body.is_purchasable, "N");
+    const isActive =
+      body.is_active === undefined ? 1 : Number(Boolean(body.is_active));
+    if (!itemCode || !itemName)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "item_code and item_name are required",
+      );
+    // Prevent duplicate item_name within the same company (case-insensitive)
+    const dup = await query(`SELECT id,
+          created_at,
+          u.username AS created_by_name
+         FROM inv_items
+        LEFT JOIN adm_users u ON u.id = created_by
+         WHERE company_id = :companyId AND UPPER(item_name) = UPPER(:itemName) 
+       LIMIT 1`,
+      { companyId, itemName },
+    );
+    if (dup.length) {
+      throw httpError(409, "DUPLICATE_ITEM_NAME", "Item name already exists");
+    }
+    const result = await query(`
+      INSERT INTO inv_items (company_id, item_code, item_name, uom, item_type, barcode, cost_price, selling_price, currency_id, price_type_id, image_url, vat_on_purchase_id, vat_on_sales_id, purchase_account_id, sales_account_id, category_id, ${groupCol}, service_item, is_stockable, is_sellable, is_purchasable, is_active)
+      VALUES (:companyId, :itemCode, :itemName, :uom, :itemType, :barcode, :costPrice, :sellingPrice, :currencyId, :priceTypeId, :imageUrl, :vatOnPurchaseId, :vatOnSalesId, :purchaseAccountId, :salesAccountId, :categoryId, :itemGroupId, :serviceItem, :isStockable, :isSellable, :isPurchasable, :isActive)
+      `,
+      {
+        companyId,
+        itemCode,
+        itemName,
+        uom,
+        itemType,
+        barcode,
+        costPrice,
+        sellingPrice,
+        currencyId,
+        priceTypeId,
+        imageUrl,
+        vatOnPurchaseId,
+        vatOnSalesId,
+        purchaseAccountId,
+        salesAccountId,
+        categoryId,
+        itemGroupId,
+        serviceItem,
+        isStockable,
+        isSellable,
+        isPurchasable,
+        isActive,
+      },
+    );
+    res.status(201).json({ id: result.insertId });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateItem = async (req, res, next) => {
+  try {
+    await ensureItemFlagColumns();
+    const { companyId } = req.scope;
+    const id = Number(req.params.id);
+    const groupCol = (await hasColumn("inv_items", "group_id"))
+      ? "group_id"
+      : "item_group_id";
+    if (!Number.isFinite(id) || id <= 0)
+      throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    const body = req.body || {};
+    const yn = (v, def = "N") => {
+      if (v === undefined || v === null) return def;
+      const s = String(v).toUpperCase();
+      if (s === "Y") return "Y";
+      if (s === "N") return "N";
+      return Boolean(v) ? "Y" : "N";
+    };
+    const itemCode = String(body.item_code || "").trim();
+    const itemName = String(body.item_name || "").trim();
+    const uom = String(body.uom || "PCS").trim() || "PCS";
+    const itemType = body.item_type ? String(body.item_type).trim() : null;
+    const barcode = body.barcode ? String(body.barcode).trim() : null;
+    const costPrice = Number(body.cost_price || 0);
+    const sellingPrice = Number(body.selling_price || 0);
+    const currencyId = Number(body.currency_id || 0) || null;
+    const priceTypeId = Number(body.price_type_id || 0) || null;
+    const imageUrl = body.image_url ? String(body.image_url).trim() : null;
+    const vatOnPurchaseId = Number(body.vat_on_purchase_id || 0) || null;
+    const vatOnSalesId = Number(body.vat_on_sales_id || 0) || null;
+    const purchaseAccountId = Number(body.purchase_account_id || 0) || null;
+    const salesAccountId = Number(body.sales_account_id || 0) || null;
+    const categoryId = Number(body.category_id || 0) || null;
+    const itemGroupId =
+      Number(body.item_group_id || body.group_id || 0) || null;
+    const serviceItem = yn(body.service_item, "N");
+    const isStockable = yn(body.is_stockable, "N");
+    const isSellable = yn(body.is_sellable, "N");
+    const isPurchasable = yn(body.is_purchasable, "N");
+    const isActive =
+      body.is_active === undefined ? 1 : Number(Boolean(body.is_active));
+    if (!itemCode || !itemName)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "item_code and item_name are required",
+      );
+    // Prevent duplicate item_name on rename (case-insensitive)
+    const exists = await query(`SELECT id,
+          created_at,
+          u.username AS created_by_name
+         FROM inv_items
+        LEFT JOIN adm_users u ON u.id = created_by
+         WHERE company_id = :companyId AND UPPER(item_name) = UPPER(:itemName) AND id <> :id
+       LIMIT 1`,
+      { companyId, itemName, id },
+    );
+    if (exists.length) {
+      throw httpError(409, "DUPLICATE_ITEM_NAME", "Item name already exists");
+    }
+    const upd = await query(`
+      UPDATE inv_items
+      SET item_code = :itemCode,
+          item_name = :itemName,
+          uom = :uom,
+          item_type = :itemType,
+          barcode = :barcode,
+          cost_price = :costPrice,
+          selling_price = :sellingPrice,
+          currency_id = :currencyId,
+          price_type_id = :priceTypeId,
+          image_url = :imageUrl,
+          vat_on_purchase_id = :vatOnPurchaseId,
+          vat_on_sales_id = :vatOnSalesId,
+          purchase_account_id = :purchaseAccountId,
+          sales_account_id = :salesAccountId,
+          category_id = :categoryId,
+          ${groupCol} = :itemGroupId,
+          service_item = :serviceItem,
+          is_stockable = :isStockable,
+          is_sellable = :isSellable,
+          is_purchasable = :isPurchasable,
+          is_active = :isActive
+      WHERE id = :id AND company_id = :companyId
+      `,
+      {
+        id,
+        companyId,
+        itemCode,
+        itemName,
+        uom,
+        itemType,
+        barcode,
+        costPrice,
+        sellingPrice,
+        currencyId,
+        priceTypeId,
+        imageUrl,
+        vatOnPurchaseId,
+        vatOnSalesId,
+        purchaseAccountId,
+        salesAccountId,
+        categoryId,
+        itemGroupId,
+        serviceItem,
+        isStockable,
+        isSellable,
+        isPurchasable,
+        isActive,
+      },
+    );
+    if (!upd.affectedRows) throw httpError(404, "NOT_FOUND", "Item not found");
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const bulkUpsertItems = async (req, res, next) => {
+  try {
+    await ensureItemFlagColumns();
+    const { companyId } = req.scope;
+    const body = req.body || {};
+    const rows = Array.isArray(body.rows) ? body.rows : [];
+    const autoCreate = !!body.auto_create_missing || !!body.bulk_import;
+    if (!rows.length)
+      return res.json({ inserted: 0, updated: 0, failed: 0, errors: [] });
+
+    const groupCol = (await hasColumn("inv_items", "group_id"))
+      ? "group_id"
+      : "item_group_id";
+    const yn = (v, def = "N") => {
+      if (v === undefined || v === null) return def;
+      const s = String(v).toUpperCase();
+      if (s === "Y") return "Y";
+      if (s === "N") return "N";
+      return Boolean(v) ? "Y" : "N";
+    };
+
+    let baseNextNum = null;
+    const needNextCode = rows.some(
+      (r) => !String(r.item_code || r.ITEM_CODE || "").trim(),
+    );
+    if (needNextCode) {
+      const rec = await query(`
+        SELECT item_code,
+          created_at,
+          u.username AS created_by_name
+         FROM inv_items
+        LEFT JOIN adm_users u ON u.id = created_by
+         WHERE company_id = :companyId AND item_code REGEXP '^[0-9]+$'
+        ORDER BY CAST(item_code AS UNSIGNED) DESC
+        LIMIT 1
+        `,
+        { companyId },
+      );
+      baseNextNum = rec.length ? parseInt(rec[0].item_code, 10) + 1 : 1;
+    }
+    const usedCodes = new Set();
+
+    let inserted = 0;
+    let updated = 0;
+    let failed = 0;
+    const errors = [];
+
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i] || {};
+      try {
+        const itemName = String(r.item_name || r.ITEM_NAME || "").trim();
+        if (!itemName) {
+          failed += 1;
+          errors.push({
+            index: i + 1,
+            item_name: "",
+            message: "Missing ITEM_NAME",
+          });
+          continue;
+        }
+        let itemCode = String(r.item_code || r.ITEM_CODE || "").trim();
+        if (!itemCode) {
+          if (baseNextNum == null) {
+            const rec2 = await query(`
+              SELECT item_code,
+          created_at,
+          u.username AS created_by_name
+         FROM inv_items
+        LEFT JOIN adm_users u ON u.id = created_by
+         WHERE company_id = :companyId AND item_code REGEXP '^[0-9]+$'
+              ORDER BY CAST(item_code AS UNSIGNED) DESC
+              LIMIT 1
+              `,
+              { companyId },
+            );
+            baseNextNum = rec2.length ? parseInt(rec2[0].item_code, 10) + 1 : 1;
+          }
+          do {
+            itemCode = String(baseNextNum).padStart(6, "0");
+            baseNextNum += 1;
+          } while (usedCodes.has(itemCode));
+        }
+        usedCodes.add(itemCode);
+
+        const uom =
+          String(r.uom || r.UOM || r.BASE_UOM || "PCS").trim() || "PCS";
+        const itemType = r.item_type || r.ITEM_TYPE || null;
+        const barcode = r.barcode || r.BARCODE || null;
+        const costPrice = Number(
+          r.cost_price || r.COST_PRICE || r.STANDARD_COST || 0,
+        );
+        const sellingPrice = Number(r.selling_price || r.SELLING_PRICE || 0);
+        let currencyId = Number(r.currency_id || r.CURRENCY_ID || 0) || null;
+        let priceTypeId =
+          Number(r.price_type_id || r.PRICE_TYPE_ID || 0) || null;
+        const imageUrl = r.image_url || r.IMAGE_URL || r.IMAGE || null;
+        let vatOnPurchaseId =
+          Number(r.vat_on_purchase_id || r.VAT_ON_PURCHASE_ID || 0) || null;
+        let vatOnSalesId =
+          Number(r.vat_on_sales_id || r.VAT_ON_SALES_ID || 0) || null;
+        let purchaseAccountId =
+          Number(r.purchase_account_id || r.PURCHASE_ACCOUNT_ID || 0) || null;
+        let salesAccountId =
+          Number(r.sales_account_id || r.SALES_ACCOUNT_ID || 0) || null;
+        let categoryId = Number(r.category_id || r.CATEGORY_ID || 0) || null;
+        let itemGroupId =
+          Number(r.item_group_id || r.group_id || r.ITEM_GROUP_ID || 0) || null;
+
+        if (!categoryId) {
+          categoryId =
+            (await resolveCategoryId(
+              companyId,
+              r.category_label || r.CATEGORY_LABEL,
+            )) ||
+            (await resolveCategoryId(
+              companyId,
+              r.category_name || r.CATEGORY_NAME,
+            )) ||
+            (await resolveCategoryId(
+              companyId,
+              r.category_code || r.CATEGORY_CODE,
+            ));
+          if (!categoryId && autoCreate) {
+            categoryId =
+              (await resolveOrCreateCategoryId(
+                companyId,
+                r.category_label || r.CATEGORY_LABEL,
+              )) ||
+              (await resolveOrCreateCategoryId(
+                companyId,
+                r.category_name || r.CATEGORY_NAME,
+              )) ||
+              (await resolveOrCreateCategoryId(
+                companyId,
+                r.category_code || r.CATEGORY_CODE,
+              ));
+          }
+        }
+        if (!itemGroupId) {
+          itemGroupId =
+            (await resolveGroupId(companyId, r.group_label || r.GROUP_LABEL)) ||
+            (await resolveGroupId(companyId, r.group_name || r.GROUP_NAME)) ||
+            (await resolveGroupId(companyId, r.group_code || r.GROUP_CODE));
+          if (!itemGroupId && autoCreate) {
+            itemGroupId =
+              (await resolveOrCreateGroupId(
+                companyId,
+                r.group_label || r.GROUP_LABEL,
+              )) ||
+              (await resolveOrCreateGroupId(
+                companyId,
+                r.group_name || r.GROUP_NAME,
+              )) ||
+              (await resolveOrCreateGroupId(
+                companyId,
+                r.group_code || r.GROUP_CODE,
+              ));
+          }
+        }
+        if (!currencyId) {
+          currencyId =
+            (await resolveCurrencyId(
+              companyId,
+              r.currency_code || r.CURRENCY_CODE,
+            )) ||
+            (await resolveCurrencyId(
+              companyId,
+              r.currency_name || r.CURRENCY_NAME,
+            ));
+        }
+        if (!priceTypeId) {
+          priceTypeId =
+            (await resolvePriceTypeId(
+              companyId,
+              r.price_type ||
+                r.PRICE_TYPE ||
+                r.price_type_name ||
+                r.PRICE_TYPE_NAME,
+            )) || null;
+        }
+        if (!vatOnPurchaseId) {
+          vatOnPurchaseId =
+            (await resolveTaxCodeId(
+              companyId,
+              r.vat_on_purchase_code ||
+                r.VAT_ON_PURCHASE_CODE ||
+                r.vat_purchase ||
+                r.VAT_PURCHASE,
+            )) ||
+            (await resolveTaxCodeId(
+              companyId,
+              r.vat_on_purchase_name || r.VAT_ON_PURCHASE_NAME,
+            )) ||
+            null;
+        }
+        if (!vatOnSalesId) {
+          vatOnSalesId =
+            (await resolveTaxCodeId(
+              companyId,
+              r.vat_on_sales_code ||
+                r.VAT_ON_SALES_CODE ||
+                r.vat_sales ||
+                r.VAT_SALES,
+            )) ||
+            (await resolveTaxCodeId(
+              companyId,
+              r.vat_on_sales_name || r.VAT_ON_SALES_NAME,
+            )) ||
+            null;
+        }
+        if (!purchaseAccountId) {
+          purchaseAccountId =
+            (await resolveAccountId(
+              companyId,
+              r.purchase_account_code || r.PURCHASE_ACCOUNT_CODE,
+            )) ||
+            (await resolveAccountId(
+              companyId,
+              r.purchase_account_name || r.PURCHASE_ACCOUNT_NAME,
+            )) ||
+            (await resolveAccountId(
+              companyId,
+              r.purchase_account || r.PURCHASE_ACCOUNT,
+            )) ||
+            null;
+        }
+        if (!salesAccountId) {
+          salesAccountId =
+            (await resolveAccountId(
+              companyId,
+              r.sales_account_code || r.SALES_ACCOUNT_CODE,
+            )) ||
+            (await resolveAccountId(
+              companyId,
+              r.sales_account_name || r.SALES_ACCOUNT_NAME,
+            )) ||
+            (await resolveAccountId(
+              companyId,
+              r.sales_account || r.SALES_ACCOUNT,
+            )) ||
+            null;
+        }
+
+        const serviceItem = yn(r.service_item, "N");
+        const isStockable = yn(r.is_stockable, "N");
+        const isSellable = yn(r.is_sellable, "N");
+        const isPurchasable = yn(r.is_purchasable, "N");
+        const isActive =
+          r.is_active === undefined ? 1 : Number(Boolean(r.is_active));
+        const minStock = Number(r.min_stock_level || r.MIN_STOCK_LEVEL || 0);
+        const maxStock = Number(r.max_stock_level || r.MAX_STOCK_LEVEL || 0);
+        const reorderLevel = Number(r.reorder_level || r.REORDER_LEVEL || 0);
+        const safetyStock = Number(r.safety_stock || r.SAFETY_STOCK || 0);
+        const description = r.description || r.DESCRIPTION || null;
+
+        const exists = await query(`SELECT id,
+          created_at,
+          u.username AS created_by_name
+         FROM inv_items
+        LEFT JOIN adm_users u ON u.id = created_by
+         WHERE company_id = :companyId AND UPPER(item_name) = UPPER(:itemName) LIMIT 1`,
+          { companyId, itemName },
+        );
+        if (exists.length) {
+          const id = Number(exists[0].id);
+          await query(`
+            UPDATE inv_items
+            SET item_code = :itemCode,
+                item_name = :itemName,
+                uom = :uom,
+                item_type = :itemType,
+                barcode = :barcode,
+                cost_price = :costPrice,
+                selling_price = :sellingPrice,
+                currency_id = :currencyId,
+                price_type_id = :priceTypeId,
+                image_url = :imageUrl,
+                vat_on_purchase_id = :vatOnPurchaseId,
+                vat_on_sales_id = :vatOnSalesId,
+                purchase_account_id = :purchaseAccountId,
+                sales_account_id = :salesAccountId,
+                category_id = :categoryId,
+                ${groupCol} = :itemGroupId,
+                service_item = :serviceItem,
+                is_stockable = :isStockable,
+                is_sellable = :isSellable,
+                is_purchasable = :isPurchasable,
+                is_active = :isActive
+            WHERE id = :id AND company_id = :companyId
+            `,
+            {
+              id,
+              companyId,
+              itemCode,
+              itemName,
+              uom,
+              itemType,
+              barcode,
+              costPrice,
+              sellingPrice,
+              currencyId,
+              priceTypeId,
+              imageUrl,
+              vatOnPurchaseId,
+              vatOnSalesId,
+              purchaseAccountId,
+              salesAccountId,
+              categoryId,
+              itemGroupId,
+              serviceItem,
+              isStockable,
+              isSellable,
+              isPurchasable,
+              isActive,
+            },
+          );
+          updated += 1;
+        } else {
+          await query(`
+            INSERT INTO inv_items (company_id, item_code, item_name, uom, item_type, barcode, cost_price, selling_price, currency_id, price_type_id, image_url, vat_on_purchase_id, vat_on_sales_id, purchase_account_id, sales_account_id, category_id, ${groupCol}, service_item, is_stockable, is_sellable, is_purchasable, is_active, min_stock_level, max_stock_level, reorder_level, safety_stock, description)
+            VALUES (:companyId, :itemCode, :itemName, :uom, :itemType, :barcode, :costPrice, :sellingPrice, :currencyId, :priceTypeId, :imageUrl, :vatOnPurchaseId, :vatOnSalesId, :purchaseAccountId, :salesAccountId, :categoryId, :itemGroupId, :serviceItem, :isStockable, :isSellable, :isPurchasable, :isActive, :minStock, :maxStock, :reorderLevel, :safetyStock, :description)
+            `,
+            {
+              companyId,
+              itemCode,
+              itemName,
+              uom,
+              itemType,
+              barcode,
+              costPrice,
+              sellingPrice,
+              currencyId,
+              priceTypeId,
+              imageUrl,
+              vatOnPurchaseId,
+              vatOnSalesId,
+              purchaseAccountId,
+              salesAccountId,
+              categoryId,
+              itemGroupId,
+              serviceItem,
+              isStockable,
+              isSellable,
+              isPurchasable,
+              isActive,
+              minStock,
+              maxStock,
+              reorderLevel,
+              safetyStock,
+              description,
+            },
+          );
+          inserted += 1;
+        }
+      } catch (e) {
+        failed += 1;
+        const msg = e?.message || "Upload failed";
+        errors.push({
+          index: i + 1,
+          item_name: String(rows[i]?.item_name || rows[i]?.ITEM_NAME || ""),
+          message: msg,
+        });
+      }
+    }
+    res.json({ inserted, updated, failed, errors });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getWarehouseById = async (req, res, next) => {
+  try {
+    const { companyId, branchId } = req.scope;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0)
+      throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    const rows = await query(`
+      SELECT w.*,
+          w.created_at,
+          u.username AS created_by_name
+         FROM inv_warehouses w
+        LEFT JOIN adm_users u ON u.id = w.created_by
+         WHERE w.id = :id AND w.company_id = :companyId AND w.branch_id = :branchId
+      LIMIT 1
+      `,
+      { id, companyId, branchId },
+    );
+    if (!rows.length) throw httpError(404, "NOT_FOUND", "Warehouse not found");
+    res.json({ item: rows[0] });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createWarehouse = async (req, res, next) => {
+  try {
+    const { companyId, branchId } = req.scope;
+    const body = req.body || {};
+    const warehouseCode = String(body.warehouse_code || "").trim();
+    const warehouseName = String(body.warehouse_name || "").trim();
+    const location = body.location ? String(body.location).trim() : null;
+    const isActive =
+      body.is_active === undefined ? 1 : Number(Boolean(body.is_active));
+    if (!warehouseCode || !warehouseName)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "warehouse_code and warehouse_name are required",
+      );
+    const result = await query(`
+      INSERT INTO inv_warehouses (company_id, branch_id, warehouse_code, warehouse_name, location, is_active)
+      VALUES (:companyId, :branchId, :warehouseCode, :warehouseName, :location, :isActive)
+      `,
+      {
+        companyId,
+        branchId,
+        warehouseCode,
+        warehouseName,
+        location,
+        isActive,
+      },
+    );
+    res.status(201).json({ id: result.insertId });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateWarehouse = async (req, res, next) => {
+  try {
+    const { companyId, branchId } = req.scope;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0)
+      throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    const body = req.body || {};
+    const warehouseCode = String(body.warehouse_code || "").trim();
+    const warehouseName = String(body.warehouse_name || "").trim();
+    const location = body.location ? String(body.location).trim() : null;
+    const isActive =
+      body.is_active === undefined ? 1 : Number(Boolean(body.is_active));
+    if (!warehouseCode || !warehouseName)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "warehouse_code and warehouse_name are required",
+      );
+    const upd = await query(`
+      UPDATE inv_warehouses
+      SET warehouse_code = :warehouseCode,
+          warehouse_name = :warehouseName,
+          location = :location,
+          is_active = :isActive
+      WHERE id = :id AND company_id = :companyId AND branch_id = :branchId
+      `,
+      {
+        id,
+        companyId,
+        branchId,
+        warehouseCode,
+        warehouseName,
+        location,
+        isActive,
+      },
+    );
+    if (!upd.affectedRows)
+      throw httpError(404, "NOT_FOUND", "Warehouse not found");
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const linkWarehouseBranch = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0)
+      throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    const body = req.body || {};
+    const targetBranchId = Number(body.branch_id);
+    if (!Number.isFinite(targetBranchId) || targetBranchId <= 0)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "branch_id is required to link warehouse",
+      );
+    const branchRow = await query(`
+      SELECT id, company_id,
+          created_at,
+          u.username AS created_by_name
+         FROM adm_branches
+        LEFT JOIN adm_users u ON u.id = created_by
+         WHERE id = :branchId
+      LIMIT 1
+      `,
+      { branchId: targetBranchId },
+    );
+    const branch = branchRow?.[0];
+    if (!branch) throw httpError(404, "NOT_FOUND", "Target branch not found");
+    if (Number(branch.company_id) !== Number(companyId))
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Branch belongs to a different company",
+      );
+    const whRow = await query(`
+      SELECT id, company_id, branch_id,
+          created_at,
+          u.username AS created_by_name
+         FROM inv_warehouses
+        LEFT JOIN adm_users u ON u.id = created_by
+         WHERE id = :id AND company_id = :companyId
+      LIMIT 1
+      `,
+      { id, companyId },
+    );
+    const warehouse = whRow?.[0];
+    if (!warehouse) throw httpError(404, "NOT_FOUND", "Warehouse not found");
+    const allowedBranches = Array.isArray(req.user?.branchIds)
+      ? req.user.branchIds.map(Number)
+      : [];
+    if (allowedBranches.length && !allowedBranches.includes(targetBranchId))
+      throw httpError(403, "FORBIDDEN", "Branch access denied");
+    const upd = await query(`
+      UPDATE inv_warehouses
+      SET branch_id = :branchId
+      WHERE id = :id AND company_id = :companyId
+      `,
+      { id, companyId, branchId: targetBranchId },
+    );
+    if (!upd.affectedRows)
+      throw httpError(404, "NOT_FOUND", "Warehouse not found");
+    res.json({ ok: true, branch_id: targetBranchId });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getNextItemCode = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const rows = await query(`
+      SELECT item_code,
+          created_at,
+          u.username AS created_by_name
+         FROM inv_items
+        LEFT JOIN adm_users u ON u.id = created_by
+         WHERE company_id = :companyId AND item_code REGEXP '^[0-9]+$'
+      ORDER BY CAST(item_code AS UNSIGNED) DESC
+      LIMIT 1
+      `,
+      { companyId },
+    );
+    let nextNum = 1;
+    if (rows.length > 0) nextNum = parseInt(rows[0].item_code, 10) + 1;
+    const nextCode = String(nextNum).padStart(6, "0");
+    res.json({ nextCode });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const listItemGroups = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const rows = await query(`
+      SELECT g.id,
+             g.group_code,
+             g.group_name,
+             g.parent_group_id,
+             pg.group_name AS parent_group_name,
+             g.is_active,
+          g.created_at,
+          u.username AS created_by_name
+         FROM inv_item_groups g
+      LEFT JOIN inv_item_groups pg ON pg.id = g.parent_group_id
+        LEFT JOIN adm_users u ON u.id = g.created_by
+         WHERE g.company_id = :companyId
+      ORDER BY g.group_name ASC, g.id ASC
+      `,
+      { companyId },
+    );
+    res.json({ items: rows });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getItemGroupById = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0)
+      throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    const rows = await query(`
+      SELECT g.*,
+          g.created_at,
+          u.username AS created_by_name
+         FROM inv_item_groups g
+        LEFT JOIN adm_users u ON u.id = g.created_by
+         WHERE g.id = :id AND g.company_id = :companyId
+      LIMIT 1
+      `,
+      { id, companyId },
+    );
+    if (!rows.length) throw httpError(404, "NOT_FOUND", "Item group not found");
+    res.json({ item: rows[0] });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createItemGroup = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const body = req.body || {};
+    const groupCode = String(body.group_code || "").trim();
+    const groupName = String(body.group_name || "").trim();
+    const parentGroupId = Number(body.parent_group_id || 0) || null;
+    const isActive = body.is_active === 0 || body.is_active === false ? 0 : 1;
+    if (!groupCode || !groupName)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "group_code and group_name are required",
+      );
+    const ins = await query(`
+      INSERT INTO inv_item_groups (company_id, group_code, group_name, parent_group_id, is_active)
+      VALUES (:companyId, :groupCode, :groupName, :parentGroupId, :isActive)
+      `,
+      { companyId, groupCode, groupName, parentGroupId, isActive },
+    );
+    res.status(201).json({ id: ins.insertId });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateItemGroup = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0)
+      throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    const body = req.body || {};
+    const groupCode = String(body.group_code || "").trim();
+    const groupName = String(body.group_name || "").trim();
+    const parentGroupId = Number(body.parent_group_id || 0) || null;
+    const isActive = body.is_active === 0 || body.is_active === false ? 0 : 1;
+    if (!groupCode || !groupName)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "group_code and group_name are required",
+      );
+    if (parentGroupId && parentGroupId === id)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "parent_group_id cannot be the same as id",
+      );
+    const upd = await query(`
+      UPDATE inv_item_groups
+      SET group_code = :groupCode,
+          group_name = :groupName,
+          parent_group_id = :parentGroupId,
+          is_active = :isActive
+      WHERE id = :id AND company_id = :companyId
+      `,
+      { id, companyId, groupCode, groupName, parentGroupId, isActive },
+    );
+    if (!upd.affectedRows)
+      throw httpError(404, "NOT_FOUND", "Item group not found");
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const listItemCategories = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const rows = await query(`
+      SELECT c.id,
+             c.category_code,
+             c.category_name,
+             c.parent_category_id,
+             pc.category_name AS parent_category_name,
+             c.is_active,
+          c.created_at,
+          u.username AS created_by_name
+         FROM inv_item_categories c
+      LEFT JOIN inv_item_categories pc ON pc.id = c.parent_category_id
+        LEFT JOIN adm_users u ON u.id = c.created_by
+         WHERE c.company_id = :companyId
+      ORDER BY c.category_name ASC, c.id ASC
+      `,
+      { companyId },
+    );
+    res.json({ items: rows });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getItemCategoryById = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0)
+      throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    const rows = await query(`
+      SELECT c.*,
+          c.created_at,
+          u.username AS created_by_name
+         FROM inv_item_categories c
+        LEFT JOIN adm_users u ON u.id = c.created_by
+         WHERE c.id = :id AND c.company_id = :companyId
+      LIMIT 1
+      `,
+      { id, companyId },
+    );
+    if (!rows.length)
+      throw httpError(404, "NOT_FOUND", "Item category not found");
+    res.json({ item: rows[0] });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createItemCategory = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const body = req.body || {};
+    const categoryCode = String(body.category_code || "").trim();
+    const categoryName = String(body.category_name || "").trim();
+    const parentCategoryId = Number(body.parent_category_id || 0) || null;
+    const isActive = body.is_active === 0 || body.is_active === false ? 0 : 1;
+    if (!categoryCode || !categoryName)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "category_code and category_name are required",
+      );
+    const ins = await query(`
+      INSERT INTO inv_item_categories (company_id, category_code, category_name, parent_category_id, is_active)
+      VALUES (:companyId, :categoryCode, :categoryName, :parentCategoryId, :isActive)
+      `,
+      { companyId, categoryCode, categoryName, parentCategoryId, isActive },
+    );
+    res.status(201).json({ id: ins.insertId });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateItemCategory = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0)
+      throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    const body = req.body || {};
+    const categoryCode = String(body.category_code || "").trim();
+    const categoryName = String(body.category_name || "").trim();
+    const parentCategoryId = Number(body.parent_category_id || 0) || null;
+    const isActive = body.is_active === 0 || body.is_active === false ? 0 : 1;
+    if (!categoryCode || !categoryName)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "category_code and category_name are required",
+      );
+    if (parentCategoryId && parentCategoryId === id)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "parent_category_id cannot be the same as id",
+      );
+    const upd = await query(`
+      UPDATE inv_item_categories
+      SET category_code = :categoryCode,
+          category_name = :categoryName,
+          parent_category_id = :parentCategoryId,
+          is_active = :isActive
+      WHERE id = :id AND company_id = :companyId
+      `,
+      { id, companyId, categoryCode, categoryName, parentCategoryId, isActive },
+    );
+    if (!upd.affectedRows)
+      throw httpError(404, "NOT_FOUND", "Item category not found");
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteItemCategory = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0)
+      throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    try {
+      const del = await query(`DELETE FROM inv_item_categories WHERE id = :id AND company_id = :companyId`,
+        { id, companyId },
+      );
+      if (!del.affectedRows)
+        throw httpError(404, "NOT_FOUND", "Item category not found");
+      res.json({ ok: true });
+    } catch (err) {
+      if (err.code === "ER_ROW_IS_REFERENCED_2") {
+        return next(
+          httpError(
+            400,
+            "CONSTRAINT_ERROR",
+            "Cannot delete Category because it is in use.",
+          ),
+        );
+      }
+      throw err;
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const listItemTypes = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const rows = await query(`
+      SELECT t.id, t.type_code, t.type_name, t.is_active,
+          t.created_at,
+          u.username AS created_by_name
+         FROM inv_item_types t
+        LEFT JOIN adm_users u ON u.id = t.created_by
+         WHERE t.company_id = :companyId
+      ORDER BY t.type_name ASC, t.id ASC
+      `,
+      { companyId },
+    );
+    res.json({ items: rows });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getItemTypeById = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0)
+      throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    const rows = await query(`
+      SELECT t.*,
+          t.created_at,
+          u.username AS created_by_name
+         FROM inv_item_types t
+        LEFT JOIN adm_users u ON u.id = t.created_by
+         WHERE t.id = :id AND t.company_id = :companyId
+      LIMIT 1
+      `,
+      { id, companyId },
+    );
+    if (!rows.length) throw httpError(404, "NOT_FOUND", "Item type not found");
+    res.json({ item: rows[0] });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createItemType = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const body = req.body || {};
+    const typeCode = String(body.type_code || "").trim();
+    const typeName = String(body.type_name || "").trim();
+    const isActive = body.is_active === 0 || body.is_active === false ? 0 : 1;
+    if (!typeCode || !typeName)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "type_code and type_name are required",
+      );
+    const ins = await query(`
+      INSERT INTO inv_item_types (company_id, type_code, type_name, is_active)
+      VALUES (:companyId, :typeCode, :typeName, :isActive)
+      `,
+      { companyId, typeCode, typeName, isActive },
+    );
+    res.status(201).json({ id: ins.insertId });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateItemType = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0)
+      throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    const body = req.body || {};
+    const typeCode = String(body.type_code || "").trim();
+    const typeName = String(body.type_name || "").trim();
+    const isActive = body.is_active === 0 || body.is_active === false ? 0 : 1;
+    if (!typeCode || !typeName)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "type_code and type_name are required",
+      );
+    const upd = await query(`
+      UPDATE inv_item_types
+      SET type_code = :typeCode,
+          type_name = :typeName,
+          is_active = :isActive
+      WHERE id = :id AND company_id = :companyId
+      `,
+      { id, companyId, typeCode, typeName, isActive },
+    );
+    if (!upd.affectedRows)
+      throw httpError(404, "NOT_FOUND", "Item type not found");
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteItemType = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0)
+      throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    const del = await query(`DELETE FROM inv_item_types WHERE id = :id AND company_id = :companyId`,
+      { id, companyId },
+    );
+    if (!del.affectedRows)
+      throw httpError(404, "NOT_FOUND", "Item type not found");
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const listUnitConversions = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const rows = await query(`
+      SELECT c.id,
+             c.item_id,
+             i.item_code,
+             i.item_name,
+             c.from_uom,
+             c.to_uom,
+             c.conversion_factor,
+             c.is_active,
+          c.created_at,
+          u.username AS created_by_name
+         FROM inv_unit_conversions c
+      JOIN inv_items i ON i.id = c.item_id
+        LEFT JOIN adm_users u ON u.id = c.created_by
+         WHERE c.company_id = :companyId
+      ORDER BY i.item_name ASC, c.from_uom ASC, c.to_uom ASC, c.id ASC
+      `,
+      { companyId },
+    );
+    res.json({ items: rows });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getUnitConversionById = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0)
+      throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    const rows = await query(`
+      SELECT c.*,
+          c.created_at,
+          u.username AS created_by_name
+         FROM inv_unit_conversions c
+        LEFT JOIN adm_users u ON u.id = c.created_by
+         WHERE c.id = :id AND c.company_id = :companyId
+      LIMIT 1
+      `,
+      { id, companyId },
+    );
+    if (!rows.length)
+      throw httpError(404, "NOT_FOUND", "Unit conversion not found");
+    res.json({ item: rows[0] });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createUnitConversion = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const body = req.body || {};
+    const itemId = Number(body.item_id || 0);
+    const fromUom = String(body.from_uom || "").trim();
+    const toUom = String(body.to_uom || "").trim();
+    const conversionFactor = Number(body.conversion_factor);
+    const isActive = body.is_active === 0 || body.is_active === false ? 0 : 1;
+    if (
+      !itemId ||
+      !fromUom ||
+      !toUom ||
+      !Number.isFinite(conversionFactor) ||
+      conversionFactor <= 0
+    ) {
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "item_id, from_uom, to_uom, conversion_factor (positive number) are required",
+      );
+    }
+    const ins = await query(`
+      INSERT INTO inv_unit_conversions (company_id, item_id, from_uom, to_uom, conversion_factor, is_active)
+      VALUES (:companyId, :itemId, :fromUom, :toUom, :conversionFactor, :isActive)
+      `,
+      { companyId, itemId, fromUom, toUom, conversionFactor, isActive },
+    );
+    res.status(201).json({ id: ins.insertId });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateUnitConversion = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id) || id <= 0)
+      throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    const body = req.body || {};
+    const itemId = Number(body.item_id || 0);
+    const fromUom = String(body.from_uom || "").trim();
+    const toUom = String(body.to_uom || "").trim();
+    const conversionFactor = Number(body.conversion_factor);
+    const isActive = body.is_active === 0 || body.is_active === false ? 0 : 1;
+    if (
+      !itemId ||
+      !fromUom ||
+      !toUom ||
+      !Number.isFinite(conversionFactor) ||
+      conversionFactor <= 0
+    ) {
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "item_id, from_uom, to_uom, conversion_factor (positive number) are required",
+      );
+    }
+    const upd = await query(`
+      UPDATE inv_unit_conversions
+      SET item_id = :itemId,
+          from_uom = :fromUom,
+          to_uom = :toUom,
+          conversion_factor = :conversionFactor,
+          is_active = :isActive
+      WHERE id = :id AND company_id = :companyId
+      `,
+      { id, companyId, itemId, fromUom, toUom, conversionFactor, isActive },
+    );
+    if (!upd.affectedRows)
+      throw httpError(404, "NOT_FOUND", "Unit conversion not found");
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const listUoms = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const rows = await query(`
+      SELECT u.*,
+          u.created_at,
+          uc.username AS created_by_name
+         FROM inv_uoms u
+        LEFT JOIN adm_users uc ON uc.id = u.created_by
+         WHERE u.company_id = :companyId
+      ORDER BY u.uom_name ASC
+      `,
+      { companyId },
+    );
+    res.json({ items: rows });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createUom = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const body = req.body || {};
+    const uomCode = String(body.uom_code || "").trim();
+    const uomName = String(body.uom_name || "").trim();
+    const uomType = String(body.uom_type || "COUNT").trim();
+    const isActive = body.is_active === 0 || body.is_active === false ? 0 : 1;
+    if (!uomCode || !uomName)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "uom_code and uom_name are required",
+      );
+    const ins = await query(`
+      INSERT INTO inv_uoms (company_id, uom_code, uom_name, uom_type, is_active)
+      VALUES (:companyId, :uomCode, :uomName, :uomType, :isActive)
+      `,
+      { companyId, uomCode, uomName, uomType, isActive },
+    );
+    res.status(201).json({ id: ins.insertId });
+  } catch (err) {
+    next(err);
+  }
+};

@@ -1,0 +1,345 @@
+import React, { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
+import { api } from "api/client";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import { filterAndSort } from "../../../../utils/searchUtils.js";
+import useSort from "@/hooks/useSort.js";
+import SortableHeader from "@/components/SortableHeader.jsx";
+
+export default function CreditorsLedgerReportPage() {
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [accounts, setAccounts] = useState([]);
+  const [accountId, setAccountId] = useState("");
+  const [accountQuery, setAccountQuery] = useState("");
+
+  // Load creditors accounts (LIABILITY group nature = accounts payable/creditors)
+  async function loadAccounts() {
+    try {
+      const res = await api.get("/finance/accounts", {
+        params: { active: 1 },
+      });
+      const allAccounts = res.data?.items || [];
+      setAccounts(allAccounts);
+    } catch {
+      toast.error("Failed to load accounts");
+    }
+  }
+
+  useEffect(() => {
+    loadAccounts();
+  }, []);
+
+  const filteredAccounts = useMemo(() => {
+    // Filter for liability nature accounts (creditors)
+    const creditorsAccounts = accounts.filter(
+      (a) => String(a.nature || a.group_nature || "").toUpperCase() === "LIABILITY"
+    );
+    return filterAndSort(creditorsAccounts, {
+      query: accountQuery,
+      getKeys: (a) => [a.code, a.name],
+    });
+  }, [accounts, accountQuery]);
+
+  const totals = useMemo(() => {
+    const debit = items.reduce((sum, r) => sum + Number(r.debit || 0), 0);
+    const credit = items.reduce((sum, r) => sum + Number(r.credit || 0), 0);
+    const balance = debit - credit;
+    return { debit, credit, balance };
+  }, [items]);
+
+  const { sorted: sortedItems, sortKey, sortDir, toggle } = useSort(items, "voucher_date", "desc");
+
+  async function run() {
+    try {
+      setLoading(true);
+      const params = { from: from || null, to: to || null };
+      if (accountId) params.accountId = accountId;
+      const res = await api.get("/finance/reports/creditors-ledger", { params });
+      const rows = res.data?.items || [];
+      const openRow =
+        rows.length && rows[0]?.doc_no === "OPEN" ? rows[0] : null;
+      const body = openRow ? rows.slice(1) : rows;
+      setItems(openRow ? [openRow, ...body] : body);
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Failed to load report");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const jan1 = new Date(year, 0, 1);
+    setFrom(jan1.toISOString().slice(0, 10));
+    setTo(today.toISOString().slice(0, 10));
+    run();
+  }, []);
+  useEffect(() => {
+    run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [from, to, accountId]);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <Link
+            to="/finance"
+            className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
+          >
+            ← Back to Finance
+          </Link>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-2">
+            Creditors Ledger
+          </h1>
+          <p className="text-sm mt-1">
+            Supplier ledger movements and running balance
+          </p>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-body">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
+            <div className="md:col-span-2">
+              <label className="label">Account (Creditors)</label>
+              <input
+                className="input mb-2"
+                placeholder="Search account code/name..."
+                value={accountQuery}
+                onChange={(e) => setAccountQuery(e.target.value)}
+              />
+              <select
+                className="input"
+                value={accountId}
+                onChange={(e) => setAccountId(e.target.value)}
+              >
+                <option value="">All Creditors</option>
+                {filteredAccounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.code} — {a.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="label">From</label>
+              <input
+                className="input"
+                type="date"
+                value={from}
+                onChange={(e) => setFrom(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="label">To</label>
+              <input
+                className="input"
+                type="date"
+                value={to}
+                onChange={(e) => setTo(e.target.value)}
+              />
+            </div>
+            <div className="md:col-span-2 flex items-end gap-2">
+              <button
+                type="button"
+                className="btn-success"
+                onClick={() => {
+                  setFrom("");
+                  setTo("");
+                }}
+                disabled={loading}
+              >
+                Clear
+              </button>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => {
+                  const rows = Array.isArray(items) ? items : [];
+                  if (!rows.length) return;
+                  const ws = XLSX.utils.json_to_sheet(rows);
+                  const wb = XLSX.utils.book_new();
+                  XLSX.utils.book_append_sheet(wb, ws, "CreditorsLedger");
+                  XLSX.writeFile(wb, "creditors-ledger.xlsx");
+                }}
+                disabled={!items.length}
+              >
+                Export Excel
+              </button>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => {
+                  const rows = Array.isArray(items) ? items : [];
+                  if (!rows.length) return;
+                  const doc = new jsPDF("p", "mm", "a4");
+                  let y = 15;
+                  doc.setFontSize(14);
+                  doc.text("Creditors Ledger", 10, y);
+                  y += 8;
+                  doc.setFontSize(10);
+                  doc.text("Date", 10, y);
+                  doc.text("Document", 45, y);
+                  doc.text("Description", 95, y);
+                  doc.text("Debit", 140, y);
+                  doc.text("Credit", 165, y);
+                  doc.text("Balance", 190, y, { align: "right" });
+                  y += 4;
+                  doc.line(10, y, 200, y);
+                  y += 5;
+                  rows.forEach((r, i) => {
+                    if (y > 270) {
+                      doc.addPage();
+                      y = 15;
+                    }
+                    const dt = r.txn_date
+                      ? new Date(r.txn_date).toLocaleDateString()
+                      : "-";
+                    const docno = String(r.doc_no || "-");
+                    const desc = String(r.description || "-").slice(0, 35);
+                    const dr = Number(r.debit || 0);
+                    const cr = Number(r.credit || 0);
+                    const running = rows
+                      .slice(0, i + 1)
+                      .reduce(
+                        (sum, x) =>
+                          sum + Number(x.debit || 0) - Number(x.credit || 0),
+                        0,
+                      );
+                    doc.text(dt, 10, y);
+                    doc.text(docno, 45, y);
+                    doc.text(desc, 95, y);
+                    doc.text(String(dr.toLocaleString()), 140, y);
+                    doc.text(String(cr.toLocaleString()), 165, y);
+                    doc.text(
+                      String(Number(running || 0).toLocaleString()),
+                      190,
+                      y,
+                      { align: "right" },
+                    );
+                    y += 5;
+                  });
+                  y += 5;
+                  doc.setFontSize(11);
+                  doc.text(
+                    `Totals — Debit: ${Number(totals.debit || 0).toLocaleString()}`,
+                    10,
+                    y,
+                  );
+                  y += 6;
+                  doc.text(
+                    `Credit: ${Number(totals.credit || 0).toLocaleString()}`,
+                    10,
+                    y,
+                  );
+                  y += 6;
+                  doc.text(
+                    `Balance: ${Number(totals.balance || 0).toLocaleString()}`,
+                    10,
+                    y,
+                  );
+                  doc.save("creditors-ledger.pdf");
+                }}
+                disabled={!items.length}
+              >
+                Export PDF
+              </button>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => window.print()}
+              >
+                Print
+              </button>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="table">
+              <thead className="sticky top-0 z-10">
+                <tr>
+                  <SortableHeader label="Voucher Date" sortKey="voucher_date" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                  <SortableHeader label="Voucher No" sortKey="voucher_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                  <SortableHeader label="Narration" sortKey="narration" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                  <SortableHeader label="Debit" sortKey="debit" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-right" />
+                  <SortableHeader label="Credit" sortKey="credit" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-right" />
+                  <SortableHeader label="Running Balance" sortKey="balance" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-right" />
+                  <th>Bal Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedItems.map((r, idx) => {
+                  const running = items
+                    .slice(0, idx + 1)
+                    .reduce(
+                      (sum, x) =>
+                        sum + Number(x.debit || 0) - Number(x.credit || 0),
+                      0,
+                    );
+                  const balType = running > 0 ? "Dr" : running < 0 ? "Cr" : "-";
+                  return (
+                    <tr key={r.id || idx}>
+                      <td>
+                        {r.voucher_date || r.txn_date
+                          ? new Date(r.voucher_date || r.txn_date).toLocaleDateString()
+                          : "-"}
+                      </td>
+                      <td className="font-medium">{r.voucher_no || r.doc_no || "-"}</td>
+                      <td>{r.narration || r.description || "-"}</td>
+                      <td className="text-right">
+                        {Number(r.debit || 0).toLocaleString()}
+                      </td>
+                      <td className="text-right">
+                        {Number(r.credit || 0).toLocaleString()}
+                      </td>
+                      <td className="text-right">
+                        {Number(Math.abs(running) || 0).toLocaleString()}
+                      </td>
+                      <td>
+                        <span className={`badge badge-sm ${balType === "Dr" ? "badge-info" : balType === "Cr" ? "badge-warning" : "badge-ghost"}`}>
+                          {balType}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colSpan={3} className="text-right font-medium">
+                    Totals
+                  </td>
+                  <td className="text-right font-medium">
+                    {totals.debit.toLocaleString()}
+                  </td>
+                  <td className="text-right font-medium">
+                    {totals.credit.toLocaleString()}
+                  </td>
+                  <td className="text-right font-medium">
+                    {Math.abs(totals.balance).toLocaleString()}
+                  </td>
+                  <td>
+                    <span className={`badge badge-sm ${totals.balance > 0 ? "badge-info" : totals.balance < 0 ? "badge-warning" : "badge-ghost"}`}>
+                      {totals.balance > 0 ? "Dr" : totals.balance < 0 ? "Cr" : "-"}
+                    </span>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          {items.length === 0 && !loading ? (
+            <div className="text-center py-10">No rows.</div>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
