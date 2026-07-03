@@ -6,10 +6,14 @@ import path from "path";
 import { fileURLToPath } from "url";
 import http from "http";
 import rateLimit from "express-rate-limit";
+import RedisStore from "rate-limit-redis";
+import helmet from "helmet";
+import morgan from "morgan";
 
 import { errorHandler } from "./middleware/errorHandler.js";
 import { notFound } from "./middleware/notFound.js";
 import adminRoutes from "./routes/admin.route.js";
+import backupRoutes from "./routes/backup.routes.js";
 import salesRoutes from "./routes/sales.route.js";
 import purchaseRoutes from "./routes/purchase.routes.js";
 import purchaseBillsRoutes from "./routes/purchase.bills.routes.js";
@@ -28,6 +32,8 @@ import healthRoutes from "./routes/health.route.js";
 import authRoutes from "./routes/auth.routes.js";
 import { logDbError, query, testDbConnection } from "./db/pool.js";
 import { isMailerConfigured, verifyMailer, sendMail } from "./utils/mailer.js";
+import { closeRedis, getRedis } from "./utils/redis.js";
+import { getLowStockQueue, closeJobQueues } from "./utils/jobQueue.js";
 import pushRoutes, {
   sendPushToUser,
   getPublicKey,
@@ -46,16 +52,27 @@ import {
 } from "./utils/dbUtils.js";
 import { seedDefaultTemplates } from "./services/seed-defaults.js";
 import { ensureIndexes } from "./utils/ensureIndexes.js";
+import { initCronJobs } from "./utils/cronJobs.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /* ---------------- ENV ---------------- */
-dotenv.config({ path: path.join(__dirname, ".env") });
-const isProd = String(process.env.NODE_ENV).toLowerCase() === "production";
 const prodPath = path.join(__dirname, ".env.production");
 const localPath = path.join(__dirname, ".env.local");
-const forceLocal = String(process.env.DEV_FORCE_LOCAL_ENV || "").trim() === "1";
+
+// Pre-load .env.local to get DEV_FORCE_LOCAL_ENV if it exists
+let forceLocal = false;
+if (fs.existsSync(localPath)) {
+  const parsed = dotenv.config({ path: localPath }).parsed || {};
+  forceLocal = String(parsed.DEV_FORCE_LOCAL_ENV || "").trim() === "1";
+}
+
+dotenv.config({ path: path.join(__dirname, ".env") });
+const isProd = String(process.env.NODE_ENV).toLowerCase() === "production";
+
+const originalPort = process.env.PORT;
+
 if (forceLocal && fs.existsSync(localPath)) {
   dotenv.config({ path: localPath, override: true });
 } else if (isProd && fs.existsSync(prodPath)) {
@@ -63,6 +80,11 @@ if (forceLocal && fs.existsSync(localPath)) {
 } else if (fs.existsSync(localPath)) {
   dotenv.config({ path: localPath, override: true });
 }
+
+if (originalPort !== undefined && String(originalPort).trim() !== "") {
+  process.env.PORT = originalPort;
+}
+
 try {
   if (fs.existsSync(prodPath)) {
     const parsed = dotenv.config({ path: prodPath }).parsed || {};
@@ -81,6 +103,13 @@ try {
 
 const app = express();
 app.set("trust proxy", 1);
+
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+  }),
+);
+app.use(morgan("dev"));
 
 app.use((req, res, next) => {
   res.setHeader(
@@ -116,7 +145,6 @@ const allowedOrigins = (() => {
     "http://127.0.0.1:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5174",
-    "https://serianamart.omnisuite-erp.com",
     "https://demo.omnisuite-erp.com",
   ];
 })();
@@ -146,17 +174,44 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 /* ---------------- RATE LIMITING ---------------- */
-const apiLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 300,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    error: "TOO_MANY_REQUESTS",
-    message: "Too many requests, please try again later",
-  },
-  skip: (req) => req.path === "/api/health" || req.path === "/api/ping",
-});
+let apiLimiter;
+function setupRateLimiter() {
+  try {
+    const redis = getRedis();
+    if (!redis || redis.status !== "ready") throw new Error("Redis not ready");
+    apiLimiter = rateLimit({
+      windowMs: 60 * 1000,
+      max: 300,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: {
+        error: "TOO_MANY_REQUESTS",
+        message: "Too many requests, please try again later",
+      },
+      skip: (req) => req.path === "/api/health" || req.path === "/api/ping",
+      store: new RedisStore({
+        sendCommand: (...args) => redis.call(...args),
+        prefix: "rl:",
+        windowMs: 60 * 1000,
+      }),
+    });
+    console.log("[RateLimit] Using Redis store");
+  } catch {
+    apiLimiter = rateLimit({
+      windowMs: 60 * 1000,
+      max: 300,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: {
+        error: "TOO_MANY_REQUESTS",
+        message: "Too many requests, please try again later",
+      },
+      skip: (req) => req.path === "/api/health" || req.path === "/api/ping",
+    });
+    console.log("[RateLimit] Using in-memory store (Redis unavailable)");
+  }
+}
+setupRateLimiter();
 app.use("/api", apiLimiter);
 
 app.head("/api/ping", (_req, res) => res.status(200).end());
@@ -211,6 +266,28 @@ app.get("/api/ping", (_req, res) => res.json({ ok: true }));
       console.log(
         "Successfully added the `created_by` column to `fin_vouchers`.",
       );
+    }
+
+    const salesOrderIsActiveColumns = await query(
+      "SHOW COLUMNS FROM `sal_orders` LIKE 'is_active'",
+    ).catch(() => []);
+    if (!salesOrderIsActiveColumns || salesOrderIsActiveColumns.length === 0) {
+      console.log("Adding `is_active` column to `sal_orders` table...");
+      await query(
+        "ALTER TABLE `sal_orders` ADD COLUMN `is_active` ENUM('Y','N') NOT NULL DEFAULT 'Y'",
+      );
+      console.log("Successfully added the `is_active` column to `sal_orders`.");
+    }
+
+    const salesOrderDeletedAtColumns = await query(
+      "SHOW COLUMNS FROM `sal_orders` LIKE 'deleted_at'",
+    ).catch(() => []);
+    if (!salesOrderDeletedAtColumns || salesOrderDeletedAtColumns.length === 0) {
+      console.log("Adding `deleted_at` column to `sal_orders` table...");
+      await query(
+        "ALTER TABLE `sal_orders` ADD COLUMN `deleted_at` DATETIME NULL",
+      );
+      console.log("Successfully added the `deleted_at` column to `sal_orders`.");
     }
 
     // Check if created_by exists in fin_voucher_reversals
@@ -527,6 +604,7 @@ app.use(
 app.use("/api/", healthRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/administration", adminRoutes);
+app.use("/api/backups", backupRoutes);
 app.use("/api/workflows", workflowRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/sales", salesRoutes);
@@ -619,7 +697,7 @@ if (serveFrontendFlag) {
 // app.use(notFound); // Handled by SPA catch-all now, or use for API 404s if desired
 app.use(errorHandler);
 
-const PORT = Number(process.env.PORT || 4002);
+const PORT = process.env.PORT || 4002;
 
 // Create HTTP server for Socket.io
 const server = http.createServer(app);
@@ -666,8 +744,17 @@ if (process.env.NODE_ENV !== "test" && !socketsDisabled) {
 export { ioInstance as io };
 
 if (process.env.NODE_ENV !== "test") {
+  const _originalListen = server.listen.bind(server);
+  server.listen = function (port, callback) {
+    const p = isNaN(Number(port)) ? port : Number(port);
+    if (typeof p === "number") {
+      return _originalListen(p, "127.0.0.1", callback);
+    }
+    return _originalListen(p, callback);
+  };
   server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+    initCronJobs();
     console.log(`Mailer configured: ${isMailerConfigured() ? "yes" : "no"}`);
     verifyMailer()
       .then((ok) => {
@@ -898,13 +985,18 @@ if (process.env.NODE_ENV !== "test") {
         lowStockRunInProgress = false;
       }
     }
-    setInterval(() => {
-      runLowStockAlertsOnSchedule().catch((e) =>
-        console.log(
-          `[LowStockScheduler] Schedule check failed: ${e?.message || e}`,
-        ),
-      );
-    }, 30 * 1000);
+    // Use BullMQ for scheduled jobs (distributed, persistent), fallback to setInterval
+    const bullQueue = getLowStockQueue(runLowStockAlertsOnSchedule);
+    if (!bullQueue) {
+      setInterval(() => {
+        runLowStockAlertsOnSchedule().catch((e) =>
+          console.log(
+            `[LowStockScheduler] Schedule check failed: ${e?.message || e}`,
+          ),
+        );
+      }, 30 * 1000);
+      console.log("[LowStockScheduler] Using setInterval fallback");
+    }
     runLowStockAlertsOnSchedule().catch((e) =>
       console.log(
         `[LowStockScheduler] Initial schedule check failed: ${e?.message || e}`,
@@ -912,5 +1004,18 @@ if (process.env.NODE_ENV !== "test") {
     );
   });
 }
+
+// ─── Graceful Shutdown ───────────────────────────────────────────────────────
+async function gracefulShutdown(signal) {
+  console.log(`\n[Server] ${signal} received — shutting down gracefully...`);
+  try {
+    await closeJobQueues();
+    await closeRedis();
+    console.log("[Server] Redis and job queues closed");
+  } catch {}
+  process.exit(0);
+}
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 
 export default app;

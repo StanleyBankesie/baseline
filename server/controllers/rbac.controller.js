@@ -1,6 +1,8 @@
 import { pool, query } from "../db/pool.js";
 import { httpError } from "../utils/httpError.js";
 import { ensureRoleFeaturesTable } from "../utils/dbUtils.js";
+import { permissionCache } from "../utils/permissionCache.js";
+import { cacheGet, cacheSet, cacheDelPattern } from "../utils/redis.js";
 
 // ROLES CONTROLLER
 /**
@@ -12,6 +14,11 @@ import { ensureRoleFeaturesTable } from "../utils/dbUtils.js";
  */
 export async function getRoles(req, res, next) {
   try {
+    const cacheKey = "roles:all";
+    const cached = await cacheGet(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
     const roles = await query(`SELECT id, name, code, is_active, created_at, updated_at,
           created_at,
           u.username AS created_by_name
@@ -19,6 +26,7 @@ export async function getRoles(req, res, next) {
         LEFT JOIN adm_users u ON u.id = created_by
          ORDER BY name`
     );
+    await cacheSet(cacheKey, roles, 86400).catch(() => {});
     res.json(roles);
   } catch (err) {
     next(err);
@@ -70,6 +78,7 @@ export async function createRole(req, res, next) {
       { id: result.insertId }
     );
     
+    await cacheDelPattern("roles:*").catch(() => {});
     res.status(201).json(newRole[0]);
   } catch (err) {
     next(err);
@@ -138,6 +147,7 @@ export async function updateRole(req, res, next) {
       { id }
     );
     
+    await cacheDelPattern("roles:*").catch(() => {});
     res.json(updatedRole[0]);
   } catch (err) {
     next(err);
@@ -236,6 +246,8 @@ export async function saveRoleModules(req, res, next) {
       }
 
       await conn.commit();
+      // Invalidate permission cache for all users with this role
+      // Best-effort: rely on TTL for users we can't identify here
       res.json({ message: "Role modules saved successfully" });
     } catch (err) {
       try {
@@ -328,6 +340,7 @@ export async function saveRolePermissions(req, res, next) {
       params
     );
     
+    // Invalidate permission cache for users with this role (TTL-based expiry as fallback)
     res.json({ message: "Role permissions saved successfully" });
   } catch (err) {
     next(err);

@@ -51,22 +51,38 @@ export function loadServerEnv(metaUrl = import.meta.url) {
     path.join(serverRoot, ".env.production"),
   ];
 
-  const wasProd = String(process.env.NODE_ENV || "").toLowerCase() === "production";
+
 
   // Load base environment variable files without overriding existing ones
   for (const filePath of baseCandidates) {
     loadIfExists(filePath, false);
   }
 
-  // Determine environment overrides from the current process state
-  const forceLocal = String(process.env.DEV_FORCE_LOCAL_ENV || "").trim() === "1";
+  // Determine environment overrides by pre-checking .env.local
+  let forceLocal = String(process.env.DEV_FORCE_LOCAL_ENV || "").trim() === "1";
+  if (!forceLocal) {
+    for (const filePath of localCandidates) {
+      if (fs.existsSync(filePath)) {
+        const parsedLocal = dotenv.config({ path: filePath }).parsed || {};
+        if (String(parsedLocal.DEV_FORCE_LOCAL_ENV || "").trim() === "1") {
+          forceLocal = true;
+          break;
+        }
+      }
+    }
+  }
+
+  // Determine prod state AFTER base env is loaded
+  const isProd = String(process.env.NODE_ENV || "").toLowerCase() === "production";
+
+  const originalPort = process.env.PORT;
 
   // Conditionally load local or production overrides based on current mode
   if (forceLocal) {
     for (const filePath of localCandidates) {
       loadIfExists(filePath, true);
     }
-  } else if (wasProd) {
+  } else if (isProd) {
     for (const filePath of prodCandidates) {
       loadIfExists(filePath, true);
     }
@@ -74,6 +90,10 @@ export function loadServerEnv(metaUrl = import.meta.url) {
     for (const filePath of localCandidates) {
       loadIfExists(filePath, true);
     }
+  }
+
+  if (originalPort !== undefined && String(originalPort).trim() !== "") {
+    process.env.PORT = originalPort;
   }
 
   loaded = true;

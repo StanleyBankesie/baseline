@@ -9,6 +9,7 @@ import { useExchangeRate } from "@/hooks/useExchangeRate";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { usePermission } from "../../../../auth/PermissionContext.jsx";
 import { filterByPrefix } from "@/utils/searchUtils.js";
+import { toast } from "react-toastify";
 
 function StatusBadge({ status }) {
   const s = String(status || "").toLowerCase();
@@ -60,9 +61,11 @@ export default function ServiceBillForm() {
     due_date: "",
     service_date: "",
     supplier_id: "",
+    relatedExecId: "",
     currency_id: 4,
     exchange_rate: 1,
     payment_terms: 30,
+    payment_status: "UNPAID",
     freight_charges: 0,
     other_charges: 0,
     payment_method: "cash",
@@ -154,16 +157,17 @@ export default function ServiceBillForm() {
     const components = [];
     let taxTotal = 0;
     const comps = taxComponentsByCode[String(newItem.tax_code_id)] || [];
+    const tc = taxCodes.find((t) => String(t.id) === String(newItem.tax_code_id));
+    const isNoTax = /no\s*tax/i.test(String(tc?.name || ""));
 
-    if (comps.length > 0) {
+    if (!isNoTax && comps.length > 0) {
       comps.forEach((c) => {
         const rate = Number(c.rate_percent) || 0;
         const amt = (taxableTotal * rate) / 100;
         components.push({ name: c.component_name, rate, amount: amt });
         taxTotal += amt;
       });
-    } else if (newItem.tax_code_id) {
-      const tc = taxCodes.find((t) => String(t.id) === String(newItem.tax_code_id));
+    } else if (newItem.tax_code_id && !isNoTax) {
       const tcRate = tc ? Number(tc.rate_percent) || 0 : 0;
       const amt = (taxableTotal * tcRate) / 100;
       if (tcRate > 0) {
@@ -235,7 +239,9 @@ export default function ServiceBillForm() {
 
     let taxAmount = 0;
     const comps = taxComponentsByCode[String(line.tax_code_id)] || [];
-    if (comps.length > 0) {
+    const tc = taxCodes.find((t) => String(t.id) === String(line.tax_code_id));
+    const isNoTax = /no\s*tax/i.test(String(tc?.name || ""));
+    if (!isNoTax && comps.length > 0) {
       comps.forEach((c) => { taxAmount += (taxable * (Number(c.rate_percent) || 0)) / 100; });
     }
 
@@ -276,7 +282,9 @@ export default function ServiceBillForm() {
 
       const taxCodeId = r.tax_code_id;
       const comps = taxComponentsByCode[String(taxCodeId)] || [];
-      if (comps.length > 0) {
+      const tc = taxCodes.find((t) => String(t.id) === String(taxCodeId));
+      const isNoTax = /no\s*tax/i.test(String(tc?.name || ""));
+      if (!isNoTax && comps.length > 0) {
         comps.forEach((c) => {
           const rate = Number(c.rate_percent) || 0;
           const amt = (taxable * rate) / 100;
@@ -292,7 +300,7 @@ export default function ServiceBillForm() {
       .sort((a, b) => a.sort_order - b.sort_order);
 
     const taxTotal = components.reduce((s, c) => s + c.amount, 0);
-    const freight = Number(bill.freight_charges || 0);
+    const freight = 0;
     const other = Number(bill.other_charges || 0);
     const total = sub - itemDiscounts + taxTotal + freight + other;
 
@@ -392,6 +400,7 @@ export default function ServiceBillForm() {
           due_date: toYmd(item.due_date) || "",
           service_date: toYmd(item.service_date) || "",
           supplier_id: item.supplier_id ? String(item.supplier_id) : "",
+          relatedExecId: item.order_id ? String(item.order_id) : "",
           currency_id: item.currency_id || 4,
           exchange_rate: Number(item.exchange_rate) || 1,
           payment_terms: Number(item.payment_terms) || 30,
@@ -430,7 +439,35 @@ export default function ServiceBillForm() {
     return () => { mounted = false; };
   }, [id]);
 
-  const saveBill = async (statusOverride) => {
+  useEffect(() => {
+    let mounted = true;
+    async function loadOrderLines() {
+      const orderId = bill.relatedExecId;
+      if (!orderId) return;
+      try {
+        const res = await api.get(`/purchase/service-orders/${orderId}`);
+        if (!mounted) return;
+        const orderLines = Array.isArray(res.data?.lines) ? res.data.lines : [];
+        setLines(orderLines.map((ln, idx) => ({
+          id: Date.now() + idx,
+          item_id: ln.item_id ? String(ln.item_id) : "",
+          item_name: ln.item_name || ln.description || "",
+          category: "",
+          uom_id: "",
+          qty: Number(ln.qty) || 0,
+          rate: Number(ln.unit_price) || 0,
+          discount_percent: 0,
+          tax_code_id: "",
+          tax_amount: 0,
+          line_total: Number(ln.line_total) || 0,
+        })));
+      } catch {}
+    }
+    loadOrderLines();
+    return () => { mounted = false; };
+  }, [bill.relatedExecId]);
+
+  const saveBill = async () => {
     if (!bill.bill_date) { setError("Bill Date is required"); return; }
     if (!bill.supplier_id) { setError("Supplier is required"); return; }
     if (lines.length === 0) { setError("At least one service line is required"); return; }
@@ -439,12 +476,13 @@ export default function ServiceBillForm() {
     setError("");
 
     try {
-      const status = statusOverride || bill.status?.toUpperCase() || "PENDING";
+      const status = "COMPLETED";
       const payload = {
         bill_no: bill.bill_no || null,
         bill_date: toYmd(bill.bill_date),
         due_date: toYmd(bill.due_date),
         supplier_id: bill.supplier_id ? Number(bill.supplier_id) : null,
+        order_id: bill.relatedExecId ? Number(bill.relatedExecId) : null,
         service_date: toYmd(bill.service_date),
         status,
         payment_method: bill.payment_method || "cash",
@@ -485,6 +523,7 @@ export default function ServiceBillForm() {
         if (newId) setCurrentBillId(newId);
       }
 
+      toast.success("Service bill saved successfully");
       navigate("/service-management/service-bills", {
         state: { success: "Service bill saved successfully" },
       });
@@ -527,7 +566,7 @@ export default function ServiceBillForm() {
             <div className="font-semibold">Bill Details</div>
             <div className="flex items-center gap-2">
               <StatusBadge status={bill.status} />
-              <PaymentBadge payment={bill.payment} />
+              <PaymentBadge payment={bill.payment_status} />
             </div>
           </div>
         </div>
@@ -745,21 +784,27 @@ export default function ServiceBillForm() {
                     {taxCodes.map((t) => (<option key={t.id} value={String(t.id)}>{t.name}</option>))}
                   </select>
                   
-                  {newItem.tax_code_id && calcNewItemTaxBreakdown().components.length > 0 && (
-                    <div className="border border-brand/20 bg-brand/5 rounded-md p-2 text-[11px] mt-2">
-                      <span className="font-bold block border-b border-brand/10 mb-1">Tax Calculation:</span>
-                      {calcNewItemTaxBreakdown().components.map((c) => (
-                        <div key={c.name} className="flex justify-between">
-                          <span>{c.name} ({c.rate}%):</span>
-                          <span className="font-semibold">{c.amount.toFixed(2)}</span>
+                  {newItem.tax_code_id && (() => {
+                    const tb = calcNewItemTaxBreakdown();
+                    const tc = taxCodes.find((t) => String(t.id) === String(newItem.tax_code_id));
+                    const isNoTax = /no\s*tax/i.test(String(tc?.name || ""));
+                    if (isNoTax || tb.components.length === 0) return null;
+                    return (
+                      <div className="border border-brand/20 bg-brand/5 rounded-md p-2 text-[11px] mt-2">
+                        <span className="font-bold block border-b border-brand/10 mb-1">Tax Calculation:</span>
+                        {tb.components.map((c) => (
+                          <div key={c.name} className="flex justify-between">
+                            <span>{c.name} ({c.rate}%):</span>
+                            <span className="font-semibold">{c.amount.toFixed(2)}</span>
+                          </div>
+                        ))}
+                        <div className="flex justify-between border-t border-brand/10 mt-1 pt-1 font-bold italic">
+                          <span>Total Tax:</span>
+                          <span>{tb.taxTotal.toFixed(2)}</span>
                         </div>
-                      ))}
-                      <div className="flex justify-between border-t border-brand/10 mt-1 pt-1 font-bold italic">
-                        <span>Total Tax:</span>
-                        <span>{calcNewItemTaxBreakdown().taxTotal.toFixed(2)}</span>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
                 <div className="md:col-span-5 flex items-end justify-end">
                   <button type="button" className="btn btn-primary px-6 py-2 text-sm flex items-center gap-2 h-10 w-full sm:w-auto justify-center" onClick={addItemToLines} disabled={!newItem.item_id || !newItem.qty}>
@@ -774,7 +819,7 @@ export default function ServiceBillForm() {
               <thead className="bg-[#f8f9fa]">
                 <tr>
                   <th>#</th>
-                  <th>Item</th>
+                  <th className="min-w-[300px]">Item</th>
                   <th>Category</th>
                   <th className="text-right">Qty</th>
                   <th className="text-right">Rate</th>
@@ -861,12 +906,6 @@ export default function ServiceBillForm() {
               </>
               )}
               <div className="flex justify-between items-center py-1">
-                <span className="text-slate-600">Freight Charges:</span>
-                {!readOnly ? (
-                  <input className={`input w-28 text-right text-xs ${disabledClass}`} type="number" value={bill.freight_charges} onChange={(e) => update("freight_charges", e.target.value)} readOnly={readOnly} />
-                ) : totals.freight.toFixed(2)}
-              </div>
-              <div className="flex justify-between items-center py-1">
                 <span className="text-slate-600">Other Charges:</span>
                 {!readOnly ? (
                   <input className={`input w-28 text-right text-xs ${disabledClass}`} type="number" value={bill.other_charges} onChange={(e) => update("other_charges", e.target.value)} readOnly={readOnly} />
@@ -898,9 +937,6 @@ export default function ServiceBillForm() {
         </button>
         {!readOnly && (
           <>
-            <button type="button" className="btn bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded" onClick={() => saveBill("PENDING")} disabled={saving}>
-              Save as Draft
-            </button>
             <button type="button" className="btn-primary" onClick={() => saveBill()} disabled={saving}>
               {saving ? "Saving..." : "Save Bill"}
             </button>

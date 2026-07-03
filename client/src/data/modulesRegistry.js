@@ -22,6 +22,7 @@ export const MODULES_REGISTRY = {
       { key: "templates", label: "Document Templates", type: "feature" },
       { key: "reports", label: "System Reports", type: "feature" },
       { key: "settings", label: "System Settings", type: "feature" },
+      { key: "backups", label: "System Backups", type: "feature" },
     ],
     dashboards: [
       { key: "system-overview", label: "System Overview Dashboard", type: "dashboard" },
@@ -192,6 +193,7 @@ export const MODULES_REGISTRY = {
       { key: "rosters", label: "Maintenance Rosters", type: "feature" },
       { key: "maintenance-reports", label: "Maintenance Reports", type: "feature" },
       { key: "setup", label: "Maintenance Setup", type: "feature" },
+      { key: "material-receipts", label: "Material Receipts", type: "feature" },
     ],
     dashboards: [
       { key: "maintenance-overview", label: "Maintenance Overview Dashboard", type: "dashboard" },

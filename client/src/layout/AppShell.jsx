@@ -20,6 +20,7 @@ import {
   getInactivityTimeoutMs,
   readStoredAuth,
   writeStoredAuth,
+  touchLastActivity,
 } from "../auth/authStorage.js";
 import { usePermission } from "../auth/PermissionContext.jsx";
 import { useTheme } from "../theme/ThemeContext.jsx";
@@ -129,6 +130,53 @@ const modules = [
     path: "/executive-overview",
   },
 ];
+
+const BACKGROUND_GET_CONFIG = { __background: true };
+
+function scheduleDeferredTask(task, delayMs = 200) {
+  let settled = false;
+  let timeoutId = null;
+  let idleId = null;
+
+  const run = () => {
+    if (settled) return;
+    settled = true;
+    if (timeoutId !== null) window.clearTimeout(timeoutId);
+    if (
+      idleId !== null &&
+      typeof window !== "undefined" &&
+      typeof window.cancelIdleCallback === "function"
+    ) {
+      window.cancelIdleCallback(idleId);
+    }
+    Promise.resolve()
+      .then(task)
+      .catch(() => {});
+  };
+
+  if (typeof window !== "undefined") {
+    timeoutId = window.setTimeout(run, delayMs);
+    if (typeof window.requestIdleCallback === "function") {
+      idleId = window.requestIdleCallback(run, { timeout: delayMs + 300 });
+    }
+  } else {
+    run();
+  }
+
+  return () => {
+    settled = true;
+    if (timeoutId !== null && typeof window !== "undefined") {
+      window.clearTimeout(timeoutId);
+    }
+    if (
+      idleId !== null &&
+      typeof window !== "undefined" &&
+      typeof window.cancelIdleCallback === "function"
+    ) {
+      window.cancelIdleCallback(idleId);
+    }
+  };
+}
 
 /**
  * AppShell component
@@ -643,7 +691,10 @@ export default function AppShell() {
     async function loadUnread() {
       try {
         if (!token || !online || authFailedRef.current) return;
-        const res = await api.get("/workflows/notifications");
+        const res = await api.get(
+          "/workflows/notifications",
+          BACKGROUND_GET_CONFIG,
+        );
         const items = Array.isArray(res.data?.items) ? res.data.items : [];
         const unread = items.filter((n) => Number(n.is_read) !== 1).length;
         setUnreadCount(unread);
@@ -698,7 +749,10 @@ export default function AppShell() {
     async function checkLowStock() {
       try {
         if (lowStockPrompted) return;
-        const res = await api.get("/inventory/alerts/low-stock");
+        const res = await api.get(
+          "/inventory/alerts/low-stock",
+          BACKGROUND_GET_CONFIG,
+        );
         const items = Array.isArray(res.data?.items) ? res.data.items : [];
         if (!items.length) return;
         setLowStockPrompted(true);
@@ -716,13 +770,43 @@ export default function AppShell() {
       } catch {}
     }
     if (token && online) {
-      checkLowStock();
-      loadUnread();
+      const cancelLowStock = scheduleDeferredTask(checkLowStock, 250);
+      const cancelUnread = scheduleDeferredTask(loadUnread, 350);
+      return () => {
+        cancelled = true;
+        cancelLowStock();
+        cancelUnread();
+      };
     }
     return () => {
       cancelled = true;
     };
   }, [scope?.companyId, scope?.branchId, lowStockPrompted, token, online]);
+
+  useEffect(() => {
+    if (!token) return;
+    let throttleTimer = null;
+    const handleActivity = () => {
+      if (throttleTimer) return;
+      throttleTimer = setTimeout(() => {
+        touchLastActivity();
+        throttleTimer = null;
+      }, 5000); // Throttle activity updates to once every 5 seconds
+    };
+    
+    window.addEventListener("mousemove", handleActivity, { passive: true });
+    window.addEventListener("keydown", handleActivity, { passive: true });
+    window.addEventListener("click", handleActivity, { passive: true });
+    window.addEventListener("scroll", handleActivity, { passive: true });
+    
+    return () => {
+      window.removeEventListener("mousemove", handleActivity);
+      window.removeEventListener("keydown", handleActivity);
+      window.removeEventListener("click", handleActivity);
+      window.removeEventListener("scroll", handleActivity);
+      if (throttleTimer) clearTimeout(throttleTimer);
+    };
+  }, [token]);
 
   useEffect(() => {
     if (!token) return;
@@ -788,7 +872,7 @@ export default function AppShell() {
     let mounted = true;
     async function loadUserBranches() {
       try {
-        const res = await api.get("/auth/user-branches");
+        const res = await api.get("/auth/user-branches", BACKGROUND_GET_CONFIG);
         const items = Array.isArray(res.data?.items) ? res.data.items : [];
         if (mounted) {
           setBranchOptions(items);
@@ -801,25 +885,27 @@ export default function AppShell() {
         setBranchOptions([]);
       }
     }
-    loadUserBranches();
+    const cancelLoad = scheduleDeferredTask(loadUserBranches, 250);
     return () => {
       mounted = false;
+      cancelLoad();
     };
   }, [scope?.branchId]);
   useEffect(() => {
     let mounted = true;
     async function loadCompanies() {
       try {
-        const res = await api.get("/admin/companies");
+        const res = await api.get("/admin/companies", BACKGROUND_GET_CONFIG);
         const items = Array.isArray(res.data?.items) ? res.data.items : [];
         if (mounted) setCompanies(items);
       } catch {
         if (mounted) setCompanies([]);
       }
     }
-    loadCompanies();
+    const cancelLoad = scheduleDeferredTask(loadCompanies, 300);
     return () => {
       mounted = false;
+      cancelLoad();
     };
   }, []);
   const currentBranchName = useMemo(() => {
@@ -899,7 +985,11 @@ export default function AppShell() {
     try {
       if (ensurePagePerms && typeof location?.pathname === "string") {
         const path = location.pathname || "/";
-        ensurePagePerms(path);
+        const cancelPrefetch = scheduleDeferredTask(
+          () => ensurePagePerms(path),
+          300,
+        );
+        return () => cancelPrefetch();
       }
     } catch {}
   }, [location.pathname, ensurePagePerms]);
