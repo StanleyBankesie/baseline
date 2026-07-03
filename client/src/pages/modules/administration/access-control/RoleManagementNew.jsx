@@ -325,13 +325,6 @@ export default function RoleManagementNew() {
                     onToggle={toggle}
                   />
                   <SortableHeader
-                    label="Code"
-                    sortKey="code"
-                    currentKey={sortKey}
-                    direction={sortDir}
-                    onToggle={toggle}
-                  />
-                  <SortableHeader
                     label="Status"
                     sortKey="is_active"
                     currentKey={sortKey}
@@ -345,7 +338,6 @@ export default function RoleManagementNew() {
                 {rolesSorted.map((r) => (
                   <tr key={r.id}>
                     <td>{r.name}</td>
-                    <td>{r.code}</td>
                     <td>{r.is_active ? "Active" : "Inactive"}</td>
                     <td className="text-right">
                       <div className="flex gap-2 justify-end">

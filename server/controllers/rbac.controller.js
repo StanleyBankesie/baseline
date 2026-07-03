@@ -300,48 +300,90 @@ export async function getRolePermissions(req, res, next) {
  */
 export async function saveRolePermissions(req, res, next) {
   try {
-    // Extract permissions payload
-    const { permissions } = req.body;
-    
-    if (!Array.isArray(permissions)) {
-      return next(httpError(400, "Permissions array is required"));
+    const body = req.body || {};
+    let permissions = Array.isArray(body.permissions) ? body.permissions : null;
+    let roleId = null;
+
+    if (!permissions) {
+      const featureKeys = Array.isArray(body.feature_keys)
+        ? body.feature_keys
+        : Array.isArray(body.featureKeys)
+          ? body.featureKeys
+          : null;
+      roleId = Number(body.role_id || body.roleId || 0);
+      if (!Number.isFinite(roleId) || roleId <= 0) {
+        return next(httpError(400, "Valid role_id is required"));
+      }
+      if (!Array.isArray(featureKeys)) {
+        return next(httpError(400, "feature_keys array is required"));
+      }
+      const deduped = Array.from(
+        new Set(featureKeys.map((fk) => String(fk || "").trim()).filter(Boolean)),
+      );
+      permissions = deduped.map((feature_key) => {
+        const module_key = feature_key.includes(":")
+          ? feature_key.split(":")[0]
+          : "";
+        return {
+          role_id: roleId,
+          module_key,
+          feature_key,
+          can_view: 1,
+          can_create: 0,
+          can_edit: 0,
+          can_delete: 0,
+        };
+      });
+    } else {
+      if (permissions.length === 0) {
+        return next(httpError(400, "At least one permission is required"));
+      }
+      roleId = Number(permissions[0]?.role_id || 0);
+      if (!Number.isFinite(roleId) || roleId <= 0) {
+        return next(httpError(400, "Valid role_id is required"));
+      }
     }
-    
-    if (permissions.length === 0) {
-      return next(httpError(400, "At least one permission is required"));
+
+    const rowsToInsert = permissions
+      .map((p) => {
+        const featureKey = String(p?.feature_key || "").trim();
+        if (!featureKey) return null;
+        const moduleKeyRaw = String(p?.module_key || "").trim();
+        const moduleKey = moduleKeyRaw || featureKey.split(":")[0] || "";
+        return [
+          roleId,
+          moduleKey,
+          featureKey,
+          Number(Boolean(p?.can_view)),
+          Number(Boolean(p?.can_create)),
+          Number(Boolean(p?.can_edit)),
+          Number(Boolean(p?.can_delete)),
+        ];
+      })
+      .filter(Boolean);
+
+    const conn = await pool.getConnection();
+    try {
+      await conn.beginTransaction();
+      await conn.query("DELETE FROM adm_role_permissions WHERE role_id = ?", [
+        roleId,
+      ]);
+      if (rowsToInsert.length > 0) {
+        await conn.query(
+          "INSERT INTO adm_role_permissions (role_id, module_key, feature_key, can_view, can_create, can_edit, can_delete) VALUES ?",
+          [rowsToInsert],
+        );
+      }
+      await conn.commit();
+      res.json({ message: "Role permissions saved successfully" });
+    } catch (err) {
+      try {
+        await conn.rollback();
+      } catch {}
+      throw err;
+    } finally {
+      conn.release();
     }
-    
-    const roleId = permissions[0].role_id;
-    
-    // Delete existing permissions for this role
-    await query(`DELETE FROM adm_role_permissions WHERE role_id = :roleId`,
-      { roleId }
-    );
-    
-    // Insert new permissions
-    const values = permissions.map((_, index) => 
-      `(:roleId, :module_${index}, :feature_${index}, :view_${index}, :create_${index}, :edit_${index}, :delete_${index})`
-    ).join(',');
-    
-    const params = { roleId };
-    
-    permissions.forEach((perm, index) => {
-      params[`module_${index}`] = perm.module_key;
-      params[`feature_${index}`] = perm.feature_key;
-      params[`view_${index}`] = perm.can_view ? 1 : 0;
-      params[`create_${index}`] = perm.can_create ? 1 : 0;
-      params[`edit_${index}`] = perm.can_edit ? 1 : 0;
-      params[`delete_${index}`] = perm.can_delete ? 1 : 0;
-    });
-    
-    await query(`INSERT INTO adm_role_permissions 
-       (role_id, module_key, feature_key, can_view, can_create, can_edit, can_delete) 
-       VALUES ${values}`,
-      params
-    );
-    
-    // Invalidate permission cache for users with this role (TTL-based expiry as fallback)
-    res.json({ message: "Role permissions saved successfully" });
   } catch (err) {
     next(err);
   }

@@ -1,8 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Table, Button, Card, Typography, Space, Popconfirm, Tag, Tooltip } from "antd";
-import { Download, Trash2, PlayCircle, HardDrive, Cloud, AlertCircle, CheckCircle, ArrowLeft } from "lucide-react";
+import {
+  Table,
+  Button,
+  Card,
+  Typography,
+  Space,
+  Popconfirm,
+  Tag,
+  Tooltip,
+} from "antd";
+import {
+  Download,
+  Trash2,
+  PlayCircle,
+  HardDrive,
+  Cloud,
+  AlertCircle,
+  CheckCircle,
+  ArrowLeft,
+} from "lucide-react";
 import { toast } from "react-toastify";
+import { api } from "../../api/client.js";
 
 const { Title, Text } = Typography;
 
@@ -16,17 +35,10 @@ export default function BackupManagement() {
   const fetchBackups = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/backups", {
-        headers: {
-          "Content-Type": "application/json",
-          // Add auth headers here if needed (e.g. from context)
-        }
-      });
-      if (!res.ok) throw new Error("Failed to fetch backups");
-      const data = await res.json();
-      setBackups(data.backups || []);
+      const res = await api.get("/backups");
+      setBackups(res.data?.backups || []);
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err?.response?.data?.error || err?.message || "Failed to fetch backups");
     } finally {
       setLoading(false);
     }
@@ -40,23 +52,15 @@ export default function BackupManagement() {
     try {
       if (localOnly) setTriggeringLocal(true);
       else if (cloudOnly) setTriggeringCloud(true);
-      
-      toast.info(`Triggering ${localOnly ? 'local' : 'cloud'} backup... This may take a few minutes.`);
-      const res = await fetch("/api/backups/trigger", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ localOnly, cloudOnly })
-      });
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || "Failed to trigger backup");
-      }
+
+      toast.info(
+        `Triggering ${localOnly ? "local" : "cloud"} backup... This may take a few minutes.`,
+      );
+      await api.post("/backups/trigger", { localOnly, cloudOnly });
       toast.success("Backup completed successfully!");
       fetchBackups();
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err?.response?.data?.error || err?.message || "Failed to trigger backup");
     } finally {
       if (localOnly) setTriggeringLocal(false);
       else if (cloudOnly) setTriggeringCloud(false);
@@ -65,16 +69,15 @@ export default function BackupManagement() {
 
   const deleteBackup = async (filename) => {
     try {
-      const res = await fetch(`/api/backups/${filename}`, {
-        method: "DELETE"
-      });
-      if (!res.ok) throw new Error("Failed to delete backup");
+      await api.delete(`/backups/${encodeURIComponent(filename)}`);
       toast.success(`Deleted ${filename}`);
       fetchBackups();
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err?.response?.data?.error || err?.message || "Failed to delete backup");
     }
   };
+
+  const apiBase = String(api.defaults.baseURL || "/api").replace(/\/$/, "");
 
   const columns = [
     {
@@ -88,9 +91,7 @@ export default function BackupManagement() {
       dataIndex: "type",
       key: "type",
       render: (type) => (
-        <Tag color={type === "Database" ? "blue" : "purple"}>
-          {type}
-        </Tag>
+        <Tag color={type === "Database" ? "blue" : "purple"}>{type}</Tag>
       ),
     },
     {
@@ -117,7 +118,7 @@ export default function BackupManagement() {
             <Button
               type="primary"
               icon={<Download size={16} />}
-              href={`/api/backups/download/${record.filename}`}
+              href={`${apiBase}/backups/download/${encodeURIComponent(record.filename)}`}
               target="_blank"
             />
           </Tooltip>
@@ -140,18 +141,33 @@ export default function BackupManagement() {
   return (
     <div style={{ padding: "24px" }}>
       <div style={{ marginBottom: "16px" }}>
-        <Button 
-          type="text" 
-          icon={<ArrowLeft size={16} />} 
+        <Button
+          type="text"
+          icon={<ArrowLeft size={16} />}
           onClick={() => navigate("/administration")}
-          style={{ paddingLeft: 0, display: "flex", alignItems: "center", gap: "8px", color: "#64748b" }}
+          style={{
+            paddingLeft: 0,
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            color: "#64748b",
+          }}
         >
           Back to Administration
         </Button>
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "24px",
+        }}
+      >
         <div>
-          <Title level={2} style={{ margin: 0 }}>System Backups</Title>
+          <Title level={2} style={{ margin: 0 }}>
+            System Backups
+          </Title>
           <Text type="secondary">Manage your local and cloud backups.</Text>
         </div>
         <Space>
@@ -186,15 +202,25 @@ export default function BackupManagement() {
         />
       </Card>
 
-      <Card style={{ marginTop: "24px", backgroundColor: "#f6ffed", borderColor: "#b7eb8f" }}>
+      <Card
+        style={{
+          marginTop: "24px",
+          backgroundColor: "#f6ffed",
+          borderColor: "#b7eb8f",
+        }}
+      >
         <Space align="start">
           <CheckCircle color="#52c41a" size={24} style={{ marginTop: 4 }} />
           <div>
-            <Text strong style={{ fontSize: 16 }}>Automated Backups are Active</Text>
+            <Text strong style={{ fontSize: 16 }}>
+              Automated Backups are Active
+            </Text>
             <br />
             <Text type="secondary">
-              Database backups run automatically every night at 12:00 AM and are pushed to the configured cloud storage. 
-              Manual backups act as a fallback and will also immediately push data to the cloud and send email notifications.
+              Database backups run automatically every night at 12:00 AM and are
+              pushed to the configured cloud storage. Manual backups act as a
+              fallback and will also immediately push data to the cloud and send
+              email notifications.
             </Text>
           </div>
         </Space>

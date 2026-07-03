@@ -54,7 +54,23 @@ import { api } from "../api/client.js";
 import useOfflineQueue from "../offline/useOfflineQueue.js";
 import FloatingInstallButton from "../components/FloatingInstallButton.jsx";
 import { toast } from "react-toastify";
-import { Bell, Menu } from "lucide-react";
+import {
+  Bell,
+  Menu,
+  Settings,
+  Banknote,
+  Archive,
+  ShoppingCart,
+  Landmark,
+  Users,
+  Wrench,
+  Blocks,
+  Factory,
+  ShoppingBasket,
+  AreaChart,
+  Headset,
+  Presentation,
+} from "lucide-react";
 import FloatingChat from "../components/chat/FloatingChat.jsx";
 import FloatingCreateButton from "../components/FloatingCreateButton.jsx";
 import useSocket from "../hooks/useSocket.js";
@@ -92,42 +108,49 @@ const modules = [
     key: "administration",
     label: "Administration",
     path: "/administration",
+    icon: <Settings />,
   },
-  { key: "sales", label: "Sales", path: "/sales" },
-  { key: "inventory", label: "Inventory", path: "/inventory" },
-  { key: "purchase", label: "Purchase", path: "/purchase" },
-  { key: "finance", label: "Finance", path: "/finance" },
+  { key: "sales", label: "Sales", path: "/sales", icon: <Banknote /> },
+  { key: "inventory", label: "Inventory", path: "/inventory", icon: <Archive /> },
+  { key: "purchase", label: "Purchase", path: "/purchase", icon: <ShoppingCart /> },
+  { key: "finance", label: "Finance", path: "/finance", icon: <Landmark /> },
   {
     key: "human-resources",
     label: "Human Resources",
     path: "/human-resources",
+    icon: <Users />,
   },
   {
     key: "maintenance",
     label: "Maintenance",
     path: "/maintenance",
+    icon: <Wrench />,
   },
   {
     key: "project-management",
     label: "Project Management",
     path: "/project-management",
+    icon: <Blocks />,
   },
-  { key: "production", label: "Production", path: "/production" },
-  { key: "pos", label: "POS", path: "/pos" },
+  { key: "production", label: "Production", path: "/production", icon: <Factory /> },
+  { key: "pos", label: "POS", path: "/pos", icon: <ShoppingBasket /> },
   {
     key: "business-intelligence",
     label: "Business Intelligence",
     path: "/business-intelligence",
+    icon: <AreaChart />,
   },
   {
     key: "service-management",
     label: "Service Management",
     path: "/service-management",
+    icon: <Headset />,
   },
   {
     key: "executive-overview",
     label: "Executive Overview",
     path: "/executive-overview",
+    icon: <Presentation />,
   },
 ];
 
@@ -1856,7 +1879,7 @@ export default function AppShell() {
                   >
                     {m.icon}
                   </span>
-                  <span>{m.label}</span>
+                  <span className="ml-3">{m.label}</span>
                 </NavLink>
               ))}
           </nav>
