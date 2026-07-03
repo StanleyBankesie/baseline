@@ -58,9 +58,13 @@ export function loadServerEnv(metaUrl = import.meta.url) {
     loadIfExists(filePath, false);
   }
 
+  // Determine prod state AFTER base env is loaded
+  const isProd = String(process.env.NODE_ENV || "").toLowerCase() === "production";
+
   // Determine environment overrides by pre-checking .env.local
-  let forceLocal = String(process.env.DEV_FORCE_LOCAL_ENV || "").trim() === "1";
-  if (!forceLocal) {
+  let forceLocal =
+    !isProd && String(process.env.DEV_FORCE_LOCAL_ENV || "").trim() === "1";
+  if (!isProd && !forceLocal) {
     for (const filePath of localCandidates) {
       if (fs.existsSync(filePath)) {
         const parsedLocal = dotenv.config({ path: filePath }).parsed || {};
@@ -71,9 +75,6 @@ export function loadServerEnv(metaUrl = import.meta.url) {
       }
     }
   }
-
-  // Determine prod state AFTER base env is loaded
-  const isProd = String(process.env.NODE_ENV || "").toLowerCase() === "production";
 
   const originalPort = process.env.PORT;
 
