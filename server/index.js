@@ -604,7 +604,7 @@ app.use(
 app.use("/api/", healthRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/administration", adminRoutes);
-app.use("/api/backups", backupRoutes);
+app.use(["/api/backups", "/backups"], backupRoutes);
 app.use("/api/workflows", workflowRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/sales", salesRoutes);
