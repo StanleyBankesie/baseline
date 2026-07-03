@@ -61,10 +61,10 @@ const __dirname = path.dirname(__filename);
 const prodPath = path.join(__dirname, ".env.production");
 const localPath = path.join(__dirname, ".env.local");
 
-// Pre-load .env.local to get DEV_FORCE_LOCAL_ENV if it exists
+// Pre-load .env.local to get DEV_FORCE_LOCAL_ENV if it exists without polluting process.env
 let forceLocal = false;
 if (fs.existsSync(localPath)) {
-  const parsed = dotenv.config({ path: localPath }).parsed || {};
+  const parsed = dotenv.parse(fs.readFileSync(localPath));
   forceLocal = String(parsed.DEV_FORCE_LOCAL_ENV || "").trim() === "1";
 }
 
@@ -73,10 +73,10 @@ const isProd = String(process.env.NODE_ENV).toLowerCase() === "production";
 
 const originalPort = process.env.PORT;
 
-if (forceLocal && fs.existsSync(localPath)) {
-  dotenv.config({ path: localPath, override: true });
-} else if (isProd && fs.existsSync(prodPath)) {
+if (isProd && fs.existsSync(prodPath)) {
   dotenv.config({ path: prodPath, override: true });
+} else if (forceLocal && fs.existsSync(localPath)) {
+  dotenv.config({ path: localPath, override: true });
 } else if (fs.existsSync(localPath)) {
   dotenv.config({ path: localPath, override: true });
 }
