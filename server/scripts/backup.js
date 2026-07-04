@@ -24,30 +24,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const serverRoot = path.resolve(__dirname, "..");
 
-dotenv.config({ path: path.join(serverRoot, ".env") });
-const localEnv = path.join(serverRoot, ".env.local");
-const prodEnv = path.join(serverRoot, ".env.production");
-
-let forceLocal = false;
-if (fs.existsSync(localEnv)) {
-  const parsed = dotenv.config({ path: localEnv }).parsed || {};
-  forceLocal = String(parsed.DEV_FORCE_LOCAL_ENV || "").trim() === "1";
-}
-
-dotenv.config({ path: path.join(serverRoot, ".env") });
-let isProd = String(process.env.NODE_ENV).toLowerCase() === "production";
-if (!isProd && fs.existsSync(prodEnv)) {
-  isProd = true;
-  process.env.NODE_ENV = "production";
-}
-
-if (forceLocal && fs.existsSync(localEnv)) {
-  dotenv.config({ path: localEnv, override: true });
-} else if (isProd && fs.existsSync(prodEnv)) {
-  dotenv.config({ path: prodEnv, override: true });
-} else if (fs.existsSync(localEnv)) {
-  dotenv.config({ path: localEnv, override: true });
-}
+import "../utils/loadServerEnv.js";
 
 const BACKUP_DIR = path.join(serverRoot, "backups");
 const RETENTION_DAYS = 7;
