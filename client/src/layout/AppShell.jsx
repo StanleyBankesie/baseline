@@ -70,6 +70,7 @@ import {
   AreaChart,
   Headset,
   Presentation,
+  Home,
 } from "lucide-react";
 import FloatingChat from "../components/chat/FloatingChat.jsx";
 import FloatingCreateButton from "../components/FloatingCreateButton.jsx";
@@ -1855,7 +1856,13 @@ export default function AppShell() {
                   : "text-brand-200 hover:bg-brand-800 hover:text-white border-l-4 border-transparent")
               }
             >
-              Home
+              <span
+                className="w-6 text-lg leading-none opacity-80 group-hover:opacity-100 transition-opacity"
+                aria-hidden="true"
+              >
+                <Home />
+              </span>
+              <span>Home</span>
             </NavLink>
             {modules
               .filter((m) => {

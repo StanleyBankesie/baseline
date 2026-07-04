@@ -64,6 +64,19 @@ export default function MaintenanceJobOrdersList() {
     load();
   }, [location.state?.refresh]);
 
+  
+  async function handleConfirm(item) {
+    try {
+      setLoading(true);
+      await api.put(`/maintenance/job-orders/${item.id}`, { ...item, status: 'POSTED' });
+      toast.success("Job order posted successfully");
+      load();
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Failed to post job order");
+      setLoading(false);
+    }
+  }
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     if (!q) return items;
@@ -137,6 +150,7 @@ export default function MaintenanceJobOrdersList() {
                   <th>Status</th>
                   <th>Created By</th>
                   <th>Created Date</th>
+                  <th>Confirm</th>
                   <th className="text-right">Actions</th>
                 </tr>
               </thead>
@@ -144,7 +158,7 @@ export default function MaintenanceJobOrdersList() {
                 {loading ? (
                   <tr>
                     <td
-                      colSpan="9"
+                      colSpan="10"
                       className="px-6 py-20 text-center animate-pulse text-slate-400 font-bold uppercase tracking-widest"
                     >
                       Loading Orders...
@@ -158,7 +172,7 @@ export default function MaintenanceJobOrdersList() {
                           {r.order_no}
                         </div>
                         <div className="text-[10px] font-bold text-slate-400 uppercase mt-0.5">
-                          {r.order_date}
+                          {r.order_date ? new Date(r.order_date).toLocaleDateString() : "-"}
                         </div>
                       </td>
                       <td className="px-4 py-3 text-sm font-semibold text-brand-700 dark:text-brand-300">
@@ -168,7 +182,7 @@ export default function MaintenanceJobOrdersList() {
                         {r.asset_name}
                       </td>
                       <td className="px-4 py-3 text-sm text-slate-500">
-                        {r.scheduled_date}
+                        {r.scheduled_date ? new Date(r.scheduled_date).toLocaleDateString() : "-"}
                       </td>
                       <td className="px-4 py-3 text-sm text-slate-500 font-medium">
                         {r.assigned_technician}
@@ -183,6 +197,17 @@ export default function MaintenanceJobOrdersList() {
                         {r.created_at
                           ? new Date(r.created_at).toLocaleDateString()
                           : "-"}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        {r.status === 'DRAFT' ? (
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-colors h-9"
+                            onClick={() => handleConfirm(r)}
+                          >
+                            Confirm
+                          </button>
+                        ) : null}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1">
@@ -217,7 +242,7 @@ export default function MaintenanceJobOrdersList() {
                 ) : (
                   <tr>
                     <td
-                      colSpan="9"
+                      colSpan="10"
                       className="px-6 py-20 text-center text-slate-400 font-bold uppercase tracking-widest italic opacity-50"
                     >
                       No job orders identified.

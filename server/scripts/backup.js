@@ -1,6 +1,5 @@
 /**
  * @file backup.js
- * @description Performs a full backup of the database and application files (uploads directory).
  * Deletes backups older than 7 days to conserve disk space.
  * Uploads to AWS S3, Backblaze B2, and Google Drive if configured.
  * Sends email notifications.
@@ -36,7 +35,11 @@ if (fs.existsSync(localEnv)) {
 }
 
 dotenv.config({ path: path.join(serverRoot, ".env") });
-const isProd = String(process.env.NODE_ENV).toLowerCase() === "production";
+let isProd = String(process.env.NODE_ENV).toLowerCase() === "production";
+if (!isProd && fs.existsSync(prodEnv)) {
+  isProd = true;
+  process.env.NODE_ENV = "production";
+}
 
 if (forceLocal && fs.existsSync(localEnv)) {
   dotenv.config({ path: localEnv, override: true });
@@ -47,7 +50,6 @@ if (forceLocal && fs.existsSync(localEnv)) {
 }
 
 const BACKUP_DIR = path.join(serverRoot, "backups");
-const UPLOADS_DIR = path.join(serverRoot, "uploads");
 const RETENTION_DAYS = 7;
 
 function ts() {
@@ -95,22 +97,7 @@ async function backupDatabase(timestamp) {
   return sqlFile;
 }
 
-function archiveFiles(sourceDir, outPath) {
-  return new Promise((resolve, reject) => {
-    if (!fs.existsSync(sourceDir)) {
-      console.log(`[Backup] Source dir ${sourceDir} does not exist, skipping.`);
-      return resolve();
-    }
-    try {
-      const zip = new AdmZip();
-      zip.addLocalFolder(sourceDir, path.basename(sourceDir));
-      zip.writeZip(outPath);
-      resolve();
-    } catch (err) {
-      reject(err);
-    }
-  });
-}
+
 
 function compressFile(sourceFile, outPath) {
   return new Promise((resolve, reject) => {

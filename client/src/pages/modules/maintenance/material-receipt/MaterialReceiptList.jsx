@@ -1,11 +1,11 @@
 /**
  * @fileoverview MaterialReceiptList component.
- * Lists material receipts issued from inventory for maintenance job orders.
+ * Provides functionality for MaterialReceiptList.
  */
 
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-
+import { Plus, RefreshCw } from "lucide-react";
 import { api } from "../../../../api/client";
 import { toast } from "react-toastify";
 import { filterAndSort } from "@/utils/searchUtils.js";
@@ -13,8 +13,8 @@ import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
 
 /**
- * MaterialReceiptList component
- *
+ *  component
+ * 
  * @returns {JSX.Element} The rendered component
  */
 export default function MaterialReceiptList() {
@@ -22,136 +22,105 @@ export default function MaterialReceiptList() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [items, setItems] = useState([]);
-
-  const { sortConfig, handleSort } = useSort({ key: "receipt_date", direction: "desc" });
+  const [pendingIssues, setPendingIssues] = useState(0);
 
   useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-    api
-      .get("/maintenance/material-receipts")
-      .then((res) => {
-        if (mounted)
-          setItems(Array.isArray(res.data?.items) ? res.data.items : Array.isArray(res.data) ? res.data : []);
-      })
-      .catch((e) => setError(e?.response?.data?.message || "Failed to load material receipts"))
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-    return () => {
-      mounted = false;
-    };
+    loadData();
   }, []);
 
-  const getStatusBadge = (status) => {
-    const b = {
-      DRAFT: "badge-info",
-      RECEIVED: "badge-success",
-      PARTIAL: "badge-warning",
-      CANCELLED: "badge-error",
-    };
-    return b[status] || "badge-info";
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this material receipt?")) return;
+  const loadData = async () => {
+    let mounted = true;
+    setLoading(true);
     try {
-      await api.delete(`/maintenance/material-receipts/${id}`);
-      setItems((prev) => prev.filter((r) => r.id !== id));
-      toast.success("Material receipt deleted");
+      const [res, pendRes] = await Promise.all([
+        api.get("/projects/material-receipts"),
+        api.get("/projects/issue-to-requirement/pm")
+      ]);
+      if (mounted) {
+        setItems(Array.isArray(res.data?.items) ? res.data.items : []);
+        const allPending = Array.isArray(pendRes.data?.items) ? pendRes.data.items : [];
+        const projectPending = allPending.filter(
+          (iss) => (iss.department_name || "").toLowerCase().includes("project"),
+        );
+        setPendingIssues(projectPending.length);
+      }
     } catch (e) {
-      toast.error(e?.response?.data?.message || "Failed to delete");
+      if (mounted) setError(e?.response?.data?.message || "Failed to load");
+    } finally {
+      if (mounted) setLoading(false);
     }
+    return () => { mounted = false; };
   };
 
-  const filtered = useMemo(
-    () =>
-      filterAndSort(items, searchTerm, sortConfig, [
-        "reference_no",
-        "job_order_no",
-        "status",
-      ]),
-    [items, searchTerm, sortConfig]
-  );
+  const filtered = useMemo(() => {
+    if (!searchTerm.trim()) return items.slice();
+    return filterAndSort(items, { query: searchTerm, getKeys: (r) => [r.receipt_no, r.warehouse_name, r.department_name] });
+  }, [items, searchTerm]);
+
+  const { sorted, sortKey, sortDir, toggle } = useSort(filtered, "created_at", "desc");
 
   return (
-    <div className="page-container">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Material Receipts</h1>
-          <p className="page-subtitle">Materials received from inventory for maintenance</p>
+    <div className="space-y-4">
+      <div className="card">
+        <div className="card-header bg-brand text-white rounded-t-lg">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold">Materials Receipt</h1>
+              <p className="text-sm mt-1">Receive materials issued from Inventory (Project Management department)</p>
+            </div>
+            <div className="flex gap-2">
+              <Link to="/project-management" className="btn btn-secondary">Return to Menu</Link>
+              <button onClick={loadData} className="btn btn-secondary p-2" title="Refresh"><RefreshCw size={16} /></button>
+              <Link to="/maintenance/material-receipts/new" className="btn-success flex items-center gap-2"><Plus size={16} />Receive{pendingIssues > 0 ? ` (${pendingIssues})` : ""}</Link>
+            </div>
+          </div>
         </div>
-        <Link to="/maintenance/material-receipts/new" className="btn btn-primary">
-          + New Receipt
-        </Link>
       </div>
 
-      {error && <div className="alert alert-error">{error}</div>}
-
       <div className="card">
-        <div className="card-header">
-          <input
-            type="text"
-            className="form-input"
-            placeholder="Search receipts…"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <div className="table-container">
-          {loading ? (
-            <div className="loading-spinner">Loading…</div>
-          ) : (
-            <table className="data-table">
+        <div className="card-body">
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <div className="flex-1">
+              <input type="text" placeholder="Search receipts..." className="input"
+                value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="table">
               <thead>
                 <tr>
-                  <SortableHeader label="Reference No." sortKey="reference_no" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader label="Job Order" sortKey="job_order_no" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader label="Receipt Date" sortKey="receipt_date" sortConfig={sortConfig} onSort={handleSort} />
-                  <SortableHeader label="Status" sortKey="status" sortConfig={sortConfig} onSort={handleSort} />
-                  <th>Actions</th>
+                  <SortableHeader label="Receipt No" sortKey="receipt_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                  <SortableHeader label="Date" sortKey="receipt_date" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                  <th>Warehouse</th>
+                  <th>Department</th>
+                  <SortableHeader label="Status" sortKey="status" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                  <th className="text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="text-center text-muted">
-                      No material receipts found.
+                {loading ? (
+                  <tr><td colSpan="6" className="text-center py-8 text-slate-400">Loading...</td></tr>
+                ) : sorted.length > 0 ? sorted.map(r => (
+                  <tr key={r.id}>
+                    <td className="font-medium text-sm">{r.receipt_no}</td>
+                    <td className="text-sm whitespace-nowrap">{r.receipt_date ? new Date(r.receipt_date).toLocaleDateString() : "—"}</td>
+                    <td className="text-sm">{r.warehouse_name || "—"}</td>
+                    <td className="text-sm">{r.department_name || "—"}</td>
+                    <td><span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600">{r.status}</span></td>
+                    <td className="text-center">
+                      <Link to={`/maintenance/material-receipts/${r.id}`}
+                        className="px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 inline-block">View</Link>
                     </td>
                   </tr>
-                ) : (
-                  filtered.map((item) => (
-                    <tr key={item.id}>
-                      <td>{item.reference_no || `MR-${item.id}`}</td>
-                      <td>{item.job_order_no || item.job_order_id || "—"}</td>
-                      <td>{item.receipt_date ? new Date(item.receipt_date).toLocaleDateString() : "—"}</td>
-                      <td>
-                        <span className={`badge ${getStatusBadge(item.status)}`}>
-                          {item.status || "DRAFT"}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="action-buttons">
-                          <Link
-                            to={`/maintenance/material-receipts/${item.id}`}
-                            className="btn btn-sm btn-secondary"
-                          >
-                            View
-                          </Link>
-                          <button
-                            className="btn btn-sm btn-danger"
-                            onClick={() => handleDelete(item.id)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                )) : (
+                  <tr><td colSpan="6" className="text-center py-8 text-slate-400">
+                    {pendingIssues > 0 ? `${pendingIssues} pending issue(s) from inventory. Create a receipt to receive them.` : "No receipts found."}
+                  </td></tr>
                 )}
               </tbody>
             </table>
-          )}
+          </div>
         </div>
       </div>
     </div>

@@ -198,7 +198,7 @@ export default function ServiceBillsList() {
 
                         {/* Slot 2: Edit */}
                         <div className="min-w-[80px]">
-                          {canPerformAction("service-management:service-bills", "edit") && String(r.payment_status || "").toUpperCase() !== "PAID" ? (
+                          {canPerformAction("service-management:service-bills", "edit") && String(r.payment_status || "").toUpperCase() !== "PAID" && String(r.status || "").toUpperCase() !== "POSTED" ? (
                             <Link
                               to={`/purchase/service-bills/${r.id}?mode=edit`}
                               className="w-full inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-slate-700 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors h-9"

@@ -143,7 +143,7 @@ export default function MaintenanceMaterialRequisitionList() {
                     direction={sortDir}
                     onToggle={toggle}
                   />
-                  <th className="text-left">Warehouse</th>
+                  <th className="text-left w-full">Warehouse</th>
                   <th className="text-left">Department</th>
                   <SortableHeader
                     label="Status"
@@ -152,7 +152,7 @@ export default function MaintenanceMaterialRequisitionList() {
                     direction={sortDir}
                     onToggle={toggle}
                   />
-                  <th className="text-left">Actions</th>
+                  <th className="text-left w-24">Actions</th>
                   <SortableHeader
                     label="Created By"
                     sortKey="created_by_username"

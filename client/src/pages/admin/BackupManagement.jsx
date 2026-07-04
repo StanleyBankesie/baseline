@@ -60,7 +60,7 @@ export default function BackupManagement() {
       toast.success("Backup completed successfully!");
       fetchBackups();
     } catch (err) {
-      toast.error(err?.response?.data?.error || err?.message || "Failed to trigger backup");
+      toast.error(err?.response?.data?.details || err?.response?.data?.error || err?.message || "Failed to trigger backup");
     } finally {
       if (localOnly) setTriggeringLocal(false);
       else if (cloudOnly) setTriggeringCloud(false);

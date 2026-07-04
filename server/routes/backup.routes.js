@@ -53,7 +53,12 @@ router.post("/trigger", async (req, res) => {
     res.json({ message: "Backup completed successfully", ...result });
   } catch (error) {
     console.error("[Backup API] Error triggering backup:", error);
-    res.status(500).json({ error: "Failed to trigger backup", details: error.message });
+    const statusCode =
+      error.message.includes("No cloud storage configurations") ||
+      error.message.includes("Missing DB env vars")
+        ? 400
+        : 500;
+    res.status(statusCode).json({ error: "Failed to trigger backup", details: error.message });
   }
 });
 
