@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Save, Plus, X } from "lucide-react";
 import { toast } from "react-toastify";
 import { api } from "../../../../api/client";
+import HierarchyEditor from "./HierarchyEditor";
 
 const DEFAULT_PARAMS = {
   default_currency: "GHS",
@@ -24,6 +25,8 @@ const TAB_LABELS = [
   { key: "locations", label: "Locations" },
   { key: "brands", label: "Brands" },
   { key: "models", label: "Models" },
+  { key: "manufacturers", label: "Manufacturers" },
+  { key: "classification-hierarchy", label: "Equip. Classification & Grouping" },
   { key: "status-types", label: "Status Types" },
   { key: "maintenance-types", label: "Maint. Types" },
   { key: "priorities", label: "Priorities" },
@@ -44,7 +47,7 @@ const EMPTY_ITEM = {
   is_active: true,
 };
 
-function ModalForm({ open, title, hideDescription, draft, onDraftChange, onClose, onSubmit, nameOptions }) {
+function ModalForm({ open, title, hideDescription, showEmail, showCurrency, currencies = [], draft, onDraftChange, onClose, onSubmit, nameOptions }) {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
@@ -60,7 +63,17 @@ function ModalForm({ open, title, hideDescription, draft, onDraftChange, onClose
               <select
                 className="input w-full"
                 value={draft.item_name}
-                onChange={e => onDraftChange("item_name", e.target.value)}
+                onChange={e => {
+                  const val = e.target.value;
+                  onDraftChange("item_name", val);
+                  if (nameOptions) {
+                    const opt = nameOptions.find((o) => o.name === val);
+                    if (opt) {
+                      if (showEmail) onDraftChange("email", opt.email || "");
+                      if (showCurrency && opt.currency_id) onDraftChange("currency_id", opt.currency_id);
+                    }
+                  }
+                }}
               >
                 <option value="">-- Select --</option>
                 {nameOptions.map((opt) => (
@@ -68,18 +81,31 @@ function ModalForm({ open, title, hideDescription, draft, onDraftChange, onClose
                 ))}
               </select>
             ) : (
-              <input className="input w-full" value={draft.item_name} onChange={e => onDraftChange("item_name", e.target.value)} />
+              <input className="input w-full" value={draft.item_name || ""} onChange={e => onDraftChange("item_name", e.target.value)} />
             )}
           </div>
-          {!hideDescription && (
+          {showEmail && (
             <div>
-              <label className="label">Description</label>
-              <input className="input w-full" value={draft.description} onChange={e => onDraftChange("description", e.target.value)} />
+              <label className="label">Email</label>
+              <input className="input w-full" type="email" value={draft.email || ""} onChange={e => onDraftChange("email", e.target.value)} />
+            </div>
+          )}
+          {showCurrency && (
+            <div>
+              <label className="label">Currency</label>
+              <select className="input w-full" value={draft.currency_id || ""} onChange={e => onDraftChange("currency_id", e.target.value)}>
+                <option value="">Select Currency...</option>
+                {currencies.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.code} - {c.symbol}
+                  </option>
+                ))}
+              </select>
             </div>
           )}
           <div>
-            <label className="label">Sort Order</label>
-            <input className="input w-full" type="number" value={draft.sort_order} onChange={e => onDraftChange("sort_order", e.target.value)} />
+            <label className="label">Description</label>
+            <input className="input w-full" value={draft.description} onChange={e => onDraftChange("description", e.target.value)} />
           </div>
           <label className="inline-flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
             <input type="checkbox" checked={Boolean(draft.is_active)} onChange={e => onDraftChange("is_active", e.target.checked)} />
@@ -107,6 +133,9 @@ function SetupItemsEditor({
   onSaveAndReload,
   onDelete,
   hideDescription = false,
+  showEmail = false,
+  showCurrency = false,
+  currencies = [],
   onOpenModal,
 }) {
   return (
@@ -129,7 +158,8 @@ function SetupItemsEditor({
             <tr>
               <th>Name</th>
               {!hideDescription && <th>Description</th>}
-              <th>Order</th>
+              {showEmail && <th>Email</th>}
+              {showCurrency && <th>Currency</th>}
               <th>Active</th>
               <th>Actions</th>
             </tr>
@@ -137,7 +167,7 @@ function SetupItemsEditor({
           <tbody>
             {items.length === 0 && (
               <tr>
-                <td colSpan={hideDescription ? "4" : "5"} className="text-center py-6 text-slate-500">
+                <td colSpan="10" className="text-center py-6 text-slate-500">
                   No records found
                 </td>
               </tr>
@@ -162,17 +192,33 @@ function SetupItemsEditor({
                   />
                 </td>
                 )}
+                {showEmail && (
                 <td>
                   <input
                     className="input"
-                    type="number"
-                    value={item.sort_order ?? 0}
-                    onChange={(e) =>
-                      onSave(kind, { ...item, sort_order: e.target.value })
-                    }
-                    onBlur={() => onSave(kind, { ...item, sort_order: item.sort_order })}
+                    type="email"
+                    value={item.email || ""}
+                    onChange={(e) => onSave(kind, { ...item, email: e.target.value })}
+                    onBlur={() => onSave(kind, { ...item, email: item.email })}
                   />
                 </td>
+                )}
+                {showCurrency && (
+                <td>
+                  <select
+                    className="input"
+                    value={item.currency_id || ""}
+                    onChange={(e) => onSave(kind, { ...item, currency_id: e.target.value })}
+                  >
+                    <option value="">Select Currency...</option>
+                    {currencies.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.code} - {c.symbol}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+                )}
                 <td>
                   <input
                     type="checkbox"
@@ -230,6 +276,7 @@ export default function MaintenanceSetupPage() {
   const [modalDraft, setModalDraft] = useState({ ...EMPTY_ITEM });
   const [sectionUsers, setSectionUsers] = useState([]);
   const [users, setUsers] = useState([]);
+  const [currencies, setCurrencies] = useState([]);
   const [drafts, setDrafts] = useState({
     "maintenance-types": { ...EMPTY_ITEM },
     priorities: { ...EMPTY_ITEM },
@@ -239,6 +286,7 @@ export default function MaintenanceSetupPage() {
     departments: { ...EMPTY_ITEM },
     brands: { ...EMPTY_ITEM },
     models: { ...EMPTY_ITEM },
+    manufacturers: { ...EMPTY_ITEM },
     "status-types": { ...EMPTY_ITEM },
     supervisors: { ...EMPTY_ITEM },
     technicians: { ...EMPTY_ITEM },
@@ -258,15 +306,16 @@ export default function MaintenanceSetupPage() {
     let m = true;
     api.get("/purchase/suppliers?contractor=Y").then((r) => {
       const items = Array.isArray(r.data?.items) ? r.data.items : [];
-      if (m) setSupplierNameOptions(items.map((s) => ({ id: s.id, name: s.supplier_name })));
+      if (m) setSupplierNameOptions(items.map((s) => ({ id: s.id, name: s.supplier_name, email: s.email, currency_id: s.currency_id })));
     }).catch(() => {});
     return () => { m = false; };
   }, []);
 
   async function loadSetup() {
-    const [catalogRes, paramRes] = await Promise.all([
+    const [catalogRes, paramRes, curRes] = await Promise.all([
       api.get("/maintenance/setup/catalog"),
       api.get("/maintenance/parameters").catch(() => ({ data: { params: {} } })),
+      api.get("/finance/currencies").catch(() => ({ data: { items: [] } })),
     ]);
 
     setCatalogs({
@@ -283,6 +332,7 @@ export default function MaintenanceSetupPage() {
     });
     setSectionUsers(Array.isArray(catalogRes.data?.sectionUsers) ? catalogRes.data.sectionUsers : []);
     setUsers(Array.isArray(catalogRes.data?.users) ? catalogRes.data.users : []);
+    setCurrencies(Array.isArray(curRes.data?.items) ? curRes.data.items : []);
     setParams((prev) => ({ ...prev, ...(paramRes.data?.params || {}), ...(catalogRes.data?.params || {}) }));
   }
 
@@ -337,6 +387,10 @@ export default function MaintenanceSetupPage() {
         departments: "departments",
         brands: "brands",
         models: "models",
+        manufacturers: "manufacturers",
+        classifications: "classifications",
+        categories: "categories",
+        groups: "groups",
         "status-types": "statusTypes",
         supervisors: "supervisors",
         technicians: "technicians",
@@ -594,6 +648,29 @@ export default function MaintenanceSetupPage() {
               />
             </div>
           )}
+          {tab === "manufacturers" && (
+            <div className="space-y-8">
+              <SetupItemsEditor
+                title="Manufacturers"
+                description="Equipment manufacturers."
+                kind="manufacturers"
+                items={catalogs.manufacturers || []}
+                draft={drafts.manufacturers}
+                onDraftChange={setDraft}
+                onCreate={createItem}
+                onSave={saveItem}
+                onSaveAndReload={saveItemAndReload}
+                onDelete={deleteItem}
+                hideDescription
+                onOpenModal={openModal}
+              />
+            </div>
+          )}
+          {tab === "classification-hierarchy" && (
+            <div className="space-y-8">
+              <HierarchyEditor catalogs={catalogs} reloadSetup={loadSetup} />
+            </div>
+          )}
           {tab === "status-types" && (
             <div className="space-y-8">
               <SetupItemsEditor
@@ -716,6 +793,9 @@ export default function MaintenanceSetupPage() {
                 onSaveAndReload={saveItemAndReload}
                 onDelete={deleteItem}
                 hideDescription
+                showEmail
+                showCurrency
+                currencies={currencies}
                 onOpenModal={openModal}
               />
             </div>
@@ -889,7 +969,10 @@ export default function MaintenanceSetupPage() {
       <ModalForm
         open={!!modalKind}
         title={`Add ${TAB_LABELS.find(t => t.key === modalKind)?.label || ""}`}
-        hideDescription={["maintenance-types","priorities","brands","models","status-types","supervisors","technicians","teams","service-providers","job-order-types"].includes(modalKind)}
+        hideDescription={["maintenance-types","priorities","brands","models","manufacturers","classifications","categories","groups","status-types","supervisors","technicians","teams","service-providers","job-order-types"].includes(modalKind)}
+        showEmail={modalKind === "service-providers"}
+        showCurrency={modalKind === "service-providers"}
+        currencies={currencies}
         draft={modalDraft}
         onDraftChange={setModalField}
         onClose={closeModal}

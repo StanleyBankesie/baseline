@@ -5,6 +5,8 @@
 import { query, pool } from "../db/pool.js";
 import { httpError } from "../utils/httpError.js";
 import { recordMovementTx } from "../services/stock.service.js";
+import { sendMail } from "../utils/mailer.js";
+import { cacheGet, cacheSet, cacheDelPattern } from "../utils/redis.js";
 
 // Utility: safely parse a value to a finite number
 function toNumber(v, fallback = null) {
@@ -12,8 +14,12 @@ function toNumber(v, fallback = null) {
   return Number.isFinite(n) ? n : fallback;
 }
 
+let tablesEnsured = false;
+
 // Helper to run database migrations/ensure tables exist for maintenance module
 async function ensureTables(companyId, branchId) {
+  if (tablesEnsured) return;
+  
   await query(`CREATE TABLE IF NOT EXISTS maint_requests (
     id INT AUTO_INCREMENT PRIMARY KEY,
     company_id INT NOT NULL, branch_id INT NOT NULL,
@@ -91,6 +97,9 @@ async function ensureTables(companyId, branchId) {
     id INT AUTO_INCREMENT PRIMARY KEY,
     rfq_id INT NOT NULL, supplier_id INT, supplier_name VARCHAR(200)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+  
+  await query(`ALTER TABLE maint_rfqs ADD INDEX IF NOT EXISTS idx_maint_rfqs_company (company_id)`).catch(() => {});
+  await query(`ALTER TABLE maint_rfq_suppliers ADD INDEX IF NOT EXISTS idx_maint_rfq_suppliers_rfq (rfq_id)`).catch(() => {});
 
   await query(`CREATE TABLE IF NOT EXISTS maint_supplier_quotations (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -101,15 +110,28 @@ async function ensureTables(companyId, branchId) {
     total_amount DECIMAL(18,4) DEFAULT 0,
     currency VARCHAR(10) DEFAULT 'GHS', exchange_rate DECIMAL(18,6) DEFAULT 1,
     status VARCHAR(50) DEFAULT 'DRAFT',
-    notes TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    notes TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    valid_until DATE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+
+  await query(`ALTER TABLE maint_supplier_quotations ADD COLUMN IF NOT EXISTS valid_until DATE`).catch(() => {});
+  await query(`ALTER TABLE maint_quotation_lines ADD COLUMN IF NOT EXISTS item_id INT, ADD COLUMN IF NOT EXISTS item_name VARCHAR(200), ADD COLUMN IF NOT EXISTS delivery_date DATE`).catch(() => {});
 
   await query(`CREATE TABLE IF NOT EXISTS maint_quotation_lines (
     id INT AUTO_INCREMENT PRIMARY KEY,
     quotation_id INT NOT NULL,
     description VARCHAR(500), qty DECIMAL(18,4) DEFAULT 1,
     rate DECIMAL(18,4) DEFAULT 0, discount_percent DECIMAL(8,4) DEFAULT 0,
-    tax_code_id INT, amount DECIMAL(18,4) DEFAULT 0
+    tax_code_id INT, amount DECIMAL(18,4) DEFAULT 0,
+    item_id INT, item_name VARCHAR(200), delivery_date DATE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+
+  await query(`CREATE TABLE IF NOT EXISTS maint_quotation_attachments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    quotation_id INT NOT NULL,
+    url VARCHAR(1000) NOT NULL,
+    filename VARCHAR(500),
+    note VARCHAR(1000)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
 
   await query(`CREATE TABLE IF NOT EXISTS maint_job_executions (
@@ -122,6 +144,7 @@ async function ensureTables(companyId, branchId) {
     sign_off_by VARCHAR(200), status VARCHAR(50) DEFAULT 'DRAFT',
     notes TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+  await query('ALTER TABLE maint_job_executions ADD COLUMN IF NOT EXISTS warehouse_id BIGINT UNSIGNED DEFAULT NULL AFTER created_by').catch(() => {});
 
   // Ensure all columns exist on maint_job_executions
   const jeMigrations = [
@@ -185,6 +208,11 @@ async function ensureTables(companyId, branchId) {
     status VARCHAR(50) DEFAULT 'ACTIVE',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+  await query(`ALTER TABLE maint_schedules ADD COLUMN IF NOT EXISTS classification VARCHAR(100) NULL`).catch(() => {});
+  await query(`ALTER TABLE maint_schedules ADD COLUMN IF NOT EXISTS category VARCHAR(100) NULL`).catch(() => {});
+  await query(`ALTER TABLE maint_schedules ADD COLUMN IF NOT EXISTS group_name VARCHAR(100) NULL`).catch(() => {});
+  await query(`ALTER TABLE maint_schedules ADD COLUMN IF NOT EXISTS maintenance_days VARCHAR(255) NULL`).catch(() => {});
+  await query(`ALTER TABLE maint_schedules ADD COLUMN IF NOT EXISTS start_date DATE NULL`).catch(() => {});
 
   await query(`CREATE TABLE IF NOT EXISTS maint_rosters (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -268,6 +296,11 @@ async function ensureTables(companyId, branchId) {
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uq_maint_setup_item (company_id, branch_id, item_type, item_name)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+  await query(`ALTER TABLE maint_setup_items ADD COLUMN IF NOT EXISTS email VARCHAR(255) NULL AFTER description`).catch(() => {});
+  await query(`ALTER TABLE maint_setup_items ADD COLUMN IF NOT EXISTS currency_id BIGINT UNSIGNED NULL AFTER email`).catch(() => {});
+  await query(`ALTER TABLE maint_setup_items ADD COLUMN IF NOT EXISTS created_by BIGINT UNSIGNED NULL`).catch(() => {});
+  await query(`ALTER TABLE maint_setup_items ADD COLUMN IF NOT EXISTS updated_by BIGINT UNSIGNED NULL`).catch(() => {});
+  await query(`ALTER TABLE maint_setup_items ADD COLUMN IF NOT EXISTS parent_id INT NULL AFTER item_type`).catch(() => {});
 
   await query(`CREATE TABLE IF NOT EXISTS maint_section_users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -334,6 +367,7 @@ async function ensureTables(companyId, branchId) {
   for (const t of noCreatedAt) {
     await query(`ALTER TABLE ${t} ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`).catch(() => {});
   }
+  tablesEnsured = true;
 }
 
 // ===== HELPERS =====
@@ -420,6 +454,10 @@ const SETUP_ITEM_TYPE_MAP = {
   teams: "TEAM",
   "service-providers": "SERVICE_PROVIDER",
   "job-order-types": "JOB_ORDER_TYPE",
+  classifications: "CLASSIFICATION",
+  categories: "CATEGORY",
+  groups: "GROUP",
+  manufacturers: "MANUFACTURER",
 };
 
 // Resolves setup item types from URL slugs/kebab-case keywords to DB ENUM strings
@@ -437,16 +475,18 @@ function resolveSetupItemType(kind) {
 async function listSetupItems(companyId, branchId, branchIdsStr = '', itemType = null) {
   const params = { companyId, branchId, branchIdsStr };
   let sql = `
-    SELECT id, item_type, item_name, description, sort_order, is_active
-    FROM maint_setup_items
-    WHERE company_id = :companyId
-      AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
+    SELECT si.id, si.item_type, si.parent_id, si.item_name, si.description, si.email, si.currency_id, si.sort_order, si.is_active,
+           si.created_at, u.username AS created_by_name
+    FROM maint_setup_items si
+    LEFT JOIN adm_users u ON u.id = si.created_by
+    WHERE si.company_id = :companyId
+      AND (:branchIdsStr = '' OR FIND_IN_SET(si.branch_id, :branchIdsStr))
   `;
   if (itemType) {
-    sql += ` AND item_type = :itemType`;
+    sql += ` AND si.item_type = :itemType`;
     params.itemType = itemType;
   }
-  sql += ` ORDER BY sort_order ASC, item_name ASC, id ASC`;
+  sql += ` ORDER BY si.sort_order ASC, si.item_name ASC, si.id ASC`;
   return query(sql, params);
 }
 
@@ -517,14 +557,21 @@ async function getSetupSummary(companyId, branchId, branchIdsStr = '') {
     teams: [],
     serviceProviders: [],
     jobOrderTypes: [],
+    classifications: [],
+    categories: [],
+    groups: [],
+    manufacturers: [],
   };
 
   for (const row of itemRows) {
     const item = {
       id: Number(row.id),
       item_type: row.item_type,
+      parent_id: row.parent_id ? Number(row.parent_id) : null,
       item_name: row.item_name,
       description: row.description || "",
+      email: row.email || null,
+      currency_id: row.currency_id ? Number(row.currency_id) : null,
       sort_order: Number(row.sort_order || 0),
       is_active: Number(row.is_active) === 1,
     };
@@ -545,6 +592,10 @@ async function getSetupSummary(companyId, branchId, branchIdsStr = '') {
     if (row.item_type === "TEAM") catalogs.teams.push(item);
     if (row.item_type === "SERVICE_PROVIDER") catalogs.serviceProviders.push(item);
     if (row.item_type === "JOB_ORDER_TYPE") catalogs.jobOrderTypes.push(item);
+    if (row.item_type === "CLASSIFICATION") catalogs.classifications.push(item);
+    if (row.item_type === "CATEGORY") catalogs.categories.push(item);
+    if (row.item_type === "GROUP") catalogs.groups.push(item);
+    if (row.item_type === "MANUFACTURER") catalogs.manufacturers.push(item);
   }
 
   const sectionUsers = linkRows.map((row) => ({
@@ -608,6 +659,10 @@ async function hasColumn(tableName, columnName) {
 export const listAssets = async (req, res, next) => {
   try {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+    const cacheKey = `maint_assets:company:${companyId}:branches:${branchIdsStr}`;
+    const cached = await cacheGet(cacheKey);
+    if (cached) return res.json({ items: cached });
+
     await ensureTables(companyId, branchId);
     const items = await query(`SELECT *,
           created_at,
@@ -619,6 +674,7 @@ export const listAssets = async (req, res, next) => {
        ORDER BY asset_name ASC, id ASC`,
       { companyId, branchId, branchIdsStr },
     );
+    await cacheSet(`maint_assets:company:${companyId}:branches:${branchIdsStr}`, items, 300);
     res.json({ items });
   } catch (err) {
     next(err);
@@ -702,6 +758,7 @@ export const updateAsset = async (req, res, next) => {
         notes: cleanText(b.notes),
       },
     );
+    await cacheDelPattern(`maint_assets:company:${companyId}:*`);
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -713,6 +770,10 @@ export const updateAsset = async (req, res, next) => {
 export const listRequests = async (req, res, next) => {
   try {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+    const cacheKey = `maint_requests:company:${companyId}:branches:${branchIdsStr}`;
+    const cached = await cacheGet(cacheKey);
+    if (cached) return res.json({ items: cached });
+
     await ensureTables(companyId, branchId);
     const items = await query(`SELECT r.*,
           r.created_at,
@@ -726,6 +787,7 @@ export const listRequests = async (req, res, next) => {
          WHERE r.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(r.branch_id, :branchIdsStr)) ORDER BY r.created_at DESC LIMIT 200`,
       { companyId, branchId, branchIdsStr },
     );
+    await cacheSet(`maint_requests:company:${companyId}:branches:${branchIdsStr}`, items, 300);
     res.json({ items });
   } catch (err) {
     next(err);
@@ -816,6 +878,7 @@ export const updateRequest = async (req, res, next) => {
          AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
       { id, companyId, branchId, branchIdsStr, ...payload },
     );
+    await cacheDelPattern(`maint_requests:company:${companyId}:*`);
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -846,7 +909,8 @@ export const submitRequest = async (req, res, next) => {
 
     if (!activeWf) {
       await query(`UPDATE maint_requests SET status='APPROVED' WHERE id=:id`, { id });
-      return res.json({ status: "APPROVED" });
+      return await cacheDelPattern(`maint_requests:company:${companyId}:*`);
+    res.json({ status: "APPROVED" });
     }
 
     const steps = await query(
@@ -855,7 +919,8 @@ export const submitRequest = async (req, res, next) => {
     );
     if (!steps.length) {
       await query(`UPDATE maint_requests SET status='APPROVED' WHERE id=:id`, { id });
-      return res.json({ status: "APPROVED" });
+      return await cacheDelPattern(`maint_requests:company:${companyId}:*`);
+    res.json({ status: "APPROVED" });
     }
 
     const first = steps[0];
@@ -879,6 +944,10 @@ export const submitRequest = async (req, res, next) => {
 export const listJobOrders = async (req, res, next) => {
   try {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+    const cacheKey = `maint_job_orders:company:${companyId}:branches:${branchIdsStr}`;
+    const cached = await cacheGet(cacheKey);
+    if (cached) return res.json({ items: cached });
+
     await ensureTables(companyId, branchId);
     const items = await query(`SELECT *,
           created_at,
@@ -888,6 +957,7 @@ export const listJobOrders = async (req, res, next) => {
          WHERE company_id=:companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) ORDER BY created_at DESC LIMIT 200`,
       { companyId, branchId, branchIdsStr },
     );
+    await cacheSet(`maint_job_orders:company:${companyId}:branches:${branchIdsStr}`, items, 300);
     res.json({ items });
   } catch (err) {
     next(err);
@@ -987,6 +1057,7 @@ export const updateJobOrder = async (req, res, next) => {
         notes: b.notes || null,
       },
     );
+    await cacheDelPattern(`maint_job_orders:company:${companyId}:*`);
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -998,6 +1069,10 @@ export const updateJobOrder = async (req, res, next) => {
 export const listRFQs = async (req, res, next) => {
   try {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+    const cacheKey = `maint_rfqs:company:${companyId}:branches:${branchIdsStr}`;
+    const cached = await cacheGet(cacheKey);
+    if (cached) return res.json({ items: cached });
+
     await ensureTables(companyId, branchId);
     const items = await query(`SELECT r.*, GROUP_CONCAT(s.supplier_name) AS supplier_names,
           r.created_at,
@@ -1007,6 +1082,7 @@ export const listRFQs = async (req, res, next) => {
          WHERE r.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(r.branch_id, :branchIdsStr)) GROUP BY r.id ORDER BY r.created_at DESC LIMIT 200`,
       { companyId, branchId, branchIdsStr },
     );
+    await cacheSet(`maint_rfqs:company:${companyId}:branches:${branchIdsStr}`, items, 300);
     res.json({ items });
   } catch (err) {
     next(err);
@@ -1045,7 +1121,7 @@ export const getRFQById = async (req, res, next) => {
 // Create a new RFQ and record the selected suppliers
 export const createRFQ = async (req, res, next) => {
   try {
-    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+    const { companyId, branchId = null, branchIdsStr = '', userId = null } = req.scope || {};
     await ensureTables(companyId, branchId);
     const b = req.body || {};
     const existing = await query(`SELECT rfq_no AS no,
@@ -1057,7 +1133,7 @@ export const createRFQ = async (req, res, next) => {
       { companyId, branchId, branchIdsStr },
     );
     const rfq_no = b.rfq_no || nextNo("MRFQ", existing);
-    const r = await query(`INSERT INTO maint_rfqs (company_id,branch_id,rfq_no,rfq_date,request_id,scope_of_work,response_deadline,status,notes) VALUES (:companyId,:branchId,:rfq_no,:rfq_date,:request_id,:scope_of_work,:response_deadline,:status,:notes)`,
+    const r = await query(`INSERT INTO maint_rfqs (company_id,branch_id,rfq_no,rfq_date,request_id,scope_of_work,response_deadline,status,notes,created_by) VALUES (:companyId,:branchId,:rfq_no,:rfq_date,:request_id,:scope_of_work,:response_deadline,:status,:notes,:created_by)`,
       {
         companyId,
         branchId, branchIdsStr,
@@ -1068,6 +1144,7 @@ export const createRFQ = async (req, res, next) => {
         response_deadline: b.response_deadline || null,
         status: b.status || "DRAFT",
         notes: b.notes || null,
+        created_by: userId,
       },
     );
     const rfqId = r.insertId;
@@ -1082,6 +1159,7 @@ export const createRFQ = async (req, res, next) => {
         );
       }
     }
+    await cacheDelPattern(`maint_rfqs:company:${companyId}:*`);
     res.status(201).json({ id: rfqId, rfq_no });
   } catch (err) {
     next(err);
@@ -1119,6 +1197,7 @@ export const updateRFQ = async (req, res, next) => {
         );
       }
     }
+    await cacheDelPattern(`maint_rfqs:company:${companyId}:*`);
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -1130,6 +1209,10 @@ export const updateRFQ = async (req, res, next) => {
 export const listSupplierQuotations = async (req, res, next) => {
   try {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+    const cacheKey = `maint_supplier_quotations:company:${companyId}:branches:${branchIdsStr}`;
+    const cached = await cacheGet(cacheKey);
+    if (cached) return res.json({ items: cached });
+
     await ensureTables(companyId, branchId);
     const items = await query(`SELECT *,
           created_at,
@@ -1139,6 +1222,7 @@ export const listSupplierQuotations = async (req, res, next) => {
          WHERE company_id=:companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) ORDER BY created_at DESC LIMIT 200`,
       { companyId, branchId, branchIdsStr },
     );
+    await cacheSet(`maint_supplier_quotations:company:${companyId}:branches:${branchIdsStr}`, items, 300);
     res.json({ items });
   } catch (err) {
     next(err);
@@ -1160,15 +1244,17 @@ export const getSupplierQuotationById = async (req, res, next) => {
       { id, companyId, branchId, branchIdsStr },
     );
     if (!rows.length) throw httpError(404, "NOT_FOUND", "Not found");
-    const lines = await query(`SELECT *,
-          created_at,
+    const lines = await query(`SELECT l.*, i.item_name, i.item_code,
+          l.created_at,
           u.username AS created_by_name
-         FROM maint_quotation_lines
-        LEFT JOIN adm_users u ON u.id = created_by
-         WHERE quotation_id=:id`,
+         FROM maint_quotation_lines l
+         LEFT JOIN inv_items i ON i.id = l.item_id
+        LEFT JOIN adm_users u ON u.id = l.created_by
+         WHERE l.quotation_id=:id`,
       { id },
     );
-    res.json({ item: rows[0], lines });
+    const attachments = await query(`SELECT * FROM maint_quotation_attachments WHERE quotation_id=:id`, { id });
+    res.json({ item: rows[0], details: lines, attachments });
   } catch (err) {
     next(err);
   }
@@ -1189,7 +1275,7 @@ export const createSupplierQuotation = async (req, res, next) => {
       { companyId, branchId, branchIdsStr },
     );
     const quotation_no = b.quotation_no || nextNo("MSQ", existing);
-    const r = await query(`INSERT INTO maint_supplier_quotations (company_id,branch_id,quotation_no,quotation_date,rfq_id,supplier_id,supplier_name,subtotal,tax_amount,total_amount,currency,exchange_rate,status,notes) VALUES (:companyId,:branchId,:quotation_no,:quotation_date,:rfq_id,:supplier_id,:supplier_name,:subtotal,:tax_amount,:total_amount,:currency,:exchange_rate,:status,:notes)`,
+    const r = await query(`INSERT INTO maint_supplier_quotations (company_id,branch_id,quotation_no,quotation_date,rfq_id,supplier_id,supplier_name,subtotal,tax_amount,total_amount,currency,exchange_rate,status,notes,valid_until) VALUES (:companyId,:branchId,:quotation_no,:quotation_date,:rfq_id,:supplier_id,:supplier_name,:subtotal,:tax_amount,:total_amount,:currency,:exchange_rate,:status,:notes,:valid_until)`,
       {
         companyId,
         branchId, branchIdsStr,
@@ -1204,23 +1290,40 @@ export const createSupplierQuotation = async (req, res, next) => {
         currency: b.currency || "GHS",
         exchange_rate: Number(b.exchange_rate || 1),
         status: b.status || "DRAFT",
-        notes: b.notes || null,
+        notes: b.remarks || b.notes || null,
+        valid_until: b.valid_until || null,
       },
     );
     const qId = r.insertId;
-    if (Array.isArray(b.lines)) {
-      for (const l of b.lines) {
-        await query(`INSERT INTO maint_quotation_lines (quotation_id,description,qty,rate,discount_percent,tax_code_id,amount) VALUES (:qId,:description,:qty,:rate,:discount_percent,:tax_code_id,:amount)`,
+    if (Array.isArray(b.details)) {
+      for (const l of b.details) {
+        await query(`INSERT INTO maint_quotation_lines (quotation_id,item_id,item_name,qty,rate,tax_code_id,amount,delivery_date) VALUES (:qId,:item_id,:item_name,:qty,:rate,:tax_code_id,:amount,:delivery_date)`,
           {
             qId,
-            description: l.description || null,
+            item_id: toNumber(l.item_id),
+            item_name: l.item_name || null,
             qty: Number(l.qty || 1),
-            rate: Number(l.rate || 0),
-            discount_percent: Number(l.discount_percent || 0),
+            rate: Number(l.unit_price || 0),
             tax_code_id: toNumber(l.tax_code_id),
-            amount: Number(l.amount || 0),
+            amount: Number(l.line_total || 0),
+            delivery_date: l.delivery_date || null,
           },
         );
+      }
+    }
+    if (Array.isArray(b.attachments)) {
+      for (const att of b.attachments) {
+        if (att.url) {
+          await query(
+            `INSERT INTO maint_quotation_attachments (quotation_id, url, filename, note) VALUES (:qId, :url, :filename, :note)`,
+            {
+              qId,
+              url: att.url,
+              filename: att.filename || null,
+              note: att.note || null,
+            }
+          );
+        }
       }
     }
     res.status(201).json({ id: qId, quotation_no });
@@ -1235,7 +1338,7 @@ export const updateSupplierQuotation = async (req, res, next) => {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const id = toNumber(req.params.id);
     const b = req.body || {};
-    await query(`UPDATE maint_supplier_quotations SET quotation_date=:quotation_date,rfq_id=:rfq_id,supplier_id=:supplier_id,supplier_name=:supplier_name,subtotal=:subtotal,tax_amount=:tax_amount,total_amount=:total_amount,currency=:currency,exchange_rate=:exchange_rate,status=:status,notes=:notes WHERE id=:id AND company_id=:companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
+    await query(`UPDATE maint_supplier_quotations SET quotation_date=:quotation_date,rfq_id=:rfq_id,supplier_id=:supplier_id,supplier_name=:supplier_name,subtotal=:subtotal,tax_amount=:tax_amount,total_amount=:total_amount,currency=:currency,exchange_rate=:exchange_rate,status=:status,notes=:notes,valid_until=:valid_until WHERE id=:id AND company_id=:companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
       {
         id,
         companyId,
@@ -1250,27 +1353,46 @@ export const updateSupplierQuotation = async (req, res, next) => {
         currency: b.currency || "GHS",
         exchange_rate: Number(b.exchange_rate || 1),
         status: b.status || "DRAFT",
-        notes: b.notes || null,
+        notes: b.remarks || b.notes || null,
+        valid_until: b.valid_until || null,
       },
     );
-    if (Array.isArray(b.lines)) {
+    if (Array.isArray(b.details)) {
       await query(`DELETE FROM maint_quotation_lines WHERE quotation_id=:id`, {
         id,
       });
-      for (const l of b.lines) {
-        await query(`INSERT INTO maint_quotation_lines (quotation_id,description,qty,rate,discount_percent,tax_code_id,amount) VALUES (:id,:description,:qty,:rate,:discount_percent,:tax_code_id,:amount)`,
+      for (const l of b.details) {
+        await query(`INSERT INTO maint_quotation_lines (quotation_id,item_id,item_name,qty,rate,tax_code_id,amount,delivery_date) VALUES (:id,:item_id,:item_name,:qty,:rate,:tax_code_id,:amount,:delivery_date)`,
           {
             id,
-            description: l.description || null,
+            item_id: toNumber(l.item_id),
+            item_name: l.item_name || null,
             qty: Number(l.qty || 1),
-            rate: Number(l.rate || 0),
-            discount_percent: Number(l.discount_percent || 0),
+            rate: Number(l.unit_price || 0),
             tax_code_id: toNumber(l.tax_code_id),
-            amount: Number(l.amount || 0),
+            amount: Number(l.line_total || 0),
+            delivery_date: l.delivery_date || null,
           },
         );
       }
     }
+    if (Array.isArray(b.attachments)) {
+      await query(`DELETE FROM maint_quotation_attachments WHERE quotation_id=:id`, { id });
+      for (const att of b.attachments) {
+        if (att.url) {
+          await query(
+            `INSERT INTO maint_quotation_attachments (quotation_id, url, filename, note) VALUES (:id, :url, :filename, :note)`,
+            {
+              id,
+              url: att.url,
+              filename: att.filename || null,
+              note: att.note || null,
+            }
+          );
+        }
+      }
+    }
+    await cacheDelPattern(`maint_supplier_quotations:company:${companyId}:*`);
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -1282,10 +1404,18 @@ export const updateSupplierQuotation = async (req, res, next) => {
 export const listJobExecutions = async (req, res, next) => {
   try {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+    const cacheKey = `maint_job_executions:company:${companyId}:branches:${branchIdsStr}`;
+    const cached = await cacheGet(cacheKey);
+    if (cached) return res.json({ items: cached });
+
     await ensureTables(companyId, branchId);
     const status = String(req.query.status || "").trim().toUpperCase();
-    let sql = `SELECT e.*, o.order_no,
-          e.created_at,
+    let sql = `SELECT e.id, e.company_id, e.branch_id, e.execution_no, e.job_order_id, 
+          e.start_date, e.start_time, e.end_date, e.end_time, e.downtime_hours, 
+          e.completion_status, e.sign_off_by, e.sign_off_date, e.status, 
+          e.approval_status, e.approved_by, e.approval_date, e.total_labor_hours, 
+          e.labor_cost, e.materials_cost, e.total_cost, e.current_step, e.created_by, 
+          o.order_no, e.created_at,
           (SELECT username FROM adm_users WHERE id = e.created_by) AS created_by_name
          FROM maint_job_executions e LEFT JOIN maint_job_orders o ON o.id=e.job_order_id
          WHERE e.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(e.branch_id, :branchIdsStr))`;
@@ -1296,6 +1426,7 @@ export const listJobExecutions = async (req, res, next) => {
     }
     sql += " ORDER BY e.created_at DESC LIMIT 200";
     const items = await query(sql, params);
+    await cacheSet(`maint_job_executions:company:${companyId}:branches:${branchIdsStr}`, items, 300);
     res.json({ items });
   } catch (err) {
     next(err);
@@ -1327,6 +1458,40 @@ export const getJobExecutionById = async (req, res, next) => {
 };
 
 // Record a new job execution/completion report
+
+async function ensureMaintMaterialUtilizationTables(companyId, branchId) {
+  await query(`CREATE TABLE IF NOT EXISTS maint_material_utilization (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    company_id BIGINT UNSIGNED NOT NULL,
+    branch_id BIGINT UNSIGNED NOT NULL,
+    utilization_no VARCHAR(50) NOT NULL,
+    utilization_date DATE NOT NULL,
+    execution_id INT NOT NULL,
+    warehouse_id BIGINT UNSIGNED DEFAULT NULL,
+    remarks TEXT,
+    status VARCHAR(30) DEFAULT 'DRAFT',
+    created_by BIGINT UNSIGNED DEFAULT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_maint_mu_scope_no (company_id, branch_id, utilization_no)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+
+  await query(`CREATE TABLE IF NOT EXISTS maint_material_utilization_items (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    utilization_id BIGINT UNSIGNED NOT NULL,
+    item_id INT NOT NULL,
+    item_name VARCHAR(255) DEFAULT NULL,
+    uom VARCHAR(50) DEFAULT 'PCS',
+    required_qty DECIMAL(10,2) NOT NULL DEFAULT 0,
+    qty_in_stock DECIMAL(10,2) DEFAULT 0,
+    cost_price DECIMAL(10,2) DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_maint_mu_id (utilization_id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+}
+
 export const createJobExecution = async (req, res, next) => {
   try {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
@@ -1414,6 +1579,7 @@ export const updateJobExecution = async (req, res, next) => {
         current_step: Number(b.current_step || 1),
       },
     );
+    await cacheDelPattern(`maint_job_executions:company:${companyId}:*`);
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -1425,6 +1591,10 @@ export const updateJobExecution = async (req, res, next) => {
 export const listBills = async (req, res, next) => {
   try {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+    const cacheKey = `maint_bills:company:${companyId}:branches:${branchIdsStr}`;
+    const cached = await cacheGet(cacheKey);
+    if (cached) return res.json({ items: cached });
+
     await ensureTables(companyId, branchId);
     const items = await query(`SELECT *,
           created_at,
@@ -1434,6 +1604,7 @@ export const listBills = async (req, res, next) => {
          WHERE company_id=:companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) ORDER BY created_at DESC LIMIT 200`,
       { companyId, branchId, branchIdsStr },
     );
+    await cacheSet(`maint_bills:company:${companyId}:branches:${branchIdsStr}`, items, 300);
     res.json({ items });
   } catch (err) {
     next(err);
@@ -1599,6 +1770,7 @@ export const updateBill = async (req, res, next) => {
         );
       }
     }
+    await cacheDelPattern(`maint_bills:company:${companyId}:*`);
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -1610,15 +1782,21 @@ export const updateBill = async (req, res, next) => {
 export const listSchedules = async (req, res, next) => {
   try {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+    const cacheKey = `maint_schedules:company:${companyId}:branches:${branchIdsStr}`;
+    const cached = await cacheGet(cacheKey);
+    if (cached) return res.json({ items: cached });
+
     await ensureTables(companyId, branchId);
-    const items = await query(`SELECT *,
-          created_at,
+    const items = await query(`SELECT m.id, m.company_id, m.branch_id, m.schedule_name, 
+          m.asset_id, m.asset_name, m.frequency, m.start_date, m.classification, m.category, m.group_name, m.maintenance_days, m.assigned_to, 
+          m.status, m.created_at, m.created_by,
           u.username AS created_by_name
-         FROM maint_schedules
-        LEFT JOIN adm_users u ON u.id = created_by
-         WHERE company_id=:companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) ORDER BY next_due_date ASC LIMIT 200`,
+         FROM maint_schedules m
+        LEFT JOIN adm_users u ON u.id = m.created_by
+         WHERE m.company_id=:companyId AND (:branchIdsStr = '' OR FIND_IN_SET(m.branch_id, :branchIdsStr)) ORDER BY m.start_date ASC LIMIT 200`,
       { companyId, branchId, branchIdsStr },
     );
+    await cacheSet(`maint_schedules:company:${companyId}:branches:${branchIdsStr}`, items, 300);
     res.json({ items });
   } catch (err) {
     next(err);
@@ -1652,7 +1830,7 @@ export const createSchedule = async (req, res, next) => {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     await ensureTables(companyId, branchId);
     const b = req.body || {};
-    const r = await query(`INSERT INTO maint_schedules (company_id,branch_id,schedule_name,asset_id,asset_name,frequency,next_due_date,assigned_to,description,status) VALUES (:companyId,:branchId,:schedule_name,:asset_id,:asset_name,:frequency,:next_due_date,:assigned_to,:description,:status)`,
+    const r = await query(`INSERT INTO maint_schedules (company_id,branch_id,schedule_name,asset_id,asset_name,frequency,start_date,classification,category,group_name,maintenance_days,assigned_to,description,status) VALUES (:companyId,:branchId,:schedule_name,:asset_id,:asset_name,:frequency,:start_date,:classification,:category,:group_name,:maintenance_days,:assigned_to,:description,:status)`,
       {
         companyId,
         branchId, branchIdsStr,
@@ -1660,7 +1838,11 @@ export const createSchedule = async (req, res, next) => {
         asset_id: toNumber(b.asset_id),
         asset_name: b.asset_name || null,
         frequency: b.frequency || null,
-        next_due_date: b.next_due_date || null,
+        start_date: b.start_date || null,
+        classification: b.classification || null,
+        category: b.category || null,
+        group_name: b.group_name || null,
+        maintenance_days: b.maintenance_days || null,
         assigned_to: b.assigned_to || null,
         description: b.description || null,
         status: b.status || "ACTIVE",
@@ -1678,7 +1860,7 @@ export const updateSchedule = async (req, res, next) => {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const id = toNumber(req.params.id);
     const b = req.body || {};
-    await query(`UPDATE maint_schedules SET schedule_name=:schedule_name,asset_id=:asset_id,asset_name=:asset_name,frequency=:frequency,next_due_date=:next_due_date,assigned_to=:assigned_to,description=:description,status=:status WHERE id=:id AND company_id=:companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
+    await query(`UPDATE maint_schedules SET schedule_name=:schedule_name,asset_id=:asset_id,asset_name=:asset_name,frequency=:frequency,start_date=:start_date,classification=:classification,category=:category,group_name=:group_name,maintenance_days=:maintenance_days,assigned_to=:assigned_to,description=:description,status=:status WHERE id=:id AND company_id=:companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
       {
         id,
         companyId,
@@ -1687,12 +1869,17 @@ export const updateSchedule = async (req, res, next) => {
         asset_id: toNumber(b.asset_id),
         asset_name: b.asset_name || null,
         frequency: b.frequency || null,
-        next_due_date: b.next_due_date || null,
+        start_date: b.start_date || null,
+        classification: b.classification || null,
+        category: b.category || null,
+        group_name: b.group_name || null,
+        maintenance_days: b.maintenance_days || null,
         assigned_to: b.assigned_to || null,
         description: b.description || null,
         status: b.status || "ACTIVE",
       },
     );
+    await cacheDelPattern(`maint_schedules:company:${companyId}:*`);
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -1704,6 +1891,10 @@ export const updateSchedule = async (req, res, next) => {
 export const listRosters = async (req, res, next) => {
   try {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+    const cacheKey = `maint_rosters:company:${companyId}:branches:${branchIdsStr}`;
+    const cached = await cacheGet(cacheKey);
+    if (cached) return res.json({ items: cached });
+
     await ensureTables(companyId, branchId);
     const items = await query(`SELECT *,
           created_at,
@@ -1713,6 +1904,7 @@ export const listRosters = async (req, res, next) => {
          WHERE company_id=:companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) ORDER BY period_start DESC LIMIT 200`,
       { companyId, branchId, branchIdsStr },
     );
+    await cacheSet(`maint_rosters:company:${companyId}:branches:${branchIdsStr}`, items, 300);
     res.json({ items });
   } catch (err) {
     next(err);
@@ -1783,6 +1975,7 @@ export const updateRoster = async (req, res, next) => {
         status: b.status || "DRAFT",
       },
     );
+    await cacheDelPattern(`maint_rosters:company:${companyId}:*`);
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -1794,6 +1987,10 @@ export const updateRoster = async (req, res, next) => {
 export const listEquipment = async (req, res, next) => {
   try {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+    const cacheKey = `maint_equipment:company:${companyId}:branches:${branchIdsStr}`;
+    const cached = await cacheGet(cacheKey);
+    if (cached) return res.json({ items: cached });
+
     await ensureTables(companyId, branchId);
     const items = await query(`SELECT *,
           created_at,
@@ -1803,6 +2000,7 @@ export const listEquipment = async (req, res, next) => {
          WHERE company_id=:companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) ORDER BY equipment_name ASC LIMIT 500`,
       { companyId, branchId, branchIdsStr },
     );
+    await cacheSet(`maint_equipment:company:${companyId}:branches:${branchIdsStr}`, items, 300);
     res.json({ items });
   } catch (err) {
     next(err);
@@ -1890,6 +2088,7 @@ export const updateEquipment = async (req, res, next) => {
         notes: b.notes || null,
       },
     );
+    await cacheDelPattern(`maint_equipment:company:${companyId}:*`);
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -1963,18 +2162,24 @@ export const createSetupItem = async (req, res, next) => {
       throw httpError(400, "VALIDATION_ERROR", "Item name is required");
 
     await ensureTables(companyId, branchId);
+    const userId = toNumber(req.scope?.userId) || toNumber(req.user?.id) || toNumber(req.user?.sub) || null;
+
     const result = await query(`INSERT INTO maint_setup_items
-        (company_id, branch_id, item_type, item_name, description, sort_order, is_active)
+        (company_id, branch_id, item_type, parent_id, item_name, description, email, currency_id, sort_order, is_active, created_by, updated_by)
        VALUES
-        (:companyId, :branchId, :itemType, :itemName, :description, :sortOrder, :isActive)`,
+        (:companyId, :branchId, :itemType, :parentId, :itemName, :description, :email, :currencyId, :sortOrder, :isActive, :userId, :userId)`,
       {
         companyId,
         branchId, branchIdsStr,
         itemType,
         itemName,
-        description: cleanText(body.description),
-        sortOrder: toNumber(body.sort_order, 0) || 0,
+        description: body.description ? String(body.description).trim() : null,
+        email: body.email ? String(body.email).slice(0, 255) : null,
+        parentId: body.parent_id ? Number(body.parent_id) : null,
+        currencyId: body.currency_id ? Number(body.currency_id) : null,
+        sortOrder: Number(body.sort_order) || 0,
         isActive: Number(body.is_active) === 0 ? 0 : 1,
+        userId,
       },
     );
     res.status(201).json({ id: result.insertId });
@@ -1997,25 +2202,33 @@ export const updateSetupItem = async (req, res, next) => {
     if (!itemName)
       throw httpError(400, "VALIDATION_ERROR", "Item name is required");
 
+    const userId = toNumber(req.scope?.userId) || toNumber(req.user?.id) || toNumber(req.user?.sub) || null;
     await ensureTables(companyId, branchId);
     await query(`UPDATE maint_setup_items
        SET item_name = :itemName,
+           parent_id = :parentId,
            description = :description,
+           email = :email,
+           currency_id = :currencyId,
            sort_order = :sortOrder,
-           is_active = :isActive
+           is_active = :isActive,
+           updated_by = :userId
        WHERE id = :id
          AND company_id = :companyId
          AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
          AND item_type = :itemType`,
       {
         id,
-        companyId,
-        branchId, branchIdsStr,
+        companyId, branchIdsStr,
         itemType,
         itemName,
-        description: cleanText(body.description),
-        sortOrder: toNumber(body.sort_order, 0) || 0,
+        parentId: body.parent_id ? Number(body.parent_id) : null,
+        description: body.description ? String(body.description).trim() : null,
+        email: body.email ? String(body.email).slice(0, 255) : null,
+        currencyId: body.currency_id ? Number(body.currency_id) : null,
+        sortOrder: Number(body.sort_order) || 0,
         isActive: Number(body.is_active) === 0 ? 0 : 1,
+        userId,
       },
     );
     res.json({ ok: true });
@@ -2931,3 +3144,45 @@ export const getMaintIssueToRequirementDetail = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+
+
+export const sendRFQEmail = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const id = Number(req.params.id);
+    if (!id || !Number.isFinite(id)) throw httpError(400, "VALIDATION_ERROR", "Invalid RFQ ID");
+
+    // 1. Get RFQ details
+    const [rfq] = await query(`SELECT * FROM maint_rfqs WHERE id = :id AND company_id = :companyId`, { id, companyId });
+    if (!rfq) throw httpError(404, "NOT_FOUND", "RFQ not found");
+
+    // 2. Get invited suppliers
+    const suppliers = await query(`SELECT supplier_name FROM maint_rfq_suppliers WHERE rfq_id = :id`, { id });
+    if (!suppliers.length) throw httpError(400, "BAD_REQUEST", "No suppliers invited to this RFQ");
+
+    const names = suppliers.map(s => s.supplier_name);
+
+    // 3. Match with setup items
+    const setupItems = await query(
+      `SELECT item_name, email FROM maint_setup_items WHERE company_id = :companyId AND item_type = 'SERVICE_PROVIDER' AND item_name IN (:names)`,
+      { companyId, names }
+    );
+
+    const emails = setupItems.filter(s => s.email).map(s => s.email);
+    if (!emails.length) {
+      throw httpError(400, "BAD_REQUEST", "None of the selected suppliers have an email configured in Setup > Service Providers");
+    }
+
+    // 4. Send email
+    await sendMail({
+      to: emails.join(','),
+      subject: `Maintenance RFQ: ${rfq.rfq_no}`,
+      text: `Dear Service Provider,\n\nPlease find the details for RFQ ${rfq.rfq_no}.\n\nScope of Work:\n${rfq.scope_of_work}\n\nResponse Deadline: ${rfq.response_deadline || 'N/A'}\n\nBest Regards.`,
+      html: `<p>Dear Service Provider,</p><p>Please find the details for RFQ <b>${rfq.rfq_no}</b>.</p><p><b>Scope of Work:</b><br/>${String(rfq.scope_of_work).replace(/\n/g, '<br/>')}</p><p><b>Response Deadline:</b> ${rfq.response_deadline || 'N/A'}</p><p>Best Regards.</p>`,
+    });
+
+    res.json({ ok: true, message: "Emails sent successfully to: " + emails.join(', ') });
+  } catch (err) {
+    next(err);
+  }
+};
