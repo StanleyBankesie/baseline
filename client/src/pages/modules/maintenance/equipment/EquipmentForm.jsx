@@ -111,15 +111,19 @@ export default function EquipmentForm() {
     }
   }
 
-  const selectedCls = catalog.classifications.find((c) => c.item_name === form.classification);
+  const selectedCls = catalog.classifications.find(
+    (c) => c.item_name === form.classification,
+  );
   const filteredCategories = selectedCls
     ? catalog.categories.filter((c) => c.parent_id === selectedCls.id)
-    : [];
+    : catalog.categories;
 
-  const selectedCat = catalog.categories.find((c) => c.item_name === form.category);
+  const selectedCat = catalog.categories.find(
+    (c) => c.item_name === form.category,
+  );
   const filteredGroups = selectedCat
     ? catalog.groups.filter((g) => g.parent_id === selectedCat.id)
-    : [];
+    : catalog.groups;
 
   return (
     <div className="space-y-6">
@@ -143,7 +147,7 @@ export default function EquipmentForm() {
           </div>
           <div className="card-body grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
-              <label className="label">Equipment Code/Tag</label>
+              <label className="label">Asset Code/Tag</label>
               <input
                 className="input"
                 value={form.equipment_code}
@@ -152,7 +156,7 @@ export default function EquipmentForm() {
               />
             </div>
             <div>
-              <label className="label">Equipment Name *</label>
+              <label className="label">Asset Name *</label>
               <input
                 className="input"
                 value={form.equipment_name}
@@ -162,7 +166,7 @@ export default function EquipmentForm() {
               />
             </div>
             <div>
-              <label className="label">Classification</label>
+              <label className="label">Asset Classification</label>
               <select
                 className="input w-52"
                 value={form.classification}
@@ -181,7 +185,7 @@ export default function EquipmentForm() {
               </select>
             </div>
             <div>
-              <label className="label">Category</label>
+              <label className="label">Asset Category</label>
               <select
                 className="input w-52"
                 value={form.category}
@@ -189,7 +193,6 @@ export default function EquipmentForm() {
                   update("category", e.target.value);
                   update("group_name", "");
                 }}
-                disabled={!form.classification}
               >
                 <option value="">-- Select Category --</option>
                 {filteredCategories.map((c) => (
@@ -200,12 +203,11 @@ export default function EquipmentForm() {
               </select>
             </div>
             <div>
-              <label className="label">Group</label>
+              <label className="label">Asset Group</label>
               <select
                 className="input w-52"
                 value={form.group_name}
                 onChange={(e) => update("group_name", e.target.value)}
-                disabled={!form.category}
               >
                 <option value="">-- Select Group --</option>
                 {filteredGroups.map((g) => (

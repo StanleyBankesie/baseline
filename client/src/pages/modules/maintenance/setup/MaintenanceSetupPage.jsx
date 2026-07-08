@@ -29,15 +29,12 @@ const TAB_LABELS = [
   { key: "classification-hierarchy", label: "Equip. Classification & Grouping" },
   { key: "status-types", label: "Status Types" },
   { key: "maintenance-types", label: "Maint. Types" },
+  { key: "maintenance-routines", label: "Maint. Routines" },
   { key: "priorities", label: "Priorities" },
-  { key: "supervisors", label: "Supervisors" },
   { key: "technicians", label: "Technicians" },
   { key: "teams", label: "Teams" },
   { key: "assignments", label: "Assignments" },
   { key: "service-providers", label: "Service Providers" },
-  { key: "job-order-types", label: "Job Order Types" },
-  { key: "notifications", label: "Notifications" },
-  { key: "scheduling", label: "Scheduling" },
 ];
 
 const EMPTY_ITEM = {
@@ -263,6 +260,7 @@ export default function MaintenanceSetupPage() {
   const [params, setParams] = useState(DEFAULT_PARAMS);
   const [catalogs, setCatalogs] = useState({
     maintenanceTypes: [],
+    maintenanceRoutines: [],
     priorities: [],
     executionTypes: [],
     sections: [],
@@ -279,6 +277,7 @@ export default function MaintenanceSetupPage() {
   const [currencies, setCurrencies] = useState([]);
   const [drafts, setDrafts] = useState({
     "maintenance-types": { ...EMPTY_ITEM },
+    "maintenance-routines": { ...EMPTY_ITEM },
     priorities: { ...EMPTY_ITEM },
     "execution-types": { ...EMPTY_ITEM },
     sections: { ...EMPTY_ITEM },
@@ -320,6 +319,7 @@ export default function MaintenanceSetupPage() {
 
     setCatalogs({
       maintenanceTypes: [],
+      maintenanceRoutines: [],
       priorities: [],
       executionTypes: [],
       sections: [],
@@ -380,6 +380,7 @@ export default function MaintenanceSetupPage() {
     setCatalogs((prev) => {
       const mapping = {
         "maintenance-types": "maintenanceTypes",
+        "maintenance-routines": "maintenanceRoutines",
         priorities: "priorities",
         "execution-types": "executionTypes",
         sections: "sections",
@@ -707,6 +708,24 @@ export default function MaintenanceSetupPage() {
               />
             </div>
           )}
+          {tab === "maintenance-routines" && (
+            <div className="space-y-8">
+              <SetupItemsEditor
+                title="Maintenance Routine"
+                description="Define reusable maintenance routines for maintenance schedules."
+                kind="maintenance-routines"
+                items={catalogs.maintenanceRoutines}
+                draft={drafts["maintenance-routines"]}
+                onDraftChange={setDraft}
+                onCreate={createItem}
+                onSave={saveItem}
+                onSaveAndReload={saveItemAndReload}
+                onDelete={deleteItem}
+                hideDescription
+                onOpenModal={openModal}
+              />
+            </div>
+          )}
           {tab === "priorities" && (
             <div className="space-y-8">
               <SetupItemsEditor
@@ -725,24 +744,7 @@ export default function MaintenanceSetupPage() {
               />
             </div>
           )}
-          {tab === "supervisors" && (
-            <div className="space-y-8">
-              <SetupItemsEditor
-                title="Supervisors"
-                description="Configure supervisor names for work orders."
-                kind="supervisors"
-                items={catalogs.supervisors}
-                draft={drafts.supervisors}
-                onDraftChange={setDraft}
-                onCreate={createItem}
-                onSave={saveItem}
-                onSaveAndReload={saveItemAndReload}
-                onDelete={deleteItem}
-                hideDescription
-                onOpenModal={openModal}
-              />
-            </div>
-          )}
+
           {tab === "technicians" && (
             <div className="space-y-8">
               <SetupItemsEditor
@@ -800,24 +802,7 @@ export default function MaintenanceSetupPage() {
               />
             </div>
           )}
-          {tab === "job-order-types" && (
-            <div className="space-y-8">
-              <SetupItemsEditor
-                title="Job Order Types"
-                description="Configure job order types (e.g. Planned, Adhoc)."
-                kind="job-order-types"
-                items={catalogs.jobOrderTypes}
-                draft={drafts["job-order-types"]}
-                onDraftChange={setDraft}
-                onCreate={createItem}
-                onSave={saveItem}
-                onSaveAndReload={saveItemAndReload}
-                onDelete={deleteItem}
-                hideDescription
-                onOpenModal={openModal}
-              />
-            </div>
-          )}
+
           {tab === "assignments" && (
             <div className="space-y-6">
               <div className="card bg-slate-50/50 dark:bg-slate-900/50 p-6 space-y-6 border-dashed">
@@ -928,48 +913,14 @@ export default function MaintenanceSetupPage() {
               </div>
             </div>
           )}
-          {tab === "notifications" && (
-            <div className="rounded-lg border border-slate-200 dark:border-slate-700 p-4 space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Notifications</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Configure alert and notification settings</p>
-              </div>
-              <div className="max-w-xl space-y-4">
-                <div>
-                  <label className="label">Master Alert Email</label>
-                  <input className="input w-full" type="email" value={params.notify_email} onChange={e => set("notify_email", e.target.value)} placeholder="maintenance@enterprise.com" />
-                  <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-tight">Receives global alerts for overdue schedules and critical faults.</p>
-                </div>
-              </div>
-            </div>
-          )}
-          {tab === "scheduling" && (
-            <div className="rounded-lg border border-slate-200 dark:border-slate-700 p-4 space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Scheduling</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Configure automatic scheduling settings</p>
-              </div>
-              <div className="max-w-xl space-y-4">
-                <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900 rounded-xl">
-                  <div>
-                    <div className="text-sm font-bold text-slate-900 dark:text-white">PM Auto-Generation</div>
-                    <div className="text-xs text-slate-500">Automatically spawn job orders from due PM schedules.</div>
-                  </div>
-                  <select className="input w-32" value={params.auto_schedule_enabled} onChange={e => set("auto_schedule_enabled", e.target.value)}>
-                    <option value="false">Off</option>
-                    <option value="true">On</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          )}
+
         </div>
       </div>
 
       <ModalForm
         open={!!modalKind}
         title={`Add ${TAB_LABELS.find(t => t.key === modalKind)?.label || ""}`}
-        hideDescription={["maintenance-types","priorities","brands","models","manufacturers","classifications","categories","groups","status-types","supervisors","technicians","teams","service-providers","job-order-types"].includes(modalKind)}
+        hideDescription={["maintenance-types","maintenance-routines","priorities","brands","models","manufacturers","classifications","categories","groups","status-types","technicians","teams","service-providers"].includes(modalKind)}
         showEmail={modalKind === "service-providers"}
         showCurrency={modalKind === "service-providers"}
         currencies={currencies}

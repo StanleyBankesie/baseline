@@ -14,6 +14,8 @@ export default function StockValueReportPage() {
   const [itemGroupId, setItemGroupId] = useState("");
   const [q, setQ] = useState("");
   const [itemOptions, setItemOptions] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [searchVal, setSearchVal] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -27,14 +29,22 @@ export default function StockValueReportPage() {
     ])
       .then(([whRes, igRes, svRes, itRes]) => {
         if (!mounted) return;
-        setWarehouses(Array.isArray(whRes?.data?.items) ? whRes.data.items : []);
-        setItemGroups(Array.isArray(igRes?.data?.items) ? igRes.data.items : []);
+        setWarehouses(
+          Array.isArray(whRes?.data?.items) ? whRes.data.items : [],
+        );
+        setItemGroups(
+          Array.isArray(igRes?.data?.items) ? igRes.data.items : [],
+        );
         setItems(Array.isArray(svRes?.data?.items) ? svRes.data.items : []);
-        setItemOptions(Array.isArray(itRes?.data?.items) ? itRes.data.items : []);
+        setItemOptions(
+          Array.isArray(itRes?.data?.items) ? itRes.data.items : [],
+        );
       })
       .catch((e) => {
         if (!mounted) return;
-        setError(e?.response?.data?.message || "Failed to load stock value report");
+        setError(
+          e?.response?.data?.message || "Failed to load stock value report",
+        );
       })
       .finally(() => {
         if (!mounted) return;
@@ -61,7 +71,9 @@ export default function StockValueReportPage() {
         }
       } catch (e) {
         if (!cancelled) {
-          setError(e?.response?.data?.message || "Failed to load stock value report");
+          setError(
+            e?.response?.data?.message || "Failed to load stock value report",
+          );
         }
       } finally {
         if (!cancelled) {
@@ -75,21 +87,55 @@ export default function StockValueReportPage() {
     };
   }, [warehouseId, itemGroupId, q]);
 
+  const itemSelectOptions = React.useMemo(() => {
+    if (!itemOptions) return [];
+    return itemOptions.map((p) => ({
+      value: String(p.id),
+      label: `${p.item_code} - ${p.item_name}`,
+      barcode: p.barcode,
+      item_code: p.item_code,
+      item_name: p.item_name,
+    }));
+  }, [itemOptions]);
+
+  const itemSearchResults = React.useMemo(() => {
+    if (!searchVal) return [];
+    const lower = searchVal.toLowerCase();
+    return itemSelectOptions.filter(
+      (o) =>
+        (o.barcode && o.barcode.toLowerCase() === lower) ||
+        (o.item_code && o.item_code.toLowerCase().includes(lower)) ||
+        (o.item_name && o.item_name.toLowerCase().includes(lower)),
+    );
+  }, [searchVal, itemSelectOptions]);
+
   const filtered = useMemo(() => {
     const key = q.trim().toLowerCase();
     return items.filter((r) => {
       if (!key) return true;
       return (
-        String(r.item_code || "").toLowerCase().includes(key) || 
-        String(r.item_name || "").toLowerCase().includes(key)
+        String(r.item_code || "")
+          .toLowerCase()
+          .includes(key) ||
+        String(r.item_name || "")
+          .toLowerCase()
+          .includes(key)
       );
     });
   }, [items, q]);
 
-  const { sorted: sorted_filtered, sortKey, sortDir, toggle } = useSort(filtered, "item_name", "asc");
+  const {
+    sorted: sorted_filtered,
+    sortKey,
+    sortDir,
+    toggle,
+  } = useSort(filtered, "item_name", "asc");
 
   const totalReportValue = useMemo(() => {
-    return sorted_filtered.reduce((sum, item) => sum + (Number(item.value) || 0), 0);
+    return sorted_filtered.reduce(
+      (sum, item) => sum + (Number(item.value) || 0),
+      0,
+    );
   }, [sorted_filtered]);
 
   return (
@@ -117,21 +163,71 @@ export default function StockValueReportPage() {
             <div className="text-red-600 text-sm mb-3">{error}</div>
           ) : null}
           <div className="flex flex-col md:flex-row gap-3 mb-4">
-            <input
-              type="text"
-              placeholder="Search item..."
-              className="input flex-1"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              list="stock_val_item_options"
-            />
-            <datalist id="stock_val_item_options">
-              {itemOptions.slice(0, 1000).map((it) => (
-                <option key={it.id} value={it.item_code}>
-                  {it.item_name}
-                </option>
-              ))}
-            </datalist>
+            <div className="relative flex-1">
+              <div className="relative w-full">
+                <input
+                  className="input pr-10 w-full"
+                  type="text"
+                  placeholder="Scan barcode or type..."
+                  value={searchVal}
+                  onChange={(e) => {
+                    setSearchVal(e.target.value);
+                    if (!e.target.value) setQ("");
+                    setShowDropdown(true);
+                  }}
+                  onFocus={() => setShowDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      if (!searchVal) {
+                        setQ("");
+                      } else if (itemSearchResults.length) {
+                        setQ(itemSearchResults[0].item_code);
+                        setSearchVal(itemSearchResults[0].item_name);
+                        setShowDropdown(false);
+                      }
+                    }
+                  }}
+                />
+                <div className="absolute right-3 top-3 text-slate-400">
+                  <svg
+                    width="20"
+                    height="20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              {showDropdown && searchVal && itemSearchResults.length > 0 ? (
+                <div className="absolute left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg max-h-60 overflow-y-auto z-50">
+                  {itemSearchResults.map((o) => (
+                    <button
+                      key={o.value}
+                      type="button"
+                      className="w-full text-left px-4 py-3 hover:bg-brand-50 dark:hover:bg-brand-900/20 border-b border-slate-100 dark:border-slate-700/50 last:border-0"
+                      onClick={() => {
+                        setQ(o.item_code);
+                        setSearchVal(o.item_name);
+                        setShowDropdown(false);
+                      }}
+                    >
+                      <div className="font-medium text-slate-900 dark:text-slate-100">
+                        {o.item_name}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
             <select
               className="input w-full md:w-64"
               value={itemGroupId}
@@ -160,16 +256,65 @@ export default function StockValueReportPage() {
             </select>
           </div>
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table table-fixed w-full">
               <thead>
                 <tr>
-                  <SortableHeader label="Item Code" sortKey="item_code" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="w-[14%] font-bold" />
-                  <SortableHeader label="Item Name" sortKey="item_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="w-[14%] font-bold" />
-                  <SortableHeader label="Item Group" sortKey="item_group" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="w-[14%] font-bold" />
-                  <SortableHeader label="Quantity" sortKey="qty" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="w-[14%] font-bold text-right" />
-                  <SortableHeader label="UOM" sortKey="uom" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="w-[14%] font-bold" />
-                  <SortableHeader label="Cost Price" sortKey="cost_price" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="w-[14%] font-bold text-right" />
-                  <SortableHeader label="Total Value" sortKey="value" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="w-[14%] font-bold text-right" />
+                  <SortableHeader
+                    label="Item Code"
+                    sortKey="item_code"
+                    currentKey={sortKey}
+                    direction={sortDir}
+                    onToggle={toggle}
+                    className="w-[14.3%] font-bold"
+                  />
+                  <SortableHeader
+                    label="Item Name"
+                    sortKey="item_name"
+                    currentKey={sortKey}
+                    direction={sortDir}
+                    onToggle={toggle}
+                    className="w-[14.3%] font-bold"
+                  />
+                  <SortableHeader
+                    label="Item Group"
+                    sortKey="item_group"
+                    currentKey={sortKey}
+                    direction={sortDir}
+                    onToggle={toggle}
+                    className="w-[14.3%] font-bold"
+                  />
+                  <SortableHeader
+                    label="Quantity"
+                    sortKey="qty"
+                    currentKey={sortKey}
+                    direction={sortDir}
+                    onToggle={toggle}
+                    className="w-[14.3%] font-bold text-right"
+                  />
+                  <SortableHeader
+                    label="UOM"
+                    sortKey="uom"
+                    currentKey={sortKey}
+                    direction={sortDir}
+                    onToggle={toggle}
+                    className="w-[14.3%] font-bold"
+                  />
+                  <SortableHeader
+                    label="Cost Price"
+                    sortKey="cost_price"
+                    currentKey={sortKey}
+                    direction={sortDir}
+                    onToggle={toggle}
+                    className="w-[14.3%] font-bold text-right"
+                  />
+                  <SortableHeader
+                    label="Total Value"
+                    sortKey="value"
+                    currentKey={sortKey}
+                    direction={sortDir}
+                    onToggle={toggle}
+                    className="w-[14.3%] font-bold text-right"
+                  />
                 </tr>
               </thead>
               <tbody>
@@ -219,7 +364,9 @@ export default function StockValueReportPage() {
               {!loading && filtered.length > 0 && (
                 <tfoot>
                   <tr className="bg-slate-50 dark:bg-slate-800/50 font-bold">
-                    <td colSpan="6" className="text-right py-3">Total Value:</td>
+                    <td colSpan="6" className="text-right py-3">
+                      Total Value:
+                    </td>
                     <td className="text-right text-brand-600 dark:text-brand-400 py-3">
                       {totalReportValue.toLocaleString(undefined, {
                         minimumFractionDigits: 2,

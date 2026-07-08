@@ -12,6 +12,7 @@ import {
   getSalesReport,
   getPurchaseReport,
   getInventoryReport,
+  getHomeOverview,
 } from "../controllers/bi.controller.js";
 
 const router = express.Router();
@@ -25,6 +26,15 @@ router.get(
   requireBranchScope,
   requirePermission("BI.DASHBOARD.VIEW"),
   (req, res, next) => getDashboards(req, res, next),
+);
+
+// GET /home-overview - Fetch overview data for the home page
+router.get(
+  "/home-overview",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  (req, res, next) => getHomeOverview(req, res, next),
 );
 
 // ===== REPORTS =====
@@ -74,7 +84,7 @@ router.get("/dashboard-stats", requireAuth, requireCompanyScope, requireBranchSc
       // Calculate total sales amount and count for last 30 days
       const [s] = await query(
         "SELECT COUNT(*) as count, COALESCE(SUM(total_amount),0) as total FROM sal_invoices WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) AND invoice_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)",
-        { companyId, branchId },
+        { companyId, branchId, branchIdsStr },
       );
       dashboards = 1;
       salesTotal = Number(s.total || 0);
@@ -83,7 +93,7 @@ router.get("/dashboard-stats", requireAuth, requireCompanyScope, requireBranchSc
       // Calculate total purchase amount for last 30 days
       const [p] = await query(
         "SELECT COALESCE(SUM(total_amount),0) as total FROM pur_orders WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) AND po_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)",
-        { companyId, branchId },
+        { companyId, branchId, branchIdsStr },
       );
       purchaseTotal = Number(p.total || 0);
     } catch {}
@@ -91,7 +101,7 @@ router.get("/dashboard-stats", requireAuth, requireCompanyScope, requireBranchSc
       // Get unique inventory item count
       const [inv] = await query(
         "SELECT COUNT(DISTINCT item_id) as count FROM inv_stock_balances WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))",
-        { companyId, branchId },
+        { companyId, branchId, branchIdsStr },
       );
       inventoryItems = Number(inv.count || 0);
     } catch {}
@@ -99,7 +109,7 @@ router.get("/dashboard-stats", requireAuth, requireCompanyScope, requireBranchSc
       // Get active employee count
       const [hr] = await query(
         "SELECT COUNT(*) as count FROM hr_employees WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) AND status IN ('ACTIVE','PROBATION') AND deleted_at IS NULL",
-        { companyId, branchId },
+        { companyId, branchId, branchIdsStr },
       );
       hrEmployees = Number(hr.count || 0);
     } catch {}

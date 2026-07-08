@@ -42,33 +42,93 @@ export default function MaintenanceScheduleForm() {
     asset_name: "",
     frequency: "Monthly",
     start_date: "",
+    end_date: "",
     classification: "",
     category: "",
     group_name: "",
     maintenance_days: "",
+    maintenance_routine: "",
     assigned_to: "",
     description: "",
     status: "ACTIVE",
+    tasks: [],
+    selected_assets: [],
   });
   const [equipment, setEquipment] = useState([]);
   const [teams, setTeams] = useState([]);
   const [classifications, setClassifications] = useState([]);
   const [categories, setCategories] = useState([]);
   const [groups, setGroups] = useState([]);
+  const [maintenanceRoutines, setMaintenanceRoutines] = useState([]);
   const [saving, setSaving] = useState(false);
   const update = (k, v) => setForm((p) => ({ ...p, [k]: v }));
+
+  const addTask = () => {
+    setForm((p) => ({
+      ...p,
+      tasks: [
+        ...(p.tasks || []),
+        { id: Date.now(), task_description: "", estimated_duration: "" },
+      ],
+    }));
+  };
+
+  const removeTask = (id) => {
+    setForm((p) => ({
+      ...p,
+      tasks: (p.tasks || []).filter((t) => t.id !== id),
+    }));
+  };
+
+  const updateTask = (id, field, value) => {
+    setForm((p) => ({
+      ...p,
+      tasks: (p.tasks || []).map((t) =>
+        t.id === id ? { ...t, [field]: value } : t,
+      ),
+    }));
+  };
+
+  /* Equipment filtering for temporal multi-select */
+  const availableAssets = equipment.filter(
+    (eq) =>
+      (!form.group_name || eq.group_name === form.group_name) &&
+      !(form.selected_assets || []).includes(eq.id),
+  );
+  const confirmedAssets = equipment.filter((eq) =>
+    (form.selected_assets || []).includes(eq.id),
+  );
+
+  const addAsset = (eqId) => {
+    update("selected_assets", [...(form.selected_assets || []), eqId]);
+  };
+  const removeAsset = (eqId) => {
+    update(
+      "selected_assets",
+      (form.selected_assets || []).filter((id) => id !== eqId),
+    );
+  };
+  const addAllAssets = () => {
+    update("selected_assets", [
+      ...(form.selected_assets || []),
+      ...availableAssets.map((a) => a.id),
+    ]);
+  };
+  const removeAllAssets = () => {
+    update("selected_assets", []);
+  };
 
   const selectedClass = classifications.find(
     (c) => c.item_name === form.classification,
   );
   const filteredCategories = selectedClass
     ? categories.filter((c) => c.parent_id === selectedClass.id)
-    : [];
+    : categories;
 
   const selectedCat = categories.find((c) => c.item_name === form.category);
   const filteredGroups = selectedCat
     ? groups.filter((g) => g.parent_id === selectedCat.id)
-    : [];
+    : groups;
 
   const handleDayChange = (day, isChecked) => {
     // kept for backward compatibility but not used with select
@@ -89,6 +149,9 @@ export default function MaintenanceScheduleForm() {
           setClassifications(setupRes.data?.catalogs?.classifications || []);
           setCategories(setupRes.data?.catalogs?.categories || []);
           setGroups(setupRes.data?.catalogs?.groups || []);
+          setMaintenanceRoutines(
+            setupRes.data?.catalogs?.maintenanceRoutines || [],
+          );
         }
       })
       .catch(() => {});
@@ -102,6 +165,16 @@ export default function MaintenanceScheduleForm() {
               ...p,
               ...item,
               start_date: (item.start_date || "").slice(0, 10),
+              end_date: (item.end_date || "").slice(0, 10),
+              tasks:
+                typeof item.tasks === "string"
+                  ? JSON.parse(item.tasks)
+                  : item.tasks || [],
+              selected_assets: item.selected_assets
+                ? typeof item.selected_assets === "string"
+                  ? JSON.parse(item.selected_assets)
+                  : item.selected_assets
+                : [],
             }));
         })
         .catch(() => toast.error("Failed to load"));
@@ -162,7 +235,7 @@ export default function MaintenanceScheduleForm() {
               />
             </div>
             <div>
-              <label className="label">Classification</label>
+              <label className="label">Asset Classification</label>
               <select
                 className="input w-56"
                 value={form.classification}
@@ -181,7 +254,7 @@ export default function MaintenanceScheduleForm() {
               </select>
             </div>
             <div>
-              <label className="label">Category</label>
+              <label className="label">Asset Category</label>
               <select
                 className="input w-56"
                 value={form.category}
@@ -189,7 +262,6 @@ export default function MaintenanceScheduleForm() {
                   update("category", e.target.value);
                   update("group_name", ""); // reset child
                 }}
-                disabled={!form.classification}
               >
                 <option value="">-- Select Category --</option>
                 {filteredCategories.map((c) => (
@@ -200,12 +272,11 @@ export default function MaintenanceScheduleForm() {
               </select>
             </div>
             <div>
-              <label className="label">Group</label>
+              <label className="label">Asset Group</label>
               <select
                 className="input w-56"
                 value={form.group_name}
                 onChange={(e) => update("group_name", e.target.value)}
-                disabled={!form.category}
               >
                 <option value="">-- Select Group --</option>
                 {filteredGroups.map((g) => (
@@ -215,21 +286,95 @@ export default function MaintenanceScheduleForm() {
                 ))}
               </select>
             </div>
-            <div>
-              <label className="label">Equipment / Asset</label>
-              <select
-                className="input w-56"
-                value={form.asset_name}
-                onChange={(e) => update("asset_name", e.target.value)}
-              >
-                <option value="">-- Select --</option>
-                {equipment.map((eq) => (
-                  <option key={eq.id} value={eq.equipment_name}>
-                    {eq.equipment_code} – {eq.equipment_name}
-                  </option>
-                ))}
-              </select>
+
+            <div className="md:col-span-3 mt-2">
+              <label className="label">Select Assets</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Available Assets */}
+                <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white dark:bg-slate-800">
+                  <div className="bg-slate-50 dark:bg-slate-800/80 px-3 py-2 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                      Available Assets{" "}
+                      {form.group_name && `(${form.group_name})`}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={addAllAssets}
+                      className="text-xs text-brand-600 hover:text-brand-700 font-medium"
+                    >
+                      Select All
+                    </button>
+                  </div>
+                  <ul className="h-48 overflow-y-auto p-2 space-y-1">
+                    {availableAssets.length === 0 && (
+                      <li className="text-xs text-slate-400 p-2 text-center">
+                        No available assets match the group.
+                      </li>
+                    )}
+                    {availableAssets.map((eq) => (
+                      <li
+                        key={eq.id}
+                        className="flex justify-between items-center p-2 hover:bg-slate-50 dark:hover:bg-slate-700 rounded text-sm group"
+                      >
+                        <span className="truncate pr-2">
+                          {eq.equipment_name}{" "}
+                          {eq.equipment_code ? `(${eq.equipment_code})` : ""}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => addAsset(eq.id)}
+                          className="text-brand-500 opacity-0 group-hover:opacity-100 transition-opacity font-bold"
+                        >
+                          →
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Confirmed Assets */}
+                <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-brand-50/30 dark:bg-brand-900/10">
+                  <div className="bg-brand-100/50 dark:bg-brand-900/30 px-3 py-2 border-b border-brand-200 dark:border-brand-800 flex justify-between items-center">
+                    <span className="text-xs font-semibold text-brand-700 dark:text-brand-300">
+                      Confirmed Assets
+                    </span>
+                    <button
+                      type="button"
+                      onClick={removeAllAssets}
+                      className="text-xs text-red-500 hover:text-red-600 font-medium"
+                    >
+                      Remove All
+                    </button>
+                  </div>
+                  <ul className="h-48 overflow-y-auto p-2 space-y-1">
+                    {confirmedAssets.length === 0 && (
+                      <li className="text-xs text-slate-400 p-2 text-center">
+                        No assets confirmed yet.
+                      </li>
+                    )}
+                    {confirmedAssets.map((eq) => (
+                      <li
+                        key={eq.id}
+                        className="flex justify-between items-center p-2 hover:bg-brand-50 dark:hover:bg-brand-900/40 rounded text-sm border border-transparent hover:border-brand-200 dark:hover:border-brand-700 group"
+                      >
+                        <span className="truncate pr-2">
+                          {eq.equipment_name}{" "}
+                          {eq.equipment_code ? `(${eq.equipment_code})` : ""}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeAsset(eq.id)}
+                          className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity font-bold"
+                        >
+                          ×
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             </div>
+
             <div>
               <label className="label">Frequency</label>
               <select
@@ -253,21 +398,14 @@ export default function MaintenanceScheduleForm() {
                 onChange={(e) => update("start_date", e.target.value)}
               />
             </div>
-
             <div>
-              <label className="label">Assigned To</label>
-              <select
+              <label className="label">End Date</label>
+              <input
                 className="input w-56"
-                value={form.assigned_to}
-                onChange={(e) => update("assigned_to", e.target.value)}
-              >
-                <option value="">-- Select Team --</option>
-                {teams.map((t) => (
-                  <option key={t.id} value={t.item_name}>
-                    {t.item_name}
-                  </option>
-                ))}
-              </select>
+                type="date"
+                value={form.end_date}
+                onChange={(e) => update("end_date", e.target.value)}
+              />
             </div>
             <div>
               <label className="label">Status</label>
@@ -284,9 +422,9 @@ export default function MaintenanceScheduleForm() {
               </select>
             </div>
           </div>
-          <div className="card-body">
+          <div className="card-body grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label className="label">Maintenance Day</label>
+              <label className="label">Maintenance Days</label>
               <select
                 className="input w-56"
                 value={form.maintenance_days}
@@ -300,6 +438,21 @@ export default function MaintenanceScheduleForm() {
                 ))}
               </select>
             </div>
+            <div>
+              <label className="label">Maintenance Routine</label>
+              <select
+                className="input w-56"
+                value={form.maintenance_routine}
+                onChange={(e) => update("maintenance_routine", e.target.value)}
+              >
+                <option value="">-- Select Routine --</option>
+                {maintenanceRoutines.map((routine) => (
+                  <option key={routine.id} value={routine.item_name}>
+                    {routine.item_name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* <div className="card-header bg-brand text-white font-semibold mt-4">
@@ -308,14 +461,92 @@ export default function MaintenanceScheduleForm() {
         </div>
 
         <div className="card">
+          <div className="card-header bg-brand text-white rounded-t-lg font-semibold flex items-center justify-between">
+            <span>Maintenance Tasks</span>
+            <button
+              type="button"
+              onClick={addTask}
+              className="text-sm bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded transition-colors"
+            >
+              + Add Task
+            </button>
+          </div>
           <div className="card-body">
-            <label className="label">Description</label>
-            <textarea
-              className="input w-full"
-              rows={6}
-              value={form.description}
-              onChange={(e) => update("description", e.target.value)}
-            />
+            {!form.tasks || form.tasks.length === 0 ? (
+              <div className="text-sm text-slate-500 py-6 text-center border rounded">
+                No tasks added yet. Click <strong>+ Add Task</strong> to create
+                one.
+              </div>
+            ) : (
+              <div className="border rounded-md overflow-hidden">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-slate-50 dark:bg-slate-800">
+                    <tr>
+                      <th className="px-3 py-2 font-semibold text-slate-700 dark:text-slate-300">
+                        #
+                      </th>
+                      <th className="px-3 py-2 font-semibold text-slate-700 dark:text-slate-300">
+                        Task Description
+                      </th>
+                      <th className="px-3 py-2 font-semibold text-slate-700 dark:text-slate-300 w-48">
+                        Est. Duration (hrs)
+                      </th>
+                      <th className="px-3 py-2 w-12"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {form.tasks.map((task, idx) => (
+                      <tr key={task.id}>
+                        <td className="px-3 py-2 text-slate-400 font-mono text-xs">
+                          {idx + 1}
+                        </td>
+                        <td className="px-3 py-2">
+                          <input
+                            className="input w-full"
+                            value={task.task_description}
+                            onChange={(e) =>
+                              updateTask(
+                                task.id,
+                                "task_description",
+                                e.target.value,
+                              )
+                            }
+                            placeholder="Describe the maintenance task..."
+                          />
+                        </td>
+                        <td className="px-3 py-2">
+                          <input
+                            className="input w-full"
+                            type="number"
+                            step="0.5"
+                            min="0"
+                            value={task.estimated_duration}
+                            onChange={(e) =>
+                              updateTask(
+                                task.id,
+                                "estimated_duration",
+                                e.target.value,
+                              )
+                            }
+                            placeholder="e.g. 1.5"
+                          />
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          <button
+                            type="button"
+                            onClick={() => removeTask(task.id)}
+                            className="text-red-400 hover:text-red-600 text-lg leading-none font-bold"
+                            title="Remove Task"
+                          >
+                            ×
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
         <div className="flex justify-end gap-2">

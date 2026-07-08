@@ -57,7 +57,7 @@ export default function MaintenanceJobOrderForm() {
   const [requests, setRequests] = useState([]);
   const [equipment, setEquipment] = useState([]);
   const [orderCategory, setOrderCategory] = useState("INTERNAL");
-  const [setupCatalogs, setSetupCatalogs] = useState({ supervisors: [], technicians: [], teams: [], serviceProviders: [], jobOrderTypes: [] });
+  const [setupCatalogs, setSetupCatalogs] = useState({ supervisors: [], technicians: [], teams: [], serviceProviders: [], maintenanceTypes: [] });
   const [saving, setSaving] = useState(false);
   const update = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
@@ -87,7 +87,7 @@ export default function MaintenanceJobOrderForm() {
             technicians: Array.isArray(c.technicians) ? c.technicians : [],
             teams: Array.isArray(c.teams) ? c.teams : [],
             serviceProviders: Array.isArray(c.serviceProviders) ? c.serviceProviders : [],
-            jobOrderTypes: Array.isArray(c.jobOrderTypes) ? c.jobOrderTypes : [],
+            maintenanceTypes: Array.isArray(c.maintenanceTypes) ? c.maintenanceTypes : [],
           });
         }
       })
@@ -206,14 +206,14 @@ export default function MaintenanceJobOrderForm() {
               />
             </div>
             <div>
-              <label className="label">Job Order Type <span className="text-red-500">*</span></label>
+              <label className="label">Maintenance Type <span className="text-red-500">*</span></label>
               <select
                 className="input w-full"
                 value={form.job_order_type}
                 onChange={(e) => update("job_order_type", e.target.value)}
               >
                 <option value="">-- Select Type --</option>
-                {setupCatalogs.jobOrderTypes.filter(t => t.is_active).map(t => (
+                {(setupCatalogs.maintenanceTypes || []).filter(t => t.is_active).map(t => (
                   <option key={t.id} value={t.item_name}>{t.item_name}</option>
                 ))}
               </select>

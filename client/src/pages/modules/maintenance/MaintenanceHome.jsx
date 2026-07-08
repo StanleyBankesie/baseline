@@ -41,6 +41,7 @@ import MaintenanceMaterialRequisitionList from "./material-requisitions/Maintena
 import MaintenanceMaterialRequisitionForm from "./material-requisitions/MaintenanceMaterialRequisitionForm.jsx";
 import MaterialReceiptList from "./material-receipt/MaterialReceiptList.jsx";
 import MaterialReceiptForm from "./material-receipt/MaterialReceiptForm.jsx";
+import MaintenanceDashboardPage from "./MaintenanceDashboardPage.jsx";
 
 function MaintenanceLanding() {
   const [stats, setStats] = React.useState([
@@ -192,12 +193,6 @@ function MaintenanceLanding() {
       title: "Preventive Maintenance",
       items: [
         buildFeature(
-          "PM Schedules",
-          "/maintenance/pm-schedules",
-          "Define preventive maintenance schedules",
-          "🗓",
-        ),
-        buildFeature(
           "Maintenance Schedules",
           "/maintenance/schedules",
           "Manage ad-hoc schedules",
@@ -235,6 +230,14 @@ function MaintenanceLanding() {
       title="Maintenance"
       description="Asset maintenance and work order management"
       stats={stats}
+      moduleKey="maintenance"
+      headerActions={[
+        {
+          label: "Dashboard",
+          path: "/maintenance/dashboard",
+          icon: "📊",
+        },
+      ]}
       sections={sections}
       features={maintenanceFeatures}
     />
@@ -250,6 +253,7 @@ export default function MaintenanceHome() {
   return (
     <Routes>
       <Route path="/" element={<MaintenanceLanding />} />
+      <Route path="dashboard" element={<MaintenanceDashboardPage />} />
 
       <Route path="/assets" element={<AssetList />} />
       <Route path="/assets/new" element={<AssetForm />} />
@@ -333,12 +337,6 @@ export default function MaintenanceHome() {
 }
 
 export const maintenanceFeatures = [
-  {
-    module_key: "maintenance",
-    label: "PM Schedules",
-    path: "/maintenance/pm-schedules",
-    type: "feature",
-  },
   {
     module_key: "maintenance",
     label: "Maintenance Reports",

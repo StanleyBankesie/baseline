@@ -33,6 +33,62 @@ async function safeQuery(sql, params, fallbackRows) {
  * @param {import('express').Response} res - The Express response object.
  * @param {import('express').NextFunction} next - The Express next middleware function.
  */
+// Home Overview Endpoint
+export const getHomeOverview = async (req, res, next) => {
+  try {
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+    
+    const [todaySalesData] = await safeQuery(
+      `SELECT SUM(total_amount) as total FROM sal_invoices 
+       WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) AND DATE(invoice_date) = CURDATE()`,
+      { companyId, branchId, branchIdsStr },
+      [{ total: 0 }]
+    );
+    const todaySales = Number(todaySalesData?.total || 0);
+
+    const [customersData] = await safeQuery(
+      `SELECT COUNT(*) as count FROM sal_customers 
+       WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) AND is_active = 1`,
+      { companyId, branchId, branchIdsStr },
+      [{ count: 0 }]
+    );
+    const totalCustomers = Number(customersData?.count || 0);
+
+    const [avgOrderData] = await safeQuery(
+      `SELECT AVG(total_amount) as avg FROM sal_invoices 
+       WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
+      { companyId, branchId, branchIdsStr },
+      [{ avg: 0 }]
+    );
+    const averageOrder = Number(avgOrderData?.avg || 0);
+
+    const [monthlyRevData] = await safeQuery(
+      `SELECT SUM(total_amount) as total FROM sal_invoices 
+       WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) AND MONTH(invoice_date) = MONTH(CURDATE()) AND YEAR(invoice_date) = YEAR(CURDATE())`,
+      { companyId, branchId, branchIdsStr },
+      [{ total: 0 }]
+    );
+    const monthlyRevenue = Number(monthlyRevData?.total || 0);
+
+    const badges = {
+      "today-sales": { text: "vs Yesterday" },
+      "total-customers": { text: "Active" },
+      "average-order": { text: "Lifetime" },
+      "monthly-revenue": { text: "This Month" },
+    };
+
+    res.json({
+      todaySales,
+      totalCustomers,
+      averageOrder,
+      monthlyRevenue,
+      badges
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // Dashboard Endpoint - Main Statistics
 export const getDashboards = async (req, res, next) => {
   try {

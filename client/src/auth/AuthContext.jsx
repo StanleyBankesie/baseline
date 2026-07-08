@@ -23,10 +23,58 @@ import {
 
 const AuthContext = createContext(null);
 
+function toPositiveNumber(value) {
+  const num = Number(value);
+  return Number.isFinite(num) && num > 0 ? num : null;
+}
+
+function resolveScope(userCandidate, preferredScope = {}) {
+  const allowedCompanyIds = Array.isArray(userCandidate?.companyIds)
+    ? userCandidate.companyIds.map((id) => Number(id)).filter((id) => id > 0)
+    : [];
+  const allowedBranchIds = Array.isArray(userCandidate?.branchIds)
+    ? userCandidate.branchIds.map((id) => Number(id)).filter((id) => id > 0)
+    : [];
+
+  let companyId = toPositiveNumber(
+    preferredScope?.companyId ??
+      userCandidate?.company_id ??
+      userCandidate?.companyId,
+  );
+  let branchId = toPositiveNumber(
+    preferredScope?.branchId ??
+      userCandidate?.branch_id ??
+      userCandidate?.branchId,
+  );
+
+  if (allowedCompanyIds.length && !allowedCompanyIds.includes(companyId)) {
+    companyId = allowedCompanyIds[0] || null;
+  }
+  if (allowedBranchIds.length && !allowedBranchIds.includes(branchId)) {
+    branchId = allowedBranchIds[0] || null;
+  }
+
+  if (!companyId) {
+    companyId =
+      allowedCompanyIds[0] ||
+      toPositiveNumber(userCandidate?.company_id ?? userCandidate?.companyId);
+  }
+  if (!branchId) {
+    branchId =
+      allowedBranchIds[0] ||
+      toPositiveNumber(userCandidate?.branch_id ?? userCandidate?.branchId);
+  }
+
+  return {
+    companyId: companyId || null,
+    branchId: branchId || null,
+  };
+}
+
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
-  const [scope, setScope] = useState({ companyId: 1, branchId: 1 });
+  const [scope, setScope] = useState({ companyId: null, branchId: null });
   const [initialized, setInitialized] = useState(false);
   const [access, setAccess] = useState({ patterns: [], modules: [] });
 
@@ -35,9 +83,7 @@ export function AuthProvider({ children }) {
     if (current?.user && current?.token) {
       setToken(current.token);
       setUser(current.user);
-      if (current.scope) {
-        setScope((prev) => ({ ...prev, ...current.scope }));
-      }
+      setScope(resolveScope(current.user, current.scope));
       return;
     }
     if (current) {
@@ -65,6 +111,7 @@ export function AuthProvider({ children }) {
       try {
         const res = await api.get("/auth/me");
         const nextUser = res?.data?.user || null;
+        const nextScope = resolveScope(nextUser, res?.data?.scope || current?.scope);
         if (!active) return;
         if (!nextUser?.id) {
           clearStoredAuth();
@@ -73,7 +120,11 @@ export function AuthProvider({ children }) {
           setInitialized(true);
           return;
         }
-        setUser(nextUser);
+        setUser({
+          ...(current?.user || {}),
+          ...nextUser,
+        });
+        setScope(nextScope);
         setInitialized(true);
       } catch {
         if (!active) return;
@@ -162,7 +213,7 @@ export function AuthProvider({ children }) {
       if (!nextToken) {
         throw new Error("Missing access token in login response");
       }
-      const initialScope = { companyId: 1, branchId: 1 };
+      const initialScope = resolveScope(nextUser);
       
       // Start grace period to suppress transient 401s from data endpoints 
       // while React re-renders and flushes new requests.
