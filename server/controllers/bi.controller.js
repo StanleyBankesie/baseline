@@ -44,7 +44,34 @@ export const getHomeOverview = async (req, res, next) => {
       { companyId, branchId, branchIdsStr },
       [{ total: 0 }]
     );
-    const todaySales = Number(todaySalesData?.total || 0);
+    const [todayPosData] = await safeQuery(
+      `SELECT SUM(net_amount) as total FROM pos_sales 
+       WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) AND DATE(sale_datetime) = CURDATE() AND status != 'VOID'`,
+      { companyId, branchId, branchIdsStr },
+      [{ total: 0 }]
+    );
+    const todaySales = Number(todaySalesData?.total || 0) + Number(todayPosData?.total || 0);
+
+    const [lastMonthSalesData] = await safeQuery(
+      `SELECT SUM(total_amount) as total FROM sal_invoices 
+       WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) AND DATE(invoice_date) = DATE_SUB(CURDATE(), INTERVAL 1 MONTH)`,
+      { companyId, branchId, branchIdsStr },
+      [{ total: 0 }]
+    );
+    const [lastMonthPosData] = await safeQuery(
+      `SELECT SUM(net_amount) as total FROM pos_sales 
+       WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) AND DATE(sale_datetime) = DATE_SUB(CURDATE(), INTERVAL 1 MONTH) AND status != 'VOID'`,
+      { companyId, branchId, branchIdsStr },
+      [{ total: 0 }]
+    );
+    const lastMonthSales = Number(lastMonthSalesData?.total || 0) + Number(lastMonthPosData?.total || 0);
+
+    let todaySalesPct = 0;
+    if (lastMonthSales > 0) {
+      todaySalesPct = Math.round(((todaySales - lastMonthSales) / lastMonthSales) * 100);
+    } else if (todaySales > 0) {
+      todaySalesPct = 100; // 100% increase if last month was 0 but today is > 0
+    }
 
     const [customersData] = await safeQuery(
       `SELECT COUNT(*) as count FROM sal_customers 
@@ -55,12 +82,20 @@ export const getHomeOverview = async (req, res, next) => {
     const totalCustomers = Number(customersData?.count || 0);
 
     const [avgOrderData] = await safeQuery(
-      `SELECT AVG(total_amount) as avg FROM sal_invoices 
+      `SELECT SUM(total_amount) as total, COUNT(*) as count FROM sal_invoices 
        WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
       { companyId, branchId, branchIdsStr },
-      [{ avg: 0 }]
+      [{ total: 0, count: 0 }]
     );
-    const averageOrder = Number(avgOrderData?.avg || 0);
+    const [avgPosData] = await safeQuery(
+      `SELECT SUM(net_amount) as total, COUNT(*) as count FROM pos_sales 
+       WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) AND status != 'VOID'`,
+      { companyId, branchId, branchIdsStr },
+      [{ total: 0, count: 0 }]
+    );
+    const totalOrderAmount = Number(avgOrderData?.total || 0) + Number(avgPosData?.total || 0);
+    const totalOrderCount = Number(avgOrderData?.count || 0) + Number(avgPosData?.count || 0);
+    const averageOrder = totalOrderCount > 0 ? (totalOrderAmount / totalOrderCount) : 0;
 
     const [monthlyRevData] = await safeQuery(
       `SELECT SUM(total_amount) as total FROM sal_invoices 
@@ -68,10 +103,16 @@ export const getHomeOverview = async (req, res, next) => {
       { companyId, branchId, branchIdsStr },
       [{ total: 0 }]
     );
-    const monthlyRevenue = Number(monthlyRevData?.total || 0);
+    const [monthlyPosData] = await safeQuery(
+      `SELECT SUM(net_amount) as total FROM pos_sales 
+       WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) AND MONTH(sale_datetime) = MONTH(CURDATE()) AND YEAR(sale_datetime) = YEAR(CURDATE()) AND status != 'VOID'`,
+      { companyId, branchId, branchIdsStr },
+      [{ total: 0 }]
+    );
+    const monthlyRevenue = Number(monthlyRevData?.total || 0) + Number(monthlyPosData?.total || 0);
 
     const badges = {
-      "today-sales": { text: "vs Yesterday" },
+      "today-sales": { text: `${todaySalesPct >= 0 ? '+' : ''}${todaySalesPct}% vs last month` },
       "total-customers": { text: "Active" },
       "average-order": { text: "Lifetime" },
       "monthly-revenue": { text: "This Month" },
