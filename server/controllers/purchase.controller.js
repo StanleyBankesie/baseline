@@ -63,6 +63,7 @@ async function resolveVoucherTypeIdByCode(conn, { companyId, code }) {
 }
 // Voucher Management: Ensure Journal Voucher type exists and return its ID
 async function ensureJournalVoucherTypeIdTx(conn, { companyId }) {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   const existingId = await resolveVoucherTypeIdByCode(conn, {
     companyId,
     code: "JV",
@@ -84,6 +85,7 @@ async function ensureJournalVoucherTypeIdTx(conn, { companyId }) {
 }
 // Voucher Management: Ensure Purchase Voucher type exists and return its ID
 async function ensurePurchaseVoucherTypeIdTx(conn, { companyId }) {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   const existingId = await resolveVoucherTypeIdByCode(conn, {
     companyId,
     code: "PV",
@@ -295,6 +297,7 @@ async function resolveApTradeAccountIdAuto(conn, { companyId, supplierId }) {
 }
 // Database Migration: Ensure supplier_type column exists on pur_suppliers
 async function ensureSupplierTypeColumn() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   if (!(await hasColumn("pur_suppliers", "supplier_type"))) {
     await pool.query(
       "ALTER TABLE pur_suppliers ADD COLUMN supplier_type VARCHAR(10) NOT NULL DEFAULT 'LOCAL'",
@@ -304,6 +307,7 @@ async function ensureSupplierTypeColumn() {
 
 // Database Migration: Ensure currency_id column exists on pur_suppliers
 async function ensureSupplierCurrencyColumn() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   if (!(await hasColumn("pur_suppliers", "currency_id"))) {
     await pool.query(
       "ALTER TABLE pur_suppliers ADD COLUMN currency_id BIGINT UNSIGNED NULL",
@@ -313,6 +317,7 @@ async function ensureSupplierCurrencyColumn() {
 
 // Database Migration: Ensure tables for service confirmations and details exist
 async function ensureServiceConfirmationTables() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   await pool.query(`
     CREATE TABLE IF NOT EXISTS inv_service_confirmations (
       id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -691,6 +696,7 @@ export const createServiceConfirmation = async (req, res, next) => {
 };
 
 async function ensureShippingAdviceStatusEnum() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   const rows = await query(`SELECT column_type, column_default
          FROM information_schema.columns
          WHERE table_schema = DATABASE()
@@ -718,6 +724,7 @@ async function ensureShippingAdviceStatusEnum() {
 }
 
 async function ensureShippingAdviceETDColumn() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   const hasEtd = await hasColumn("pur_shipping_advices", "etd_date");
   if (!hasEtd) {
     try {
@@ -729,6 +736,7 @@ async function ensureShippingAdviceETDColumn() {
 }
 
 async function ensurePortClearanceStatusEnum() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   const rows = await query(`SELECT column_type, column_default
          FROM information_schema.columns
          WHERE table_schema = DATABASE()
@@ -1441,6 +1449,7 @@ export const updateServiceConfirmation = async (req, res, next) => {
 };
 
 async function ensureServiceRequestTables() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   await pool.query(`
     CREATE TABLE IF NOT EXISTS pur_service_requests (
       id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -1476,6 +1485,7 @@ async function ensureServiceRequestTables() {
 }
 
 async function ensureServiceBillTables() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   await pool.query(`
     CREATE TABLE IF NOT EXISTS pur_service_bills (
       id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -1632,6 +1642,7 @@ async function ensureServiceBillTables() {
 }
 
 async function ensureProspectCustomersTable() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   await pool.query(`
     CREATE TABLE IF NOT EXISTS sal_prospect_customers (
       id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

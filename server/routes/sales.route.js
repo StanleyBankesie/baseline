@@ -4108,6 +4108,72 @@ router.get(
   },
 );
 
+router.post(
+  "/invoices/:id/send-email",
+  requireAuth,
+  requireCompanyScope,
+  requireAnyPermission(["SAL.INVOICE.EDIT"]),
+  async (req, res, next) => {
+    try {
+      const { companyId } = req.scope || {};
+      const id = Number(req.params.id);
+      const { pdfBase64, to_email } = req.body;
+
+      if (!id || !Number.isFinite(id)) {
+        return res.status(400).json({ error: "Invalid Invoice ID" });
+      }
+      if (!pdfBase64) {
+        return res.status(400).json({ error: "Missing invoice PDF data" });
+      }
+
+      // Fetch invoice info to get the default email if to_email is not provided
+      const invoiceRows = await query(
+        `SELECT i.invoice_no, c.email AS customer_email, c.customer_name 
+         FROM sal_invoices i 
+         LEFT JOIN sal_customers c ON c.id = i.customer_id
+         WHERE i.id = :id AND i.company_id = :companyId`,
+        { id, companyId }
+      );
+
+      if (invoiceRows.length === 0) {
+        return res.status(404).json({ error: "Invoice not found" });
+      }
+
+      const invoice = invoiceRows[0];
+      const recipientEmail = to_email || invoice.customer_email;
+
+      if (!recipientEmail) {
+        return res.status(400).json({ error: "No recipient email address found. Please provide an email address." });
+      }
+
+      if (!isMailerConfigured()) {
+        return res.status(500).json({ error: "Email service is not configured on the server." });
+      }
+
+      const attachments = [
+        {
+          filename: `Invoice_${invoice.invoice_no}.pdf`,
+          content: pdfBase64.split("base64,")[1] || pdfBase64, // Remove data URI prefix if present
+          encoding: "base64",
+        }
+      ];
+
+      await sendMail({
+        to: recipientEmail,
+        subject: `Invoice ${invoice.invoice_no} from OmniSuite`,
+        text: `Dear ${invoice.customer_name},\n\nPlease find attached the invoice ${invoice.invoice_no}.\n\nThank you for your business!`,
+        html: `<p>Dear ${invoice.customer_name},</p><p>Please find attached the invoice <strong>${invoice.invoice_no}</strong>.</p><p>Thank you for your business!</p>`,
+        attachments,
+      });
+
+      res.json({ message: "Invoice sent successfully to " + recipientEmail });
+    } catch (err) {
+      console.error("[send-email] Error:", err?.message || err);
+      next(err);
+    }
+  }
+);
+
 router.get(
   "/invoices/:id",
   requireAuth,
@@ -4126,16 +4192,19 @@ router.get(
           i.id,
           i.invoice_no,
           i.invoice_date,
+          i.due_date,
           i.customer_id,
           COALESCE(c.customer_name, '') AS customer_name,
-          i.payment_status,
+          c.address AS customer_address,
           i.status,
+          i.payment_status,
           i.total_amount,
           i.net_amount,
           i.balance_amount,
           i.price_type,
           i.payment_type,
           i.currency_id,
+          i.exchange_rate,
           i.warehouse_id,
           i.sales_order_id,
           i.service_execution_id,
@@ -4143,12 +4212,13 @@ router.get(
           i.tax_amount,
           i.tax_components,
           i.created_at,
+          i.payment_date,
           u.username AS created_by_name
          FROM sal_invoices i
         LEFT JOIN sal_customers c
           ON c.id = i.customer_id AND c.company_id = i.company_id
         LEFT JOIN adm_users u ON u.id = i.created_by
-         WHERE i.id = :id AND i.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
+         WHERE i.id = :id AND i.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(i.branch_id, :branchIdsStr))
         LIMIT 1
         `,
         { id, companyId, branchId, branchIdsStr },
@@ -4167,6 +4237,7 @@ router.get(
           d.tax_amount,
           d.tax_type AS tax_id,
           d.uom,
+          d.remarks,
           it.item_code,
           it.item_name,
           d.created_at,
@@ -6364,13 +6435,14 @@ async function resolveBestPrice(
       basePrice = Number(priceRow.selling_price);
   }
 
-  // Cascade 4: fallback to item selling_price
-  if (basePrice == null) {
+  // Cascade 4: fallback to item selling_price or cost_price
+  if (basePrice == null || basePrice === 0) {
     const [fallback] = await query(
-      `SELECT selling_price FROM inv_items WHERE company_id = :companyId AND id = :productId LIMIT 1`,
+      `SELECT selling_price, cost_price FROM inv_items WHERE company_id = :companyId AND id = :productId LIMIT 1`,
       { companyId, productId },
     ).catch(() => []);
-    basePrice = Number(fallback?.selling_price ?? 0);
+    basePrice = Number(fallback?.selling_price);
+    if (!basePrice || basePrice === 0) basePrice = Number(fallback?.cost_price ?? 0);
     if (!Number.isFinite(basePrice)) basePrice = 0;
   }
 
@@ -7395,7 +7467,7 @@ router.get(
          FROM sal_invoices i
         LEFT JOIN sal_customers c ON c.id = i.customer_id AND c.company_id = i.company_id
         LEFT JOIN adm_users u ON u.id = i.created_by
-         WHERE i.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
+         WHERE i.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(i.branch_id, :branchIdsStr))
           AND COALESCE(i.balance_amount,0) > 0
         ORDER BY c.customer_name ASC, i.invoice_date ASC
         `,
@@ -7479,7 +7551,7 @@ router.get(
         JOIN sal_invoices i ON i.id = d.invoice_id
         LEFT JOIN inv_items it ON it.id = d.item_id AND it.company_id = i.company_id
         LEFT JOIN adm_users u ON u.id = d.created_by
-         WHERE i.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
+         WHERE i.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(i.branch_id, :branchIdsStr))
         GROUP BY it.item_name
         ORDER BY total_revenue DESC
         `,
@@ -7517,7 +7589,7 @@ router.get(
         LEFT JOIN sal_customers c ON c.id = i.customer_id AND c.company_id = i.company_id
         LEFT JOIN adm_users u ON u.id = i.created_by
         LEFT JOIN adm_users u ON u.id = d.created_by
-         WHERE i.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
+         WHERE i.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(i.branch_id, :branchIdsStr))
           AND d.discount_percent > 0
         ORDER BY i.invoice_date DESC, i.id DESC, d.id ASC
         `,
@@ -7586,7 +7658,7 @@ router.get(
           u.username AS created_by_name
          FROM sal_invoices i
         LEFT JOIN adm_users u ON u.id = i.created_by
-         WHERE i.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
+         WHERE i.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(i.branch_id, :branchIdsStr))
         GROUP BY DATE_FORMAT(i.invoice_date, '%Y-%m-01')
         ORDER BY month_start ASC
         `,
@@ -7632,7 +7704,7 @@ router.get(
             FROM sal_quotations q
             LEFT JOIN sal_customers c ON c.id = q.customer_id AND c.company_id = q.company_id
             LEFT JOIN adm_users u ON u.id = q.created_by
-           WHERE q.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
+           WHERE q.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(q.branch_id, :branchIdsStr))
           UNION ALL
           SELECT 'ORDER' AS stage, o.order_no AS ref_no, o.order_date AS txn_date, o.total_amount AS amount, o.status AS notes,
                  COALESCE(c.customer_name,'') AS customer_name,
@@ -7642,7 +7714,7 @@ router.get(
             FROM sal_orders o
             LEFT JOIN sal_customers c ON c.id = o.customer_id AND c.company_id = o.company_id
             LEFT JOIN adm_users u ON u.id = o.created_by
-           WHERE o.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
+           WHERE o.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(o.branch_id, :branchIdsStr))
           UNION ALL
           SELECT 'INVOICE' AS stage, i.invoice_no AS ref_no, i.invoice_date AS txn_date, COALESCE(i.net_amount, i.total_amount,0) AS amount, i.status AS notes,
                  COALESCE(c.customer_name,'') AS customer_name,
@@ -7652,7 +7724,7 @@ router.get(
             FROM sal_invoices i
             LEFT JOIN sal_customers c ON c.id = i.customer_id AND c.company_id = i.company_id
             LEFT JOIN adm_users u ON u.id = i.created_by
-           WHERE i.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
+           WHERE i.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(i.branch_id, :branchIdsStr))
           UNION ALL
           SELECT 'DELIVERY' AS stage, d.delivery_no AS ref_no, d.delivery_date AS txn_date, 0 AS amount, d.status AS notes,
                  COALESCE(c.customer_name,'') AS customer_name,
@@ -7662,7 +7734,7 @@ router.get(
             FROM sal_deliveries d
             LEFT JOIN sal_customers c ON c.id = d.customer_id AND c.company_id = d.company_id
             LEFT JOIN adm_users u ON u.id = d.created_by
-           WHERE d.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
+           WHERE d.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(d.branch_id, :branchIdsStr))
         ) t
         WHERE (:customerId IS NULL OR t.customer_id = :customerId)
           AND (:customer IS NULL OR t.customer_name LIKE :customerLike)
@@ -7724,7 +7796,7 @@ router.get(
             FROM sal_quotations q
             LEFT JOIN sal_customers c ON c.id = q.customer_id AND c.company_id = q.company_id
             LEFT JOIN adm_users u ON u.id = q.created_by
-           WHERE q.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
+           WHERE q.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(q.branch_id, :branchIdsStr))
           UNION ALL
           SELECT 'ORDER' AS stage, o.order_no AS ref_no, o.order_date AS txn_date, o.total_amount AS amount, o.status AS notes,
                  COALESCE(c.customer_name,'') AS customer_name,
@@ -7734,7 +7806,7 @@ router.get(
             FROM sal_orders o
             LEFT JOIN sal_customers c ON c.id = o.customer_id AND c.company_id = o.company_id
             LEFT JOIN adm_users u ON u.id = o.created_by
-           WHERE o.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
+           WHERE o.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(o.branch_id, :branchIdsStr))
           UNION ALL
           SELECT 'INVOICE' AS stage, i.invoice_no AS ref_no, i.invoice_date AS txn_date, COALESCE(i.net_amount, i.total_amount,0) AS amount, i.status AS notes,
                  COALESCE(c.customer_name,'') AS customer_name,
@@ -7744,7 +7816,7 @@ router.get(
             FROM sal_invoices i
             LEFT JOIN sal_customers c ON c.id = i.customer_id AND c.company_id = i.company_id
             LEFT JOIN adm_users u ON u.id = i.created_by
-           WHERE i.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
+           WHERE i.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(i.branch_id, :branchIdsStr))
           UNION ALL
           SELECT 'DELIVERY' AS stage, d.delivery_no AS ref_no, d.delivery_date AS txn_date, 0 AS amount, d.status AS notes,
                  COALESCE(c.customer_name,'') AS customer_name,
@@ -7754,7 +7826,7 @@ router.get(
             FROM sal_deliveries d
             LEFT JOIN sal_customers c ON c.id = d.customer_id AND c.company_id = d.company_id
             LEFT JOIN adm_users u ON u.id = d.created_by
-           WHERE d.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
+           WHERE d.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(d.branch_id, :branchIdsStr))
           UNION ALL
           SELECT 'RETURN' AS stage, r.return_no AS ref_no, r.return_date AS txn_date, COALESCE(r.total_amount, 0) AS amount, r.status AS notes,
                  COALESCE(c.customer_name,'') AS customer_name,
@@ -7764,7 +7836,7 @@ router.get(
             FROM sal_returns r
             LEFT JOIN sal_customers c ON c.id = r.customer_id AND c.company_id = r.company_id
             LEFT JOIN adm_users u ON u.id = r.created_by
-           WHERE r.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
+           WHERE r.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(r.branch_id, :branchIdsStr))
         ) t
         WHERE (:customerId IS NULL OR t.customer_id = :customerId)
           AND (:customer IS NULL OR t.customer_name LIKE :customerLike)
@@ -7832,7 +7904,7 @@ router.get(
         LEFT JOIN sal_customers c ON c.id = o.customer_id AND c.company_id = o.company_id
         LEFT JOIN adm_users u ON u.id = o.updated_by
         LEFT JOIN adm_users u ON u.id = o.created_by
-         WHERE o.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
+         WHERE o.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(o.branch_id, :branchIdsStr))
           AND UPPER(o.status) IN ('CANCELLED','REJECTED')
         ORDER BY o.order_date DESC, o.id DESC
         `,
@@ -8063,7 +8135,7 @@ router.get(
         ) iw ON iw.document_id = r.id
         LEFT JOIN adm_users fu ON fu.id = x.assigned_to_user_id
         LEFT JOIN adm_users cu ON cu.id = r.created_by
-        WHERE r.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
+        WHERE r.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(r.branch_id, :branchIdsStr))
         ORDER BY r.id DESC
         `,
         { companyId, branchId, branchIdsStr },

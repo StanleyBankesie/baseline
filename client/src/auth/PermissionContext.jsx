@@ -47,6 +47,9 @@ function readPermissionSnapshot() {
       exceptionalPerms: Array.isArray(data?.exceptionalPerms)
         ? data.exceptionalPerms
         : [],
+      licensedModules: Array.isArray(data?.licensedModules)
+        ? data.licensedModules
+        : [],
     };
   } catch {
     return null;
@@ -74,6 +77,7 @@ export const PermissionProvider = ({ children }) => {
   const [permissions, setPermissions] = useState([]);
   const [roleFeatures, setRoleFeatures] = useState(new Set());
   const [exceptionalPerms, setExceptionalPerms] = useState(new Set());
+  const [licensedModules, setLicensedModules] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sessionOverrides, setSessionOverrides] = useState(() => new Map());
@@ -140,6 +144,7 @@ export const PermissionProvider = ({ children }) => {
         setPermissions([]);
         setRoleFeatures(new Set());
         setExceptionalPerms(new Set());
+        setLicensedModules(new Set());
         return;
       }
 
@@ -179,6 +184,13 @@ export const PermissionProvider = ({ children }) => {
               .filter(Boolean),
           ),
         );
+        setLicensedModules(
+          new Set(
+            (snapshot.licensedModules || [])
+              .map((m) => String(m || "").trim())
+              .filter(Boolean),
+          ),
+        );
       }
 
       const res = await api.get("/admin/user-permissions", BACKGROUND_GET_CONFIG);
@@ -188,6 +200,9 @@ export const PermissionProvider = ({ children }) => {
         : [];
       const feats = Array.isArray(res.data?.role_features)
         ? res.data.role_features
+        : [];
+      const licensedMods = Array.isArray(res.data?.licensed_modules)
+        ? res.data.licensed_modules
         : [];
 
       // Load user-specific overrides and merge (overrides win)
@@ -284,17 +299,24 @@ export const PermissionProvider = ({ children }) => {
           if (active && isDeny) cur.deny = true;
           byCode.set(code, cur);
         }
-        const set = new Set(
+        const exceptionalSet = new Set(
           Array.from(byCode.entries())
             .filter(([_, v]) => v.allow && !v.deny)
             .map(([k]) => k),
         );
-        setExceptionalPerms(set);
+        setExceptionalPerms(exceptionalSet);
+
+        const licensedSet = new Set(
+          licensedMods.map((m) => String(m || "").trim()).filter(Boolean),
+        );
+        setLicensedModules(licensedSet);
+
         writePermissionSnapshot({
-          modules: mods,
+          modules: Array.from(modSet),
           permissions: merged,
-          roleFeatures: feats,
-          exceptionalPerms: Array.from(set),
+          roleFeatures: Array.from(featureSet),
+          exceptionalPerms: Array.from(exceptionalSet),
+          licensedModules: Array.from(licensedSet),
         });
       } catch {
         setExceptionalPerms(new Set());
@@ -451,7 +473,7 @@ export const PermissionProvider = ({ children }) => {
       parts = parts.slice(0, parts.length - 1);
     }
 
-    if (
+    if(
       parts[0] === "administration" &&
       parts[1] === "access" &&
       parts.length >= 3
@@ -914,6 +936,7 @@ export const PermissionProvider = ({ children }) => {
       setPermissions([]);
       setRoleFeatures(new Set());
       setExceptionalPerms(new Set());
+      setLicensedModules(new Set());
       setDashboardViewMap(new Map());
       setDashboardViewLoaded(true);
       setLoading(false);
@@ -1136,6 +1159,7 @@ export const PermissionProvider = ({ children }) => {
 
   const value = {
     modules,
+    licensedModules,
     permissions,
     roleFeatures,
     exceptionalPerms,

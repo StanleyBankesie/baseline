@@ -55,6 +55,7 @@ function convertPagesToIds(pages) {
 
 // Ensure fin_bank_accounts has required columns
 async function ensureBankAccountsColumns() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   try {
     const [cols] = await pool.execute(
       `SELECT COLUMN_NAME FROM information_schema.COLUMNS 
@@ -90,6 +91,7 @@ ensureBankAccountsColumns();
  * Specifically adds currency_id and exchange_rate to support multi-currency vouchers.
  */
 async function ensureVoucherLineCurrencyColumns() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   try {
     const [cols] = await pool.execute(
       `SELECT COLUMN_NAME FROM information_schema.COLUMNS 
@@ -121,6 +123,7 @@ ensureVoucherLineCurrencyColumns();
  * Backfills account default balance types based on their group nature (ASSET/EXPENSE -> DEBIT, etc).
  */
 async function ensureAccountBalanceObjects() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   let conn;
   try {
     conn = await pool.getConnection();
@@ -181,6 +184,7 @@ ensureAccountBalanceObjects();
  * the payment status on INSERT and UPDATE.
  */
 async function ensurePurBillsPaymentStatusObjects() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   let conn;
   try {
     conn = await pool.getConnection();
@@ -389,6 +393,7 @@ async function findVoucherTypeByRequest({ companyId, requestedCode }) {
  * @returns {Promise<Object|null>} The existing or newly created voucher type object.
  */
 async function ensureVoucherTypeForRequest({ companyId, requestedCode }) {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   const existing = await findVoucherTypeByRequest({ companyId, requestedCode });
   if (existing?.id) return existing;
 
@@ -661,6 +666,7 @@ async function ensureTaxComponentAccountTx(
   conn,
   { companyId, taxDetailId, componentName, isPurchase },
 ) {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   if (taxDetailId) {
     try {
       const [tdRows] = await conn.execute(
@@ -859,6 +865,7 @@ async function ensureGroupIdTx(
   conn,
   { companyId, code, name, nature, parentId },
 ) {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   const [foundByCode] = await conn.execute(
     "SELECT id FROM fin_account_groups WHERE company_id = :companyId AND code = :code LIMIT 1",
     { companyId, code },
@@ -894,6 +901,7 @@ export async function ensureCustomerFinAccountIdTx(
   conn,
   { companyId, customerId },
 ) {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   const [custRows] = await conn.execute(
     "SELECT id, customer_code, customer_name, currency_id FROM sal_customers WHERE company_id = :companyId AND id = :id LIMIT 1",
     { companyId, id: customerId },
@@ -954,6 +962,7 @@ export async function ensureSupplierFinAccountIdTx(
   conn,
   { companyId, supplierId },
 ) {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   const [supRows] = await conn.execute(
     "SELECT id, supplier_code, supplier_name, currency_id FROM pur_suppliers WHERE company_id = :companyId AND id = :id LIMIT 1",
     { companyId, id: supplierId },
@@ -5531,7 +5540,7 @@ export const getFinanceDashboardStats = async (req, res, next) => {
          JOIN fin_vouchers v ON v.id = vl.voucher_id AND v.company_id = :companyId AND v.status = 'POSTED'
          JOIN fin_accounts a ON a.id = vl.account_id
          JOIN fin_account_groups g ON g.id = a.group_id
-         WHERE g.code IN ('AST_CASH')`,
+         WHERE g.code IN ('AST_CASH') AND a.name = 'Cash on Hand'`,
         { companyId },
       );
       cashBalance = Number(cashRow?.balance || 0);

@@ -8644,7 +8644,7 @@ router.post(
   async (req, res, next) => {
     try {
       await ensureItemsTable();
-      const { companyId = null } = req.scope || {};
+      const { companyId = null, branchId = null } = req.scope || {};
       const userId = toNumber(req.scope?.userId ?? req.user?.sub) || null;
       const body = req.body || {};
       let itemCode = body.item_code ? String(body.item_code).trim() : null;
@@ -8764,14 +8764,19 @@ router.post(
       if (openingQuantity > 0 && openingWarehouseId) {
         const updationNo = `UPD-OP-${Date.now()}`;
         
+        // Fetch warehouse branch_id
+        const whRes = await query('SELECT branch_id FROM inv_warehouses WHERE id = :warehouseId', { warehouseId: openingWarehouseId });
+        const actualBranchId = whRes && whRes.length > 0 ? whRes[0].branch_id : null;
+        
         // 1. Create Stock Updation Header
         const updRaw = await query(
           `INSERT INTO inv_stock_updations 
-             (company_id, warehouse_id, updation_no, updation_date, reason, status, created_by)
+             (company_id, branch_id, warehouse_id, updation_no, updation_date, reason, status, created_by)
            VALUES 
-             (:companyId, :warehouseId, :updationNo, NOW(), 'Opening Balance', 'APPROVED', :createdBy)`,
+             (:companyId, :branchId, :warehouseId, :updationNo, NOW(), 'Opening Balance', 'APPROVED', :createdBy)`,
           {
             companyId: companyId || null,
+            branchId: actualBranchId,
             warehouseId: openingWarehouseId,
             updationNo,
             createdBy: userId
@@ -8811,8 +8816,8 @@ router.post(
         } else {
           await query(
             `INSERT INTO inv_stock_balances (company_id, branch_id, warehouse_id, item_id, qty)
-             VALUES (:companyId, NULL, :warehouseId, :itemId, :qty)`,
-            { companyId: companyId || null, warehouseId: openingWarehouseId, itemId, qty: openingQuantity }
+             VALUES (:companyId, :branchId, :warehouseId, :itemId, :qty)`,
+            { companyId: companyId || null, branchId: actualBranchId, warehouseId: openingWarehouseId, itemId, qty: openingQuantity }
           );
         }
       }
@@ -10141,7 +10146,7 @@ router.get(
   requireBranchScope,
   async (req, res, next) => {
     try {
-      const { companyId, branchId = null } = req.scope || {};
+      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
       const [items] = await query(
         "SELECT COUNT(*) as count FROM inv_items WHERE company_id = :companyId AND is_active = 1",
         { companyId },
@@ -10161,8 +10166,8 @@ router.get(
       const [lowStock] = await query(
         `SELECT COUNT(*) as count FROM inv_items i
        WHERE i.company_id = :companyId AND i.is_active = 1 AND i.reorder_level > 0
-       AND i.reorder_level > (SELECT COALESCE(SUM(sb.qty), 0) FROM inv_stock_balances sb WHERE sb.item_id = i.id AND sb.branch_id = :branchId)`,
-        { companyId, branchId },
+       AND i.reorder_level > (SELECT COALESCE(SUM(sb.qty), 0) FROM inv_stock_balances sb WHERE sb.item_id = i.id AND (:branchIdsStr = '' OR FIND_IN_SET(sb.branch_id, :branchIdsStr)))`,
+        { companyId, branchIdsStr },
       ).catch(() => [{ count: 0 }]);
       const [adjustments] = await query(
         "SELECT COUNT(*) as count FROM inv_stock_adjustments WHERE company_id = :companyId AND branch_id = :branchId AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)",

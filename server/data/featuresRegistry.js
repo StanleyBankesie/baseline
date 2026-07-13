@@ -305,6 +305,21 @@ export const FEATURES_REGISTRY = {
       { feature_key: "service-management:billing-analytics", type: "dashboard", label: "Billing Analytics Dashboard", path: "/service-management/billing-analytics" },
     ],
   },
+  
+  // Transport Module
+  transport: {
+    features: [
+      { feature_key: "transport:requests", type: "feature", label: "Transport Requests", path: "/transport/requests" },
+      { feature_key: "transport:vehicles", type: "feature", label: "Vehicles", path: "/transport/vehicles" },
+      { feature_key: "transport:drivers", type: "feature", label: "Drivers", path: "/transport/drivers" },
+      { feature_key: "transport:trips", type: "feature", label: "Trips & Dispatch", path: "/transport/trips" },
+      { feature_key: "transport:fuel", type: "feature", label: "Fuel & Expenses", path: "/transport/fuel" },
+      { feature_key: "transport:billing", type: "feature", label: "Billing", path: "/transport/billing" }
+    ],
+    dashboards: [
+      { feature_key: "transport:overview", type: "dashboard", label: "Transport Overview Dashboard", path: "/transport/overview" }
+    ],
+  },
 };
 
 /**

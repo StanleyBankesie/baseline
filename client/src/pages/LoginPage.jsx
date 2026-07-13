@@ -13,6 +13,7 @@ import api from "../api/client.js";
 import logoClear from "../assets/resources/OMNISUITE_LOGO_CLEAR.png";
 import backgroundImage from "../assets/resources/BACKGROUND.jpg";
 import { Eye, EyeOff } from "lucide-react";
+import Swal from "sweetalert2";
 
 /**
  * LoginPage component
@@ -208,7 +209,80 @@ export default function LoginPage() {
     } catch (err) {
       if (err?.response?.data?.error === "PASSWORD_RESET_REQUIRED") {
         navigate("/reset-password", { replace: true });
+        return;
       }
+      
+      if (err?.response?.data?.error === "LICENSE_EXPIRED") {
+        setLoading(false);
+        Swal.fire({
+          title: "License Expired",
+          text: err?.response?.data?.message || "Your company license has expired. Please renew your license to continue using the system.",
+          icon: "error",
+          showCancelButton: true,
+          confirmButtonText: "Renew License",
+          cancelButtonText: "Cancel",
+          confirmButtonColor: "#2563eb",
+          input: 'password',
+          inputLabel: 'Please confirm your password to proceed with renewal',
+          inputPlaceholder: 'Enter your password',
+          inputAttributes: {
+            autocapitalize: 'off',
+            autocorrect: 'off'
+          },
+          preConfirm: (password) => {
+            if (!password) {
+              Swal.showValidationMessage('Please enter your password');
+            }
+            return password;
+          }
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            setLoading(true);
+            try {
+              const data = await login({
+                username: submittedUsername,
+                password: result.value,
+                rememberMe,
+                intent: "renew"
+              });
+
+              if (rememberMe) {
+                authStorage.saveRememberedCredentials(submittedUsername, result.value, { profilePictureUrl: data?.user?.profile_picture_url || "" });
+                authStorage.saveRememberMePreference(true);
+              } else {
+                authStorage.clearRememberedCredentials(submittedUsername);
+                authStorage.saveRememberMePreference(false);
+              }
+
+              const branches = Array.isArray(data?.user?.branchIds) ? data.user.branchIds.map(Number).filter(Number.isFinite) : [];
+              const companies = Array.isArray(data?.user?.companyIds) ? data.user.companyIds.map(Number).filter(Number.isFinite) : [];
+
+              if (branches.length === 1) {
+                const branchId = branches[0];
+                let companyId = companies.length === 1 ? companies[0] : null;
+                if (!companyId) {
+                  companyId = companies[0] || 1;
+                }
+                setScope((prev) => ({
+                  ...prev,
+                  companyId: companyId || prev.companyId || 1,
+                  branchId: branchId,
+                }));
+              }
+              
+              sessionStorage.setItem("triggerRenewal", "true");
+              navigate("/", { replace: true });
+            } catch (retryErr) {
+              const retryMsg = retryErr?.response?.data?.message || retryErr?.message || "Renewal login failed";
+              setError(retryMsg);
+              toast.error(retryMsg);
+              setLoading(false);
+            }
+          }
+        });
+        return;
+      }
+
       const msg =
         err?.response?.data?.message || err?.message || "Login failed";
       setError(msg);
@@ -264,7 +338,7 @@ export default function LoginPage() {
                 id="username"
                 name="username"
                 type="text"
-                className="input w-full"
+                className="login-input"
                 ref={usernameRef}
                 autoComplete="off"
                 required
@@ -390,7 +464,7 @@ export default function LoginPage() {
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
-                  className="input w-full pr-20"
+                  className="login-input pr-20"
                   ref={passwordRef}
                   autoComplete="current-password"
                   required

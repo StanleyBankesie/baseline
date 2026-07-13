@@ -27,6 +27,7 @@ import posRoutes from "./routes/pos.routes.js";
 import biRoutes from "./routes/bi.routes.js";
 import serviceMgmtRoutes from "./routes/service-management.routes.js";
 import srvInvoicesRoutes from "./routes/srv_invoices.route.js";
+import transportRoutes from "./routes/transport.route.js";
 import uploadRoutes from "./routes/upload.routes.js";
 import workflowRoutes from "./routes/workflow.routes.js";
 import healthRoutes from "./routes/health.route.js";
@@ -46,6 +47,9 @@ import accessRoutes from "./routes/access.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
 import emailTestRoutes from "./routes/email-test.routes.js";
 import visitorsRoutes from "./routes/visitors.routes.js";
+import licenseRoutes from "./routes/license.routes.js";
+import paymentPackageRoutes from "./routes/paymentPackages.js";
+import { requireLicense } from "./middleware/license.middleware.js";
 import { initializeSocket } from "./utils/socket.js";
 import {
   ensureExceptionalPermissionsTable,
@@ -603,6 +607,9 @@ app.use(
   ),
 );
 app.use("/api/", healthRoutes);
+app.use("/api", requireLicense);
+app.use("/api/licenses", licenseRoutes);
+app.use("/api/payment-packages", paymentPackageRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/administration", adminRoutes);
 app.use(["/api/backups", "/backups"], backupRoutes);
@@ -621,6 +628,7 @@ app.use("/api/pos", posRoutes);
 app.use("/api/bi", biRoutes);
 app.use("/api/service-management", serviceMgmtRoutes);
 app.use("/api/services", srvInvoicesRoutes);
+app.use("/api/transport", transportRoutes);
 app.use("/api", authRoutes);
 app.use("/api/push", pushRoutes);
 app.use("/api/templates", templatesRoutes);

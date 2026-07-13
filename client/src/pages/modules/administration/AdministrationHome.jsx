@@ -7,6 +7,9 @@ import React from "react";
 import { Link, Route, Routes } from "react-router-dom";
 import ModuleDashboard from "../../../components/ModuleDashboard";
 import { api } from "../../../api/client.js";
+import { useAuth } from "../../../auth/AuthContext.jsx";
+import LicenseManagement from "../../admin/LicenseManagement.jsx";
+import PaymentPackages from "../../admin/PaymentPackages.jsx";
 
 import UserList from "./users/UserList.jsx";
 import UserForm from "./users/UserForm.jsx";
@@ -31,6 +34,7 @@ import UserPermissions from "./access-control/UserPermissionsNew.jsx";
 import BackupManagement from "../../admin/BackupManagement.jsx";
 
 function AdministrationLanding() {
+  const { user } = useAuth();
   const [stats, setStats] = React.useState([
     {
       rbac_key: "total-users",
@@ -264,6 +268,29 @@ function AdministrationLanding() {
     },
   ];
 
+  if (Number(user?.id) === 1) {
+    sections.push({
+      title: "Super Admin",
+      badge: "Exclusive",
+      items: [
+        {
+          title: "License Management",
+          description: "Manage client licenses",
+          path: "/administration/licenses",
+          icon: "🔑",
+          actions: [],
+        },
+        {
+          title: "Payment Packages",
+          description: "Manage pricing plans",
+          path: "/administration/payment-packages",
+          icon: "💳",
+          actions: [],
+        },
+      ],
+    });
+  }
+
   return (
     <ModuleDashboard
       title="Administration"
@@ -324,6 +351,8 @@ export default function AdministrationHome() {
         element={<ExceptionalPermissionsList />}
       />
       <Route path="/backups" element={<BackupManagement />} />
+      <Route path="/licenses" element={<LicenseManagement />} />
+      <Route path="/payment-packages" element={<PaymentPackages />} />
     </Routes>
   );
 }

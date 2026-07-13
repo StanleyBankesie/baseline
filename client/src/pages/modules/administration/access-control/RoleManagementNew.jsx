@@ -12,6 +12,7 @@ import {
   getModuleFeatures,
 } from "../../../../data/modulesRegistry.js";
 import { usePermission } from "../../../../auth/PermissionContext.jsx";
+import { toast } from "react-toastify";
 import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
 
@@ -30,7 +31,7 @@ export default function RoleManagementNew() {
   } = useSort(roles, "name", "asc");
   const navigate = useNavigate();
   const location = useLocation();
-  const { refreshPermissions } = usePermission();
+  const { refreshPermissions, licensedModules: allowedModules } = usePermission();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -179,7 +180,10 @@ export default function RoleManagementNew() {
         modules: Array.from(selectedModules),
       });
 
-      const allPermissions = Array.from(selectedFeatures);
+      const allPermissions = Array.from(selectedFeatures).filter(fk => {
+        const parts = String(fk || "").split(":");
+        return parts.length >= 1 && selectedModules.has(parts[0]);
+      });
 
       // Sync adm_role_permissions for permByFeatureKey to work
       const permPayload = [];
@@ -207,6 +211,7 @@ export default function RoleManagementNew() {
       ]);
 
       setSuccess("Role permissions updated successfully");
+      toast.success("Role permissions updated successfully");
       try {
         window.dispatchEvent(new Event("rbac:changed"));
       } catch {}
@@ -367,9 +372,9 @@ export default function RoleManagementNew() {
       {/* Create Role Modal */}
       {showCreate && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow max-w-lg w-full">
-            <div className="px-5 py-4 border-b flex justify-between items-center">
-              <h2 className="text-lg font-semibold">Create Role</h2>
+          <div className="bg-white dark:bg-slate-900 border dark:border-slate-700 rounded-lg shadow max-w-lg w-full">
+            <div className="px-5 py-4 border-b dark:border-slate-700 flex justify-between items-center">
+              <h2 className="text-lg font-semibold dark:text-white">Create Role</h2>
               <button
                 className="btn-outline"
                 type="button"
@@ -411,7 +416,7 @@ export default function RoleManagementNew() {
                 <span className="text-sm font-medium">Active</span>
               </div>
             </div>
-            <div className="px-5 py-4 border-t flex justify-end gap-2">
+            <div className="px-5 py-4 border-t dark:border-slate-700 flex justify-end gap-2">
               <button
                 className="btn-outline"
                 type="button"
@@ -434,11 +439,11 @@ export default function RoleManagementNew() {
       {/* Role Settings Modal */}
       {assignRole && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow max-w-6xl w-full max-h-[90vh] flex flex-col">
-            <div className="px-5 py-4 border-b flex justify-between items-center">
+          <div className="bg-white dark:bg-slate-900 rounded-lg shadow max-w-6xl w-full max-h-[90vh] flex flex-col border dark:border-slate-700">
+            <div className="px-5 py-4 border-b dark:border-slate-700 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <h2 className="text-lg font-semibold">Configure Permissions</h2>
-                <span className="text-sm text-slate-500">{editRole.name}</span>
+                <h2 className="text-lg font-semibold dark:text-white">Configure Permissions</h2>
+                <span className="text-sm text-slate-500 dark:text-slate-400">{editRole.name}</span>
               </div>
               <button
                 className="btn-outline"
@@ -497,12 +502,14 @@ export default function RoleManagementNew() {
                   Modules
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {getAllModuleKeys().map((moduleKey) => {
+                  {getAllModuleKeys()
+                    .filter((moduleKey) => allowedModules.has(moduleKey))
+                    .map((moduleKey) => {
                     const moduleInfo = MODULES_REGISTRY[moduleKey];
                     return (
                       <label
                         key={moduleKey}
-                        className="flex items-center gap-3 p-3 border rounded-lg hover:bg-slate-50 cursor-pointer"
+                        className="flex items-center gap-3 p-3 border dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
                       >
                         <input
                           type="checkbox"
@@ -526,7 +533,9 @@ export default function RoleManagementNew() {
 
               {/* Features Section */}
               <div className="space-y-6">
-                {getAllModuleKeys().map((moduleKey) => {
+                {getAllModuleKeys()
+                  .filter((moduleKey) => allowedModules.has(moduleKey))
+                  .map((moduleKey) => {
                   const moduleInfo = MODULES_REGISTRY[moduleKey];
                   const isModuleSelected = selectedModules.has(moduleKey);
                   const moduleFeatures = getModuleFeatures(moduleKey);
@@ -542,8 +551,8 @@ export default function RoleManagementNew() {
                   }
 
                   return (
-                    <div key={moduleKey} className="border rounded-lg">
-                      <div className="px-4 py-3 bg-slate-50 border-b flex items-center justify-between">
+                    <div key={moduleKey} className="border dark:border-slate-700 rounded-lg">
+                      <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border-b dark:border-slate-700 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <input
                             type="checkbox"
@@ -584,7 +593,7 @@ export default function RoleManagementNew() {
                             {moduleFeatures.map((feature) => (
                               <label
                                 key={feature.feature_key}
-                                className="flex items-center gap-2 p-2 border rounded hover:bg-slate-50 cursor-pointer"
+                                className="flex items-center gap-2 p-2 border dark:border-slate-700 rounded hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
                               >
                                 <input
                                   type="checkbox"
@@ -611,7 +620,7 @@ export default function RoleManagementNew() {
               </div>
             </div>
 
-            <div className="px-5 py-4 border-t flex justify-end gap-2">
+            <div className="px-5 py-4 border-t dark:border-slate-700 flex justify-end gap-2">
               <button
                 className="btn-outline"
                 type="button"

@@ -13,6 +13,7 @@ import {
   useNavigate,
   useLocation,
 } from "react-router-dom";
+import Swal from "sweetalert2";
 
 import { useAuth } from "../auth/AuthContext.jsx";
 import {
@@ -39,6 +40,7 @@ import ProductionHome from "../pages/modules/production/ProductionHome.jsx";
 import PosHome from "../pages/modules/pos/PosHome.jsx";
 import BusinessIntelligenceHome from "../pages/modules/business-intelligence/BusinessIntelligenceHome.jsx";
 import ServiceManagementHome from "../pages/modules/service-management/ServiceManagementHome.jsx";
+import TransportLayout from "../pages/modules/transport/TransportLayout.jsx";
 import ExecutiveOverviewRoutes from "../pages/modules/executive-overview/ExecutiveOverviewRoutes.jsx";
 import NotificationsPage from "../pages/NotificationsPage.jsx";
 import SocialFeedPage from "../pages/social/SocialFeedPage.jsx";
@@ -50,6 +52,7 @@ import addNotification from "../utils/addNotification.js";
 
 import logoDark from "../assets/resources/OMNISUITE_WHITE_LOGO.png";
 import logoLight from "../assets/resources/OMNISUITE_LOGO_FILL.png";
+import PaymentPackageModal from "../components/PaymentPackageModal.jsx";
 import { api } from "../api/client.js";
 import useOfflineQueue from "../offline/useOfflineQueue.js";
 import FloatingInstallButton from "../components/FloatingInstallButton.jsx";
@@ -70,6 +73,7 @@ import {
   AreaChart,
   Headset,
   Presentation,
+  Truck,
   Home,
 } from "lucide-react";
 import FloatingChat from "../components/chat/FloatingChat.jsx";
@@ -93,6 +97,7 @@ const AppRoutes = React.memo(function AppRoutes() {
       <Route path="/pos/*" element={<PosHome />} />
       <Route path="/business-intelligence/*" element={<BusinessIntelligenceHome />} />
       <Route path="/service-management/*" element={<ServiceManagementHome />} />
+      <Route path="/transport/*" element={<TransportLayout />} />
       <Route path="/executive-overview/*" element={<ExecutiveOverviewRoutes />} />
       <Route path="/administration/access/dashboard-permissions" element={<DashboardPermissions />} />
       <Route path="/notifications" element={<NotificationsPage />} />
@@ -152,6 +157,12 @@ const modules = [
     label: "Executive Overview",
     path: "/executive-overview",
     icon: <Presentation />,
+  },
+  {
+    key: "transport",
+    label: "Transport",
+    path: "/transport",
+    icon: <Truck />,
   },
 ];
 
@@ -225,6 +236,7 @@ export default function AppShell() {
   const navigate = useNavigate();
   const location = useLocation();
   const [queueOpen, setQueueOpen] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [savedToast, setSavedToast] = useState(false);
   const lastChatToneAtRef = useRef(0);
   useEffect(() => {
@@ -234,6 +246,110 @@ export default function AppShell() {
       return () => clearTimeout(t);
     }
   }, [lastEvent]);
+
+  useEffect(() => {
+    if (sessionStorage.getItem("triggerRenewal") === "true") {
+      sessionStorage.removeItem("triggerRenewal");
+      setShowPaymentModal(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function checkLicense() {
+      const companyId = user?.company_id || user?.companyIds?.[0];
+      if (!companyId) return;
+
+      try {
+        const res = await api.get(`/licenses/company/${companyId}`);
+        if (mounted && res?.data) {
+          const l = res.data;
+          console.log("License Data:", l);
+          if (["ACTIVE", "EXPIRED", "INACTIVE", "SUSPENDED", "CANCELLED"].includes(l.status)) {
+            const exp = new Date(l.expiry_date);
+            const graceDays = l.grace_days || 0;
+            const finalExp = new Date(
+              exp.getTime() + graceDays * 24 * 60 * 60 * 1000,
+            );
+            const now = new Date();
+            let daysRemaining = Math.max(
+              0,
+              Math.ceil((finalExp - now) / (1000 * 60 * 60 * 24)),
+            );
+
+            const alertDays = l.alert_days !== undefined && l.alert_days !== null ? l.alert_days : 30;
+            console.log("License Expiry:", { daysRemaining, alertDays, finalExp, now, status: l.status });
+            
+            const shouldAlert = (daysRemaining <= alertDays && daysRemaining >= 0) || (l.status !== "ACTIVE" && l.status !== "EXPIRED");
+
+            if (shouldAlert) {
+              const formattedDate = new Date(l.expiry_date).toLocaleDateString();
+              let title = "";
+              let text = "";
+
+              if (l.status === "INACTIVE") {
+                title = "License Inactive";
+                text = "Your license is currently INACTIVE. Please renew.";
+              } else if (l.status === "SUSPENDED") {
+                title = "License Suspended";
+                text = "Your license is suspended. Please renew.";
+              } else if (l.status === "CANCELLED") {
+                title = "License Cancelled";
+                text = "Your license is cancelled. Please renew.";
+              } else {
+                title = daysRemaining === 0 ? "License Expired" : "License Expiring Soon";
+                text = daysRemaining === 0 
+                  ? `Your license expired on ${formattedDate} (including ${graceDays} days grace).`
+                  : `Your license expires on ${formattedDate} + ${graceDays} days grace period.`;
+              }
+              
+              const isDismissed = sessionStorage.getItem("licenseAlertDismissed") === "true";
+              const canDismiss = (l.status === "ACTIVE" && daysRemaining > 0);
+
+              if (!isDismissed || !canDismiss) {
+                Swal.fire({
+                  toast: true,
+                  position: "bottom-end",
+                  title,
+                  icon: (daysRemaining === 0 || l.status !== "ACTIVE") ? "error" : "warning",
+                  text,
+                  showCancelButton: true,
+                  confirmButtonColor: "#2563eb",
+                  cancelButtonColor: "#64748b",
+                  confirmButtonText: "Renew",
+                  cancelButtonText: "Dismiss",
+                  width: "20em",
+                  padding: "0.5em",
+                  customClass: {
+                    title: 'text-sm m-0 p-0',
+                    htmlContainer: 'text-xs m-1 p-0',
+                    actions: 'm-0 p-0 scale-75'
+                  },
+                  timerProgressBar: true,
+                  showCloseButton: true,
+                  background: "rgba(255, 255, 255, 1)",
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    setShowPaymentModal(true);
+                  } else if (result.isDismissed) {
+                    sessionStorage.setItem("licenseAlertDismissed", "true");
+                  }
+                });
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error("License check error:", err);
+      }
+    }
+
+    checkLicense();
+    return () => {
+      mounted = false;
+    };
+  }, [user]);
 
   const [online, setOnline] = useState(
     typeof navigator !== "undefined" ? navigator.onLine !== false : true,
@@ -1255,6 +1371,7 @@ export default function AppShell() {
           {/* <div className="badge bg-brand-100 dark:bg-brand-900/50 text-brand-800 dark:text-brand-200 border border-brand-300 dark:border-brand-700">
             Role-based + Branch-based
           </div> */}
+          <FloatingInstallButton />
           <ThemeToggle />
           <Link
             to="/notifications"
@@ -1941,7 +2058,7 @@ export default function AppShell() {
           title="New Verification"
         />
       ) : null}
-      <FloatingInstallButton />
+      <PaymentPackageModal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)} companyId={user?.company_id || user?.companyIds?.[0]} />
       <FloatingChat />
     </div>
   );

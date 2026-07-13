@@ -6,6 +6,7 @@ import { query } from "../db/pool.js";
 import { httpError } from "../utils/httpError.js";
 import { cacheDel } from "../utils/redis.js";
 import { isMailerConfigured, sendMail } from "../utils/mailer.js";
+import { validateCompanyLicense, getCompanyLicense } from "../services/license.service.js";
 import {
   clearRefreshTokenCookie,
   buildAuthUserPayload,
@@ -34,6 +35,7 @@ const loginSchema = Joi.object({
     .falsy("0")
     .falsy("false")
     .default(false),
+  intent: Joi.string().optional(),
 }).required();
 
 const forgotRequestSchema = Joi.object({
@@ -94,6 +96,7 @@ function postDebugEvent(hypothesisId, location, msg, data = {}) {
 
 let _loginLogsTableEnsured = false;
 async function ensureLoginLogsTable() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   if (_loginLogsTableEnsured) return;
   _loginLogsTableEnsured = true;
   await query(`
@@ -410,6 +413,26 @@ export const login = async (req, res, next) => {
       throw httpError(401, "INVALID_CREDENTIALS", "Invalid credentials");
     }
 
+    if (user.company_id) {
+      const licenseStatus = await validateCompanyLicense(user.company_id);
+      if (!licenseStatus.valid) {
+        const licenseData = await getCompanyLicense(user.company_id);
+        
+        // If the intent is explicitly "renew" from the login page, bypass the login block
+        // to allow them inside where they are forcibly redirected to the renewal modal
+        if (value.intent === "renew" && licenseData && licenseData.exists && (licenseData.status === 'EXPIRED' || licenseData.status === 'INACTIVE' || licenseStatus.reason.includes('expired'))) {
+          user.licenseExpired = true;
+        } else if (licenseData && licenseData.exists && (licenseData.status === 'EXPIRED' || licenseData.status === 'INACTIVE' || licenseStatus.reason.includes('expired')) && licenseData.allow_login_renewal === 0) {
+          // Bypass login block to allow them inside where modules are hidden
+          user.licenseExpired = true;
+        } else {
+          const error = httpError(403, "LICENSE_EXPIRED", licenseStatus.reason || "Your company license has expired. Please contact your administrator to renew.");
+          error.companyId = user.company_id;
+          throw error;
+        }
+      }
+    }
+
     await completeLogin(req, res, user, Boolean(value.rememberMe));
     // #region debug-point A:login-success
     postDebugEvent(
@@ -431,6 +454,7 @@ export const login = async (req, res, next) => {
       {
         elapsedMs: Date.now() - loginStartedAt,
         errorCode: err?.code || null,
+        companyId: err?.companyId || null,
         errorMessage: err?.message || String(err),
         sqlMessage: err?.sqlMessage || null,
       },

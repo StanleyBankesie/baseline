@@ -18,6 +18,7 @@ import {
   ensureRoleFeaturesTable,
 } from "../utils/dbUtils.js";
 import { getAllFeatures } from "../data/featuresRegistry.js";
+import { checkUserLimit } from "../services/license.service.js";
 
 /**
  * Fetches a paginated and filtered list of users based on company, branch, active status, and search query.
@@ -70,11 +71,14 @@ export const getUsers = async (req, res, next) => {
     const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
     const lim = Math.min(100, Math.max(1, parseInt(limit || "50", 10)));
     const sql = `
-      SELECT u.id, u.company_id, u.branch_id, u.username, u.email, u.full_name, u.is_active, u.created_at,
-             c.name as company_name, b.name as branch_name
+      SELECT u.id, u.company_id, u.branch_id, u.username, u.email, 
+u.full_name, u.is_active, u.created_at,
+             c.name as company_name, b.name as branch_name,
+             uc.username as created_by_name
       FROM adm_users u
       LEFT JOIN adm_companies c ON u.company_id = c.id
       LEFT JOIN adm_branches b ON u.branch_id = b.id
+      LEFT JOIN adm_users uc ON u.created_by = uc.id
       ${where}
       ORDER BY u.username ASC
       LIMIT ${lim}
@@ -234,6 +238,13 @@ export const createUser = async (req, res, next) => {
         "company_id, branch_id, username, and email are required",
       );
 
+    if (String(is_active) !== "0" && is_active !== 0 && is_active !== false) {
+      const limitCheck = await checkUserLimit(company_id);
+      if (!limitCheck.allowed) {
+        throw httpError(400, "LICENSE_LIMIT_EXCEEDED", limitCheck.reason);
+      }
+    }
+
     const hashedPassword = password_hash ? await bcrypt.hash(password_hash, 10) : null;
 
     const result = await query(`INSERT INTO adm_users (
@@ -324,6 +335,16 @@ export const updateUser = async (req, res, next) => {
         "VALIDATION_ERROR",
         "company_id, branch_id, username, and email are required",
       );
+
+    if (String(is_active) !== "0" && is_active !== 0 && is_active !== false) {
+      const oldUser = await query("SELECT is_active FROM adm_users WHERE id = :id", { id });
+      if (oldUser && oldUser.length > 0 && String(oldUser[0].is_active) !== "1") {
+        const limitCheck = await checkUserLimit(company_id);
+        if (!limitCheck.allowed) {
+          throw httpError(400, "LICENSE_LIMIT_EXCEEDED", limitCheck.reason);
+        }
+      }
+    }
 
     let queryStr = `UPDATE adm_users SET
       company_id = :company_id,

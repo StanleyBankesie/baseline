@@ -468,11 +468,8 @@ export async function buildAuthUserPayload(user, permissions = []) {
     branchName: user.branch_name || "",
     profile_picture_url: profilePictureToDataUrl(user.profile_picture),
     status: user.status || "N",
+    licenseExpired: Boolean(user.licenseExpired),
   };
-
-  if (Number(user.id) === 1) {
-    payload.permissions = ["*"];
-  }
 
   return payload;
 }
@@ -530,6 +527,19 @@ export async function revokeRefreshToken(rawToken) {
   });
 }
 
+// Major Logic: Expires a refresh token in 30 seconds instead of immediate deletion.
+// This allows concurrent requests to succeed even if Redis is completely down.
+export async function expireRefreshTokenGracefully(rawToken) {
+  const tokenHash = hashRefreshToken(rawToken);
+  const expiryDate = new Date(Date.now() + 30000);
+  await query(
+    `UPDATE refresh_tokens 
+     SET expiry_date = :expiryDate 
+     WHERE refresh_token = :tokenHash AND expiry_date > :expiryDate`,
+    { tokenHash, expiryDate }
+  );
+}
+
 // Major Logic: Logs user out everywhere by revoking all their refresh tokens
 export async function revokeUserRefreshTokens(userId) {
   await query(`DELETE FROM refresh_tokens WHERE user_id = :userId`, {
@@ -570,7 +580,9 @@ const recentlyRotatedTokens = new Map();
 // Endpoint / Major Logic: Refreshes access tokens and rotates refresh tokens, supporting slight concurrency delay
 export async function rotateRefreshSession(rawToken, oldAccessToken = null) {
   const tokenHash = hashRefreshToken(rawToken);
+  const { cacheGet, cacheSet } = await import("../utils/redis.js");
 
+  // 1. Check in-memory map (fast path for single process)
   if (recentlyRotatedTokens.has(tokenHash)) {
     const cached = recentlyRotatedTokens.get(tokenHash);
     if (Date.now() < cached.expiresAt) {
@@ -579,8 +591,28 @@ export async function rotateRefreshSession(rawToken, oldAccessToken = null) {
     }
   }
 
+  // 2. Check Redis (fast path for multi-process)
+  const redisKey = `auth:rotated_refresh:${tokenHash}`;
+  const redisCached = await cacheGet(redisKey);
+  if (redisCached) {
+    return redisCached;
+  }
+
   const promise = (async () => {
-    const refreshRecord = await consumeRefreshToken(rawToken);
+    let refreshRecord;
+    try {
+      refreshRecord = await consumeRefreshToken(rawToken);
+    } catch (err) {
+      if (err.message === "Refresh token is invalid") {
+        // Race condition mitigation: Another process might have JUST rotated it and deleted it from DB.
+        // If they deleted it, they must have saved the new tokens to Redis right before deleting.
+        // Let's check Redis one more time.
+        const secondCheck = await cacheGet(redisKey);
+        if (secondCheck) return secondCheck;
+      }
+      throw err;
+    }
+
     const user = await getUserForAuth(refreshRecord.user_id);
     if (!user || !Number(user.is_active)) {
       await revokeRefreshToken(rawToken);
@@ -588,13 +620,23 @@ export async function rotateRefreshSession(rawToken, oldAccessToken = null) {
     }
 
     const permissions = await getUserPermissions(user.id);
-    await revokeRefreshToken(rawToken);
-
+    
+    // Generate new tokens
     const newTokens = await createSessionTokens({
       user,
       rememberMe: refreshRecord.remember_me,
       permissions,
     });
+
+    // 3. Save to Redis BEFORE revoking from DB.
+    // This ensures that concurrent processes will either find the old token in the DB,
+    // or the new tokens in Redis. There's no gap where both are missing.
+    await cacheSet(redisKey, newTokens, 60);
+
+    // 4. Set a short grace period on the token instead of immediate deletion.
+    // This allows concurrent requests to succeed even if Redis is completely down
+    // (e.g. Upstash quota exceeded).
+    await expireRefreshTokenGracefully(rawToken);
 
     return newTokens;
   })();

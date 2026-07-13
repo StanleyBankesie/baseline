@@ -99,6 +99,20 @@ const ModuleDashboard = ({
       return canViewDashboardElement(mk, "dashboard", "dashboard") === true;
     }
     if (mk && fk) {
+      // Check if this feature key is a known/registered feature in the registry.
+      // If it is, we use canAccessFeatureKey as the definitive gate — no fallback.
+      // Unknown paths (e.g. sub-pages like /sales/reports/sales-register) fall
+      // through to canAccessPath for looser path-based access.
+      const moduleInfo = MODULES_REGISTRY[mk];
+      const isKnownFeature = moduleInfo && (
+        (moduleInfo.features || []).some(f => String(f.key) === fk) ||
+        (moduleInfo.dashboards || []).some(d => String(d.key) === fk)
+      );
+      if (isKnownFeature) {
+        // Explicit feature: respect the RBAC gate with no fallback.
+        return canAccessFeatureKey(mk, fk);
+      }
+      // Unknown feature key — try the primary key first, then path fallback.
       if (canAccessFeatureKey(mk, fk)) return true;
       if (!item.feature_key && parts.length > 2) {
         const fk2 = String(parts[2] || "");

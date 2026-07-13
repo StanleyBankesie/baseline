@@ -9,6 +9,7 @@ function toNumber(v, fallback = null) {
 }
 
 async function ensureProjectTables(companyId, branchId) {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   await query(`CREATE TABLE IF NOT EXISTS pm_projects (
     id INT AUTO_INCREMENT PRIMARY KEY,
     company_id INT NOT NULL, branch_id INT NOT NULL,
@@ -440,6 +441,7 @@ export const getPMDashboardStats = async (req, res, next) => {
 
 // ===== TASK DEPENDENCIES =====
 async function ensureTaskDependenciesTable(companyId, branchId) {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   await query(`CREATE TABLE IF NOT EXISTS pm_task_dependencies (
     id INT AUTO_INCREMENT PRIMARY KEY,
     company_id INT NOT NULL, branch_id INT NOT NULL,
@@ -651,6 +653,7 @@ export const getProjectDetail = async (req, res, next) => {
 
 // ===== PM MATERIAL REQUISITION TABLES =====
 async function ensurePMMaterialRequisitionTables(companyId, branchId) {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   await query(`CREATE TABLE IF NOT EXISTS pm_material_requisitions (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     company_id BIGINT UNSIGNED NOT NULL,
@@ -699,6 +702,7 @@ async function nextPMMRNo(companyId, branchId) {
 
 // ===== PM MATERIAL UTILIZATION TABLES =====
 async function ensurePMMaterialUtilizationTables(companyId, branchId) {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   await query(`CREATE TABLE IF NOT EXISTS pm_material_utilization (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     company_id BIGINT UNSIGNED NOT NULL,
@@ -750,6 +754,7 @@ async function nextPMUtilNo(companyId, branchId) {
 
 // ===== PM MATERIALS RECEIPT TABLES =====
 async function ensurePMMaterialReceiptTables(companyId, branchId) {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   await query(`CREATE TABLE IF NOT EXISTS pm_material_receipts (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     company_id BIGINT UNSIGNED NOT NULL,

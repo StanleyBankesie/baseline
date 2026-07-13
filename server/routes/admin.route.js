@@ -2528,9 +2528,9 @@ router.get("/user-permissions", requireAuth, async (req, res, next) => {
       return res.json({ modules: [], permissions: [] });
     }
 
-    // Get user's role
+    // Get user's role and company
     const roleResult = await query(
-      `SELECT role_id
+      `SELECT role_id, company_id
          FROM adm_users
         WHERE id = :userId`,
       { userId },
@@ -2588,25 +2588,44 @@ router.get("/user-permissions", requireAuth, async (req, res, next) => {
       .map((row) => normalizeFeatureKey(row.feature_key))
       .filter(Boolean);
 
-    const inferredModules = new Set(
+    const explicitModules = new Set(
       modules
         .map((row) => normalizeModuleKey(row.module_key))
         .filter(Boolean),
     );
-    for (const row of normalizedPermissions) {
-      if (row.module_key) inferredModules.add(row.module_key);
-      const [featureModule] = String(row.feature_key || "").split(":");
-      if (featureModule) inferredModules.add(featureModule);
-    }
-    for (const featureKey of normalizedRoleFeatures) {
-      const [featureModule] = String(featureKey || "").split(":");
-      if (featureModule) inferredModules.add(featureModule);
+
+    const inferredModules = new Set(explicitModules);
+
+    const companyId = Number(roleResult?.[0]?.company_id || 0);
+    let licensedModules = null;
+    if (companyId) {
+      const licenseQuery = await query(`SELECT id FROM adm_company_licenses WHERE company_id = :companyId ORDER BY id DESC LIMIT 1`, { companyId });
+      if (licenseQuery && licenseQuery.length > 0) {
+        const licenseId = licenseQuery[0].id;
+        const lm = await query(`SELECT module_code FROM adm_license_modules WHERE license_id = :licenseId`, { licenseId });
+        licensedModules = new Set(lm.map(x => x.module_code));
+      }
     }
 
+    let finalModules = Array.from(inferredModules);
+    let finalPermissions = normalizedPermissions;
+    let finalRoleFeatures = normalizedRoleFeatures;
+
+    // Only filter by modules explicitly assigned to the role.
+    // License enforcement happens at role-assignment time (in saveRoleModules).
+    // Do NOT strip role-assigned modules by license here — that causes enabled modules
+    // (e.g. transport) to disappear from sidebar even when checked in role setup.
+    finalPermissions = finalPermissions.filter(p => explicitModules.has(p.module_key));
+    finalRoleFeatures = finalRoleFeatures.filter(f => {
+      const [m] = f.split(":");
+      return explicitModules.has(m);
+    });
+
     res.json({
-      modules: Array.from(inferredModules),
-      permissions: normalizedPermissions,
-      role_features: normalizedRoleFeatures,
+      modules: finalModules,
+      permissions: finalPermissions,
+      role_features: finalRoleFeatures,
+      licensed_modules: Array.from(licensedModules || []),
     });
   } catch (err) {
     next(err);

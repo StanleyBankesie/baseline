@@ -119,7 +119,7 @@ function renderDeliveryNoteHtml(data) {
       <tr>
         <th style="width:6%;">Sr No.</th>
         <th style="width:16%;">Product Code</th>
-        <th>Product Description</th>
+        <th style="width:36%;">Product Description</th>
         <th class="right" style="width:18%;">Quantity Unit</th>
       </tr>
     </thead>

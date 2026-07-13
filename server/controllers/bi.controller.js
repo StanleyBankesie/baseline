@@ -114,7 +114,7 @@ export const getHomeOverview = async (req, res, next) => {
     const badges = {
       "today-sales": { text: `${todaySalesPct >= 0 ? '+' : ''}${todaySalesPct}% vs last month` },
       "total-customers": { text: "Active" },
-      "average-order": { text: "Lifetime" },
+      "average-order": { text: "" },
       "monthly-revenue": { text: "This Month" },
     };
 

@@ -158,6 +158,7 @@ async function listTrainingProgramsDup(req, res, next) {
 // Database Utility: Ensures that attachment columns exist in the hr_policies table
 // Adds attachment_url and attachment_name columns if they do not already exist
 async function ensurePolicyAttachmentColumns() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   // Add attachment_url column
   await query(`ALTER TABLE hr_policies
      ADD COLUMN attachment_url TEXT NULL AFTER content`,
@@ -173,6 +174,7 @@ async function ensurePolicyAttachmentColumns() {
 // Database Utility: Ensures that attachment columns exist in the hr_medical_policies table
 // Adds attachment_url and attachment_name columns if they do not already exist
 async function ensureMedicalPolicyAttachmentColumns() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   // Add attachment_url column
   await query(`ALTER TABLE hr_medical_policies
      ADD COLUMN attachment_url TEXT NULL AFTER coverage_details`,
@@ -5076,6 +5078,7 @@ export async function saveAllowanceType(req, res, next) {
  * Work Schedules — link employees to shifts and off days
  */
 async function ensureWorkSchedulesTable() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   await query(`CREATE TABLE IF NOT EXISTS hr_work_schedules (
       id INT AUTO_INCREMENT PRIMARY KEY,
       company_id INT NOT NULL,
@@ -5153,6 +5156,7 @@ export async function saveWorkSchedule(req, res, next) {
 // ============================================================
 
 async function ensureLeaveTables() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   // Leave Types (e.g. Annual, Sick, Maternity)
   await query(`CREATE TABLE IF NOT EXISTS hr_leave_types (
       id              INT AUTO_INCREMENT PRIMARY KEY,

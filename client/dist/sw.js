@@ -13,7 +13,7 @@ if (!DEV_MODE) {
       (async () => {
         const cache = await caches.open(ASSET_CACHE);
         await cache.addAll([
-        "/assets/index-JBTEMKHr.js"
+        "/assets/index-CU-3hZ28.js"
 ]);
         // NOTE: Do NOT call self.skipWaiting() here.
         // skipWaiting causes the new SW to immediately take over ALL open tabs
@@ -92,11 +92,12 @@ async function staleWhileRevalidate(cacheName, request) {
       if (resp && resp.ok) {
         const t = resp.type;
         const canCache =
-          t === "basic" ||
+          request.method === "GET" &&
+          (t === "basic" ||
           t === "default" ||
           (t === "opaque" &&
             typeof request.url === "string" &&
-            request.url.startsWith(self.location.origin));
+            request.url.startsWith(self.location.origin)));
         if (canCache) {
           try {
             await cache.put(request, resp.clone());
@@ -118,7 +119,7 @@ async function cacheFirstWithNetworkFallback(cacheName, request) {
   if (cached) return cached;
   try {
     const resp = await fetch(request);
-    if (resp && resp.ok) {
+    if (resp && resp.ok && request.method === "GET") {
       try {
         await cache.put(request, resp.clone());
       } catch (e) {}

@@ -22,6 +22,7 @@ async function hasColumn(tableName, columnName) {
 }
 
 async function ensureItemFlagColumns() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   if (!(await hasColumn("inv_items", "service_item"))) {
     await query(
       "ALTER TABLE inv_items ADD COLUMN service_item CHAR(1) NOT NULL DEFAULT 'N'",

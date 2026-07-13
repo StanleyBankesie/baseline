@@ -247,6 +247,7 @@ export function AuthProvider({ children }) {
       clearLastActivity();
       setToken(null);
       setUser(null);
+      sessionStorage.removeItem('license_alert_dismissed');
       window.location.href = "/login";
     }
   };

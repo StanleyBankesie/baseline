@@ -257,16 +257,16 @@ export default function UserPermissions() {
             <div>Loading...</div>
           ) : selectedUser ? (
             <div className="overflow-x-auto">
-              <table className="table w-full">
+              <table className="table w-full table-fixed">
                 <thead>
                   <tr>
-                    <th>Feature</th>
-                    <th>Type</th>
-                    <th>Module</th>
-                    <th className="text-center w-28">View</th>
-                    <th className="text-center w-28">Create</th>
-                    <th className="text-center w-28">Edit</th>
-                    <th className="text-center w-28">Delete</th>
+                    <th className="text-center w-[14.28%]">Feature</th>
+                    <th className="text-center w-[14.28%]">Module</th>
+                    <th className="text-center w-[14.28%]">Type</th>
+                    <th className="text-center w-[14.28%]">View</th>
+                    <th className="text-center w-[14.28%]">Create</th>
+                    <th className="text-center w-[14.28%]">Edit</th>
+                    <th className="text-center w-[14.28%]">Delete</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -276,9 +276,9 @@ export default function UserPermissions() {
                     const overrideRow = featureOverrides[f.feature_key] || {};
                     return (
                       <tr key={f.feature_key}>
-                        <td className="p-3 font-medium">{f.label}</td>
-                        <td className="p-3">{f.type}</td>
-                        <td className="p-3">{mk}</td>
+                        <td className="p-3 font-medium text-center truncate">{f.label}</td>
+                        <td className="p-3 text-center truncate">{mk}</td>
+                        <td className="p-3 text-center truncate">{f.type}</td>
                         <td className="p-3 text-center">
                           <input
                             type="checkbox"

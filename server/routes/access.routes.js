@@ -710,10 +710,8 @@ router.put(
       const assignedSet = new Set(assigned.map((r) => String(r.module_key)));
       for (const p of permissions) {
         const mk = String(p.module_key || "");
-        if (!assignedSet.has(mk))
-          return res
-            .status(400)
-            .json({ message: `module not assigned: ${mk}` });
+        // Skip permissions for modules not assigned to this role (don't error)
+        if (!assignedSet.has(mk)) continue;
         const featureKey = String(
           p.feature_key || p.featureKey || `${mk}:*`,
         ).trim();

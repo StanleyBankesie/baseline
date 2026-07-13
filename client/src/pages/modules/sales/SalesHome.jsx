@@ -252,6 +252,7 @@ const SalesModuleHome = () => {
         {
           title: "Quotations",
           path: "/sales/quotations",
+          feature_key: "quotations",
           description: "Create and manage customer quotations",
           icon: "📋",
           actions: [
@@ -276,6 +277,7 @@ const SalesModuleHome = () => {
         {
           title: "Sales Orders",
           path: "/sales/sales-orders",
+          feature_key: "sales-orders",
           description: "Process customer orders and track fulfillment",
           icon: "🛒",
           actions: [
@@ -300,6 +302,7 @@ const SalesModuleHome = () => {
         {
           title: "Invoices",
           path: "/sales/invoices",
+          feature_key: "invoices",
           description: "Generate and manage sales invoices",
           icon: "🧾",
           actions: [
@@ -324,6 +327,7 @@ const SalesModuleHome = () => {
         {
           title: "Delivery Notes",
           path: "/sales/delivery",
+          feature_key: "delivery",
           description: "Track product deliveries to customers",
           icon: "🚚",
           actions: [
@@ -380,6 +384,7 @@ const SalesModuleHome = () => {
         {
           title: "Customers",
           path: "/sales/customers",
+          feature_key: "customers",
           description: "Manage customer information and credit limits",
           icon: "👥",
           actions: [
@@ -404,6 +409,7 @@ const SalesModuleHome = () => {
         {
           title: "Prospective Customers",
           path: "/sales/prospect-customers",
+          feature_key: "prospect-customers",
           description: "Manage prospective customer (leads) information",
           icon: "🔮",
           actions: [
@@ -428,6 +434,7 @@ const SalesModuleHome = () => {
         {
           title: "Prospect Conversion",
           path: "/sales/prospect-conversion",
+          feature_key: "prospect-conversion",
           description:
             "Convert prospective customers into full customer accounts",
           icon: "🔄",

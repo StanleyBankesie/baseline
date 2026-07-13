@@ -749,16 +749,16 @@ export default function UserPermissionsNew() {
                         Features ({visibleFeatures.length})
                       </h3>
                       <div className="overflow-x-auto">
-                        <table className="table w-full">
+                        <table className="table w-full table-fixed">
                           <thead>
                             <tr>
-                              <th>Feature</th>
-                              <th>Module</th>
-                              <th>Type</th>
-                              <th className="text-center w-24">View</th>
-                              <th className="text-center w-24">Create</th>
-                              <th className="text-center w-24">Edit</th>
-                              <th className="text-center w-24">Delete</th>
+                              <th className="text-center w-[14.28%]">Feature</th>
+                              <th className="text-center w-[14.28%]">Module</th>
+                              <th className="text-center w-[14.28%]">Type</th>
+                              <th className="text-center w-[14.28%]">View</th>
+                              <th className="text-center w-[14.28%]">Create</th>
+                              <th className="text-center w-[14.28%]">Edit</th>
+                              <th className="text-center w-[14.28%]">Delete</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -774,11 +774,11 @@ export default function UserPermissionsNew() {
 
                               return (
                                 <tr key={feature.feature_key}>
-                                  <td className="p-3 font-medium">
+                                  <td className="p-3 font-medium text-center truncate">
                                     {feature.label}
                                   </td>
-                                  <td className="p-3">{feature.module_key}</td>
-                                  <td className="p-3">
+                                  <td className="p-3 text-center truncate">{feature.module_key}</td>
+                                  <td className="p-3 text-center truncate">
                                     <span
                                       className={`px-2 py-1 rounded text-xs font-medium ${
                                         feature.type === "dashboard"

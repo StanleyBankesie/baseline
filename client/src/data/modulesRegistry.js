@@ -318,6 +318,28 @@ export const MODULES_REGISTRY = {
       { key: "service-overview", label: "Service Overview Dashboard", type: "dashboard" },
       { key: "billing-analytics", label: "Billing Analytics Dashboard", type: "dashboard" },
     ]
+  },
+  transport: {
+    name: "Transport",
+    path: "/transport",
+    icon: "🚚",
+    features: [
+      { key: "requests", label: "Transport Requests", type: "feature" },
+      { key: "vehicles", label: "Vehicles", type: "feature" },
+      { key: "drivers", label: "Drivers", type: "feature" },
+      { key: "trips", label: "Trips & Dispatch", type: "feature" },
+      { key: "tracking", label: "GPS Tracking", type: "feature" },
+      { key: "fuel", label: "Fuel & Expenses", type: "feature" },
+      { key: "billing", label: "Billing", type: "feature" },
+      { key: "routes", label: "Routes", type: "feature" },
+      { key: "inspections", label: "Inspections", type: "feature" },
+      { key: "maintenance", label: "Maintenance Requests", type: "feature" },
+      { key: "settings", label: "Transport Settings", type: "feature" },
+      { key: "reports", label: "Reports & Analytics", type: "feature" }
+    ],
+    dashboards: [
+      { key: "dashboard", label: "Transport Dashboard", type: "dashboard" }
+    ]
   }
 };
 
@@ -332,12 +354,13 @@ export function getModuleInfo(moduleKey) {
 export function getAllFeatures() {
   const features = [];
   Object.entries(MODULES_REGISTRY).forEach(([moduleKey, moduleInfo]) => {
-    moduleInfo.features.forEach(feature => {
+    const allItems = [...(moduleInfo.features || []), ...(moduleInfo.dashboards || [])];
+    allItems.forEach(feature => {
       features.push({
         module_key: moduleKey,
         feature_key: `${moduleKey}:${feature.key}`,
         label: feature.label,
-        type: feature.type,
+        type: feature.type || "feature",
         path: `/${moduleKey}/${feature.key}`,
       });
     });
@@ -364,11 +387,12 @@ export function getAllDashboards() {
 export function getModuleFeatures(moduleKey) {
   const moduleInfo = MODULES_REGISTRY[moduleKey];
   if (!moduleInfo) return [];
-  return moduleInfo.features.map(feature => ({
+  const allItems = [...(moduleInfo.features || []), ...(moduleInfo.dashboards || [])];
+  return allItems.map(feature => ({
     module_key: moduleKey,
     feature_key: `${moduleKey}:${feature.key}`,
     label: feature.label,
-    type: feature.type,
+    type: feature.type || "feature",
     path: `/${moduleKey}/${feature.key}`,
   }));
 }

@@ -21,6 +21,7 @@ export function errorHandler(err, req, res, next) {
   const payload = {
     error: err.code || "INTERNAL_ERROR",
     message: err.message || "Internal server error",
+    companyId: err.companyId,
     stack: err.stack,
     sqlMessage: err.sqlMessage,
   };

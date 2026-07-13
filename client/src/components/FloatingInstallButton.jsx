@@ -31,52 +31,74 @@ export default function FloatingInstallButton() {
   }, []);
 
   useEffect(() => {
-    // Show whenever supported and not yet installed.
-    // If installPrompt is not available (iOS/Safari), show help to guide manual install.
-    const shouldShow = isPWASupported && !isInstalled;
+    // Show only when not yet installed.
+    const shouldShow = !isInstalled;
     setVisible(shouldShow);
-  }, [isInstallable, isInstalled, isPWASupported, viewportWidth]);
+  }, [isInstalled, viewportWidth]);
 
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-[60] flex flex-col items-end gap-2">
+    <>
+      <div className="relative flex items-center">
+        <button
+          type="button"
+          className="inline-flex items-center justify-center w-9 h-9 lg:w-auto lg:px-3 lg:gap-2 rounded-lg text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
+          aria-label="Install App"
+          onClick={async () => {
+            if (isInstallable) {
+              await handleInstall();
+            } else {
+              setShowHelp(true);
+            }
+          }}
+          title="Install OmniSuite"
+        >
+          <Download className="w-5 h-5" />
+          <span className="hidden lg:inline text-sm font-medium">Install App</span>
+        </button>
+      </div>
+
       {showHelp && (
-        <div className="card p-3 shadow-erp-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-          <div className="text-sm font-semibold">Install</div>
-          <div className="text-xs text-slate-600 dark:text-slate-400">
-            {/iPad|iPhone|iPod/.test(navigator.userAgent)
-              ? "Tap Share → Add to Home Screen"
-              : "Tap menu → Install / Add to Home Screen"}
-          </div>
-          <div className="mt-2 flex justify-end">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-xl max-w-sm w-full p-6 shadow-xl relative">
             <button
-              type="button"
-              className="btn-secondary px-2 py-1"
               onClick={() => setShowHelp(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
             >
-              Close
+              ✕
             </button>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">
+              Install OmniSuite
+            </h3>
+            <div className="space-y-4 text-sm text-slate-600 dark:text-slate-300">
+              <p>To install OmniSuite as an app on your device:</p>
+              
+              <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">iOS (Safari)</h4>
+                <ol className="list-decimal list-inside space-y-1">
+                  <li>Tap the Share button <span className="inline-block border border-slate-300 dark:border-slate-600 rounded px-1 text-xs">⍗</span></li>
+                  <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+                  <li>Tap <strong>Add</strong> in the top right</li>
+                </ol>
+              </div>
+
+              <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">Android / Desktop</h4>
+                <p>If you don't see an automatic install prompt, look for an install icon <span className="inline-flex items-center justify-center w-5 h-5 bg-slate-200 dark:bg-slate-700 rounded-full text-xs">💻</span> in your browser's address bar or menu.</p>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowHelp(false)}
+                className="btn btn-primary"
+              >
+                Got it
+              </button>
+            </div>
           </div>
         </div>
       )}
-      <button
-        type="button"
-        className="btn-primary rounded-full w-12 h-12 shadow-erp-lg flex items-center justify-center"
-        aria-label="Install app"
-        onClick={async () => {
-          if (isInstallable) {
-            const accepted = await handleInstall();
-            if (!accepted) setShowHelp(true);
-          } else {
-            setShowHelp(true);
-            setTimeout(() => setShowHelp(false), 4000);
-          }
-        }}
-        title="Install OmniSuite"
-      >
-        <Download className="w-5 h-5" />
-      </button>
-    </div>
+    </>
   );
 }

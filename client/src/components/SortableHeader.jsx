@@ -47,7 +47,7 @@ export default function SortableHeader({
 
   return (
     <th
-      className={`select-none font-bold transition-colors ${active ? "bg-sky-50 text-sky-700" : "text-slate-700 hover:text-brand-700"} ${className}`}
+      className={`select-none font-bold transition-colors ${active ? "bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300" : "text-slate-700 dark:text-slate-100 hover:text-brand-700 dark:hover:text-brand-400"} ${className}`}
       title={`Sort by ${label}`}
       aria-sort={ariaSort}
     >
@@ -59,7 +59,7 @@ export default function SortableHeader({
         <span>{label}</span>
         <span
           className={`inline-flex flex-col leading-none ${
-            active ? "text-sky-600" : "text-slate-500"
+            active ? "text-sky-600 dark:text-sky-400" : "text-slate-500 dark:text-slate-400"
           }`}
           aria-hidden="true"
         >

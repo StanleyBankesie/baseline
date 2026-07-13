@@ -14,12 +14,14 @@ function toNumber(v, fallback = null) {
   return Number.isFinite(n) ? n : fallback;
 }
 
-let tablesEnsured = false;
+let tablesEnsuredPromise = null;
 
 // Helper to run database migrations/ensure tables exist for maintenance module
-async function ensureTables(companyId, branchId) {
-  if (tablesEnsured) return;
-  
+function ensureTables(companyId, branchId) {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
+  if (!tablesEnsuredPromise) {
+    tablesEnsuredPromise = (async () => {
+      try {
   await query(`CREATE TABLE IF NOT EXISTS maint_requests (
     id INT AUTO_INCREMENT PRIMARY KEY,
     company_id INT NOT NULL, branch_id INT NOT NULL,
@@ -396,7 +398,12 @@ async function ensureTables(companyId, branchId) {
   for (const t of noCreatedAt) {
     await query(`ALTER TABLE ${t} ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`).catch(() => {});
   }
-  tablesEnsured = true;
+  } finally {
+    // Done
+  }
+    })();
+  }
+  return tablesEnsuredPromise;
 }
 
 // ===== HELPERS =====
@@ -1720,6 +1727,7 @@ export const getJobExecutionById = async (req, res, next) => {
 // Record a new job execution/completion report
 
 async function ensureMaintMaterialUtilizationTables(companyId, branchId) {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   await query(`CREATE TABLE IF NOT EXISTS maint_material_utilization (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     company_id BIGINT UNSIGNED NOT NULL,
@@ -3099,6 +3107,7 @@ export const getDowntimeReport = async (req, res, next) => {
 
 // Setup routine to ensure material requisition tables exist
 async function ensureMaintMaterialRequisitionTables() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   await query(`CREATE TABLE IF NOT EXISTS maint_material_requisitions (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     company_id BIGINT UNSIGNED NOT NULL,
@@ -3312,6 +3321,7 @@ export const submitMaintMaterialRequisition = async (req, res, next) => {
 
 // ===== MAINTENANCE MATERIAL RECEIPT TABLES =====
 async function ensureMaintMaterialReceiptTables(companyId, branchId) {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   await query(`CREATE TABLE IF NOT EXISTS maint_material_receipts (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     company_id BIGINT UNSIGNED NOT NULL,

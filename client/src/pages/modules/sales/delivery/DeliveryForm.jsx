@@ -556,7 +556,7 @@ export default function DeliveryForm() {
               <table className="w-full text-sm text-left">
                 <thead className="bg-gray-50 text-gray-700">
                   <tr>
-                    <th className="p-3">Item</th>
+                    <th className="p-3 w-[40%]">Item</th>
                     <th className="p-3 w-28">Qty</th>
                     <th className="p-3 w-24">UOM</th>
                     <th className="p-3 w-48">Batch</th>
