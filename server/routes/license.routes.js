@@ -7,7 +7,8 @@ import {
   initializePaystackPayment,
   verifyPaystackPayment,
   getInvoiceTemplate,
-  saveInvoiceTemplate
+  saveInvoiceTemplate,
+  getGlobalLicenseStatus
 } from "../controllers/license.controller.js";
 import { requireAuth } from "../middleware/auth.js";
 import { requirePermission } from "../middleware/requirePermission.js";
@@ -25,6 +26,7 @@ router.get("/super-admin", requireAuth, (req, res) => {
 // Paystack payment routes (PUBLICly accessible for expired license renewal on login)
 router.post("/paystack/initialize", initializePaystackPayment);
 router.get("/paystack/verify", verifyPaystackPayment);
+router.get("/global-status", getGlobalLicenseStatus);
 
 // All other license endpoints require authentication
 router.use(requireAuth);

@@ -2200,6 +2200,7 @@ export const createServiceBill = async (req, res, next) => {
     const exchangeRate = Number(body.exchange_rate) || 1;
     const freightCharges = Number(body.freight_charges) || 0;
     const otherCharges = Number(body.other_charges) || 0;
+    const costCenterId = body.cost_center_id ? Number(body.cost_center_id) : null;
     const rows = Array.isArray(body.details)
       ? body.details
       : Array.isArray(body.rows)
@@ -2254,14 +2255,14 @@ export const createServiceBill = async (req, res, next) => {
         payment_method, payment_reference, payment_terms, notes,
         discount_percent, tax_percent, subtotal, discount_amount, tax_amount, total_amount,
         currency_id, exchange_rate, freight_charges, other_charges,
-        created_by
+        created_by, cost_center_id
       ) VALUES (
         :companyId, :branchId, :supplierId, :orderId, :billNo, :billDate, :dueDate, :serviceDate, :status, :paymentStatus,
         :clientName, :clientCompany, :clientAddress, :clientPhone, :clientEmail,
         :paymentMethod, :paymentReference, :paymentTerms, :notes,
         :discountPercent, :taxPercent, :subtotal, :discountAmount, :taxAmount, :totalAmount,
         :currencyId, :exchangeRate, :freightCharges, :otherCharges,
-        :createdBy
+        :createdBy, :costCenterId
       )
       `,
       {
@@ -2295,6 +2296,7 @@ export const createServiceBill = async (req, res, next) => {
         freightCharges,
         otherCharges,
         createdBy,
+        costCenterId,
       },
     );
     const billId = hdr.insertId;
@@ -2479,6 +2481,7 @@ export const updateServiceBill = async (req, res, next) => {
     const exchangeRate = Number(body.exchange_rate) || 1;
     const freightCharges = Number(body.freight_charges) || 0;
     const otherCharges = Number(body.other_charges) || 0;
+    const costCenterId = body.cost_center_id ? Number(body.cost_center_id) : null;
     const rows = Array.isArray(body.details)
       ? body.details
       : Array.isArray(body.rows)
@@ -2561,7 +2564,8 @@ export const updateServiceBill = async (req, res, next) => {
              currency_id = :currencyId,
              exchange_rate = :exchangeRate,
              freight_charges = :freightCharges,
-             other_charges = :otherCharges
+             other_charges = :otherCharges,
+             cost_center_id = :costCenterId
        WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
       `,
       {
@@ -2595,6 +2599,7 @@ export const updateServiceBill = async (req, res, next) => {
         exchangeRate,
         freightCharges,
         otherCharges,
+        costCenterId,
       },
     );
     await conn.execute(

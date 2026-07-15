@@ -462,6 +462,14 @@ router.post(
   financeController.createCostCenter,
 );
 
+router.put(
+  "/cost-centers/:id",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  financeController.updateCostCenter,
+);
+
 // Opening Balances
 router.get(
   "/opening-balances",

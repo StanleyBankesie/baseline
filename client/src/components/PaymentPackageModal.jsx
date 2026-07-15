@@ -40,24 +40,34 @@ export default function PaymentPackageModal({
 
   useEffect(() => {
     if (isOpen) {
-      setName(defaultName);
-      setEmail(defaultEmail);
-      setMobile("");
+      setName(user?.full_name || user?.name || defaultName);
+      setEmail(user?.email || defaultEmail);
+      setMobile(defaultMobile || "");
       if (plans.length > 0) {
         setSelectedPlan(plans[plans.length - 1]);
       }
     }
-  }, [isOpen, defaultName, defaultEmail, plans]);
+  }, [isOpen, user, defaultName, defaultEmail, defaultMobile, plans]);
 
-  if (!isOpen || plans.length === 0) return null;
+  if (!isOpen) return null;
+  if (plans.length === 0) {
+    return (
+      <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm p-4 animate-fade-in">
+        <div className="bg-white rounded-xl shadow-2xl p-6 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading payment packages...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const isLoggedIn = Boolean(user || (defaultName && defaultEmail));
+
 
   const handlePay = async (e) => {
     e.preventDefault();
-    const payName = user?.name || user?.full_name || name;
-    const payEmail = user?.email || email;
-    const payMobile = isLoggedIn ? "" : mobile;
+    const payName = name.trim();
+    const payEmail = email.trim();
+    const payMobile = mobile.trim();
 
     if (!payName || !payEmail) {
       return Swal.fire("Error", "Name and email are required.", "error");
@@ -65,15 +75,19 @@ export default function PaymentPackageModal({
 
     setLoading(true);
     try {
-      const res = await api.post("/licenses/paystack/initialize", {
+      const payload = {
         companyId,
         name: payName,
         email: payEmail,
-        mobile: payMobile,
         plan: selectedPlan.plan_name,
         amount: selectedPlan.amount,
         duration: selectedPlan.duration_months
-      });
+      };
+      if (payMobile) {
+        payload.mobile = payMobile;
+      }
+
+      const res = await api.post("/licenses/paystack/initialize", payload);
 
       if (res.data?.access_code) {
         onClose(); // close custom modal
@@ -182,44 +196,10 @@ export default function PaymentPackageModal({
             </div>
           </div>
 
-          {!isLoggedIn && (
-            <>
-              <div className="pt-2 border-t border-slate-100">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-                <input 
-                  type="text" 
-                  required 
-                  value={name} 
-                  onChange={e => setName(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary-500 outline-none"
-                  placeholder="John Doe"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
-                <input 
-                  type="email" 
-                  required 
-                  value={email} 
-                  onChange={e => setEmail(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary-500 outline-none"
-                  placeholder="john@example.com"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Mobile Number</label>
-                <input 
-                  type="tel" 
-                  value={mobile} 
-                  onChange={e => setMobile(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-primary-500 outline-none"
-                  placeholder="024xxxxxxx"
-                />
-              </div>
-            </>
-          )}
+          {/* Hidden fields to keep them populated */}
+          <input type="hidden" value={name} />
+          <input type="hidden" value={email} />
+          <input type="hidden" value={mobile} />
 
           <button 
             type="submit" 

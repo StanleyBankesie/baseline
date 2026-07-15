@@ -51,37 +51,7 @@ export default function ServiceRevenueReport() {
     }
   }
 
-  function exportCSV() {
-    if (!items.length) return;
-    const headers = [
-      "Bill No",
-      "Bill Date",
-      "Customer",
-      "Service Type",
-      "Total",
-      "Paid",
-      "Outstanding",
-      "VAT",
-    ];
-    const rows = items.map((r) => [
-      r.bill_no || "-",
-      r.bill_date ? new Date(r.bill_date).toLocaleDateString() : "-",
-      r.customer_name || "-",
-      r.service_type || "-",
-      Number(r.total_amount || 0).toFixed(2),
-      Number(r.amount_paid || 0).toFixed(2),
-      Number(r.outstanding || 0).toFixed(2),
-      Number(r.vat_collected || 0).toFixed(2),
-    ]);
-    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "service-revenue.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  
   function exportExcel() {
     if (!items.length) return;
     const ws = XLSX.utils.json_to_sheet(
@@ -161,14 +131,7 @@ export default function ServiceRevenueReport() {
             <Link to="/service-management" className="btn btn-secondary">
               Return to Menu
             </Link>
-            <button
-              className="btn-success"
-              type="button"
-              onClick={exportCSV}
-              disabled={loading || items.length === 0}
-            >
-              Export CSV
-            </button>
+            
             <button
               className="btn-secondary"
               type="button"

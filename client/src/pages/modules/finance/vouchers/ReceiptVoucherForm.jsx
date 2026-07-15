@@ -61,6 +61,8 @@ export default function ReceiptVoucherForm() {
   const [customerInvoices, setCustomerInvoices] = useState([]);
   const [selectedInvoiceRefs, setSelectedInvoiceRefs] = useState([]);
   const [voucherNoPreview, setVoucherNoPreview] = useState("");
+  const [costCenters, setCostCenters] = useState([]);
+  const [costCenterId, setCostCenterId] = useState("");
 
   const [voucherDate, setVoucherDate] = useState(
     new Date().toISOString().split("T")[0],
@@ -208,7 +210,7 @@ export default function ReceiptVoucherForm() {
       };
       const formParam = formIdMap[vTypeCode] || null;
 
-      const [vtRes, fyRes, accRes, taxRes, custRes, supRes, curRes, projRes] =
+      const [vtRes, fyRes, accRes, taxRes, custRes, supRes, curRes, projRes, ccRes] =
         await Promise.all([
           api.get("/finance/voucher-types"),
           api.get("/finance/fiscal-years"),
@@ -218,6 +220,7 @@ export default function ReceiptVoucherForm() {
           api.get("/purchase/suppliers?active=true"),
           api.get("/finance/currencies"),
           api.get("/projects/projects"),
+          api.get("/finance/cost-centers"),
         ]);
       const vt = vtRes.data?.items || [];
       const fys = fyRes.data?.items || [];
@@ -262,6 +265,7 @@ export default function ReceiptVoucherForm() {
       setCurrencies(currs);
       setSuppliers(suppliers);
       setProjects(projRes.data?.items || []);
+      setCostCenters(ccRes.data?.items || ccRes.data?.data?.items || []);
 
       if (!fiscalYearId && fys.length) setFiscalYearId(String(fys[0].id));
     } catch (e) {
@@ -526,6 +530,7 @@ export default function ReceiptVoucherForm() {
       }
       setNarration(v.narration || data.voucher?.narration || "");
       setProjectId(v.project_id || data.voucher?.project_id || "");
+      setCostCenterId(v.cost_center_id || data.voucher?.cost_center_id || "");
       setVoucherHeaderAmounts({
         totalDebit: Number(v.total_debit || 0),
         totalCredit: Number(v.total_credit || 0),
@@ -1864,6 +1869,7 @@ export default function ReceiptVoucherForm() {
                   : narration,
         lines: cleaned,
         projectId: projectId || null,
+        costCenterId: costCenterId || null,
       };
 
       if (isEdit) {
@@ -3755,6 +3761,22 @@ export default function ReceiptVoucherForm() {
                     {projects.map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.project_name || p.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="label">Cost Center</label>
+                  <select
+                    className="input w-64"
+                    value={costCenterId}
+                    onChange={(e) => setCostCenterId(e.target.value)}
+                    disabled={readOnly}
+                  >
+                    <option value=""> Select Cost Center </option>
+                    {costCenters.map((cc) => (
+                      <option key={cc.id} value={cc.id}>
+                        {cc.name} ({cc.code})
                       </option>
                     ))}
                   </select>

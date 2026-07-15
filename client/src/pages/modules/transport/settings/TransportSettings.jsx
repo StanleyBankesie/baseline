@@ -14,9 +14,13 @@ const TAB_LABELS = [
 export default function TransportSettings() {
   const [activeTab, setActiveTab] = useState("general");
   const [loading, setLoading] = useState(false);
+  const [vehicleTypes, setVehicleTypes] = useState(
+    localStorage.getItem("transport_vehicle_types") || "TRUCK, VAN, CAR, MOTORCYCLE"
+  );
 
   const handleSave = () => {
     setLoading(true);
+    localStorage.setItem("transport_vehicle_types", vehicleTypes);
     setTimeout(() => {
       setLoading(false);
       toast.success("Transport settings saved successfully");
@@ -47,6 +51,18 @@ export default function TransportSettings() {
               <span className="label-text">Require Post-Trip Inspections</span> 
               <input type="checkbox" className="toggle toggle-primary" />
             </label>
+          </div>
+          <div className="form-control mt-4">
+            <label className="label">
+              <span className="label-text font-semibold">Vehicle Types</span>
+              <span className="label-text-alt text-slate-500">Comma separated list</span>
+            </label>
+            <textarea 
+              className="textarea textarea-bordered h-24"
+              value={vehicleTypes}
+              onChange={(e) => setVehicleTypes(e.target.value)}
+              placeholder="e.g. TRUCK, VAN, CAR, MOTORCYCLE"
+            ></textarea>
           </div>
         </div>
       </div>
@@ -112,51 +128,32 @@ export default function TransportSettings() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
-            <Link
-              to="/transport"
-              className="btn btn-ghost btn-sm px-2 text-slate-500"
-            >
-              ← Back to Menu
-            </Link>
-            Transport Settings
-          </h1>
-          <p className="text-sm mt-1 ml-11 text-slate-500">
-            Configure transport module rules, notifications, vehicles, and drivers.
-          </p>
-        </div>
+    <div className="p-4">
+      <div className="flex items-center gap-2 mb-4">
+        <Link to="/transport" className="btn-secondary text-sm">
+          ← Back
+        </Link>
+        <h2 className="text-lg font-semibold">Transport Settings</h2>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-6">
-        {/* Sidebar Tabs */}
-        <div className="w-full md:w-64 flex-shrink-0">
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-            <nav className="flex flex-col">
-              {TAB_LABELS.map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  className={`
-                    w-full flex items-center px-4 py-3 text-sm font-medium border-l-4 transition-colors text-left
-                    ${
-                      activeTab === tab.key
-                        ? "bg-brand-50 dark:bg-brand-900/20 border-brand-500 text-brand-700 dark:text-brand-300"
-                        : "border-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-slate-200"
-                    }
-                  `}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
-          </div>
-        </div>
+      <div className="flex border-b mb-6 overflow-x-auto">
+        {TAB_LABELS.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`px-4 py-2 text-sm font-medium capitalize whitespace-nowrap ${
+              activeTab === tab.key
+                ? "border-b-2 border-brand text-brand dark:border-brand-500 dark:text-brand-400"
+                : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
-        {/* Content Area */}
-        <div className="flex-1 min-w-0">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-3">
           {renderContent()}
         </div>
       </div>

@@ -4,6 +4,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import * as XLSX from "xlsx";
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import { Guard } from "../../../../hooks/usePermissions.jsx";
@@ -127,7 +130,10 @@ export default function HRReports() {
                 <input type="date" className="input text-sm h-9" value={toDate} onChange={e => setToDate(e.target.value)} />
               </div>
               <button onClick={loadReport} className="btn-primary h-9 px-4 text-sm">Generate</button>
-              <button onClick={exportCSV} className="btn-secondary h-9 px-4 text-sm">Export CSV</button>
+              <div className="flex items-center gap-2">
+              <button onClick={exportExcel} className="btn-success px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 flex items-center gap-2">Excel</button>
+              <button onClick={exportPdf} className="btn-error px-4 py-2 text-sm font-medium text-white bg-rose-600 rounded-lg hover:bg-rose-700 flex items-center gap-2">PDF</button>
+            </div>
             </div>
 
             {/* Results */}

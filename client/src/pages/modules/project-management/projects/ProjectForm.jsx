@@ -62,10 +62,16 @@ export default function ProjectForm() {
     if (isEdit) fetchProject();
   }, [id]);
 
+  const [clients, setClients] = useState([]);
+
   const fetchAuxiliaryData = async () => {
     try {
       const res = await api.get("/projects/project-managers");
       setManagers(res.data?.items || []);
+    } catch (e) {}
+    try {
+      const res = await api.get("/sales/customers?service_customer=Y");
+      setClients(res.data?.items || res.data?.data?.items || []);
     } catch (e) {}
   };
 
@@ -170,13 +176,16 @@ export default function ProjectForm() {
 
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Client / Organization</label>
-                <input 
-                  type="text" 
+                <select 
                   className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none font-medium text-sm"
-                  placeholder="Stakeholder Name"
                   value={form.client_name}
                   onChange={e => setForm({...form, client_name: e.target.value})}
-                />
+                >
+                  <option value="">-- Select Client --</option>
+                  {clients.map(c => (
+                    <option key={c.id} value={c.customer_name}>{c.customer_name}</option>
+                  ))}
+                </select>
               </div>
             </div>
 

@@ -5,14 +5,18 @@ import api from "../../../../api/client.js";
 
 export default function VehicleForm() {
   const navigate = useNavigate();
+  const storedTypes = localStorage.getItem("transport_vehicle_types");
+  const vehicleTypesList = storedTypes ? storedTypes.split(",").map(s => s.trim()).filter(Boolean) : ["TRUCK", "VAN", "CAR", "MOTORCYCLE"];
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     reg_number: "",
-    vehicle_type: "TRUCK",
+    vehicle_type: vehicleTypesList[0] || "TRUCK",
     make: "",
     model: "",
+    year_of_manufacture: "",
     capacity: "",
-    current_odometer: "0",
+    capacity_unit: "Tonnes",
+    insurance_expiry: "",
   });
 
   const handleChange = (e) => {
@@ -82,10 +86,9 @@ export default function VehicleForm() {
                 onChange={handleChange}
                 required
               >
-                <option value="TRUCK">Truck</option>
-                <option value="VAN">Van</option>
-                <option value="CAR">Car</option>
-                <option value="MOTORCYCLE">Motorcycle</option>
+                {vehicleTypesList.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
               </select>
             </div>
 
@@ -117,26 +120,54 @@ export default function VehicleForm() {
 
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Capacity/Load</span>
+                <span className="label-text">Year of Manufacture</span>
               </label>
               <input
-                type="text"
-                name="capacity"
+                type="number"
+                name="year_of_manufacture"
                 className="input input-bordered w-full"
-                value={formData.capacity}
+                value={formData.year_of_manufacture}
                 onChange={handleChange}
+                placeholder="e.g. 2020"
               />
             </div>
 
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Current Odometer</span>
+                <span className="label-text">Capacity/Load</span>
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  name="capacity"
+                  className="input input-bordered w-2/3"
+                  value={formData.capacity}
+                  onChange={handleChange}
+                />
+                <select
+                  name="capacity_unit"
+                  className="select select-bordered w-1/3"
+                  value={formData.capacity_unit}
+                  onChange={handleChange}
+                >
+                  <option value="Tonnes">Tonnes</option>
+                  <option value="Kg">Kg</option>
+                  <option value="Liters">Liters</option>
+                  <option value="Cubic Meters">Cubic Meters</option>
+                  <option value="Passengers">Passengers</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Insurance Expiry</span>
               </label>
               <input
-                type="number"
-                name="current_odometer"
+                type="date"
+                name="insurance_expiry"
                 className="input input-bordered w-full"
-                value={formData.current_odometer}
+                value={formData.insurance_expiry}
                 onChange={handleChange}
               />
             </div>

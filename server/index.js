@@ -12,6 +12,7 @@ import morgan from "morgan";
 
 import { errorHandler } from "./middleware/errorHandler.js";
 import { notFound } from "./middleware/notFound.js";
+import { sanitizeInput } from "./middleware/sanitize.middleware.js";
 import adminRoutes from "./routes/admin.route.js";
 import backupRoutes from "./routes/backup.routes.js";
 import salesRoutes from "./routes/sales.route.js";
@@ -177,6 +178,7 @@ app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+app.use(sanitizeInput);
 
 /* ---------------- RATE LIMITING ---------------- */
 let apiLimiter;

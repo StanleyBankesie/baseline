@@ -6,16 +6,55 @@ import api from "../../../../api/client.js";
 export default function TransportRequestForm() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [vehicles, setVehicles] = useState([]);
   const [formData, setFormData] = useState({
-    request_date: "",
+    requester_name: "",
+    request_date: new Date().toISOString().split('T')[0],
     required_date: "",
+    required_time: "",
+    return_date: "",
+    return_time: "",
+    no_of_days: "",
+    no_of_hours: "",
     origin: "",
     destination: "",
-    cargo_description: "",
-    weight: "",
+    purpose_of_journey: "",
     priority: "NORMAL",
     notes: "",
+    vehicle_id: "",
   });
+
+  const selectedVehicle = vehicles.find(v => v.id.toString() === formData.vehicle_id?.toString());
+
+  React.useEffect(() => {
+    if (formData.required_date && formData.return_date) {
+      const required = new Date(`${formData.required_date}T${formData.required_time || '00:00'}`);
+      const ret = new Date(`${formData.return_date}T${formData.return_time || '00:00'}`);
+      
+      const diffMs = ret - required;
+      if (diffMs >= 0) {
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const diffHours = (diffMs / (1000 * 60 * 60)).toFixed(2);
+        setFormData(prev => ({ ...prev, no_of_days: diffDays, no_of_hours: diffHours }));
+      } else {
+        setFormData(prev => ({ ...prev, no_of_days: 0, no_of_hours: 0 }));
+      }
+    }
+  }, [formData.required_date, formData.return_date, formData.required_time, formData.return_time]);
+
+  React.useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        const { data } = await api.get("/transport/vehicles");
+        if (data?.data?.items) {
+          setVehicles(data.data.items);
+        }
+      } catch (err) {
+        console.error("Failed to fetch vehicles");
+      }
+    };
+    fetchVehicles();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -61,6 +100,19 @@ export default function TransportRequestForm() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="form-control">
               <label className="label">
+                <span className="label-text">Requester Name</span>
+              </label>
+              <input
+                type="text"
+                name="requester_name"
+                className="input input-bordered w-full"
+                value={formData.requester_name}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-control">
+              <label className="label">
                 <span className="label-text">Request Date *</span>
               </label>
               <input
@@ -77,13 +129,60 @@ export default function TransportRequestForm() {
               <label className="label">
                 <span className="label-text">Required By Date</span>
               </label>
-              <input
-                type="date"
-                name="required_date"
-                className="input input-bordered w-full"
-                value={formData.required_date}
-                onChange={handleChange}
-              />
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  name="required_date"
+                  className="input input-bordered w-2/3"
+                  value={formData.required_date}
+                  onChange={handleChange}
+                />
+                <input
+                  type="time"
+                  name="required_time"
+                  className="input input-bordered w-1/3"
+                  value={formData.required_time}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Return Date</span>
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  name="return_date"
+                  className="input input-bordered w-2/3"
+                  value={formData.return_date}
+                  onChange={handleChange}
+                />
+                <input
+                  type="time"
+                  name="return_time"
+                  className="input input-bordered w-1/3"
+                  value={formData.return_time}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Duration</span>
+              </label>
+              <div className="flex gap-2">
+                <div className="w-1/2 flex items-center gap-2">
+                  <span className="text-sm font-semibold">Days:</span>
+                  <input type="text" readOnly className="input input-bordered input-sm w-full bg-slate-50" value={formData.no_of_days} />
+                </div>
+                <div className="w-1/2 flex items-center gap-2">
+                  <span className="text-sm font-semibold">Hours:</span>
+                  <input type="text" readOnly className="input input-bordered input-sm w-full bg-slate-50" value={formData.no_of_hours} />
+                </div>
+              </div>
             </div>
 
             <div className="form-control">
@@ -116,11 +215,36 @@ export default function TransportRequestForm() {
 
             <div className="form-control">
               <label className="label">
+                <span className="label-text">Vehicle Number</span>
+              </label>
+              <select
+                name="vehicle_id"
+                className="select select-bordered w-full"
+                value={formData.vehicle_id}
+                onChange={handleChange}
+              >
+                <option value="">Select a Vehicle</option>
+                {vehicles.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.reg_number}
+                  </option>
+                ))}
+              </select>
+              {selectedVehicle && (
+                <div className="mt-2 text-sm text-slate-500 bg-slate-50 p-2 rounded">
+                  <strong>Make:</strong> {selectedVehicle.make || "N/A"} &nbsp;|&nbsp; 
+                  <strong>Model:</strong> {selectedVehicle.model || "N/A"}
+                </div>
+              )}
+            </div>
+
+            <div className="form-control">
+              <label className="label">
                 <span className="label-text">Priority</span>
               </label>
               <select
                 name="priority"
-                className="select select-bordered w-full"
+                className="select select-bordered border-2 border-slate-300 w-full"
                 value={formData.priority}
                 onChange={handleChange}
               >
@@ -131,29 +255,15 @@ export default function TransportRequestForm() {
               </select>
             </div>
 
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Weight/Volume</span>
-              </label>
-              <input
-                type="text"
-                name="weight"
-                className="input input-bordered w-full"
-                value={formData.weight}
-                onChange={handleChange}
-                placeholder="e.g. 500kg, 2 pallets"
-              />
-            </div>
-
             <div className="form-control md:col-span-2">
               <label className="label">
-                <span className="label-text">Cargo Description</span>
+                <span className="label-text font-semibold">Purpose of Journey</span>
               </label>
               <textarea
-                name="cargo_description"
-                className="textarea textarea-bordered w-full"
+                name="purpose_of_journey"
+                className="textarea textarea-bordered border-2 border-slate-300 w-full"
                 rows={3}
-                value={formData.cargo_description}
+                value={formData.purpose_of_journey}
                 onChange={handleChange}
               />
             </div>
@@ -164,10 +274,11 @@ export default function TransportRequestForm() {
               </label>
               <textarea
                 name="notes"
-                className="textarea textarea-bordered w-full"
-                rows={2}
+                className="textarea textarea-bordered border-2 border-slate-300 w-full"
+                rows={3}
                 value={formData.notes}
                 onChange={handleChange}
+                placeholder="Any special handling instructions..."
               />
             </div>
           </div>

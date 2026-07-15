@@ -28,6 +28,8 @@ import MaintenanceList from "./maintenance/MaintenanceList.jsx";
 import MaintenanceForm from "./maintenance/MaintenanceForm.jsx";
 import TransportSettings from "./settings/TransportSettings.jsx";
 import TransportReports from "./reports/TransportReports.jsx";
+import TransportIncomeList from "./income/TransportIncomeList.jsx";
+import TransportExpenseList from "./expenses/TransportExpenseList.jsx";
 
 const ActionButton = ({ label, path, type, featureKey, action }) => {
   const { canPerformAction } = usePermission();
@@ -196,6 +198,26 @@ function TransportLanding() {
             <ActionButton key="view" label="View" path="/transport/billing" type="outline" featureKey="transport:billing" action="view" />
           ]
         },
+        { 
+          title: "Transportation Income", 
+          path: "/transport/income", 
+          feature_key: "income", 
+          description: "Manage income records",
+          icon: "💵",
+          actions: [
+            <ActionButton key="view" label="View" path="/transport/income" type="outline" featureKey="transport:income" action="view" />
+          ]
+        },
+        { 
+          title: "Transportation Expenses", 
+          path: "/transport/expenses", 
+          feature_key: "expenses", 
+          description: "Manage expense records",
+          icon: "💸",
+          actions: [
+            <ActionButton key="view" label="View" path="/transport/expenses" type="outline" featureKey="transport:expenses" action="view" />
+          ]
+        },
       ],
     },
 
@@ -261,6 +283,8 @@ export default function TransportLayout() {
       <Route path="maintenance/:id" element={<MaintenanceForm />} />
       <Route path="settings" element={<TransportSettings />} />
       <Route path="reports" element={<TransportReports />} />
+      <Route path="income" element={<TransportIncomeList />} />
+      <Route path="expenses" element={<TransportExpenseList />} />
     </Routes>
   );
 }

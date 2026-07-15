@@ -5938,12 +5938,6 @@ router.post(
         }
       }
       if (!supplierCode) {
-        supplierCode = await getNextNumericCode(conn, {
-          companyId,
-          table: "fin_accounts",
-          nature: "LIABILITY",
-        });
-        if (!supplierCode) {
           const [mxRows] = await conn.execute(
             `
             SELECT MAX(CAST(SUBSTRING(supplier_code, 4) AS UNSIGNED)) AS maxnum
@@ -5968,7 +5962,6 @@ router.post(
           );
           const nextNum = currentMax + 1;
           supplierCode = `SU-${String(nextNum).padStart(6, "0")}`;
-        }
       }
 
       const [resHeader] = await conn.execute(
@@ -9920,6 +9913,7 @@ router.post(
       const discountAmount = Number(body.discount_amount) || 0;
       const freightCharges = Number(body.freight_charges) || 0;
       const otherCharges = Number(body.other_charges) || 0;
+      const costCenterId = toNumber(body.cost_center_id) || null;
 
       const details = Array.isArray(body.details) ? body.details : [];
 
@@ -9983,12 +9977,12 @@ router.post(
           (company_id, branch_id, bill_no, bill_date, supplier_id, po_id, grn_id, bill_type, 
            due_date, currency_id, exchange_rate, payment_terms,
            total_amount, discount_amount, tax_amount, freight_charges, other_charges, net_amount, 
-           status, created_by)
+           status, created_by, cost_center_id)
         VALUES
           (:companyId, :branchId, :billNo, :billDate, :supplierId, :poId, :grnId, :billType,
            :dueDate, :currencyId, :exchangeRate, :paymentTerms,
            :totalAmount, :discountAmount, :taxAmount, :freightCharges, :otherCharges, :netAmount,
-           :status, :createdBy)
+           :status, :createdBy, :costCenterId)
         `,
         {
           companyId,
@@ -10011,6 +10005,7 @@ router.post(
           netAmount,
           status,
           createdBy,
+          costCenterId,
         },
       );
       const billId = hdr.insertId;
@@ -10108,6 +10103,7 @@ router.put(
       const discountAmount = Number(body.discount_amount) || 0;
       const freightCharges = Number(body.freight_charges) || 0;
       const otherCharges = Number(body.other_charges) || 0;
+      const costCenterId = toNumber(body.cost_center_id) || null;
 
       const details = Array.isArray(body.details) ? body.details : [];
 
@@ -10183,7 +10179,8 @@ router.put(
             freight_charges = :freightCharges,
             other_charges = :otherCharges,
             net_amount = :netAmount,
-            status = :status
+            status = :status,
+            cost_center_id = :costCenterId
         WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
         `,
         {
@@ -10206,6 +10203,7 @@ router.put(
           otherCharges,
           netAmount,
           status,
+          costCenterId,
         },
       );
       if (!upd.affectedRows)

@@ -32,31 +32,7 @@ export default function RepeatServiceRequestReport() {
     }
   }
 
-  function exportCSV() {
-    if (!items.length) return;
-    const headers = [
-      "Customer",
-      "Asset/Equipment",
-      "Number of Requests",
-      "Last Service Date",
-      "Issue Type",
-    ];
-    const rows = items.map((r) => [
-      r.customer || "-",
-      r.asset_equipment || "-",
-      Number(r.num_requests || 0),
-      r.last_service_date || "-",
-      r.issue_type || "-",
-    ]);
-    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "repeat-service-requests.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  
   function exportExcel() {
     if (!items.length) return;
     const ws = XLSX.utils.json_to_sheet(
@@ -123,13 +99,7 @@ export default function RepeatServiceRequestReport() {
             <Link to="/service-management" className="btn btn-secondary">
               Return to Menu
             </Link>
-            <button
-              className="btn-success"
-              onClick={exportCSV}
-              disabled={loading || items.length === 0}
-            >
-              Export CSV
-            </button>
+            
             <button
               className="btn-secondary"
               onClick={exportExcel}

@@ -281,7 +281,7 @@ export default function AppShell() {
             const alertDays = l.alert_days !== undefined && l.alert_days !== null ? l.alert_days : 30;
             console.log("License Expiry:", { daysRemaining, alertDays, finalExp, now, status: l.status });
             
-            const shouldAlert = (daysRemaining <= alertDays && daysRemaining >= 0) || (l.status !== "ACTIVE" && l.status !== "EXPIRED");
+            const shouldAlert = l.status !== "ACTIVE" || daysRemaining <= alertDays || isNaN(daysRemaining);
 
             if (shouldAlert) {
               const formattedDate = new Date(l.expiry_date).toLocaleDateString();
@@ -304,7 +304,8 @@ export default function AppShell() {
                   : `Your license expires on ${formattedDate} + ${graceDays} days grace period.`;
               }
               
-              const isDismissed = sessionStorage.getItem("licenseAlertDismissed") === "true";
+              // Temporarily ignore the dismissal check to guarantee it shows during our testing
+              const isDismissed = false; // sessionStorage.getItem("licenseAlertDismissed") === "true";
               const canDismiss = (l.status === "ACTIVE" && daysRemaining > 0);
 
               if (!isDismissed || !canDismiss) {
@@ -314,7 +315,7 @@ export default function AppShell() {
                   title,
                   icon: (daysRemaining === 0 || l.status !== "ACTIVE") ? "error" : "warning",
                   text,
-                  showCancelButton: true,
+                  showCancelButton: canDismiss,
                   confirmButtonColor: "#2563eb",
                   cancelButtonColor: "#64748b",
                   confirmButtonText: "Renew",
@@ -322,12 +323,13 @@ export default function AppShell() {
                   width: "20em",
                   padding: "0.5em",
                   customClass: {
+                    container: 'z-[999999]',
                     title: 'text-sm m-0 p-0',
                     htmlContainer: 'text-xs m-1 p-0',
                     actions: 'm-0 p-0 scale-75'
                   },
                   timerProgressBar: true,
-                  showCloseButton: true,
+                  showCloseButton: canDismiss,
                   background: "rgba(255, 255, 255, 1)",
                 }).then((result) => {
                   if (result.isConfirmed) {

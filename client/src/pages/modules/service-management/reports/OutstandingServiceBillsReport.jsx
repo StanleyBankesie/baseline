@@ -34,39 +34,7 @@ export default function OutstandingServiceBillsReport() {
     }
   }
 
-  function exportCSV() {
-    if (!items.length) return;
-    const headers = [
-      "Bill No",
-      "Service Order No",
-      "Customer",
-      "Bill Date",
-      "Due Date",
-      "Total",
-      "Paid",
-      "Balance",
-      "Aging",
-    ];
-    const rows = items.map((r) => [
-      r.bill_no || "-",
-      r.service_order_no || "-",
-      r.customer || "-",
-      r.bill_date || "-",
-      r.due_date || "-",
-      Number(r.total_amount || 0).toFixed(2),
-      Number(r.paid_amount || 0).toFixed(2),
-      Number(r.balance || 0).toFixed(2),
-      r.aging || "-",
-    ]);
-    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "outstanding-service-bills.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  
   function exportExcel() {
     if (!items.length) return;
     const ws = XLSX.utils.json_to_sheet(
@@ -139,13 +107,7 @@ export default function OutstandingServiceBillsReport() {
             <Link to="/service-management" className="btn btn-secondary">
               Return to Menu
             </Link>
-            <button
-              className="btn-success"
-              onClick={exportCSV}
-              disabled={loading || items.length === 0}
-            >
-              Export CSV
-            </button>
+            
             <button
               className="btn-secondary"
               onClick={exportExcel}

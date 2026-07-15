@@ -1,5 +1,6 @@
 import { query } from "../db/pool.js";
 import { sendMail } from "../utils/mailer.js";
+import puppeteer from "puppeteer";
 import {
   getCompanyLicense,
   generateLicenseKey,
@@ -23,6 +24,27 @@ export async function getLicense(req, res) {
     res.json(license);
   } catch (error) {
     console.error("[License Controller] getLicense Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/**
+ * Get global license status for the primary company (Publicly Accessible)
+ */
+export async function getGlobalLicenseStatus(req, res) {
+  try {
+    const license = await getCompanyLicense(1); // Assuming companyId 1 is the primary/only tenant
+    if (!license || !license.exists) {
+      return res.json({ exists: false, status: "UNKNOWN" });
+    }
+    
+    res.json({
+      exists: true,
+      status: license.status,
+      message: license.status === "EXPIRED" ? "Your company license has expired." : "License is active."
+    });
+  } catch (error) {
+    console.error("[License Controller] getGlobalLicenseStatus Error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -478,7 +500,7 @@ export async function verifyPaystackPayment(req, res) {
       const formattedDate = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
       const newExpiryFormatted = newExpiryDateStr ? new Date(newExpiryDateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
       
-      const finalHtml = htmlTemplate
+      let finalHtml = htmlTemplate
         .replace(/\{\{name\}\}/g, renewalEntry.initiator_name || 'Customer')
         .replace(/\{\{email\}\}/g, renewalEntry.initiator_email)
         .replace(/\{\{date\}\}/g, formattedDate)
@@ -487,11 +509,44 @@ export async function verifyPaystackPayment(req, res) {
         .replace(/\{\{plan_name\}\}/g, renewalEntry.plan_name || 'Renewal')
         .replace(/\{\{amount\}\}/g, `GHS ${renewalEntry.amount || 0}`);
         
-      sendMail({
-        to: renewalEntry.initiator_email,
-        subject: `License Renewal Invoice - ${invoiceNo}`,
-        html: finalHtml
-      }).catch(err => console.error("Failed to send invoice email", err));
+      try {
+        const companyRowLogo = await query(`SELECT logo FROM adm_companies WHERE id = ? LIMIT 1`, [companyId]);
+        if (companyRowLogo && companyRowLogo.length > 0 && companyRowLogo[0].logo) {
+          const base64Logo = Buffer.from(companyRowLogo[0].logo).toString('base64');
+          const logoImg = `<img src="data:image/png;base64,${base64Logo}" alt="Company Logo" style="max-height: 60px; max-width: 150px;" />`;
+          finalHtml = finalHtml.replace('[Insert Logo Here]', logoImg);
+        }
+      } catch (err) {
+        console.error("Failed to inject logo into invoice:", err);
+      }
+
+      try {
+        const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+        const page = await browser.newPage();
+        await page.setContent(finalHtml, { waitUntil: 'networkidle0' });
+        const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
+        await browser.close();
+
+        sendMail({
+          to: renewalEntry.initiator_email,
+          subject: `License Renewal Invoice - ${invoiceNo}`,
+          html: finalHtml,
+          attachments: [
+            {
+              filename: `Invoice_${invoiceNo}.pdf`,
+              content: pdfBuffer,
+              contentType: 'application/pdf'
+            }
+          ]
+        }).catch(err => console.error("Failed to send invoice email with PDF", err));
+      } catch (pdfErr) {
+        console.error("Failed to generate invoice PDF:", pdfErr);
+        sendMail({
+          to: renewalEntry.initiator_email,
+          subject: `License Renewal Invoice - ${invoiceNo}`,
+          html: finalHtml
+        }).catch(err => console.error("Failed to send invoice email without PDF", err));
+      }
     }
 
     res.json({

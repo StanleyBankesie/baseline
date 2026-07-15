@@ -14,6 +14,7 @@ import logoClear from "../assets/resources/OMNISUITE_LOGO_CLEAR.png";
 import backgroundImage from "../assets/resources/BACKGROUND.jpg";
 import { Eye, EyeOff } from "lucide-react";
 import Swal from "sweetalert2";
+import PaymentPackageModal from "../components/PaymentPackageModal.jsx";
 
 /**
  * LoginPage component
@@ -24,7 +25,7 @@ import Swal from "sweetalert2";
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, setScope, token, initialized } = useAuth();
+  const { login, setScope, token, initialized, scope } = useAuth();
 
   const usernameRef = useRef(null);
   const passwordRef = useRef(null);
@@ -42,6 +43,9 @@ export default function LoginPage() {
   const [usernameQuery, setUsernameQuery] = useState("");
   const [showSuggestion, setShowSuggestion] = useState(false);
   const suggestionRef = useRef(null);
+  
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const renewingLicenseRef = useRef(false);
 
   // Load remembered credentials on mount
   useEffect(() => {
@@ -51,6 +55,148 @@ export default function LoginPage() {
       setRememberMe(true);
     }
   }, []);
+
+  // Check global license status on mount
+  useEffect(() => {
+    async function checkGlobalLicense() {
+      try {
+        const res = await api.get("/licenses/global-status");
+        if (res.data?.status === "EXPIRED" || res.data?.status === "INACTIVE" || res.data?.message?.toLowerCase().includes("expired")) {
+          // 1. Informational Alert First
+          Swal.fire({
+            title: "License Expired",
+            text: "Your company license has expired. Please log in to renew your license.",
+            icon: "warning",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showCancelButton: false,
+            confirmButtonText: "Renew License",
+            buttonsStyling: false,
+            customClass: {
+              container: 'backdrop-blur-sm bg-slate-900/40',
+              popup: 'rounded-2xl shadow-2xl border-0 p-6',
+              title: 'text-2xl font-bold text-slate-800 mt-2',
+              htmlContainer: 'text-slate-500 text-base mt-2',
+              confirmButton: 'bg-brand-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-brand-700 transition-all shadow-sm w-full mt-4',
+              icon: 'border-0 text-amber-500'
+            }
+          }).then((firstResult) => {
+            if (firstResult.isConfirmed) {
+              // 2. Authentication Alert Second
+              Swal.fire({
+                title: "Authentication Required",
+                html: `
+                  <p class="text-slate-500 text-sm mb-5">Please verify your credentials to proceed with renewal.</p>
+                  <div class="space-y-4">
+                    <input id="swal-login-username" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-slate-700 placeholder-slate-400 bg-slate-50 focus:bg-white" placeholder="Username" autocomplete="off">
+                    <div class="relative w-full">
+                      <input id="swal-login-password" type="password" class="w-full px-4 py-3 pr-10 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-slate-700 placeholder-slate-400 bg-slate-50 focus:bg-white" placeholder="Password">
+                      <button type="button" id="swal-password-toggle" class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.543 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                      </button>
+                    </div>
+                  </div>
+                `,
+                icon: "info",
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showCancelButton: true,
+                confirmButtonText: "Verify & Continue",
+                cancelButtonText: "Cancel",
+                buttonsStyling: false,
+                customClass: {
+                  container: 'backdrop-blur-sm bg-slate-900/40',
+                  popup: 'rounded-2xl shadow-2xl border-0 p-6',
+                  title: 'text-xl font-bold text-slate-800 mt-2',
+                  actions: 'w-full flex gap-3 mt-6',
+                  confirmButton: 'flex-1 bg-brand-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-brand-700 transition-all shadow-sm',
+                  cancelButton: 'flex-1 bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-semibold hover:bg-slate-200 transition-all',
+                  icon: 'border-0 text-brand-500'
+                },
+                didOpen: () => {
+                  const p = document.getElementById('swal-login-password');
+                  const t = document.getElementById('swal-password-toggle');
+                  t.addEventListener('click', () => {
+                    if (p.type === 'password') {
+                      p.type = 'text';
+                      t.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>`;
+                    } else {
+                      p.type = 'password';
+                      t.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.543 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>`;
+                    }
+                  });
+                },
+                preConfirm: () => {
+                  const u = document.getElementById('swal-login-username').value;
+                  const p = document.getElementById('swal-login-password').value;
+                  if (!u || !p) {
+                    Swal.showValidationMessage('Please enter both username and password');
+                    return false;
+                  }
+                  return { username: u, password: p };
+                }
+              }).then(async (result) => {
+                if (result.isConfirmed) {
+                  setLoading(true);
+                  renewingLicenseRef.current = true;
+                  try {
+                    const data = await login({
+                      username: result.value.username,
+                      password: result.value.password,
+                      rememberMe: false,
+                      intent: "renew"
+                    });
+
+                    const branches = Array.isArray(data?.user?.branchIds) ? data.user.branchIds.map(Number).filter(Number.isFinite) : [];
+                    const companies = Array.isArray(data?.user?.companyIds) ? data.user.companyIds.map(Number).filter(Number.isFinite) : [];
+
+                    if (branches.length === 1) {
+                      const branchId = branches[0];
+                      let companyId = companies.length === 1 ? companies[0] : null;
+                      if (!companyId) companyId = companies[0] || 1;
+                      setScope((prev) => ({
+                        ...prev,
+                        companyId: companyId || prev.companyId || 1,
+                        branchId: branchId,
+                      }));
+                    }
+                    
+                    // Do not navigate! Instead, stay on login page and open the PaymentPackageModal directly over it.
+                    setShowPaymentModal(true);
+                  } catch (retryErr) {
+                    const retryMsg = retryErr?.response?.data?.message || retryErr?.message || "Renewal login failed";
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Login Failed',
+                      text: retryMsg,
+                      confirmButtonText: 'Try Again',
+                      buttonsStyling: false,
+                      customClass: {
+                        container: 'backdrop-blur-sm bg-slate-900/40',
+                        popup: 'rounded-2xl shadow-2xl border-0 p-6',
+                        title: 'text-xl font-bold text-slate-800',
+                        htmlContainer: 'text-slate-500',
+                        confirmButton: 'bg-red-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-red-700 w-full mt-4',
+                      }
+                    }).then(() => checkGlobalLicense()); // Prompt again from the start
+                  } finally {
+                    setLoading(false);
+                    // We DO NOT set renewingLicenseRef.current = false here because we want them to stay on the page with the modal
+                  }
+                } else if (result.isDismissed) {
+                  // If they cancel authentication, take them back to the first informational alert
+                  checkGlobalLicense();
+                }
+              });
+            }
+          });
+        }
+      } catch (err) {
+        // Silently fail if endpoint is not accessible or returns error
+      }
+    }
+    checkGlobalLicense();
+  }, [login, setScope]);
 
   useEffect(() => {
     let mounted = true;
@@ -127,13 +273,10 @@ export default function LoginPage() {
   const shouldShowSuggestion = showSuggestion && usernameQuery.length >= 2 && filteredProfiles.length > 0;
 
   useEffect(() => {
-    if (handledStartupRedirect.current) return;
-    if (!initialized || !token) return;
-
-    // Autofill-safe redirect: We don't care if fields are filled;
-    // if we already have a valid token and are initialized, skip login.
-    handledStartupRedirect.current = true;
-    navigate("/", { replace: true });
+    if (initialized && token && !handledStartupRedirect.current && !renewingLicenseRef.current) {
+      handledStartupRedirect.current = true;
+      navigate("/", { replace: true });
+    }
   }, [initialized, token, navigate]);
 
   /**
@@ -216,33 +359,45 @@ export default function LoginPage() {
         setLoading(false);
         Swal.fire({
           title: "License Expired",
-          text: err?.response?.data?.message || "Your company license has expired. Please renew your license to continue using the system.",
-          icon: "error",
+          html: `
+            <p class="text-slate-500 text-sm mb-5">Your company license has expired. Please log in to renew your license.</p>
+            <div class="space-y-4">
+              <input id="swal-login-username-retry" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-slate-700 placeholder-slate-400 bg-slate-50 focus:bg-white" placeholder="Username" value="${submittedUsername}">
+              <input id="swal-login-password-retry" type="password" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-slate-700 placeholder-slate-400 bg-slate-50 focus:bg-white" placeholder="Password">
+            </div>
+          `,
+          icon: "warning",
           showCancelButton: true,
           confirmButtonText: "Renew License",
           cancelButtonText: "Cancel",
-          confirmButtonColor: "#2563eb",
-          input: 'password',
-          inputLabel: 'Please confirm your password to proceed with renewal',
-          inputPlaceholder: 'Enter your password',
-          inputAttributes: {
-            autocapitalize: 'off',
-            autocorrect: 'off'
+          buttonsStyling: false,
+          customClass: {
+            container: 'backdrop-blur-sm bg-slate-900/40',
+            popup: 'rounded-2xl shadow-2xl border-0 p-6',
+            title: 'text-xl font-bold text-slate-800 mt-2',
+            actions: 'w-full flex gap-3 mt-6',
+            confirmButton: 'flex-1 bg-brand-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-brand-700 transition-all shadow-sm',
+            cancelButton: 'flex-1 bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-semibold hover:bg-slate-200 transition-all',
+            icon: 'border-0 text-amber-500'
           },
-          preConfirm: (password) => {
-            if (!password) {
-              Swal.showValidationMessage('Please enter your password');
+          preConfirm: () => {
+            const u = document.getElementById('swal-login-username-retry').value;
+            const p = document.getElementById('swal-login-password-retry').value;
+            if (!u || !p) {
+              Swal.showValidationMessage('Please enter both username and password');
+              return false;
             }
-            return password;
+            return { username: u, password: p };
           }
         }).then(async (result) => {
           if (result.isConfirmed) {
             setLoading(true);
+            renewingLicenseRef.current = true;
             try {
               const data = await login({
-                username: submittedUsername,
-                password: result.value,
-                rememberMe,
+                username: result.value.username,
+                password: result.value.password,
+                rememberMe: false,
                 intent: "renew"
               });
 
@@ -270,8 +425,8 @@ export default function LoginPage() {
                 }));
               }
               
-              sessionStorage.setItem("triggerRenewal", "true");
-              navigate("/", { replace: true });
+              // Stay on login page and show the payment modal directly!
+              setShowPaymentModal(true);
             } catch (retryErr) {
               const retryMsg = retryErr?.response?.data?.message || retryErr?.message || "Renewal login failed";
               setError(retryMsg);
@@ -512,6 +667,7 @@ export default function LoginPage() {
           </form>
         </div>
       </div>
+      <PaymentPackageModal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)} companyId={scope?.companyId || null} />
     </div>
   );
 }

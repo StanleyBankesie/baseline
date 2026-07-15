@@ -2032,7 +2032,7 @@ export const getVoucherById = async (req, res, next) => {
     const id = Number(req.params.id || 0);
     if (!id) return next(httpError(400, "VALIDATION_ERROR", "Invalid id"));
     const headerRows = await query(
-      `SELECT v.id, v.voucher_no, v.voucher_date, v.status, v.project_id,
+      `SELECT v.id, v.voucher_no, v.voucher_date, v.status, v.project_id, v.cost_center_id,
               v.narration AS remarks, v.narration, v.total_debit, v.total_credit, v.balanced_amount,
               v.total_debit AS total_amount,
               v.voucher_type_id, vt.code AS voucher_type_code, vt.name AS voucher_type_name,
@@ -2054,7 +2054,7 @@ export const getVoucherById = async (req, res, next) => {
     if (!voucher) return next(httpError(404, "NOT_FOUND", "Voucher not found"));
     const lines = await query(
       `SELECT l.id, l.line_no, l.account_id, l.debit, l.credit, l.description,
-              l.currency_id, l.exchange_rate,
+              l.currency_id, l.exchange_rate, l.tax_code_id, l.payment_method, l.reference_no,
               a.code AS account_code, a.name AS account_name
          FROM fin_voucher_lines l
          LEFT JOIN fin_accounts a ON a.id = l.account_id AND a.company_id = :companyId
@@ -2063,7 +2063,25 @@ export const getVoucherById = async (req, res, next) => {
         ORDER BY l.line_no ASC, l.id ASC`,
       { companyId, voucherId: id },
     );
-    res.json({ ...voucher, lines });
+
+    let additionalLines = [];
+    const linkMatch = String(voucher.narration || "").match(/Linked to (?:PV|SV)#(\d+)/);
+    if (linkMatch) {
+      const linkedId = Number(linkMatch[1]);
+      additionalLines = await query(
+        `SELECT l.id, l.line_no, l.account_id, l.debit, l.credit, l.description,
+                l.currency_id, l.exchange_rate, l.tax_code_id, l.payment_method, l.reference_no,
+                a.code AS account_code, a.name AS account_name
+           FROM fin_voucher_lines l
+           LEFT JOIN fin_accounts a ON a.id = l.account_id AND a.company_id = :companyId
+          WHERE l.company_id = :companyId
+            AND l.voucher_id = :linkedId
+          ORDER BY l.line_no ASC, l.id ASC`,
+        { companyId, linkedId }
+      );
+    }
+
+    res.json({ ...voucher, lines: [...additionalLines, ...lines] });
   } catch (e) {
     next(e);
   }
@@ -2120,6 +2138,7 @@ export const createVoucher = async (req, res, next) => {
       apply_to_maintenance_bills: applyToMaintenanceBills,
       apply_to_sales_invoices: applyToSalesInvoices,
       paymentDetails,
+      costCenterId,
     } = req.body || {};
     const effectiveRemarks = remarks || bodyNarration || null;
     let finalVoucherTypeId = Number(voucherTypeId || 0) || 0;
@@ -2256,9 +2275,9 @@ export const createVoucher = async (req, res, next) => {
         // Create PV with posting lines
         const pvResult = await txQuery(
           `INSERT INTO fin_vouchers
-             (company_id, branch_id, fiscal_year_id, voucher_type_id, voucher_no, voucher_date, narration, currency_id, exchange_rate, total_debit, total_credit, balanced_amount, status, created_by)
+             (company_id, branch_id, fiscal_year_id, voucher_type_id, voucher_no, voucher_date, narration, currency_id, exchange_rate, total_debit, total_credit, balanced_amount, status, created_by, cost_center_id)
            VALUES
-             (:companyId, :branchId, :fiscalYearId, :voucherTypeId, :voucherNo, :voucherDate, :narration, :currencyId, :exchangeRate, :totalDebit, :totalCredit, :balancedAmount, :status, :createdBy)`,
+             (:companyId, :branchId, :fiscalYearId, :voucherTypeId, :voucherNo, :voucherDate, :narration, :currencyId, :exchangeRate, :totalDebit, :totalCredit, :balancedAmount, :status, :createdBy, :costCenterId)`,
           {
             companyId,
             branchId,
@@ -2274,6 +2293,7 @@ export const createVoucher = async (req, res, next) => {
             balancedAmount: pvTotal,
             status: "POSTED",
             createdBy: Number(req.user?.sub || req.user?.id || 0) || null,
+            costCenterId: costCenterId ? Number(costCenterId) : null,
           },
         );
         purchaseVoucherId = pvResult.insertId;
@@ -2330,9 +2350,9 @@ export const createVoucher = async (req, res, next) => {
         const svTotal = Math.max(svTotalDebit, svTotalCredit);
         const svResult = await txQuery(
           `INSERT INTO fin_vouchers
-             (company_id, branch_id, fiscal_year_id, voucher_type_id, voucher_no, voucher_date, narration, currency_id, exchange_rate, total_debit, total_credit, balanced_amount, status, created_by)
+             (company_id, branch_id, fiscal_year_id, voucher_type_id, voucher_no, voucher_date, narration, currency_id, exchange_rate, total_debit, total_credit, balanced_amount, status, created_by, project_id, cost_center_id)
            VALUES
-             (:companyId, :branchId, :fiscalYearId, :voucherTypeId, :voucherNo, :voucherDate, :narration, :currencyId, :exchangeRate, :totalDebit, :totalCredit, :balancedAmount, :status, :createdBy)`,
+             (:companyId, :branchId, :fiscalYearId, :voucherTypeId, :voucherNo, :voucherDate, :narration, :currencyId, :exchangeRate, :totalDebit, :totalCredit, :balancedAmount, :status, :createdBy, :projectId, :costCenterId)`,
           {
             companyId,
             branchId,
@@ -2348,6 +2368,8 @@ export const createVoucher = async (req, res, next) => {
             balancedAmount: svTotal,
             status: "POSTED",
             createdBy: Number(req.user?.sub || req.user?.id || 0) || null,
+            projectId: projectId ? Number(projectId) : null,
+            costCenterId: costCenterId ? Number(costCenterId) : null,
           },
         );
         salesVoucherId = svResult.insertId;
@@ -2412,9 +2434,9 @@ export const createVoucher = async (req, res, next) => {
 
     const result = await txQuery(
       `INSERT INTO fin_vouchers
-         (company_id, branch_id, fiscal_year_id, voucher_type_id, voucher_no, voucher_date, narration, currency_id, exchange_rate, total_debit, total_credit, balanced_amount, status, created_by, project_id)
+         (company_id, branch_id, fiscal_year_id, voucher_type_id, voucher_no, voucher_date, narration, currency_id, exchange_rate, total_debit, total_credit, balanced_amount, status, created_by, project_id, cost_center_id)
        VALUES
-         (:companyId, :branchId, :fiscalYearId, :voucherTypeId, :voucherNo, :voucherDate, :narration, :currencyId, :exchangeRate, :totalDebit, :totalCredit, :balancedAmount, :status, :createdBy, :projectId)`,
+         (:companyId, :branchId, :fiscalYearId, :voucherTypeId, :voucherNo, :voucherDate, :narration, :currencyId, :exchangeRate, :totalDebit, :totalCredit, :balancedAmount, :status, :createdBy, :projectId, :costCenterId)`,
       {
         companyId,
         branchId,
@@ -2431,6 +2453,7 @@ export const createVoucher = async (req, res, next) => {
         status: status || (isPurchaseVoucherMain ? "POSTED" : "DRAFT"),
         createdBy: Number(req.user?.sub || req.user?.id || 0) || null,
         projectId: projectId ? Number(projectId) : null,
+        costCenterId: costCenterId ? Number(costCenterId) : null,
       },
     );
 
@@ -2681,14 +2704,15 @@ export const updateVoucher = async (req, res, next) => {
   const branchIdsStr = req.scope.branchIdsStr;
     const id = Number(req.params.id || 0);
     if (!id) return next(httpError(400, "VALIDATION_ERROR", "Invalid id"));
-    const { voucherDate, remarks, narration: bodyNarration, status, exchangeRate } = req.body || {};
+    const { voucherDate, remarks, narration: bodyNarration, status, exchangeRate, costCenterId } = req.body || {};
     const effectiveRemarks = remarks || bodyNarration || null;
     await query(
       `UPDATE fin_vouchers
           SET voucher_date = COALESCE(:voucherDate, voucher_date),
               narration = COALESCE(:remarks, narration),
               exchange_rate = COALESCE(:exchangeRate, exchange_rate),
-              status = COALESCE(:status, status)
+              status = COALESCE(:status, status),
+              cost_center_id = COALESCE(:costCenterId, cost_center_id)
         WHERE company_id = :companyId
           AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
           AND id = :id`,
@@ -2700,6 +2724,7 @@ export const updateVoucher = async (req, res, next) => {
         remarks: effectiveRemarks,
         exchangeRate: Number(exchangeRate || 0) || null,
         status: status || null,
+        costCenterId: costCenterId ? Number(costCenterId) : null,
       },
     );
     res.json({ ok: true });
@@ -5437,7 +5462,7 @@ export const listCostCenters = async (req, res, next) => {
     );
 
     const items = await query(
-      `SELECT id, company_id, branch_id, code, name, is_active, created_at, updated_at
+      `SELECT id, company_id, branch_id, code, name, description, default_currency_id, is_active, created_at, updated_at
          FROM fin_cost_centers
         WHERE company_id = :companyId
           AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
@@ -5454,21 +5479,51 @@ export const createCostCenter = async (req, res, next) => {
   try {
     const companyId = req.scope.companyId;
     const branchId = req.scope.branchId === "all" ? null : req.scope.branchId;
-    const { code, name, isActive } = req.body || {};
+    const { code, name, description, default_currency_id, isActive } = req.body || {};
     if (!code || !name)
       throw httpError(400, "VALIDATION_ERROR", "code and name are required");
     const result = await query(
-      `INSERT INTO fin_cost_centers (company_id, branch_id, code, name, is_active)
-       VALUES (:companyId, :branchId, :code, :name, :isActive)`,
+      `INSERT INTO fin_cost_centers (company_id, branch_id, code, name, description, default_currency_id, is_active)
+       VALUES (:companyId, :branchId, :code, :name, :description, :default_currency_id, :isActive)`,
       {
         companyId,
         branchId,
         code,
         name,
+        description: description || null,
+        default_currency_id: default_currency_id ? Number(default_currency_id) : null,
         isActive: isActive === undefined ? 1 : Number(Boolean(isActive)),
       },
     );
     res.status(201).json({ id: result.insertId });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const updateCostCenter = async (req, res, next) => {
+  try {
+    const companyId = req.scope.companyId;
+    const branchId = req.scope.branchId === "all" ? null : req.scope.branchId;
+    const id = req.params.id;
+    const { code, name, description, default_currency_id, isActive } = req.body || {};
+    if (!code || !name)
+      throw httpError(400, "VALIDATION_ERROR", "code and name are required");
+    await query(
+      `UPDATE fin_cost_centers 
+       SET code = :code, name = :name, description = :description, default_currency_id = :default_currency_id, is_active = :isActive 
+       WHERE id = :id AND company_id = :companyId`,
+      {
+        id,
+        companyId,
+        code,
+        name,
+        description: description || null,
+        default_currency_id: default_currency_id ? Number(default_currency_id) : null,
+        isActive: isActive === undefined ? 1 : Number(Boolean(isActive)),
+      },
+    );
+    res.json({ ok: true });
   } catch (e) {
     next(e);
   }

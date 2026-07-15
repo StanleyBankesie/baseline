@@ -34,31 +34,7 @@ export default function ServiceTypePerformanceReport() {
     }
   }
 
-  function exportCSV() {
-    if (!items.length) return;
-    const headers = [
-      "Service Type",
-      "Total Orders",
-      "Total Revenue",
-      "Avg Completion Time",
-      "Avg Cost",
-    ];
-    const rows = items.map((r) => [
-      r.service_type || "-",
-      Number(r.total_orders || 0),
-      Number(r.total_revenue || 0).toFixed(2),
-      r.avg_completion_time || "-",
-      Number(r.avg_cost || 0).toFixed(2),
-    ]);
-    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "service-type-performance.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  
   function exportExcel() {
     if (!items.length) return;
     const ws = XLSX.utils.json_to_sheet(
@@ -127,13 +103,7 @@ export default function ServiceTypePerformanceReport() {
             <Link to="/service-management" className="btn btn-secondary">
               Return to Menu
             </Link>
-            <button
-              className="btn-success"
-              onClick={exportCSV}
-              disabled={loading || items.length === 0}
-            >
-              Export CSV
-            </button>
+            
             <button
               className="btn-secondary"
               onClick={exportExcel}

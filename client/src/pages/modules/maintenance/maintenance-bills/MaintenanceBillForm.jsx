@@ -28,7 +28,7 @@ export default function MaintenanceBillForm() {
     execution_id: params.get("execution_id") || "", supplier_id: "", supplier_name: "",
     currency: "GHS", exchange_rate: 1, other_charges: 0,
     payment_terms: "30", payment_method: "bank", payment_reference: "",
-    payment_status: "UNPAID", status: "DRAFT", notes: ""
+    payment_status: "UNPAID", status: "DRAFT", notes: "", cost_center_id: ""
   });
   const [lines, setLines] = useState([]);
   const [newItem, setNewItem] = useState({
@@ -45,6 +45,7 @@ export default function MaintenanceBillForm() {
   const [executions, setExecutions] = useState([]);
   const [currencies, setCurrencies] = useState([]);
   const [taxCodes, setTaxCodes] = useState([]);
+  const [costCenters, setCostCenters] = useState([]);
   const update = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
   useEffect(() => {
@@ -52,6 +53,7 @@ export default function MaintenanceBillForm() {
     api.get("/purchase/suppliers").then(r => { if (mounted) setSuppliers(Array.isArray(r.data?.items) ? r.data.items : []); }).catch(() => {});
     api.get("/maintenance/job-executions?status=COMPLETED").then(r => { if (mounted) setExecutions(Array.isArray(r.data?.items) ? r.data.items : []); }).catch(() => {});
     api.get("/finance/currencies").then(r => { if (mounted) setCurrencies(Array.isArray(r.data?.items) ? r.data.items : []); }).catch(() => {});
+    api.get("/finance/cost-centers").then(r => { if (mounted) setCostCenters(Array.isArray(r.data?.items) ? r.data.items : (Array.isArray(r.data?.data?.items) ? r.data.data.items : [])); }).catch(() => {});
     api.get("/finance/tax-codes?form=MAINTENANCE_BILL").then(r => {
       if (!mounted) return;
       const fetchedTaxCodes = Array.isArray(r.data?.items) ? r.data.items : [];
@@ -295,6 +297,13 @@ export default function MaintenanceBillForm() {
             </div>
             <div><label className="label">Exchange Rate</label><input className="input w-56 text-right" type="number" step="0.000001" value={form.exchange_rate} readOnly /></div>
             <div><label className="label">Payment Terms (Days)</label><input className="input w-56" type="number" value={form.payment_terms} onChange={e => update("payment_terms", e.target.value)} /></div>
+            <div>
+              <label className="label">Cost Center</label>
+              <select className="input w-56" value={form.cost_center_id || ""} onChange={e => update("cost_center_id", e.target.value)}>
+                <option value="">-- Select Cost Center --</option>
+                {costCenters.map(cc => <option key={cc.id} value={cc.id}>{cc.name} ({cc.code})</option>)}
+              </select>
+            </div>
             <div className="md:col-span-3"><label className="label">Notes</label><textarea className="input" rows={2} value={form.notes} onChange={e => update("notes", e.target.value)} /></div>
           </div>
         </div>

@@ -58,7 +58,7 @@ export default function ProjectStatusReport() {
   const totalCompletedTasks = items.reduce((s, p) => s + Number(p.completed_tasks || 0), 0);
   const totalBlockedTasks = items.reduce((s, p) => s + Number(p.blocked_tasks || 0), 0);
 
-  const exportCsv = () => {
+  const exportExcel = () => {
     const headers = ["Project Code", "Project Name", "Status", "Completion %", "Manager", "Client", "Budget", "Total Tasks", "Completed", "In Progress", "Blocked", "Pending", "Est. Hours", "Actual Hours"];
     const rows = items.map(p => [
       p.project_code, p.project_name, p.project_status, p.completion_percent,
@@ -66,13 +66,29 @@ export default function ProjectStatusReport() {
       p.in_progress_tasks, p.blocked_tasks, p.pending_tasks,
       p.total_estimated_hours, p.total_actual_hours
     ]);
-    const csv = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = `project-status-report-${new Date().toISOString().split("T")[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    XLSX.utils.book_append_sheet(wb, ws, "Report");
+    XLSX.writeFile(wb, `project-status-report-${new Date().toISOString().split("T")[0]}.xlsx`);
+  };
+
+  const exportPdf = () => {
+    const headers = ["Project Code", "Project Name", "Status", "Completion %", "Manager", "Client", "Budget", "Total Tasks", "Completed", "In Progress", "Blocked", "Pending", "Est. Hours", "Actual Hours"];
+    const rows = items.map(p => [
+      p.project_code, p.project_name, p.project_status, p.completion_percent,
+      p.manager_name, p.client_name, p.budget, p.total_tasks, p.completed_tasks,
+      p.in_progress_tasks, p.blocked_tasks, p.pending_tasks,
+      p.total_estimated_hours, p.total_actual_hours
+    ]);
+    const doc = new jsPDF();
+    doc.autoTable({
+      head: [headers],
+      body: rows,
+      theme: 'grid',
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [41, 128, 185] }
+    });
+    doc.save(`project-status-report-${new Date().toISOString().split("T")[0]}.pdf`);
   };
 
   return (
@@ -87,7 +103,10 @@ export default function ProjectStatusReport() {
         </div>
         <div className="flex items-center gap-2">
           <button onClick={fetchReport} className="btn btn-secondary p-2" title="Refresh"><RefreshCw size={18} /></button>
-          <button onClick={exportCsv} className="btn-success flex items-center gap-2"><Download size={18} /> Export CSV</button>
+          <div className="flex items-center gap-2">
+              <button onClick={exportExcel} className="btn-success px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 flex items-center gap-2">Excel</button>
+              <button onClick={exportPdf} className="btn-error px-4 py-2 text-sm font-medium text-white bg-rose-600 rounded-lg hover:bg-rose-700 flex items-center gap-2">PDF</button>
+            </div>
         </div>
       </div>
 

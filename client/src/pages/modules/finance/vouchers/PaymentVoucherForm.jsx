@@ -61,6 +61,8 @@ export default function PaymentVoucherForm() {
   const [customerInvoices, setCustomerInvoices] = useState([]);
   const [selectedInvoiceRefs, setSelectedInvoiceRefs] = useState([]);
   const [voucherNoPreview, setVoucherNoPreview] = useState("");
+  const [costCenters, setCostCenters] = useState([]);
+  const [costCenterId, setCostCenterId] = useState("");
 
   const [voucherDate, setVoucherDate] = useState(
     new Date().toISOString().split("T")[0],
@@ -208,7 +210,7 @@ export default function PaymentVoucherForm() {
       };
       const formParam = formIdMap[vTypeCode] || null;
 
-      const [vtRes, fyRes, accRes, taxRes, custRes, supRes, curRes, projRes] =
+      const [vtRes, fyRes, accRes, taxRes, custRes, supRes, curRes, projRes, ccRes] =
         await Promise.all([
           api.get("/finance/voucher-types"),
           api.get("/finance/fiscal-years"),
@@ -218,6 +220,7 @@ export default function PaymentVoucherForm() {
           api.get("/purchase/suppliers?active=true"),
           api.get("/finance/currencies"),
           api.get("/projects/projects"),
+          api.get("/finance/cost-centers"),
         ]);
       const vt = vtRes.data?.items || [];
       const fys = fyRes.data?.items || [];
@@ -262,6 +265,7 @@ export default function PaymentVoucherForm() {
       setCurrencies(currs);
       setSuppliers(suppliers);
       setProjects(projRes.data?.items || []);
+      setCostCenters(ccRes.data?.items || ccRes.data?.data?.items || []);
 
       if (!fiscalYearId && fys.length) setFiscalYearId(String(fys[0].id));
     } catch (e) {
@@ -519,6 +523,7 @@ export default function PaymentVoucherForm() {
       }
       setNarration(v.narration || data.voucher?.narration || "");
       setProjectId(v.project_id || data.voucher?.project_id || "");
+      setCostCenterId(v.cost_center_id || data.voucher?.cost_center_id || "");
       setVoucherHeaderAmounts({
         totalDebit: Number(v.total_debit || 0),
         totalCredit: Number(v.total_credit || 0),
@@ -546,20 +551,21 @@ export default function PaymentVoucherForm() {
           credit: Number(it.credit || 0),
           currencyId: String(it.currency_id || it.currencyId || ""),
           exchangeRate: String(it.exchange_rate || it.exchangeRate || "1"),
+          taxCodeId: String(it.tax_code_id || it.taxCodeId || ""),
         })) || [];
       setLines(mapped.length ? mapped : [emptyLine(), emptyLine()]);
+      
+      const taxLine = mapped.find(l => l.taxCodeId);
+      const isTaxIncludedFromLines = !!taxLine;
+      const taxCodeIdFromLines = taxLine ? taxLine.taxCodeId : "";
+
       if (isRV) {
         const debitLine = mapped.find((l) => Number(l.debit || 0) > 0);
         const creditLines = mapped.filter((l) => Number(l.credit || 0) > 0);
         const creditFirstRaw = rawCredit[0] || null;
-        const rvName =
-          token("Received from") || creditFirstRaw?.account_name || "";
-        const rvCode = creditFirstRaw?.account_code
-          ? String(creditFirstRaw.account_code)
-          : "";
-        const rvPayAccId = creditFirstRaw?.account_id
-          ? String(creditFirstRaw.account_id)
-          : "";
+        const rvName = token("Received from") || creditFirstRaw?.account_name || "";
+        const rvCode = creditFirstRaw?.account_code ? String(creditFirstRaw.account_code) : "";
+        const rvPayAccId = creditFirstRaw?.account_id ? String(creditFirstRaw.account_id) : "";
         if (!rvPayAccId) {
           setCustomerInvoices([]);
         }
@@ -569,58 +575,63 @@ export default function PaymentVoucherForm() {
           receivedFrom: rvName || prev.receivedFrom,
           receivedFromCode: rvCode || prev.receivedFromCode,
           payerAccountId: rvPayAccId || prev.payerAccountId,
-          paymentMethod:
-            rawLines.find((l) => l.payment_method)?.payment_method ||
-            token("Method") ||
-            prev.paymentMethod,
+          taxCodeId: taxCodeIdFromLines || prev.taxCodeId,
+          paymentMethod: rawLines.find((l) => l.payment_method)?.payment_method || token("Method") || prev.paymentMethod,
           reference: token("Ref") || prev.reference,
-          items:
-            creditLines.length > 0
+          items: creditLines.length > 0
               ? creditLines.map((l) => ({
                   description: l.description || "",
                   accountId: String(l.accountId || ""),
                   amount: Number(l.credit || 0),
-                  currencyCode:
-                    getAccountCurrencyCode(String(l.accountId || "")) ||
-                    String(v.currency_code || ""),
+                  currencyCode: getAccountCurrencyCode(String(l.accountId || "")) || String(v.currency_code || ""),
                   exchangeRate: String(v.exchange_rate || 1),
-                  referenceNo:
-                    String(
-                      (
-                        rawCredit.find(
-                          (rc) =>
-                            String(rc.account_id || "") ===
-                            String(l.accountId || ""),
-                        ) || {}
-                      ).reference_no || "",
-                    ) || "",
+                  referenceNo: String((rawCredit.find((rc) => String(rc.account_id || "") === String(l.accountId || "")) || {}).reference_no || "") || "",
                 }))
               : prev.items,
         }));
+        setRvIsTaxIncluded(isTaxIncludedFromLines);
       } else if (isPAYV) {
+        const debitAccIds = new Set(mapped.filter((l) => Number(l.debit || 0) > 0).map((l) => String(l.accountId)));
+        const supplierSettledLine = mapped.find((l) => Number(l.credit || 0) > 0 && debitAccIds.has(String(l.accountId)));
+        const isDirect = !!supplierSettledLine;
+
+        if (isDirect) setPaymentType("DIRECT");
+        else setPaymentType("AGAINST_BILL");
+
         const creditLine = mapped.find((l) => Number(l.credit || 0) > 0);
         const debitLines = mapped.filter((l) => Number(l.debit || 0) > 0);
         const debitFirstRaw = rawDebit[0] || null;
         const pvName = token("Paid to") || debitFirstRaw?.account_name || "";
-        const pvCode = debitFirstRaw?.account_code
-          ? String(debitFirstRaw.account_code)
-          : "";
-        const pvPayAccId = debitFirstRaw?.account_id
-          ? String(debitFirstRaw.account_id)
-          : "";
+        const pvCode = debitFirstRaw?.account_code ? String(debitFirstRaw.account_code) : "";
+        
+        let pvPayAccId = debitFirstRaw?.account_id ? String(debitFirstRaw.account_id) : "";
+        let bankAccId = creditLine?.accountId || "";
+
+        if (isDirect) {
+          pvPayAccId = String(supplierSettledLine.accountId);
+          const bankLine = mapped.find(l => Number(l.credit || 0) > 0 && String(l.accountId) !== pvPayAccId);
+          bankAccId = bankLine ? String(bankLine.accountId) : bankAccId;
+        }
+
         setPvForm((prev) => ({
           ...prev,
-          paymentAccountId: creditLine?.accountId || "",
+          paymentAccountId: bankAccId || "",
           payTo: pvName || prev.payTo,
           payToCode: pvCode || prev.payToCode,
           payToAccountId: pvPayAccId || prev.payToAccountId,
-          paymentMethod:
-            rawLines.find((l) => l.payment_method)?.payment_method ||
-            token("Method") ||
-            prev.paymentMethod,
+          taxCodeId: taxCodeIdFromLines || prev.taxCodeId,
+          paymentMethod: rawLines.find((l) => l.payment_method)?.payment_method || token("Method") || prev.paymentMethod,
           reference: token("Ref") || prev.reference,
           items:
-            debitLines.length > 0
+            isDirect
+              ? [{
+                  description: supplierSettledLine?.description || debitFirstRaw?.description || "",
+                  accountId: String(pvPayAccId),
+                  amount: Number(v.total_debit || 0),
+                  currencyCode: getAccountCurrencyCode(String(pvPayAccId)) || String(v.currency_code || ""),
+                  exchangeRate: String(v.exchange_rate || 1),
+                }]
+              : debitLines.length > 0
               ? debitLines.map((l) => ({
                   description: l.description || "",
                   accountId: String(l.accountId || ""),
@@ -628,6 +639,7 @@ export default function PaymentVoucherForm() {
                 }))
               : prev.items,
         }));
+        setPvIsTaxIncluded(isTaxIncludedFromLines);
       } else if (isCV) {
         const debitLine = mapped.find((l) => Number(l.debit || 0) > 0);
         const creditLine = mapped.find((l) => Number(l.credit || 0) > 0);
@@ -1848,6 +1860,7 @@ export default function PaymentVoucherForm() {
                   : narration,
         lines: cleaned,
         projectId: projectId || null,
+        costCenterId: costCenterId || null,
       };
 
       if (isEdit) {
@@ -2744,13 +2757,20 @@ export default function PaymentVoucherForm() {
           (a) => String(a.id) === String(accountId),
         );
         const accountCode = selectedAcc?.code || "";
+        const accountName = selectedAcc?.name || "";
 
-        // Find supplier by account code
-        const supplier = suppliers.find(
-          (s) =>
-            String(s.account_code || s.code || s.supplier_code || "").trim() ===
-            String(accountCode).trim(),
+        // First try to find by exact name match (reliable if codes are duplicated)
+        let supplier = suppliers.find(
+          (s) => String(s.supplier_name || "").trim().toLowerCase() === String(accountName).trim().toLowerCase()
         );
+
+        // Fallback to code match if name match fails
+        if (!supplier && accountCode) {
+          supplier = suppliers.find(
+            (s) =>
+              String(s.account_code || s.code || s.supplier_code || "").trim() === String(accountCode).trim()
+          );
+        }
 
         if (supplier?.purchase_account_id || supplier?.expense_account_id) {
           const purchaseAccountId =
@@ -3694,6 +3714,22 @@ export default function PaymentVoucherForm() {
                     {projects.map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.project_name || p.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="label">Cost Center</label>
+                  <select
+                    className="input"
+                    value={costCenterId}
+                    onChange={(e) => setCostCenterId(e.target.value)}
+                    disabled={readOnly}
+                  >
+                    <option value="">-- Select Cost Center --</option>
+                    {costCenters.map((cc) => (
+                      <option key={cc.id} value={cc.id}>
+                        {cc.name} ({cc.code})
                       </option>
                     ))}
                   </select>

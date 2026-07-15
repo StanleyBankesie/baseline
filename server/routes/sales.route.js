@@ -1791,9 +1791,14 @@ router.get(
       // If active=false is explicitly requested, show all. Otherwise show only active.
       const onlyActive =
         activeParam === "true" || activeParam === "1" || activeParam === "";
+      
+      const serviceCustomerParam = String(req.query.service_customer || "").trim().toUpperCase();
+
       const params = { companyId };
       const where = ["c.company_id = :companyId"];
       if (onlyActive) where.push("c.is_active = 1");
+      if (serviceCustomerParam === "Y") where.push("c.service_customer = 'Y'");
+      else if (serviceCustomerParam === "N") where.push("c.service_customer = 'N'");
       const items = await query(
         `SELECT 
            c.id,
@@ -1818,6 +1823,7 @@ router.get(
            c.payment_terms,
            c.currency_id,
            c.sales_account_id,
+           c.service_customer,
            fa.name AS sales_account_name,
           c.created_at,
           u.username AS created_by_name
@@ -1902,6 +1908,7 @@ router.post(
         payment_terms,
         is_active,
         sales_account_id,
+        service_customer,
       } = req.body;
 
       if (!customer_name) {
@@ -1917,10 +1924,10 @@ router.post(
         `INSERT INTO sal_customers 
          (company_id, branch_id, customer_code, customer_name, email, phone, mobile, 
           contact_person, address, city, state, zone, country, customer_type, 
-          price_type_id, currency_id, credit_limit, payment_terms, is_active, sales_account_id, created_by)
+          price_type_id, currency_id, credit_limit, payment_terms, is_active, sales_account_id, service_customer, created_by)
          VALUES (:companyId, :branchId, :customer_code, :customer_name, :email, :phone, :mobile,
                  :contact_person, :address, :city, :state, :zone, :country, :customer_type,
-                 :price_type_id, :currency_id, :credit_limit, :payment_terms, :is_active, :sales_account_id, :createdBy)`,
+                 :price_type_id, :currency_id, :credit_limit, :payment_terms, :is_active, :sales_account_id, :service_customer, :createdBy)`,
         {
           companyId,
           branchId, branchIdsStr,
@@ -1942,12 +1949,31 @@ router.post(
           payment_terms: payment_terms || "Net 30",
           is_active: is_active === false ? 0 : 1,
           sales_account_id: sales_account_id || null,
+          service_customer: (service_customer === 'Y' || service_customer === true || String(service_customer).toLowerCase() === 'true') ? 'Y' : 'N',
           createdBy,
         },
       );
 
+      const createdId = result.insertId;
+
+      try {
+        const conn = await pool.getConnection();
+        try {
+          await conn.beginTransaction();
+          await ensureCustomerFinAccountIdTx(conn, { companyId, customerId: createdId });
+          await conn.commit();
+        } catch (txnErr) {
+          await conn.rollback();
+          console.warn("Failed to auto-create customer fin account:", txnErr);
+        } finally {
+          conn.release();
+        }
+      } catch (connErr) {
+        console.warn("Failed to get connection for fin account creation:", connErr);
+      }
+
       res.status(201).json({
-        id: result.insertId,
+        id: createdId,
         message: "Customer created successfully",
       });
     } catch (e) {
@@ -1988,6 +2014,7 @@ router.put(
         payment_terms,
         is_active,
         sales_account_id,
+        service_customer,
       } = req.body;
 
       const isActive =
@@ -2019,7 +2046,8 @@ router.put(
              credit_limit = :credit_limit, 
              payment_terms = :payment_terms, 
              is_active = :is_active,
-             sales_account_id = :sales_account_id
+             sales_account_id = :sales_account_id,
+             service_customer = :service_customer
          WHERE id = :id AND company_id = :companyId`,
         {
           id,
@@ -2042,6 +2070,7 @@ router.put(
           payment_terms: payment_terms || "Net 30",
           is_active: isActive,
           sales_account_id: sales_account_id || null,
+          service_customer: (service_customer === 'Y' || service_customer === true || String(service_customer).toLowerCase() === 'true') ? 'Y' : 'N',
         },
       );
 
@@ -2063,6 +2092,22 @@ router.put(
          LIMIT 1`,
         { id, companyId },
       ).catch(() => []);
+
+      try {
+        const conn = await pool.getConnection();
+        try {
+          await conn.beginTransaction();
+          await ensureCustomerFinAccountIdTx(conn, { companyId, customerId: id });
+          await conn.commit();
+        } catch (txnErr) {
+          await conn.rollback();
+          console.warn("Failed to auto-create customer fin account:", txnErr);
+        } finally {
+          conn.release();
+        }
+      } catch (connErr) {
+        console.warn("Failed to get connection for fin account creation:", connErr);
+      }
 
       res.json({
         message: "Customer updated successfully",

@@ -13,7 +13,10 @@ import {
   listTrips, createTrip,
   listFuelLogs, createFuelLog,
   listBilling,
-  addTripLocation, getTripLocations, submitPOD
+  addTripLocation, getTripLocations, submitPOD,
+  listBreakdowns, createBreakdown,
+  listTransportIncome, createTransportIncome, updateTransportIncome, deleteTransportIncome, updateTransportIncomeVoucherId,
+  listTransportExpenses, createTransportExpense, updateTransportExpense, deleteTransportExpense, updateTransportExpenseVoucherId
 } from "../controllers/transport.controller.js";
 
 const router = express.Router();
@@ -48,5 +51,23 @@ router.get("/billing", requireAuth, requireCompanyScope, requirePermission("TRAN
 router.post("/trips/:id/location", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.TRIPS.EDIT"), addTripLocation);
 router.get("/trips/:id/locations", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.TRIPS.VIEW"), getTripLocations);
 router.post("/trips/:id/pod", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.TRIPS.EDIT"), submitPOD);
+
+// Breakdowns
+router.get("/breakdowns", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.BREAKDOWN-LOGBOOK.VIEW"), listBreakdowns);
+router.post("/breakdowns", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.BREAKDOWN-LOGBOOK.CREATE"), createBreakdown);
+
+// Income
+router.get("/income", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.INCOME.VIEW"), listTransportIncome);
+router.post("/income", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.INCOME.CREATE"), createTransportIncome);
+router.put("/income/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.INCOME.EDIT"), updateTransportIncome);
+router.delete("/income/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.INCOME.DELETE"), deleteTransportIncome);
+router.put("/income/:id/voucher", requireAuth, requireCompanyScope, updateTransportIncomeVoucherId);
+
+// Expenses
+router.get("/expenses", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.EXPENSES.VIEW"), listTransportExpenses);
+router.post("/expenses", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.EXPENSES.CREATE"), createTransportExpense);
+router.put("/expenses/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.EXPENSES.EDIT"), updateTransportExpense);
+router.delete("/expenses/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.EXPENSES.DELETE"), deleteTransportExpense);
+router.put("/expenses/:id/voucher", requireAuth, requireCompanyScope, updateTransportExpenseVoucherId);
 
 export default router;

@@ -76,20 +76,18 @@ export default function DriverForm() {
               <label className="label">
                 <span className="label-text">Select Employee *</span>
               </label>
-              <select
-                name="employee_id"
-                className="select select-bordered w-full"
-                value={formData.employee_id}
-                onChange={handleChange}
+              <input
+                type="text"
+                name="employee_name"
+                className="input input-bordered w-full"
+                value={formData.employee_name || formData.employee_id || ""}
+                onChange={(e) => {
+                  handleChange({ target: { name: 'employee_id', value: e.target.value }});
+                  handleChange({ target: { name: 'employee_name', value: e.target.value }});
+                }}
+                placeholder="Enter employee name"
                 required
-              >
-                <option value="" disabled>Select an employee</option>
-                {employees.map(e => (
-                  <option key={e.id} value={e.id}>
-                    {e.employee_code} - {e.first_name} {e.last_name}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
 
             <div className="form-control">

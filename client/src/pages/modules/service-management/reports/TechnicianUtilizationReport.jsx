@@ -39,33 +39,7 @@ export default function TechnicianUtilizationReport() {
     }
   }
 
-  function exportCSV() {
-    if (!items.length) return;
-    const headers = [
-      "Technician",
-      "Total Assigned Jobs",
-      "Completed Jobs",
-      "Pending Jobs",
-      "Total Hours Worked",
-      "Utilization %",
-    ];
-    const rows = items.map((r) => [
-      r.technician || "-",
-      Number(r.total_jobs || 0),
-      Number(r.completed_jobs || 0),
-      Number(r.pending_jobs || 0),
-      Number(r.hours || 0),
-      String(r.utilization || "0%"),
-    ]);
-    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "technician-utilization.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  
 
   function exportExcel() {
     if (!items.length) return;
@@ -135,13 +109,7 @@ export default function TechnicianUtilizationReport() {
             <Link to="/service-management" className="btn btn-secondary">
               Return to Menu
             </Link>
-            <button
-              className="btn-success"
-              onClick={exportCSV}
-              disabled={loading || items.length === 0}
-            >
-              Export CSV
-            </button>
+            
             <button
               className="btn-secondary"
               onClick={exportExcel}

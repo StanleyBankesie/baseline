@@ -16,6 +16,7 @@ import TaskForm from "./tasks/TaskForm.jsx";
 import ProjectReports from "./reports/ProjectReports.jsx";
 import TimesheetList from "./timesheets/TimesheetList.jsx";
 import ExpenseList from "./expenses/ExpenseList.jsx";
+import ProjectIncomeList from "./income/ProjectIncomeList.jsx";
 import PMSetup from "./setup/Setup.jsx";
 import PMMaterialRequisitionList from "./material-requisition/MaterialRequisitionList.jsx";
 import PMMaterialRequisitionForm from "./material-requisition/MaterialRequisitionForm.jsx";
@@ -182,6 +183,12 @@ function ProjectManagementLanding() {
       title: "Finance",
       items: [
         {
+          title: "Project Income",
+          path: "/project-management/income",
+          description: "Track project-related revenues",
+          icon: "💰",
+        },
+        {
           title: "Project Expenses",
           path: "/project-management/expenses",
           description: "Track project-related costs",
@@ -265,6 +272,7 @@ export default function ProjectManagementHome() {
 
       <Route path="/timesheets" element={<TimesheetList />} />
       <Route path="/expenses" element={<ExpenseList />} />
+      <Route path="/income" element={<ProjectIncomeList />} />
 
       <Route path="/reports" element={<ProjectReports />} />
       <Route path="/reports/project-status" element={<ProjectStatusReport />} />

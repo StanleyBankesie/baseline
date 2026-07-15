@@ -85,7 +85,7 @@ async function ensureProjectTables(companyId, branchId) {
 
 export const listProjects = async (req, res, next) => {
   try {
-    const { companyId, branchId = null } = req.scope || {};
+    const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
     await ensureProjectTables(companyId, branchId);
     const activeFilter = req.query.active !== 'all' ? " AND p.is_active = 'Y'" : "";
     const items = await query(`SELECT p.*,
@@ -94,8 +94,10 @@ export const listProjects = async (req, res, next) => {
          FROM pm_projects p
         LEFT JOIN adm_users u ON u.id = p.created_by
         LEFT JOIN (SELECT project_id, SUM(amount) AS expense_total FROM pm_expenses GROUP BY project_id) e ON p.id = e.project_id
-         WHERE p.company_id = :companyId AND p.branch_id = :branchId${activeFilter} ORDER BY p.start_date DESC LIMIT 100`,
-      { companyId, branchId },
+         WHERE p.company_id = :companyId
+           AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(p.branch_id, :branchIdsStr)))
+           ${activeFilter} ORDER BY p.start_date DESC LIMIT 100`,
+      { companyId, branchId, branchIdsStr },
     );
     res.json({ items });
   } catch (err) {
@@ -502,17 +504,27 @@ export const deleteTaskDependency = async (req, res, next) => {
 // ===== EXPENSES CRUD =====
 export const listExpenses = async (req, res, next) => {
   try {
-    const { companyId, branchId = null } = req.scope || {};
+    const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
     await ensureProjectTables(companyId, branchId);
     const projectId = toNumber(req.query.projectId);
-    let sql = `SELECT e.*, p.project_name, u.username AS created_by_name
+    let sql = `SELECT e.*, p.project_name, u.username AS created_by_name,
+      s.supplier_name, c.name AS cost_center_name,
+      CASE 
+        WHEN v.status IN ('DRAFT', 'SUBMITTED') THEN 'PENDING'
+        WHEN v.status IS NOT NULL THEN v.status
+        ELSE e.status 
+      END AS status
       FROM pm_expenses e
       LEFT JOIN pm_projects p ON e.project_id = p.id
       LEFT JOIN adm_users u ON e.recorded_by = u.username
-      WHERE e.company_id = :companyId AND e.branch_id = :branchId`;
+      LEFT JOIN pur_suppliers s ON e.supplier_id = s.id
+      LEFT JOIN fin_cost_centers c ON e.cost_center_id = c.id
+      LEFT JOIN fin_vouchers v ON e.voucher_id = v.id
+      WHERE e.company_id = :companyId
+        AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(e.branch_id, :branchIdsStr)))`;
     if (projectId) sql += ` AND e.project_id = :projectId`;
     sql += ` ORDER BY e.expense_date DESC`;
-    const rows = await query(sql, { companyId, branchId, projectId });
+    const rows = await query(sql, { companyId, branchId, branchIdsStr, projectId });
     res.json({ items: rows });
   } catch (err) { next(err); }
 };
@@ -523,8 +535,8 @@ export const createExpense = async (req, res, next) => {
     await ensureProjectTables(companyId, branchId);
     const b = req.body;
     if (!b.project_id || !b.amount) throw httpError(400, "VALIDATION_ERROR", "project_id and amount required");
-    const r = await query(`INSERT INTO pm_expenses (company_id, branch_id, project_id, expense_date, category, amount, currency, description, recorded_by, status)
-      VALUES (:companyId, :branchId, :projectId, :expenseDate, :category, :amount, :currency, :description, :recordedBy, :status)`, {
+    const r = await query(`INSERT INTO pm_expenses (company_id, branch_id, project_id, expense_date, category, amount, currency, description, recorded_by, status, supplier_id, payment_method, payment_account_id, is_tax_included, tax_code_id, reference_no, cheque_date, cost_center_id)
+      VALUES (:companyId, :branchId, :projectId, :expenseDate, :category, :amount, :currency, :description, :recordedBy, :status, :supplierId, :paymentMethod, :paymentAccountId, :isTaxIncluded, :taxCodeId, :referenceNo, :chequeDate, :costCenterId)`, {
       companyId, branchId,
       projectId: toNumber(b.project_id),
       expenseDate: b.expense_date || new Date().toISOString().split('T')[0],
@@ -533,7 +545,15 @@ export const createExpense = async (req, res, next) => {
       currency: b.currency || 'GHS',
       description: b.description || null,
       recordedBy: req.user?.username || null,
-      status: b.status || 'PENDING'
+      status: b.status || 'PENDING',
+      supplierId: b.supplier_id ? toNumber(b.supplier_id) : null,
+      paymentMethod: b.payment_method || null,
+      paymentAccountId: b.payment_account_id ? toNumber(b.payment_account_id) : null,
+      isTaxIncluded: b.is_tax_included ? 1 : 0,
+      taxCodeId: b.tax_code_id ? toNumber(b.tax_code_id) : null,
+      referenceNo: b.reference_no || null,
+      chequeDate: b.cheque_date || null,
+      costCenterId: b.cost_center_id ? toNumber(b.cost_center_id) : null
     });
     res.status(201).json({ id: r.insertId });
   } catch (err) { next(err); }
@@ -545,13 +565,21 @@ export const updateExpense = async (req, res, next) => {
     const id = toNumber(req.params.id);
     if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
     const b = req.body;
-    await query(`UPDATE pm_expenses SET expense_date = :expenseDate, category = :category, amount = :amount, description = :description, status = :status WHERE id = :id AND company_id = :companyId AND branch_id = :branchId`, {
+    await query(`UPDATE pm_expenses SET expense_date = :expenseDate, category = :category, amount = :amount, description = :description, status = :status, supplier_id = :supplierId, payment_method = :paymentMethod, payment_account_id = :paymentAccountId, is_tax_included = :isTaxIncluded, tax_code_id = :taxCodeId, reference_no = :referenceNo, cheque_date = :chequeDate, cost_center_id = :costCenterId WHERE id = :id AND company_id = :companyId AND branch_id = :branchId`, {
       id, companyId, branchId,
       expenseDate: b.expense_date || null,
       category: b.category || 'OTHER',
       amount: Number(b.amount || 0),
       description: b.description || null,
-      status: b.status || 'PENDING'
+      status: b.status || 'PENDING',
+      supplierId: b.supplier_id ? toNumber(b.supplier_id) : null,
+      paymentMethod: b.payment_method || null,
+      paymentAccountId: b.payment_account_id ? toNumber(b.payment_account_id) : null,
+      isTaxIncluded: b.is_tax_included ? 1 : 0,
+      taxCodeId: b.tax_code_id ? toNumber(b.tax_code_id) : null,
+      referenceNo: b.reference_no || null,
+      chequeDate: b.cheque_date || null,
+      costCenterId: b.cost_center_id ? toNumber(b.cost_center_id) : null
     });
     res.json({ ok: true });
   } catch (err) { next(err); }
@@ -563,6 +591,120 @@ export const deleteExpense = async (req, res, next) => {
     const id = toNumber(req.params.id);
     if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
     await query(`DELETE FROM pm_expenses WHERE id = :id AND company_id = :companyId AND branch_id = :branchId`, { id, companyId, branchId });
+    res.json({ ok: true });
+  } catch (err) { next(err); }
+};
+
+export const updateExpenseVoucherId = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const id = toNumber(req.params.id);
+    const voucherId = toNumber(req.body.voucher_id);
+    if (!id || !voucherId) throw httpError(400, "VALIDATION_ERROR", "Invalid id or voucher_id");
+    await query(`UPDATE pm_expenses SET voucher_id = :voucherId WHERE id = :id AND company_id = :companyId`, { id, voucherId, companyId });
+    res.json({ ok: true });
+  } catch (err) { next(err); }
+};
+
+// ===== INCOME CRUD =====
+export const listIncome = async (req, res, next) => {
+  try {
+    const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
+    const projectId = toNumber(req.query.projectId);
+    let sql = `SELECT i.*, p.project_name, u.username AS created_by_name,
+      c_cust.customer_name, cc.name AS cost_center_name,
+      CASE 
+        WHEN v.status IN ('DRAFT', 'SUBMITTED') THEN 'PENDING'
+        WHEN v.status IS NOT NULL THEN v.status
+        ELSE i.status 
+      END AS status
+      FROM pm_income i
+      LEFT JOIN pm_projects p ON i.project_id = p.id
+      LEFT JOIN adm_users u ON i.recorded_by = u.username
+      LEFT JOIN sal_customers c_cust ON i.customer_id = c_cust.id
+      LEFT JOIN fin_cost_centers cc ON i.cost_center_id = cc.id
+      LEFT JOIN fin_vouchers v ON i.voucher_id = v.id
+      WHERE i.company_id = :companyId
+        AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(i.branch_id, :branchIdsStr)))`;
+    if (projectId) sql += ` AND i.project_id = :projectId`;
+    sql += ` ORDER BY i.income_date DESC`;
+    const rows = await query(sql, { companyId, branchId, branchIdsStr, projectId });
+    res.json({ items: rows });
+  } catch (err) { next(err); }
+};
+
+export const createIncome = async (req, res, next) => {
+  try {
+    const { companyId, branchId = null } = req.scope || {};
+    const b = req.body;
+    if (!b.project_id || !b.amount) throw httpError(400, "VALIDATION_ERROR", "project_id and amount required");
+    const r = await query(`INSERT INTO pm_income (company_id, branch_id, project_id, income_date, category, amount, currency, description, recorded_by, status, customer_id, payment_method, payment_account_id, is_tax_included, tax_code_id, reference_no, cheque_date, cost_center_id)
+      VALUES (:companyId, :branchId, :projectId, :incomeDate, :category, :amount, :currency, :description, :recordedBy, :status, :customerId, :paymentMethod, :paymentAccountId, :isTaxIncluded, :taxCodeId, :referenceNo, :chequeDate, :costCenterId)`, {
+      companyId, branchId,
+      projectId: toNumber(b.project_id),
+      incomeDate: b.income_date || new Date().toISOString().split('T')[0],
+      category: b.category || 'OTHER',
+      amount: Number(b.amount || 0),
+      currency: b.currency || 'GHS',
+      description: b.description || null,
+      recordedBy: req.user?.username || null,
+      status: b.status || 'PENDING',
+      customerId: b.customer_id ? toNumber(b.customer_id) : null,
+      paymentMethod: b.payment_method || null,
+      paymentAccountId: b.payment_account_id ? toNumber(b.payment_account_id) : null,
+      isTaxIncluded: b.is_tax_included ? 1 : 0,
+      taxCodeId: b.tax_code_id ? toNumber(b.tax_code_id) : null,
+      referenceNo: b.reference_no || null,
+      chequeDate: b.cheque_date || null,
+      costCenterId: b.cost_center_id ? toNumber(b.cost_center_id) : null
+    });
+    res.status(201).json({ id: r.insertId });
+  } catch (err) { next(err); }
+};
+
+export const updateIncome = async (req, res, next) => {
+  try {
+    const { companyId, branchId = null } = req.scope || {};
+    const id = toNumber(req.params.id);
+    if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    const b = req.body;
+    await query(`UPDATE pm_income SET income_date = :incomeDate, category = :category, amount = :amount, description = :description, status = :status, customer_id = :customerId, payment_method = :paymentMethod, payment_account_id = :paymentAccountId, is_tax_included = :isTaxIncluded, tax_code_id = :taxCodeId, reference_no = :referenceNo, cheque_date = :chequeDate, cost_center_id = :costCenterId WHERE id = :id AND company_id = :companyId AND branch_id = :branchId`, {
+      id, companyId, branchId,
+      incomeDate: b.income_date || null,
+      category: b.category || 'OTHER',
+      amount: Number(b.amount || 0),
+      description: b.description || null,
+      status: b.status || 'PENDING',
+      customerId: b.customer_id ? toNumber(b.customer_id) : null,
+      paymentMethod: b.payment_method || null,
+      paymentAccountId: b.payment_account_id ? toNumber(b.payment_account_id) : null,
+      isTaxIncluded: b.is_tax_included ? 1 : 0,
+      taxCodeId: b.tax_code_id ? toNumber(b.tax_code_id) : null,
+      referenceNo: b.reference_no || null,
+      chequeDate: b.cheque_date || null,
+      costCenterId: b.cost_center_id ? toNumber(b.cost_center_id) : null
+    });
+    res.json({ ok: true });
+  } catch (err) { next(err); }
+};
+
+export const deleteIncome = async (req, res, next) => {
+  try {
+    const { companyId, branchId = null } = req.scope || {};
+    const id = toNumber(req.params.id);
+    if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    await query(`DELETE FROM pm_income WHERE id = :id AND company_id = :companyId AND branch_id = :branchId`, { id, companyId, branchId });
+    res.json({ ok: true });
+  } catch (err) { next(err); }
+};
+
+export const updateIncomeVoucherId = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const id = toNumber(req.params.id);
+    const voucherId = toNumber(req.body.voucher_id);
+    if (!id || !voucherId) throw httpError(400, "VALIDATION_ERROR", "Invalid id or voucher_id");
+    await query(`UPDATE pm_income SET voucher_id = :voucherId WHERE id = :id AND company_id = :companyId`, { id, voucherId, companyId });
     res.json({ ok: true });
   } catch (err) { next(err); }
 };
@@ -1587,27 +1729,31 @@ export const getProjectIncomeReport = async (req, res, next) => {
   try {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const projectId = req.query.project_id ? toNumber(req.query.project_id) : null;
-    if (!projectId) {
-      const projects = await query(`SELECT DISTINCT p.id, p.project_code, p.project_name
-        FROM pm_projects p
-        JOIN fin_vouchers v ON v.project_id = p.id AND v.company_id = p.company_id
-        JOIN fin_voucher_types vt ON vt.id = v.voucher_type_id AND vt.company_id = v.company_id
-        WHERE p.company_id = :companyId AND vt.code = 'RV'
-          AND (:branchIdsStr = '' OR FIND_IN_SET(p.branch_id, :branchIdsStr))
-        ORDER BY p.project_name`, { companyId, branchId, branchIdsStr });
-      return res.json({ projects });
-    }
+    const fromDate = req.query.from ? String(req.query.from) : null;
+    const toDate = req.query.to ? String(req.query.to) : null;
+
+    const projects = await query(`SELECT p.id, p.project_code, p.project_name
+      FROM pm_projects p
+      WHERE p.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(p.branch_id, :branchIdsStr))
+      ORDER BY p.project_name`, { companyId, branchIdsStr });
+
     const items = await query(`SELECT v.id, v.voucher_no, v.voucher_date,
         COALESCE((SELECT l.description FROM fin_voucher_lines l WHERE l.voucher_id = v.id AND l.company_id = v.company_id AND NULLIF(TRIM(l.description), '') IS NOT NULL ORDER BY l.line_no ASC LIMIT 1), v.narration) AS description,
-        vt.name AS voucher_type_name, c.code AS currency_code, v.total_debit AS amount, v.status
+        vt.name AS voucher_type_name, c.code AS currency_code, v.total_debit AS amount, v.status, p.project_name
       FROM fin_vouchers v
       JOIN fin_voucher_types vt ON vt.id = v.voucher_type_id AND vt.company_id = v.company_id
       LEFT JOIN fin_currencies c ON c.id = v.currency_id AND c.company_id = v.company_id
-      WHERE v.company_id = :companyId AND v.project_id = :projectId AND vt.code = 'RV'
+      LEFT JOIN pm_projects p ON p.id = v.project_id
+      WHERE v.company_id = :companyId AND vt.code IN ('RV', 'RECV')
+        AND v.project_id IS NOT NULL
+        AND (:projectId IS NULL OR v.project_id = :projectId)
+        AND (:fromDate IS NULL OR v.voucher_date >= :fromDate)
+        AND (:toDate IS NULL OR v.voucher_date <= :toDate)
         AND (:branchIdsStr = '' OR FIND_IN_SET(v.branch_id, :branchIdsStr))
-      ORDER BY v.voucher_date DESC, v.id DESC`, { companyId, branchId, branchIdsStr, projectId });
+      ORDER BY v.voucher_date DESC, v.id DESC`, { companyId, branchId, branchIdsStr, projectId, fromDate, toDate });
+
     const summary = { count: items.length, total: items.reduce((s, v) => s + Number(v.amount || 0), 0) };
-    res.json({ items, summary });
+    res.json({ projects, items, summary });
   } catch (err) { next(err); }
 };
 
@@ -1615,27 +1761,31 @@ export const getProjectExpenseReport = async (req, res, next) => {
   try {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const projectId = req.query.project_id ? toNumber(req.query.project_id) : null;
-    if (!projectId) {
-      const projects = await query(`SELECT DISTINCT p.id, p.project_code, p.project_name
-        FROM pm_projects p
-        JOIN fin_vouchers v ON v.project_id = p.id AND v.company_id = p.company_id
-        JOIN fin_voucher_types vt ON vt.id = v.voucher_type_id AND vt.company_id = v.company_id
-        WHERE p.company_id = :companyId AND vt.code = 'PV'
-          AND (:branchIdsStr = '' OR FIND_IN_SET(p.branch_id, :branchIdsStr))
-        ORDER BY p.project_name`, { companyId, branchId, branchIdsStr });
-      return res.json({ projects });
-    }
+    const fromDate = req.query.from ? String(req.query.from) : null;
+    const toDate = req.query.to ? String(req.query.to) : null;
+
+    const projects = await query(`SELECT p.id, p.project_code, p.project_name
+      FROM pm_projects p
+      WHERE p.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(p.branch_id, :branchIdsStr))
+      ORDER BY p.project_name`, { companyId, branchIdsStr });
+
     const items = await query(`SELECT v.id, v.voucher_no, v.voucher_date,
         COALESCE((SELECT l.description FROM fin_voucher_lines l WHERE l.voucher_id = v.id AND l.company_id = v.company_id AND NULLIF(TRIM(l.description), '') IS NOT NULL ORDER BY l.line_no ASC LIMIT 1), v.narration) AS description,
-        vt.name AS voucher_type_name, c.code AS currency_code, v.total_debit AS amount, v.status
+        vt.name AS voucher_type_name, c.code AS currency_code, v.total_debit AS amount, v.status, p.project_name
       FROM fin_vouchers v
       JOIN fin_voucher_types vt ON vt.id = v.voucher_type_id AND vt.company_id = v.company_id
       LEFT JOIN fin_currencies c ON c.id = v.currency_id AND c.company_id = v.company_id
-      WHERE v.company_id = :companyId AND v.project_id = :projectId AND vt.code = 'PV'
+      LEFT JOIN pm_projects p ON p.id = v.project_id
+      WHERE v.company_id = :companyId AND vt.code IN ('PV', 'PAYV')
+        AND v.project_id IS NOT NULL
+        AND (:projectId IS NULL OR v.project_id = :projectId)
+        AND (:fromDate IS NULL OR v.voucher_date >= :fromDate)
+        AND (:toDate IS NULL OR v.voucher_date <= :toDate)
         AND (:branchIdsStr = '' OR FIND_IN_SET(v.branch_id, :branchIdsStr))
-      ORDER BY v.voucher_date DESC, v.id DESC`, { companyId, branchId, branchIdsStr, projectId });
+      ORDER BY v.voucher_date DESC, v.id DESC`, { companyId, branchId, branchIdsStr, projectId, fromDate, toDate });
+
     const summary = { count: items.length, total: items.reduce((s, v) => s + Number(v.amount || 0), 0) };
-    res.json({ items, summary });
+    res.json({ projects, items, summary });
   } catch (err) { next(err); }
 };
 
