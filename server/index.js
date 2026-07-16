@@ -55,6 +55,10 @@ import { initializeSocket } from "./utils/socket.js";
 import {
   ensureExceptionalPermissionsTable,
   ensureSystemLogsTable,
+  ensureUserPermissionsTable,
+  ensureUserPermissionCacheAndTriggers,
+  ensureUserBranchMapping,
+  ensurePagesTable,
   verifiedTables,
 } from "./utils/dbUtils.js";
 import { seedDefaultTemplates } from "./services/seed-defaults.js";
@@ -765,7 +769,42 @@ if (process.env.NODE_ENV !== "test") {
     }
     return _originalListen(p, callback);
   };
-  server.listen(PORT, () => {
+
+  // ─── Pre-warm all DDL before accepting connections ──────────────────────────────
+  // By running all ensure*() calls here, verifiedTables is populated before
+  // the first request arrives. Subsequent calls inside route handlers are
+  // instant no-ops (verifiedTables.has() = true). This eliminates the DDL
+  // lock contention that caused ERR_CONNECTION_CLOSED / ERR_HTTP2_PROTOCOL_ERROR.
+  async function prewarmDatabase() {
+    const dbCheck = await testDbConnection({ silent: true });
+    if (!dbCheck.ok) {
+      console.warn("[Prewarm] DB not available, skipping DDL prewarm");
+      return;
+    }
+    console.log("[Prewarm] Running database schema setup...");
+    const steps = [
+      ["pages table", () => ensurePagesTable()],
+      ["user permissions table", () => ensureUserPermissionsTable()],
+      ["user permission triggers", () => ensureUserPermissionCacheAndTriggers()],
+      ["user branch mapping", () => ensureUserBranchMapping()],
+      ["exceptional permissions", () => ensureExceptionalPermissionsTable()],
+      ["system logs", () => ensureSystemLogsTable()],
+    ];
+    for (const [name, fn] of steps) {
+      try {
+        await fn();
+        console.log(`[Prewarm] ✓ ${name}`);
+      } catch (e) {
+        console.warn(`[Prewarm] ⚠ ${name} failed: ${e?.message || e}`);
+      }
+    }
+    console.log("[Prewarm] Database schema setup complete.");
+  }
+
+  prewarmDatabase()
+    .catch((e) => console.warn(`[Prewarm] Error: ${e?.message || e}`))
+    .finally(() => {
+      server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     initCronJobs();
     console.log(`Mailer configured: ${isMailerConfigured() ? "yes" : "no"}`);
@@ -1018,8 +1057,9 @@ if (process.env.NODE_ENV !== "test") {
         `[LowStockScheduler] Initial schedule check failed: ${e?.message || e}`,
       ),
     );
-  });
-}
+  });       // closes server.listen callback
+    });     // closes .finally(() => {
+}           // closes if (process.env.NODE_ENV !== "test")
 
 // ─── Graceful Shutdown ───────────────────────────────────────────────────────
 async function gracefulShutdown(signal) {
