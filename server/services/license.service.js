@@ -4,6 +4,29 @@ import crypto from "crypto";
 
 const CACHE_TTL_SECONDS = 3600; // 1 hour
 
+// In-memory fallback cache for when Redis is not configured.
+// Prevents 2+ DB queries per request from the license middleware.
+const memCache = new Map();
+const MEM_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+function memCacheGet(key) {
+  const entry = memCache.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) {
+    memCache.delete(key);
+    return null;
+  }
+  return entry.value;
+}
+
+function memCacheSet(key, value, ttlMs = MEM_CACHE_TTL_MS) {
+  memCache.set(key, { value, expiresAt: Date.now() + ttlMs });
+}
+
+function memCacheDel(key) {
+  memCache.delete(key);
+}
+
 /**
  * Generate a standard ERP license key
  */
@@ -20,7 +43,14 @@ export function generateLicenseKey() {
  */
 export async function getCompanyLicense(companyId) {
   const cacheKey = `omnisuite:license:${companyId}`;
-  let licenseData = await cacheGet(cacheKey);
+
+  // 1. Try Redis
+  let licenseData = await cacheGet(cacheKey).catch(() => null);
+
+  // 2. Fall back to in-memory cache (used when Redis is not configured)
+  if (!licenseData) {
+    licenseData = memCacheGet(cacheKey);
+  }
 
   if (!licenseData) {
     const licenses = await query(
@@ -43,9 +73,10 @@ export async function getCompanyLicense(companyId) {
         modules: modules.map(m => m.module_code)
       };
     }
-    
-    // Fire and forget cache update
+
+    // Write to both Redis and in-memory cache
     cacheSet(cacheKey, licenseData, CACHE_TTL_SECONDS).catch(() => {});
+    memCacheSet(cacheKey, licenseData);
   }
 
   return licenseData;
@@ -55,19 +86,27 @@ export async function getCompanyLicense(companyId) {
  * Clear license cache
  */
 export async function invalidateLicenseCache(companyId) {
-  await cacheDel(`omnisuite:license:${companyId}`);
+  const cacheKey = `omnisuite:license:${companyId}`;
+  await cacheDel(cacheKey).catch(() => {});
+  memCacheDel(cacheKey);
 }
 
 /**
  * Validate company license status, expiry, and grace period
  */
 export async function validateCompanyLicense(companyId) {
-  const companies = await query(
-    `SELECT is_active FROM adm_companies WHERE id = ? LIMIT 1`,
-    [companyId]
-  );
+  const companyCacheKey = `omnisuite:company_active:${companyId}`;
+  let isActive = memCacheGet(companyCacheKey);
+  if (isActive === null) {
+    const companies = await query(
+      `SELECT is_active FROM adm_companies WHERE id = ? LIMIT 1`,
+      [companyId]
+    );
+    isActive = (companies && companies.length > 0) ? companies[0].is_active : 0;
+    memCacheSet(companyCacheKey, isActive, 2 * 60 * 1000); // 2 minute cache
+  }
 
-  if (!companies || companies.length === 0 || companies[0].is_active !== 1) {
+  if (isActive !== 1) {
     return { valid: false, reason: "Company is inactive or does not exist." };
   }
 
