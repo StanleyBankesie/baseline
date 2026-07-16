@@ -160,7 +160,8 @@ export async function ensureSystemLogsTable() {
 }
 
 // Track tables that have already been verified to avoid redundant checks
-const verifiedTables = new Set();
+// Exported so other modules can share this singleton cache and skip DDL queries
+export const verifiedTables = new Set();
 
 /**
  * Ensure the adm_branches table has all expected columns.

@@ -55,6 +55,7 @@ import { initializeSocket } from "./utils/socket.js";
 import {
   ensureExceptionalPermissionsTable,
   ensureSystemLogsTable,
+  verifiedTables,
 } from "./utils/dbUtils.js";
 import { seedDefaultTemplates } from "./services/seed-defaults.js";
 import { ensureIndexes } from "./utils/ensureIndexes.js";
@@ -844,18 +845,21 @@ if (process.env.NODE_ENV !== "test") {
           );
           if (!items.length) continue;
           // Filter recipients by notification preferences (low-stock)
-          await query(`
-            CREATE TABLE IF NOT EXISTS adm_notification_prefs (
-              user_id BIGINT UNSIGNED NOT NULL,
-              pref_key VARCHAR(100) NOT NULL,
-              push_enabled TINYINT(1) NOT NULL DEFAULT 0,
-              email_enabled TINYINT(1) NOT NULL DEFAULT 0,
-              created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-              updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-              PRIMARY KEY (user_id, pref_key),
-              INDEX idx_pref_key (pref_key)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-          `);
+          if (!verifiedTables.has("adm_notification_prefs")) {
+            await query(`
+              CREATE TABLE IF NOT EXISTS adm_notification_prefs (
+                user_id BIGINT UNSIGNED NOT NULL,
+                pref_key VARCHAR(100) NOT NULL,
+                push_enabled TINYINT(1) NOT NULL DEFAULT 0,
+                email_enabled TINYINT(1) NOT NULL DEFAULT 0,
+                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (user_id, pref_key),
+                INDEX idx_pref_key (pref_key)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            `);
+            verifiedTables.add("adm_notification_prefs");
+          }
           const recipients = await query(
             `SELECT u.id, u.email, np.push_enabled, np.email_enabled
              FROM adm_users u
@@ -1029,5 +1033,27 @@ async function gracefulShutdown(signal) {
 }
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+
+// ─── Prevent process crashes from unhandled errors ───────────────────────────
+// Without these handlers, any unhandled Promise rejection or thrown exception
+// will crash the entire Node.js server, causing ERR_CONNECTION_CLOSED for all
+// in-flight requests. Log the error but keep the process running.
+process.on("unhandledRejection", (reason, promise) => {
+  const msg = reason instanceof Error ? reason.message : String(reason);
+  const stack = reason instanceof Error ? reason.stack : "(no stack)";
+  console.error(`[Process] Unhandled Promise Rejection: ${msg}`);
+  console.error(stack);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error(`[Process] Uncaught Exception: ${err?.message || err}`);
+  console.error(err?.stack || "(no stack)");
+  // Only exit for truly fatal errors (memory corruption, etc.).
+  // Do NOT exit for recoverable errors like DB timeouts.
+  if (err && (err.code === "ERR_WORKER_OUT_OF_MEMORY" || err.code === "ERR_INVALID_HANDLE_STATE")) {
+    console.error("[Process] Fatal error, exiting.");
+    process.exit(1);
+  }
+});
 
 export default app;
