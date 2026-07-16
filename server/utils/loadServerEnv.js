@@ -88,7 +88,23 @@ export function loadServerEnv(metaUrl = import.meta.url) {
 
   const originalPort = process.env.PORT;
 
-  const effectiveIsProd = runtimeIsProd || (!hasLocalEnvFile && baseIsProd);
+  // Pre-check if any production candidate sets NODE_ENV=production
+  let prodSetsNodeEnv = false;
+  if (!runtimeIsProd) {
+    for (const filePath of prodCandidates) {
+      if (fs.existsSync(filePath)) {
+        try {
+          const parsedProd = dotenv.parse(fs.readFileSync(filePath, "utf8"));
+          if (String(parsedProd.NODE_ENV || "").toLowerCase() === "production") {
+            prodSetsNodeEnv = true;
+            break;
+          }
+        } catch {}
+      }
+    }
+  }
+
+  const effectiveIsProd = runtimeIsProd || baseIsProd || prodSetsNodeEnv;
 
   // Conditionally load local or production overrides based on current mode
   if (!effectiveIsProd && (forceLocal || hasLocalEnvFile)) {
