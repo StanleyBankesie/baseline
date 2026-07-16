@@ -29,9 +29,9 @@ export default function PaymentPackages() {
   // Auto-calculate the total amount whenever the breakdown fields change
   useEffect(() => {
     const total =
-      parseFloat(formData.cloud_hosting) +
-      parseFloat(formData.support_maintenance) +
-      parseFloat(formData.software_license);
+      (parseFloat(formData.cloud_hosting) || 0) +
+      (parseFloat(formData.support_maintenance) || 0) +
+      (parseFloat(formData.software_license) || 0);
     setFormData((prev) => ({ ...prev, amount: total }));
   }, [
     formData.cloud_hosting,
@@ -114,6 +114,7 @@ export default function PaymentPackages() {
       toast.error(
         err.response?.data?.message ||
           err.response?.data?.error ||
+          err.message ||
           "Failed to save package",
       );
     } finally {

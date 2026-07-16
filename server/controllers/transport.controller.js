@@ -311,8 +311,27 @@ export const getNextBillingNo = async (req, res, next) => {
 export const listBilling = async (req, res, next) => {
   try {
     const { companyId } = req.scope;
-    const items = await query("SELECT * FROM trans_invoices WHERE company_id = :companyId ORDER BY id DESC", { companyId });
-    res.json({ success: true, data: { items } });
+    const items = await query(`
+      SELECT r.*,
+             fu.username AS forwarded_to_username
+       FROM trans_invoices r
+      LEFT JOIN (
+        SELECT t.document_id, t.assigned_to_user_id
+        FROM adm_document_workflows t
+        JOIN adm_workflows w ON w.id = t.workflow_id AND w.is_active = 1
+        JOIN (
+          SELECT document_id, MAX(id) AS max_id
+          FROM adm_document_workflows
+          WHERE status = 'PENDING'
+            AND (document_type = 'TRANSPORT_BILLING' OR document_type = 'Transport Billing' OR document_type = 'TRANSPORT BILLING')
+          GROUP BY document_id
+        ) m ON m.max_id = t.id
+      ) x ON x.document_id = r.id
+      LEFT JOIN adm_users fu ON fu.id = x.assigned_to_user_id
+      WHERE r.company_id = :companyId
+      ORDER BY r.id DESC
+    `, { companyId });
+    res.json({ success: true, items });
   } catch (err) {
     next(err);
   }
@@ -792,7 +811,25 @@ export const deleteFuelBill = async (req, res, next) => {
 export const getBilling = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const items = await query("SELECT * FROM trans_invoices WHERE id = :id", { id });
+    const items = await query(`
+      SELECT r.*,
+             fu.username AS forwarded_to_username
+       FROM trans_invoices r
+      LEFT JOIN (
+        SELECT t.document_id, t.assigned_to_user_id
+        FROM adm_document_workflows t
+        JOIN adm_workflows w ON w.id = t.workflow_id AND w.is_active = 1
+        JOIN (
+          SELECT document_id, MAX(id) AS max_id
+          FROM adm_document_workflows
+          WHERE status = 'PENDING'
+            AND (document_type = 'TRANSPORT_BILLING' OR document_type = 'Transport Billing' OR document_type = 'TRANSPORT BILLING')
+          GROUP BY document_id
+        ) m ON m.max_id = t.id
+      ) x ON x.document_id = r.id
+      LEFT JOIN adm_users fu ON fu.id = x.assigned_to_user_id
+      WHERE r.id = :id
+    `, { id });
     const details = await query("SELECT * FROM trans_invoice_details WHERE invoice_id = :id", { id });
     res.json({ success: true, data: { ...items[0], items: details } });
   } catch (err) {
