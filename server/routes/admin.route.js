@@ -36,6 +36,7 @@ import {
   ensureRoleModulesTable,
   ensureRolePermissionsTable,
   ensureRoleFeaturesTable,
+  verifiedTables,
 } from "../utils/dbUtils.js";
 import { ensureUserPermissionCacheAndTriggers } from "../utils/dbUtils.js";
 import {
@@ -389,6 +390,7 @@ async function ensureUserColumns() {
  * Ensures the adm_pages table exists to define application modules and features.
  */
 async function ensurePagesTable() {
+  if (verifiedTables.has("adm_pages")) return;
   await query(`
     CREATE TABLE IF NOT EXISTS adm_pages (
       id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -410,6 +412,7 @@ async function ensurePagesTable() {
       `ALTER TABLE adm_pages ADD COLUMN feature_key VARCHAR(150) NULL AFTER path`,
     );
   }
+  verifiedTables.add("adm_pages");
 }
 
 /**
@@ -1442,6 +1445,7 @@ async function ensureRolePagesTable() {
  * Ensures the adm_user_permissions table exists for fine-grained user access control to pages.
  */
 async function ensureUserPermissionsTable() {
+  if (verifiedTables.has("adm_user_permissions")) return;
   await query(`
     CREATE TABLE IF NOT EXISTS adm_user_permissions (
       id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -1459,6 +1463,7 @@ async function ensureUserPermissionsTable() {
       FOREIGN KEY (page_id) REFERENCES adm_pages(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
+  verifiedTables.add("adm_user_permissions");
 }
 
 function deriveActionAndBase(page) {
@@ -1641,6 +1646,7 @@ async function logError({
 }
 
 async function ensureUserBranchMapping() {
+  if (verifiedTables.has("adm_user_branches")) return;
   await query(`
     CREATE TABLE IF NOT EXISTS adm_user_branches (
       user_id BIGINT UNSIGNED NOT NULL,
@@ -1654,6 +1660,7 @@ async function ensureUserBranchMapping() {
       CONSTRAINT fk_ub_branch FOREIGN KEY (branch_id) REFERENCES adm_branches(id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
   `);
+  verifiedTables.add("adm_user_branches");
 }
 
 const logoUpload = multer({

@@ -10,6 +10,7 @@ import {
   ensurePagesSeed,
   ensurePagesTable,
   toNumber,
+  verifiedTables,
 } from "../utils/dbUtils.js";
 import { getAllFeatures } from "../data/featuresRegistry.js";
 import { getUserPermissions as rbacGetUserPermissions } from "../middleware/rbac.middleware.js";
@@ -85,6 +86,7 @@ async function ensureAccessTables() {
 }
 
 async function ensureDashboardPermissionsTable() {
+  if (verifiedTables.has("adm_dashboard_permissions")) return;
   await query(`
     CREATE TABLE IF NOT EXISTS adm_dashboard_permissions (
       id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -107,6 +109,7 @@ async function ensureDashboardPermissionsTable() {
     "updated_at",
     "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
   );
+  verifiedTables.add("adm_dashboard_permissions");
 }
 
 async function ensureNotificationPrefsTable() {
