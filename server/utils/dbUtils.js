@@ -1397,6 +1397,7 @@ export async function ensureRolePagesTable() {
 }
 
 export async function ensureUserPermissionsTable() {
+  if (verifiedTables.has("adm_user_permissions")) return;
   await query(`
     CREATE TABLE IF NOT EXISTS adm_user_permissions (
       id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -1414,9 +1415,11 @@ export async function ensureUserPermissionsTable() {
       FOREIGN KEY (page_id) REFERENCES adm_pages(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
+  verifiedTables.add("adm_user_permissions");
 }
 
 export async function ensureUserPermissionCacheAndTriggers() {
+  if (verifiedTables.has("adm_page_permission_effective_triggers")) return;
   await query(`
     CREATE TABLE IF NOT EXISTS adm_page_permission_effective (
       user_id BIGINT UNSIGNED NOT NULL,
@@ -1475,6 +1478,7 @@ export async function ensureUserPermissionCacheAndTriggers() {
       WHERE user_id = OLD.user_id AND page_id = OLD.page_id;
     END
   `);
+  verifiedTables.add("adm_page_permission_effective_triggers");
 }
 
 export async function ensureErrorLogsTable() {
@@ -1517,6 +1521,7 @@ export async function ensureExceptionalPermissionsTable() {
 }
 
 export async function ensureUserBranchMapping() {
+  if (verifiedTables.has("adm_user_branches")) return;
   await query(`
     CREATE TABLE IF NOT EXISTS adm_user_branches (
       user_id BIGINT UNSIGNED NOT NULL,
@@ -1530,6 +1535,7 @@ export async function ensureUserBranchMapping() {
       CONSTRAINT fk_ub_branch FOREIGN KEY (branch_id) REFERENCES adm_branches(id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
   `);
+  verifiedTables.add("adm_user_branches");
 }
 
 export async function logError({
