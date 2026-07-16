@@ -3,6 +3,8 @@
  * @description Global Express error handling middleware.
  */
 
+import { logToCrashReport } from "../utils/crashLogger.js";
+
 /**
  * Formats and sends error responses.
  *
@@ -18,6 +20,16 @@ export function errorHandler(err, req, res, next) {
   }
   // Build the error response payload with status and message
   const status = err.status || 500;
+  
+  if (status >= 500) {
+    logToCrashReport("HTTP_500", err, {
+      method: req.method,
+      url: req.originalUrl || req.url,
+      ip: req.ip,
+      body: req.body,
+    });
+  }
+
   const payload = {
     error: err.code || "INTERNAL_ERROR",
     message: err.message || "Internal server error",

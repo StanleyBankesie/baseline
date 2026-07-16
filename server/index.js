@@ -9,6 +9,7 @@ import rateLimit from "express-rate-limit";
 import RedisStore from "rate-limit-redis";
 import helmet from "helmet";
 import morgan from "morgan";
+import { logToCrashReport } from "./utils/crashLogger.js";
 
 import { errorHandler } from "./middleware/errorHandler.js";
 import { notFound } from "./middleware/notFound.js";
@@ -1080,15 +1081,18 @@ process.on("unhandledRejection", (reason, promise) => {
   const stack = reason instanceof Error ? reason.stack : "(no stack)";
   console.error(`[Process] Unhandled Promise Rejection: ${msg}`);
   console.error(stack);
+  logToCrashReport("UnhandledRejection", reason);
 });
 
 process.on("uncaughtException", (err) => {
   console.error(`[Process] Uncaught Exception: ${err?.message || err}`);
   console.error(err?.stack || "(no stack)");
+  logToCrashReport("UncaughtException", err);
   // Only exit for truly fatal errors (memory corruption, etc.).
   // Do NOT exit for recoverable errors like DB timeouts.
   if (err && (err.code === "ERR_WORKER_OUT_OF_MEMORY" || err.code === "ERR_INVALID_HANDLE_STATE")) {
     console.error("[Process] Fatal error, exiting.");
+    logToCrashReport("FatalExit", "Process exiting due to fatal error");
     process.exit(1);
   }
 });
