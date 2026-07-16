@@ -35,10 +35,10 @@ export default function FuelLogsList() {
         <div className="card-header bg-brand text-white rounded-t-lg flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold dark:text-brand-300">
-              Fuel & Expenses
+              Refuelling
             </h1>
             <p className="text-sm mt-1">
-              Log fuel consumption and manage vehicle expenses
+              Log all information of fuel purchased and refuelling events
             </p>
           </div>
           <div className="flex gap-2">

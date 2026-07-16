@@ -84,6 +84,7 @@ export default function TripsList() {
                   <th className="px-6 py-4 font-semibold uppercase">Trip #</th>
                   <th className="px-6 py-4 font-semibold uppercase">Vehicle</th>
                   <th className="px-6 py-4 font-semibold uppercase">Driver</th>
+                  <th className="px-6 py-4 font-semibold uppercase">Origin &rarr; Dest</th>
                   <th className="px-6 py-4 font-semibold uppercase">Start Time</th>
                   <th className="px-6 py-4 font-semibold uppercase">Status</th>
                   <th className="px-6 py-4 font-semibold uppercase text-right">Actions</th>
@@ -110,7 +111,8 @@ export default function TripsList() {
                     >
                       <td className="px-6 py-4 font-medium">{t.trip_number}</td>
                       <td className="px-6 py-4">{t.reg_number}</td>
-                      <td className="px-6 py-4">{t.license_number}</td>
+                      <td className="px-6 py-4">{t.employee_name || 'Unnamed Driver'}</td>
+                      <td className="px-6 py-4">{t.origin || "Origin"} &rarr; {t.destination || "Dest"}</td>
                       <td className="px-6 py-4">{t.start_time ? new Date(t.start_time).toLocaleString() : ''}</td>
                       <td className="px-6 py-4">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${

@@ -179,7 +179,7 @@ requisitionType: "ITEM",
     let mounted = true;
     async function fetchCustomers() {
       try {
-        const resp = await api.get("/sales/customers");
+        const resp = await api.get("/sales/customers", { params: { service_customer: "Y" } });
         const items = Array.isArray(resp.data?.items) ? resp.data.items : [];
         if (mounted) setCustomers(items);
       } catch {

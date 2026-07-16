@@ -931,6 +931,23 @@ router.get(
             },
           ],
         },
+        {
+          key: "transport",
+          name: "Transport",
+          icon: "🚚",
+          path: "/transport",
+          features: [
+            { key: "trips", name: "Trips", path: "/transport/trips" },
+            { key: "vehicles", name: "Vehicles", path: "/transport/vehicles" },
+            { key: "drivers", name: "Drivers", path: "/transport/drivers" },
+            { key: "income", name: "Income", path: "/transport/income" },
+            { key: "expenses", name: "Transportation Expenses", path: "/transport/expenses" },
+            { key: "expense_log", name: "Expense Logs", path: "/transport/expense-logs" },
+          ],
+          dashboards: [
+            { key: "transport-dashboard", name: "Transport Dashboard", path: "/transport/dashboard" },
+          ],
+        },
       ];
 
       res.json({ modules });

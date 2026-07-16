@@ -26,7 +26,7 @@ export default function TransportExpenseList() {
     trip_id: "", vehicle_id: "", expense_date: new Date().toISOString().split('T')[0],
     amount: "", currency: "GHS", description: "", status: "PENDING",
     supplier_id: "", supplier_name: "", payment_method: "Cash", payment_account_id: "", is_tax_included: false, tax_code_id: "",
-    reference_no: "", cheque_date: "", cost_center_id: ""
+    reference_no: "", cheque_date: "", cost_center_id: "", expense_type: "Other"
   });
 
   const supplierSearchResults = React.useMemo(() => {
@@ -54,28 +54,28 @@ export default function TransportExpenseList() {
       setSuppliers(r.data?.items || r.data?.data?.items || []);
     }).catch(() => {});
     api.get("/finance/accounts").then(r => setAccounts(r.data?.items || r.data?.data?.items || [])).catch(() => {});
-    api.get("/finance/tax-codes", { params: { form: "payment-voucher" } }).then(r => {
+    api.get("/finance/tax-codes", { params: { form: "PAYMENT_VOUCHER" } }).then(r => {
       const allTaxes = r.data?.items || r.data?.data?.items || [];
-      setTaxCodes(allTaxes.filter(t => t.active === 1));
+      setTaxCodes(allTaxes.filter(t => Number(t.is_active || 0) === 1));
     }).catch(() => {});
     api.get("/finance/cost-centers").then(r => setCostCenters(r.data?.items || r.data?.data?.items || [])).catch(() => {});
   }, []);
 
   const openCreate = () => {
     setEditing(null);
-    setSupplierSearch(s.supplier_name);
-    setForm({ trip_id: "", vehicle_id: "", expense_date: new Date().toISOString().split('T')[0], amount: "", currency: "GHS", description: "", status: "PENDING", supplier_id: "", supplier_name: "", payment_method: "Cash", payment_account_id: "", is_tax_included: false, tax_code_id: "", reference_no: "", cheque_date: "", cost_center_id: "" });
+    setSupplierSearch("");
+    setForm({ trip_id: "", vehicle_id: "", expense_date: new Date().toISOString().split('T')[0], amount: "", currency: "GHS", description: "", status: "PENDING", supplier_id: "", supplier_name: "", payment_method: "Cash", payment_account_id: "", is_tax_included: false, tax_code_id: "", reference_no: "", cheque_date: "", cost_center_id: "", expense_type: "Other" });
     setShowModal(true);
   };
 
   const openEdit = (item) => {
     setEditing(item);
-    setSupplierSearch(s.supplier_name);
     const matchedSupplier = suppliers.find(s => String(s.id) === String(item.supplier_id));
+    setSupplierSearch(matchedSupplier?.supplier_name || "");
     setForm({ 
       trip_id: item.trip_id || "", vehicle_id: item.vehicle_id || "", expense_date: item.expense_date?.split('T')[0] || "", amount: item.amount, currency: item.currency || "GHS", description: item.description || "", status: item.status,
       supplier_id: item.supplier_id || "", supplier_name: matchedSupplier?.supplier_name || "", payment_method: item.payment_method || "Cash", payment_account_id: item.payment_account_id || "", is_tax_included: Boolean(item.is_tax_included), tax_code_id: item.tax_code_id || "",
-      reference_no: item.reference_no || "", cheque_date: item.cheque_date?.split('T')[0] || "", cost_center_id: item.cost_center_id || ""
+      reference_no: item.reference_no || "", cheque_date: item.cheque_date?.split('T')[0] || "", cost_center_id: item.cost_center_id || "", expense_type: item.expense_type || "Other"
     });
     setShowModal(true);
   };
@@ -168,7 +168,7 @@ export default function TransportExpenseList() {
               voucherTypeCode: "PAYV",
               voucherDate: form.expense_date,
               isDirectPayment: true,
-              status: "POSTED",
+              status: "DRAFT",
               paymentDetails: {
                 accountId: suppAcc.id,
                 paymentAccountId: form.payment_account_id,
@@ -248,6 +248,7 @@ export default function TransportExpenseList() {
                   <SortableHeader label="Date" sortKey="expense_date" currentKey={sortKey} direction={sortDir} onToggle={requestSort} />
                   <SortableHeader label="Trip No" sortKey="trip_no" currentKey={sortKey} direction={sortDir} onToggle={requestSort} />
                   <SortableHeader label="Vehicle" sortKey="vehicle_reg" currentKey={sortKey} direction={sortDir} onToggle={requestSort} />
+                  <SortableHeader label="Expense Type" sortKey="expense_type" currentKey={sortKey} direction={sortDir} onToggle={requestSort} />
                   <SortableHeader label="Supplier" sortKey="supplier_name" currentKey={sortKey} direction={sortDir} onToggle={requestSort} />
                   <SortableHeader label="Amount" sortKey="amount" currentKey={sortKey} direction={sortDir} onToggle={requestSort} />
                   <SortableHeader label="Status" sortKey="status" currentKey={sortKey} direction={sortDir} onToggle={requestSort} />
@@ -260,6 +261,7 @@ export default function TransportExpenseList() {
                     <td>{new Date(item.expense_date).toLocaleDateString()}</td>
                     <td>{item.trip_no || '-'}</td>
                     <td>{item.vehicle_reg || '-'}</td>
+                    <td><span className="badge badge-outline">{item.expense_type || 'Other'}</span></td>
                     <td>{item.supplier_name || '-'}</td>
                     <td>{item.currency} {Number(item.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                     <td>
@@ -267,7 +269,13 @@ export default function TransportExpenseList() {
                         {item.status}
                       </span>
                     </td>
-                    <td>
+                    <td className="flex items-center gap-1">
+                      <button onClick={() => openEdit(item)} className="btn btn-ghost btn-sm text-slate-500 hover:text-slate-700" title="View Details">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                          <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                        </svg>
+                      </button>
                       {item.status !== 'POSTED' && item.status !== 'APPROVED' && (
                         <button onClick={() => openEdit(item)} className="btn btn-ghost btn-sm text-blue-600">Edit</button>
                       )}
@@ -305,6 +313,17 @@ export default function TransportExpenseList() {
                   <select className="input input-bordered w-full" value={form.vehicle_id} onChange={e => setForm({...form, vehicle_id: e.target.value})}>
                     <option value="">-- Select Vehicle --</option>
                     {vehicles.map(p => <option key={p.id} value={p.id}>{p.reg_number || p.registration_number}</option>)}
+                  </select>
+                </div>
+                <div className="form-control">
+                  <label className="label"><span className="label-text">Expense Type</span></label>
+                  <select className="input input-bordered w-full" value={form.expense_type} onChange={e => setForm({...form, expense_type: e.target.value})}>
+                    <option value="Road Worthy">Road Worthy</option>
+                    <option value="Spare Parts">Spare Parts</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="Tolls">Tolls</option>
+                    <option value="Fuel">Fuel</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
                 <div className="form-control">
@@ -396,9 +415,11 @@ export default function TransportExpenseList() {
               </div>
               <div className="flex justify-end gap-2 pt-4 border-t">
                 <button type="button" onClick={() => setShowModal(false)} className="btn btn-outline">Cancel</button>
-                <button type="submit" disabled={saving} className="btn btn-primary">
-                  {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Save
-                </button>
+                {(!editing || (editing.status !== 'POSTED' && editing.status !== 'APPROVED')) && (
+                  <button type="submit" disabled={saving} className="btn btn-primary">
+                    {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Save
+                  </button>
+                )}
               </div>
             </form>
           </div>

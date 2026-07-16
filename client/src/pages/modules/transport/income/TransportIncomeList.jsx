@@ -54,9 +54,9 @@ export default function TransportIncomeList() {
       setCustomers(r.data?.items || r.data?.data?.items || []);
     }).catch(() => {});
     api.get("/finance/accounts").then(r => setAccounts(r.data?.items || r.data?.data?.items || [])).catch(() => {});
-    api.get("/finance/tax-codes", { params: { form: "receipt-voucher" } }).then(r => {
+    api.get("/finance/tax-codes", { params: { form: "RECEIPT_VOUCHER" } }).then(r => {
       const allTaxes = r.data?.items || r.data?.data?.items || [];
-      setTaxCodes(allTaxes.filter(t => t.active === 1));
+      setTaxCodes(allTaxes.filter(t => Number(t.is_active || 0) === 1));
     }).catch(() => {});
     api.get("/finance/cost-centers").then(r => setCostCenters(r.data?.items || r.data?.data?.items || [])).catch(() => {});
   }, []);
@@ -173,7 +173,7 @@ export default function TransportIncomeList() {
               voucherTypeCode: "RV",
               voucherDate: form.income_date,
               isDirectPayment: true,
-              status: "POSTED",
+              status: "DRAFT",
               paymentDetails: {
                 accountId: customerAcc.id,
                 paymentAccountId: form.payment_account_id,
@@ -271,7 +271,13 @@ export default function TransportIncomeList() {
                         {item.status}
                       </span>
                     </td>
-                    <td>
+                    <td className="flex items-center gap-1">
+                      <button onClick={() => openEdit(item)} className="btn btn-ghost btn-sm text-slate-500 hover:text-slate-700" title="View Details">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                          <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                        </svg>
+                      </button>
                       {item.status !== 'POSTED' && item.status !== 'APPROVED' && (
                         <button onClick={() => openEdit(item)} className="btn btn-ghost btn-sm text-blue-600">Edit</button>
                       )}
@@ -398,9 +404,11 @@ export default function TransportIncomeList() {
               </div>
               <div className="flex justify-end gap-2 pt-4 border-t">
                 <button type="button" onClick={() => setShowModal(false)} className="btn btn-outline">Cancel</button>
-                <button type="submit" disabled={saving} className="btn btn-primary">
-                  {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Save
-                </button>
+                {(!editing || (editing.status !== 'POSTED' && editing.status !== 'APPROVED')) && (
+                  <button type="submit" disabled={saving} className="btn btn-primary">
+                    {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Save
+                  </button>
+                )}
               </div>
             </form>
           </div>

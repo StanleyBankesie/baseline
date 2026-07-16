@@ -1243,7 +1243,7 @@ async function calculateInvoiceTaxLines(
 
   return taxCreditLines;
 }
-async function createPostedSalesVoucherForInvoiceTx(
+export async function createPostedSalesVoucherForInvoiceTx(
   conn,
   {
     companyId,
@@ -4892,7 +4892,7 @@ router.post(
         `INSERT INTO sal_invoices
           (company_id, branch_id, invoice_no, invoice_date, customer_id, payment_status, status, total_amount, net_amount, balance_amount, tax_amount, tax_components, price_type, payment_type, currency_id, exchange_rate, warehouse_id, sales_order_id, service_execution_id, remarks, payment_date, created_by)
          VALUES
-          (:companyId, :branchId, :invoiceNo, :invoiceDate, :customerId, 'UNPAID', 'POSTED', :totalAmount, :netAmount, :balanceAmount, :taxAmount, :taxComponents, :priceType, :paymentType, :currencyId, :exchangeRate, :warehouseId, :salesOrderId, :serviceExecutionId, :remarks, :paymentDate, :createdBy)`,
+          (:companyId, :branchId, :invoiceNo, :invoiceDate, :customerId, 'UNPAID', 'DRAFT', :totalAmount, :netAmount, :balanceAmount, :taxAmount, :taxComponents, :priceType, :paymentType, :currencyId, :exchangeRate, :warehouseId, :salesOrderId, :serviceExecutionId, :remarks, :paymentDate, :createdBy)`,
         {
           companyId,
           branchId, branchIdsStr,
@@ -4997,27 +4997,55 @@ router.post(
         const discPct = Number(l.discount_percent || 0);
         discountTotal += (qty * price * discPct) / 100;
       }
-      await createPostedSalesVoucherForInvoiceTx(conn, {
+      let finalStatus = "DRAFT";
+      let finalPStatus = "UNPAID";
+      
+      let { activeWorkflow: activeWf, inactiveWorkflow } = await resolveWorkflowSelection({
         companyId,
-        branchId, branchIdsStr,
-        invoiceId,
-        invoiceNo: finalInvoiceNo,
-        invoiceDate: invoice_date || toYmd(new Date()),
-        customerId: Number(customer_id),
-        grandTotal,
-        baseTotal: subTotal,
-        taxTotal,
-        discountTotal,
-        currencyId: currency_id || null,
-        exchangeRate: exchange_rate || 1,
-        createdBy: req.user?.sub || null,
-        lineTaxes: taxCreditLines,
-        itemLines: details,
-        remarks: remarks || null,
+        workflowIdOverride: null,
+        docRouteBase: "/sales/invoices",
+        typeSynonyms: ["SALES_INVOICE", "Sales Invoice", "SALES INVOICE"],
+        amount: grandTotal,
       });
 
+      if (!activeWf) {
+        const behavior = getInactiveWorkflowBehavior(inactiveWorkflow);
+        if (!behavior || behavior.toUpperCase() === "AUTO_APPROVE") {
+          finalStatus = "POSTED";
+          finalPStatus = grandTotal <= 0 ? "PAID" : "UNPAID";
+          await conn.execute(
+            `UPDATE sal_invoices SET status = 'POSTED', payment_status = :pStatus WHERE id = :id AND company_id = :companyId`,
+            { id: invoiceId, companyId, pStatus: finalPStatus }
+          );
+          
+          await createPostedSalesVoucherForInvoiceTx(conn, {
+            companyId,
+            branchId, branchIdsStr,
+            invoiceId: invoiceId,
+            invoiceNo: finalInvoiceNo,
+            invoiceDate: invoice_date || new Date().toISOString().slice(0, 10),
+            customerId: Number(customer_id || 0),
+            grandTotal,
+            baseTotal: subTotal,
+            taxTotal,
+            discountTotal,
+            currencyId: currency_id || null,
+            exchangeRate: exchange_rate || 1,
+            createdBy: req.user?.sub || null,
+            lineTaxes: taxCreditLines,
+            itemLines: details.map((d) => ({
+              item_id: d.item_id || d.itemId,
+              quantity: d.qty || d.quantity || 0,
+              unit_price: d.unit_price || d.unitPrice || 0,
+              discount_percent: d.discount_percent || d.discountPercent || 0,
+            })),
+            remarks: remarks || null,
+          });
+        }
+      }
+
       await conn.commit();
-      res.status(201).json({ id: invoiceId, status: "POSTED" });
+      res.status(201).json({ id: invoiceId, status: finalStatus, payment_status: finalPStatus });
     } catch (e) {
       try {
         await conn.rollback();
@@ -5101,26 +5129,26 @@ router.put(
         taxTotal,
       });
 
-      const effectiveStatus = String(body.status || existingStatus || "DRAFT");
       await conn.beginTransaction();
-      await conn.execute(
+      const [upd] = await conn.execute(
         `UPDATE sal_invoices
-           SET invoice_no = :invoiceNo,
-               invoice_date = :invoiceDate,
-               customer_id = :customerId,
-               total_amount = :totalAmount,
-               net_amount = :netAmount,
-               balance_amount = :balanceAmount,
-               tax_amount = :taxAmount,
-               tax_components = :taxComponents,
-               price_type = :priceType,
-               payment_type = :paymentType,
-               currency_id = :currencyId,
-               exchange_rate = :exchangeRate,
-               warehouse_id = :warehouseId,
-               sales_order_id = :salesOrderId,
-               remarks = :remarks,
-               status = :status
+         SET invoice_no = :invoiceNo,
+             invoice_date = :invoiceDate,
+             customer_id = :customerId,
+             payment_status = 'UNPAID',
+             status = 'DRAFT',
+             total_amount = :totalAmount,
+             net_amount = :netAmount,
+             balance_amount = :balanceAmount,
+             tax_amount = :taxAmount,
+             tax_components = :taxComponents,
+             price_type = :priceType,
+             payment_type = :paymentType,
+             currency_id = :currencyId,
+             exchange_rate = :exchangeRate,
+             warehouse_id = :warehouseId,
+             sales_order_id = :salesOrderId,
+             remarks = :remarks
          WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
         {
           id,
@@ -5141,10 +5169,6 @@ router.put(
           warehouseId: warehouse_id || null,
           salesOrderId: sales_order_id || null,
           remarks: remarks || null,
-          status: effectiveStatus,
-          paymentDate: body.payment_date
-            ? String(body.payment_date).slice(0, 10)
-            : null,
         },
       );
 
@@ -5213,35 +5237,8 @@ router.put(
           ).catch(() => {});
         }
       }
-      if (effectiveStatus === "POSTED" && Number(grandTotal || 0) > 0) {
-        let discountTotal = 0;
-        for (const l of details) {
-          const qty = Number(l.qty || l.quantity || 0);
-          const price = Number(l.unit_price || 0);
-          const discPct = Number(l.discount_percent || 0);
-          discountTotal += (qty * price * discPct) / 100;
-        }
-        await createPostedSalesVoucherForInvoiceTx(conn, {
-          companyId,
-          branchId, branchIdsStr,
-          invoiceId: id,
-          invoiceNo: String(invoice_no || existingInvoiceNo || ""),
-          invoiceDate: invoice_date || toYmd(new Date()),
-          customerId: Number(customer_id),
-          grandTotal,
-          baseTotal: subTotal,
-          taxTotal,
-          discountTotal,
-          currencyId: currency_id || null,
-          exchangeRate: exchange_rate || 1,
-          createdBy: req.user?.sub || null,
-          lineTaxes: taxCreditLines,
-          itemLines: details,
-          remarks: remarks || null,
-        });
-      }
       await conn.commit();
-      res.json({ id });
+      res.json({ id, status: "DRAFT" });
     } catch (e) {
       try {
         await conn.rollback();
@@ -5320,56 +5317,205 @@ router.post(
       const paymentStatus =
         bal <= 0 ? "PAID" : bal > 0 ? "UNPAID" : "PARTIALLY_PAID";
 
-      await conn.beginTransaction();
-      await conn.execute(
-        `UPDATE sal_invoices
-           SET status = 'POSTED',
-               payment_status = :paymentStatus,
-               balance_amount = :balance,
-               total_amount = :totalAmount,
-               net_amount = :netAmount,
-               tax_amount = :taxAmount,
-               tax_components = :taxComponents
-         WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
-        {
-          id,
+      const explicitWorkflowId = req.body?.workflow_id == null ? null : Number(req.body.workflow_id);
+      const targetUserId = req.body?.target_user_id == null ? null : Number(req.body.target_user_id);
+      
+      const amount = req.body?.amount == null ? Number(inv.net_amount || grandTotal) : Number(req.body.amount || 0);
+
+      let { activeWorkflow: activeWf, inactiveWorkflow } = await resolveWorkflowSelection({
+        companyId,
+        workflowIdOverride: explicitWorkflowId,
+        docRouteBase: "/sales/invoices",
+        typeSynonyms: ["SALES_INVOICE", "Sales Invoice", "SALES INVOICE"],
+        amount: amount,
+      });
+
+      // Fallback default workflow if none exists but target user is provided
+      if (!activeWf && Number.isFinite(targetUserId) && targetUserId > 0) {
+        try {
+          await query(
+            `INSERT INTO adm_workflows (company_id, workflow_code, workflow_name, module_key, document_type, document_route, is_active)
+             VALUES (:companyId, 'WF-INV-DEFAULT', 'Default Invoice Approval', 'sales', 'SALES_INVOICE', '/sales/invoices', 1)
+             ON DUPLICATE KEY UPDATE is_active = VALUES(is_active)`,
+            { companyId },
+          );
+        } catch {}
+        const wfRows = await query(
+          `SELECT *, created_at, u.username AS created_by_name
+           FROM adm_workflows
+           LEFT JOIN adm_users u ON u.id = created_by
+           WHERE company_id = :companyId AND module_key = 'sales' AND (document_type = 'SALES_INVOICE' OR document_type = 'Sales Invoice') AND workflow_name = 'Default Invoice Approval'
+           ORDER BY id ASC LIMIT 1`,
+          { companyId },
+        ).catch(() => []);
+        if (wfRows.length) {
+          const wfId = wfRows[0].id;
+          try {
+            await query(
+              `INSERT INTO adm_workflow_steps (workflow_id, step_order, step_name, approver_user_id, approval_limit, is_mandatory)
+               VALUES (:wfId, 1, 'Approval', :uid, NULL, 1)
+               ON DUPLICATE KEY UPDATE approver_user_id = VALUES(approver_user_id)`,
+              { wfId, uid: targetUserId },
+            );
+          } catch {}
+          try {
+            await query(
+              `INSERT INTO adm_workflow_step_approvers (workflow_id, step_order, approver_user_id, approval_limit)
+               VALUES (:wfId, 1, :uid, NULL)
+               ON DUPLICATE KEY UPDATE approval_limit = VALUES(approval_limit)`,
+              { wfId, uid: targetUserId },
+            );
+          } catch {}
+          activeWf = wfRows[0];
+        }
+      }
+
+      const applyPosted = async () => {
+        await conn.beginTransaction();
+        await conn.execute(
+          `UPDATE sal_invoices
+             SET status = 'POSTED',
+                 payment_status = :paymentStatus,
+                 balance_amount = :balance,
+                 total_amount = :totalAmount,
+                 net_amount = :netAmount,
+                 tax_amount = :taxAmount,
+                 tax_components = :taxComponents
+           WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
+          {
+            id,
+            companyId,
+            branchId, branchIdsStr,
+            paymentStatus,
+            balance: bal,
+            totalAmount: grandTotal,
+            netAmount: grandTotal,
+            taxAmount: taxTotal,
+            taxComponents: JSON.stringify(taxCreditLines),
+          },
+        );
+
+        await createPostedSalesVoucherForInvoiceTx(conn, {
           companyId,
           branchId, branchIdsStr,
-          paymentStatus,
-          balance: bal,
-          totalAmount: grandTotal,
-          netAmount: grandTotal,
-          taxAmount: taxTotal,
-          taxComponents: JSON.stringify(taxCreditLines),
+          invoiceId: id,
+          invoiceNo: String(inv.invoice_no || ""),
+          invoiceDate: inv.invoice_date || toYmd(new Date()),
+          customerId: Number(inv.customer_id || 0),
+          grandTotal,
+          baseTotal: subTotal,
+          taxTotal,
+          discountTotal,
+          currencyId: inv.currency_id || null,
+          exchangeRate: inv.exchange_rate || 1,
+          createdBy: req.user?.sub || null,
+          lineTaxes: taxCreditLines,
+          itemLines: details.map((d) => ({
+            item_id: d.item_id,
+            quantity: d.quantity,
+            unit_price: d.unit_price,
+            discount_percent: d.discount_percent,
+          })),
+          remarks: inv.remarks || null,
+        });
+        await conn.commit();
+      };
+
+      if (!activeWf) {
+        const behavior = getInactiveWorkflowBehavior(inactiveWorkflow);
+        if (behavior && behavior.toUpperCase() !== "AUTO_APPROVE") {
+          return res.json({ id, status: "SUBMITTED" });
+        }
+        await applyPosted();
+        return res.json({ id, status: "POSTED", payment_status: paymentStatus });
+      }
+
+      // Workflow exists, resolve first step
+      const steps = await query(
+        `SELECT *, created_at, u.username AS created_by_name
+         FROM adm_workflow_steps
+         LEFT JOIN adm_users u ON u.id = created_by
+         WHERE workflow_id = :wf ORDER BY step_order ASC LIMIT 1`,
+        { wf: activeWf.id },
+      );
+      
+      if (!steps.length) {
+        await applyPosted();
+        return res.json({ id, status: "POSTED", payment_status: paymentStatus });
+      }
+
+      const first = steps[0];
+      if (!first.approver_user_id) {
+        throw httpError(400, "BAD_REQUEST", "Workflow step 1 has no approver_user_id configured");
+      }
+      
+      const allowedUsers = await query(
+        `SELECT approver_user_id, created_at, u.username AS created_by_name
+         FROM adm_workflow_step_approvers
+         LEFT JOIN adm_users u ON u.id = created_by
+         WHERE workflow_id = :wf AND step_order = :ord`,
+        { wf: activeWf.id, ord: first.step_order },
+      );
+      
+      const allowedSet = new Set(allowedUsers.map((r) => Number(r.approver_user_id)));
+      let assignedToUserId = Number(first.approver_user_id);
+      if (targetUserId != null && Number.isFinite(targetUserId) && allowedSet.has(Number(targetUserId))) {
+        assignedToUserId = Number(targetUserId);
+      } else if (allowedUsers.length > 0) {
+        assignedToUserId = Number(allowedUsers[0].approver_user_id);
+      }
+
+      await conn.beginTransaction();
+      const dwRes = await conn.execute(
+        `INSERT INTO adm_document_workflows
+          (company_id, workflow_id, document_id, document_type, amount, current_step_order, status, assigned_to_user_id)
+        VALUES
+          (:companyId, :workflowId, :documentId, 'SALES_INVOICE', :amount, :stepOrder, 'PENDING', :assignedTo)`,
+        {
+          companyId,
+          workflowId: activeWf.id,
+          documentId: id,
+          amount: amount,
+          stepOrder: first.step_order,
+          assignedTo: assignedToUserId,
+        },
+      );
+      const instanceId = dwRes[0].insertId;
+      
+      await conn.execute(
+        `INSERT INTO adm_workflow_tasks
+          (company_id, workflow_id, document_workflow_id, document_id, document_type, step_order, assigned_to_user_id, action)
+        VALUES
+          (:companyId, :workflowId, :dwId, :documentId, 'SALES_INVOICE', :stepOrder, :assignedTo, 'PENDING')`,
+        {
+          companyId,
+          workflowId: activeWf.id,
+          dwId: instanceId,
+          documentId: id,
+          stepOrder: first.step_order,
+          assignedTo: assignedToUserId,
+        },
+      );
+      
+      await conn.execute(
+        `INSERT INTO adm_workflow_logs
+          (document_workflow_id, step_order, action, actor_user_id, comments)
+        VALUES
+          (:dwId, :stepOrder, 'SUBMIT', :actor, :comments)`,
+        {
+          dwId: instanceId,
+          stepOrder: first.step_order,
+          actor: req.user.sub,
+          comments: "",
         },
       );
 
-      await createPostedSalesVoucherForInvoiceTx(conn, {
-        companyId,
-        branchId, branchIdsStr,
-        invoiceId: id,
-        invoiceNo: String(inv.invoice_no || ""),
-        invoiceDate: inv.invoice_date || toYmd(new Date()),
-        customerId: Number(inv.customer_id || 0),
-        grandTotal,
-        baseTotal: subTotal,
-        taxTotal,
-        discountTotal,
-        currencyId: inv.currency_id || null,
-        exchangeRate: inv.exchange_rate || 1,
-        createdBy: req.user?.sub || null,
-        lineTaxes: taxCreditLines,
-        itemLines: details.map((d) => ({
-          item_id: d.item_id,
-          quantity: d.quantity,
-          unit_price: d.unit_price,
-          discount_percent: d.discount_percent,
-        })),
-        remarks: inv.remarks || null,
-      });
-
+      await conn.execute(
+        `UPDATE sal_invoices SET status = 'PENDING_APPROVAL' WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
+        { id, companyId, branchId, branchIdsStr },
+      );
       await conn.commit();
-      res.json({ id, status: "POSTED", payment_status: paymentStatus });
+      res.json({ id, status: "PENDING_APPROVAL" });
     } catch (e) {
       try {
         await conn.rollback();

@@ -2,9 +2,11 @@
  * @file transport.controller.js
  * @description Controller for the Transport Module, managing vehicles, drivers, trips, fuel, expenses, and billing.
  */
-import { query } from "../db/pool.js";
+import { query, pool } from "../db/pool.js";
 import { httpError } from "../utils/httpError.js";
+import { createPostedSalesVoucherForInvoiceTx } from "../routes/sales.route.js";
 import { toNumber } from "../utils/dbUtils.js";
+import { resolveWorkflowSelection, getInactiveWorkflowBehavior } from "../utils/workflowResolution.js";
 
 // === DASHBOARD STATS ===
 export const getTransportDashboardStats = async (req, res, next) => {
@@ -52,6 +54,7 @@ export const listVehicles = async (req, res, next) => {
     );
     res.json({ success: true, data: { items } });
   } catch (err) {
+    console.error("listVehicles Error:", err);
     next(err);
   }
 };
@@ -79,6 +82,7 @@ export const createVehicle = async (req, res, next) => {
     );
     res.status(201).json({ success: true, data: { id: result.insertId } });
   } catch (err) {
+    console.error("createVehicle Error:", err);
     next(err);
   }
 };
@@ -88,7 +92,7 @@ export const listDrivers = async (req, res, next) => {
   try {
     const { companyId } = req.scope;
     const items = await query(`
-      SELECT d.*, IFNULL(d.employee_name, CONCAT(e.first_name, ' ', e.last_name)) as employee_name, e.employee_code, e.first_name, e.last_name 
+      SELECT d.*, IFNULL(d.employee_name, CONCAT(e.first_name, ' ', e.last_name)) as employee_name, e.emp_code as employee_code 
       FROM trans_drivers d
       LEFT JOIN hr_employees e ON d.employee_id = e.id
       WHERE d.company_id = :companyId ORDER BY d.id DESC`,
@@ -96,6 +100,7 @@ export const listDrivers = async (req, res, next) => {
     );
     res.json({ success: true, data: { items } });
   } catch (err) {
+    console.error("listDrivers Error:", err);
     next(err);
   }
 };
@@ -120,6 +125,7 @@ export const createDriver = async (req, res, next) => {
     );
     res.status(201).json({ success: true, data: { id: result.insertId } });
   } catch (err) {
+    console.error("createDriver Error:", err);
     next(err);
   }
 };
@@ -128,12 +134,16 @@ export const createDriver = async (req, res, next) => {
 export const listRequests = async (req, res, next) => {
   try {
     const { companyId } = req.scope;
-    const items = await query(
-      "SELECT * FROM trans_requests WHERE company_id = :companyId ORDER BY id DESC",
-      { companyId }
-    );
+    const items = await query(`
+      SELECT r.*, c.customer_name 
+      FROM trans_requests r 
+      LEFT JOIN sal_customers c ON r.customer_id = c.id 
+      WHERE r.company_id = :companyId 
+      ORDER BY r.id DESC
+    `, { companyId });
     res.json({ success: true, data: { items } });
   } catch (err) {
+    console.error("listRequests Error:", err);
     next(err);
   }
 };
@@ -142,16 +152,18 @@ export const createRequest = async (req, res, next) => {
   try {
     const { companyId, branchIdStr } = req.scope;
     const branchId = toNumber(branchIdStr) || 1;
-    const { customer_id, vehicle_id, requester_name, request_date, required_date, return_date, required_time, return_time, no_of_days, no_of_hours, origin, destination, purpose_of_journey } = req.body;
-    
-    const request_number = "REQ-" + Date.now();
-
+    const { customer_id, vehicle_id, requester_name, request_date, required_date, return_date, required_time, return_time, no_of_days, no_of_hours, origin, destination, purpose_of_journey, priority, notes } = req.body;
+    const lastReqResult = await query("SELECT id FROM trans_requests ORDER BY id DESC LIMIT 1");
+    const nextId = (lastReqResult && lastReqResult.length > 0) ? Number(lastReqResult[0].id) + 1 : 1;
+    const request_number = "REQ-" + String(nextId).padStart(6, '0');
     const result = await query(
-      `INSERT INTO trans_requests (company_id, branch_id, request_number, customer_id, vehicle_id, requester_name, request_date, required_date, return_date, required_time, return_time, no_of_days, no_of_hours, origin, destination, purpose_of_journey, created_by) 
-       VALUES (:companyId, :branchId, :request_number, :customer_id, :vehicle_id, :requester_name, :request_date, :required_date, :return_date, :required_time, :return_time, :no_of_days, :no_of_hours, :origin, :destination, :purpose_of_journey, :userId)`,
+      `INSERT INTO trans_requests (company_id, branch_id, request_number, customer_id, vehicle_id, requester_name, request_date, required_date, return_date, required_time, return_time, no_of_days, no_of_hours, origin, destination, purpose_of_journey, priority, notes, created_by, status) 
+       VALUES (:companyId, :branchId, :request_number, :customer_id, :vehicle_id, :requester_name, :request_date, :required_date, :return_date, :required_time, :return_time, :no_of_days, :no_of_hours, :origin, :destination, :purpose_of_journey, :priority, :notes, :userId, 'PENDING')`,
       {
         companyId, branchId, request_number, customer_id, request_date, required_date, origin, destination, 
         purpose_of_journey, requester_name, return_date, required_time, return_time, no_of_days, no_of_hours,
+        priority: priority || 'NORMAL',
+        notes: notes || null,
         vehicle_id: vehicle_id || null,
         userId: req.user?.id || null
       }
@@ -162,15 +174,31 @@ export const createRequest = async (req, res, next) => {
   }
 };
 
+export const updateRequestStatus = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const { id } = req.params;
+    const { status } = req.body;
+    await query(
+      "UPDATE trans_requests SET status = :status WHERE id = :id AND company_id = :companyId",
+      { status, id, companyId }
+    );
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // === TRIPS ===
 export const listTrips = async (req, res, next) => {
   try {
     const { companyId } = req.scope;
     const items = await query(`
-      SELECT t.*, v.reg_number, d.license_number
+      SELECT t.*, v.reg_number, IFNULL(d.employee_name, CONCAT(e.first_name, ' ', e.last_name)) as employee_name
       FROM trans_trips t
       LEFT JOIN trans_vehicles v ON t.vehicle_id = v.id
       LEFT JOIN trans_drivers d ON t.driver_id = d.id
+      LEFT JOIN hr_employees e ON d.employee_id = e.id
       WHERE t.company_id = :companyId ORDER BY t.id DESC`,
       { companyId }
     );
@@ -184,20 +212,21 @@ export const createTrip = async (req, res, next) => {
   try {
     const { companyId, branchIdStr } = req.scope;
     const branchId = toNumber(branchIdStr) || 1;
-    const { request_id, vehicle_id, driver_id, start_time } = req.body;
+    const { request_id, vehicle_id, driver_id, start_time, start_odometer } = req.body;
     
     if (!vehicle_id || !driver_id) {
       throw httpError(400, "VALIDATION_ERROR", "Vehicle and Driver are required");
     }
-
-    const trip_number = "TRP-" + Date.now();
-
+    const lastTripResult = await query("SELECT id FROM trans_trips ORDER BY id DESC LIMIT 1");
+    const nextId = (lastTripResult && lastTripResult.length > 0) ? Number(lastTripResult[0].id) + 1 : 1;
+    const trip_number = "TRP-" + String(nextId).padStart(6, '0');
     const result = await query(
-      `INSERT INTO trans_trips (company_id, branch_id, trip_number, request_id, vehicle_id, driver_id, start_time, created_by) 
-       VALUES (:companyId, :branchId, :trip_number, :request_id, :vehicle_id, :driver_id, :start_time, :userId)`,
+      `INSERT INTO trans_trips (company_id, branch_id, trip_number, request_id, vehicle_id, driver_id, start_time, start_odometer, created_by) 
+       VALUES (:companyId, :branchId, :trip_number, :request_id, :vehicle_id, :driver_id, :start_time, :start_odometer, :userId)`,
       {
         companyId, branchId, trip_number, 
         request_id: request_id || null, vehicle_id, driver_id, start_time: start_time || null,
+        start_odometer: start_odometer ? Number(start_odometer) : null,
         userId: req.user?.id || null
       }
     );
@@ -259,18 +288,36 @@ export const createFuelLog = async (req, res, next) => {
 };
 
 // === BILLING ===
+export const getNextBillingNo = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const [latest] = await query(
+      "SELECT invoice_no FROM trans_invoices WHERE company_id = :companyId AND invoice_no LIKE 'TINV-%' ORDER BY id DESC LIMIT 1",
+      { companyId }
+    );
+    let nextNum = 1;
+    if (latest && latest.invoice_no) {
+      const numMatch = latest.invoice_no.match(/\d+$/);
+      if (numMatch) {
+        nextNum = parseInt(numMatch[0], 10) + 1;
+      }
+    }
+    const nextNo = `TINV-${String(nextNum).padStart(6, "0")}`;
+    res.json({ success: true, nextNo });
+  } catch (error) {
+    next(error);
+  }
+};
 export const listBilling = async (req, res, next) => {
   try {
     const { companyId } = req.scope;
-    const items = await query(
-      "SELECT * FROM trans_billing WHERE company_id = :companyId ORDER BY id DESC",
-      { companyId }
-    );
+    const items = await query("SELECT * FROM trans_invoices WHERE company_id = :companyId ORDER BY id DESC", { companyId });
     res.json({ success: true, data: { items } });
   } catch (err) {
     next(err);
   }
 };
+
 
 // === GPS & POD ===
 export const addTripLocation = async (req, res, next) => {
@@ -506,7 +553,8 @@ export const listTransportExpenses = async (req, res, next) => {
 
 export const createTransportExpense = async (req, res, next) => {
   try {
-    const { companyId, branchId = null } = req.scope || {};
+    const { companyId, branchIdStr } = req.scope || {};
+    const branchId = toNumber(branchIdStr) || 1;
     const b = req.body;
     if (!b.amount) throw httpError(400, "VALIDATION_ERROR", "amount required");
     const r = await query(`INSERT INTO trn_transport_expenses (company_id, branch_id, trip_id, vehicle_id, expense_date, category, amount, currency, description, recorded_by, status, supplier_id, payment_method, payment_account_id, is_tax_included, tax_code_id, reference_no, cheque_date, cost_center_id)
@@ -585,4 +633,685 @@ export const updateTransportExpenseVoucherId = async (req, res, next) => {
     await query(`UPDATE trn_transport_expenses SET voucher_id = :voucherId WHERE id = :id AND company_id = :companyId`, { id, voucherId, companyId });
     res.json({ ok: true });
   } catch (err) { next(err); }
+};
+
+// === FUEL EXPENSES ===
+export const listFuelExpenses = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const items = await query(
+      `SELECT f.*, v.vehicle_name, v.registration_number, c.customer_name as supplier_name_mapped
+       FROM trans_fuel_expenses f
+       LEFT JOIN trans_vehicles v ON f.vehicle_id = v.id
+       LEFT JOIN sal_customers c ON f.supplier_id = c.id
+       WHERE f.company_id = :companyId ORDER BY f.id DESC`,
+      { companyId }
+    );
+    res.json({ success: true, data: { items } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createFuelExpense = async (req, res, next) => {
+  try {
+    const { companyId, branchIdStr } = req.scope;
+    const branchId = Number(branchIdStr) || 1;
+    const { vehicle_id, driver_name, description, supplier_id, supplier_name, expense_type, is_tax_included, tax_code_id, amount, remarks } = req.body;
+
+    const result = await query(
+      `INSERT INTO trans_fuel_expenses 
+       (company_id, branch_id, vehicle_id, driver_name, description, supplier_id, supplier_name, expense_type, is_tax_included, tax_code_id, amount, remarks, created_by)
+       VALUES 
+       (:companyId, :branchId, :vehicle_id, :driver_name, :description, :supplier_id, :supplier_name, :expense_type, :is_tax_included, :tax_code_id, :amount, :remarks, :userId)`,
+      {
+        companyId, branchId, vehicle_id: vehicle_id || null, driver_name: driver_name || null,
+        description: description || null, supplier_id: supplier_id || null, supplier_name: supplier_name || null,
+        expense_type: expense_type || null, is_tax_included: is_tax_included ? 1 : 0,
+        tax_code_id: tax_code_id || null, amount: amount || 0, remarks: remarks || null,
+        userId: req.user?.id || null
+      }
+    );
+    res.status(201).json({ success: true, data: { id: result.insertId } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const returnTrip = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const { id } = req.params;
+    const { end_time, end_odometer, remarks } = req.body;
+    
+    // Status can be COMPLETED
+    await query(
+      `UPDATE trans_trips 
+       SET status = 'COMPLETED', end_time = :end_time, end_odometer = :end_odometer, remarks = CONCAT(IFNULL(remarks, ''), '\n', :remarks)
+       WHERE id = :id AND company_id = :companyId`,
+      { id, companyId, end_time: end_time || null, end_odometer: end_odometer || null, remarks: remarks || '' }
+    );
+
+    // Free up driver and vehicle
+    const [trip] = await query(`SELECT vehicle_id, driver_id FROM trans_trips WHERE id = :id`, { id });
+    if (trip) {
+      await query(`UPDATE trans_vehicles SET status = 'AVAILABLE' WHERE id = :vid`, { vid: trip.vehicle_id });
+      await query(`UPDATE trans_drivers SET status = 'AVAILABLE' WHERE id = :did`, { did: trip.driver_id });
+    }
+
+    res.json({ success: true, message: "Trip returned successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+// === FUEL BILLS ===
+export const listFuelBills = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const items = await query(
+      "SELECT * FROM trans_fuel_bills WHERE company_id = :companyId ORDER BY id DESC",
+      { companyId }
+    );
+    res.json({ success: true, data: { items } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getFuelBill = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const items = await query("SELECT * FROM trans_fuel_bills WHERE id = :id", { id });
+    const details = await query("SELECT * FROM trans_fuel_bill_details WHERE bill_id = :id", { id });
+    res.json({ success: true, data: { ...items[0], items: details } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createFuelBill = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const { bill_no, bill_date, supplier_id, total_amount, items } = req.body;
+    const result = await query(
+      "INSERT INTO trans_fuel_bills (company_id, bill_no, bill_date, supplier_id, total_amount) VALUES (:companyId, :bill_no, :bill_date, :supplier_id, :total_amount)",
+      { companyId, bill_no, bill_date: bill_date || new Date(), supplier_id: supplier_id || 0, total_amount: total_amount || 0 }
+    );
+    const billId = result.insertId;
+    if (items && items.length) {
+      for (const item of items) {
+        await query(
+          "INSERT INTO trans_fuel_bill_details (bill_id, item_id, quantity, unit_price, total_amount) VALUES (:billId, :item_id, :quantity, :unit_price, :total_amount)",
+          { billId, item_id: item.item_id || 0, quantity: item.quantity || 0, unit_price: item.unit_price || 0, total_amount: item.total_amount || 0 }
+        );
+      }
+    }
+    res.json({ success: true, data: { id: billId } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateFuelBill = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { bill_no, bill_date, supplier_id, total_amount, items } = req.body;
+    await query(
+      "UPDATE trans_fuel_bills SET bill_no = :bill_no, bill_date = :bill_date, supplier_id = :supplier_id, total_amount = :total_amount WHERE id = :id",
+      { bill_no, bill_date, supplier_id: supplier_id || 0, total_amount: total_amount || 0, id }
+    );
+    await query("DELETE FROM trans_fuel_bill_details WHERE bill_id = :id", { id });
+    if (items && items.length) {
+      for (const item of items) {
+        await query(
+          "INSERT INTO trans_fuel_bill_details (bill_id, item_id, quantity, unit_price, total_amount) VALUES (:id, :item_id, :quantity, :unit_price, :total_amount)",
+          { id, item_id: item.item_id || 0, quantity: item.quantity || 0, unit_price: item.unit_price || 0, total_amount: item.total_amount || 0 }
+        );
+      }
+    }
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteFuelBill = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    await query("DELETE FROM trans_fuel_bill_details WHERE bill_id = :id", { id });
+    await query("DELETE FROM trans_fuel_bills WHERE id = :id", { id });
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// === TRANSPORT INVOICES / BILLING ===
+export const getBilling = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const items = await query("SELECT * FROM trans_invoices WHERE id = :id", { id });
+    const details = await query("SELECT * FROM trans_invoice_details WHERE invoice_id = :id", { id });
+    res.json({ success: true, data: { ...items[0], items: details } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createBilling = async (req, res, next) => {
+  try {
+    const { companyId, branchIdStr } = req.scope;
+    const branchId = toNumber(branchIdStr) || 1;
+    const { invoice_no, invoice_date, customer_id, total_amount, items, trip_id } = req.body;
+    const result = await query(
+      "INSERT INTO trans_invoices (company_id, branch_id, invoice_no, invoice_date, customer_id, total_amount, trip_id) VALUES (:companyId, :branchId, :invoice_no, :invoice_date, :customer_id, :total_amount, :trip_id)",
+      { companyId, branchId, invoice_no: invoice_no || 'INV-TEMP', invoice_date: invoice_date || new Date(), customer_id: customer_id || 0, total_amount: total_amount || 0, trip_id: trip_id || null }
+    );
+    const invoiceId = result.insertId;
+    if (items && items.length) {
+      for (const item of items) {
+        await query(
+          "INSERT INTO trans_invoice_details (invoice_id, item_id, quantity, unit_price, total_amount) VALUES (:invoiceId, :item_id, :quantity, :unit_price, :total_amount)",
+          { invoiceId, item_id: item.item_id || 0, quantity: item.quantity || 0, unit_price: item.unit_price || 0, total_amount: item.total_amount || 0 }
+        );
+      }
+    }
+    res.json({ success: true, data: { id: invoiceId } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateBilling = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { invoice_no, invoice_date, customer_id, total_amount, items, trip_id } = req.body;
+    await query(
+      "UPDATE trans_invoices SET invoice_no = :invoice_no, invoice_date = :invoice_date, customer_id = :customer_id, total_amount = :total_amount, trip_id = :trip_id WHERE id = :id",
+      { invoice_no, invoice_date, customer_id: customer_id || 0, total_amount: total_amount || 0, trip_id: trip_id || null, id }
+    );
+    await query("DELETE FROM trans_invoice_details WHERE invoice_id = :id", { id });
+    if (items && items.length) {
+      for (const item of items) {
+        await query(
+          "INSERT INTO trans_invoice_details (invoice_id, item_id, quantity, unit_price, total_amount) VALUES (:id, :item_id, :quantity, :unit_price, :total_amount)",
+          { id, item_id: item.item_id || 0, quantity: item.quantity || 0, unit_price: item.unit_price || 0, total_amount: item.total_amount || 0 }
+        );
+      }
+    }
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteBilling = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    await query("DELETE FROM trans_invoice_details WHERE invoice_id = :id", { id });
+    await query("DELETE FROM trans_invoices WHERE id = :id", { id });
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const submitBilling = async (req, res, next) => {
+  const conn = await pool.getConnection();
+  try {
+    const { companyId, branchIdStr = '', branchIdsStr = '' } = req.scope || {};
+    const branchId = toNumber(branchIdStr) || 1;
+    const id = Number(req.params.id);
+    const invoices = await query(
+      "SELECT id, invoice_no, invoice_date, customer_id, total_amount as net_amount, status, remarks FROM trans_invoices WHERE id = :id AND company_id = :companyId LIMIT 1",
+      { id, companyId }
+    );
+    if (!invoices.length) throw httpError(404, "NOT_FOUND", "Invoice not found");
+    const inv = invoices[0];
+    if (String(inv.status) === "POSTED") {
+      return res.json({ id, status: "POSTED", payment_status: inv.payment_status || "UNPAID" });
+    }
+    if (String(inv.status) === "PENDING_APPROVAL") {
+      throw httpError(400, "BAD_REQUEST", "Document is already pending approval");
+    }
+    const details = await query(
+      "SELECT item_id, quantity, unit_price, total_amount as net_amount FROM trans_invoice_details WHERE invoice_id = :id",
+      { id }
+    );
+    if (!details.length) throw httpError(400, "VALIDATION_ERROR", "No line items");
+
+    let subTotal = 0;
+    for (const l of details) {
+      subTotal += Number(l.net_amount || 0);
+    }
+    const grandTotal = subTotal;
+    
+    const explicitWorkflowId = req.body?.workflow_id == null ? null : Number(req.body.workflow_id);
+    const targetUserId = req.body?.target_approver_id == null ? null : Number(req.body.target_approver_id);
+    
+    let { activeWorkflow: activeWf, inactiveWorkflow } = await resolveWorkflowSelection({
+      companyId,
+      workflowIdOverride: explicitWorkflowId,
+      docRouteBase: "/transport/billing",
+      typeSynonyms: ["TRANSPORT_BILLING", "Transport Billing", "TRANSPORT BILLING"],
+      amount: grandTotal
+    });
+
+    if (!activeWf && targetUserId) {
+      // Fallback default workflow
+      await conn.execute(
+        `INSERT INTO adm_workflows (company_id, workflow_code, workflow_name, module_key, document_type, document_route, is_active)
+         SELECT :companyId, 'WF-TB-DEF', 'Default Transport Billing Approval', 'transport', 'TRANSPORT_BILLING', '/transport/billing', 1
+         FROM DUAL WHERE NOT EXISTS (
+           SELECT 1 FROM adm_workflows
+           WHERE company_id = :companyId AND module_key = 'transport' AND document_type = 'TRANSPORT_BILLING' AND workflow_name = 'Default Transport Billing Approval'
+         )`,
+        { companyId }
+      );
+      const [wfRows] = await conn.execute(
+        `SELECT id FROM adm_workflows WHERE company_id = :companyId AND module_key = 'transport' AND document_type = 'TRANSPORT_BILLING' AND workflow_name = 'Default Transport Billing Approval' LIMIT 1`,
+        { companyId }
+      );
+      if (wfRows?.length) {
+        const wfId = wfRows[0].id;
+        const [stepsRows] = await conn.execute(`SELECT 1 FROM adm_workflow_steps WHERE workflow_id = :wfId LIMIT 1`, { wfId });
+        if (!stepsRows.length) {
+          await conn.execute(
+            `INSERT INTO adm_workflow_steps (workflow_id, step_order, step_name, approver_user_id, approval_limit, is_mandatory)
+             VALUES (:wfId, 1, 'Final Approval', :targetUserId, 999999999, 1)`,
+            { wfId, targetUserId }
+          );
+          await conn.execute(
+            `INSERT INTO adm_workflow_step_approvers (workflow_id, step_order, approver_user_id, approval_limit)
+             VALUES (:wfId, 1, :targetUserId, 999999999)`,
+            { wfId, targetUserId }
+          );
+        }
+        const { activeWorkflow: fallbackWf } = await resolveWorkflowSelection({ companyId, workflowIdOverride: wfId, docRouteBase: "/transport/billing", typeSynonyms: ["TRANSPORT_BILLING"], amount: grandTotal });
+        if (fallbackWf) activeWf = fallbackWf;
+      }
+    }
+
+    const applyPosted = async () => {
+      await conn.execute(
+        `UPDATE trans_invoices SET status = 'POSTED', payment_status = 'UNPAID' WHERE id = :id`,
+        { id }
+      );
+      await createPostedSalesVoucherForInvoiceTx(conn, {
+        companyId,
+        branchId, branchIdsStr,
+        invoiceId: id,
+        invoiceNo: String(inv.invoice_no || ""),
+        invoiceDate: inv.invoice_date || new Date().toISOString().slice(0, 10),
+        customerId: Number(inv.customer_id || 0),
+        grandTotal,
+        baseTotal: subTotal,
+        taxTotal: 0,
+        discountTotal: 0,
+        currencyId: null,
+        exchangeRate: 1,
+        createdBy: req.user?.sub || null,
+        lineTaxes: [],
+        itemLines: details.map((d) => ({
+          item_id: d.item_id,
+          quantity: d.quantity,
+          unit_price: d.unit_price,
+          discount_percent: 0,
+        })),
+        remarks: inv.remarks || null,
+      });
+    };
+
+    await conn.beginTransaction();
+
+    if (!activeWf) {
+      const behavior = getInactiveWorkflowBehavior(inactiveWorkflow);
+      if (!behavior || behavior.toUpperCase() === "AUTO_APPROVE") {
+        await applyPosted();
+        await conn.commit();
+        return res.json({ id, status: "POSTED", payment_status: "UNPAID" });
+      } else {
+        await conn.commit();
+        return res.json({ id, status: "DRAFT", payment_status: "UNPAID" });
+      }
+    }
+
+    const [firstStep] = await conn.execute(
+      `SELECT step_order, approver_user_id
+       FROM adm_workflow_steps
+       WHERE workflow_id = :wf ORDER BY step_order ASC LIMIT 1`,
+      { wf: activeWf.id }
+    );
+    if (!firstStep || !firstStep.length) {
+      throw httpError(400, "BAD_REQUEST", "Workflow has no steps configured");
+    }
+    const stepOrder = firstStep[0].step_order;
+    let assignedTo = targetUserId || firstStep[0].approver_user_id || null;
+    if (!assignedTo) {
+      const [apprs] = await conn.execute(
+        `SELECT approver_user_id FROM adm_workflow_step_approvers WHERE workflow_id = :wf AND step_order = :ord`,
+        { wf: activeWf.id, ord: stepOrder }
+      );
+      if (apprs && apprs.length) {
+        assignedTo = apprs[0].approver_user_id;
+      }
+    }
+    if (!assignedTo) {
+      throw httpError(400, "BAD_REQUEST", "Workflow step 1 has no approver_user_id configured");
+    }
+
+    await conn.execute(
+      `UPDATE trans_invoices SET status = 'PENDING_APPROVAL' WHERE id = :id`,
+      { id }
+    );
+
+    const [dwIns] = await conn.execute(
+      `INSERT INTO adm_document_workflows
+        (company_id, workflow_id, document_id, document_type, amount, current_step_order, status, assigned_to_user_id)
+       VALUES
+        (:companyId, :workflowId, :documentId, 'TRANSPORT_BILLING', :amount, :stepOrder, 'PENDING', :assignedTo)`,
+      {
+        companyId,
+        workflowId: activeWf.id,
+        documentId: id,
+        amount: grandTotal,
+        stepOrder,
+        assignedTo,
+      }
+    );
+    const dwId = dwIns.insertId;
+
+    await conn.execute(
+      `INSERT INTO adm_workflow_tasks
+        (company_id, workflow_id, document_workflow_id, document_id, document_type, step_order, assigned_to_user_id, action)
+       VALUES
+        (:companyId, :workflowId, :dwId, :documentId, 'TRANSPORT_BILLING', :stepOrder, :assignedTo, 'PENDING')`,
+      {
+        companyId,
+        workflowId: activeWf.id,
+        dwId,
+        documentId: id,
+        stepOrder,
+        assignedTo,
+      }
+    );
+
+    await conn.execute(
+      `INSERT INTO adm_workflow_logs
+        (document_workflow_id, step_order, action, actor_user_id, comments)
+       VALUES
+        (:dwId, :stepOrder, 'SUBMITTED', :actorId, 'Document submitted for approval')`,
+      {
+        dwId,
+        stepOrder,
+        actorId: req.user?.sub || null,
+      }
+    );
+
+    await conn.commit();
+    res.json({ id, status: "PENDING_APPROVAL", payment_status: "UNPAID" });
+  } catch (e) {
+    try { await conn.rollback(); } catch {}
+    next(e);
+  } finally {
+    conn.release();
+  }
+};
+
+
+// === TRANSPORTATION BILLS ===
+export const getNextTransportationBillNo = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const [latest] = await query(
+      "SELECT bill_no FROM trans_transportation_bills WHERE company_id = :companyId AND bill_no LIKE 'TB-%' ORDER BY id DESC LIMIT 1",
+      { companyId }
+    );
+    let nextNum = 1;
+    if (latest && latest.bill_no) {
+      const numMatch = latest.bill_no.match(/\d+$/);
+      if (numMatch) {
+        nextNum = parseInt(numMatch[0], 10) + 1;
+      }
+    }
+    const nextNo = `TB-${String(nextNum).padStart(6, "0")}`;
+    res.json({ success: true, nextNo });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const listTransportationBills = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const items = await query(
+      "SELECT * FROM trans_transportation_bills WHERE company_id = :companyId ORDER BY id DESC",
+      { companyId }
+    );
+    res.json({ success: true, data: { items } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getTransportationBill = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const items = await query("SELECT * FROM trans_transportation_bills WHERE id = :id", { id });
+    const details = await query("SELECT * FROM trans_transportation_bill_details WHERE bill_id = :id", { id });
+    res.json({ success: true, data: { ...items[0], items: details } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createTransportationBill = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const { bill_no, bill_date, supplier_id, total_amount, items } = req.body;
+    const result = await query(
+      "INSERT INTO trans_transportation_bills (company_id, bill_no, bill_date, supplier_id, total_amount) VALUES (:companyId, :bill_no, :bill_date, :supplier_id, :total_amount)",
+      { companyId, bill_no, bill_date: bill_date || new Date(), supplier_id: supplier_id || 0, total_amount: total_amount || 0 }
+    );
+    const billId = result.insertId;
+    if (items && items.length) {
+      for (const item of items) {
+        await query(
+          "INSERT INTO trans_transportation_bill_details (bill_id, item_id, quantity, unit_price, total_amount) VALUES (:billId, :item_id, :quantity, :unit_price, :total_amount)",
+          { billId, item_id: item.item_id || 0, quantity: item.quantity || 0, unit_price: item.unit_price || 0, total_amount: item.total_amount || 0 }
+        );
+      }
+    }
+    res.json({ success: true, data: { id: billId } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateTransportationBill = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { bill_no, bill_date, supplier_id, total_amount, items } = req.body;
+    await query(
+      "UPDATE trans_transportation_bills SET bill_no = :bill_no, bill_date = :bill_date, supplier_id = :supplier_id, total_amount = :total_amount WHERE id = :id",
+      { bill_no, bill_date, supplier_id: supplier_id || 0, total_amount: total_amount || 0, id }
+    );
+    await query("DELETE FROM trans_transportation_bill_details WHERE bill_id = :id", { id });
+    if (items && items.length) {
+      for (const item of items) {
+        await query(
+          "INSERT INTO trans_transportation_bill_details (bill_id, item_id, quantity, unit_price, total_amount) VALUES (:id, :item_id, :quantity, :unit_price, :total_amount)",
+          { id, item_id: item.item_id || 0, quantity: item.quantity || 0, unit_price: item.unit_price || 0, total_amount: item.total_amount || 0 }
+        );
+      }
+    }
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteTransportationBill = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    await query("DELETE FROM trans_transportation_bill_details WHERE bill_id = :id", { id });
+    await query("DELETE FROM trans_transportation_bills WHERE id = :id", { id });
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// === EXPENSE LOGS ===
+export const listExpenseLogs = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const sql = `
+      SELECT e.*, 
+        t.trip_number as trip_no,
+        v.reg_number as vehicle_reg,
+        s.supplier_name
+      FROM trans_expense_logs e
+      LEFT JOIN trans_trips t ON e.trip_id = t.id
+      LEFT JOIN trans_vehicles v ON e.vehicle_id = v.id
+      LEFT JOIN pur_suppliers s ON e.supplier_id = s.id
+      WHERE e.company_id = :companyId AND e.deleted_at IS NULL
+      ORDER BY e.expense_date DESC, e.id DESC`;
+    const rows = await query(sql, { companyId });
+    
+    const logIds = rows.map(r => Number(r.id));
+    if (logIds.length > 0) {
+      const itemsSql = `
+        SELECT i.*, it.item_name, it.item_code
+        FROM trans_expense_log_items i
+        LEFT JOIN inv_items it ON i.item_id = it.id
+        WHERE i.log_id IN (${logIds.join(',')})
+      `;
+      const itemRows = await query(itemsSql, {});
+      const itemsByLog = {};
+      itemRows.forEach(item => {
+        if (!itemsByLog[item.log_id]) itemsByLog[item.log_id] = [];
+        itemsByLog[item.log_id].push(item);
+      });
+      rows.forEach(r => {
+        r.items = itemsByLog[r.id] || [];
+      });
+    } else {
+      rows.forEach(r => r.items = []);
+    }
+    
+    res.json({ items: rows });
+  } catch (err) { next(err); }
+};
+
+export const createExpenseLog = async (req, res, next) => {
+  try {
+    const { companyId, branchIdStr } = req.scope || {};
+    const branchId = toNumber(branchIdStr) || 1;
+    const b = req.body;
+    if (!b.amount && (!b.items || !b.items.length)) throw httpError(400, "VALIDATION_ERROR", "amount or items required");
+    
+    const r = await query(`INSERT INTO trans_expense_logs (company_id, branch_id, trip_id, vehicle_id, supplier_id, expense_date, expense_type, amount, currency, description, recorded_by, status)
+      VALUES (:companyId, :branchId, :tripId, :vehicleId, :supplierId, :expenseDate, :expenseType, :amount, :currency, :description, :recordedBy, :status)`, {
+      companyId, branchId,
+      tripId: toNumber(b.trip_id) || null,
+      vehicleId: toNumber(b.vehicle_id) || null,
+      supplierId: toNumber(b.supplier_id) || null,
+      expenseDate: b.expense_date || new Date().toISOString().split('T')[0],
+      expenseType: b.expense_type || 'OTHER',
+      amount: Number(b.amount || 0),
+      currency: b.currency || 'GHS',
+      description: b.description || null,
+      recordedBy: req.user?.username || null,
+      status: b.status || 'PENDING'
+    });
+    
+    const logId = r.insertId;
+    
+    if (b.items && Array.isArray(b.items)) {
+      for (const item of b.items) {
+        await query(`INSERT INTO trans_expense_log_items (log_id, item_id, uom, quantity, unit_price, total_amount, tax_amount, net_amount)
+          VALUES (:logId, :itemId, :uom, :quantity, :unitPrice, :totalAmount, :taxAmount, :netAmount)`, {
+          logId,
+          itemId: toNumber(item.item_id),
+          uom: item.uom || null,
+          quantity: Number(item.quantity || 1),
+          unitPrice: Number(item.unit_price || 0),
+          totalAmount: Number(item.total_amount || (Number(item.quantity||1)*Number(item.unit_price||0))),
+          taxAmount: Number(item.tax_amount || 0),
+          netAmount: Number(item.net_amount || 0)
+        });
+      }
+    }
+    
+    res.status(201).json({ id: logId });
+  } catch (err) { next(err); }
+};
+
+export const updateExpenseLog = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const id = toNumber(req.params.id);
+    const b = req.body;
+    await query(`UPDATE trans_expense_logs SET
+      trip_id = :tripId, vehicle_id = :vehicleId, supplier_id = :supplierId, expense_date = :expenseDate, expense_type = :expenseType, amount = :amount, currency = :currency,
+      description = :description, status = :status
+      WHERE id = :id AND company_id = :companyId`, {
+      id, companyId,
+      tripId: toNumber(b.trip_id) || null,
+      vehicleId: toNumber(b.vehicle_id) || null,
+      supplierId: toNumber(b.supplier_id) || null,
+      expenseDate: b.expense_date || new Date().toISOString().split('T')[0],
+      expenseType: b.expense_type || 'OTHER',
+      amount: Number(b.amount || 0),
+      currency: b.currency || 'GHS',
+      description: b.description || null,
+      status: b.status || 'PENDING'
+    });
+    
+    if (b.items && Array.isArray(b.items)) {
+      await query(`DELETE FROM trans_expense_log_items WHERE log_id = :id`, { id });
+      for (const item of b.items) {
+        await query(`INSERT INTO trans_expense_log_items (log_id, item_id, uom, quantity, unit_price, total_amount, tax_amount, net_amount)
+          VALUES (:logId, :itemId, :uom, :quantity, :unitPrice, :totalAmount, :taxAmount, :netAmount)`, {
+          logId: id,
+          itemId: toNumber(item.item_id),
+          uom: item.uom || null,
+          quantity: Number(item.quantity || 1),
+          unitPrice: Number(item.unit_price || 0),
+          totalAmount: Number(item.total_amount || (Number(item.quantity||1)*Number(item.unit_price||0))),
+          taxAmount: Number(item.tax_amount || 0),
+          netAmount: Number(item.net_amount || 0)
+        });
+      }
+    }
+    
+    res.json({ ok: true });
+  } catch (err) { next(err); }
+};
+
+export const deleteExpenseLog = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const id = toNumber(req.params.id);
+    await query("UPDATE trans_expense_logs SET deleted_at = NOW() WHERE id = :id AND company_id = :companyId", { id, companyId });
+    res.json({ ok: true });
+  } catch (err) { next(err); }
+};
+
+export const updateExpenseLogVoucherId = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const id = toNumber(req.params.id);
+    const { voucher_id } = req.body;
+    await query(
+      "UPDATE trans_expense_logs SET voucher_id = :voucher_id WHERE id = :id AND company_id = :companyId",
+      { voucher_id, id, companyId }
+    );
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
 };

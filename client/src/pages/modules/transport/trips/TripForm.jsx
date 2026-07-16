@@ -16,8 +16,14 @@ export default function TripForm() {
     start_time: "",
     origin: "",
     destination: "",
+    requester_name: "",
     notes: "",
+    start_odometer: "",
   });
+
+  const selectedVehicle = vehicles.find(
+    (v) => v.id.toString() === formData.vehicle_id?.toString()
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -31,12 +37,28 @@ export default function TripForm() {
         setDrivers(drvRes.data?.data?.items || []);
         setRequests(reqRes.data?.data?.items || []);
       }
-    }).catch(() => toast.error("Failed to load form data"));
+    }).catch((err) => toast.error("Error: " + (err.response?.data?.message || err.message)));
     return () => { cancelled = true; };
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === "request_id" && value) {
+      const req = requests.find(r => String(r.id) === String(value));
+      if (req) {
+        setFormData(prev => ({
+          ...prev,
+          [name]: value,
+          origin: req.origin || prev.origin,
+          destination: req.destination || prev.destination,
+          start_time: req.required_date ? (req.required_date.split('T')[0] + "T" + (req.required_time || "00:00")) : prev.start_time,
+          requester_name: req.requester_name || req.customer_name || prev.requester_name,
+          vehicle_id: req.vehicle_id || prev.vehicle_id,
+          notes: req.notes || req.purpose_of_journey || prev.notes
+        }));
+        return;
+      }
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -84,57 +106,92 @@ export default function TripForm() {
               <label className="label">
                 <span className="label-text">Link Request (Optional)</span>
               </label>
-              <select
-                name="request_id"
-                className="select select-bordered w-full"
-                value={formData.request_id}
+                <select
+                  name="request_id"
+                  className="input input-bordered w-full"
+                  value={formData.request_id}
+                  onChange={handleChange}
+                >
+                  <option value="">-- None --</option>
+                  {requests.filter(r => r.status === 'APPROVED').map(r => (
+                    <option key={r.id} value={r.id}>
+                      {r.request_number} - {r.requester_name || r.customer_name || 'N/A'} - {r.request_date ? r.request_date.split('T')[0] : ''}
+                    </option>
+                  ))}
+                </select>
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Requester's Name</span>
+              </label>
+              <input
+                type="text"
+                name="requester_name"
+                className="input input-bordered w-full"
+                value={formData.requester_name || ""}
                 onChange={handleChange}
-              >
-                <option value="">-- None --</option>
-                {requests.filter(r => r.status === 'PENDING').map(r => (
-                  <option key={r.id} value={r.id}>
-                    {r.request_number} - {r.destination}
-                  </option>
-                ))}
-              </select>
+                placeholder="Auto-populated or enter manually"
+              />
             </div>
 
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Vehicle *</span>
               </label>
-              <select
-                name="vehicle_id"
-                className="select select-bordered w-full"
-                value={formData.vehicle_id}
-                onChange={handleChange}
-                required
-              >
-                <option value="" disabled>Select available vehicle</option>
-                {vehicles.filter(v => v.status === 'AVAILABLE').map(v => (
-                  <option key={v.id} value={v.id}>{v.reg_number}</option>
-                ))}
-              </select>
+                <select
+                  name="vehicle_id"
+                  className="input input-bordered w-full"
+                  value={formData.vehicle_id}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="" disabled>Select available vehicle</option>
+                  {vehicles.filter(v => v.status === 'AVAILABLE').map(v => (
+                    <option key={v.id} value={v.id}>{v.reg_number}</option>
+                  ))}
+                </select>
+                {selectedVehicle && (
+                  <div className="mt-2 text-sm text-slate-500 bg-slate-50 p-2 rounded">
+                    <strong>Make:</strong> {selectedVehicle.make || "N/A"}{" "}
+                    &nbsp;|&nbsp;
+                    <strong>Model:</strong> {selectedVehicle.model || "N/A"}
+                  </div>
+                )}
             </div>
 
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Driver *</span>
               </label>
-              <select
-                name="driver_id"
-                className="select select-bordered w-full"
-                value={formData.driver_id}
+                <select
+                  name="driver_id"
+                  className="input input-bordered w-full"
+                  value={formData.driver_id}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="" disabled>Select available driver</option>
+                  {drivers.filter(d => d.status === 'AVAILABLE').map(d => (
+                    <option key={d.id} value={d.id}>
+                      {d.employee_name || 'Unnamed Driver'}
+                    </option>
+                  ))}
+                </select>
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Start Odometer</span>
+              </label>
+              <input
+                type="number"
+                name="start_odometer"
+                className="input input-bordered w-full"
+                value={formData.start_odometer || ""}
                 onChange={handleChange}
-                required
-              >
-                <option value="" disabled>Select available driver</option>
-                {drivers.filter(d => d.status === 'AVAILABLE').map(d => (
-                  <option key={d.id} value={d.id}>
-                    {d.first_name} {d.last_name} ({d.license_number})
-                  </option>
-                ))}
-              </select>
+                placeholder="Enter starting odometer reading"
+              />
             </div>
 
             <div className="form-control">
@@ -182,7 +239,7 @@ export default function TripForm() {
               </label>
               <textarea
                 name="notes"
-                className="textarea textarea-bordered w-full"
+                className="textarea textarea-bordered border border-slate-300 rounded-md p-3 w-full"
                 rows={3}
                 value={formData.notes}
                 onChange={handleChange}

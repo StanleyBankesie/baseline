@@ -1270,64 +1270,46 @@ export default function InvoiceForm() {
         const resp = await api.post("/sales/invoices", payload);
         savedId = Number(resp?.data?.id || 0);
       }
-      try {
-        const subResp = await api.post(`/sales/invoices/${savedId}/submit`);
-        const pstatus = subResp?.data?.payment_status || "UNPAID";
-        toast.success(`Invoice ${invoiceNo} saved and submitted (${pstatus})`);
-        if (autoDelivery) {
-          try {
-            const nextNoResp = await api.get("/sales/deliveries/next-no");
-            const nextNo = nextNoResp?.data?.nextNo || "";
-            const dPayload = {
-              delivery_no: nextNo || `DN${String(Date.now()).slice(-6)}`,
-              delivery_date: toYmd(form.invoice_date),
-              customer_id: Number(form.customer_id),
-              sales_order_id: form.sales_order_id
-                ? Number(form.sales_order_id)
-                : null,
-              invoice_id: savedId || null,
-              remarks: `Auto delivery for invoice ${invoiceNo}`,
-              status: "DELIVERED",
-              items: workingLines.map((l) => ({
-                item_id: Number(l.item_id),
-                quantity: Math.round(Number(l.qty || 0) * 100) / 100,
-                unit_price: Math.round(Number(l.unit_price || 0) * 100) / 100,
-                uom: String(l.uom || defaultUomCode),
-              })),
-            };
-            const dResp = await api.post("/sales/deliveries", dPayload);
-            const createdNo = nextNo || dPayload.delivery_no;
-            if (dResp?.data?.item?.delivery_no) {
-              toast.success(
-                `Delivery ${dResp.data.item.delivery_no} created automatically`,
-              );
-            } else {
-              toast.success(`Delivery ${createdNo} created automatically`);
-            }
-          } catch (delErr) {
-            const dmsg =
-              delErr?.response?.data?.message ||
-              "Failed to create delivery note";
-            toast.error(dmsg);
+      
+      toast.success(`Invoice ${invoiceNo} saved successfully`);
+      if (autoDelivery) {
+        try {
+          const nextNoResp = await api.get("/sales/deliveries/next-no");
+          const nextNo = nextNoResp?.data?.nextNo || "";
+          const dPayload = {
+            delivery_no: nextNo || `DN${String(Date.now()).slice(-6)}`,
+            delivery_date: toYmd(form.invoice_date),
+            customer_id: Number(form.customer_id),
+            sales_order_id: form.sales_order_id
+              ? Number(form.sales_order_id)
+              : null,
+            invoice_id: savedId || null,
+            remarks: `Auto delivery for invoice ${invoiceNo}`,
+            status: "DELIVERED",
+            items: workingLines.map((l) => ({
+              item_id: Number(l.item_id),
+              quantity: Math.round(Number(l.qty || 0) * 100) / 100,
+              unit_price: Math.round(Number(l.unit_price || 0) * 100) / 100,
+              uom: String(l.uom || defaultUomCode),
+            })),
+          };
+          const dResp = await api.post("/sales/deliveries", dPayload);
+          const createdNo = nextNo || dPayload.delivery_no;
+          if (dResp?.data?.item?.delivery_no) {
+            toast.success(
+              `Delivery ${dResp.data.item.delivery_no} created automatically`,
+            );
+          } else {
+            toast.success(`Delivery ${createdNo} created automatically`);
           }
-        }
-        navigate("/sales/invoices");
-      } catch (subErr) {
-        const smsg =
-          subErr?.response?.data?.message || "Failed to submit invoice";
-        if (/already submitted/i.test(smsg)) {
-          toast.info(`Invoice ${invoiceNo} already submitted`);
-          navigate("/sales/invoices");
-        } else if (
-          /no line items/i.test(smsg) ||
-          /warehouse_id is required/i.test(smsg) ||
-          /insufficient stock/i.test(smsg)
-        ) {
-          toast.error(smsg);
-        } else {
-          toast.error(smsg);
+        } catch (delErr) {
+          const dmsg =
+            delErr?.response?.data?.message ||
+            "Failed to create delivery note";
+          toast.error(dmsg);
         }
       }
+      navigate("/sales/invoices");
     } catch (err) {
       const msg = err?.response?.data?.message || "Error saving invoice";
       setError(msg);

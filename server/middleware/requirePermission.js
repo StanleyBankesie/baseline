@@ -23,6 +23,7 @@ function mapPermissionKeyToModuleAndAction(key) {
     PROJ: "project-management",
     SERVICE: "service-management",
     SVC: "service-management",
+    TRANSPORT: "transport",
   };
   const moduleKey = moduleMap[prefix] || "";
   let action = "view";

@@ -105,7 +105,7 @@ export default function DriversList({ isTab = false }) {
                       className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
                     >
                       <td className="px-6 py-4 font-medium">{d.employee_code || "N/A"}</td>
-                      <td className="px-6 py-4">{`${d.first_name || ""} ${d.last_name || ""}`.trim()}</td>
+                      <td className="px-6 py-4">{d.employee_name || `${d.first_name || ""} ${d.last_name || ""}`.trim() || "N/A"}</td>
                       <td className="px-6 py-4">{d.license_number}</td>
                       <td className="px-6 py-4">{d.license_type}</td>
                       <td className="px-6 py-4">{d.license_expiry ? d.license_expiry.split('T')[0] : ''}</td>

@@ -8,7 +8,7 @@ import { applyStockVerificationApprovalTx } from "../services/stock-verification
 import { isMailerConfigured, sendMail } from "../utils/mailer.js";
 import { sendDocumentForwardNotification } from "../utils/documentNotification.js";
 import { sendPushToUser } from "../routes/push.routes.js";
-import { createCreditNoteForReturnApprovalTx } from "../routes/sales.route.js";
+import { createCreditNoteForReturnApprovalTx, createPostedSalesVoucherForInvoiceTx } from "../routes/sales.route.js";
 import { createDebitNoteForReturnApprovalTx } from "../routes/purchase.routes.js";
 
 const toNumber = (v, fallback = null) => {
@@ -1356,7 +1356,7 @@ export const getPendingApprovals = async (req, res, next) => {
           dw.created_at as submitted_at,
           w.workflow_name,
           ws.step_name,
-          COALESCE(so.order_no, fv.voucher_no, po.po_no, mr.requisition_no, rts.rts_no, sa.adjustment_no, grn.grn_no, pm_ord.order_no, pm_pr.requisition_no, gr.requisition_no) as doc_ref,
+          COALESCE(so.order_no, fv.voucher_no, po.po_no, mr.requisition_no, rts.rts_no, sa.adjustment_no, grn.grn_no, pm_ord.order_no, pm_pr.requisition_no, gr.requisition_no, inv.invoice_no) as doc_ref,
           po.po_type as po_type,
           u.username as initiator,
           (
@@ -1367,6 +1367,9 @@ export const getPendingApprovals = async (req, res, next) => {
          FROM adm_document_workflows dw
          JOIN adm_workflows w ON dw.workflow_id = w.id
          JOIN adm_workflow_steps ws ON w.id = ws.workflow_id AND dw.current_step_order = ws.step_order
+         LEFT JOIN sal_invoices inv
+           ON (dw.document_type = 'SALES_INVOICE' OR dw.document_type = 'Sales Invoice')
+          AND inv.id = dw.document_id
          LEFT JOIN sal_orders so
            ON (dw.document_type = 'SALES_ORDER' OR dw.document_type = 'Sales Order')
           AND so.id = dw.document_id
@@ -1445,11 +1448,8 @@ export const getApprovalInstanceDetail = async (req, res, next) => {
       `SELECT dw.*, 
                w.workflow_name, w.workflow_code,
                ws.step_name, ws.approver_user_id, ws.approval_limit,
-               (SELECT COUNT(*),
-          created_at,
-          u.username AS created_by_name
+               (SELECT COUNT(*)
          FROM adm_workflow_steps
-        LEFT JOIN adm_users u ON u.id = created_by
          WHERE workflow_id = w.id AND step_order > dw.current_step_order) = 0 as is_last_step
         FROM adm_document_workflows dw
         JOIN adm_workflows w ON dw.workflow_id = w.id
@@ -1972,6 +1972,115 @@ export const performAction = async (req, res, next) => {
             { id: instance.document_id, companyId: instance.company_id },
           );
         }
+        if (
+          instance.document_type === "SALES_ORDER" ||
+          instance.document_type === "Sales Order"
+        ) {
+          await query(
+            `UPDATE sal_orders SET status = 'APPROVED' WHERE id = :id AND company_id = :companyId`,
+            { id: instance.document_id, companyId: instance.company_id },
+          );
+        }
+        if (
+          instance.document_type === "SALES_INVOICE" ||
+          instance.document_type === "Sales Invoice"
+        ) {
+          const conn = await pool.getConnection();
+          try {
+            const invoiceId = instance.document_id;
+            const companyId = instance.company_id;
+            const invoices = await query(
+              "SELECT id, invoice_no, invoice_date, customer_id, branch_id, net_amount, balance_amount, status, currency_id, exchange_rate, remarks, tax_components FROM sal_invoices WHERE id = :id AND company_id = :companyId LIMIT 1",
+              { id: invoiceId, companyId }
+            );
+            if (invoices.length) {
+              const inv = invoices[0];
+              const branchId = inv.branch_id || null;
+              const branchIdsStr = branchId ? String(branchId) : '';
+              const details = await query(
+                "SELECT item_id, quantity, unit_price, discount_percent, total_amount, net_amount, tax_amount, tax_type FROM sal_invoice_details WHERE invoice_id = :id",
+                { id: invoiceId }
+              );
+              
+              let subTotal = 0;
+              let taxTotal = 0;
+              let grandTotal = 0;
+              let discountTotal = 0;
+              for (const l of details) {
+                const qty = Number(l.quantity || 0);
+                const price = Number(l.unit_price || 0);
+                const discPct = Number(l.discount_percent || 0);
+                const gross = qty * price;
+                const discount = (gross * discPct) / 100;
+                const net = gross - discount;
+                const taxAmt = Number(l.tax_amount || 0);
+                subTotal += net;
+                taxTotal += taxAmt;
+                grandTotal += net + taxAmt;
+                discountTotal += discount;
+              }
+
+              const bal = Number(inv.balance_amount || inv.net_amount || grandTotal);
+              const paymentStatus = bal <= 0 ? "PAID" : bal > 0 ? "UNPAID" : "PARTIALLY_PAID";
+
+              await conn.beginTransaction();
+              await conn.execute(
+                `UPDATE sal_invoices
+                   SET status = 'POSTED',
+                       payment_status = :paymentStatus,
+                       balance_amount = :balance,
+                       total_amount = :totalAmount,
+                       net_amount = :netAmount,
+                       tax_amount = :taxAmount
+                 WHERE id = :id AND company_id = :companyId`,
+                {
+                  id: invoiceId,
+                  companyId,
+                  paymentStatus,
+                  balance: bal,
+                  totalAmount: grandTotal,
+                  netAmount: grandTotal,
+                  taxAmount: taxTotal,
+                }
+              );
+
+              let parsedTaxes = [];
+              try { parsedTaxes = JSON.parse(inv.tax_components || "[]"); } catch (e) {}
+
+              await createPostedSalesVoucherForInvoiceTx(conn, {
+                companyId,
+                branchId, branchIdsStr,
+                invoiceId,
+                invoiceNo: String(inv.invoice_no || ""),
+                invoiceDate: inv.invoice_date || new Date().toISOString().slice(0, 10),
+                customerId: Number(inv.customer_id || 0),
+                grandTotal,
+                baseTotal: subTotal,
+                taxTotal,
+                discountTotal,
+                currencyId: inv.currency_id || null,
+                exchangeRate: inv.exchange_rate || 1,
+                createdBy: userId || null,
+                lineTaxes: parsedTaxes,
+                itemLines: details.map((d) => ({
+                  item_id: d.item_id,
+                  quantity: d.quantity,
+                  unit_price: d.unit_price,
+                  discount_percent: d.discount_percent,
+                })),
+                remarks: inv.remarks || null,
+              });
+
+              await conn.commit();
+            }
+          } catch (e) {
+            console.error("Error creating sales voucher from workflow approval:", e);
+            try { await conn.rollback(); } catch {}
+            throw e;
+          } finally {
+            conn.release();
+          }
+        }
         const initiatorId = await getInitiator();
         await notifyUser(
           initiatorId,
@@ -2046,6 +2155,14 @@ export const performAction = async (req, res, next) => {
       ) {
         await query(
           `UPDATE sal_orders SET status = 'REJECTED' WHERE id = :id AND company_id = :companyId`,
+          { id: instance.document_id, companyId: instance.company_id },
+        );
+      } else if (
+        instance.document_type === "SALES_INVOICE" ||
+        instance.document_type === "Sales Invoice"
+      ) {
+        await query(
+          `UPDATE sal_invoices SET status = 'REJECTED' WHERE id = :id AND company_id = :companyId`,
           { id: instance.document_id, companyId: instance.company_id },
         );
       } else if (

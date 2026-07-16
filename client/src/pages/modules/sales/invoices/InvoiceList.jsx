@@ -35,6 +35,8 @@ export default function InvoiceList() {
   const [targetApproverId, setTargetApproverId] = useState(null);
   const [workflowSteps, setWorkflowSteps] = useState([]);
   const [wfError, setWfError] = useState("");
+  const [wfLoading, setWfLoading] = useState(false);
+  const [submittingForward, setSubmittingForward] = useState(false);
   const [invoices, setInvoices] = useState([]);
   const [currencies, setCurrencies] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
@@ -426,6 +428,7 @@ export default function InvoiceList() {
       DRAFT: "badge badge-warning",
       POSTED: "badge badge-success",
       CANCELLED: "badge badge-error",
+      PENDING_APPROVAL: "badge bg-blue-100 text-blue-700",
     };
     return <span className={statusClasses[status] || "badge"}>{status}</span>;
   };
@@ -445,31 +448,67 @@ export default function InvoiceList() {
     setWfError("");
     setShowForwardModal(true);
     try {
-      const res = await api.get("/workflows", { params: { document_type: "INVOICE" } });
+      const res = await api.get("/workflows");
       const wfs = Array.isArray(res.data?.items) ? res.data.items : [];
-      const active = wfs.find((w) => w.is_active);
+      const active = wfs.find((w) => Number(w.is_active) === 1 && (String(w.document_type).toUpperCase() === "SALES_INVOICE" || String(w.document_type).toUpperCase() === "SALES INVOICE" || String(w.document_route) === "/sales/invoices"));
       setCandidateWorkflow(active || null);
-      if (active?.steps) setWorkflowSteps(Array.isArray(active.steps) ? active.steps : []);
+      if (active) {
+        setWfLoading(true);
+        const wfRes = await api.get(`/workflows/${active.id}`);
+        const steps = Array.isArray(wfRes.data?.item?.steps) ? wfRes.data.item.steps : [];
+        setWorkflowSteps(steps);
+        if (steps.length > 0) {
+           const first = steps[0];
+           const defaultTarget = (Array.isArray(first.approvers) && first.approvers.length ? first.approvers[0].id : first.approver_user_id) || null;
+           setTargetApproverId(defaultTarget);
+        } else {
+           setTargetApproverId(null);
+        }
+        setWfLoading(false);
+      } else {
+        setWorkflowSteps([]);
+        setTargetApproverId(null);
+      }
     } catch {
       setCandidateWorkflow(null);
       setWorkflowSteps([]);
+      setTargetApproverId(null);
+      setWfLoading(false);
     }
   };
 
   async function handleForwardSubmit() {
     if (!selectedDoc) return;
+    setSubmittingForward(true);
+    setWfError("");
     try {
-      const approverName = workflowSteps.find((s) => Number(s.approver_id) === Number(targetApproverId))?.approver_name || "";
-      await api.post(`/sales/invoices/${selectedDoc.id}/submit`, {
+      let optimisticApprover = null;
+      try {
+        const first = Array.isArray(workflowSteps) && workflowSteps.length ? workflowSteps[0] : null;
+        const opts = first ? (Array.isArray(first.approvers) && first.approvers.length ? first.approvers.map((u) => ({ id: u.id, name: u.username })) : first.approver_user_id ? [{ id: first.approver_user_id, name: first.approver_name || String(first.approver_user_id) }] : []) : [];
+        if (targetApproverId && opts.length) {
+          const hit = opts.find((u) => Number(u.id) === Number(targetApproverId));
+          optimisticApprover = hit ? hit.name : null;
+        }
+      } catch {}
+      const res = await api.post(`/sales/invoices/${selectedDoc.id}/submit`, {
         workflow_id: candidateWorkflow ? candidateWorkflow.id : null,
-        target_approver_id: targetApproverId || null,
+        target_user_id: targetApproverId || null,
       });
-      toast.success("Invoice forwarded for approval");
+      const newStatus = res?.data?.status || "PENDING_APPROVAL";
+      if (newStatus === "POSTED") {
+        toast.success("Invoice automatically approved and posted");
+      } else {
+        toast.success("Invoice forwarded for approval");
+      }
       setInvoices((prev) =>
         prev.map((x) =>
-          x.id === selectedDoc.id ? { ...x, forwarded_to_username: approverName || "Approver", status: "PENDING_APPROVAL" } : x,
+          x.id === selectedDoc.id ? { ...x, forwarded_to_username: optimisticApprover || x.forwarded_to_username || "Approver", status: newStatus } : x,
         ),
       );
+      try {
+        await fetchInvoices();
+      } catch {}
       setShowForwardModal(false);
       setSelectedDoc(null);
       setCandidateWorkflow(null);
@@ -477,6 +516,9 @@ export default function InvoiceList() {
       setWorkflowSteps([]);
     } catch (e) {
       toast.error(e?.response?.data?.message || "Failed to forward for approval");
+      setWfError(e?.response?.data?.message || "Failed to forward for approval");
+    } finally {
+      setSubmittingForward(false);
     }
   }
 
@@ -604,9 +646,59 @@ export default function InvoiceList() {
                           </button>
                         </div>
 
-                        {/* Slot 2: Edit (Blank for Invoices) */}
+                        {/* Slot 1.5: Edit */}
                         <div className="min-w-[80px]">
-                          <div className="w-full h-9" />
+                          {["DRAFT", "RETURNED", "PENDING_APPROVAL"].includes(String(inv.status || "").toUpperCase()) &&
+                          canPerformAction("sales:invoices", "edit") ? (
+                            <button
+                              type="button"
+                              className="w-full inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-slate-700 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors h-9"
+                              onClick={() => navigate(`/sales/invoices/${inv.id}?mode=edit`)}
+                            >
+                              Edit
+                            </button>
+                          ) : (
+                            <div className="w-full h-9" />
+                          )}
+                        </div>
+
+                        {/* Slot 2: workflow (forward / approved / reverse) */}
+                        <div className="min-w-[160px]">
+                          <div className="list-approval-slot">
+                            {["APPROVED", "POSTED"].includes(String(inv.status || "").toUpperCase()) ? (
+                              <div className="flex items-center gap-2">
+                                <span className="list-approval-approved-pill">Approved</span>
+                                {canReverseApproval() && (
+                                  <ReverseApprovalButton
+                                    docType="INVOICE"
+                                    docId={inv.id}
+                                    className="list-approval-reverse-btn"
+                                    onDone={() =>
+                                      setInvoices((prev) =>
+                                        prev.map((x) =>
+                                          x.id === inv.id ? { ...x, status: "RETURNED", forwarded_to_username: null } : x,
+                                        ),
+                                      )
+                                    }
+                                  >
+                                    Reverse Approval
+                                  </ReverseApprovalButton>
+                                )}
+                              </div>
+                            ) : String(inv.status || "").toUpperCase() === "PENDING_APPROVAL" ? (
+                              <span className="list-approval-forwarded-pill">
+                                Forwarded to {inv.forwarded_to_username || "Approver"}
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                className="list-approval-forward-btn"
+                                onClick={() => openForwardModal(inv)}
+                              >
+                                Forward for Approval
+                              </button>
+                            )}
+                          </div>
                         </div>
 
                         {/* Slot 3: Print */}
@@ -629,38 +721,7 @@ export default function InvoiceList() {
                           />
                         </div>
 
-                        {/* Slot 6: workflow (forward / approved / reverse) */}
-                        <div className="min-w-[160px]">
-                          <div className="list-approval-slot">
-                            {String(inv.status || "").toUpperCase() === "APPROVED" ? (
-                              <div className="flex items-center gap-2">
-                                <span className="list-approval-approved-pill">Approved</span>
-                                {canReverseApproval() && (
-                                  <ReverseApprovalButton
-                                    docType="INVOICE"
-                                    docId={inv.id}
-                                    className="list-approval-reverse-btn"
-                                    onDone={() =>
-                                      setInvoices((prev) =>
-                                        prev.map((x) =>
-                                          x.id === inv.id ? { ...x, status: "RETURNED", forwarded_to_username: null } : x,
-                                        ),
-                                      )
-                                    }
-                                  >
-                                    Reverse Approval
-                                  </ReverseApprovalButton>
-                                )}
-                              </div>
-                            ) : inv.forwarded_to_username ? (
-                              <span className="list-approval-forwarded-pill">
-                                Forwarded to {inv.forwarded_to_username}
-                              </span>
-                            ) : (
-                              <div className="w-full h-9" />
-                            )}
-                          </div>
-                        </div>
+
 
                         {/* Slot 7: Cancel */}
                         <div className="min-w-[80px]">
@@ -754,48 +815,89 @@ export default function InvoiceList() {
                 &times;
               </button>
             </div>
-            <div className="p-4 space-y-4">
-              {wfError && <div className="text-sm text-red-600">{wfError}</div>}
-              <div className="text-sm">
-                <span className="font-medium">Invoice:</span>{" "}
-                {selectedDoc?.invoice_no || `#${selectedDoc?.id}`}
+            <div className="p-4 space-y-3">
+              <div className="text-sm text-slate-700">
+                Document No:{" "}
+                <span className="font-semibold">
+                  {selectedDoc?.invoice_no || `#${selectedDoc?.id}`}
+                </span>
               </div>
-              {candidateWorkflow && (
-                <div className="text-sm">
-                  <span className="font-medium">Workflow:</span>{" "}
-                  {candidateWorkflow.workflow_name || candidateWorkflow.name}
-                </div>
-              )}
-              {workflowSteps.length > 0 && (
-                <div>
-                  <label className="label">First Approver</label>
-                  <select
-                    className="input"
-                    value={targetApproverId || ""}
-                    onChange={(e) => setTargetApproverId(e.target.value || null)}
-                  >
-                    <option value="">-- Select --</option>
-                    {workflowSteps.map((step) => (
-                      <option key={step.approver_id} value={step.approver_id}>
-                        {step.approver_name || `Approver #${step.approver_id}`}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="text-sm text-slate-700">
+                Workflow:{" "}
+                <span className="font-semibold">
+                  {candidateWorkflow
+                    ? `${candidateWorkflow.workflow_name || candidateWorkflow.name} (${candidateWorkflow.workflow_code || ""})`
+                    : "None (inactive)"}
+                </span>
+              </div>
+              <div>
+                {wfLoading ? (
+                  <div className="text-sm text-slate-500">Loading workflow...</div>
+                ) : null}
+              </div>
+              <div>
+                {wfError ? (
+                  <div className="text-sm text-red-600">{wfError}</div>
+                ) : null}
+              </div>
+              <div className="text-sm">
+                <div className="font-medium">Target Approver</div>
+                {(() => {
+                  const hasSteps = Array.isArray(workflowSteps) && workflowSteps.length > 0;
+                  const first = hasSteps ? workflowSteps[0] : null;
+                  const opts = first
+                    ? Array.isArray(first.approvers) && first.approvers.length
+                      ? first.approvers.map((u) => ({ id: u.id, name: u.username }))
+                      : first.approver_user_id
+                        ? [{ id: first.approver_user_id, name: first.approver_name || String(first.approver_user_id) }]
+                        : []
+                    : [];
+
+                  if (!hasSteps) {
+                    return <div className="text-slate-500">None required</div>;
+                  }
+                  if (opts.length === 0) {
+                    return <div className="text-slate-500">No approvers</div>;
+                  }
+                  if (opts.length === 1) {
+                    return <div className="text-slate-700 font-semibold">{opts[0].name}</div>;
+                  }
+                  return (
+                    <select
+                      className="input mt-1"
+                      value={targetApproverId || ""}
+                      onChange={(e) => setTargetApproverId(e.target.value ? Number(e.target.value) : null)}
+                    >
+                      <option value="">-- Select Approver --</option>
+                      {opts.map((o) => (
+                        <option key={o.id} value={o.id}>{o.name}</option>
+                      ))}
+                    </select>
+                  );
+                })()}
+              </div>
+              <div className="mt-5 flex justify-end gap-2 border-t border-slate-100 pt-4">
                 <button
-                  className="btn btn-secondary"
+                  type="button"
+                  className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50"
                   onClick={() => {
                     setShowForwardModal(false);
                     setSelectedDoc(null);
                     setCandidateWorkflow(null);
+                    setWorkflowSteps([]);
+                    setWfError("");
                   }}
+                  disabled={submittingForward}
                 >
                   Cancel
                 </button>
-                <button className="btn-success" onClick={handleForwardSubmit}>
-                  Submit
+                <button
+                  type="button"
+                  className="px-4 py-2 text-sm font-medium text-white bg-brand rounded hover:bg-brand/90 flex items-center justify-center disabled:opacity-50"
+                  onClick={handleForwardSubmit}
+                  disabled={submittingForward || wfLoading}
+                >
+                  {submittingForward ? "Submitting..." : "Submit"}
                 </button>
               </div>
             </div>

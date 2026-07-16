@@ -7,9 +7,10 @@ export default function TransportRequestForm() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [vehicles, setVehicles] = useState([]);
+  const [clients, setClients] = useState([]);
   const [formData, setFormData] = useState({
     requester_name: "",
-    request_date: new Date().toISOString().split('T')[0],
+    request_date: new Date().toISOString().split("T")[0],
     required_date: "",
     required_time: "",
     return_date: "",
@@ -24,41 +25,71 @@ export default function TransportRequestForm() {
     vehicle_id: "",
   });
 
-  const selectedVehicle = vehicles.find(v => v.id.toString() === formData.vehicle_id?.toString());
+  const selectedVehicle = vehicles.find(
+    (v) => v.id.toString() === formData.vehicle_id?.toString(),
+  );
 
   React.useEffect(() => {
     if (formData.required_date && formData.return_date) {
-      const required = new Date(`${formData.required_date}T${formData.required_time || '00:00'}`);
-      const ret = new Date(`${formData.return_date}T${formData.return_time || '00:00'}`);
-      
+      const required = new Date(
+        `${formData.required_date}T${formData.required_time || "00:00"}`,
+      );
+      const ret = new Date(
+        `${formData.return_date}T${formData.return_time || "00:00"}`,
+      );
+
       const diffMs = ret - required;
       if (diffMs >= 0) {
         const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
         const diffHours = (diffMs / (1000 * 60 * 60)).toFixed(2);
-        setFormData(prev => ({ ...prev, no_of_days: diffDays, no_of_hours: diffHours }));
+        setFormData((prev) => ({
+          ...prev,
+          no_of_days: diffDays,
+          no_of_hours: diffHours,
+        }));
       } else {
-        setFormData(prev => ({ ...prev, no_of_days: 0, no_of_hours: 0 }));
+        setFormData((prev) => ({ ...prev, no_of_days: 0, no_of_hours: 0 }));
       }
     }
-  }, [formData.required_date, formData.return_date, formData.required_time, formData.return_time]);
+  }, [
+    formData.required_date,
+    formData.return_date,
+    formData.required_time,
+    formData.return_time,
+  ]);
 
   React.useEffect(() => {
-    const fetchVehicles = async () => {
+    const fetchInitialData = async () => {
       try {
-        const { data } = await api.get("/transport/vehicles");
-        if (data?.data?.items) {
-          setVehicles(data.data.items);
+        const [vehiclesRes, clientsRes] = await Promise.all([
+          api.get("/transport/vehicles"),
+          api.get("/sales/customers?service_customer=Y"),
+        ]);
+        if (vehiclesRes.data?.data?.items) {
+          setVehicles(vehiclesRes.data.data.items);
+        }
+        if (clientsRes.data?.items) {
+          setClients(clientsRes.data.items);
         }
       } catch (err) {
-        console.error("Failed to fetch vehicles");
+        console.error("Failed to fetch initial data", err);
       }
     };
-    fetchVehicles();
+    fetchInitialData();
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "requester_name") {
+      const selectedClient = clients.find(c => c.customer_name === value);
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+        customer_id: selectedClient ? selectedClient.id : ""
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -97,18 +128,25 @@ export default function TransportRequestForm() {
 
       <div className="card">
         <form onSubmit={handleSubmit} className="card-body p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Requester Name</span>
+                <span className="label-text">Requester's Name</span>
               </label>
-              <input
-                type="text"
+              <select
                 name="requester_name"
                 className="input input-bordered w-full"
                 value={formData.requester_name}
                 onChange={handleChange}
-              />
+                required
+              >
+                <option value="">Select Requester</option>
+                {clients.map((c) => (
+                  <option key={c.id} value={c.customer_name}>
+                    {c.customer_name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="form-control">
@@ -169,48 +207,62 @@ export default function TransportRequestForm() {
               </div>
             </div>
 
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Duration</span>
-              </label>
-              <div className="flex gap-2">
-                <div className="w-1/2 flex items-center gap-2">
-                  <span className="text-sm font-semibold">Days:</span>
-                  <input type="text" readOnly className="input input-bordered input-sm w-full bg-slate-50" value={formData.no_of_days} />
-                </div>
-                <div className="w-1/2 flex items-center gap-2">
-                  <span className="text-sm font-semibold">Hours:</span>
-                  <input type="text" readOnly className="input input-bordered input-sm w-full bg-slate-50" value={formData.no_of_hours} />
+            {formData.required_date && formData.return_date && (
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Duration</span>
+                </label>
+                <div className="flex gap-2">
+                  <div className="w-1/2 flex items-center gap-2">
+                    <span className="text-sm font-semibold">Days:</span>
+                    <input
+                      type="text"
+                      readOnly
+                      className="input input-bordered input-sm w-full bg-slate-50"
+                      value={formData.no_of_days}
+                    />
+                  </div>
+                  <div className="w-1/2 flex items-center gap-2">
+                    <span className="text-sm font-semibold">Hours:</span>
+                    <input
+                      type="text"
+                      readOnly
+                      className="input input-bordered input-sm w-full bg-slate-50"
+                      value={formData.no_of_hours}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Origin *</span>
-              </label>
-              <input
-                type="text"
-                name="origin"
-                className="input input-bordered w-full"
-                value={formData.origin}
-                onChange={handleChange}
-                required
-              />
-            </div>
+            <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Origin *</span>
+                </label>
+                <input
+                  type="text"
+                  name="origin"
+                  className="input input-bordered w-full"
+                  value={formData.origin}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Destination *</span>
-              </label>
-              <input
-                type="text"
-                name="destination"
-                className="input input-bordered w-full"
-                value={formData.destination}
-                onChange={handleChange}
-                required
-              />
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Destination *</span>
+                </label>
+                <input
+                  type="text"
+                  name="destination"
+                  className="input input-bordered w-full"
+                  value={formData.destination}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
 
             <div className="form-control">
@@ -219,7 +271,7 @@ export default function TransportRequestForm() {
               </label>
               <select
                 name="vehicle_id"
-                className="select select-bordered w-full"
+                className="input input-bordered w-full"
                 value={formData.vehicle_id}
                 onChange={handleChange}
               >
@@ -232,7 +284,8 @@ export default function TransportRequestForm() {
               </select>
               {selectedVehicle && (
                 <div className="mt-2 text-sm text-slate-500 bg-slate-50 p-2 rounded">
-                  <strong>Make:</strong> {selectedVehicle.make || "N/A"} &nbsp;|&nbsp; 
+                  <strong>Make:</strong> {selectedVehicle.make || "N/A"}{" "}
+                  &nbsp;|&nbsp;
                   <strong>Model:</strong> {selectedVehicle.model || "N/A"}
                 </div>
               )}
@@ -244,7 +297,7 @@ export default function TransportRequestForm() {
               </label>
               <select
                 name="priority"
-                className="select select-bordered border-2 border-slate-300 w-full"
+                className="input input-bordered w-full"
                 value={formData.priority}
                 onChange={handleChange}
               >
@@ -255,31 +308,35 @@ export default function TransportRequestForm() {
               </select>
             </div>
 
-            <div className="form-control md:col-span-2">
-              <label className="label">
-                <span className="label-text font-semibold">Purpose of Journey</span>
-              </label>
-              <textarea
-                name="purpose_of_journey"
-                className="textarea textarea-bordered border-2 border-slate-300 w-full"
-                rows={3}
-                value={formData.purpose_of_journey}
-                onChange={handleChange}
-              />
-            </div>
+            <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-semibold">
+                    Purpose of Journey
+                  </span>
+                </label>
+                <textarea
+                  name="purpose_of_journey"
+                  className="textarea textarea-bordered border border-slate-300 rounded-md w-full p-3"
+                  rows={3}
+                  value={formData.purpose_of_journey}
+                  onChange={handleChange}
+                />
+              </div>
 
-            <div className="form-control md:col-span-2">
-              <label className="label">
-                <span className="label-text">Notes</span>
-              </label>
-              <textarea
-                name="notes"
-                className="textarea textarea-bordered border-2 border-slate-300 w-full"
-                rows={3}
-                value={formData.notes}
-                onChange={handleChange}
-                placeholder="Any special handling instructions..."
-              />
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Notes</span>
+                </label>
+                <textarea
+                  name="notes"
+                  className="textarea textarea-bordered border border-slate-300 rounded-md w-full p-3"
+                  rows={3}
+                  value={formData.notes}
+                  onChange={handleChange}
+                  placeholder="Any special handling instructions..."
+                />
+              </div>
             </div>
           </div>
 

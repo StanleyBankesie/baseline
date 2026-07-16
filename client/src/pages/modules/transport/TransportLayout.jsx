@@ -1,6 +1,3 @@
-/**
- * @fileoverview TransportLayout module routing and dashboard landing page.
- */
 import React, { useEffect, useState } from "react";
 import { Link, Route, Routes, Navigate } from "react-router-dom";
 import api from "../../../api/client.js";
@@ -13,6 +10,8 @@ import TransportRequestForm from "./requests/TransportRequestForm.jsx";
 import VehiclesList from "./vehicles/VehiclesList.jsx";
 import VehicleForm from "./vehicles/VehicleForm.jsx";
 import TripsList from "./trips/TripsList.jsx";
+import TripReturnList from "./trips/TripReturnList.jsx";
+import TripHistoryReport from "./reports/TripHistoryReport.jsx";
 import TripForm from "./trips/TripForm.jsx";
 import TripTrackingPage from "./trips/TripTrackingPage.jsx";
 import DriversList from "./drivers/DriversList.jsx";
@@ -20,6 +19,7 @@ import DriverForm from "./drivers/DriverForm.jsx";
 import FuelLogsList from "./fuel/FuelLogsList.jsx";
 import FuelLogForm from "./fuel/FuelLogForm.jsx";
 import BillingList from "./billing/BillingList.jsx";
+import BillingForm from "./billing/BillingForm.jsx";
 import RoutesList from "./routes/RoutesList.jsx";
 import RouteForm from "./routes/RouteForm.jsx";
 import InspectionsList from "./inspections/InspectionsList.jsx";
@@ -30,6 +30,12 @@ import TransportSettings from "./settings/TransportSettings.jsx";
 import TransportReports from "./reports/TransportReports.jsx";
 import TransportIncomeList from "./income/TransportIncomeList.jsx";
 import TransportExpenseList from "./expenses/TransportExpenseList.jsx";
+import ExpenseLogList from "./expenses/ExpenseLogList.jsx";
+import FuelExpenseList from "./fuel-expenses/FuelExpenseList.jsx";
+import FuelBillsList from "./fuel-bills/FuelBillsList.jsx";
+import FuelBillForm from "./fuel-bills/FuelBillForm.jsx";
+import TransportationBillsList from "./transportation-bills/TransportationBillsList.jsx";
+import TransportationBillForm from "./transportation-bills/TransportationBillForm.jsx";
 
 const ActionButton = ({ label, path, type, featureKey, action }) => {
   const { canPerformAction } = usePermission();
@@ -135,6 +141,26 @@ function TransportLanding() {
           ]
         },
         { 
+          title: "Trip & Dispatch Returns", 
+          path: "/transport/trip-returns", 
+          feature_key: "trips", 
+          description: "Confirm returning trips and log vehicle metrics",
+          icon: "🔙",
+          actions: [
+            <ActionButton key="view" label="Manage Returns" path="/transport/trip-returns" type="primary" featureKey="transport:trips" action="view" />
+          ]
+        },
+        { 
+          title: "Trip History & Tracking", 
+          path: "/transport/reports/trip-history", 
+          feature_key: "trips", 
+          description: "Detailed history logs and tracking of fleet trips",
+          icon: "📜",
+          actions: [
+            <ActionButton key="view" label="View Report" path="/transport/reports/trip-history" type="primary" featureKey="transport:trips" action="view" />
+          ]
+        },
+        { 
           title: "GPS Tracking", 
           path: "/transport/trips", 
           feature_key: "tracking", 
@@ -160,7 +186,6 @@ function TransportLanding() {
     {
       title: "Fleet Management",
       items: [
-
         { 
           title: "Inspections", 
           path: "/transport/inspections", 
@@ -178,14 +203,25 @@ function TransportLanding() {
       title: "Costing & Billing",
       items: [
         { 
-          title: "Fuel & Expenses", 
+          title: "Refuelling", 
           path: "/transport/fuel", 
           feature_key: "fuel", 
-          description: "Log fuel consumption and transport expenses",
+          description: "Log all information of fuel purchased and refuelling events",
           icon: "⛽",
           actions: [
             <ActionButton key="view" label="View" path="/transport/fuel" type="outline" featureKey="transport:fuel" action="view" />,
             <ActionButton key="new" label="New" path="/transport/fuel/new" type="primary" featureKey="transport:fuel" action="create" />
+          ]
+        },
+        { 
+          title: "Transportation Bills", 
+          path: "/transport/transportation-bills", 
+          feature_key: "bills", 
+          description: "Manage transportation bills and service supplier invoices",
+          icon: "📑",
+          actions: [
+            <ActionButton key="view" label="View" path="/transport/transportation-bills" type="outline" featureKey="transport:bills" action="view" />,
+            <ActionButton key="new" label="New" path="/transport/transportation-bills/new" type="primary" featureKey="transport:bills" action="create" />
           ]
         },
         { 
@@ -218,9 +254,18 @@ function TransportLanding() {
             <ActionButton key="view" label="View" path="/transport/expenses" type="outline" featureKey="transport:expenses" action="view" />
           ]
         },
+        { 
+          title: "Expense Logs", 
+          path: "/transport/expense-logs", 
+          feature_key: "expense_log", 
+          description: "Log general fleet expenses",
+          icon: "🧾",
+          actions: [
+            <ActionButton key="view" label="View" path="/transport/expense-logs" type="outline" featureKey="transport:expense_log" action="view" />
+          ]
+        },
       ],
     },
-
     {
       title: "Configuration",
       items: [
@@ -264,6 +309,8 @@ export default function TransportLayout() {
       <Route path="drivers/new" element={<DriverForm />} />
       <Route path="drivers/:id" element={<DriverForm />} />
       <Route path="trips" element={<TripsList />} />
+      <Route path="trip-returns" element={<TripReturnList />} />
+      <Route path="reports/trip-history" element={<TripHistoryReport />} />
       <Route path="trips/new" element={<TripForm />} />
       <Route path="trips/:id" element={<TripForm />} />
       <Route path="tracking/:id" element={<TripTrackingPage />} />
@@ -271,7 +318,16 @@ export default function TransportLayout() {
       <Route path="fuel" element={<FuelLogsList />} />
       <Route path="fuel/new" element={<FuelLogForm />} />
       <Route path="fuel/:id" element={<FuelLogForm />} />
+      <Route path="fuel-expenses" element={<FuelExpenseList />} />
+      <Route path="fuel-bills" element={<FuelBillsList />} />
+      <Route path="fuel-bills/new" element={<FuelBillForm />} />
+      <Route path="fuel-bills/:id" element={<FuelBillForm />} />
+      <Route path="transportation-bills" element={<TransportationBillsList />} />
+      <Route path="transportation-bills/new" element={<TransportationBillForm />} />
+      <Route path="transportation-bills/:id" element={<TransportationBillForm />} />
       <Route path="billing" element={<BillingList />} />
+      <Route path="billing/new" element={<BillingForm />} />
+      <Route path="billing/:id" element={<BillingForm />} />
       <Route path="routes" element={<RoutesList />} />
       <Route path="routes/new" element={<RouteForm />} />
       <Route path="routes/:id" element={<RouteForm />} />
@@ -285,6 +341,7 @@ export default function TransportLayout() {
       <Route path="reports" element={<TransportReports />} />
       <Route path="income" element={<TransportIncomeList />} />
       <Route path="expenses" element={<TransportExpenseList />} />
+      <Route path="expense-logs" element={<ExpenseLogList />} />
     </Routes>
   );
 }
