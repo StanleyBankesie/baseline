@@ -116,6 +116,67 @@ try {
 const app = express();
 app.set("trust proxy", 1);
 
+// Hook res.writeHead at the request level to completely strip connection headers,
+// bypassing any custom subclassing by Passenger.
+app.use((req, res, next) => {
+  const origWriteHead = res.writeHead;
+  res.writeHead = function (statusCode, statusMessage, headers) {
+    this.removeHeader('Connection');
+    this.removeHeader('connection');
+    this.removeHeader('Keep-Alive');
+    this.removeHeader('keep-alive');
+
+    let headersObj = headers;
+    let statusMsg = statusMessage;
+
+    if (typeof statusMessage === 'object') {
+      headersObj = statusMessage;
+      statusMsg = undefined;
+    }
+
+    if (headersObj) {
+      if (Array.isArray(headersObj)) {
+        for (let i = 0; i < headersObj.length; i++) {
+          const key = headersObj[i][0];
+          if (key && (key.toLowerCase() === 'connection' || key.toLowerCase() === 'keep-alive')) {
+            headersObj.splice(i, 1);
+            i--;
+          }
+        }
+      } else if (typeof headersObj === 'object') {
+        for (const k of Object.keys(headersObj)) {
+          const lower = k.toLowerCase();
+          if (lower === 'connection' || lower === 'keep-alive') {
+            delete headersObj[k];
+          }
+        }
+      }
+    }
+
+    const strip = (obj) => {
+      if (!obj) return;
+      for (const k of Object.getOwnPropertyNames(obj)) {
+        const lower = k.toLowerCase();
+        if (lower === "connection" || lower === "keep-alive") {
+          delete obj[k];
+        }
+      }
+    };
+    strip(this._headers);
+    const sym = Object.getOwnPropertySymbols(this).find(
+      (s) => s.toString().includes("Headers") || s.toString().includes("headers")
+    );
+    if (sym) strip(this[sym]);
+
+    if (statusMsg) {
+      return origWriteHead.call(this, statusCode, statusMsg, headersObj);
+    } else {
+      return origWriteHead.call(this, statusCode, headersObj);
+    }
+  };
+  next();
+});
+
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
@@ -176,13 +237,39 @@ app.use((req, res, next) => {
 // causing Chrome to immediately drop the connection with ERR_HTTP2_PROTOCOL_ERROR.
 // We MUST forcefully strip 'Connection' and 'Keep-Alive' right before Node writes headers.
 const ORIG_WRITE_HEAD = http.ServerResponse.prototype.writeHead;
-http.ServerResponse.prototype.writeHead = function (...args) {
+http.ServerResponse.prototype.writeHead = function (statusCode, statusMessage, headers) {
   this.removeHeader('Connection');
   this.removeHeader('connection');
   this.removeHeader('Keep-Alive');
   this.removeHeader('keep-alive');
-  
-  // Also strip from internal symbols if Node already serialized them
+
+  let headersObj = headers;
+  let statusMsg = statusMessage;
+
+  if (typeof statusMessage === 'object') {
+    headersObj = statusMessage;
+    statusMsg = undefined;
+  }
+
+  if (headersObj) {
+    if (Array.isArray(headersObj)) {
+      for (let i = 0; i < headersObj.length; i++) {
+        const key = headersObj[i][0];
+        if (key && (key.toLowerCase() === 'connection' || key.toLowerCase() === 'keep-alive')) {
+          headersObj.splice(i, 1);
+          i--;
+        }
+      }
+    } else if (typeof headersObj === 'object') {
+      for (const k of Object.keys(headersObj)) {
+        const lower = k.toLowerCase();
+        if (lower === 'connection' || lower === 'keep-alive') {
+          delete headersObj[k];
+        }
+      }
+    }
+  }
+
   const strip = (obj) => {
     if (!obj) return;
     for (const k of Object.getOwnPropertyNames(obj)) {
@@ -198,7 +285,11 @@ http.ServerResponse.prototype.writeHead = function (...args) {
   );
   if (sym) strip(this[sym]);
 
-  return ORIG_WRITE_HEAD.apply(this, args);
+  if (statusMsg) {
+    return ORIG_WRITE_HEAD.call(this, statusCode, statusMsg, headersObj);
+  } else {
+    return ORIG_WRITE_HEAD.call(this, statusCode, headersObj);
+  }
 };
 
 /* ---------------- UTILS ---------------- */
