@@ -770,6 +770,22 @@ app.use(
     path.join(path.dirname(fileURLToPath(import.meta.url)), "uploads"),
   ),
 );
+app.get("/api/debug-crash-log", (req, res) => {
+  try {
+    const p1 = path.join(process.cwd(), "crash_report.txt");
+    const p2 = path.join(process.cwd(), "CRASH_REPORT.txt");
+    const file = fs.existsSync(p1) ? p1 : (fs.existsSync(p2) ? p2 : null);
+    if (!file) {
+      return res.status(404).send("No crash report file found.");
+    }
+    const content = fs.readFileSync(file, "utf8");
+    res.setHeader("Content-Type", "text/plain");
+    res.send(content);
+  } catch (err) {
+    res.status(500).send("Error reading crash report: " + err.message);
+  }
+});
+
 app.use("/api/", healthRoutes);
 app.use("/api", requireLicense);
 app.use("/api/licenses", licenseRoutes);
