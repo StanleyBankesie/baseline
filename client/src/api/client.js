@@ -17,7 +17,10 @@ import {
   writeStoredAuth,
 } from "../auth/authStorage.js";
 
-const AXIOS_TIMEOUT_MS = 30000;
+const AXIOS_TIMEOUT_MS = Math.max(
+  5000,
+  Number(import.meta.env.VITE_AXIOS_TIMEOUT_MS || 45000),
+);
 const WARM_CACHE_MAX_AGE_MS = Math.max(
   0,
   Number(import.meta.env.VITE_WARM_CACHE_MAX_AGE_MS || 30 * 60 * 1000),
@@ -505,7 +508,8 @@ function dequeueNextGet(priority = "foreground") {
   if (priority === "background") {
     if (activeBackgroundGetCount >= BACKGROUND_GET_CONCURRENCY) return;
     if (
-      activeForegroundGetCount + activeBackgroundGetCount >= MAX_CONCURRENT_GETS
+      activeForegroundGetCount + activeBackgroundGetCount >=
+      MAX_CONCURRENT_GETS
     ) {
       return;
     }
@@ -515,7 +519,10 @@ function dequeueNextGet(priority = "foreground") {
   }
 
   if (activeForegroundGetCount >= FOREGROUND_GET_CONCURRENCY) return;
-  if (activeForegroundGetCount + activeBackgroundGetCount >= MAX_CONCURRENT_GETS) {
+  if (
+    activeForegroundGetCount + activeBackgroundGetCount >=
+    MAX_CONCURRENT_GETS
+  ) {
     return;
   }
   const next = queuedForegroundGets.shift();
@@ -556,9 +563,15 @@ function enqueueGet(work, priority = "foreground") {
         .then(resolve, reject)
         .finally(() => {
           if (priority === "background") {
-            activeBackgroundGetCount = Math.max(0, activeBackgroundGetCount - 1);
+            activeBackgroundGetCount = Math.max(
+              0,
+              activeBackgroundGetCount - 1,
+            );
           } else {
-            activeForegroundGetCount = Math.max(0, activeForegroundGetCount - 1);
+            activeForegroundGetCount = Math.max(
+              0,
+              activeForegroundGetCount - 1,
+            );
           }
           flushQueuedGets();
         });
@@ -590,6 +603,9 @@ function delay(ms) {
 function shouldRetryGet(error, attempt) {
   if (attempt >= GET_RETRY_LIMIT) return false;
   if (error?.response) return false;
+  const msg = String(error?.message || "").toLowerCase();
+  if (error?.code === "ECONNABORTED" || msg.includes("timeout of"))
+    return false;
   if (error?.config?.__skipNetworkRetry === true) return false;
   return true;
 }
@@ -599,8 +615,10 @@ async function runGetRequest(url, config) {
   const priority = normalizeGetPriority(config);
   while (true) {
     try {
-      return await enqueueGet(() =>
-        _origRequest({ method: "get", url, ...config }), priority);
+      return await enqueueGet(
+        () => _origRequest({ method: "get", url, ...config }),
+        priority,
+      );
     } catch (error) {
       if (!shouldRetryGet(error, attempt)) {
         throw error;

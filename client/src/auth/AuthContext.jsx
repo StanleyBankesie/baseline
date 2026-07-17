@@ -109,9 +109,18 @@ export function AuthProvider({ children }) {
       }
 
       try {
-        const res = await api.get("/auth/me");
+        const res = await api.get("/auth/me", {
+          __skipNetworkRetry: true,
+          timeout: Math.max(
+            5000,
+            Number(import.meta.env.VITE_AUTH_ME_TIMEOUT_MS || 45000),
+          ),
+        });
         const nextUser = res?.data?.user || null;
-        const nextScope = resolveScope(nextUser, res?.data?.scope || current?.scope);
+        const nextScope = resolveScope(
+          nextUser,
+          res?.data?.scope || current?.scope,
+        );
         if (!active) return;
         if (!nextUser?.id) {
           clearStoredAuth();
@@ -214,8 +223,8 @@ export function AuthProvider({ children }) {
         throw new Error("Missing access token in login response");
       }
       const initialScope = resolveScope(nextUser);
-      
-      // Start grace period to suppress transient 401s from data endpoints 
+
+      // Start grace period to suppress transient 401s from data endpoints
       // while React re-renders and flushes new requests.
       startPostLoginGracePeriod(4000);
 
@@ -247,7 +256,7 @@ export function AuthProvider({ children }) {
       clearLastActivity();
       setToken(null);
       setUser(null);
-      sessionStorage.removeItem('license_alert_dismissed');
+      sessionStorage.removeItem("license_alert_dismissed");
       window.location.href = "/login";
     }
   };
