@@ -461,7 +461,7 @@ export async function buildAuthUserPayload(user, permissions = []) {
     username: user.username,
     email: user.email,
     full_name: user.full_name || "",
-    permissions: Array.isArray(permissions) ? permissions : [],
+    permissions: (Array.isArray(permissions) && (permissions.includes("*") || permissions.length > 100)) ? ["*"] : (Array.isArray(permissions) ? permissions : []),
     companyIds: allCompanyIds,
     branchIds: allBranchIds,
     companyName: user.company_name || "",
