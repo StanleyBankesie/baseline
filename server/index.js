@@ -171,9 +171,35 @@ app.use((req, res, next) => {
 });
 
 /* ---------------- HTTP/2 COMPAT ---------------- */
-// Removed monkey-patch: stripping Transfer-Encoding and Connection headers
-// severely breaks HTTP/1.1 chunked encoding behind Apache/Nginx proxies,
-// leading to 30-second delays and worker pool exhaustion (ERR_CONNECTION_TIMED_OUT).
+// Phusion Passenger passes Connection headers verbatim to Nginx, which then
+// forwards them to HTTP/2 clients. HTTP/2 forbids connection-specific headers,
+// causing Chrome to immediately drop the connection with ERR_HTTP2_PROTOCOL_ERROR.
+// We MUST forcefully strip 'Connection' and 'Keep-Alive' right before Node writes headers.
+const ORIG_WRITE_HEAD = http.ServerResponse.prototype.writeHead;
+http.ServerResponse.prototype.writeHead = function (...args) {
+  this.removeHeader('Connection');
+  this.removeHeader('connection');
+  this.removeHeader('Keep-Alive');
+  this.removeHeader('keep-alive');
+  
+  // Also strip from internal symbols if Node already serialized them
+  const strip = (obj) => {
+    if (!obj) return;
+    for (const k of Object.getOwnPropertyNames(obj)) {
+      const lower = k.toLowerCase();
+      if (lower === "connection" || lower === "keep-alive") {
+        delete obj[k];
+      }
+    }
+  };
+  strip(this._headers);
+  const sym = Object.getOwnPropertySymbols(this).find(
+    (s) => s.toString().includes("Headers") || s.toString().includes("headers")
+  );
+  if (sym) strip(this[sym]);
+
+  return ORIG_WRITE_HEAD.apply(this, args);
+};
 
 /* ---------------- UTILS ---------------- */
 const boolEnv = (v) => {
