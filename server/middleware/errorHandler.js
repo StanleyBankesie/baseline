@@ -37,6 +37,7 @@ export function errorHandler(err, req, res, next) {
   const status = err.status || 500;
   
   const type = `HTTP_${Number(status) || 500}`;
+  res.locals.__crashLogged = true;
   logToCrashReport(type, err, {
     status,
     code: err?.code || null,

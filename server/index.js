@@ -124,6 +124,45 @@ app.use(
 app.use(morgan("dev"));
 
 app.use((req, res, next) => {
+  const startedAt = Date.now();
+  const requestId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  res.locals.__requestId = requestId;
+
+  const getBaseContext = () => ({
+    requestId,
+    durationMs: Date.now() - startedAt,
+    method: req.method,
+    url: req.originalUrl || req.url,
+    ip: req.ip,
+    origin: req.headers?.origin || "",
+    userAgent: req.headers?.["user-agent"] || "",
+    userId: Number(req.user?.sub || req.user?.id) || null,
+    companyId: req.scope?.companyId ?? null,
+    branchId: req.scope?.branchId ?? null,
+  });
+
+  res.on("finish", () => {
+    const status = Number(res.statusCode || 0) || 0;
+    if (status >= 400 && res.locals.__crashLogged !== true) {
+      logToCrashReport(`HTTP_${status}`, `Request failed with status ${status}`, {
+        ...getBaseContext(),
+        status,
+      });
+      res.locals.__crashLogged = true;
+    }
+  });
+
+  res.on("close", () => {
+    if (res.writableEnded) return;
+    if (res.locals.__crashLogged === true) return;
+    logToCrashReport("HTTP_CONNECTION_CLOSED", "Connection closed before response finished", getBaseContext());
+    res.locals.__crashLogged = true;
+  });
+
+  next();
+});
+
+app.use((req, res, next) => {
   res.setHeader(
     "Content-Security-Policy",
     "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' http://localhost:* ws://localhost:* https://demoserver.omnisuite-erp.com wss://demoserver.omnisuite-erp.com https://demo.omnisuite-erp.com;",
