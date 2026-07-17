@@ -61,3 +61,159 @@ Stack: Error: Connection is closed.
     at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
 
 ---
+
+[2026-07-16T21:06:47.921Z] [HTTP_500] Table 'demo_db.adm_users' doesn't exist
+Context: {"method":"POST","url":"/api/auth/refresh","ip":"127.0.0.1","body":{}}
+Error: Table 'demo_db.adm_users' doesn't exist
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:576:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:646:22)
+    at async ensureAuthTables (file:///C:/Users/stanl/baseline/server/services/token.service.js:291:5)
+    at async consumeRefreshToken (file:///C:/Users/stanl/baseline/server/services/token.service.js:552:3)
+    at async file:///C:/Users/stanl/baseline/server/services/token.service.js:604:23
+    at async rotateRefreshSession (file:///C:/Users/stanl/baseline/server/services/token.service.js:650:23)
+--------------------------------------------------------------------------------
+
+[2026-07-16T21:06:48.063Z] [HTTP_500] Table 'demo_db.adm_payment_packages' doesn't exist
+Context: {"method":"GET","url":"/api/payment-packages","ip":"127.0.0.1","body":{}}
+Error: Table 'demo_db.adm_payment_packages' doesn't exist
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async getPaymentPackages (file:///C:/Users/stanl/baseline/server/controllers/paymentPackages.controller.js:6:22)
+--------------------------------------------------------------------------------
+
+[2026-07-16T21:07:01.877Z] [HTTP_500] Table 'demo_db.adm_users' doesn't exist
+Context: {"method":"POST","url":"/api/login","ip":"127.0.0.1","body":{"username":"admin","password":"Admin@123","rememberMe":true}}
+Error: Table 'demo_db.adm_users' doesn't exist
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async findUserByUsername (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:141:16)
+    at async login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:357:18)
+--------------------------------------------------------------------------------
+
+[2026-07-17T07:25:04.377Z] [HTTP_500] Table 'demo_db.adm_payment_packages' doesn't exist
+Context: {"method":"GET","url":"/api/payment-packages","ip":"127.0.0.1","body":{}}
+Error: Table 'demo_db.adm_payment_packages' doesn't exist
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async getPaymentPackages (file:///C:/Users/stanl/baseline/server/controllers/paymentPackages.controller.js:6:22)
+--------------------------------------------------------------------------------
+
+[2026-07-17T07:43:07.326Z] [HTTP_500] Access denied for user 'admin'@'localhost' (using password: YES)
+Context: {"method":"POST","url":"/api/login","ip":"127.0.0.1","body":{"username":"admin","password":"Admin@123","rememberMe":true}}
+Error: Access denied for user 'admin'@'localhost' (using password: YES)
+    at Packet.asError (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\packets\packet.js:791:17)
+    at ClientHandshake.execute (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\commands\command.js:29:26)
+    at PoolConnection.handlePacket (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+--------------------------------------------------------------------------------
+
+[2026-07-17T07:43:18.838Z] [HTTP_500] Access denied for user 'admin'@'localhost' (using password: YES)
+Context: {"method":"GET","url":"/api/payment-packages","ip":"127.0.0.1","body":{}}
+Error: Access denied for user 'admin'@'localhost' (using password: YES)
+    at Packet.asError (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\packets\packet.js:791:17)
+    at ClientHandshake.execute (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\commands\command.js:29:26)
+    at PoolConnection.handlePacket (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+--------------------------------------------------------------------------------
+
+[2026-07-17T07:43:19.159Z] [HTTP_500] Access denied for user 'admin'@'localhost' (using password: YES)
+Context: {"method":"GET","url":"/api/admin/settings/login-background/meta","ip":"127.0.0.1","body":{}}
+Error: Access denied for user 'admin'@'localhost' (using password: YES)
+    at Packet.asError (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\packets\packet.js:791:17)
+    at ClientHandshake.execute (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\commands\command.js:29:26)
+    at PoolConnection.handlePacket (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+--------------------------------------------------------------------------------
+
+[2026-07-17T07:43:28.251Z] [HTTP_500] Access denied for user 'admin'@'localhost' (using password: YES)
+Context: {"method":"POST","url":"/api/login","ip":"127.0.0.1","body":{"username":"admin","password":"Admin@123","rememberMe":true}}
+Error: Access denied for user 'admin'@'localhost' (using password: YES)
+    at Packet.asError (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\packets\packet.js:791:17)
+    at ClientHandshake.execute (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\commands\command.js:29:26)
+    at PoolConnection.handlePacket (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+--------------------------------------------------------------------------------
+
+[2026-07-17T07:46:07.268Z] [HTTP_500] Access denied for user 'admin'@'localhost' (using password: YES)
+Context: {"method":"GET","url":"/api/payment-packages","ip":"127.0.0.1","body":{}}
+Error: Access denied for user 'admin'@'localhost' (using password: YES)
+    at Packet.asError (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\packets\packet.js:791:17)
+    at ClientHandshake.execute (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\commands\command.js:29:26)
+    at PoolConnection.handlePacket (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+--------------------------------------------------------------------------------
+
+[2026-07-17T07:46:13.457Z] [HTTP_500] Access denied for user 'admin'@'localhost' (using password: YES)
+Context: {"method":"GET","url":"/api/admin/settings/login-background/meta","ip":"127.0.0.1","body":{}}
+Error: Access denied for user 'admin'@'localhost' (using password: YES)
+    at Packet.asError (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\packets\packet.js:791:17)
+    at ClientHandshake.execute (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\commands\command.js:29:26)
+    at PoolConnection.handlePacket (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\base\connection.js:552:34)
+    at PacketParser.onPacket (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\base\connection.js:102:12)
+    at PacketParser.executeStart (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\packet_parser.js:75:16)
+    at Socket.<anonymous> (C:\Users\stanl\baseline\server\node_modules\mysql2\lib\base\connection.js:109:25)
+    at Socket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+--------------------------------------------------------------------------------
+
+[2026-07-17T07:48:54.281Z] [HTTP_500] The user specified as a definer ('admin'@'localhost') does not exist
+Context: {"method":"POST","url":"/api/login","ip":"127.0.0.1","body":{"username":"admin","password":"Admin@123","rememberMe":true}}
+Error: The user specified as a definer ('admin'@'localhost') does not exist
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async resetFailedLoginAttempts (file:///C:/Users/stanl/baseline/server/services/token.service.js:676:3)
+    at async completeLogin (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:294:3)
+    at async login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:436:5)
+--------------------------------------------------------------------------------

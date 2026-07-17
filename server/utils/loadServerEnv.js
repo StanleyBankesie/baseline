@@ -107,12 +107,16 @@ export function loadServerEnv(metaUrl = import.meta.url) {
   const effectiveIsProd = runtimeIsProd || baseIsProd || prodSetsNodeEnv;
 
   // Conditionally load local or production overrides based on current mode
-  if (!effectiveIsProd && (forceLocal || hasLocalEnvFile)) {
+  if (forceLocal) {
     for (const filePath of localCandidates) {
       loadIfExists(filePath, true);
     }
   } else if (effectiveIsProd) {
     for (const filePath of prodCandidates) {
+      loadIfExists(filePath, true);
+    }
+  } else if (hasLocalEnvFile) {
+    for (const filePath of localCandidates) {
       loadIfExists(filePath, true);
     }
   }
