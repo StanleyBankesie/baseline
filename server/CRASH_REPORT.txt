@@ -217,3 +217,19 @@ Error: The user specified as a definer ('admin'@'localhost') does not exist
     at async completeLogin (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:294:3)
     at async login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:436:5)
 --------------------------------------------------------------------------------
+
+[2026-07-17T08:11:09.077Z] [UncaughtException] listen EADDRINUSE: address already in use 127.0.0.1:4002
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-17T08:12:31.648Z] [UncaughtException] listen EADDRINUSE: address already in use 127.0.0.1:4002
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------

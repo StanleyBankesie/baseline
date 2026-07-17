@@ -85,10 +85,10 @@ const isProd = String(process.env.NODE_ENV).toLowerCase() === "production";
 
 const originalPort = process.env.PORT;
 
-if (isProd && fs.existsSync(prodPath)) {
-  dotenv.config({ path: prodPath, override: true });
-} else if (forceLocal && fs.existsSync(localPath)) {
+if (forceLocal && fs.existsSync(localPath)) {
   dotenv.config({ path: localPath, override: true });
+} else if (isProd && fs.existsSync(prodPath)) {
+  dotenv.config({ path: prodPath, override: true });
 } else if (fs.existsSync(localPath)) {
   dotenv.config({ path: localPath, override: true });
 }
@@ -99,7 +99,7 @@ if (originalPort !== undefined && String(originalPort).trim() !== "") {
 
 try {
   if (fs.existsSync(prodPath)) {
-    const parsed = dotenv.config({ path: prodPath }).parsed || {};
+    const parsed = dotenv.parse(fs.readFileSync(prodPath, "utf8")) || {};
     [
       "SMTP_HOST",
       "SMTP_PORT",
