@@ -35,7 +35,7 @@ export function startPostLoginGracePeriod(durationMs = 4000) {
  * Includes credentials by default and automatically normalizes JSON payloads.
  */
 export const api = axios.create({
-  withCredentials: true,
+  withCredentials: false,
   timeout: AXIOS_TIMEOUT_MS,
   headers: {
     "Content-Type": "application/json",
@@ -205,6 +205,16 @@ api.interceptors.request.use(
     if (!config.baseURL) {
       config.baseURL = api.defaults.baseURL;
     }
+
+    const urlPath = normalizeUrl(config.url);
+    const needsCookieCredentials =
+      urlPath === "/login" ||
+      urlPath === "/auth/refresh" ||
+      urlPath === "/auth/logout";
+    if (needsCookieCredentials) {
+      config.withCredentials = true;
+    }
+
     const storedAuth = readStoredAuth();
     const accessToken = String(storedAuth?.token || "").trim();
     if (accessToken) {
