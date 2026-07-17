@@ -47,15 +47,20 @@ export async function requireAuth(req, res, next) {
       ? authHeader.slice(7).trim()
       : "";
 
-    console.log(
-      `[AUTH-MIDDLEWARE] Cookie header: ${req.headers.cookie ? req.headers.cookie.substring(0, 50) + "..." : "empty"}, sessionId: ${sessionId ? sessionId.substring(0, 8) + "..." : "none"}`,
-    );
+    const debugAuth = String(process.env.DEBUG_AUTH || "").trim() === "1";
+    if (debugAuth) {
+      console.log(
+        `[AUTH-MIDDLEWARE] Cookie header: ${req.headers.cookie ? req.headers.cookie.substring(0, 50) + "..." : "empty"}, sessionId: ${sessionId ? sessionId.substring(0, 8) + "..." : "none"}`,
+      );
+    }
 
     if (sessionId) {
       const sessionData = await cacheGet(`omnisuite_session:${sessionId}`);
-      console.log(
-        `[AUTH-MIDDLEWARE] Looking up omnisuite_session:${sessionId.substring(0, 8)}... found: ${sessionData ? "YES" : "NO"}`,
-      );
+      if (debugAuth) {
+        console.log(
+          `[AUTH-MIDDLEWARE] Looking up omnisuite_session:${sessionId.substring(0, 8)}... found: ${sessionData ? "YES" : "NO"}`,
+        );
+      }
 
       if (sessionData && sessionData.user) {
         // Slide session TTL
@@ -66,9 +71,11 @@ export async function requireAuth(req, res, next) {
           sessionData,
           ttlSeconds,
         ).catch(() => {});
-        console.log(
-          `[AUTH-MIDDLEWARE] Session authenticated for user: ${sessionData.user.username}`,
-        );
+        if (debugAuth) {
+          console.log(
+            `[AUTH-MIDDLEWARE] Session authenticated for user: ${sessionData.user.username}`,
+          );
+        }
 
         req.user = {
           ...(req.user || {}),
@@ -90,9 +97,11 @@ export async function requireAuth(req, res, next) {
         };
         req.scope = req.scope || {};
         req.scope.userId = Number(payload.sub || payload.id) || null;
-        console.log(
-          `[AUTH-MIDDLEWARE] Bearer token authenticated for user: ${payload.username || payload.sub || payload.id}`,
-        );
+        if (debugAuth) {
+          console.log(
+            `[AUTH-MIDDLEWARE] Bearer token authenticated for user: ${payload.username || payload.sub || payload.id}`,
+          );
+        }
         return next();
       } catch (tokenErr) {
         const gracePayload = await lookupGraceToken(bearerToken);
@@ -104,18 +113,24 @@ export async function requireAuth(req, res, next) {
           req.scope = req.scope || {};
           req.scope.userId =
             Number(gracePayload.sub || gracePayload.id) || null;
-          console.log(
-            `[AUTH-MIDDLEWARE] Grace token authenticated for user: ${gracePayload.username || gracePayload.sub || gracePayload.id}`,
-          );
+          if (debugAuth) {
+            console.log(
+              `[AUTH-MIDDLEWARE] Grace token authenticated for user: ${gracePayload.username || gracePayload.sub || gracePayload.id}`,
+            );
+          }
           return next();
         }
-        console.warn(
-          `[AUTH-MIDDLEWARE] Bearer token rejected: ${tokenErr?.message || tokenErr}`,
-        );
+        if (debugAuth) {
+          console.warn(
+            `[AUTH-MIDDLEWARE] Bearer token rejected: ${tokenErr?.message || tokenErr}`,
+          );
+        }
       }
     }
 
-    console.log(`[AUTH-MIDDLEWARE] No valid session found, returning 401`);
+    if (debugAuth) {
+      console.log(`[AUTH-MIDDLEWARE] No valid session found, returning 401`);
+    }
 
     // If token is missing but dev bypass is allowed, attach dev user
     if (allowDevBypass()) {

@@ -719,6 +719,18 @@ const PORT = process.env.PORT || 4002;
 
 // Create HTTP server for Socket.io
 const server = http.createServer(app);
+server.on("error", (err) => {
+  logToCrashReport("SERVER_ERROR", err);
+});
+server.on("clientError", (err, socket) => {
+  logToCrashReport("CLIENT_ERROR", err, {
+    remoteAddress: socket?.remoteAddress || null,
+    remotePort: socket?.remotePort || null,
+  });
+  try {
+    socket.end("HTTP/1.1 400 Bad Request\r\n\r\n");
+  } catch {}
+});
 
 // Timeouts to avoid long-hanging connections in managed hosting
 try {
