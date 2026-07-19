@@ -796,8 +796,32 @@ export const reverseByDocument = async (req, res, next) => {
         ...Object.fromEntries(docTypes.map((v, i) => [`t${i}`, v])),
       },
     );
-    if (!instances.length)
+    if (!instances.length) {
+      const tableMap = {
+        SALES_ORDER: "sal_orders",
+        SALES_INVOICE: "sal_invoices",
+        SALES_QUOTATION: "sal_quotations",
+        SALES_RETURN: "sal_returns",
+        PURCHASE_ORDER: "pur_orders",
+        PURCHASE_VOUCHER: "pur_vouchers",
+        PURCHASE_RETURN: "pur_returns",
+        GOODS_RECEIPT: "inv_goods_receipt_hdr",
+        GOODS_ISSUE: "inv_goods_issues",
+        MATERIAL_REQUISITION: "inv_material_requisitions",
+        STOCK_UPDATION: "inv_stock_adjustments",
+        STOCK_VERIFICATION: "inv_stock_verifications",
+        GENERAL_REQUISITION: "pur_general_requisitions",
+        SERVICE_REQUEST: "srv_service_requests",
+        CUSTOMER_PROSPECT: "sal_prospect_customers"
+      };
+      const tableName = tableMap[docTypeRaw.toUpperCase()];
+      if (tableName) {
+        // Fallback for manually approved documents without workflow
+        await query(`UPDATE ${tableName} SET status = 'DRAFT' WHERE id = :docId AND company_id = :companyId`, { docId, companyId });
+        return res.json({ message: "Document reversed to DRAFT (manual approval)" });
+      }
       throw httpError(404, "NOT_FOUND", "Workflow instance not found");
+    }
     req.params.instanceId = instances[0].id;
     return reverseApproval(req, res, next);
   } catch (err) {

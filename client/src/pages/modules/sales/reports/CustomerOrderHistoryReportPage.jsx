@@ -62,8 +62,7 @@ export default function CustomerOrderHistoryReportPage() {
 
   useEffect(() => {
     run();
-  }, []);
-
+  }, [customerId, fromDate, toDate]);
 
   const { sorted: sorted_items, sortKey, sortDir, toggle } = useSort(items, "txn_date", "desc");
 
@@ -85,7 +84,7 @@ export default function CustomerOrderHistoryReportPage() {
         </div>
         <div className="card-body">
           {error ? <div className="text-red-600 text-sm mb-3">{error}</div> : null}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
               <label className="label">Customer</label>
               <select
@@ -119,14 +118,9 @@ export default function CustomerOrderHistoryReportPage() {
                 onChange={(e) => setToDate(e.target.value)}
               />
             </div>
-            <div className="flex items-end">
-              <button type="button" className="btn" onClick={run} disabled={loading}>
-                {loading ? "Running..." : "Run"}
-              </button>
-            </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table w-full table-fixed">
               <thead>
                 <tr>
                   <SortableHeader label="Stage" sortKey="stage" currentKey={sortKey} direction={sortDir} onToggle={toggle} />

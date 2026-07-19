@@ -426,8 +426,19 @@ export const login = async (req, res, next) => {
           // Bypass login block to allow them inside where modules are hidden
           user.licenseExpired = true;
         } else {
+          const permCheck = await query(
+            "SELECT 1 FROM adm_admin_page_permissions WHERE user_id = ? AND feature_key = 'system:license-renewal'", 
+            [user.id]
+          );
+          const superRes = await query("SELECT value FROM app_settings WHERE `key` = 'super_admin_id'").catch(()=>({rows:[]}));
+          const superIdVal = superRes[0]?.value || (superRes.rows && superRes.rows[0]?.value);
+          const superId = superIdVal ? parseInt(superIdVal, 10) : 1;
+          
+          const canRenew = (user.id === superId) || (permCheck && permCheck.length > 0);
+
           const error = httpError(403, "LICENSE_EXPIRED", licenseStatus.reason || "Your company license has expired. Please contact your administrator to renew.");
           error.companyId = user.company_id;
+          error.canRenew = canRenew;
           throw error;
         }
       }

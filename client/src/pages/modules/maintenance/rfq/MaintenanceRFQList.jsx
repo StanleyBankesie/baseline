@@ -68,29 +68,29 @@ export default function MaintenanceRFQList() {
             <table className="min-w-full">
               <thead className="bg-[#f8fafc] dark:bg-slate-900/50">
                 <tr className="text-left bg-slate-50 dark:bg-slate-900/50">
-                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">RFQ No</th>
-                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Date</th>
-                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Request Ref</th>
-                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Suppliers Invited</th>
-                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Deadline</th>
-                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
-                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Approval Email</th>
-                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Created By</th>
-                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Created Date</th>
-                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Actions</th>
+                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 whitespace-nowrap">RFQ No</th>
+                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 whitespace-nowrap">Date</th>
+                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 whitespace-nowrap">Request Ref</th>
+                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 whitespace-nowrap">Suppliers Invited</th>
+                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 whitespace-nowrap">Deadline</th>
+                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 whitespace-nowrap">Status</th>
+                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 whitespace-nowrap">Approval Email</th>
+                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 whitespace-nowrap">Created By</th>
+                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 whitespace-nowrap">Created Date</th>
+                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                {loading && <tr><td colSpan="10" className="px-4 py-8 text-center text-slate-500">Loading...</td></tr>}
-                {!loading && !filtered.length && <tr><td colSpan="10" className="px-4 py-8 text-center text-slate-500">No RFQs found</td></tr>}
+                {loading && <tr><td colSpan="10" className="px-4 py-8 text-center text-slate-500 whitespace-nowrap">Loading...</td></tr>}
+                {!loading && !filtered.length && <tr><td colSpan="10" className="px-4 py-8 text-center text-slate-500 whitespace-nowrap">No RFQs found</td></tr>}
                 {!loading && filtered.map(r => (
                   <tr key={r.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                    <td className="px-4 py-3 font-mono text-sm">{r.rfq_no}</td>
-                    <td className="px-4 py-3 text-sm">{r.rfq_date ? new Date(r.rfq_date).toLocaleDateString() : "-"}</td>
-                    <td className="px-4 py-3 text-sm">{r.request_id}</td>
-                    <td className="px-4 py-3 text-sm">{r.supplier_names}</td>
-                    <td className="px-4 py-3 text-sm">{r.response_deadline ? new Date(r.response_deadline).toLocaleDateString() : "-"}</td>
-                    <td className="px-4 py-3 text-sm"><Badge value={r.status} colorMap={statusColors} /></td>
+                    <td className="px-4 py-3 font-mono text-sm whitespace-nowrap">{r.rfq_no}</td>
+                    <td className="px-4 py-3 text-sm whitespace-nowrap">{r.rfq_date ? new Date(r.rfq_date).toLocaleDateString() : "-"}</td>
+                    <td className="px-4 py-3 text-sm whitespace-nowrap">{r.request_id}</td>
+                    <td className="px-4 py-3 text-sm whitespace-nowrap">{r.supplier_names}</td>
+                    <td className="px-4 py-3 text-sm whitespace-nowrap">{r.response_deadline ? new Date(r.response_deadline).toLocaleDateString() : "-"}</td>
+                    <td className="px-4 py-3 text-sm whitespace-nowrap"><Badge value={r.status} colorMap={statusColors} /></td>
                     <td className="px-4 py-3 text-sm whitespace-nowrap space-x-2">
                       <button
                         type="button"
@@ -124,8 +124,8 @@ export default function MaintenanceRFQList() {
                         Send Email
                       </button>
                     </td>
-                    <td className="px-4 py-3 text-sm">{r.created_by_name || "-"}</td>
-                    <td className="px-4 py-3 text-sm">{r.created_at ? new Date(r.created_at).toLocaleDateString() : "-"}</td>
+                    <td className="px-4 py-3 text-sm whitespace-nowrap">{r.created_by_name || "-"}</td>
+                    <td className="px-4 py-3 text-sm whitespace-nowrap">{r.created_at ? new Date(r.created_at).toLocaleDateString() : "-"}</td>
                     <td className="px-4 py-3 text-sm whitespace-nowrap">
                       <div className="flex items-center gap-1">
                         <button type="button" className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded transition-colors" title="View" onClick={() => navigate(`/maintenance/rfq/${r.id}?mode=view`)}><Eye size={15} /></button>

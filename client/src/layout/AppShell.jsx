@@ -52,6 +52,7 @@ import addNotification from "../utils/addNotification.js";
 
 import logoDark from "../assets/resources/OMNISUITE_WHITE_LOGO.png";
 import logoLight from "../assets/resources/OMNISUITE_LOGO_FILL.png";
+import clearIcon from "../assets/resources/OMNISUITE_ICON_CLEAR.png";
 import PaymentPackageModal from "../components/PaymentPackageModal.jsx";
 import { api } from "../api/client.js";
 import useOfflineQueue from "../offline/useOfflineQueue.js";
@@ -230,6 +231,7 @@ export default function AppShell() {
     canPerformPageAction,
     ensurePagePerms,
     basePathFrom,
+    canAccessFeatureKey,
   } = usePermission();
   const { theme } = useTheme();
   const { pending, failed, completed, items, lastEvent } = useOfflineQueue();
@@ -307,15 +309,17 @@ export default function AppShell() {
               // Temporarily ignore the dismissal check to guarantee it shows during our testing
               const isDismissed = false; // sessionStorage.getItem("licenseAlertDismissed") === "true";
               const canDismiss = (l.status === "ACTIVE" && daysRemaining > 0);
+              const canRenew = canAccessFeatureKey("system", "license-renewal");
 
               if (!isDismissed || !canDismiss) {
                 Swal.fire({
                   toast: true,
                   position: "bottom-end",
                   title,
-                  icon: (daysRemaining === 0 || l.status !== "ACTIVE") ? "error" : "warning",
+                  iconHtml: `<img src="${clearIcon}" style="height: 64px; width: auto; object-fit: contain;" />`,
                   text,
                   showCancelButton: canDismiss,
+                  showConfirmButton: canRenew,
                   confirmButtonColor: "#2563eb",
                   cancelButtonColor: "#64748b",
                   confirmButtonText: "Renew",
@@ -326,7 +330,8 @@ export default function AppShell() {
                     container: 'z-[999999]',
                     title: 'text-sm m-0 p-0',
                     htmlContainer: 'text-xs m-1 p-0',
-                    actions: 'm-0 p-0 scale-75'
+                    actions: 'm-0 p-0 scale-75',
+                    icon: 'border-0 m-0 mr-2'
                   },
                   timerProgressBar: true,
                   showCloseButton: canDismiss,

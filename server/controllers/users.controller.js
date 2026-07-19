@@ -71,8 +71,8 @@ export const getUsers = async (req, res, next) => {
     const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
     const lim = Math.min(100, Math.max(1, parseInt(limit || "50", 10)));
     const sql = `
-      SELECT u.id, u.company_id, u.branch_id, u.username, u.email, 
-u.full_name, u.is_active, u.created_at,
+      SELECT u.id, u.company_id, u.branch_id, u.username, u.full_name, u.email, 
+             u.is_active, u.created_at,
              c.name as company_name, b.name as branch_name,
              uc.username as created_by_name
       FROM adm_users u
@@ -930,6 +930,7 @@ export const getUserAssignments = async (req, res, next) => {
     const items = await query(`SELECT 
          u.id, 
          u.username, 
+         u.full_name,
          u.email, 
          r.name as role_name,
          COUNT(up.page_id) as custom_count,
@@ -939,7 +940,7 @@ export const getUserAssignments = async (req, res, next) => {
        JOIN adm_user_permissions up ON u.id = up.user_id
        LEFT JOIN adm_roles r ON u.role_id = r.id
         LEFT JOIN adm_users uc ON uc.id = u.created_by
-         GROUP BY u.id, u.username, u.email, r.name, uc.username
+         GROUP BY u.id, u.username, u.full_name, u.email, r.name, uc.username
        ORDER BY u.username`,
     );
     res.json({

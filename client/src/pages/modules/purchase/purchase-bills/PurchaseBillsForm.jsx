@@ -111,7 +111,7 @@ export default function PurchaseBillsForm() {
               : `PLB-${String(1).padStart(6, "0")}`;
           setFormData((prev) => ({ ...prev, bill_no: initialNo }));
         }
-        const [supRes, poRes, itemsRes, uomsRes, taxesRes, curRes, projRes] =
+        const [supRes, poRes, itemsRes, uomsRes, taxesRes, curRes, projRes, ccRes] =
           await Promise.all([
             api
               .get("/purchase/suppliers")

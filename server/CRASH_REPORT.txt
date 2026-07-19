@@ -1,0 +1,1623 @@
+
+[2026-07-17T17:13:01.060Z] HTTP_500
+Summary: branchIdsStr is not defined
+Request: GET /api/sales/returns/next-no (status 500)
+Context:
+status: 500
+code: null
+method: GET
+url: /api/sales/returns/next-no
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+ReferenceError: branchIdsStr is not defined
+    at nextSalesReturnNo (file:///C:/Users/stanl/baseline/server/routes/sales.route.js:693:28)
+    at file:///C:/Users/stanl/baseline/server/routes/sales.route.js:8351:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-17T17:14:13.062Z] HTTP_500
+Summary: branchIdsStr is not defined
+Request: GET /api/sales/returns/next-no (status 500)
+Context:
+status: 500
+code: null
+method: GET
+url: /api/sales/returns/next-no
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+ReferenceError: branchIdsStr is not defined
+    at nextSalesReturnNo (file:///C:/Users/stanl/baseline/server/routes/sales.route.js:693:28)
+    at file:///C:/Users/stanl/baseline/server/routes/sales.route.js:8351:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-17T17:26:10.668Z] HTTP_404
+Summary: Quotation not found
+Request: GET /api/sales/quotations/12 (status 404)
+Context:
+status: 404
+code: NOT_FOUND
+method: GET
+url: /api/sales/quotations/12
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Quotation not found
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/routes/sales.route.js:2644:24
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-17T17:26:22.503Z] HTTP_404
+Summary: Quotation not found
+Request: GET /api/sales/quotations/18 (status 404)
+Context:
+status: 404
+code: NOT_FOUND
+method: GET
+url: /api/sales/quotations/18
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Quotation not found
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/routes/sales.route.js:2644:24
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-17T17:27:16.404Z] HTTP_404
+Summary: Quotation not found
+Request: GET /api/sales/quotations/10 (status 404)
+Context:
+status: 404
+code: NOT_FOUND
+method: GET
+url: /api/sales/quotations/10
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Quotation not found
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/routes/sales.route.js:2644:24
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-17T17:31:43.478Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/routes/sales.route.js:4233:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/baseline/server/middleware/requirePermission.js:96:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:235:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-17T17:57:55.600Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/inventory/reports/stock-aging-analysis?asOf=2026-07-17 (status 404)
+Context:
+requestId: mrp8qtby-43ocfai0
+durationMs: 18
+method: GET
+url: /api/inventory/reports/stock-aging-analysis?asOf=2026-07-17
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-17T18:03:54.906Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/inventory/reports/stock-transfer-register (status 404)
+Context:
+requestId: mrp8yil1-cly1waka
+durationMs: 5
+method: GET
+url: /api/inventory/reports/stock-transfer-register
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-17T18:19:56.096Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/inventory/reports/stock-aging-analysis?asOf=2026-07-17 (status 404)
+Context:
+requestId: mrp9j48o-8uy56chw
+durationMs: 8
+method: GET
+url: /api/inventory/reports/stock-aging-analysis?asOf=2026-07-17
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-17T18:20:51.968Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/inventory/reports/slow-moving (status 404)
+Context:
+requestId: mrp9kbbb-qcr83dmd
+durationMs: 56
+method: GET
+url: /api/inventory/reports/slow-moving
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-17T18:21:09.649Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/inventory/reports/stock-aging-analysis?asOf=2026-07-17 (status 404)
+Context:
+requestId: mrp9kozx-ujeuhqx4
+durationMs: 4
+method: GET
+url: /api/inventory/reports/stock-aging-analysis?asOf=2026-07-17
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-17T18:21:23.478Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/inventory/reports/stock-aging-analysis?asOf=2026-07-17 (status 404)
+Context:
+requestId: mrp9kzo4-z9v31x4m
+durationMs: 2
+method: GET
+url: /api/inventory/reports/stock-aging-analysis?asOf=2026-07-17
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-17T18:21:29.673Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/inventory/reports/fast-moving (status 404)
+Context:
+requestId: mrp9l4g4-5xj8zc2g
+durationMs: 5
+method: GET
+url: /api/inventory/reports/fast-moving
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-17T18:22:08.454Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/inventory/reports/fast-moving (status 404)
+Context:
+requestId: mrp9lyde-f208fjmg
+durationMs: 4
+method: GET
+url: /api/inventory/reports/fast-moving
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-17T18:22:50.238Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/inventory/reports/non-moving?asOf=2026-07-17 (status 404)
+Context:
+requestId: mrp9mum3-aiv4p0ys
+durationMs: 3
+method: GET
+url: /api/inventory/reports/non-moving?asOf=2026-07-17
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-17T18:23:15.819Z] HTTP_500
+Summary: Table 'omnisuite.v_inv_material_returns' doesn't exist
+Request: GET /api/inventory/reports/material-returns (status 500)
+Context:
+status: 500
+code: ER_NO_SUCH_TABLE
+method: GET
+url: /api/inventory/reports/material-returns
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Table 'omnisuite.v_inv_material_returns' doesn't exist
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:2280:20
+--------------------------------------------------------------------------------
+
+[2026-07-17T18:31:25.831Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/inventory/reports/stock-aging-analysis?asOf=2026-07-17 (status 404)
+Context:
+requestId: mrp9xwg2-guwwnh74
+durationMs: 4
+method: GET
+url: /api/inventory/reports/stock-aging-analysis?asOf=2026-07-17
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-17T18:40:23.424Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/inventory/reports/stock-aging-analysis?asOf=2026-07-17 (status 404)
+Context:
+requestId: mrpa9f92-nf8v5y4k
+durationMs: 9
+method: GET
+url: /api/inventory/reports/stock-aging-analysis?asOf=2026-07-17
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-17T23:15:11.174Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/access/users (status 404)
+Context:
+requestId: mrpk2ta9-nacuogot
+durationMs: 5
+method: GET
+url: /api/access/users
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-17T23:16:54.938Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/access/users (status 404)
+Context:
+requestId: mrpk51cm-hlxst4ya
+durationMs: 4
+method: GET
+url: /api/access/users
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-17T23:46:53.900Z] HTTP_404
+Summary: Request failed with status 404
+Request: POST /api (status 404)
+Context:
+requestId: mrpl7lfr-sh2afh2l
+durationMs: 5
+method: POST
+url: /api
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-17T23:46:55.494Z] HTTP_404
+Summary: Request failed with status 404
+Request: POST /api (status 404)
+Context:
+requestId: mrpl7mo4-hjo4r73m
+durationMs: 2
+method: POST
+url: /api
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-17T23:47:43.818Z] HTTP_404
+Summary: Request failed with status 404
+Request: POST /api (status 404)
+Context:
+requestId: mrpl8nyg-1m1iydr6
+durationMs: 2
+method: POST
+url: /api
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-17T23:49:34.273Z] HTTP_404
+Summary: Request failed with status 404
+Request: POST /api (status 404)
+Context:
+requestId: mrplb16i-wo8qqhf1
+durationMs: 6
+method: POST
+url: /api
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-17T23:53:57.912Z] HTTP_500
+Summary: Unknown column 'email' in 'field list'
+Request: POST /api/sales/sales-persons (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: POST
+url: /api/sales/sales-persons
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"salespersons":[{"name":"Joseph Bentum","email":"joe@gmail.com"}]}
+query: {}
+Technical details:
+Error: Unknown column 'email' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:8280:9
+--------------------------------------------------------------------------------
+
+[2026-07-17T23:54:16.225Z] HTTP_500
+Summary: Unknown column 'email' in 'field list'
+Request: POST /api/sales/sales-persons (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: POST
+url: /api/sales/sales-persons
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Mobile Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"salespersons":[{"name":"Joseph Bentum","email":"joe@gmail.com"}]}
+query: {}
+Technical details:
+Error: Unknown column 'email' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:8280:9
+--------------------------------------------------------------------------------
+
+[2026-07-17T23:55:22.776Z] HTTP_500
+Summary: Unknown column 'email' in 'field list'
+Request: POST /api/sales/sales-persons (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: POST
+url: /api/sales/sales-persons
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Mobile Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"salespersons":[{"name":"Joseph Bentum","email":"joe@gmail.com"}]}
+query: {}
+Technical details:
+Error: Unknown column 'email' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:8280:9
+--------------------------------------------------------------------------------
+
+[2026-07-17T23:58:07.187Z] HTTP_500
+Summary: Unknown column 'email' in 'field list'
+Request: POST /api/sales/sales-persons (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: POST
+url: /api/sales/sales-persons
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Mobile Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"salespersons":[{"name":"Joseph Bentum","email":"joe@gmail.com"}]}
+query: {}
+Technical details:
+Error: Unknown column 'email' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:8280:9
+--------------------------------------------------------------------------------
+
+[2026-07-18T00:00:32.885Z] HTTP_500
+Summary: Unknown column 'email' in 'field list'
+Request: POST /api/sales/sales-persons (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: POST
+url: /api/sales/sales-persons
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Mobile Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"salespersons":[{"name":"Joseph Bentum","email":"joe@gmail.com"}]}
+query: {}
+Technical details:
+Error: Unknown column 'email' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:8280:9
+--------------------------------------------------------------------------------
+
+[2026-07-18T00:04:08.334Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/routes/sales.route.js:4259:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/baseline/server/middleware/requirePermission.js:96:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:235:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-18T00:09:52.101Z] HTTP_500
+Summary: Unknown column 'email' in 'field list'
+Request: POST /api/sales/sales-persons (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: POST
+url: /api/sales/sales-persons
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"salespersons":[{"id":2,"company_id":1,"branch_id":1,"name":"Joseph Bentum","created_at":"2026-07-18T00:03:58.000Z","email":"dfghjk@fghjkl"}]}
+query: {}
+Technical details:
+Error: Unknown column 'email' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:8280:9
+--------------------------------------------------------------------------------
+
+[2026-07-18T00:09:57.914Z] HTTP_500
+Summary: Unknown column 'email' in 'field list'
+Request: POST /api/sales/sales-persons (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: POST
+url: /api/sales/sales-persons
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"salespersons":[{"id":2,"company_id":1,"branch_id":1,"name":"Joseph Bentum","created_at":"2026-07-18T00:03:58.000Z","email":"dfghjk@fghjkl"}]}
+query: {}
+Technical details:
+Error: Unknown column 'email' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:8280:9
+--------------------------------------------------------------------------------
+
+[2026-07-18T00:13:08.745Z] HTTP_500
+Summary: Unknown column 'email' in 'field list'
+Request: POST /api/sales/sales-persons (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: POST
+url: /api/sales/sales-persons
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"salespersons":[{"id":2,"company_id":1,"branch_id":1,"name":"Joseph Bentum","created_at":"2026-07-18T00:03:58.000Z","email":"dfghjk@fghjkl"}]}
+query: {}
+Technical details:
+Error: Unknown column 'email' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:8280:9
+--------------------------------------------------------------------------------
+
+[2026-07-18T00:19:30.785Z] HTTP_500
+Summary: Unknown column 'email' in 'field list'
+Request: POST /api/sales/sales-persons (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: POST
+url: /api/sales/sales-persons
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"salespersons":[{"id":2,"company_id":1,"branch_id":1,"name":"Joseph Bentum","created_at":"2026-07-18T00:03:58.000Z","email":"dfghjk@fghjkl"}]}
+query: {}
+Technical details:
+Error: Unknown column 'email' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:8280:9
+--------------------------------------------------------------------------------
+
+[2026-07-18T00:20:02.294Z] HTTP_500
+Summary: Unknown column 'email' in 'field list'
+Request: POST /api/sales/sales-persons (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: POST
+url: /api/sales/sales-persons
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"salespersons":[{"id":2,"company_id":1,"branch_id":1,"name":"Joseph Bentum","created_at":"2026-07-18T00:03:58.000Z","email":"joe@gmail.com"}]}
+query: {}
+Technical details:
+Error: Unknown column 'email' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:8280:9
+--------------------------------------------------------------------------------
+
+[2026-07-18T08:04:11.343Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-18T08:26:03.744Z] HTTP_401
+Summary: Authentication required
+Request: GET /api/admin/users (status 401)
+Context:
+status: 401
+code: UNAUTHORIZED
+method: GET
+url: /api/admin/users
+ip: 127.0.0.1
+origin: 
+userAgent: 
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Authentication required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:143:17)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+    at Function.handle (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:175:3)
+--------------------------------------------------------------------------------
+
+[2026-07-18T08:31:11.390Z] HTTP_401
+Summary: Authentication required
+Request: GET /api/admin/users (status 401)
+Context:
+status: 401
+code: UNAUTHORIZED
+method: GET
+url: /api/admin/users
+ip: 127.0.0.1
+origin: 
+userAgent: 
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Authentication required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:143:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-18T08:46:55.868Z] HTTP_403
+Summary: Request failed with status 403
+Request: GET /api/access/roles/5/features (status 403)
+Context:
+requestId: mrq4i2xg-0kl9p03d
+durationMs: 38
+method: GET
+url: /api/access/roles/5/features
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-18T08:47:08.666Z] HTTP_403
+Summary: Request failed with status 403
+Request: GET /api/access/roles/5/features (status 403)
+Context:
+requestId: mrq4icso-cojed53g
+durationMs: 50
+method: GET
+url: /api/access/roles/5/features
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-18T08:47:49.767Z] HTTP_403
+Summary: Request failed with status 403
+Request: GET /api/access/roles/5/features (status 403)
+Context:
+requestId: mrq4j8dt-ovcjc795
+durationMs: 214
+method: GET
+url: /api/access/roles/5/features
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-18T09:13:57.223Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/routes/sales.route.js:4259:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/baseline/server/middleware/requirePermission.js:96:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:235:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-18T10:49:08.565Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/routes/sales.route.js:4259:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/baseline/server/middleware/requirePermission.js:96:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:235:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-18T22:53:38.596Z] HTTP_403
+Summary: Request failed with status 403
+Request: GET /api/access/roles/5/modules (status 403)
+Context:
+requestId: mrqyqykz-eq1c1n71
+durationMs: 16
+method: GET
+url: /api/access/roles/5/modules
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-18T22:53:38.622Z] HTTP_403
+Summary: Request failed with status 403
+Request: GET /api/access/roles/5/permissions (status 403)
+Context:
+requestId: mrqyqylq-l31drfym
+durationMs: 16
+method: GET
+url: /api/access/roles/5/permissions
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-18T23:25:17.915Z] HTTP_404
+Summary: Workflow instance not found
+Request: POST /api/workflows/reverse-by-document (status 404)
+Context:
+status: 404
+code: NOT_FOUND
+method: POST
+url: /api/workflows/reverse-by-document
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+body: {"document_type":"INVOICE","document_id":65}
+query: {}
+Technical details:
+Error: Workflow instance not found
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at reverseByDocument (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:800:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-18T23:25:24.154Z] HTTP_404
+Summary: Workflow instance not found
+Request: POST /api/workflows/reverse-by-document (status 404)
+Context:
+status: 404
+code: NOT_FOUND
+method: POST
+url: /api/workflows/reverse-by-document
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+body: {"document_type":"INVOICE","document_id":79}
+query: {}
+Technical details:
+Error: Workflow instance not found
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at reverseByDocument (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:800:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-19T07:05:38.992Z] HTTP_404
+Summary: Request failed with status 404
+Request: POST /api/purchase/direct-purchase/44/cancel (status 404)
+Context:
+requestId: mrrgboo1-72u020ls
+durationMs: 14
+method: POST
+url: /api/purchase/direct-purchase/44/cancel
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-19T10:58:32.238Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=PAYV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=PAYV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"PAYV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:235:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-19T11:01:38.379Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=RV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=RV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"RV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:235:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-19T11:08:29.899Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/fast-moving?from=2026-07-01&to=2026-07-19 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/fast-moving?from=2026-07-01&to=2026-07-19
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-07-01","to":"2026-07-19"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1774:20
+--------------------------------------------------------------------------------
+
+[2026-07-19T11:08:30.237Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/fast-moving?from=2026-06-01&to=2026-06-30 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/fast-moving?from=2026-06-01&to=2026-06-30
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-06-01","to":"2026-06-30"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1774:20
+--------------------------------------------------------------------------------
+
+[2026-07-19T11:08:30.280Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/slow-moving?from=2026-07-01&to=2026-07-19 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/slow-moving?from=2026-07-01&to=2026-07-19
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-07-01","to":"2026-07-19"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1816:20
+--------------------------------------------------------------------------------
+
+[2026-07-19T11:08:30.288Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/slow-moving?from=2026-06-01&to=2026-06-30 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/slow-moving?from=2026-06-01&to=2026-06-30
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-06-01","to":"2026-06-30"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1816:20
+--------------------------------------------------------------------------------
+
+[2026-07-19T13:01:16.885Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=PAYV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=PAYV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"PAYV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:235:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-19T13:02:41.943Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=RV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=RV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"RV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:235:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-19T13:02:46.862Z] HTTP_500
+Summary: Unknown column 'customer_id' in 'where clause'
+Request: GET /api/sales/invoices/outstanding-by-account?account_id=19 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/sales/invoices/outstanding-by-account?account_id=19
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"account_id":"19"}
+Technical details:
+Error: Unknown column 'customer_id' in 'where clause'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:651:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:4126:24
+--------------------------------------------------------------------------------
+
+[2026-07-19T13:18:58.426Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=RV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=RV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"RV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:235:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-19T13:19:35.732Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=PAYV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=PAYV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"PAYV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:235:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-19T13:26:01.548Z] HTTP_403
+Summary: Request failed with status 403
+Request: GET /api/access/roles (status 403)
+Context:
+requestId: mrrtwunl-uo1sk56g
+durationMs: 27
+method: GET
+url: /api/access/roles
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-19T13:30:11.988Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=PAYV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=PAYV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"PAYV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:267:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-19T13:31:59.978Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=RV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=RV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"RV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:267:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-19T13:32:48.523Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=PAYV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=PAYV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"PAYV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:267:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-19T14:04:19.841Z] HTTP_403
+Summary: Request failed with status 403
+Request: GET /api/access/roles (status 403)
+Context:
+requestId: mrrva41e-lznfjbbn
+durationMs: 14
+method: GET
+url: /api/access/roles
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-19T14:07:27.578Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=PAYV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=PAYV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"PAYV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:267:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-19T14:09:00.417Z] HTTP_403
+Summary: Request failed with status 403
+Request: GET /api/access/roles (status 403)
+Context:
+requestId: mrrvg4ho-wdxalpam
+durationMs: 69
+method: GET
+url: /api/access/roles
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-19T14:09:34.517Z] HTTP_403
+Summary: Request failed with status 403
+Request: GET /api/access/roles (status 403)
+Context:
+requestId: mrrvgusz-7dvw5mgy
+durationMs: 66
+method: GET
+url: /api/access/roles
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-19T15:33:58.578Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=PAYV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=PAYV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"PAYV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:235:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-19T15:36:55.602Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=PAYV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=PAYV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"PAYV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:235:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-19T15:37:52.185Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=RV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=RV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"RV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:235:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------

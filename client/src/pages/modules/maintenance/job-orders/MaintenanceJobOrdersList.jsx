@@ -142,16 +142,16 @@ export default function MaintenanceJobOrdersList() {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Order No</th>
-                  <th>Request Ref</th>
-                  <th>Asset</th>
-                  <th>Schedule</th>
-                  <th>Technician</th>
-                  <th>Status</th>
-                  <th>Created By</th>
-                  <th>Created Date</th>
-                  <th>Confirm</th>
-                  <th className="text-right">Actions</th>
+                  <th className="whitespace-nowrap">Order No</th>
+                  <th className="whitespace-nowrap">Request Ref</th>
+                  <th className="whitespace-nowrap">Asset</th>
+                  <th className="whitespace-nowrap">Schedule</th>
+                  <th className="whitespace-nowrap">Technician</th>
+                  <th className="whitespace-nowrap">Status</th>
+                  <th className="whitespace-nowrap">Created By</th>
+                  <th className="whitespace-nowrap">Created Date</th>
+                  <th className="whitespace-nowrap">Confirm</th>
+                  <th className="text-right whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
@@ -159,7 +159,7 @@ export default function MaintenanceJobOrdersList() {
                   <tr>
                     <td
                       colSpan="10"
-                      className="px-6 py-20 text-center animate-pulse text-slate-400 font-bold uppercase tracking-widest"
+                      className="px-6 py-20 text-center animate-pulse text-slate-400 font-bold uppercase tracking-widest whitespace-nowrap"
                     >
                       Loading Orders...
                     </td>
@@ -167,7 +167,7 @@ export default function MaintenanceJobOrdersList() {
                 ) : filtered.length > 0 ? (
                   filtered.map((r) => (
                     <tr key={r.id} className="group">
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="font-bold text-slate-900 dark:text-white text-sm leading-tight">
                           {r.order_no}
                         </div>
@@ -175,30 +175,30 @@ export default function MaintenanceJobOrdersList() {
                           {r.order_date ? new Date(r.order_date).toLocaleDateString() : "-"}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm font-semibold text-brand-700 dark:text-brand-300">
+                      <td className="px-4 py-3 text-sm font-semibold text-brand-700 dark:text-brand-300 whitespace-nowrap">
                         {r.request_no || r.request_id}
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-700 dark:text-slate-200">
+                      <td className="px-4 py-3 text-sm text-slate-700 dark:text-slate-200 whitespace-nowrap">
                         {r.asset_name}
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-500">
+                      <td className="px-4 py-3 text-sm text-slate-500 whitespace-nowrap">
                         {r.scheduled_date ? new Date(r.scheduled_date).toLocaleDateString() : "-"}
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-500 font-medium">
+                      <td className="px-4 py-3 text-sm text-slate-500 font-medium whitespace-nowrap">
                         {r.assigned_technician}
                       </td>
-                      <td className="px-4 py-3 text-sm">
+                      <td className="px-4 py-3 text-sm whitespace-nowrap">
                         <Badge value={r.status} colorMap={statusColors} />
                       </td>
-                      <td className="px-4 py-3 text-sm">
+                      <td className="px-4 py-3 text-sm whitespace-nowrap">
                         {r.created_by_name || "-"}
                       </td>
-                      <td className="px-4 py-3 text-sm">
+                      <td className="px-4 py-3 text-sm whitespace-nowrap">
                         {r.created_at
                           ? new Date(r.created_at).toLocaleDateString()
                           : "-"}
                       </td>
-                      <td className="px-4 py-3 text-sm">
+                      <td className="px-4 py-3 text-sm whitespace-nowrap">
                         {r.status === 'DRAFT' ? (
                           <button
                             type="button"
@@ -217,7 +217,7 @@ export default function MaintenanceJobOrdersList() {
                           </button>
                         ) : null}
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-6 py-4 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1">
                           <button
                             type="button"
@@ -265,7 +265,7 @@ export default function MaintenanceJobOrdersList() {
                   <tr>
                     <td
                       colSpan="10"
-                      className="px-6 py-20 text-center text-slate-400 font-bold uppercase tracking-widest italic opacity-50"
+                      className="px-6 py-20 text-center text-slate-400 font-bold uppercase tracking-widest italic opacity-50 whitespace-nowrap"
                     >
                       No job orders identified.
                     </td>

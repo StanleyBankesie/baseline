@@ -140,28 +140,10 @@ export default function MaterialReturnReportPage() {
                 ))}
               </select>
             </div>
-            <div className="md:col-span-2 flex items-end gap-2">
-              <button type="button" className="btn-success" onClick={run} disabled={loading}>
-                {loading ? "Running..." : "Run Report"}
-              </button>
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => {
-                  setFrom("");
-                  setTo("");
-                  setWarehouseId("");
-                  setDepartmentId("");
-                }}
-                disabled={loading}
-              >
-                Clear
-              </button>
             </div>
-          </div>
 
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table table-fixed">
               <thead>
                 <tr>
                   <SortableHeader label="RTS No" sortKey="rts_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />

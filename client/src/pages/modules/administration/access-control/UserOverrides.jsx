@@ -24,6 +24,8 @@ export default function UserOverrides() {
     { code: "SALES.INVOICE.CANCEL", label: "Invoice Cancellations" },
     { code: "PURCHASE.GRN.REVERSE", label: "GRN Reversal" },
     { code: "PURCHASE.BILL.CANCEL", label: "Purchase Bill Cancellation" },
+    { code: "MAINTENANCE.BILL.CANCEL", label: "Maintenance Bill Cancellation" },
+    { code: "SERVICE.BILL.CANCEL", label: "Service Bill Cancellation" },
     {
       code: "PURCHASE.SHIPPING_ADVICE.CANCEL",
       label: "Cancel Shipping Advice",

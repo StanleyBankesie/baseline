@@ -388,9 +388,20 @@ export async function getUserPermissions(userId) {
     { userId },
   ).catch(() => []);
 
+  // Include exclusive admin page permissions
+  const exclusiveRows = await query(
+    `
+    SELECT feature_key as code
+    FROM adm_admin_page_permissions
+    WHERE user_id = :userId
+    `,
+    { userId }
+  ).catch(() => []);
+
   const allPerms = [
     ...permRows.map((row) => row.code),
     ...legacyRows.map((row) => row.code),
+    ...exclusiveRows.map((row) => row.code),
   ];
 
   return Array.from(new Set(allPerms.filter(Boolean)));

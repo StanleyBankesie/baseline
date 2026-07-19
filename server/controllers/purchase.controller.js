@@ -2067,9 +2067,17 @@ export const listServiceBills = async (req, res, next) => {
              b.created_by, (SELECT username FROM adm_users WHERE id = b.created_by) AS created_by_username, b.created_at
       FROM pur_service_bills b
       LEFT JOIN pur_suppliers s ON s.id = b.supplier_id AND s.company_id = b.company_id
-      WHERE b.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(b.branch_id, :branchIdsStr))
+      WHERE b.company_id = :companyId
     `;
-    const params = { companyId, branchId, branchIdsStr };
+    const params = { companyId };
+    
+    if (branchIdsStr) {
+      sql += " AND FIND_IN_SET(b.branch_id, :branchIdsStr)";
+      params.branchIdsStr = branchIdsStr;
+    } else if (branchId) {
+      sql += " AND b.branch_id = :branchId";
+      params.branchId = branchId;
+    }
     if (status) {
       sql += " AND b.status = :status";
       params.status = status;
@@ -2464,9 +2472,20 @@ export const updateServiceBill = async (req, res, next) => {
     const dueDate = body.due_date || null;
     const serviceDate = body.service_date || null;
     const status = String(body.status || "PENDING").toUpperCase();
-    const sStatus = ["PENDING", "PAID", "OVERDUE", "COMPLETED"].includes(status)
+    const sStatus = ["PENDING", "PAID", "OVERDUE", "COMPLETED", "CANCELLED", "REVERSED"].includes(status)
       ? status
       : "PENDING";
+      
+    if (sStatus === "CANCELLED") {
+      const uRows = await query(
+        `SELECT 1 FROM adm_exceptional_permissions WHERE user_id = :uid AND effect = 'ALLOW' AND is_active = 1 AND permission_code = 'SERVICE.BILL.CANCEL' LIMIT 1`,
+        { uid: req.user?.id }
+      );
+      if (!uRows || uRows.length === 0) {
+        throw httpError(403, "FORBIDDEN", "You do not have exceptional permission to cancel service bills");
+      }
+    }
+
     const clientName = body.client_name || body.clientName || null;
     const clientCompany = body.client_company || body.clientCompany || null;
     const clientAddress = body.client_address || body.clientAddress || null;
@@ -2631,6 +2650,27 @@ export const updateServiceBill = async (req, res, next) => {
         },
       );
     }
+    
+    if (sStatus === "CANCELLED" || sStatus === "REVERSED") {
+      const bNo = billNo || exists[0]?.bill_no;
+      if (bNo) {
+        const [vRows] = await conn.execute(
+          `SELECT DISTINCT v.id AS voucher_id
+             FROM fin_vouchers v
+             JOIN fin_voucher_lines l ON l.voucher_id = v.id
+            WHERE v.company_id = :companyId
+              AND l.reference_no = :referenceNo`,
+          { companyId, referenceNo: bNo }
+        ).catch(() => [[]]);
+        const voucherIds = vRows.map((r) => Number(r.voucher_id)).filter((n) => Number.isFinite(n) && n > 0);
+        if (voucherIds.length > 0) {
+          const inList = voucherIds.join(",");
+          await conn.execute(`DELETE FROM fin_voucher_lines WHERE voucher_id IN (${inList})`).catch(() => null);
+          await conn.execute(`DELETE FROM fin_vouchers WHERE id IN (${inList})`).catch(() => null);
+        }
+      }
+    }
+
     await conn.commit();
     res.json({
       id,

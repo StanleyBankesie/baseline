@@ -23,6 +23,7 @@ import SortableHeader from "@/components/SortableHeader.jsx";
  */
 export default function RoleManagementNew() {
   const [roles, setRoles] = useState([]);
+  const [exclusiveFeatures, setExclusiveFeatures] = useState(new Set());
   const {
     sorted: rolesSorted,
     sortKey,
@@ -74,8 +75,23 @@ export default function RoleManagementNew() {
     setLoading(true);
     setError("");
     try {
-      const rolesRes = await api.get("/access/roles");
+      const [rolesRes] = await Promise.all([
+        api.get("/access/roles")
+      ]);
       setRoles(rolesRes?.data?.items || []);
+      
+      const exclSet = new Set();
+      for (const mk of Object.keys(MODULES_REGISTRY)) {
+        const mod = MODULES_REGISTRY[mk];
+        if (mod.features) {
+          for (const f of mod.features) {
+            if (f.isExclusive) {
+              exclSet.add(`${mk}:${f.key}`);
+            }
+          }
+        }
+      }
+      setExclusiveFeatures(exclSet);
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to load");
     } finally {
@@ -538,7 +554,7 @@ export default function RoleManagementNew() {
                   .map((moduleKey) => {
                   const moduleInfo = MODULES_REGISTRY[moduleKey];
                   const isModuleSelected = selectedModules.has(moduleKey);
-                  const moduleFeatures = getModuleFeatures(moduleKey);
+                  const moduleFeatures = getModuleFeatures(moduleKey).filter(f => !exclusiveFeatures.has(f.feature_key));
                   const allKeys = moduleFeatures.map((f) => f.feature_key);
                   const selectedCount = allKeys.filter((k) =>
                     selectedFeatures.has(k),

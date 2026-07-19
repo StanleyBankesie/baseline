@@ -20,13 +20,18 @@ import jsPDF from "jspdf";
 export default function RevenueByProductReportPage() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [product, setProduct] = useState("");
   const [error, setError] = useState("");
 
   async function run() {
     try {
       setLoading(true);
       setError("");
-      const res = await api.get("/sales/reports/revenue-by-product");
+      const res = await api.get("/sales/reports/revenue-by-product", {
+        params: { from: from || null, to: to || null, product: product || null },
+      });
       setItems(Array.isArray(res?.data?.items) ? res.data.items : []);
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to load report");
@@ -37,7 +42,7 @@ export default function RevenueByProductReportPage() {
 
   useEffect(() => {
     run();
-  }, []);
+  }, [from, to, product]);
 
   function exportCSV() {
     if (!items.length) return;
@@ -150,11 +155,25 @@ export default function RevenueByProductReportPage() {
           </div>
         </div>
         <div className="card-body">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div>
+              <label className="label">From</label>
+              <input className="input" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+            </div>
+            <div>
+              <label className="label">To</label>
+              <input className="input" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+            </div>
+            <div>
+              <label className="label">Product</label>
+              <input className="input" type="text" placeholder="Search product..." value={product} onChange={(e) => setProduct(e.target.value)} />
+            </div>
+          </div>
           {error ? (
             <div className="text-red-600 text-sm mb-3">{error}</div>
           ) : null}
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table w-full table-fixed">
               <thead>
                 <tr>
                   <SortableHeader label="Product" sortKey="product" currentKey={sortKey} direction={sortDir} onToggle={toggle} />

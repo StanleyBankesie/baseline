@@ -20,13 +20,16 @@ import jsPDF from "jspdf";
 export default function PriceListReportPage() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [product, setProduct] = useState("");
   const [error, setError] = useState("");
 
   async function run() {
     try {
       setLoading(true);
       setError("");
-      const res = await api.get("/sales/reports/price-list");
+      const res = await api.get("/sales/reports/price-list", {
+        params: { product: product || null },
+      });
       setItems(Array.isArray(res?.data?.items) ? res.data.items : []);
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to load report");
@@ -37,7 +40,7 @@ export default function PriceListReportPage() {
 
   useEffect(() => {
     run();
-  }, []);
+  }, [product]);
 
   function exportCSV() {
     if (!items.length) return;
@@ -161,11 +164,17 @@ export default function PriceListReportPage() {
           </div>
         </div>
         <div className="card-body">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label className="label">Product</label>
+              <input className="input" type="text" placeholder="Search product..." value={product} onChange={(e) => setProduct(e.target.value)} />
+            </div>
+          </div>
           {error ? (
             <div className="text-red-600 text-sm mb-3">{error}</div>
           ) : null}
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table w-full table-fixed">
               <thead>
                 <tr>
                   <SortableHeader label="Product" sortKey="product" currentKey={sortKey} direction={sortDir} onToggle={toggle} />

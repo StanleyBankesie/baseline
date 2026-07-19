@@ -6,6 +6,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "api/client";
+import { useAuth } from "@/auth/AuthContext.jsx";
 
 /**
  *  component
@@ -13,6 +14,7 @@ import { api } from "api/client";
  * @returns {JSX.Element} The rendered component
  */
 export default function CompanyList() {
+  const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,6 +34,17 @@ export default function CompanyList() {
       setLoading(false);
     }
   };
+
+  if (Number(user?.id) !== 1) {
+    return (
+      <div className="p-8 text-center">
+        <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
+        <p className="text-slate-600 dark:text-slate-400">
+          You do not have permission to view the Company Setup page.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

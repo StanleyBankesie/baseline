@@ -41,7 +41,7 @@ export default function IssueRegisterReportPage() {
 
   useEffect(() => {
     run();
-  }, []);
+  }, [from, to]);
 
 
   const { sorted: sorted_items, sortKey, sortDir, toggle } = useSort(items, "date", "desc");
@@ -87,25 +87,7 @@ export default function IssueRegisterReportPage() {
               />
             </div>
             <div className="md:col-span-2 flex items-end gap-2">
-              <button
-                type="button"
-                className="btn-success"
-                onClick={run}
-                disabled={loading}
-              >
-                {loading ? "Running..." : "Run Report"}
-              </button>
-              <button
-                type="button"
-                className="btn-success"
-                onClick={() => {
-                  setFrom("");
-                  setTo("");
-                }}
-                disabled={loading}
-              >
-                Clear
-              </button>
+              
               <button
                 type="button"
                 className="btn-secondary"
@@ -117,7 +99,7 @@ export default function IssueRegisterReportPage() {
                       ? new Date(r.issue_date).toLocaleDateString()
                       : "",
                     "Issue No": r.issue_no || "",
-                    Department: r.department_name || "",
+                    Department: r.department_id || "",
                     "Item Code": r.item_code || "",
                     "Item Name": r.item_name || "",
                     "Qty Issued": Number(r.qty_issued || 0),
@@ -175,7 +157,7 @@ export default function IssueRegisterReportPage() {
                       ? new Date(r.issue_date).toLocaleDateString()
                       : "-";
                     const no = String(r.issue_no || "-");
-                    const dep = String(r.department_name || "-").slice(0, 35);
+                    const dep = String(r.department_id || "-").slice(0, 35);
                     const item = String(
                       r.item_name || r.item_code || "-",
                     ).slice(0, 30);
@@ -214,12 +196,12 @@ export default function IssueRegisterReportPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table table-fixed">
               <thead className="sticky top-0 z-10">
                 <tr>
                   <SortableHeader label="Date" sortKey="date" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <SortableHeader label="Issue No" sortKey="issue_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                  <SortableHeader label="Department" sortKey="department" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                  <SortableHeader label="Department" sortKey="department_id" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <SortableHeader label="Item" sortKey="item" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <SortableHeader label="Qty Issued" sortKey="qty_issued" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-right" />
                   <SortableHeader label="Returned" sortKey="returned" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-right" />
@@ -235,7 +217,7 @@ export default function IssueRegisterReportPage() {
                         : "-"}
                     </td>
                     <td className="font-medium">{r.issue_no || "-"}</td>
-                    <td>{r.department_name || "-"}</td>
+                    <td>{r.department_id || "-"}</td>
                     <td>{r.item_name || r.item_code}</td>
                     <td className="text-right">
                       {Number(r.qty_issued || 0).toLocaleString()}

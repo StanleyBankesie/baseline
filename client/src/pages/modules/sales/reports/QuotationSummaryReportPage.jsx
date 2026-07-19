@@ -47,7 +47,7 @@ export default function QuotationSummaryReportPage() {
 
   useEffect(() => {
     run();
-  }, []);
+  }, [from, to, status, salesperson]);
 
   function exportCSV() {
     if (!items.length) return;
@@ -194,7 +194,7 @@ export default function QuotationSummaryReportPage() {
           {error ? (
             <div className="text-red-600 text-sm mb-3">{error}</div>
           ) : null}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div>
               <label className="label">From</label>
               <input
@@ -237,19 +237,10 @@ export default function QuotationSummaryReportPage() {
                 placeholder="Username contains..."
               />
             </div>
-            <div className="md:col-span-5 flex items-end gap-2">
-              <button
-                type="button"
-                className="btn"
-                onClick={run}
-                disabled={loading}
-              >
-                {loading ? "Running..." : "Run"}
-              </button>
-            </div>
+            
           </div>
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table w-full table-fixed">
               <thead>
                 <tr>
                   <SortableHeader label="Quotation No" sortKey="quotation_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />

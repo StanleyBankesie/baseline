@@ -1318,8 +1318,7 @@ export default function SalesOrderList() {
                           {/* Slot 8: exceptional cancel — fixed cell */}
                           <div className="min-w-[80px]">
                             {!order.has_invoice &&
-                            hasExceptional("SALES.ORDER.CANCEL") &&
-                            displayStatus !== "APPROVED" ? (
+                            hasExceptional("SALES.ORDER.CANCEL") ? (
                               <button
                                 type="button"
                                 className="w-full inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-white bg-[#990000] rounded-lg hover:bg-[#770000] transition-colors h-9"

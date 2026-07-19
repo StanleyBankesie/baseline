@@ -41,7 +41,7 @@ export default function QuotationConversionReportPage() {
 
   useEffect(() => {
     run();
-  }, []);
+  }, [from, to]);
 
   return (
     <div className="space-y-4">
@@ -81,9 +81,7 @@ export default function QuotationConversionReportPage() {
               />
             </div>
             <div className="flex items-end">
-              <button type="button" className="btn" onClick={run} disabled={loading}>
-                {loading ? "Running..." : "Run"}
-              </button>
+              
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

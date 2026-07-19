@@ -9,6 +9,7 @@ import * as XLSX from "xlsx";
 import { api } from "api/client";
 import { Link } from "react-router-dom";
 import { filterAndSort } from "@/utils/searchUtils.js";
+import { useAuth } from "@/auth/AuthContext.jsx";
 
 /**
  *  component
@@ -16,6 +17,8 @@ import { filterAndSort } from "@/utils/searchUtils.js";
  * @returns {JSX.Element} The rendered component
  */
 export default function OpeningBalancesPage() {
+  const { scope, user } = useAuth();
+  const [accessAllowed, setAccessAllowed] = useState(null);
   const [fiscalYears, setFiscalYears] = useState([]);
   const [selectedFyId, setSelectedFyId] = useState("");
   const [accounts, setAccounts] = useState([]);
@@ -44,6 +47,29 @@ export default function OpeningBalancesPage() {
       toast.error(e?.response?.data?.message || "Failed to load fiscal years");
     }
   }
+
+  // Check branch-level access restriction
+  useEffect(() => {
+    async function checkAccess() {
+      const bid = scope?.branchId;
+      if (!bid) { setAccessAllowed(true); return; }
+      try {
+        const res = await api.get(`/admin/branches/${bid}`);
+        const branchData = res.data?.item || res.data;
+        const allowedUserId = branchData?.stock_upload_user_id;
+        const currentUserId = Number(user?.id);
+        if (!allowedUserId || currentUserId === 1 || currentUserId === Number(allowedUserId)) {
+          setAccessAllowed(true);
+        } else {
+          setAccessAllowed(false);
+        }
+      } catch {
+        setAccessAllowed(true);
+      }
+    }
+    if (user?.id) checkAccess();
+  }, [scope?.branchId, user?.id]);
+
 
   async function loadData() {
     if (!selectedFyId) return;
@@ -232,6 +258,19 @@ export default function OpeningBalancesPage() {
       if (fileRef.current) fileRef.current.value = "";
     }
   }
+  if (accessAllowed === false) {
+    return (
+      <div className="p-8 text-center">
+        <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
+        <p className="text-slate-600 dark:text-slate-400">
+          You do not have permission to access the Opening Balances page.
+          Please contact your system administrator.
+        </p>
+        <Link to="/finance" className="btn btn-secondary mt-4 inline-block">← Back to Finance</Link>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="card">

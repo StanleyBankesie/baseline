@@ -211,7 +211,7 @@ export default function DebtorsBalanceReportPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table w-full table-fixed">
               <thead>
                 <tr>
                   <SortableHeader label="Customer" sortKey="customer_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />

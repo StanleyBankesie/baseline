@@ -6,6 +6,16 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "api/client";
+import { useAuth } from "@/auth/AuthContext.jsx";
+
+function generateBranchCode(name) {
+  if (!name) return "";
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (words.length > 1) {
+    return words.map(w => w[0]).join("").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10);
+  }
+  return name.trim().slice(0, 4).toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
 
 /**
  *  component
@@ -13,6 +23,7 @@ import { api } from "api/client";
  * @returns {JSX.Element} The rendered component
  */
 export default function BranchForm() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
@@ -34,12 +45,22 @@ export default function BranchForm() {
     telephone: "",
     email: "",
     remarks: "",
+    stock_upload_user_id: "",
   });
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
+    fetchUsers();
     if (!isEdit) return;
     fetchBranch();
   }, [id]);
+
+  async function fetchUsers() {
+    try {
+      const res = await api.get("/admin/users");
+      setUsers(Array.isArray(res.data?.items) ? res.data.items : []);
+    } catch {}
+  }
 
   async function fetchBranch() {
     try {
@@ -63,6 +84,7 @@ export default function BranchForm() {
           telephone: item.telephone || "",
           email: item.email || "",
           remarks: item.remarks || "",
+          stock_upload_user_id: item.stock_upload_user_id ? String(item.stock_upload_user_id) : "",
         });
       }
     } catch (err) {
@@ -96,6 +118,7 @@ export default function BranchForm() {
         telephone: form.telephone || null,
         email: form.email || null,
         remarks: form.remarks || null,
+        stock_upload_user_id: form.stock_upload_user_id ? Number(form.stock_upload_user_id) : null,
       };
       if (isEdit) {
         await api.put(`/admin/branches/${id}`, payload);
@@ -108,6 +131,17 @@ export default function BranchForm() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (Number(user?.id) !== 1) {
+    return (
+      <div className="p-8 text-center">
+        <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
+        <p className="text-slate-600 dark:text-slate-400">
+          You do not have permission to view the Branch Setup page.
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -155,7 +189,13 @@ export default function BranchForm() {
                 <input
                   className="input"
                   value={form.name}
-                  onChange={(e) => update("name", e.target.value)}
+                  onChange={(e) => {
+                    const nameVal = e.target.value;
+                    update("name", nameVal);
+                    if (!isEdit) {
+                      update("code", generateBranchCode(nameVal));
+                    }
+                  }}
                   required
                 />
               </div>
@@ -273,6 +313,24 @@ export default function BranchForm() {
                   value={form.remarks}
                   onChange={(e) => update("remarks", e.target.value)}
                 />
+              </div>
+              <div className="md:col-span-2">
+                <label className="label">Stock Upload &amp; Opening Balances — Allowed User</label>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
+                  Only the selected user (plus system admin) will be allowed to access Stock Upload and Opening Balances pages.
+                </p>
+                <select
+                  className="input"
+                  value={form.stock_upload_user_id}
+                  onChange={(e) => update("stock_upload_user_id", e.target.value)}
+                >
+                  <option value="">-- Any authorised user --</option>
+                  {users.map((u) => (
+                    <option key={u.id} value={String(u.id)}>
+                      {u.username || u.name || `User #${u.id}`}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 

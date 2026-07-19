@@ -27,11 +27,14 @@ import UserLoginActivityReportPage from "./reports/UserLoginActivityReportPage.j
 import SettingsPage from "./SettingsPage.jsx";
 import DiagnosticsPage from "./DiagnosticsPage.jsx";
 import DocumentTemplatesPage from "./templates/DocumentTemplatesPage.jsx";
+import BackupPage from "./BackupPage.jsx";
 import RoleManagement from "./access-control/RoleManagementNew.jsx";
 import UserOverrides from "./access-control/UserOverrides.jsx";
 import ExceptionalPermissionsList from "./access-control/ExceptionalPermissionsList.jsx";
 import UserPermissions from "./access-control/UserPermissionsNew.jsx";
 import BackupManagement from "../../admin/BackupManagement.jsx";
+
+import AdminPermissionsPage from "../../admin/AdminPermissionsPage.jsx";
 
 function AdministrationLanding() {
   const { user } = useAuth();
@@ -170,6 +173,7 @@ function AdministrationLanding() {
           icon: "🩺",
           actions: [],
         },
+        
       ],
     },
     {
@@ -274,6 +278,20 @@ function AdministrationLanding() {
       badge: "Exclusive",
       items: [
         {
+          title: "Admin Permissions",
+          description: "Manage system admin permissions",
+          path: "/administration/admin-permissions",
+          icon: "🛡️",
+          actions: [],
+        },
+        {
+          title: "Backup Settings",
+          description: "Configure system database backups",
+          path: "/administration/backup-settings",
+          icon: "💾",
+          actions: [],
+        },
+        {
           title: "License Management",
           description: "Manage client licenses",
           path: "/administration/licenses",
@@ -351,6 +369,9 @@ export default function AdministrationHome() {
         element={<ExceptionalPermissionsList />}
       />
       <Route path="/backups" element={<BackupManagement />} />
+      <Route path="/admin-permissions" element={<AdminPermissionsPage />} />
+      <Route path="/backup-settings" element={<BackupPage />} />
+      <Route path="/backup-settings" element={<BackupPage />} />
       <Route path="/licenses" element={<LicenseManagement />} />
       <Route path="/payment-packages" element={<PaymentPackages />} />
     </Routes>

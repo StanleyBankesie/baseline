@@ -250,9 +250,8 @@ export const PermissionProvider = ({ children }) => {
         return p;
       });
 
-      setModules(
-        new Set(mods.map((m) => String(m || "").trim()).filter(Boolean)),
-      );
+      const modSet = new Set(mods.map((m) => String(m || "").trim()).filter(Boolean));
+      setModules(modSet);
       // Use merged permissions; include overrides for features not in role perms
       for (const [fk, ov] of overrideByFk.entries()) {
         if (!merged.find((p) => String(p.feature_key || "") === fk)) {
@@ -269,9 +268,8 @@ export const PermissionProvider = ({ children }) => {
       }
 
       setPermissions(merged);
-      setRoleFeatures(
-        new Set(feats.map((f) => String(f || "").trim()).filter(Boolean)),
-      );
+      const featureSet = new Set(feats.map((f) => String(f || "").trim()).filter(Boolean));
+      setRoleFeatures(featureSet);
       try {
         const exRes = await api
           .get(
@@ -546,6 +544,7 @@ export const PermissionProvider = ({ children }) => {
   };
 
   const canPerformPageAction = (path, action = "view") => {
+    if (isSuper) return true;
     const perms = getPagePerms(path);
     if (!perms) return null;
     const key =
@@ -623,6 +622,7 @@ export const PermissionProvider = ({ children }) => {
   const canViewModule = (moduleKey) => {
     const mk = String(moduleKey || "");
     if (!mk) return false;
+    if (isSuper) return true;
     if (modules.size > 0) return modules.has(mk);
     return isSuper;
   };
@@ -633,6 +633,7 @@ export const PermissionProvider = ({ children }) => {
   const hasExplicitRoleConfig = roleFeatures.size > 0 || permissions.length > 0;
 
   const isFeatureEnabled = (moduleKey, featureKey) => {
+    if (isSuper) return true;
     if (!isModuleEnabled(moduleKey)) return false;
     const fk = `${moduleKey}:${featureKey}`;
     if (hasExplicitRoleConfig) return permByFeatureKey.has(fk);
@@ -644,6 +645,7 @@ export const PermissionProvider = ({ children }) => {
    * Check if dashboard is enabled
    */
   const isDashboardEnabled = (moduleKey, dashboardKey) => {
+    if (isSuper) return true;
     if (!isModuleEnabled(moduleKey)) return false;
     const fk = `${moduleKey}:${dashboardKey}`;
     if (hasExplicitRoleConfig) return permByFeatureKey.has(fk);
@@ -658,7 +660,17 @@ export const PermissionProvider = ({ children }) => {
     const mk = String(moduleKey || "");
     const seg = String(featureKey || "");
     if (!mk || !seg) return false;
+    if (isSuper) return true;
     if (!isModuleEnabled(mk)) return false;
+
+    let isExclusive = false;
+    const moduleInfo = MODULES_REGISTRY[mk];
+    if (moduleInfo && moduleInfo.features) {
+      const feature = moduleInfo.features.find((f) => String(f.key) === seg);
+      if (feature && feature.isExclusive) {
+        isExclusive = true;
+      }
+    }
 
     const allowKey = `${mk}:${seg}`;
     if (roleFeatures.has(allowKey)) return true;
@@ -692,33 +704,49 @@ export const PermissionProvider = ({ children }) => {
         return true;
     }
     if (hasExplicitRoleConfig) return false;
-    return isSuper;
+    return isExclusive ? false : isSuper;
   };
 
   const hasRoleFeature = (allowKey) => {
     const k = String(allowKey || "").trim();
     if (!k) return false;
+    if (isSuper) return true;
     if (hasExplicitRoleConfig)
       return roleFeatures.has(k) || permByFeatureKey.has(k);
-    if (isSuper) return true;
     return roleFeatures.has(k) || permByFeatureKey.has(k);
   };
 
   const canAccessPath = (path, action = "view") => {
     const p = String(path || "");
     if (!p) return false;
+    if (isSuper) return true;
     if (p === "/" || p === "/dashboard") return true;
-    if (hasExplicitRoleConfig && globalOverrides.view) return true;
-    if (!hasExplicitRoleConfig && (isSuper || globalOverrides.view))
-      return true;
-
     const parts = p.split("/").filter(Boolean);
+    const mk = String(parts[0] || "");
+    const seg = String(parts[1] || "");
+
+    let isExclusive = false;
+    if (mk && seg) {
+      const moduleInfo = MODULES_REGISTRY[mk];
+      if (moduleInfo && moduleInfo.features) {
+        const feature = moduleInfo.features.find((f) => String(f.key) === seg);
+        if (feature && feature.isExclusive) {
+          isExclusive = true;
+        }
+      }
+    }
+
+    if (!isExclusive) {
+      if (hasExplicitRoleConfig && globalOverrides.view) return true;
+      if (!hasExplicitRoleConfig && (isSuper || globalOverrides.view))
+        return true;
+    }
+
     if (parts[0] === "home") {
       const k = String(parts[1] || "");
       if (!k) return true;
       return hasRoleFeature(`home:${k}`);
     }
-    const mk = String(parts[0] || "");
     if (!mk) return false;
     if (!isModuleEnabled(mk)) return false;
 
@@ -727,7 +755,6 @@ export const PermissionProvider = ({ children }) => {
     if (parts.length === 1) return true;
 
     const moduleInfo = MODULES_REGISTRY[mk];
-    const seg = String(parts[1] || "");
     if (!seg) {
       return true;
     }
@@ -744,7 +771,7 @@ export const PermissionProvider = ({ children }) => {
   const canPerformAction = (featureKey, action = "view") => {
     const fk = String(featureKey || "").trim();
     if (!fk) return false;
-    if (isSuper && !hasExplicitRoleConfig) return true;
+    if (isSuper) return true;
     try {
       const path =
         (typeof window !== "undefined" &&

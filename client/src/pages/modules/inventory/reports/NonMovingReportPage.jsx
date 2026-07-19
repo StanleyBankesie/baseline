@@ -38,7 +38,7 @@ export default function NonMovingReportPage() {
 
   useEffect(() => {
     run();
-  }, []);
+  }, [asOf]);
 
 
   const { sorted: sorted_items, sortKey, sortDir, toggle } = useSort(items, "date", "desc");
@@ -75,24 +75,8 @@ export default function NonMovingReportPage() {
               />
             </div>
             <div className="md:col-span-2 flex items-end gap-2">
-              <button
-                type="button"
-                className="btn-success"
-                onClick={run}
-                disabled={loading}
-              >
-                {loading ? "Running..." : "Run Report"}
-              </button>
-              <button
-                type="button"
-                className="btn-success"
-                onClick={() => {
-                  setAsOf("");
-                }}
-                disabled={loading}
-              >
-                Clear
-              </button>
+              
+              
               <button
                 type="button"
                 className="btn-secondary"
@@ -166,7 +150,7 @@ export default function NonMovingReportPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table table-fixed">
               <thead className="sticky top-0 z-10">
                 <tr>
                   <SortableHeader label="Item" sortKey="item" currentKey={sortKey} direction={sortDir} onToggle={toggle} />

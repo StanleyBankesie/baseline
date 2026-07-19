@@ -1699,7 +1699,7 @@ router.get(
                r.warehouse_id,
                r.department_id,
                w.warehouse_name,
-               dep.dept_name AS department_name,
+               dep.name AS department_name,
                COUNT(d.id) AS item_count,
                fu.username AS forwarded_to_username,
           r.created_at,
@@ -1707,7 +1707,7 @@ router.get(
          FROM inv_material_requisitions r
         LEFT JOIN inv_material_requisition_details d ON d.requisition_id = r.id
         LEFT JOIN inv_warehouses w ON w.id = r.warehouse_id
-        LEFT JOIN hr_departments dep ON dep.id = r.department_id
+        LEFT JOIN adm_departments dep ON dep.id = r.department_id
         LEFT JOIN (
           SELECT t.document_id, t.assigned_to_user_id
           FROM adm_document_workflows t
@@ -1748,6 +1748,171 @@ router.get(
       });
     } catch (err) {
       next(err);
+    }
+  },
+);
+
+
+// ─── Fast Moving Items Report ────────────────────────────────────────────────
+router.get(
+  "/reports/fast-moving",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const from = req.query?.from || null;
+      const to = req.query?.to || null;
+      const params = { companyId, branchIdsStr };
+      const where = [
+        "r.company_id = :companyId",
+        "(:branchIdsStr = '' OR FIND_IN_SET(r.branch_id, :branchIdsStr))"
+      ];
+      if (from) { where.push("DATE(r.issue_date) >= :from"); params.from = from; }
+      if (to) { where.push("DATE(r.issue_date) <= :to"); params.to = to; }
+      const rows = await query(
+        `SELECT 
+           d.item_id, 
+           i.item_code, 
+           i.item_name, 
+           SUM(d.qty_issued) AS issued_qty, 
+           SUM(d.qty_issued * d.cost_price) AS turnover 
+         FROM inv_issue_to_requirement r 
+         JOIN inv_issue_to_requirement_details d ON d.issue_id = r.id 
+         JOIN inv_items i ON i.id = d.item_id 
+         WHERE ${where.join(" AND ")} 
+         GROUP BY d.item_id, i.item_code, i.item_name 
+         HAVING issued_qty > 0 
+         ORDER BY turnover DESC, issued_qty DESC 
+         LIMIT 100`,
+        params
+      );
+      res.json({ items: rows || [] });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+// ─── Slow Moving Items Report ────────────────────────────────────────────────
+router.get(
+  "/reports/slow-moving",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const from = req.query?.from || null;
+      const to = req.query?.to || null;
+      const params = { companyId, branchIdsStr };
+      const where = [
+        "r.company_id = :companyId",
+        "(:branchIdsStr = '' OR FIND_IN_SET(r.branch_id, :branchIdsStr))"
+      ];
+      if (from) { where.push("DATE(r.issue_date) >= :from"); params.from = from; }
+      if (to) { where.push("DATE(r.issue_date) <= :to"); params.to = to; }
+      const rows = await query(
+        `SELECT 
+           d.item_id, 
+           i.item_code, 
+           i.item_name, 
+           SUM(d.qty_issued) AS issued_qty, 
+           SUM(d.qty_issued * d.cost_price) AS turnover 
+         FROM inv_issue_to_requirement r 
+         JOIN inv_issue_to_requirement_details d ON d.issue_id = r.id 
+         JOIN inv_items i ON i.id = d.item_id 
+         WHERE ${where.join(" AND ")} 
+         GROUP BY d.item_id, i.item_code, i.item_name 
+         HAVING issued_qty > 0 
+         ORDER BY turnover ASC, issued_qty ASC 
+         LIMIT 100`,
+        params
+      );
+      res.json({ items: rows || [] });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+// ─── Non Moving Items Report ─────────────────────────────────────────────────
+router.get(
+  "/reports/non-moving",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const asOf = req.query?.asOf || null;
+      const params = { companyId, branchIdsStr };
+      const where = [
+        "b.company_id = :companyId",
+        "(:branchIdsStr = '' OR FIND_IN_SET(b.branch_id, :branchIdsStr))",
+        "b.qty > 0"
+      ];
+      
+      const rows = await query(
+        `SELECT 
+           b.item_id, 
+           i.item_code, 
+           i.item_name, 
+           SUM(b.qty) AS available_qty,
+           DATEDIFF(IFNULL(:asOf, CURDATE()), MAX(t.transaction_date)) AS days_since_last
+         FROM inv_stock_balances b 
+         JOIN inv_items i ON i.id = b.item_id 
+         LEFT JOIN v_inv_stock_ledger_computed t ON t.item_id = b.item_id AND t.company_id = b.company_id
+         WHERE ${where.join(" AND ")} 
+         GROUP BY b.item_id, i.item_code, i.item_name 
+         HAVING days_since_last IS NULL OR days_since_last > 90
+         ORDER BY days_since_last DESC, available_qty DESC 
+         LIMIT 100`,
+        { ...params, asOf }
+      );
+      res.json({ items: rows || [] });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+// ─── Stock Aging Analysis Report ─────────────────────────────────────────────
+router.get(
+  "/reports/stock-aging-analysis",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const asOf = req.query?.asOf || null;
+      const params = { companyId, branchIdsStr, asOf };
+      const where = [
+        "b.company_id = :companyId",
+        "(:branchIdsStr = '' OR FIND_IN_SET(b.branch_id, :branchIdsStr))",
+        "b.qty > 0"
+      ];
+      
+      const rows = await query(
+        `SELECT 
+           b.item_id, 
+           i.item_code, 
+           i.item_name,
+           SUM(CASE WHEN DATEDIFF(IFNULL(:asOf, CURDATE()), IFNULL((SELECT MAX(transaction_date) FROM v_inv_stock_ledger_computed t WHERE t.item_id = b.item_id AND t.company_id = b.company_id AND type='GRN'), b.created_at)) <= 30 THEN b.qty ELSE 0 END) AS bucket_0_30,
+           SUM(CASE WHEN DATEDIFF(IFNULL(:asOf, CURDATE()), IFNULL((SELECT MAX(transaction_date) FROM v_inv_stock_ledger_computed t WHERE t.item_id = b.item_id AND t.company_id = b.company_id AND type='GRN'), b.created_at)) BETWEEN 31 AND 60 THEN b.qty ELSE 0 END) AS bucket_31_60,
+           SUM(CASE WHEN DATEDIFF(IFNULL(:asOf, CURDATE()), IFNULL((SELECT MAX(transaction_date) FROM v_inv_stock_ledger_computed t WHERE t.item_id = b.item_id AND t.company_id = b.company_id AND type='GRN'), b.created_at)) BETWEEN 61 AND 90 THEN b.qty ELSE 0 END) AS bucket_61_90,
+           SUM(CASE WHEN DATEDIFF(IFNULL(:asOf, CURDATE()), IFNULL((SELECT MAX(transaction_date) FROM v_inv_stock_ledger_computed t WHERE t.item_id = b.item_id AND t.company_id = b.company_id AND type='GRN'), b.created_at)) > 90 THEN b.qty ELSE 0 END) AS bucket_90_plus
+         FROM inv_stock_balances b 
+         JOIN inv_items i ON i.id = b.item_id 
+         WHERE ${where.join(" AND ")} 
+         GROUP BY b.item_id, i.item_code, i.item_name`,
+        params
+      );
+      res.json({ items: rows || [] });
+    } catch (e) {
+      next(e);
     }
   },
 );
@@ -2180,17 +2345,65 @@ router.get(
           v.remaining_qty,
           i.item_code,
           i.item_name,
-          d.dept_name AS department_name,
+          d.name AS department_name,
           v.created_at,
           u.username AS created_by_name
          FROM v_inv_issue_register v
         LEFT JOIN inv_items i ON i.id = v.item_id
-        LEFT JOIN hr_departments d ON d.id = v.department_id
+        LEFT JOIN adm_departments d ON d.id = v.department_id
          WHERE ${where.join(" AND ")}
         ORDER BY v.issue_date DESC, v.issue_id DESC
         `,
         params,
       );
+      res.json({ items: rows || [] });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+// ─── Stock Transfer Register Report ────────────────────────────────────────────
+router.get(
+  "/reports/stock-transfer-register",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      const { companyId, branchIdsStr = '' } = req.scope || {};
+      const from = toDateOnly(req.query?.from) || null;
+      const to = toDateOnly(req.query?.to) || null;
+      const params = { companyId, branchIdsStr };
+      const where = [
+        "t.company_id = :companyId",
+        "(:branchIdsStr = '' OR FIND_IN_SET(t.branch_id, :branchIdsStr))"
+      ];
+      if (from) { where.push("DATE(t.transfer_date) >= :from"); params.from = from; }
+      if (to)   { where.push("DATE(t.transfer_date) <= :to");   params.to   = to;   }
+      const rows = await query(
+        `SELECT
+           t.id,
+           t.transfer_no,
+           DATE(t.transfer_date) AS transfer_date,
+           fw.warehouse_name AS from_warehouse_name,
+           tw.warehouse_name AS to_warehouse_name,
+           d.item_id,
+           i.item_name,
+           i.item_code,
+           d.qty,
+           d.uom,
+           t.status,
+           t.remarks
+         FROM inv_stock_transfers t
+         LEFT JOIN inv_stock_transfer_details d ON d.transfer_id = t.id
+         LEFT JOIN inv_warehouses fw ON fw.id = t.from_warehouse_id
+         LEFT JOIN inv_warehouses tw ON tw.id = t.to_warehouse_id
+         LEFT JOIN inv_items i ON i.id = d.item_id
+         WHERE ${where.join(" AND ")}
+         ORDER BY t.transfer_date DESC, t.id DESC`,
+        params
+      ).catch(() => []);
       res.json({ items: rows || [] });
     } catch (e) {
       next(e);
@@ -2243,10 +2456,14 @@ router.get(
           v.uom,
           i.item_code,
           i.item_name,
+          d.name AS department_name,
+          w.warehouse_name,
           v.created_at,
           u.username AS created_by_name
          FROM v_inv_material_returns v
         LEFT JOIN inv_items i ON i.id = v.item_id
+        LEFT JOIN adm_departments d ON d.id = v.department_id
+        LEFT JOIN inv_warehouses w ON w.id = v.warehouse_id
          WHERE ${where.join(" AND ")}
         ORDER BY v.rts_date DESC, v.rts_id DESC
         `,
@@ -2801,13 +3018,13 @@ router.get(
                CASE WHEN iw.has_inactive_pending = 1 THEN 'APPROVED' ELSE r.status END AS status,
                r.return_type,
                w.warehouse_name,
-               d.dept_name AS department_name,
+               d.name AS department_name,
                (SELECT COUNT(*) FROM inv_return_to_stores_details WHERE rts_id = r.id) as item_count,
                dw.assigned_to_user_id,
                fu.username as forwarded_to_username
         FROM inv_return_to_stores r
         LEFT JOIN inv_warehouses w ON w.id = r.warehouse_id
-        LEFT JOIN hr_departments d ON d.id = r.department_id
+        LEFT JOIN adm_departments d ON d.id = r.department_id
         LEFT JOIN adm_document_workflows dw 
           ON dw.document_id = r.id 
           AND dw.document_type = 'RETURN_TO_STORES'
@@ -3064,7 +3281,7 @@ async function ensureReportingViews() {
       r.warehouse_id,
       r.department_id,
       d.item_id,
-      d.qty,
+      d.qty_returned AS qty,
       d.uom,
       r.created_at,
       r.created_by,
@@ -6357,11 +6574,11 @@ router.get(
         SELECT i.id, i.issue_no, i.issue_date, i.warehouse_id, i.issued_to,
                i.department_id, i.status, i.remarks, i.issue_type,
                i.requisition_id, i.created_by, i.created_at, i.updated_at,
-               w.warehouse_name, d.dept_name AS department_name,
+               w.warehouse_name, d.name AS department_name,
                COALESCE(u.username, ru.username) AS created_by_name
          FROM inv_issue_to_requirement i
         LEFT JOIN inv_warehouses w ON w.id = i.warehouse_id
-        LEFT JOIN hr_departments d ON d.id = i.department_id
+        LEFT JOIN adm_departments d ON d.id = i.department_id
         LEFT JOIN inv_material_requisitions r ON r.id = i.requisition_id
         LEFT JOIN adm_users u ON u.id = i.created_by
         LEFT JOIN adm_users ru ON ru.id = r.created_by
@@ -6393,12 +6610,12 @@ router.get(
 
       const [hdr] = await query(
         `
-        SELECT i.*, w.warehouse_name, d.dept_name AS department_name, u.username AS created_by_username,
+        SELECT i.*, w.warehouse_name, d.name AS department_name, u.username AS created_by_username,
           i.created_at,
           COALESCE(u.username, ru.username) AS created_by_name
          FROM inv_issue_to_requirement i
         LEFT JOIN inv_warehouses w ON w.id = i.warehouse_id
-        LEFT JOIN hr_departments d ON d.id = i.department_id
+        LEFT JOIN adm_departments d ON d.id = i.department_id
         LEFT JOIN inv_material_requisitions r ON r.id = i.requisition_id
         LEFT JOIN adm_users u ON u.id = i.created_by
         LEFT JOIN adm_users ru ON ru.id = r.created_by
@@ -6834,12 +7051,12 @@ router.get(
       if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
       const [hdr] = await query(
         `
-        SELECT r.*, w.warehouse_name, d.dept_name AS department_name,
+        SELECT r.*, w.warehouse_name, d.name AS department_name,
           r.created_at,
           u.username AS created_by_name
          FROM inv_return_to_stores r
         LEFT JOIN inv_warehouses w ON w.id = r.warehouse_id
-        LEFT JOIN hr_departments d ON d.id = r.department_id
+        LEFT JOIN adm_departments d ON d.id = r.department_id
         LEFT JOIN adm_users u ON u.id = r.created_by
          WHERE r.id = :id
         LIMIT 1

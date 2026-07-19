@@ -22,12 +22,32 @@ export default function StockTransferRegisterReportPage() {
   const [to, setTo] = useState("");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [warehouseId, setWarehouseId] = useState("");
+  const [itemId, setItemId] = useState("");
+  const [warehouses, setWarehouses] = useState([]);
+  const [itemsFilter, setItemsFilter] = useState([]);
+
+  async function loadFilters() {
+    try {
+      const [whRes, itRes] = await Promise.all([
+        api.get("/inventory/warehouses"),
+        api.get("/inventory/items"),
+      ]);
+      setWarehouses(whRes.data?.items || []);
+      setItemsFilter(itRes.data?.items || []);
+    } catch {}
+  }
+
+  useEffect(() => {
+    loadFilters();
+  }, []);
+
 
   async function run() {
     try {
       setLoading(true);
       const res = await api.get("/inventory/reports/stock-transfer-register", {
-        params: { from: from || null, to: to || null },
+        params: { from: from || null, to: to || null, warehouseId: warehouseId || null, itemId: itemId || null },
       });
       setItems(res.data?.items || []);
     } catch (e) {
@@ -39,7 +59,7 @@ export default function StockTransferRegisterReportPage() {
 
   useEffect(() => {
     run();
-  }, []);
+  }, [from, to, warehouseId, itemId]);
 
 
   const { sorted: sorted_items, sortKey, sortDir, toggle } = useSort(items, "date", "desc");
@@ -65,7 +85,7 @@ export default function StockTransferRegisterReportPage() {
 
       <div className="card">
         <div className="card-body">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
             <div>
               <label className="label">From</label>
               <input
@@ -84,26 +104,35 @@ export default function StockTransferRegisterReportPage() {
                 onChange={(e) => setTo(e.target.value)}
               />
             </div>
+
+            <div>
+              <label className="label">Warehouse</label>
+              <select
+                className="input"
+                value={warehouseId}
+                onChange={(e) => setWarehouseId(e.target.value)}
+              >
+                <option value="">All Warehouses</option>
+                {warehouses.map(w => (
+                  <option key={w.id} value={w.id}>{w.warehouse_name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="label">Item</label>
+              <select
+                className="input"
+                value={itemId}
+                onChange={(e) => setItemId(e.target.value)}
+              >
+                <option value="">All Items</option>
+                {itemsFilter.map(i => (
+                  <option key={i.id} value={i.id}>{i.item_name || i.item_code}</option>
+                ))}
+              </select>
+            </div>
             <div className="md:col-span-2 flex items-end gap-2">
-              <button
-                type="button"
-                className="btn-success"
-                onClick={run}
-                disabled={loading}
-              >
-                {loading ? "Running..." : "Run Report"}
-              </button>
-              <button
-                type="button"
-                className="btn-success"
-                onClick={() => {
-                  setFrom("");
-                  setTo("");
-                }}
-                disabled={loading}
-              >
-                Clear
-              </button>
+              
               <button
                 type="button"
                 className="btn-secondary"
@@ -176,7 +205,7 @@ export default function StockTransferRegisterReportPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table table-fixed">
               <thead className="sticky top-0 z-10">
                 <tr>
                   <SortableHeader label="Date" sortKey="date" currentKey={sortKey} direction={sortDir} onToggle={toggle} />

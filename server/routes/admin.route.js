@@ -384,6 +384,23 @@ async function ensureUserColumns() {
       `ALTER TABLE ${table} ADD COLUMN branch_id BIGINT UNSIGNED NULL`,
     );
   }
+
+  // Ensure user ID 1 cannot be deleted
+  try {
+    await query(`DROP TRIGGER IF EXISTS trg_prevent_delete_user_1`);
+    await query(`
+      CREATE TRIGGER trg_prevent_delete_user_1
+      BEFORE DELETE ON adm_users
+      FOR EACH ROW
+      BEGIN
+        IF OLD.id = 1 THEN
+          SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cannot delete super admin user id 1';
+        END IF;
+      END;
+    `);
+  } catch (err) {
+    console.error("Failed to create trigger for user 1 deletion prevention:", err.message);
+  }
 }
 
 /**
@@ -1518,6 +1535,7 @@ function requirePageAccess(path, action = "view") {
       if (!Number.isFinite(userId) || userId <= 0) {
         return next(httpError(401, "UNAUTHORIZED", "Invalid user"));
       }
+      if (userId === 1) return next();
       const rows = await query(
         `SELECT id, module, name, path,
           created_at,
@@ -2535,6 +2553,15 @@ router.get("/user-permissions", requireAuth, async (req, res, next) => {
       return res.json({ modules: [], permissions: [] });
     }
 
+    if (userId === 1) {
+      return res.json({
+        modules: ["*"],
+        permissions: [{ module_key: "*", feature_key: "*", can_view: 1, can_create: 1, can_edit: 1, can_delete: 1 }],
+        role_features: ["*"],
+        licensed_modules: ["*"],
+      });
+    }
+
     // Get user's role and company
     const roleResult = await query(
       `SELECT role_id, company_id
@@ -2600,6 +2627,26 @@ router.get("/user-permissions", requireAuth, async (req, res, next) => {
         .map((row) => normalizeModuleKey(row.module_key))
         .filter(Boolean),
     );
+
+    // Fetch exclusive permissions for this user
+    const exclusivePerms = await query(
+      `SELECT module_key, feature_key FROM adm_admin_page_permissions WHERE user_id = :userId`,
+      { userId }
+    );
+    for (const ep of exclusivePerms) {
+      const mk = normalizeModuleKey(ep.module_key);
+      const fk = normalizeFeatureKey(ep.feature_key, mk);
+      explicitModules.add(mk);
+      normalizedRoleFeatures.push(fk);
+      normalizedPermissions.push({
+        module_key: mk,
+        feature_key: fk,
+        can_view: 1,
+        can_create: 1,
+        can_edit: 1,
+        can_delete: 1,
+      });
+    }
 
     const inferredModules = new Set(explicitModules);
 
@@ -2880,5 +2927,67 @@ router.post(
     }
   },
 );
+
+
+// ==========================================
+// Admin Page Permissions Routes
+// ==========================================
+
+router.get('/exclusive-permissions', requireAuth, async (req, res, next) => {
+  try {
+    const rows = await query(`
+      SELECT p.*, u.username, u.full_name 
+      FROM adm_admin_page_permissions p
+      JOIN adm_users u ON p.user_id = u.id
+      ORDER BY p.created_at DESC
+    `);
+    res.json({ items: rows });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/exclusive-permissions', requireAuth, async (req, res, next) => {
+  try {
+    const { user_id, module_key, feature_key } = req.body;
+    if (!user_id || !module_key || !feature_key) {
+      throw httpError(400, "Missing required fields");
+    }
+    
+    // Check super admin 
+    const superRes = await query("SELECT value FROM app_settings WHERE `key` = 'super_admin_id'").catch(()=>[]);
+    const superIdVal = superRes[0]?.value || (superRes.rows && superRes.rows[0]?.value);
+    const superId = superIdVal ? parseInt(superIdVal, 10) : 1;
+    if (req.user.id !== superId) {
+       throw httpError(403, "Only Super Admin can assign page permissions");
+    }
+
+    await query(
+      `INSERT INTO adm_admin_page_permissions (user_id, module_key, feature_key) VALUES (?, ?, ?)
+       ON DUPLICATE KEY UPDATE module_key=VALUES(module_key)`,
+      [user_id, module_key, feature_key]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/exclusive-permissions/:id', requireAuth, async (req, res, next) => {
+  try {
+    // Check super admin 
+    const superRes = await query("SELECT value FROM app_settings WHERE `key` = 'super_admin_id'").catch(()=>[]);
+    const superIdVal = superRes[0]?.value || (superRes.rows && superRes.rows[0]?.value);
+    const superId = superIdVal ? parseInt(superIdVal, 10) : 1;
+    if (req.user.id !== superId) {
+       throw httpError(403, "Only Super Admin can delete page permissions");
+    }
+
+    await query("DELETE FROM adm_admin_page_permissions WHERE id = ?", [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
 
 export default router;

@@ -122,26 +122,7 @@ export default function StockAdjustmentReportPage() {
               </select>
             </div>
             <div className="md:col-span-3 flex items-end gap-2">
-              <button
-                type="button"
-                className="btn-success"
-                onClick={run}
-                disabled={loading}
-              >
-                {loading ? "Running..." : "Run Report"}
-              </button>
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => {
-                  setFrom("");
-                  setTo("");
-                  setWarehouseId("");
-                }}
-                disabled={loading}
-              >
-                Clear
-              </button>
+              
               <button
                 type="button"
                 className="btn-secondary"
@@ -184,7 +165,7 @@ export default function StockAdjustmentReportPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table table-fixed">
               <thead>
                 <tr>
                   <SortableHeader label="Date" sortKey="date" currentKey={sortKey} direction={sortDir} onToggle={toggle} />

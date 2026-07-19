@@ -17,7 +17,7 @@ import { toast } from "react-toastify";
  */
 export default function ServiceBillsList() {
   const location = useLocation();
-  const { canPerformAction } = usePermission();
+  const { canPerformAction, exceptionalPerms } = usePermission();
   const successMsg = location.state?.success || "";
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -113,16 +113,16 @@ export default function ServiceBillsList() {
             <table className="table">
               <thead>
                 <tr>
-                  <th>No</th>
-                  <th>Date</th>
-                  <th>Client</th>
-                  <th>Payment</th>
-                  <th>Total</th>
-                  <th>Status</th>
-                  <th className="text-right">Actions</th>
-                  <th>Created By</th>
-                  <th>Created Date</th>
-                  <th>Attachments</th>
+                  <th className="whitespace-nowrap">No</th>
+                  <th className="whitespace-nowrap">Date</th>
+                  <th className="whitespace-nowrap">Client</th>
+                  <th className="whitespace-nowrap">Payment</th>
+                  <th className="whitespace-nowrap">Total</th>
+                  <th className="whitespace-nowrap">Status</th>
+                  <th className="text-right whitespace-nowrap">Actions</th>
+                  <th className="whitespace-nowrap">Created By</th>
+                  <th className="whitespace-nowrap">Created Date</th>
+                  <th className="whitespace-nowrap">Attachments</th>
                 </tr>
               </thead>
               <tbody>
@@ -130,7 +130,7 @@ export default function ServiceBillsList() {
                   <tr>
                     <td
                       colSpan="6"
-                      className="text-center py-8 text-slate-500 dark:text-slate-400"
+                      className="text-center py-8 text-slate-500 dark:text-slate-400 whitespace-nowrap"
                     >
                       Loading...
                     </td>
@@ -141,7 +141,7 @@ export default function ServiceBillsList() {
                   <tr>
                     <td
                       colSpan="6"
-                      className="text-center text-slate-500 dark:text-slate-400"
+                      className="text-center text-slate-500 dark:text-slate-400 whitespace-nowrap"
                     >
                       No service bills
                     </td>
@@ -150,10 +150,10 @@ export default function ServiceBillsList() {
 
                 {filtered.map((r) => (
                   <tr key={r.id}>
-                    <td>{r.bill_no}</td>
-                    <td>{r.bill_date}</td>
-                    <td>{r.supplier_name || r.client_name || "-"}</td>
-                    <td>
+                    <td className="whitespace-nowrap">{r.bill_no}</td>
+                    <td className="whitespace-nowrap">{r.bill_date}</td>
+                    <td className="whitespace-nowrap">{r.supplier_name || r.client_name || "-"}</td>
+                    <td className="whitespace-nowrap">
                       <span
                         className={`badge ${
                           String(r.payment_status || "").toUpperCase() === "PAID"
@@ -164,10 +164,10 @@ export default function ServiceBillsList() {
                         {String(r.payment_status || "UNPAID").toUpperCase()}
                       </span>
                     </td>
-                    <td className="text-right">
+                    <td className="text-right whitespace-nowrap">
                       {Number(r.total_amount || 0).toFixed(2)}
                     </td>
-                    <td>
+                    <td className="whitespace-nowrap">
                       <span
                         className={`badge ${
                           String(r.status || "").toUpperCase() === "POSTED"
@@ -184,7 +184,7 @@ export default function ServiceBillsList() {
                         {String(r.status || "").toUpperCase()}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2">
                         {/* Slot 1: View */}
                         <div className="min-w-[80px]">
@@ -225,14 +225,20 @@ export default function ServiceBillsList() {
 
                         {/* Slot 7: Cancel */}
                         <div className="min-w-[80px]">
-                          {canPerformAction("service-management:service-bills", "cancel") && String(r.payment_status || "").toUpperCase() !== "PAID" ? (
+                          {canPerformAction("service-management:service-bills", "cancel") && String(r.payment_status || "").toUpperCase() !== "PAID" && exceptionalPerms?.has?.("SERVICE.BILL.CANCEL") ? (
                             <button
                               type="button"
                               className="w-full inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-white bg-[#990000] rounded-lg hover:bg-[#770000] transition-colors h-9"
                               onClick={() => {
                                 if (!window.confirm("Cancel this bill?")) return;
-                                // Implementation would call API here
-                                toast.info("Cancel API call goes here");
+                                api.put(`/purchase/service-bills/${r.id}`, { status: "CANCELLED" })
+                                  .then(() => {
+                                    toast.success("Service bill cancelled");
+                                    setItems(items.map((i) => (i.id === r.id ? { ...i, status: "CANCELLED" } : i)));
+                                  })
+                                  .catch((err) => {
+                                    toast.error(err?.response?.data?.message || "Failed to cancel service bill");
+                                  });
                               }}
                             >
                               Cancel
@@ -243,9 +249,9 @@ export default function ServiceBillsList() {
                         </div>
                       </div>
                     </td>
-                    <td>{r.created_by_username || r.created_by_name || "-"}</td>
-                    <td>{r.created_at ? new Date(r.created_at).toLocaleDateString() : "-"}</td>
-                    <td>
+                    <td className="whitespace-nowrap">{r.created_by_username || r.created_by_name || "-"}</td>
+                    <td className="whitespace-nowrap">{r.created_at ? new Date(r.created_at).toLocaleDateString() : "-"}</td>
+                    <td className="whitespace-nowrap">
                       <button
                         type="button"
                         className="text-brand hover:underline font-medium text-sm"

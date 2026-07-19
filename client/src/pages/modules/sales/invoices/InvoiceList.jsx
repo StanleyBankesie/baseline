@@ -670,7 +670,7 @@ export default function InvoiceList() {
                                 <span className="list-approval-approved-pill">Approved</span>
                                 {canReverseApproval() && (
                                   <ReverseApprovalButton
-                                    docType="INVOICE"
+                                    docType="SALES_INVOICE"
                                     docId={inv.id}
                                     className="list-approval-reverse-btn"
                                     onDone={() =>

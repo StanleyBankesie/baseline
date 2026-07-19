@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "api/client";
 import { useGhanaCities } from "../../../../hooks/useGhanaCities";
+import { useAuth } from "@/auth/AuthContext.jsx";
 
 /**
  *  component
@@ -14,6 +15,7 @@ import { useGhanaCities } from "../../../../hooks/useGhanaCities";
  * @returns {JSX.Element} The rendered component
  */
 export default function CompanyForm() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
@@ -301,6 +303,17 @@ export default function CompanyForm() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (Number(user?.id) !== 1) {
+    return (
+      <div className="p-8 text-center">
+        <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
+        <p className="text-slate-600 dark:text-slate-400">
+          You do not have permission to view the Company Setup page.
+        </p>
+      </div>
+    );
   }
 
   return (

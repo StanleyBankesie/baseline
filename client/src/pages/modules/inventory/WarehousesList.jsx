@@ -92,7 +92,7 @@ export default function WarehousesList() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table table-fixed">
               <thead>
                 <tr>
                   <th>Code</th>

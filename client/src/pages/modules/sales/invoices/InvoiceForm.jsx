@@ -40,6 +40,7 @@ export default function InvoiceForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [customers, setCustomers] = useState([]);
+  const [salespersons, setSalespersons] = useState([]);
   const [customerSearch, setCustomerSearch] = useState("");
   const [itemsCatalog, setItemsCatalog] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -65,6 +66,7 @@ export default function InvoiceForm() {
     phone: "",
     remarks: "",
     project_id: "",
+    salesperson: "",
   });
 
   const [lines, setLines] = useState([]);
@@ -196,6 +198,7 @@ export default function InvoiceForm() {
 
   useEffect(() => {
     fetchCustomers();
+    fetchSalespersons();
     fetchItems();
     fetchOrders();
     fetchWarehouses();
@@ -275,6 +278,15 @@ export default function InvoiceForm() {
     };
     run();
   }, [actionParam, isEdit]);
+
+  const fetchSalespersons = async () => {
+    try {
+      const response = await api.get('/sales/sales-persons');
+      setSalespersons(Array.isArray(response.data?.items) ? response.data.items : []);
+    } catch (error) {
+      console.error('Error fetching salespersons:', error);
+    }
+  };
 
   const fetchCustomers = async () => {
     try {
@@ -1619,6 +1631,22 @@ export default function InvoiceForm() {
                   {projects.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.project_name || p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="label">Salesperson</label>
+                <select
+                  className="input w-56"
+                  value={form.salesperson || ""}
+                  onChange={(e) => update("salesperson", e.target.value)}
+                  disabled={readOnly}
+                >
+                  <option value="">Select Salesperson</option>
+                  {salespersons.map((s) => (
+                    <option key={s.id} value={s.name}>
+                      {s.name}
                     </option>
                   ))}
                 </select>

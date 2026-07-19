@@ -20,6 +20,7 @@ import jsPDF from "jspdf";
 export default function SalesRegisterReportPage() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [customer, setCustomer] = useState("");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -27,7 +28,7 @@ export default function SalesRegisterReportPage() {
     try {
       setLoading(true);
       const res = await api.get("/sales/reports/sales-register", {
-        params: { from: from || null, to: to || null },
+        params: { from: from || null, to: to || null, customer: customer || null },
       });
       setItems(res.data?.items || []);
     } catch (e) {
@@ -128,10 +129,10 @@ export default function SalesRegisterReportPage() {
     });
     doc.save("sales-register.pdf");
   }
+
   useEffect(() => {
     run();
-  }, []);
-
+  }, [from, to, customer]);
 
   const { sorted: sorted_items, sortKey, sortDir, toggle } = useSort(items, "date", "desc");
 
@@ -177,11 +178,8 @@ export default function SalesRegisterReportPage() {
             </button>
           </div>
         </div>
-      </div>
-
-      <div className="card">
         <div className="card-body">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div>
               <label className="label">From</label>
               <input
@@ -200,31 +198,20 @@ export default function SalesRegisterReportPage() {
                 onChange={(e) => setTo(e.target.value)}
               />
             </div>
-            <div className="md:col-span-2 flex items-end gap-2">
-              <button
-                type="button"
-                className="btn-success"
-                onClick={run}
-                disabled={loading}
-              >
-                {loading ? "Running..." : "Run Report"}
-              </button>
-              <button
-                type="button"
-                className="btn-success"
-                onClick={() => {
-                  setFrom("");
-                  setTo("");
-                }}
-                disabled={loading}
-              >
-                Clear
-              </button>
+            <div>
+              <label className="label">Customer</label>
+              <input
+                className="input"
+                type="text"
+                placeholder="Search customer..."
+                value={customer}
+                onChange={(e) => setCustomer(e.target.value)}
+              />
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table w-full table-fixed">
               <thead>
                 <tr>
                   <SortableHeader label="Date" sortKey="date" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
@@ -237,7 +224,7 @@ export default function SalesRegisterReportPage() {
               </thead>
               <tbody>
                 {sorted_items.map((r) => (
-                  <tr key={r.id}>
+                  <tr key={r.id || Math.random()}>
                     <td>
                       {r.invoice_date
                         ? new Date(r.invoice_date).toLocaleDateString()

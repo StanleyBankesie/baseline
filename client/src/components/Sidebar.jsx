@@ -398,6 +398,9 @@ export default function Sidebar() {
     // Filter children based on permissions
     const visibleChildren = hasChildren
       ? item.children.filter((child) => {
+          if ((child.key === "company-setup" || child.key === "branch-setup") && Number(user?.id) !== 1) {
+            return false;
+          }
           if (child.key) {
             return canAccessFeatureKey(item.key, child.key);
           }

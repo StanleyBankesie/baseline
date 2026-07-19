@@ -20,6 +20,7 @@ import jsPDF from "jspdf";
 export default function DeliveryRegisterReportPage() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [customer, setCustomer] = useState("");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -27,7 +28,7 @@ export default function DeliveryRegisterReportPage() {
     try {
       setLoading(true);
       const res = await api.get("/sales/reports/delivery-register", {
-        params: { from: from || null, to: to || null },
+        params: { from: from || null, to: to || null, customer: customer || null },
       });
       setItems(res.data?.items || []);
     } catch (e) {
@@ -111,7 +112,7 @@ export default function DeliveryRegisterReportPage() {
   }
   useEffect(() => {
     run();
-  }, []);
+  }, [from, to, customer]);
 
 
   const { sorted: sorted_items, sortKey, sortDir, toggle } = useSort(items, "date", "desc");
@@ -181,31 +182,20 @@ export default function DeliveryRegisterReportPage() {
                 onChange={(e) => setTo(e.target.value)}
               />
             </div>
-            <div className="md:col-span-2 flex items-end gap-2">
-              <button
-                type="button"
-                className="btn-success"
-                onClick={run}
-                disabled={loading}
-              >
-                {loading ? "Running..." : "Run Report"}
-              </button>
-              <button
-                type="button"
-                className="btn-success"
-                onClick={() => {
-                  setFrom("");
-                  setTo("");
-                }}
-                disabled={loading}
-              >
-                Clear
-              </button>
+            <div>
+              <label className="label">Customer</label>
+              <input
+                className="input"
+                type="text"
+                placeholder="Search customer..."
+                value={customer}
+                onChange={(e) => setCustomer(e.target.value)}
+              />
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table  w-full table-fixed">
               <thead>
                 <tr>
                   <SortableHeader label="Date" sortKey="date" currentKey={sortKey} direction={sortDir} onToggle={toggle} />

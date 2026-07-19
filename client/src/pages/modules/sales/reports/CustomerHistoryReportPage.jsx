@@ -75,7 +75,7 @@ export default function CustomerHistoryReportPage() {
 
   useEffect(() => {
     run();
-  }, []);
+  }, [customerId, fromDate, toDate]);
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
@@ -291,24 +291,7 @@ export default function CustomerHistoryReportPage() {
                 onChange={(e) => setToDate(e.target.value)}
               />
             </div>
-            <div className="flex items-end gap-2">
-              <button type="button" className="btn-success" onClick={run} disabled={loading}>
-                {loading ? "Running..." : "Run Report"}
-              </button>
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => {
-                  setCustomerId("");
-                  setFromDate("");
-                  setToDate("");
-                }}
-                disabled={loading}
-              >
-                Clear
-              </button>
             </div>
-          </div>
 
           {/* Stage Filters */}
           <div className="flex flex-wrap gap-2 mb-4 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
@@ -413,7 +396,7 @@ export default function CustomerHistoryReportPage() {
 
           {/* Data Table */}
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table w-full table-fixed">
               <thead>
                 <tr>
                   <SortableHeader label="Stage" sortKey="stage" currentKey={sortKey} direction={sortDir} onToggle={toggle} />

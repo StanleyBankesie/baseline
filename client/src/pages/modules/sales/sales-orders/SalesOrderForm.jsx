@@ -67,6 +67,7 @@ export default function SalesOrderForm() {
     currency_id: 4,
     exchange_rate: 1,
     sales_person_id: "",
+    salesperson: "",
     warehouse_id: "",
     price_type: "",
     payment_type: "CASH",
@@ -87,6 +88,7 @@ export default function SalesOrderForm() {
 
   const [items, setItems] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [salespersons, setSalespersons] = useState([]);
   const [customerSearch, setCustomerSearch] = useState("");
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showPermModal, setShowPermModal] = useState(false);
@@ -319,6 +321,7 @@ export default function SalesOrderForm() {
     fetchPriceTypes();
     fetchTaxCodes();
     fetchCompanyInfo();
+    fetchSalespersons();
     if (isEditMode) {
       fetchOrder();
     } else {
@@ -440,6 +443,17 @@ export default function SalesOrderForm() {
       );
     } catch (error) {
       console.error("Error fetching customers:", error);
+    }
+  };
+
+  const fetchSalespersons = async () => {
+    try {
+      const response = await api.get("/sales/sales-persons");
+      setSalespersons(
+        Array.isArray(response.data?.items) ? response.data.items : [],
+      );
+    } catch (error) {
+      console.error("Error fetching salespersons:", error);
     }
   };
 
@@ -651,6 +665,7 @@ export default function SalesOrderForm() {
           currency_id: data.currency_id ?? prev.currency_id ?? "",
           exchange_rate: data.exchange_rate || 1,
           sales_person_id: data.sales_person_id || "",
+          salesperson: data.salesperson || "",
           payment_terms: data.payment_terms || "",
           priority: data.priority || "MEDIUM",
           shipping_charges: data.shipping_charges || 0,
@@ -1138,10 +1153,8 @@ export default function SalesOrderForm() {
           formData.warehouse_id != null && formData.warehouse_id !== ""
             ? Number(formData.warehouse_id)
             : null,
-        sales_person_id:
-          formData.sales_person_id != null && formData.sales_person_id !== ""
-            ? Number(formData.sales_person_id)
-            : null,
+        salesperson: formData.salesperson || "",
+        remarks: formData.remarks,
         total_amount: totals.total,
         sub_total: totals.sub,
         tax_amount: totals.tax,
@@ -1511,6 +1524,33 @@ export default function SalesOrderForm() {
                       {quotations.map((q) => (
                         <option key={q.id} value={q.id}>
                           {q.quotation_no} - {q.customer_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="label">Salesperson</label>
+                    <select
+                      className="input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0E3646]"
+                      value={formData.sales_person_id || ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (!val) {
+                          setFormData({ ...formData, sales_person_id: "", salesperson: "" });
+                          return;
+                        }
+                        const sp = salespersons.find(s => String(s.id) === String(val));
+                        setFormData({
+                           ...formData,
+                           sales_person_id: sp ? sp.id : "",
+                           salesperson: sp ? sp.name : ""
+                        });
+                      }}
+                    >
+                      <option value="">Select Salesperson</option>
+                      {salespersons.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
                         </option>
                       ))}
                     </select>

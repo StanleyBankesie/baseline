@@ -283,6 +283,7 @@ export default function DirectPurchase() {
     if (comps.length > 0) {
       comps.forEach((c) => {
         const rate = Number(c.rate_percent) || 0;
+        if (rate === 0) return;
         const amt = (taxableTotal * rate) / 100;
         components.push({
           name: c.component_name,
@@ -396,6 +397,7 @@ export default function DirectPurchase() {
       if (comps.length > 0) {
         comps.forEach((c) => {
           const rate = Number(c.rate_percent) || 0;
+          if (rate === 0) return;
           const amt = (base * rate) / 100;
           const name = c.component_name;
           if (!compTotals[name]) {

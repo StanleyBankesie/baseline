@@ -257,23 +257,23 @@ export default function SupplierQuotationsList() {
                   <SortableHeader label="Total" sortKey="total_amount" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-right" />
                   <SortableHeader label="Currency" sortKey="currency" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <SortableHeader label="Status" sortKey="status" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                  <th className="text-right">Actions</th>
+                  <th className="text-right whitespace-nowrap">Actions</th>
                   <SortableHeader label="Created By" sortKey="created_by_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <SortableHeader label="Created Date" sortKey="created_at" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                 </tr>
               </thead>
               <tbody>
-                {loading && <tr><td colSpan="11" className="text-center py-8 text-slate-500">Loading...</td></tr>}
-                {!loading && !filtered.length && <tr><td colSpan="11" className="text-center py-8 text-slate-500">No quotations found</td></tr>}
+                {loading && <tr><td colSpan="11" className="text-center py-8 text-slate-500 whitespace-nowrap">Loading...</td></tr>}
+                {!loading && !filtered.length && <tr><td colSpan="11" className="text-center py-8 text-slate-500 whitespace-nowrap">No quotations found</td></tr>}
                 {!loading && filtered.map(r => (
                   <tr key={r.id}>
-                    <td className="font-mono text-sm">{r.quotation_no}</td>
-                    <td>{r.quotation_date}</td>
-                    <td>{r.rfq_id}</td>
-                    <td>{r.supplier_name}</td>
-                    <td className="text-right">{Number(r.total_amount || 0).toFixed(2)}</td>
-                    <td>{r.currency}</td>
-                    <td><Badge value={r.status} colorMap={statusColors} /></td>
+                    <td className="font-mono text-sm whitespace-nowrap">{r.quotation_no}</td>
+                    <td className="whitespace-nowrap">{r.quotation_date}</td>
+                    <td className="whitespace-nowrap">{r.rfq_id}</td>
+                    <td className="whitespace-nowrap">{r.supplier_name}</td>
+                    <td className="text-right whitespace-nowrap">{Number(r.total_amount || 0).toFixed(2)}</td>
+                    <td className="whitespace-nowrap">{r.currency}</td>
+                    <td className="whitespace-nowrap"><Badge value={r.status} colorMap={statusColors} /></td>
                     <td className="whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2">
                         <button type="button" className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded transition-colors" title="View" onClick={() => navigate(`/maintenance/supplier-quotations/${r.id}?mode=view`)}><Eye size={15} /></button>
@@ -311,8 +311,8 @@ export default function SupplierQuotationsList() {
                         </div>
                       </div>
                     </td>
-                    <td>{r.created_by_name || "-"}</td>
-                    <td>{r.created_at ? new Date(r.created_at).toLocaleDateString() : "-"}</td>
+                    <td className="whitespace-nowrap">{r.created_by_name || "-"}</td>
+                    <td className="whitespace-nowrap">{r.created_at ? new Date(r.created_at).toLocaleDateString() : "-"}</td>
                   </tr>
                 ))}
               </tbody>

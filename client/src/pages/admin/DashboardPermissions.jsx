@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "../../api/client.js";
 import { MODULES_REGISTRY } from "../../data/modulesRegistry.js";
+import { useAuth } from "../../auth/AuthContext.jsx";
+import { usePermission } from "../../auth/PermissionContext.jsx";
 
 /**
  * Helper to generate a unique key for a permission combination.
@@ -30,6 +32,8 @@ function permKey(module_key, dashboard_key, card_key, ticker_key) {
  */
 export default function DashboardPermissions() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { refreshPermissions } = usePermission();
   const [users, setUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [perms, setPerms] = useState([]);
@@ -60,10 +64,40 @@ export default function DashboardPermissions() {
       if (key === "business-intelligence") {
         extras.unshift({ key: "dashboards", name: "Dashboards" });
       }
+      const excludeDashboards = new Set([
+        "System Overview Dashboard",
+        "User Activity Dashboard",
+        "Sales Overview Dashboard",
+        "Revenue Analytics Dashboard",
+        "Customer Analytics Dashboard",
+        "Procurement Overview Dashboard",
+        "Supplier Analytics Dashboard",
+        "Inventory Overview Dashboard",
+        "Stock Analytics Dashboard",
+        "Financial Overview Dashboard",
+        "Cash Flow Dashboard",
+        "Budget Analysis Dashboard",
+        "Maintenance Overview Dashboard",
+        "Asset Analytics Dashboard",
+        "Production Overview Dashboard",
+        "Efficiency Analytics Dashboard",
+        "Project Overview Dashboard",
+        "Resource Utilization Dashboard",
+        "Service Overview Dashboard",
+        "Billing Analytics Dashboard",
+        "BI Overview Dashboard",
+        "Executive Dashboard",
+        "HR Overview Dashboard",
+        "Attendance Dashboard",
+        "Payroll Dashboard",
+      ]);
       const dashboards = [
         ...extras.filter((d) => !existing.has(String(d.key || ""))),
         ...fromRegistry,
-      ];
+      ].filter((d) => {
+        const name = d.name || d.label || "";
+        return !excludeDashboards.has(name);
+      });
       return {
         key,
         name: val.name,
@@ -85,7 +119,8 @@ export default function DashboardPermissions() {
       ],
       administration: [
         { key: "total-users", label: "Total Users" },
-        { key: "active-sessions", label: "Active Sessions" },
+        { key: "roles-pages", label: "Roles & Pages" },
+        { key: "active-sessions", label: "Active Sessions (24h)" },
         { key: "pending-workflows", label: "Pending Workflows" },
       ],
       sales: [
@@ -95,8 +130,6 @@ export default function DashboardPermissions() {
         { key: "overdue-invoices", label: "Overdue Invoices" },
         { key: "total-revenue", label: "Total Revenue" },
         { key: "sales-growth", label: "Sales Growth %" },
-        { key: "total-sales", label: "Total Sales" },
-        { key: "open-orders", label: "Open Orders" },
       ],
       purchase: [
         { key: "total-purchases", label: "Total Purchases" },
@@ -104,43 +137,41 @@ export default function DashboardPermissions() {
         { key: "active-suppliers", label: "Active Suppliers" },
         { key: "pending-approvals", label: "Pending Approvals" },
         { key: "outstanding-payables", label: "Outstanding Payables" },
-        { key: "pending-orders", label: "Pending Orders" },
-        { key: "pending-grns", label: "Pending GRNs" },
       ],
       inventory: [
         { key: "items-tracked", label: "Items Tracked" },
+        { key: "stock-quantity", label: "Stock Quantity" },
         { key: "pending-requisitions", label: "Pending Requisitions" },
-        { key: "incoming-transfers", label: "Incoming Transfers" },
+        { key: "low-stock-items", label: "Low Stock Items" },
       ],
       finance: [
-        { key: "cash-balance", label: "Cash Balance" },
+        { key: "cash-balance", label: "Cash on Hand" },
+        { key: "bank-balance", label: "Bank Balance" },
         { key: "pending-vouchers", label: "Pending Vouchers" },
-        { key: "monthly-expenses", label: "Monthly Expenses" },
+        { key: "net-income", label: "Net Income (MTD)" },
       ],
       "human-resources": [
         { key: "active-employees", label: "Active Employees" },
-        { key: "on-leave", label: "On Leave" },
+        { key: "today-attendance", label: "Present Today" },
+        { key: "on-leave", label: "On Leave Today" },
         { key: "payroll-status", label: "Payroll Status" },
       ],
       maintenance: [
         { key: "open-requests", label: "New Requests" },
         { key: "active-jobs", label: "Jobs In Progress" },
-        { key: "open-work-orders", label: "Open Work Orders" },
         { key: "overdue-pms", label: "Overdue PMs" },
-        { key: "asset-health", label: "Asset Health" },
       ],
       production: [
-        { key: "active-work-orders", label: "Active Work Orders" },
-        { key: "efficiency", label: "Efficiency" },
-        { key: "active-boms", label: "Active BOMs" },
+        { key: "active-production-orders", label: "Active Production Orders" },
+        { key: "open-job-cards", label: "Open Job Cards" },
+        { key: "pending-requisitions", label: "Pending Requisitions" },
+        { key: "bom-master-records", label: "BOM Master Records" },
       ],
       "project-management": [
-        { key: "active-projects", label: "Active Projects" },
+        { key: "active-projects", label: "Total Projects" },
         { key: "active-tasks", label: "Active Tasks" },
         { key: "total-budget", label: "Total Budget" },
         { key: "logged-hours", label: "Logged Hours" },
-        { key: "open-tasks", label: "Open Tasks" },
-        { key: "on-time-completion", label: "On Time Completion" },
       ],
       pos: [
         { key: "today-sales", label: "Today Sales" },
@@ -150,18 +181,31 @@ export default function DashboardPermissions() {
       ],
       "business-intelligence": [
         { key: "active-dashboards", label: "Active Dashboards" },
-        { key: "scheduled-reports", label: "Scheduled Reports" },
-        { key: "data-sources", label: "Data Sources" },
+        { key: "sales-30d", label: "Sales (30d)" },
+        { key: "purchase-30d", label: "Purchases (30d)" },
+        { key: "overview", label: "Items / Employees" },
       ],
       "service-management": [
-        { key: "open-requests", label: "Open Requests" },
-        { key: "pending-bills", label: "Pending Bills" },
+        { key: "service-requests", label: "Customer Service Requests" },
+        { key: "open-orders", label: "Open Orders" },
+        { key: "executions", label: "Executions" },
         { key: "confirmed-services", label: "Confirmed Services" },
       ],
       "executive-overview": [
-        { key: "executive-metrics", label: "Executive Metrics" },
-        { key: "kpi-summary", label: "KPI Summary" },
-        { key: "goal-tracking", label: "Goal Tracking" },
+        { key: "outstanding-receivables", label: "Outstanding Receivables" },
+        { key: "outstanding-payables", label: "Outstanding Payables" },
+        { key: "todays-sales", label: "Today's Sales" },
+        { key: "current-month-revenue", label: "Current Month Revenue" },
+        { key: "current-week-revenue", label: "Current Week Revenue" },
+        { key: "supplier-outstanding", label: "Supplier Outstanding" },
+        { key: "fast-moving-items", label: "Fast Moving Items" },
+        { key: "slow-moving-items", label: "Slow Moving Items" },
+      ],
+      transport: [
+        { key: "active-trips", label: "Active Trips" },
+        { key: "total-vehicles", label: "Total Vehicles" },
+        { key: "total-drivers", label: "Total Drivers" },
+        { key: "total-fuel-cost", label: "Total Fuel Cost" },
       ],
     }),
     [],
@@ -292,6 +336,9 @@ export default function DashboardPermissions() {
         type === "dashboard" ? "Dashboard" : type === "card" ? "Card" : "Ticker",
       )} ${String(key || "")} ${allow ? "enabled" : "disabled"}`;
       toast.success(msg);
+      if (Number(selectedUserId) === Number(user?.id)) {
+        await refreshPermissions();
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to save");
     }
@@ -361,22 +408,49 @@ export default function DashboardPermissions() {
                                 getView(m.key, null, c.key, null),
                               )
                             }
-                            onChange={(e) => {
+                            onChange={async (e) => {
                               const val = e.target.checked;
                               const updates = {};
+                              const permsList = [];
                               m.dashboards.forEach((d) => {
                                 const k = permKey(m.key, d.key, null, null);
                                 updates[k] = val;
                                 setView(m.key, d.key, null, null, val);
-                                persistPermission(m.key, "dashboard", d.key, val);
+                                permsList.push({
+                                  module_key: m.key,
+                                  dashboard_key: d.key,
+                                  card_key: null,
+                                  ticker_key: null,
+                                  can_view: val ? 1 : 0
+                                });
                               });
                               cards.forEach((c) => {
                                 const k = permKey(m.key, null, c.key, null);
                                 updates[k] = val;
                                 setView(m.key, null, c.key, null, val);
-                                persistPermission(m.key, "card", c.key, val);
+                                permsList.push({
+                                  module_key: m.key,
+                                  dashboard_key: null,
+                                  card_key: c.key,
+                                  ticker_key: null,
+                                  can_view: val ? 1 : 0
+                                });
                               });
                               setUserToggles((prev) => ({ ...prev, ...updates }));
+                              if (permsList.length > 0 && selectedUserId) {
+                                try {
+                                  await api.put("/access/dashboard-permissions", {
+                                    user_id: Number(selectedUserId),
+                                    permissions: permsList
+                                  });
+                                  toast.success(`Updated ${String(m.key || "").toUpperCase()} permissions`);
+                                  if (Number(selectedUserId) === Number(user?.id)) {
+                                    await refreshPermissions();
+                                  }
+                                } catch {
+                                  toast.error("Failed to save permissions");
+                                }
+                              }
                             }}
                           />
                           <span>Select All</span>

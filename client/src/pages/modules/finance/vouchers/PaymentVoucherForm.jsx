@@ -135,8 +135,7 @@ export default function PaymentVoucherForm() {
   const [submittingForward, setSubmittingForward] = useState(false);
   const [voucherStatus, setVoucherStatus] = useState("DRAFT");
   const [outstandingBills, setOutstandingBills] = useState([]);
-  const [selectedBillKey, setSelectedBillKey] = useState("");
-  const [selectedBillDetails, setSelectedBillDetails] = useState(null);
+  const [selectedBillKeys, setSelectedBillKeys] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [loadingBills, setLoadingBills] = useState(false);
   const [cvForm, setCvForm] = useState({
@@ -325,8 +324,7 @@ export default function PaymentVoucherForm() {
     const code = String(accountCode || "").trim();
     if (!code) {
       setOutstandingBills([]);
-      setSelectedBillKey("");
-      setSelectedBillDetails(null);
+      setSelectedBillKeys([]);
       return;
     }
     setLoadingBills(true);
@@ -336,15 +334,11 @@ export default function PaymentVoucherForm() {
       });
       const bills = Array.isArray(res.data?.items) ? res.data.items : [];
       setOutstandingBills(bills);
-      if (!bills.some((b) => `${b.source}_${b.id}` === selectedBillKey)) {
-        setSelectedBillKey("");
-        setSelectedBillDetails(null);
-      }
+      setSelectedBillKeys(prev => prev.filter(key => bills.some(b => `${b.source}_${b.id}` === key)));
     } catch (e) {
       console.error("[outstanding-bills] Error:", e?.response?.status, e?.response?.data || e?.message || e);
       setOutstandingBills([]);
-      setSelectedBillKey("");
-      setSelectedBillDetails(null);
+      setSelectedBillKeys([]);
     } finally {
       setLoadingBills(false);
     }
@@ -1015,8 +1009,7 @@ export default function PaymentVoucherForm() {
       loadOutstandingBillsForSupplier(pvForm.payToCode);
     } else {
       setOutstandingBills([]);
-      setSelectedBillKey("");
-      setSelectedBillDetails(null);
+      setSelectedBillKeys([]);
     }
   }, [isPAYV, pvForm.payToCode, paymentType]);
 
@@ -1780,17 +1773,28 @@ export default function PaymentVoucherForm() {
           : {}),
         ...(isPAYV &&
         paymentType === "AGAINST_BILL" &&
-        selectedBillKey &&
+        selectedBillKeys.length > 0 &&
         Number(totals.grand || 0) > 0
-          ? {
-              apply_to_purchase_bills: [
-                {
-                  bill_id: Number(selectedBillKey.split("_")[1] || 0),
-                  bill_source: selectedBillKey.split("_")[0] || "Purchase",
-                  amount: Number(totals.grand || 0),
-                },
-              ],
-            }
+          ? (() => {
+              let remaining = Number(totals.grand || 0);
+              const allocations = [];
+              for (const key of selectedBillKeys) {
+                const bill = outstandingBills.find((b) => `${b.source}_${b.id}` === key);
+                if (!bill || remaining <= 0) continue;
+                const balance = Number(bill.balance_amount || bill.net_amount || 0);
+                const alloc = Math.min(balance, remaining);
+                remaining -= alloc;
+                allocations.push({ id: bill.id, amount: alloc, source: bill.source || "PBL" });
+              }
+              const result = {};
+              const pbl = allocations.filter((a) => a.source === "PBL" || a.source === "DP" || a.source === "Purchase");
+              if (pbl.length) result.apply_to_purchase_bills = pbl.map((a) => ({ bill_id: Number(a.id), amount: Number(a.amount) }));
+              const svb = allocations.filter((a) => a.source === "SVB" || a.source === "Service");
+              if (svb.length) result.apply_to_service_bills = svb.map((a) => ({ bill_id: Number(a.id), amount: Number(a.amount) }));
+              const mtb = allocations.filter((a) => a.source === "MTB" || a.source === "Maintenance");
+              if (mtb.length) result.apply_to_maintenance_bills = mtb.map((a) => ({ bill_id: Number(a.id), amount: Number(a.amount) }));
+              return result;
+            })()
           : {}),
         // Include payment details for Direct Payment - backend will generate posting lines
         ...(isPAYV && paymentType === "DIRECT"
@@ -3667,8 +3671,7 @@ export default function PaymentVoucherForm() {
                     onClick={() => {
                       setPaymentType("DIRECT");
                       setOutstandingBills([]);
-                      setSelectedBillKey("");
-                      setSelectedBillDetails(null);
+                      setSelectedBillKeys([]);
                     }}
                     disabled={readOnly}
                   >
@@ -4022,66 +4025,88 @@ export default function PaymentVoucherForm() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:w-96">
                       <label className="label">Outstanding Bills</label>
-                      <select
-                        className={`input md:w-96 ${disabledClass}`}
-                        value={selectedBillKey}
-                        onChange={(e) => {
-                          const billKey = e.target.value;
-                          setSelectedBillKey(billKey);
-                          const bill = outstandingBills.find(
-                            (b) => `${b.source}_${b.id}` === billKey,
+                      <div className={`border rounded p-2 md:w-96 min-h-[120px] max-h-[160px] overflow-y-auto bg-white dark:bg-slate-900 ${disabledClass}`}>
+                        {outstandingBills.length === 0 && (
+                          <div className="text-slate-500 italic p-2 text-sm">
+                            {loadingBills ? "Loading bills..." : "No outstanding bills"}
+                          </div>
+                        )}
+                        {outstandingBills.map((bill) => {
+                          const key = `${bill.source}_${bill.id}`;
+                          const isChecked = selectedBillKeys.includes(key);
+                          return (
+                            <label key={key} className="flex items-center space-x-2 p-1 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                disabled={readOnly || loadingBills}
+                                onChange={(e) => {
+                                  let keys = [...selectedBillKeys];
+                                  if (e.target.checked) {
+                                    keys.push(key);
+                                  } else {
+                                    keys = keys.filter(k => k !== key);
+                                  }
+                                  setSelectedBillKeys(keys);
+                                  const selectedBills = outstandingBills.filter((b) => keys.includes(`${b.source}_${b.id}`));
+                                  if (selectedBills.length > 0) {
+                                    const totalAmount = selectedBills.reduce((sum, b) => sum + Number(b.balance_amount || b.net_amount || 0), 0);
+                                    updatePv({
+                                      items: [
+                                        {
+                                          description: `Payment for ${selectedBills.length} Bill(s)`,
+                                          accountId: pvForm.payToAccountId || "",
+                                          amount: totalAmount,
+                                          exchangeRate: "1",
+                                          currencyCode: effectivePaymentCurrencyCode,
+                                        },
+                                      ],
+                                    });
+                                  } else {
+                                    updatePv({
+                                      items: [
+                                        {
+                                          description: "",
+                                          accountId: pvForm.payToAccountId || "",
+                                          amount: 0,
+                                          exchangeRate: "1",
+                                          currencyCode: effectivePaymentCurrencyCode,
+                                        },
+                                      ],
+                                    });
+                                  }
+                                }}
+                              />
+                              <span className="text-sm">
+                                {bill.bill_no} - GH₵ {Number(bill.balance_amount || bill.net_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })} ({bill.source || "Purchase"})
+                              </span>
+                            </label>
                           );
-                          setSelectedBillDetails(bill || null);
-                          // Auto-populate amount if bill is selected
-                          if (bill && bill.net_amount) {
-                            updatePv({
-                              items: [
-                                {
-                                  description: `Payment for ${bill.source || "Purchase"} Bill ${bill.bill_no}`,
-                                  accountId: pvForm.payToAccountId || "",
-                                  amount: Number(
-                                    bill.balance_amount || bill.net_amount || 0,
-                                  ),
-                                  exchangeRate: "1",
-                                  currencyCode: effectivePaymentCurrencyCode,
-                                },
-                              ],
-                            });
-                          }
-                        }}
-                        disabled={
-                          readOnly ||
-                          loadingBills ||
-                          outstandingBills.length === 0
-                        }
-                      >
-                        <option value="">
-                          {loadingBills
-                            ? "Loading bills..."
-                            : outstandingBills.length === 0
-                              ? "No outstanding bills"
-                              : "Select outstanding bill"}
-                        </option>
-                        {outstandingBills.map((bill) => (
-                          <option key={`${bill.source}_${bill.id}`} value={`${bill.source}_${bill.id}`}>
-                            {bill.bill_no} - GH₵ {Number(bill.balance_amount || bill.net_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })} ({bill.source || "Purchase"})
-                          </option>
-                        ))}
-                      </select>
+                        })}
+                      </div>
                     </div>
-                    {selectedBillDetails && (
-                      <div className="bg-slate-50 dark:bg-slate-800 rounded p-3 text-sm">
-                        <div className="font-medium">Bill Details</div>
-                        <div>
-                          Total:{" "}
-                          {selectedBillDetails.net_amount?.toLocaleString()}
+                    {selectedBillKeys.length > 0 && (
+                      <div className="bg-slate-50 dark:bg-slate-800 rounded p-3 text-sm max-h-[160px] overflow-y-auto">
+                        <div className="font-medium mb-1">Selected Bills Summary</div>
+                        {selectedBillKeys.map(key => {
+                          const bill = outstandingBills.find(b => `${b.source}_${b.id}` === key);
+                          if (!bill) return null;
+                          return (
+                            <div key={key} className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-700 last:border-0">
+                              <span>{bill.bill_no}</span>
+                              <span className="font-medium">GH₵ {Number(bill.balance_amount || bill.net_amount || 0).toLocaleString()}</span>
+                            </div>
+                          );
+                        })}
+                        <div className="flex justify-between pt-2 mt-1 border-t border-slate-300 dark:border-slate-600 font-bold">
+                          <span>Total</span>
+                          <span>
+                            GH₵ {outstandingBills
+                              .filter(b => selectedBillKeys.includes(`${b.source}_${b.id}`))
+                              .reduce((sum, b) => sum + Number(b.balance_amount || b.net_amount || 0), 0)
+                              .toLocaleString()}
+                          </span>
                         </div>
-                        <div>
-                          Balance:{" "}
-                          {selectedBillDetails.balance_amount?.toLocaleString() ||
-                            selectedBillDetails.net_amount?.toLocaleString()}
-                        </div>
-                        <div>Status: {selectedBillDetails.payment_status}</div>
                       </div>
                     )}
                   </div>

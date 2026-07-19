@@ -138,22 +138,22 @@ export default function PmScheduleList() {
           <table className="table">
             <thead>
               <tr>
-                <th>Schedule Information</th>
-                <th>Asset Reference</th>
-                <th>Frequency</th>
-                <th>Next Due</th>
-                <th className="text-right">Status</th>
-                <th>Created By</th>
-                <th>Created Date</th>
-                <th className="text-right">Actions</th>
+                <th className="whitespace-nowrap">Schedule Information</th>
+                <th className="whitespace-nowrap">Asset Reference</th>
+                <th className="whitespace-nowrap">Frequency</th>
+                <th className="whitespace-nowrap">Next Due</th>
+                <th className="text-right whitespace-nowrap">Status</th>
+                <th className="whitespace-nowrap">Created By</th>
+                <th className="whitespace-nowrap">Created Date</th>
+                <th className="text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
               {loading ? (
-                <tr><td colSpan="8" className="px-6 py-20 text-center animate-pulse text-slate-400 font-bold tracking-widest uppercase">Syncing Registry...</td></tr>
+                <tr><td colSpan="8" className="px-6 py-20 text-center animate-pulse text-slate-400 font-bold tracking-widest uppercase whitespace-nowrap">Syncing Registry...</td></tr>
               ) : filteredItems.length > 0 ? filteredItems.map((item) => (
                 <tr key={item.id} className="group">
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-lg bg-brand-50 dark:bg-slate-900 border border-brand-100 dark:border-slate-700 flex items-center justify-center text-brand-600 shadow-sm">
                         <ShieldCheck size={18} />
@@ -164,7 +164,7 @@ export default function PmScheduleList() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex flex-col gap-1">
                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200">
                           <Activity size={14} className="text-slate-400" />
@@ -172,25 +172,25 @@ export default function PmScheduleList() {
                        </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase">
                        <Clock size={14} /> {item.frequency}
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200">
                         <Calendar size={14} className="text-slate-400" />
                         {new Date(item.next_due_date).toLocaleDateString()}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-6 py-4 text-right whitespace-nowrap">
                     <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border uppercase tracking-wider ${item.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
                        {item.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm">{item.created_by_name || "-"}</td>
-                  <td className="px-6 py-4 text-sm">{item.created_at ? new Date(item.created_at).toLocaleDateString() : "-"}</td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-6 py-4 text-sm whitespace-nowrap">{item.created_by_name || "-"}</td>
+                  <td className="px-6 py-4 text-sm whitespace-nowrap">{item.created_at ? new Date(item.created_at).toLocaleDateString() : "-"}</td>
+                  <td className="px-6 py-4 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end gap-1">
                       <button type="button" className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded transition-colors" title="View" onClick={() => navigate(`/maintenance/pm-schedules/${item.id}?mode=view`)}><Eye size={15} /></button>
                       <ListPrintIconButton onClick={() => toast.info("Print coming soon")} />
@@ -207,7 +207,7 @@ export default function PmScheduleList() {
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan="8" className="px-6 py-20 text-center text-slate-400 font-bold uppercase tracking-widest italic opacity-50">
+                  <td colSpan="8" className="px-6 py-20 text-center text-slate-400 font-bold uppercase tracking-widest italic opacity-50 whitespace-nowrap">
                     No active PM plans identified.
                   </td>
                 </tr>

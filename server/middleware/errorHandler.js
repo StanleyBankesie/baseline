@@ -57,6 +57,7 @@ export function errorHandler(err, req, res, next) {
     error: err.code || "INTERNAL_ERROR",
     message: err.message || "Internal server error",
     companyId: err.companyId,
+    canRenew: err.canRenew,
     stack: err.stack,
     sqlMessage: err.sqlMessage,
   };

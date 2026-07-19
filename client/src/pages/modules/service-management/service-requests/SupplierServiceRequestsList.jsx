@@ -494,7 +494,7 @@ export default function SupplierServiceRequestsList() {
                 <SortableHeader label="Priority" sortKey="priority" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                 <SortableHeader label="Est. Cost" sortKey="total_estimated_cost" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-right" />
                 <SortableHeader label="Status" sortKey="status" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                <th className="text-right">Actions</th>
+                <th className="text-right whitespace-nowrap">Actions</th>
                 <SortableHeader label="Created By" sortKey="created_by_username" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                 <SortableHeader label="Created Date" sortKey="created_at" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
               </tr>
@@ -502,19 +502,19 @@ export default function SupplierServiceRequestsList() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={11} className="text-center py-8 text-slate-500">
+                  <td colSpan={11} className="text-center py-8 text-slate-500 whitespace-nowrap">
                     Loading...
                   </td>
                 </tr>
               ) : error ? (
                 <tr>
-                  <td colSpan={11} className="text-center py-8 text-red-600">
+                  <td colSpan={11} className="text-center py-8 text-red-600 whitespace-nowrap">
                     {error}
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="text-center py-8 text-slate-500">
+                  <td colSpan={11} className="text-center py-8 text-slate-500 whitespace-nowrap">
                     No requisitions found
                   </td>
                 </tr>
@@ -525,9 +525,9 @@ export default function SupplierServiceRequestsList() {
                   const displayStatus = autoApproved ? "APPROVED" : nrStatus;
                   return (
                   <tr key={r.id}>
-                    <td className="font-mono text-sm text-brand">{r.requisition_no}</td>
-                    <td className="text-sm">{String(r.requisition_date || "").slice(0, 10)}</td>
-                    <td className="text-xs">
+                    <td className="font-mono text-sm text-brand whitespace-nowrap">{r.requisition_no}</td>
+                    <td className="text-sm whitespace-nowrap">{String(r.requisition_date || "").slice(0, 10)}</td>
+                    <td className="text-xs whitespace-nowrap">
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
                           r.requisition_type === "SERVICE"
@@ -538,23 +538,23 @@ export default function SupplierServiceRequestsList() {
                         {r.requisition_type}
                       </span>
                     </td>
-                    <td className="text-sm">{r.department || "-"}</td>
-                    <td className="text-sm">{r.requested_by || "-"}</td>
-                    <td>
+                    <td className="text-sm whitespace-nowrap">{r.department || "-"}</td>
+                    <td className="text-sm whitespace-nowrap">{r.requested_by || "-"}</td>
+                    <td className="whitespace-nowrap">
                       <span className="inline-flex items-center px-2 py-0.5 rounded border text-[10px] font-bold uppercase">
                         {r.priority || "-"}
                       </span>
                     </td>
-                    <td className="text-right font-mono text-sm">
+                    <td className="text-right font-mono text-sm whitespace-nowrap">
                       {Number(r.total_estimated_cost || 0).toLocaleString(undefined, {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}
                     </td>
-                    <td>
+                    <td className="whitespace-nowrap">
                       <span className={`badge ${getStatusBadge(displayStatus)}`}>{statusLabel(displayStatus)}</span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2">
                         {/* Slot 1: View */}
                         <div className="min-w-[80px]">
@@ -659,8 +659,8 @@ export default function SupplierServiceRequestsList() {
                         </div>
                       </div>
                     </td>
-                    <td>{r.created_by_username || r.created_by_name || "-"}</td>
-                    <td>{r.created_at ? new Date(r.created_at).toLocaleDateString() : "-"}</td>
+                    <td className="whitespace-nowrap">{r.created_by_username || r.created_by_name || "-"}</td>
+                    <td className="whitespace-nowrap">{r.created_at ? new Date(r.created_at).toLocaleDateString() : "-"}</td>
                   </tr>
                 );
                 })

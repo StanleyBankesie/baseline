@@ -48,7 +48,7 @@ export default function InvoiceSummaryReportPage() {
 
   useEffect(() => {
     run();
-  }, []);
+  }, [from, to, customer, paymentStatus]);
 
   function exportCSV() {
     if (!items.length) return;
@@ -188,7 +188,7 @@ export default function InvoiceSummaryReportPage() {
           {error ? (
             <div className="text-red-600 text-sm mb-3">{error}</div>
           ) : null}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div>
               <label className="label">From</label>
               <input
@@ -230,18 +230,11 @@ export default function InvoiceSummaryReportPage() {
               </select>
             </div>
             <div className="md:col-span-1 flex items-end">
-              <button
-                type="button"
-                className="btn"
-                onClick={run}
-                disabled={loading}
-              >
-                {loading ? "Running..." : "Run"}
-              </button>
+              
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table w-full table-fixed">
               <thead>
                 <tr>
                   <SortableHeader label="Invoice No" sortKey="invoice_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />

@@ -144,55 +144,55 @@ export default function VisitorsLogList() {
         </div>
         <div className="card-body">
           {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-7 gap-3 mb-4">
-            <div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 mb-4 items-end">
+            <div className="min-w-0">
               <label className="label text-xs">From Date</label>
               <input
                 type="date"
-                className="input input-sm"
+                className="input input-sm w-full min-w-0"
                 value={filters.from}
                 onChange={(e) =>
                   setFilters((f) => ({ ...f, from: e.target.value }))
                 }
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="label text-xs">From Time</label>
               <input
                 type="time"
-                className="input input-sm"
+                className="input input-sm w-full min-w-0"
                 value={filters.from_time}
                 onChange={(e) =>
                   setFilters((f) => ({ ...f, from_time: e.target.value }))
                 }
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="label text-xs">To Date</label>
               <input
                 type="date"
-                className="input input-sm"
+                className="input input-sm w-full min-w-0"
                 value={filters.to}
                 onChange={(e) =>
                   setFilters((f) => ({ ...f, to: e.target.value }))
                 }
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="label text-xs">To Time</label>
               <input
                 type="time"
-                className="input input-sm"
+                className="input input-sm w-full min-w-0"
                 value={filters.to_time}
                 onChange={(e) =>
                   setFilters((f) => ({ ...f, to_time: e.target.value }))
                 }
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="label text-xs">Status</label>
               <select
-                className="input input-sm"
+                className="input input-sm w-full min-w-0"
                 value={filters.status}
                 onChange={(e) =>
                   setFilters((f) => ({ ...f, status: e.target.value }))
@@ -203,10 +203,10 @@ export default function VisitorsLogList() {
                 <option value="COMPLETED">Completed</option>
               </select>
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="label text-xs">Department</label>
               <select
-                className="input input-sm"
+                className="input input-sm w-full min-w-0"
                 value={filters.department}
                 onChange={(e) =>
                   setFilters((f) => ({ ...f, department: e.target.value }))
@@ -220,11 +220,11 @@ export default function VisitorsLogList() {
                 ))}
               </select>
             </div>
-            <div>
+            <div className="min-w-0 sm:col-span-2 md:col-span-3 lg:col-span-2 xl:col-span-1">
               <label className="label text-xs">Search</label>
               <input
                 type="text"
-                className="input input-sm"
+                className="input input-sm w-full min-w-0"
                 placeholder="Name, phone, org..."
                 value={filters.search}
                 onChange={(e) =>
@@ -242,43 +242,43 @@ export default function VisitorsLogList() {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Visitor Name</th>
-                  <th>Phone</th>
-                  <th>Organisation</th>
-                  <th>Department</th>
-                  <th>Temp Address</th>
-                  <th>Date</th>
-                  <th>Time In</th>
-                  <th>Time Out</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <th className="whitespace-nowrap">Visitor Name</th>
+                  <th className="whitespace-nowrap">Phone</th>
+                  <th className="whitespace-nowrap">Organisation</th>
+                  <th className="whitespace-nowrap">Department</th>
+                  <th className="whitespace-nowrap">Temp Address</th>
+                  <th className="whitespace-nowrap">Date</th>
+                  <th className="whitespace-nowrap">Time In</th>
+                  <th className="whitespace-nowrap">Time Out</th>
+                  <th className="whitespace-nowrap">Status</th>
+                  <th className="whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={10} className="text-center py-4">
+                    <td colSpan={10} className="text-center py-4 whitespace-nowrap">
                       Loading...
                     </td>
                   </tr>
                 ) : items.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="text-center py-4 text-slate-500">
+                    <td colSpan={10} className="text-center py-4 text-slate-500 whitespace-nowrap">
                       No visitor records found
                     </td>
                   </tr>
                 ) : (
                   items.map((item) => (
                     <tr key={item.id}>
-                      <td className="font-medium">{item.visitor_name}</td>
-                      <td>{item.phone_number || "-"}</td>
-                      <td>{item.organisation || "-"}</td>
-                      <td>{item.department_visited || "-"}</td>
-                      <td>{item.temp_address || "-"}</td>
-                      <td>{formatDate(item.visit_date)}</td>
-                      <td>{formatTime(item.time_in)}</td>
-                      <td>{formatTime(item.time_out)}</td>
-                      <td>
+                      <td className="font-medium whitespace-nowrap">{item.visitor_name}</td>
+                      <td className="whitespace-nowrap">{item.phone_number || "-"}</td>
+                      <td className="whitespace-nowrap">{item.organisation || "-"}</td>
+                      <td className="whitespace-nowrap">{item.department_visited || "-"}</td>
+                      <td className="whitespace-nowrap">{item.temp_address || "-"}</td>
+                      <td className="whitespace-nowrap">{formatDate(item.visit_date)}</td>
+                      <td className="whitespace-nowrap">{formatTime(item.time_in)}</td>
+                      <td className="whitespace-nowrap">{formatTime(item.time_out)}</td>
+                      <td className="whitespace-nowrap">
                         <span
                           className={`inline-flex px-2 py-1 rounded text-xs font-medium ${
                             item.status === "ACTIVE"
@@ -289,7 +289,7 @@ export default function VisitorsLogList() {
                           {item.status}
                         </span>
                       </td>
-                      <td>
+                      <td className="whitespace-nowrap">
                         <div className="flex gap-2">
                           <Link
                             to={`${item.id}/edit?mode=view`}

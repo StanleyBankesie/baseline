@@ -86,7 +86,7 @@ export const MODULES_REGISTRY = {
     icon: "📦",
     features: [
       { key: "material-requisitions", label: "Material Requisitions", type: "feature" },
-      { key: "stock-upload", label: "Stock Upload", type: "feature" },
+      { key: "stock-upload", label: "Stock Upload", type: "feature", isExclusive: true },
       { key: "stock-updation", label: "Stock Updation", type: "feature" },
       { key: "stock-adjustments", label: "Stock Adjustment", type: "feature" },
       { key: "stock-transfers", label: "Stock Transfer", type: "feature" },
@@ -132,7 +132,7 @@ export const MODULES_REGISTRY = {
       { key: "budget", label: "Budget Management", type: "feature" },
       { key: "bank-reconciliation", label: "Bank Reconciliation", type: "feature" },
       { key: "fixed-assets", label: "Fixed Assets", type: "feature" },
-      { key: "opening-balances", label: "Opening Balances", type: "feature" },
+      { key: "opening-balances", label: "Opening Balances", type: "feature", isExclusive: true },
       { key: "pdc-postings", label: "Post-Dated Cheques", type: "feature" },
       { key: "reports", label: "Finance Reports", type: "feature" },
     ],
@@ -346,6 +346,15 @@ export const MODULES_REGISTRY = {
     dashboards: [
       { key: "dashboard", label: "Transport Dashboard", type: "dashboard" }
     ]
+  },
+  
+  system: {
+    name: "System Operations",
+    icon: "🔧",
+    features: [
+      { key: "license-renewal", label: "License Renewal Access", type: "feature", isExclusive: true }
+    ],
+    dashboards: []
   }
 };
 
@@ -393,7 +402,7 @@ export function getAllDashboards() {
 export function getModuleFeatures(moduleKey) {
   const moduleInfo = MODULES_REGISTRY[moduleKey];
   if (!moduleInfo) return [];
-  const allItems = [...(moduleInfo.features || []), ...(moduleInfo.dashboards || [])];
+  const allItems = [...(moduleInfo.features || []), ...(moduleInfo.dashboards || [])].filter(item => !item.isExclusive);
   return allItems.map(feature => ({
     module_key: moduleKey,
     feature_key: `${moduleKey}:${feature.key}`,

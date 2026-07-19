@@ -197,32 +197,32 @@ export default function VisitorsLogReport() {
 
           {/* Filters */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
-            <div>
+            <div className="min-w-0">
               <label className="label text-xs">From Date</label>
               <input
                 type="date"
-                className="input input-sm"
+                className="input input-sm w-full min-w-0"
                 value={filters.from}
                 onChange={(e) =>
                   setFilters((f) => ({ ...f, from: e.target.value }))
                 }
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="label text-xs">To Date</label>
               <input
                 type="date"
-                className="input input-sm"
+                className="input input-sm w-full min-w-0"
                 value={filters.to}
                 onChange={(e) =>
                   setFilters((f) => ({ ...f, to: e.target.value }))
                 }
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="label text-xs">Department</label>
               <select
-                className="input input-sm"
+                className="input input-sm w-full min-w-0"
                 value={filters.department}
                 onChange={(e) =>
                   setFilters((f) => ({ ...f, department: e.target.value }))

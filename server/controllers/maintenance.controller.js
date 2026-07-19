@@ -1997,6 +1997,17 @@ export const updateBill = async (req, res, next) => {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const id = toNumber(req.params.id);
     const b = req.body || {};
+    
+    if (b.status === "CANCELLED") {
+      const uRows = await query(
+        `SELECT 1 FROM adm_exceptional_permissions WHERE user_id = :uid AND effect = 'ALLOW' AND is_active = 1 AND permission_code = 'MAINTENANCE.BILL.CANCEL' LIMIT 1`,
+        { uid: req.user?.id }
+      );
+      if (!uRows || uRows.length === 0) {
+        throw httpError(403, "FORBIDDEN", "You do not have exceptional permission to cancel maintenance bills");
+      }
+    }
+    
     await query(`UPDATE maint_bills SET bill_date=:bill_date,due_date=:due_date,execution_id=:execution_id,supplier_id=:supplier_id,supplier_name=:supplier_name,subtotal=:subtotal,discount_amount=:discount_amount,tax_amount=:tax_amount,other_charges=:other_charges,total_amount=:total_amount,currency=:currency,exchange_rate=:exchange_rate,payment_terms=:payment_terms,payment_method=:payment_method,payment_reference=:payment_reference,payment_status=:payment_status,status=:status,notes=:notes,cost_center_id=:costCenterId WHERE id=:id AND company_id=:companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
       {
         id,
@@ -2038,6 +2049,27 @@ export const updateBill = async (req, res, next) => {
             amount: Number(l.amount || 0),
           },
         );
+      }
+    }
+
+    if (b.status === "CANCELLED" || b.status === "REVERSED") {
+      const prevRows = await query(`SELECT bill_no FROM maint_bills WHERE id=:id AND company_id=:companyId`, { id, companyId });
+      const billNo = prevRows[0]?.bill_no;
+      if (billNo) {
+        const vRows = await query(
+          `SELECT DISTINCT v.id AS voucher_id
+             FROM fin_vouchers v
+             JOIN fin_voucher_lines l ON l.voucher_id = v.id
+            WHERE v.company_id = :companyId
+              AND l.reference_no = :referenceNo`,
+          { companyId, referenceNo: billNo }
+        ).catch(() => []);
+        const voucherIds = vRows.map((r) => Number(r.voucher_id)).filter((n) => Number.isFinite(n) && n > 0);
+        if (voucherIds.length > 0) {
+          const inList = voucherIds.join(",");
+          await query(`DELETE FROM fin_voucher_lines WHERE voucher_id IN (${inList})`).catch(() => null);
+          await query(`DELETE FROM fin_vouchers WHERE id IN (${inList})`).catch(() => null);
+        }
       }
     }
     await cacheDelPattern(`maint_bills:company:${companyId}:*`);

@@ -22,7 +22,7 @@ const ModuleDashboard = ({
   const isDashboardPath = (path) => {
     const parts = String(path || "").split("/").filter(Boolean);
     const last = String(parts[parts.length - 1] || "");
-    return last.toLowerCase() === "dashboard";
+    return last.toLowerCase() === "dashboard" || last.toLowerCase() === "dashboards";
   };
 
   // Auto-inject a Dashboard button if the module has registered dashboards
@@ -31,19 +31,29 @@ const ModuleDashboard = ({
     const mk = moduleKey || (location.pathname.split("/").filter(Boolean)[0] || "");
     const moduleInfo = MODULES_REGISTRY[mk];
     const hasDashboards = moduleInfo && moduleInfo.dashboards && moduleInfo.dashboards.length > 0;
+    
+    const isDashboardAllowed =
+      canViewDashboardElement(mk, "dashboard", "dashboard") !== false &&
+      canViewDashboardElement(mk, "dashboard", "dashboards") !== false;
+
+    const dbPath = `/${mk}/dashboard`;
+    const dbsPath = `/${mk}/dashboards`;
+    const canAccessDb = canAccessPath(dbPath) || canAccessPath(dbsPath);
+
     if (
       mk &&
       hasDashboards &&
-      canAccessPath(`/${mk}/dashboard`) &&
-      canViewDashboardElement(mk, "dashboard", "dashboard") &&
-      !actions.some((a) => String(a.path || "") === `/${mk}/dashboard`)
+      canAccessDb &&
+      isDashboardAllowed &&
+      !actions.some((a) => String(a.path || "") === dbPath || String(a.path || "") === dbsPath)
     ) {
-      actions.push({ label: "Dashboard", path: `/${mk}/dashboard`, icon: "📊" });
+      const targetPath = canAccessPath(dbPath) ? dbPath : dbsPath;
+      actions.push({ label: "Dashboard", path: targetPath, icon: "📊" });
     }
     return actions.filter((a) => {
       const p = String(a?.path || "");
       if (mk && isDashboardPath(p)) {
-        return canViewDashboardElement(mk, "dashboard", "dashboard") !== false;
+        return isDashboardAllowed;
       }
       return true;
     });
@@ -96,7 +106,10 @@ const ModuleDashboard = ({
 
     if (showAll) return true;
     if (mk && isDashboardPath(path)) {
-      return canViewDashboardElement(mk, "dashboard", "dashboard") === true;
+      return (
+        canViewDashboardElement(mk, "dashboard", "dashboard") !== false &&
+        canViewDashboardElement(mk, "dashboard", "dashboards") !== false
+      );
     }
     if (mk && fk) {
       // Check if this feature key is a known/registered feature in the registry.

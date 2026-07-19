@@ -154,7 +154,7 @@ export default function StockBalancesReportPage() {
             </select>
           </div>
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table table-fixed">
               <thead>
                 <tr>
                   <SortableHeader label="Item Code" sortKey="item_code" currentKey={sortKey} direction={sortDir} onToggle={toggle} />

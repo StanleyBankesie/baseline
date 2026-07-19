@@ -49,7 +49,7 @@ export default function SalesOrderStatusReportPage() {
 
   useEffect(() => {
     run();
-  }, []);
+  }, [from, to, status, customer, salesperson]);
 
   function exportCSV() {
     if (!items.length) return;
@@ -162,7 +162,7 @@ export default function SalesOrderStatusReportPage() {
         </div>
         <div className="card-body">
           {error ? <div className="text-red-600 text-sm mb-3">{error}</div> : null}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div>
               <label className="label">From</label>
               <input className="input" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
@@ -183,14 +183,10 @@ export default function SalesOrderStatusReportPage() {
               <label className="label">Salesperson</label>
               <input className="input" value={salesperson} onChange={(e) => setSalesperson(e.target.value)} placeholder="Username..." />
             </div>
-            <div className="md:col-span-5 flex items-end gap-2">
-              <button type="button" className="btn" onClick={run} disabled={loading}>
-                {loading ? "Running..." : "Run"}
-              </button>
-            </div>
+            
           </div>
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table w-full table-fixed">
               <thead>
                 <tr>
                   <SortableHeader label="Sales Order No" sortKey="sales_order_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />

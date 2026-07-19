@@ -277,9 +277,17 @@ router.put(
         };
         if (!payload.module_key) continue;
         await query(
+          `DELETE FROM adm_dashboard_permissions
+           WHERE user_id = :user_id
+             AND module_key = :module_key
+             AND (dashboard_key = :dashboard_key OR (dashboard_key IS NULL AND :dashboard_key IS NULL))
+             AND (card_key = :card_key OR (card_key IS NULL AND :card_key IS NULL))
+             AND (ticker_key = :ticker_key OR (ticker_key IS NULL AND :ticker_key IS NULL))`,
+          payload,
+        );
+        await query(
           `INSERT INTO adm_dashboard_permissions (user_id, module_key, dashboard_key, card_key, ticker_key, can_view)
-           VALUES (:user_id, :module_key, :dashboard_key, :card_key, :ticker_key, :can_view)
-           ON DUPLICATE KEY UPDATE can_view = VALUES(can_view), updated_at = CURRENT_TIMESTAMP`,
+           VALUES (:user_id, :module_key, :dashboard_key, :card_key, :ticker_key, :can_view)`,
           payload,
         );
       }
@@ -474,12 +482,27 @@ async function requireSuperAdmin(req, res, next) {
     const userId = toNumber(req.user?.sub || req.user?.id);
     if (!userId) return res.status(401).json({ message: "Unauthorized" });
     const rows = await query(
-      "SELECT role_id FROM adm_users WHERE id = :id LIMIT 1",
-      { id: userId },
+      "SELECT role_id FROM adm_users WHERE id = ? LIMIT 1",
+      [userId],
     );
     const roleId = toNumber(rows?.[0]?.role_id);
     if (roleId === 1) return next();
-    return res.status(403).json({ message: "Forbidden" });
+
+    // Check RBAC feature permissions
+    let featureKey = null;
+    if (req.path.startsWith('/roles')) featureKey = 'roles';
+    else if (req.path.includes('permissions')) featureKey = 'user-permissions';
+    else if (req.path.includes('overrides')) featureKey = 'user-overrides';
+
+    if (featureKey) {
+      const perm = await query(
+        "SELECT 1 FROM adm_role_permissions WHERE role_id = ? AND feature_key = ? LIMIT 1",
+        [roleId, featureKey]
+      );
+      if (perm.length > 0) return next();
+    }
+
+    return res.status(403).json({ message: "Forbidden: Access restricted" });
   } catch (err) {
     next(err);
   }

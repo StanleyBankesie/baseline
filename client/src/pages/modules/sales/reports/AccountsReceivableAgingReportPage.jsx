@@ -180,7 +180,7 @@ export default function AccountsReceivableAgingReportPage() {
             <div className="text-red-600 text-sm mb-3">{error}</div>
           ) : null}
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table w-full table-fixed">
               <thead>
                 <tr>
                   <SortableHeader label="Customer" sortKey="customer_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />

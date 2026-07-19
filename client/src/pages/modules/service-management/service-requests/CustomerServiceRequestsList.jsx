@@ -308,7 +308,7 @@ export default function CustomerServiceRequestsList() {
                   <th className="w-1 whitespace-nowrap">Actions</th>
                   <SortableHeader label="Created By" sortKey="created_by_username" currentKey={currentSortKey} direction={currentSortDir} onToggle={toggle} />
                   <SortableHeader label="Created Date" sortKey="created_at" currentKey={currentSortKey} direction={currentSortDir} onToggle={toggle} />
-                  <th>Attachments</th>
+                  <th className="whitespace-nowrap">Attachments</th>
                 </tr>
               </thead>
               <tbody>
@@ -316,7 +316,7 @@ export default function CustomerServiceRequestsList() {
                   <tr>
                     <td
                       colSpan="9"
-                      className="text-center py-8 text-slate-500 dark:text-slate-400"
+                      className="text-center py-8 text-slate-500 dark:text-slate-400 whitespace-nowrap"
                     >
                       Loading...
                     </td>
@@ -330,12 +330,12 @@ export default function CustomerServiceRequestsList() {
                     const displayStatus = autoApproved ? "APPROVED" : upperStatus;
                     return (
                     <tr key={r.id}>
-                      <td>{r.request_no}</td>
-                      <td>{r.request_date}</td>
-                      <td>{r.requester_company || r.requester_full_name}</td>
-                      <td>{String(r.service_type || "").replace(/_/g, " ")}</td>
-                      <td className="capitalize">{r.priority}</td>
-                      <td>
+                      <td className="whitespace-nowrap">{r.request_no}</td>
+                      <td className="whitespace-nowrap">{r.request_date}</td>
+                      <td className="whitespace-nowrap">{r.requester_company || r.requester_full_name}</td>
+                      <td className="whitespace-nowrap">{String(r.service_type || "").replace(/_/g, " ")}</td>
+                      <td className="capitalize whitespace-nowrap">{r.priority}</td>
+                      <td className="whitespace-nowrap">
                         <span className={`px-2 py-1 rounded text-xs font-medium ${
                           displayStatus === 'APPROVED' ? 'bg-green-100 text-green-800' : 
                           displayStatus === 'PENDING_APPROVAL' ? 'bg-yellow-100 text-yellow-800' : 
@@ -421,9 +421,9 @@ export default function CustomerServiceRequestsList() {
                           </div>
                         </div>
                       </td>
-                      <td>{r.created_by_username || r.created_by_name || "-"}</td>
-                      <td>{r.created_at ? new Date(r.created_at).toLocaleDateString() : "-"}</td>
-                      <td>
+                      <td className="whitespace-nowrap">{r.created_by_username || r.created_by_name || "-"}</td>
+                      <td className="whitespace-nowrap">{r.created_at ? new Date(r.created_at).toLocaleDateString() : "-"}</td>
+                      <td className="whitespace-nowrap">
                         <ListAttachmentIconButton
                           onClick={() => {
                             setActiveDocId(r.id);

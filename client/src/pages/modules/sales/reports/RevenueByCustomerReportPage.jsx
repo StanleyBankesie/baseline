@@ -26,7 +26,9 @@ export default function RevenueByCustomerReportPage() {
     try {
       setLoading(true);
       setError("");
-      const res = await api.get("/sales/reports/revenue-by-customer");
+      const res = await api.get("/sales/reports/revenue-by-customer", {
+        params: { from: from || null, to: to || null, customer: customer || null },
+      });
       setItems(Array.isArray(res?.data?.items) ? res.data.items : []);
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to load report");
@@ -158,7 +160,7 @@ export default function RevenueByCustomerReportPage() {
             <div className="text-red-600 text-sm mb-3">{error}</div>
           ) : null}
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table w-full table-fixed">
               <thead>
                 <tr>
                   <SortableHeader label="Customer" sortKey="customer_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />

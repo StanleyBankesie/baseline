@@ -444,15 +444,15 @@ export default function MaintenanceRequestsList() {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Requester</th>
-                  <th>Department</th>
-                  <th>Type</th>
-                  <th>Priority</th>
-                  <th>Status</th>
-                  <th>Created By</th>
-                  <th>Created Date</th>
-                  <th>Approval</th>
-                  <th className="text-right">Actions</th>
+                  <th className="whitespace-nowrap">Requester</th>
+                  <th className="whitespace-nowrap">Department</th>
+                  <th className="whitespace-nowrap">Type</th>
+                  <th className="whitespace-nowrap">Priority</th>
+                  <th className="whitespace-nowrap">Status</th>
+                  <th className="whitespace-nowrap">Created By</th>
+                  <th className="whitespace-nowrap">Created Date</th>
+                  <th className="whitespace-nowrap">Approval</th>
+                  <th className="text-right whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
@@ -460,7 +460,7 @@ export default function MaintenanceRequestsList() {
                   <tr>
                     <td
                       colSpan="9"
-                      className="px-6 py-20 text-center animate-pulse text-slate-400 font-bold uppercase tracking-widest"
+                      className="px-6 py-20 text-center animate-pulse text-slate-400 font-bold uppercase tracking-widest whitespace-nowrap"
                     >
                       Fetching Tickets...
                     </td>
@@ -477,33 +477,33 @@ export default function MaintenanceRequestsList() {
                       : upperStatus || "DRAFT";
                     return (
                       <tr key={r.id} className="group">
-                        <td className="px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                        <td className="px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 whitespace-nowrap">
                           {r.requester_name}
                         </td>
-                        <td className="px-4 py-3 text-sm text-slate-500">
+                        <td className="px-4 py-3 text-sm text-slate-500 whitespace-nowrap">
                           {r.department}
                         </td>
-                        <td className="px-4 py-3 text-sm text-slate-500">
+                        <td className="px-4 py-3 text-sm text-slate-500 whitespace-nowrap">
                           {r.maintenance_type}
                         </td>
-                        <td className="px-4 py-3 text-sm">
+                        <td className="px-4 py-3 text-sm whitespace-nowrap">
                           <Badge value={r.priority} colorMap={priorityColors} />
                         </td>
-                        <td className="px-4 py-3 text-sm">
+                        <td className="px-4 py-3 text-sm whitespace-nowrap">
                           <Badge
                             value={displayStatus}
                             colorMap={statusColors}
                           />
                         </td>
-                        <td className="px-4 py-3 text-sm">
+                        <td className="px-4 py-3 text-sm whitespace-nowrap">
                           {r.created_by_name || "-"}
                         </td>
-                        <td className="px-4 py-3 text-sm">
+                        <td className="px-4 py-3 text-sm whitespace-nowrap">
                           {r.created_at
                             ? new Date(r.created_at).toLocaleDateString()
                             : "-"}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3 whitespace-nowrap">
                           <div className="min-w-[160px]">
                             <div className="list-approval-slot">
                               {displayStatus === "APPROVED" ? (
@@ -542,7 +542,7 @@ export default function MaintenanceRequestsList() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-right">
+                        <td className="px-6 py-4 text-right whitespace-nowrap">
                           <div className="flex items-center justify-end gap-2">
                             <button
                               type="button"
@@ -590,7 +590,7 @@ export default function MaintenanceRequestsList() {
                   <tr>
                     <td
                       colSpan="9"
-                      className="px-6 py-20 text-center text-slate-400 font-bold uppercase tracking-widest italic opacity-50"
+                      className="px-6 py-20 text-center text-slate-400 font-bold uppercase tracking-widest italic opacity-50 whitespace-nowrap"
                     >
                       No maintenance tickets found.
                     </td>

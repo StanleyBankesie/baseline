@@ -121,7 +121,7 @@ export default function SalesReturnReportPage() {
   }
   useEffect(() => {
     run();
-  }, []);
+  }, [from, to]);
 
 
   const { sorted: sorted_items, sortKey, sortDir, toggle } = useSort(items, "date", "desc");
@@ -172,7 +172,7 @@ export default function SalesReturnReportPage() {
 
       <div className="card">
         <div className="card-body">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div>
               <label className="label">From</label>
               <input
@@ -191,31 +191,11 @@ export default function SalesReturnReportPage() {
                 onChange={(e) => setTo(e.target.value)}
               />
             </div>
-            <div className="md:col-span-2 flex items-end gap-2">
-              <button
-                type="button"
-                className="btn-success"
-                onClick={run}
-                disabled={loading}
-              >
-                {loading ? "Running..." : "Run Report"}
-              </button>
-              <button
-                type="button"
-                className="btn-success"
-                onClick={() => {
-                  setFrom("");
-                  setTo("");
-                }}
-                disabled={loading}
-              >
-                Clear
-              </button>
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table w-full table-fixed">
               <thead>
                 <tr>
                   <SortableHeader label="Date" sortKey="date" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
@@ -252,7 +232,6 @@ export default function SalesReturnReportPage() {
           {items.length === 0 && !loading ? (
             <div className="text-center py-10">No rows.</div>
           ) : null}
-        </div>
       </div>
     </div>
   );

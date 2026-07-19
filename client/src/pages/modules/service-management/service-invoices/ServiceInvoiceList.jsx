@@ -307,11 +307,11 @@ export default function InvoiceList() {
         <table style="margin-top: 8px;">
           <thead>
             <tr>
-              <th>Description</th>
-              <th style="text-align:right;">Qty</th>
-              <th style="text-align:right;">Unit Price</th>
-              <th style="text-align:right;">Discount</th>
-              <th style="text-align:right;">Net</th>
+              <th className="whitespace-nowrap">Description</th>
+              <th style="text-align:right;" className="whitespace-nowrap">Qty</th>
+              <th style="text-align:right;" className="whitespace-nowrap">Unit Price</th>
+              <th style="text-align:right;" className="whitespace-nowrap">Discount</th>
+              <th style="text-align:right;" className="whitespace-nowrap">Net</th>
             </tr>
           </thead>
           <tbody>
@@ -319,11 +319,11 @@ export default function InvoiceList() {
               .map(
                 (it) => `
                 <tr>
-                  <td>${escapeHtml(it.item_name || "")}</td>
-                  <td style="text-align:right;">${escapeHtml(it.qty || "")}</td>
-                  <td style="text-align:right;">${escapeHtml(it.unit_price || "")}</td>
-                  <td style="text-align:right;">${escapeHtml(it.discount || "")}</td>
-                  <td style="text-align:right;">${escapeHtml(it.net || "")}</td>
+                  <td className="whitespace-nowrap">${escapeHtml(it.item_name || "")}</td>
+                  <td style="text-align:right;" className="whitespace-nowrap">${escapeHtml(it.qty || "")}</td>
+                  <td style="text-align:right;" className="whitespace-nowrap">${escapeHtml(it.unit_price || "")}</td>
+                  <td style="text-align:right;" className="whitespace-nowrap">${escapeHtml(it.discount || "")}</td>
+                  <td style="text-align:right;" className="whitespace-nowrap">${escapeHtml(it.net || "")}</td>
                 </tr>
               `,
               )
@@ -334,11 +334,11 @@ export default function InvoiceList() {
         <div class="totals">
           <table>
             <tbody>
-              <tr><td>Subtotal</td><td style="text-align:right;">${escapeHtml(totals.subtotal || "")}</td></tr>
-              <tr><td>Discount</td><td style="text-align:right;">${escapeHtml(totals.discount || "")}</td></tr>
-              <tr><td>Net Subtotal</td><td style="text-align:right;">${escapeHtml(totals.netSubtotal || "")}</td></tr>
-              <tr><td>Tax</td><td style="text-align:right;">${escapeHtml(totals.tax || "")}</td></tr>
-              <tr><td><strong>Total</strong></td><td style="text-align:right;"><strong>${escapeHtml(totals.total || "")}</strong></td></tr>
+              <tr><td className="whitespace-nowrap">Subtotal</td><td style="text-align:right;" className="whitespace-nowrap">${escapeHtml(totals.subtotal || "")}</td></tr>
+              <tr><td className="whitespace-nowrap">Discount</td><td style="text-align:right;" className="whitespace-nowrap">${escapeHtml(totals.discount || "")}</td></tr>
+              <tr><td className="whitespace-nowrap">Net Subtotal</td><td style="text-align:right;" className="whitespace-nowrap">${escapeHtml(totals.netSubtotal || "")}</td></tr>
+              <tr><td className="whitespace-nowrap">Tax</td><td style="text-align:right;" className="whitespace-nowrap">${escapeHtml(totals.tax || "")}</td></tr>
+              <tr><td className="whitespace-nowrap"><strong>Total</strong></td><td style="text-align:right;" className="whitespace-nowrap"><strong>${escapeHtml(totals.total || "")}</strong></td></tr>
             </tbody>
           </table>
         </div>
@@ -558,14 +558,14 @@ export default function InvoiceList() {
                     <SortableHeader label="Invoice No" sortKey="invoice_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                     <SortableHeader label="Date" sortKey="invoice_date" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                     <SortableHeader label="Customer" sortKey="customer_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                    <th>Payment</th>
+                    <th className="whitespace-nowrap">Payment</th>
                     <SortableHeader label="Status" sortKey="status" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                     <SortableHeader label="Net Amount" sortKey="net_amount" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                    <th className="text-right">Actions</th>
+                    <th className="text-right whitespace-nowrap">Actions</th>
                     <SortableHeader label="Created By" sortKey="created_by_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                     <SortableHeader label="Created Date" sortKey="created_at" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                    <th>Payment Type</th>
-                    <th>Price Type</th>
+                    <th className="whitespace-nowrap">Payment Type</th>
+                    <th className="whitespace-nowrap">Price Type</th>
                     <SortableHeader label="Warehouse" sortKey="warehouse_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                     <SortableHeader label="Balance" sortKey="balance_amount" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-right" />
                     <SortableHeader label="Remarks" sortKey="remarks" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
@@ -574,17 +574,17 @@ export default function InvoiceList() {
                 <tbody>
                   {filteredInvoices.map((inv) => (
                     <tr key={inv.id}>
-                      <td className="font-medium">{inv.invoice_no}</td>
-                      <td>{new Date(inv.invoice_date).toLocaleDateString()}</td>
-                      <td>{inv.customer_name}</td>
-                      <td>{getPaymentStatusBadge(inv.payment_status)}</td>
-                      <td>{getStatusBadge(inv.status)}</td>
-                      <td className="font-semibold">
+                      <td className="font-medium whitespace-nowrap">{inv.invoice_no}</td>
+                      <td className="whitespace-nowrap">{new Date(inv.invoice_date).toLocaleDateString()}</td>
+                      <td className="whitespace-nowrap">{inv.customer_name}</td>
+                      <td className="whitespace-nowrap">{getPaymentStatusBadge(inv.payment_status)}</td>
+                      <td className="whitespace-nowrap">{getStatusBadge(inv.status)}</td>
+                      <td className="font-semibold whitespace-nowrap">
                         {inv.net_amount.toLocaleString("en-US", {
                           minimumFractionDigits: 2,
                         })}
                       </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2">
                         {/* Slot 1: View */}
                         <div className="min-w-[80px]">
@@ -680,15 +680,15 @@ export default function InvoiceList() {
                         </div>
                       </div>
                     </td>
-                    <td>{inv.created_by_name || "-"}</td>
-                    <td>{inv.created_at ? new Date(inv.created_at).toLocaleDateString() : "-"}</td>
-                      <td>{inv.payment_type || ""}</td>
-                      <td>{inv.price_type || ""}</td>
-                      <td>{warehouses.find((w) => String(w.id) === String(inv.warehouse_id))?.warehouse_name || ""}</td>
-                      <td className="text-right">
+                    <td className="whitespace-nowrap">{inv.created_by_name || "-"}</td>
+                    <td className="whitespace-nowrap">{inv.created_at ? new Date(inv.created_at).toLocaleDateString() : "-"}</td>
+                      <td className="whitespace-nowrap">{inv.payment_type || ""}</td>
+                      <td className="whitespace-nowrap">{inv.price_type || ""}</td>
+                      <td className="whitespace-nowrap">{warehouses.find((w) => String(w.id) === String(inv.warehouse_id))?.warehouse_name || ""}</td>
+                      <td className="text-right whitespace-nowrap">
                         {Number(inv.balance_amount || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </td>
-                      <td>{inv.remarks || ""}</td>
+                      <td className="whitespace-nowrap">{inv.remarks || ""}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -92,29 +92,29 @@ export default function MaterialReceiptList() {
                 <tr>
                   <SortableHeader label="Receipt No" sortKey="receipt_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <SortableHeader label="Date" sortKey="receipt_date" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                  <th>Warehouse</th>
-                  <th>Department</th>
+                  <th className="whitespace-nowrap">Warehouse</th>
+                  <th className="whitespace-nowrap">Department</th>
                   <SortableHeader label="Status" sortKey="status" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                  <th className="text-center">Actions</th>
+                  <th className="text-center whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan="6" className="text-center py-8 text-slate-400">Loading...</td></tr>
+                  <tr><td colSpan="6" className="text-center py-8 text-slate-400 whitespace-nowrap">Loading...</td></tr>
                 ) : sorted.length > 0 ? sorted.map(r => (
                   <tr key={r.id}>
-                    <td className="font-medium text-sm">{r.receipt_no}</td>
+                    <td className="font-medium text-sm whitespace-nowrap">{r.receipt_no}</td>
                     <td className="text-sm whitespace-nowrap">{r.receipt_date ? new Date(r.receipt_date).toLocaleDateString() : "—"}</td>
-                    <td className="text-sm">{r.warehouse_name || "—"}</td>
-                    <td className="text-sm">{r.department_name || "—"}</td>
-                    <td><span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600">{r.status}</span></td>
-                    <td className="text-center">
+                    <td className="text-sm whitespace-nowrap">{r.warehouse_name || "—"}</td>
+                    <td className="text-sm whitespace-nowrap">{r.department_name || "—"}</td>
+                    <td className="whitespace-nowrap"><span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600">{r.status}</span></td>
+                    <td className="text-center whitespace-nowrap">
                       <Link to={`/maintenance/material-receipts/${r.id}`}
                         className="px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 inline-block">View</Link>
                     </td>
                   </tr>
                 )) : (
-                  <tr><td colSpan="6" className="text-center py-8 text-slate-400">
+                  <tr><td colSpan="6" className="text-center py-8 text-slate-400 whitespace-nowrap">
                     {pendingIssues > 0 ? `${pendingIssues} pending issue(s) from inventory. Create a receipt to receive them.` : "No receipts found."}
                   </td></tr>
                 )}

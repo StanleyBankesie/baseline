@@ -104,22 +104,7 @@ export default function SalesVoucherList() {
 
   // Helper to format voucher numbers with correct prefixes
   function formatVoucherNoDisplay(voucherNo, typeCode) {
-    const raw = String(voucherNo || "");
-    const code = String(typeCode || "").toUpperCase();
-
-    // Extract numeric part
-    const numMatch = raw.match(/(\d+)$/);
-    const num = numMatch ? numMatch[1] : raw.replace(/[^\d]/g, "");
-
-    if (!num) return raw;
-
-    // Format based on voucher type
-    if (code === "PAYV") {
-      return `PV${String(num).padStart(6, "0")}`;
-    } else if (code === "PV" || code === "PUV") {
-      return `PB${String(num).padStart(6, "0")}`;
-    }
-    return raw;
+    return String(voucherNo || "");
   }
 
   function initDefaultDates() {

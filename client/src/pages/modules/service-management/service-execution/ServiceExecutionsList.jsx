@@ -73,32 +73,32 @@ export default function ServiceExecutionsList() {
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Execution No</th>
-                    <th>Order No</th>
-                    <th>Customer</th>
-                    <th>Supervisor</th>
-                    <th>Date</th>
-                    <th>Work Status</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                    <th>Created By</th>
-                    <th>Created Date</th>
+                    <th className="whitespace-nowrap">Execution No</th>
+                    <th className="whitespace-nowrap">Order No</th>
+                    <th className="whitespace-nowrap">Customer</th>
+                    <th className="whitespace-nowrap">Supervisor</th>
+                    <th className="whitespace-nowrap">Date</th>
+                    <th className="whitespace-nowrap">Work Status</th>
+                    <th className="whitespace-nowrap">Status</th>
+                    <th className="whitespace-nowrap">Actions</th>
+                    <th className="whitespace-nowrap">Created By</th>
+                    <th className="whitespace-nowrap">Created Date</th>
                   </tr>
                 </thead>
                 <tbody>
                   {items.map((it) => (
                     <tr key={it.id}>
-                      <td>{it.execution_no || ""}</td>
-                      <td>{it.order_no || ""}</td>
-                      <td>{it.customer_name || ""}</td>
-                      <td>
+                      <td className="whitespace-nowrap">{it.execution_no || ""}</td>
+                      <td className="whitespace-nowrap">{it.order_no || ""}</td>
+                      <td className="whitespace-nowrap">{it.customer_name || ""}</td>
+                      <td className="whitespace-nowrap">
                         {it.assigned_supervisor_username ||
                           it.assigned_supervisor_user_id ||
                           ""}
                       </td>
-                      <td>{it.execution_date || ""}</td>
-                      <td>{it.work_status || ""}</td>
-                      <td>{it.status || ""}</td>
+                      <td className="whitespace-nowrap">{it.execution_date || ""}</td>
+                      <td className="whitespace-nowrap">{it.work_status || ""}</td>
+                      <td className="whitespace-nowrap">{it.status || ""}</td>
                       <td className="px-2 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <Link
@@ -117,13 +117,13 @@ export default function ServiceExecutionsList() {
                           )}
                         </div>
                       </td>
-                      <td>{it.created_by_name || "-"}</td>
-                      <td>{it.created_at ? new Date(it.created_at).toLocaleDateString() : "-"}</td>
+                      <td className="whitespace-nowrap">{it.created_by_name || "-"}</td>
+                      <td className="whitespace-nowrap">{it.created_at ? new Date(it.created_at).toLocaleDateString() : "-"}</td>
                     </tr>
                   ))}
                   {!items.length && (
                     <tr>
-                      <td colSpan={10} className="text-center text-slate-500">
+                      <td colSpan={10} className="text-center text-slate-500 whitespace-nowrap">
                         No service executions found
                       </td>
                     </tr>

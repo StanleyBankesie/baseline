@@ -487,7 +487,7 @@ export default function MaterialRequisitionList() {
                   <SortableHeader label="Requisition No" sortKey="requisition_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <SortableHeader label="Date" sortKey="requisition_date" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <SortableHeader label="Requested By" sortKey="requested_by" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                  <SortableHeader label="Department" sortKey="department_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                  <SortableHeader label="Department" sortKey="department_id" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <SortableHeader label="Warehouse" sortKey="warehouse_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <SortableHeader label="Status" sortKey="status" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <th className="text-right">Actions</th>
@@ -507,7 +507,7 @@ export default function MaterialRequisitionList() {
                     </td>
                     <td>{String(req.requisition_date || "").slice(0, 10)}</td>
                     <td>{req.requested_by || "-"}</td>
-                    <td>{req.department_name || "-"}</td>
+                    <td>{req.department_id || "-"}</td>
                     <td>{req.warehouse_name || "-"}</td>
                     <td>
                       <span className={`badge ${getStatusBadge(displayStatus)}`}>

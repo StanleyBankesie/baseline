@@ -1271,13 +1271,13 @@ async function postGrnAccrualTx(
   { companyId, branchId, branchIdsStr, grnId, inventoryAccountRef, grnClearingAccountRef },
 ) {
   const safeCompanyId = toNumber(companyId);
-  const safeBranchId = toNumber(branchId);
+  const safeBranchId = toNumber(branchId) || null;
   const safeGrnId = toNumber(grnId);
-  if (!safeCompanyId || !safeBranchId || !safeGrnId) {
+  if (!safeCompanyId || !safeGrnId) {
     throw httpError(
       400,
       "VALIDATION_ERROR",
-      "companyId, branchId, branchIdsStr and grnId are required",
+      "companyId and grnId are required",
     );
   }
   companyId = safeCompanyId;
@@ -1878,14 +1878,14 @@ async function postPurchaseBillVoucherTx(
   { companyId, branchId, branchIdsStr, billId, userId, isDirectPurchase = false },
 ) {
   const safeCompanyId = toNumber(companyId);
-  const safeBranchId = toNumber(branchId);
+  const safeBranchId = toNumber(branchId) || null;
   const safeBillId = toNumber(billId);
   const safeUserId = toNumber(userId) || null;
-  if (!safeCompanyId || !safeBranchId || !safeBillId) {
+  if (!safeCompanyId || !safeBillId) {
     throw httpError(
       400,
       "VALIDATION_ERROR",
-      "companyId, branchId, branchIdsStr and billId are required",
+      "companyId and billId are required",
     );
   }
   companyId = safeCompanyId;
@@ -10831,9 +10831,102 @@ router.get(
   }
 );
 
+router.post(
+  "/direct-purchase/:id/cancel",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    const conn = await pool.getConnection();
+    try {
+      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const id = toNumber(req.params.id);
+      if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+
+      const [rows] = await conn.execute(
+        "SELECT * FROM pur_direct_purchase_hdr WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) FOR UPDATE",
+        { id, companyId, branchId, branchIdsStr }
+      );
+      const dp = rows?.[0];
+      if (!dp) throw httpError(404, "NOT_FOUND", "Direct purchase not found");
+      if (dp.status === "CANCELLED") {
+        return res.json({ message: "Already cancelled" });
+      }
+
+      await conn.beginTransaction();
+
+      if (dp.bill_id) {
+         await conn.execute("UPDATE pur_bills SET status = 'CANCELLED' WHERE id = :billId", { billId: dp.bill_id });
+      }
+
+      if (dp.grn_id) {
+         await conn.execute("UPDATE inv_goods_receipt_notes SET status = 'CANCELLED' WHERE id = :grnId", { grnId: dp.grn_id });
+      }
+
+      const dpNo = String(dp.dp_no || "").trim();
+      if (dpNo) {
+        const [vRows] = await conn.execute(
+          `SELECT DISTINCT v.id AS voucher_id
+             FROM fin_vouchers v
+             JOIN fin_voucher_lines l ON l.voucher_id = v.id
+            WHERE v.company_id = :companyId
+              AND l.reference_no = :referenceNo`,
+          { companyId, referenceNo: dpNo }
+        ).catch(() => [[]]);
+        const voucherIds = vRows.map((r) => Number(r.voucher_id)).filter((n) => Number.isFinite(n) && n > 0);
+        if (voucherIds.length > 0) {
+          const inList = voucherIds.join(",");
+          await conn.execute(`DELETE FROM fin_voucher_lines WHERE voucher_id IN (${inList})`).catch(() => null);
+          await conn.execute(`DELETE FROM fin_vouchers WHERE id IN (${inList})`).catch(() => null);
+        }
+      }
+
+      await conn.execute(
+        "UPDATE pur_direct_purchase_hdr SET status = 'CANCELLED' WHERE id = :id",
+        { id }
+      );
+
+      await conn.commit();
+      res.json({ message: "Cancelled successfully" });
+    } catch (err) {
+      if (conn) await conn.rollback();
+      next(err);
+    } finally {
+      if (conn) conn.release();
+    }
+  }
+);
+
+router.post("/bills/fix-voucher/:id", async (req, res, next) => {
+    const conn = await pool.getConnection();
+    try {
+        const id = Number(req.params.id);
+        const [rows] = await conn.execute("SELECT id, company_id, branch_id FROM pur_bills WHERE id = :id OR bill_no = :id", { id: req.params.id });
+        if (rows.length) {
+            const bill = rows[0];
+            await conn.beginTransaction();
+            const vRes = await postPurchaseBillVoucherTx(conn, { billId: bill.id, companyId: bill.company_id, branchId: bill.branch_id, branchIdsStr: '' });
+            if (vRes?.voucherId) {
+                await conn.execute("UPDATE pur_bills SET voucher_id = :vid WHERE id = :bid", { vid: vRes.voucherId, bid: bill.id });
+                await conn.commit();
+                return res.json({ success: true, voucherNo: vRes.voucherNo });
+            }
+            await conn.commit();
+            res.json({ success: true, message: "No voucher returned" });
+        } else {
+            res.status(404).json({ error: "Not found" });
+        }
+    } catch(e) {
+        if (conn) await conn.rollback();
+        next(e);
+    } finally {
+        if (conn) conn.release();
+    }
+});
+
 export default router;
 
-export { createDebitNoteForReturnTx, createDebitNoteForReturnApprovalTx };
+export { createDebitNoteForReturnTx, createDebitNoteForReturnApprovalTx, postPurchaseBillVoucherTx };
 // Direct Purchase
 async function ensureDirectPurchaseTables() {
   await pool.query(`
@@ -11170,8 +11263,17 @@ router.post(
           purchaseUnitCost: d.unitPrice,
         });
       }
-      const grnVoucherId = null;
-      const grnVoucherNo = null;
+      let grnVoucherId = null;
+      let grnVoucherNo = null;
+      try {
+         const gRes = await postGrnAccrualTx(conn, { grnId, companyId, branchId, branchIdsStr });
+         if (gRes?.voucherId) {
+             grnVoucherId = gRes.voucherId;
+             grnVoucherNo = gRes.voucherNo;
+         }
+      } catch(e) {
+         console.error("Direct Purchase GRN Voucher Error:", e);
+      }
 
       const billNo = await nextSequentialNo("pur_bills", "bill_no", "PBL");
       const [billHdr] = await conn.execute(
@@ -11225,12 +11327,21 @@ router.post(
         );
       }
 
-      const billVoucherId = null;
-      const billVoucherNo = null;
+      let billVoucherId = null;
+      let billVoucherNo = null;
       await conn.execute(
         "UPDATE pur_bills SET status = 'POSTED' WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))",
         { id: billId, companyId, branchId, branchIdsStr },
       );
+      try {
+        const vRes = await postPurchaseBillVoucherTx(conn, { billId, companyId, branchId, branchIdsStr });
+        if (vRes?.voucherId) {
+          billVoucherId = vRes.voucherId;
+          billVoucherNo = vRes.voucherNo;
+        }
+      } catch(e) {
+         console.error("Direct Purchase Bill Voucher Error:", e);
+      }
 
       await conn.execute(
         `UPDATE pur_direct_purchase_hdr

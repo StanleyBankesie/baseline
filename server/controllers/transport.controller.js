@@ -1193,8 +1193,31 @@ export const updateTransportationBill = async (req, res, next) => {
 export const deleteTransportationBill = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const { companyId } = req.scope || {};
+    
+    const prevRows = await query("SELECT bill_no FROM trans_transportation_bills WHERE id = :id", { id });
+    const billNo = prevRows[0]?.bill_no;
+
     await query("DELETE FROM trans_transportation_bill_details WHERE bill_id = :id", { id });
     await query("DELETE FROM trans_transportation_bills WHERE id = :id", { id });
+
+    if (billNo && companyId) {
+      const vRows = await query(
+        `SELECT DISTINCT v.id AS voucher_id
+           FROM fin_vouchers v
+           JOIN fin_voucher_lines l ON l.voucher_id = v.id
+          WHERE v.company_id = :companyId
+            AND l.reference_no = :referenceNo`,
+        { companyId, referenceNo: billNo }
+      ).catch(() => []);
+      const voucherIds = vRows.map((r) => Number(r.voucher_id)).filter((n) => Number.isFinite(n) && n > 0);
+      if (voucherIds.length > 0) {
+        const inList = voucherIds.join(",");
+        await query(`DELETE FROM fin_voucher_lines WHERE voucher_id IN (${inList})`).catch(() => null);
+        await query(`DELETE FROM fin_vouchers WHERE id IN (${inList})`).catch(() => null);
+      }
+    }
+
     res.json({ success: true });
   } catch (err) {
     next(err);
