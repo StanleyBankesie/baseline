@@ -1459,8 +1459,9 @@ async function postGrnAccrualTx(
   return { voucherId, voucherNo, amount: inventoryValue };
 }
 
-async function nextSequentialNo(table, column, prefix) {
-  const rows = await query(`
+async function nextSequentialNo(table, column, prefix, connObj = null) {
+  const executor = connObj || { query };
+  let sql = `
     SELECT ${column} AS no,
           created_at,
           u.username AS created_by_name
@@ -1469,9 +1470,16 @@ async function nextSequentialNo(table, column, prefix) {
          WHERE ${column} REGEXP '^${prefix}-[0-9]{6}$'
     ORDER BY CAST(SUBSTRING(${column}, ${prefix.length + 2}) AS UNSIGNED) DESC
     LIMIT 1
-    `);
+  `;
+  if (connObj) sql += " FOR UPDATE";
+  
+  const executeQuery = connObj 
+    ? connObj.execute(sql).then(r => r[0]).catch(() => []) 
+    : query(sql).catch(() => []);
+    
+  const rows = await executeQuery;
   let nextNum = 1;
-  if (rows.length > 0) {
+  if (rows && rows.length > 0) {
     const prev = String(rows[0].no || "");
     const numPart = prev.slice(prefix.length + 1);
     const n = parseInt(numPart, 10);
@@ -2638,6 +2646,7 @@ router.put(
         "inv_goods_receipt_notes",
         "grn_no",
         "GRN",
+        conn
       );
       const [grnHdr] = await conn.execute(
         `INSERT INTO inv_goods_receipt_notes
@@ -2781,7 +2790,7 @@ router.put(
           inventoryAccountRef: "1200",
           grnClearingAccountRef: "2100",
         });
-      const billNo = await nextSequentialNo("pur_bills", "bill_no", "PBL");
+      const billNo = await nextSequentialNo("pur_bills", "bill_no", "PBL", conn);
       const [billHdr] = await conn.execute(
         `INSERT INTO pur_bills
           (company_id, branch_id, bill_no, bill_date, supplier_id, po_id, grn_id, bill_type,
@@ -3603,7 +3612,7 @@ router.post(
       await conn.beginTransaction();
       const orderNo =
         String(body.order_no || "").trim() ||
-        (await nextSequentialNo("pur_service_orders", "order_no", "SVO"));
+        (await nextSequentialNo("pur_service_orders", "order_no", "SVO", conn));
       const orderDate =
         String(body.order_date || "").trim() || toYmd(new Date());
       const orderType = String(body.order_type || "INTERNAL").toUpperCase();
@@ -9898,7 +9907,7 @@ router.post(
         ? String(body.bill_type).toUpperCase()
         : "LOCAL";
       const billPrefix = billType === "IMPORT" ? "PBI" : "PBL";
-      const billNo = await nextSequentialNo("pur_bills", "bill_no", billPrefix);
+      const billNo = await nextSequentialNo("pur_bills", "bill_no", billPrefix, conn);
       const billDate = body.bill_date;
       const supplierId = toNumber(body.supplier_id);
       const poId = toNumber(body.po_id);
@@ -11102,7 +11111,7 @@ router.post(
       await ensureUnitConversionsTable();
       const dpNo =
         body.dp_no ||
-        (await nextSequentialNo("pur_direct_purchase_hdr", "dp_no", "DP"));
+        (await nextSequentialNo("pur_direct_purchase_hdr", "dp_no", "DP", conn));
 
       let subtotal = 0;
       let totalDiscount = 0;
@@ -11218,6 +11227,7 @@ router.post(
         "inv_goods_receipt_notes",
         "grn_no",
         "GRN",
+        conn
       );
       await ensureGrnMfgExpColumns();
       const [grnHdr] = await conn.execute(
@@ -11275,7 +11285,7 @@ router.post(
          console.error("Direct Purchase GRN Voucher Error:", e);
       }
 
-      const billNo = await nextSequentialNo("pur_bills", "bill_no", "PBL");
+      const billNo = await nextSequentialNo("pur_bills", "bill_no", "PBL", conn);
       const [billHdr] = await conn.execute(
         `INSERT INTO pur_bills
           (company_id, branch_id, bill_no, bill_date, supplier_id, po_id, grn_id, bill_type,

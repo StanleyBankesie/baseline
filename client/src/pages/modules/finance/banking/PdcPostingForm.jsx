@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "api/client";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
@@ -14,6 +15,7 @@ import { api } from "api/client";
  * @returns {JSX.Element} The rendered component
  */
 export default function PdcPostingForm() {
+  const { hasExceptional } = usePermission();
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
   const [item, setItem] = useState(null);
@@ -237,6 +239,8 @@ export default function PdcPostingForm() {
                   onChange={(e) =>
                     setDraft((p) => ({ ...p, instrument_date: e.target.value }))
                   }
+                
+                  disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
               <div className="form-control">

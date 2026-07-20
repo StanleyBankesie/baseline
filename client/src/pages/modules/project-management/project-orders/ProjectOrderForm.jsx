@@ -25,7 +25,7 @@ export default function ProjectOrderForm() {
   const effectiveId = isNew ? null : id;
 
   useAuth();
-  const { canEditDiscount } = usePermission();
+  const { canEditDiscount, hasExceptional } = usePermission();
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);

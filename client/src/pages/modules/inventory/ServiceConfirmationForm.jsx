@@ -7,6 +7,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { api } from "api/client";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 function toISODate(v) {
   if (!v) return "";
@@ -23,6 +24,7 @@ function toISODate(v) {
  * @returns {JSX.Element} The rendered component
  */
 export default function ServiceConfirmationForm() {
+  const { hasExceptional } = usePermission();
   const { id } = useParams();
   const navigate = useNavigate();
   const isNew = id === "new";
@@ -235,6 +237,8 @@ export default function ServiceConfirmationForm() {
                     setFormData({ ...formData, sc_date: e.target.value })
                   }
                   required
+                
+                  disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
               <div>

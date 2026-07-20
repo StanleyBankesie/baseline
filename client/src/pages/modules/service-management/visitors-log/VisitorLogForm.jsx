@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "../../../../api/client.js";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
@@ -14,6 +15,7 @@ import { api } from "../../../../api/client.js";
  * @returns {JSX.Element} The rendered component
  */
 export default function VisitorLogForm() {
+  const { hasExceptional } = usePermission();
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -242,6 +244,8 @@ export default function VisitorLogForm() {
                 value={form.visitDate}
                 onChange={(e) => updateField("visitDate", e.target.value)}
                 required
+              
+                disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
               />
             </div>
           </div>

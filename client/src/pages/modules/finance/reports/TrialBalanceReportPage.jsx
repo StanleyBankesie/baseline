@@ -139,7 +139,7 @@ export default function TrialBalanceReportPage() {
 
       <div className="card">
         <div className="card-body">
-          <div className="grid grid-cols-1 md:grid-cols-7 gap-4 mb-6">
+          <div className="flex flex-wrap items-end gap-4 mb-6">
             <div>
               <label className="label">From</label>
               <input

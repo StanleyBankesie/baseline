@@ -1,0 +1,1012 @@
+async function loadVoucher() {
+    if (!isEdit) return;
+    try {
+      setLoading(true);
+      const res = await api.get(`/finance/vouchers/${id}`);
+      const data = res.data || {};
+      const v = data.item || data.voucher || data;
+      if (!v) return;
+      const dateStr = (
+        v.voucher_date ||
+        v.date ||
+        new Date().toISOString()
+      ).split("T")[0];
+      setVoucherDate(dateStr);
+      setVoucherNoPreview(
+        String(v.voucher_no || data.voucher?.voucher_no || ""),
+      );
+      setVoucherStatus(String(v.status || data.voucher?.status || "DRAFT"));
+      if (v.fiscal_year_id || v.fiscalYearId || data.voucher?.fiscal_year_id) {
+        setFiscalYearId(
+          String(
+            v.fiscal_year_id || v.fiscalYearId || data.voucher?.fiscal_year_id,
+          ),
+        );
+      }
+      setNarration(v.narration || data.voucher?.narration || "");
+      setVoucherHeaderAmounts({
+        totalDebit: Number(v.total_debit || 0),
+        totalCredit: Number(v.total_credit || 0),
+        balancedAmount: Number(v.balanced_amount || 0),
+      });
+      const rawLines = Array.isArray(data.lines)
+        ? data.lines
+        : Array.isArray(v.lines)
+          ? v.lines
+          : v.items || [];
+      const narr = String(v.narration || data.voucher?.narration || "");
+      const token = (label) => {
+        const m = narr.match(new RegExp(`${label}\\s*:\\s*([^|]+)`, "i"));
+        return m ? String(m[1]).trim() : "";
+      };
+      const rawCredit = rawLines.filter((l) => Number(l.credit || 0) > 0);
+      const rawDebit = rawLines.filter((l) => Number(l.debit || 0) > 0);
+      const mapped =
+        rawLines.map((it) => ({
+          accountId: String(it.account_id || it.accountId || ""),
+          accountName: String(it.account_name || ""),
+          accountCode: String(it.account_code || ""),
+          description: it.description || "",
+          debit: Number(it.debit || 0),
+          credit: Number(it.credit || 0),
+          currencyId: String(it.currency_id || it.currencyId || ""),
+          exchangeRate: String(it.exchange_rate || it.exchangeRate || "1"),
+        })) || [];
+      setLines(mapped.length ? mapped : [emptyLine(), emptyLine()]);
+      linesManuallyEdited.current = true;
+      if (isRV) {
+        const debitLine = mapped.find((l) => Number(l.debit || 0) > 0);
+        const creditLines = mapped.filter((l) => Number(l.credit || 0) > 0);
+        const creditFirstRaw = rawCredit[0] || null;
+        const rvName =
+          token("Received from") || creditFirstRaw?.account_name || "";
+        const rvCode = creditFirstRaw?.account_code
+          ? String(creditFirstRaw.account_code)
+          : "";
+        const rvPayAccId = creditFirstRaw?.account_id
+          ? String(creditFirstRaw.account_id)
+          : "";
+        if (!rvPayAccId) {
+          setCustomerInvoices([]);
+        }
+        setRvForm((prev) => ({
+          ...prev,
+          depositAccountId: debitLine?.accountId || "",
+          receivedFrom: rvName || prev.receivedFrom,
+          receivedFromCode: rvCode || prev.receivedFromCode,
+          payerAccountId: rvPayAccId || prev.payerAccountId,
+          paymentMethod:
+            rawLines.find((l) => l.payment_method)?.payment_method ||
+            token("Method") ||
+            prev.paymentMethod,
+          reference: token("Ref") || prev.reference,
+          items:
+            creditLines.length > 0
+              ? creditLines.map((l) => ({
+                  description: l.description || "",
+                  accountId: String(l.accountId || ""),
+                  amount: Number(l.credit || 0),
+                  currencyCode:
+                    getAccountCurrencyCode(String(l.accountId || "")) ||
+                    String(v.currency_code || ""),
+                  exchangeRate: String(v.exchange_rate || 1),
+                  referenceNo:
+                    String(
+                      (
+                        rawCredit.find(
+                          (rc) =>
+                            String(rc.account_id || "") ===
+                            String(l.accountId || ""),
+                        ) || {}
+                      ).reference_no || "",
+                    ) || "",
+                }))
+              : prev.items,
+        }));
+      } else if (isPAYV) {
+        const creditLine = mapped.find((l) => Number(l.credit || 0) > 0);
+        const debitLines = mapped.filter((l) => Number(l.debit || 0) > 0);
+        const debitFirstRaw = rawDebit[0] || null;
+        const pvName = token("Paid to") || debitFirstRaw?.account_name || "";
+        const pvCode = debitFirstRaw?.account_code
+          ? String(debitFirstRaw.account_code)
+          : "";
+        const pvPayAccId = debitFirstRaw?.account_id
+          ? String(debitFirstRaw.account_id)
+          : "";
+        setPvForm((prev) => ({
+          ...prev,
+          paymentAccountId: creditLine?.accountId || "",
+          payTo: pvName || prev.payTo,
+          payToCode: pvCode || prev.payToCode,
+          payToAccountId: pvPayAccId || prev.payToAccountId,
+          paymentMethod:
+            rawLines.find((l) => l.payment_method)?.payment_method ||
+            token("Method") ||
+            prev.paymentMethod,
+          reference: token("Ref") || prev.reference,
+          items:
+            debitLines.length > 0
+              ? debitLines.map((l) => ({
+                  description: l.description || "",
+                  accountId: String(l.accountId || ""),
+                  amount: Number(l.debit || 0),
+                }))
+              : prev.items,
+        }));
+      } else if (isCV) {
+        const debitLine = mapped.find((l) => Number(l.debit || 0) > 0);
+        const creditLine = mapped.find((l) => Number(l.credit || 0) > 0);
+        setCvForm((prev) => ({
+          ...prev,
+          toAccountId: debitLine?.accountId || "",
+          fromAccountId: creditLine?.accountId || "",
+          transferMethod:
+            rawLines.find((l) => l.payment_method)?.payment_method ||
+            token("Method") ||
+            prev.transferMethod,
+          items:
+            mapped.length > 0
+              ? mapped
+                  .filter(
+                    (l) =>
+                      Number(l.debit || 0) > 0 || Number(l.credit || 0) > 0,
+                  )
+                  .map((l) => ({
+                    description: l.description || "",
+                    amount: Number(l.debit || l.credit || 0),
+                  }))
+              : prev.items,
+        }));
+      }
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Failed to load voucher");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    async function loadNextNoPv() {
+      if (isEdit || !isPV) return;
+      try {
+        const res = await api.get(
+          "/finance/vouchers/next-no?voucherTypeCode=PV",
+        );
+        const raw = String(res.data?.nextNo || "");
+        // Format as PV000001 (no dash)
+        const m = raw.match(/^PV-?(\d+)$/i);
+        const formatted = m ? `PV${String(m[1]).padStart(6, "0")}` : raw;
+        setVoucherNoPreview(formatted);
+      } catch {
+        setVoucherNoPreview("");
+      }
+    }
+    loadNextNoPv();
+  }, [isPV, isEdit]);
+
+  useEffect(() => {
+    async function loadNextNoSv() {
+      if (isEdit || !isSV) return;
+      try {
+        const res = await api.get(
+          "/finance/vouchers/next-no?voucherTypeCode=SV",
+        );
+        const raw = String(res.data?.nextNo || "");
+        // Format as SV000001 (no dash)
+        const m = raw.match(/^SV-?(\d+)$/i);
+        const formatted = m ? `SV${String(m[1]).padStart(6, "0")}` : raw;
+        setVoucherNoPreview(formatted);
+      } catch {
+        setVoucherNoPreview("");
+      }
+    }
+    loadNextNoSv();
+  }, [isSV, isEdit]);
+
+  async function resolveOrCreateVoucherTypeId(code) {
+    try {
+      const res = await api.get("/finance/voucher-types", { params: { code } });
+      const items = Array.isArray(res.data?.items) ? res.data.items : [];
+      if (items.length > 0) {
+        return Number(items[0].id || 0);
+      }
+      const upper = String(code || "").toUpperCase();
+      const name =
+        upper === "PV"
+          ? "Payment Voucher"
+          : upper === "RV"
+            ? "Receipt Voucher"
+            : upper === "CV"
+              ? "Contra Voucher"
+              : upper === "CN"
+                ? "Credit Note"
+                : upper === "DN"
+                  ? "Debit Note"
+                  : "Voucher";
+      const category =
+        upper === "PV"
+          ? "PAYMENT"
+          : upper === "RV"
+            ? "RECEIPT"
+            : upper === "CN"
+              ? "GENERAL"
+              : upper === "DN"
+                ? "GENERAL"
+                : "GENERAL";
+      await api.post("/finance/voucher-types", {
+        code: upper,
+        name,
+        category,
+        prefix: upper,
+        next_number: 1,
+        requires_approval: 0,
+        is_active: 1,
+      });
+      const res2 = await api.get("/finance/voucher-types", {
+        params: { code: upper },
+      });
+      const items2 = Array.isArray(res2.data?.items) ? res2.data.items : [];
+      return Number(items2?.[0]?.id || 0);
+    } catch {
+      return 0;
+    }
+  }
+
+  const voucherType = useMemo(() => {
+    return voucherTypes.find((x) => x.code === voucherTypeCode);
+  }, [voucherTypes, voucherTypeCode]);
+
+  const generalVoucherTypeName = useMemo(() => {
+    const vt = voucherTypes.find(
+      (x) =>
+        String(x.code).toUpperCase() === String(voucherTypeCode).toUpperCase(),
+    );
+    if (vt?.name) return vt.name;
+    const upper = String(voucherTypeCode || "").toUpperCase();
+    return upper === "CN"
+      ? "Credit Note"
+      : upper === "DN"
+        ? "Debit Note"
+        : "Voucher";
+  }, [voucherTypes, voucherTypeCode]);
+
+  const totals = useMemo(() => {
+    if (isRV) {
+      const subtotal = rvForm.items.reduce(
+        (sum, it) => sum + Number(it.amount || 0),
+        0,
+      );
+      return {
+        debit: subtotal,
+        credit: subtotal,
+        subtotal,
+        tax: 0,
+        grand: subtotal,
+      };
+    }
+    if (isPAYV) {
+      const subtotal = pvForm.items.reduce(
+        (sum, it) => sum + Number(it.amount || 0),
+        0,
+      );
+      const pvRate = Number(
+        taxCodes.find((t) => String(t.id) === String(pvForm.taxCodeId))
+          ?.rate_percent || 0,
+      );
+      const tax = Math.round(subtotal * pvRate) / 100;
+      return {
+        debit: subtotal,
+        credit: subtotal,
+        subtotal,
+        tax,
+        grand: subtotal, // Tax not included in total amount
+      };
+    }
+    if (isCV) {
+      const subtotal = cvForm.items.reduce(
+        (sum, it) => sum + Number(it.amount || 0),
+        0,
+      );
+      const cvRate = Number(
+        taxCodes.find((t) => String(t.id) === String(cvForm.taxCodeId))
+          ?.rate_percent || 0,
+      );
+      const tax = Math.round(subtotal * cvRate) / 100;
+      return {
+        debit: subtotal,
+        credit: subtotal,
+        subtotal,
+        tax,
+        grand: subtotal + tax,
+      };
+    }
+    return lines.reduce(
+      (acc, l) => {
+        acc.debit += Number(l.debit || 0);
+        acc.credit += Number(l.credit || 0);
+        return acc;
+      },
+      { debit: 0, credit: 0 },
+    );
+  }, [lines, rvForm, pvForm, cvForm, isRV, isPAYV, isCV, taxCodes]);
+  const pvAmountInBase = useMemo(() => {
+    if (!isPAYV) return 0;
+    const amount = Number(totals.grand || 0);
+    const rate = Number(pvExchangeRate || 1) || 1;
+    return Math.round(amount * rate * 100) / 100;
+  }, [isPAYV, totals.grand, pvExchangeRate]);
+
+  const balanced =
+    Math.round(totals.debit * 100) === Math.round(totals.credit * 100);
+
+  const disabledClass = readOnly
+    ? "bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-200 dark:border-blue-700 font-semibold"
+    : "";
+
+  // moved earlier to avoid temporal-dead-zone during RV render
+
+  const [companyInfo, setCompanyInfo] = useState({
+    name: "",
+    address: "",
+    city: "",
+    state: "",
+    country: "",
+    phone: "",
+    email: "",
+    website: "",
+    taxId: "",
+    registrationNo: "",
+    logoUrl: "",
+  });
+
+  const [rvTaxComponentsByCode, setRvTaxComponentsByCode] = useState({});
+  const [pvTaxComponentsByCode, setPvTaxComponentsByCode] = useState({});
+
+  // Account balance state for RV and PAYV
+  const [accountBalances, setAccountBalances] = useState({});
+
+  // Helper function to fetch account balance
+  async function fetchAccountBalance(accountId) {
+    if (!accountId) return null;
+    const cached = accountBalances[String(accountId)];
+    if (cached !== undefined) return cached;
+    try {
+      let balance = null;
+      try {
+        const gl = await api.get("/finance/reports/general-ledger", {
+          params: { accountId: Number(accountId) },
+        });
+        balance =
+          gl.data?.account?.current_balance ??
+          gl.data?.account?.balance ??
+          gl.data?.closing_balance ??
+          null;
+      } catch {}
+      if (balance === null || balance === undefined) {
+        const res = await api.get(`/finance/accounts/${accountId}/balance`);
+        balance = res.data?.balance ?? res.data?.item?.balance ?? null;
+      }
+      setAccountBalances((prev) => ({ ...prev, [String(accountId)]: balance }));
+      return balance;
+    } catch {
+      return null;
+    }
+  }
+
+  const payeeOptions = useMemo(() => {
+    const base = accounts.filter((a) =>
+      ["DEBTORS", "CREDITORS"].includes(
+        String(a.group_name || "").toUpperCase(),
+      ),
+    );
+    const q = String(payToSearch || "").trim();
+    if (!q) return base;
+    return filterAndSort(base, {
+      query: q,
+      getKeys: (a) => [a.name, a.code],
+    });
+  }, [accounts, payToSearch]);
+
+  const rvTaxComponentsTotals = useMemo(() => {
+    if (!isRV) return { components: [], taxTotal: 0, grand: totals.grand };
+    const sub = totals.subtotal || 0;
+    const comps = rvTaxComponentsByCode[String(rvForm.taxCodeId || "")] || [];
+    const components = comps
+      .map((c) => {
+        const rate = Number(c.rate_percent || 0);
+        const amount = (sub * rate) / 100;
+        return {
+          name: c.component_name,
+          rate,
+          amount,
+          sort_order: c.sort_order || 0,
+        };
+      })
+      .sort((a, b) => a.sort_order - b.sort_order);
+    const taxTotal = components.reduce((s, c) => s + c.amount, 0);
+    const grand = sub + taxTotal;
+    return { components, taxTotal, grand };
+  }, [
+    isRV,
+    totals.subtotal,
+    totals.grand,
+    rvForm.taxCodeId,
+    rvTaxComponentsByCode,
+  ]);
+
+  useEffect(() => {
+    async function loadRvTaxComponents() {
+      const key = String(rvForm.taxCodeId || "");
+      if (!isRV || !key || rvTaxComponentsByCode[key]) return;
+      try {
+        const resp = await api.get(`/finance/tax-codes/${key}/components`);
+        const items = Array.isArray(resp.data?.items) ? resp.data.items : [];
+        setRvTaxComponentsByCode((prev) => ({ ...prev, [key]: items }));
+        // Auto-populate posting lines with tax components after loading
+        setTimeout(() => autoPopulateRvTaxLines(), 0);
+      } catch {}
+    }
+    loadRvTaxComponents();
+  }, [isRV, rvForm.taxCodeId, rvTaxComponentsByCode]);
+
+  // Auto-populate RV posting lines when tax code changes (even if components already cached)
+  useEffect(() => {
+    if (
+      isRV &&
+      rvForm.taxCodeId &&
+      rvTaxComponentsByCode[String(rvForm.taxCodeId)]
+    ) {
+      autoPopulateRvTaxLines();
+    }
+  }, [isRV, rvForm.taxCodeId, rvTaxComponentsByCode]);
+
+  useEffect(() => {
+    async function loadPvTaxComponents() {
+      const key = String(pvForm.taxCodeId || "");
+      if (!isPAYV || !key || pvTaxComponentsByCode[key]) return;
+      try {
+        const resp = await api.get(`/finance/tax-codes/${key}/components`);
+        const items = Array.isArray(resp.data?.items) ? resp.data.items : [];
+        setPvTaxComponentsByCode((prev) => ({ ...prev, [key]: items }));
+        // Auto-populate posting lines with tax components after loading
+        setTimeout(async () => await autoPopulatePvTaxLines(), 0);
+      } catch {}
+    }
+    loadPvTaxComponents();
+  }, [isPAYV, pvForm.taxCodeId, pvTaxComponentsByCode]);
+
+  // Auto-populate posting lines when PAYV tax code changes (even if components already cached or cleared)
+  useEffect(() => {
+    if (!isPAYV) return;
+    // Trigger whenever tax code changes or components load (including when cleared to empty)
+    if (pvForm.taxCodeId && pvTaxComponentsByCode[String(pvForm.taxCodeId)]) {
+      // Tax code selected and components loaded - populate with tax
+      (async () => await autoPopulatePvTaxLines())();
+    } else if (!pvForm.taxCodeId) {
+      // Tax code cleared - still trigger rebuild without tax
+      (async () => await autoPopulatePvTaxLines())();
+    }
+  }, [isPAYV, pvForm.taxCodeId, pvTaxComponentsByCode, paymentType]);
+
+  // Fetch balance when RV deposit account changes
+  useEffect(() => {
+    if (isRV && rvForm.depositAccountId) {
+      fetchAccountBalance(rvForm.depositAccountId);
+    }
+  }, [isRV, rvForm.depositAccountId]);
+
+  // Fetch balance when PAYV payment account changes
+  useEffect(() => {
+    if (isPAYV && pvForm.paymentAccountId) {
+      fetchAccountBalance(pvForm.paymentAccountId);
+    }
+  }, [isPAYV, pvForm.paymentAccountId]);
+
+  // Load outstanding bills when Paid To account changes in Against Bill mode
+  useEffect(() => {
+    if (isPAYV && paymentType === "AGAINST_BILL" && pvForm.payToAccountId) {
+      loadOutstandingBillsForSupplier(pvForm.payToAccountId);
+    } else {
+      setOutstandingBills([]);
+      setSelectedBillId("");
+      setSelectedBillDetails(null);
+    }
+  }, [isPAYV, pvForm.payToAccountId, paymentType]);
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadCompany() {
+      try {
+        const meResp = await api.get("/admin/me");
+        const companyId = meResp.data?.scope?.companyId;
+        if (!companyId) return;
+        const cResp = await api.get(`/admin/companies/${companyId}`);
+        const item = cResp.data?.item || {};
+        const logoUrl =
+          item.has_logo === 1 || item.has_logo === true
+            ? `/api/admin/companies/${companyId}/logo`
+            : "";
+        if (!mounted) return;
+        setCompanyInfo({
+          name: item.name || "",
+          address: item.address || "",
+          city: item.city || "",
+          state: item.state || "",
+          country: item.country || "",
+          phone: item.telephone || "",
+          email: item.email || "",
+          website: item.website || "",
+          taxId: item.tax_id || "",
+          registrationNo: item.registration_no || "",
+          logoUrl,
+        });
+      } catch {}
+    }
+    loadCompany();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  function escapeHtml(v) {
+    return String(v ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+  function wrapDoc(bodyHtml) {
+    return `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Voucher</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; padding: 24px; color: #0f172a; background: #fff; }
+      .vh { font-size: 12px; }
+      .vh table { border-collapse: collapse; width: 100%; }
+      .vh th, .vh td { border: 1px solid #e2e8f0; padding: 6px 8px; vertical-align: top; }
+      .vh th { background: #f8fafc; text-align: left; }
+      .vh .right { text-align: right; }
+      .vh .center { text-align: center; }
+      .vh-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+      .vh-logo { min-width: 120px; max-width: 200px; }
+      .vh-company { text-align: right; font-size: 11px; line-height: 1.35; }
+      .vh-company .name { font-weight: 800; font-size: 14px; }
+      .vh-titlebar { display: flex; align-items: center; gap: 10px; color: #0f172a; margin: 4px 0 10px; }
+      .vh-titlebar .line { flex: 1; height: 1px; background: #0f172a; }
+      .vh-titlebar .title { font-weight: 700; }
+      .vh-details { width: 100%; margin-bottom: 10px; border: 1px solid #cbd5e1; }
+      .vh-details td { border-color: #cbd5e1; }
+      .vh-details .label { width: 32%; color: #475569; }
+      .vh-details .label-wide { width: 40%; color: #475569; }
+      .vh-items thead th { font-weight: 600; }
+      .vh-footer a { color: inherit; text-decoration: underline; }
+      @media print { button { display: none; } }
+    </style>
+  </head>
+  <body>${bodyHtml || ""}</body>
+</html>`;
+  }
+  function renderReceiptVoucherHtml(data) {
+    const c = data.company || {};
+    const r = data.receipt || {};
+    const items = Array.isArray(data.items) ? data.items : [];
+    const t = data.totals || {};
+    return `
+    <div class="vh">
+      <div class="vh-header">
+        <div class="vh-logo">${c.logoHtml || ""}</div>
+        <div class="vh-company">
+          <div class="name">${escapeHtml(c.name || "")}</div>
+          <div>${escapeHtml(c.addressLine1 || "")}</div>
+          <div>${escapeHtml(c.addressLine2 || "")}</div>
+          <div>Telephone: ${escapeHtml(c.phone || "")}</div>
+          <div>Email: ${escapeHtml(c.email || "")}</div>
+          <div>${escapeHtml(c.website || "")}</div>
+          <div>TIN: ${escapeHtml(c.taxId || "")} &nbsp; Reg: ${escapeHtml(c.registrationNo || "")}</div>
+        </div>
+      </div>
+      <div class="vh-titlebar">
+        <div class="line"></div>
+        <div class="title">* Receipt Voucher *</div>
+        <div class="line"></div>
+      </div>
+      <table class="vh-details">
+        <tr>
+          <td style="width:50%;vertical-align:top;border-right:1px solid #cbd5e1;">
+            <table style="width:100%;">
+              <tr><td class="label-wide">Receipt No</td><td>:</td><td>${escapeHtml(r.receiptNo || "")}</td></tr>
+              <tr><td class="label-wide">Date/Time</td><td>:</td><td>${escapeHtml(r.dateTime || "")}</td></tr>
+              <tr><td class="label-wide">Method</td><td>:</td><td>${escapeHtml(r.paymentMethod || "")}</td></tr>
+            </table>
+          </td>
+          <td style="width:50%;vertical-align:top;">
+            <div style="padding:8px;">
+              <div class="label">Narration</div>
+              <div>${escapeHtml(r.headerText || "")}</div>
+            </div>
+          </td>
+        </tr>
+      </table>
+      <table class="vh-items">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th class="right" style="width:22%;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${items
+            .map(
+              (it) => `
+            <tr>
+              <td>${escapeHtml(it.name || "")}</td>
+              <td class="right">${escapeHtml(it.lineTotal || it.price || "0.00")}</td>
+            </tr>
+          `,
+            )
+            .join("")}
+          <tr>
+            <td class="right"><strong>Subtotal</strong></td>
+            <td class="right"><strong>${escapeHtml(Number(t.subtotal || 0).toFixed(2))}</strong></td>
+          </tr>
+          <tr>
+            <td class="right">Tax</td>
+            <td class="right">${escapeHtml(Number(t.tax || 0).toFixed(2))}</td>
+          </tr>
+          <tr>
+            <td class="right"><strong>Total</strong></td>
+            <td class="right"><strong>${escapeHtml(Number(t.total || t.grand || 0).toFixed(2))}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="vh-footer" style="margin-top:10px;text-align:center;">
+        <div>${escapeHtml(r.footerText || "")}</div>
+      </div>
+    </div>
+    `;
+  }
+  function renderPaymentVoucherHtml(data) {
+    const c = data.company || {};
+    const p = data.payment || {};
+    const items = Array.isArray(data.items) ? data.items : [];
+    const t = data.totals || {};
+    return `
+    <div class="vh">
+      <div class="vh-header">
+        <div class="vh-logo">${c.logoHtml || ""}</div>
+        <div class="vh-company">
+          <div class="name">${escapeHtml(c.name || "")}</div>
+          <div>${escapeHtml(c.addressLine1 || "")}</div>
+          <div>${escapeHtml(c.addressLine2 || "")}</div>
+          <div>Telephone: ${escapeHtml(c.phone || "")}</div>
+          <div>Email: ${escapeHtml(c.email || "")}</div>
+          <div>${escapeHtml(c.website || "")}</div>
+          <div>TIN: ${escapeHtml(c.taxId || "")} &nbsp; Reg: ${escapeHtml(c.registrationNo || "")}</div>
+        </div>
+      </div>
+      <div class="vh-titlebar">
+        <div class="line"></div>
+        <div class="title">* Payment Voucher *</div>
+        <div class="line"></div>
+      </div>
+      <table class="vh-details">
+        <tr>
+          <td style="width:50%;vertical-align:top;border-right:1px solid #cbd5e1;">
+            <table style="width:100%;">
+              <tr><td class="label-wide">Payment No</td><td>:</td><td>${escapeHtml(p.paymentNo || "")}</td></tr>
+              <tr><td class="label-wide">Date/Time</td><td>:</td><td>${escapeHtml(p.dateTime || "")}</td></tr>
+              <tr><td class="label-wide">Method</td><td>:</td><td>${escapeHtml(p.paymentMethod || "")}</td></tr>
+            </table>
+          </td>
+          <td style="width:50%;vertical-align:top;">
+            <div style="padding:8px;">
+              <div class="label">Narration</div>
+              <div>${escapeHtml(p.headerText || "")}</div>
+            </div>
+          </td>
+        </tr>
+      </table>
+      <table class="vh-items">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th class="right" style="width:22%;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${items
+            .map(
+              (it) => `
+            <tr>
+              <td>${escapeHtml(it.name || "")}</td>
+              <td class="right">${escapeHtml(it.lineTotal || it.price || "0.00")}</td>
+            </tr>
+          `,
+            )
+            .join("")}
+          <tr>
+            <td class="right"><strong>Subtotal</strong></td>
+            <td class="right"><strong>${escapeHtml(Number(t.subtotal || 0).toFixed(2))}</strong></td>
+          </tr>
+          <tr>
+            <td class="right">Tax</td>
+            <td class="right">${escapeHtml(Number(t.tax || 0).toFixed(2))}</td>
+          </tr>
+          <tr>
+            <td class="right"><strong>Total</strong></td>
+            <td class="right"><strong>${escapeHtml(Number(t.total || t.grand || 0).toFixed(2))}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="vh-footer" style="margin-top:10px;text-align:center;">
+        <div>${escapeHtml(p.footerText || "")}</div>
+      </div>
+    </div>
+    `;
+  }
+  const buildReceiptVoucherTemplateData = () => {
+    const logoUrl = String(companyInfo.logoUrl || "").trim();
+    const logoHtml = logoUrl
+      ? `<img src="${logoUrl}" alt="${escapeHtml(companyInfo.name || "Company")}" style="max-height:80px;object-fit:contain;" />`
+      : "";
+    const addressParts = [];
+    if (companyInfo.address) addressParts.push(companyInfo.address);
+    const cityState = [companyInfo.city, companyInfo.state]
+      .filter(Boolean)
+      .join(", ");
+    if (cityState) addressParts.push(cityState);
+    if (companyInfo.country) addressParts.push(companyInfo.country);
+    const addressLine1 = String(addressParts[0] || "");
+    const addressLine2 = String(addressParts.slice(1).join(" • ") || "");
+    const itemsArr = (Array.isArray(rvForm.items) ? rvForm.items : []).map(
+      (it) => {
+        const amt = Number(it.amount || 0);
+        return {
+          name: String(it.description || ""),
+          qty: "1.00",
+          price: amt.toFixed(2),
+          discount: "0.00",
+          lineTotal: amt.toFixed(2),
+        };
+      },
+    );
+    const when = voucherDate ? new Date(voucherDate) : new Date();
+    const method = String(rvForm.paymentMethod || "").toUpperCase();
+    const methodLabel =
+      method === "CASH"
+        ? "Cash"
+        : method === "BANK"
+          ? "Bank"
+          : method === "CHEQUE"
+            ? "Cheque"
+            : method === "TRANSFER"
+              ? "Bank Transfer"
+              : method === "CARD"
+                ? "Card"
+                : "Other";
+    return {
+      company: {
+        name: companyInfo.name || "",
+        addressLine1,
+        addressLine2,
+        phone: companyInfo.phone || "",
+        website: companyInfo.website || "",
+        taxId: companyInfo.taxId || "",
+        registrationNo: companyInfo.registrationNo || "",
+        logoUrl,
+        logoHtml,
+      },
+      receipt: {
+        receiptNo: String(voucherNoPreview || ""),
+        dateTime: when.toLocaleString(),
+        paymentMethod: methodLabel,
+        headerText: "",
+        footerText: "",
+      },
+      items: itemsArr,
+      totals: {
+        subtotal: Number(totals.subtotal || 0).toFixed(2),
+        tax: Number(totals.tax || 0).toFixed(2),
+        total: Number(totals.grand || 0).toFixed(2),
+      },
+    };
+  };
+  const buildPaymentVoucherTemplateData = () => {
+    const logoUrl = String(companyInfo.logoUrl || "").trim();
+    const logoHtml = logoUrl
+      ? `<img src="${logoUrl}" alt="${escapeHtml(companyInfo.name || "Company")}" style="max-height:80px;object-fit:contain;" />`
+      : "";
+    const addressParts = [];
+    if (companyInfo.address) addressParts.push(companyInfo.address);
+    const cityState = [companyInfo.city, companyInfo.state]
+      .filter(Boolean)
+      .join(", ");
+    if (cityState) addressParts.push(cityState);
+    if (companyInfo.country) addressParts.push(companyInfo.country);
+    const addressLine1 = String(addressParts[0] || "");
+    const addressLine2 = String(addressParts.slice(1).join(" • ") || "");
+    const itemsArr = (Array.isArray(pvForm.items) ? pvForm.items : []).map(
+      (it) => {
+        const amt = Number(it.amount || 0);
+        return {
+          name: String(it.description || ""),
+          qty: "1.00",
+          price: amt.toFixed(2),
+          discount: "0.00",
+          lineTotal: amt.toFixed(2),
+        };
+      },
+    );
+    const when = voucherDate ? new Date(voucherDate) : new Date();
+    const method = String(pvForm.paymentMethod || "").toUpperCase();
+    const methodLabel =
+      method === "CASH"
+        ? "Cash"
+        : method === "BANK"
+          ? "Bank"
+          : method === "CHEQUE"
+            ? "Cheque"
+            : method === "TRANSFER"
+              ? "Bank Transfer"
+              : method === "CARD"
+                ? "Card"
+                : "Other";
+    return {
+      company: {
+        name: companyInfo.name || "",
+        addressLine1,
+        addressLine2,
+        phone: companyInfo.phone || "",
+        website: companyInfo.website || "",
+        taxId: companyInfo.taxId || "",
+        registrationNo: companyInfo.registrationNo || "",
+        logoUrl,
+        logoHtml,
+      },
+      payment: {
+        paymentNo: String(voucherNoPreview || ""),
+        dateTime: when.toLocaleString(),
+        paymentMethod: methodLabel,
+        headerText: "",
+        footerText: "",
+      },
+      items: itemsArr,
+      totals: {
+        subtotal: Number(totals.subtotal || 0).toFixed(2),
+        tax: Number(totals.tax || 0).toFixed(2),
+        total: Number(totals.grand || 0).toFixed(2),
+      },
+    };
+  };
+  const handlePrintVoucher = async () => {
+    try {
+      if (!isEdit) return;
+      const templateType = isRV
+        ? "receipt-voucher"
+        : isPAYV
+          ? "payment-voucher"
+          : "";
+      if (!templateType) return;
+      const templateName = isRV
+        ? "Receipt Voucher"
+        : isPAYV
+          ? "Payment voucher"
+          : "";
+      let templateId = null;
+      try {
+        const tRes = await api.get(`/templates/${templateType}`, {
+          params: { name: templateName },
+        });
+        const tItems = Array.isArray(tRes.data?.items) ? tRes.data.items : [];
+        templateId = Number(tItems?.[0]?.id || 0) || null;
+      } catch {}
+      const resp = await api.post(
+        `/documents/${templateType}/${id}/render`,
+        { format: "html", ...(templateId ? { template_id: templateId } : {}) },
+        { headers: { "Content-Type": "application/json" } },
+      );
+      const html =
+        typeof resp.data === "string" ? resp.data : String(resp.data || "");
+      const iframe = document.createElement("iframe");
+      iframe.style.position = "fixed";
+      iframe.style.right = "0";
+      iframe.style.bottom = "0";
+      iframe.style.width = "0";
+      iframe.style.height = "0";
+      iframe.style.border = "0";
+      document.body.appendChild(iframe);
+      const doc =
+        iframe.contentWindow?.document || iframe.contentDocument || null;
+      if (!doc) {
+        document.body.removeChild(iframe);
+        window.print();
+        return;
+      }
+      const printStyle = `<style>@media print { img, svg { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }</style>`;
+      doc.open();
+      doc.write(printStyle + html);
+      doc.close();
+      const win = iframe.contentWindow || window;
+      const doPrint = () => {
+        win.focus();
+        try {
+          win.print();
+        } catch {}
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+        }, 100);
+      };
+      setTimeout(doPrint, 200);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to print voucher");
+    }
+  };
+  const handleDownloadVoucherPdf = async () => {
+    try {
+      if (!isEdit) return;
+      const templateType = isRV
+        ? "receipt-voucher"
+        : isPAYV
+          ? "payment-voucher"
+          : "";
+      if (!templateType) return;
+      const templateName = isRV
+        ? "Receipt Voucher"
+        : isPAYV
+          ? "Payment voucher"
+          : "";
+      let templateId = null;
+      try {
+        const tRes = await api.get(`/templates/${templateType}`, {
+          params: { name: templateName },
+        });
+        const tItems = Array.isArray(tRes.data?.items) ? tRes.data.items : [];
+        templateId = Number(tItems?.[0]?.id || 0) || null;
+      } catch {}
+      const resp = await api.post(
+        `/documents/${templateType}/${id}/render`,
+        { format: "html", ...(templateId ? { template_id: templateId } : {}) },
+        { headers: { "Content-Type": "application/json" } },
+      );
+      const html =
+        typeof resp.data === "string" ? resp.data : String(resp.data || "");
+      const fname =
+        (isRV ? "ReceiptVoucher_" : isPAYV ? "PaymentVoucher_" : "Voucher_") +
+        (voucherNoPreview || new Date().toISOString().slice(0, 10)) +
+        ".pdf";
+      await renderHtmlToPdf(html, fname);
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to download voucher PDF",
+      );
+    }
+  };
+
+  function updateLine(index, patch) {
+    if (readOnly) return;
+    linesManuallyEdited.current = true;
+    setLines((prev) =>
+      prev.map((l, i) => (i === index ? { ...l, ...patch } : l)),
+    );
+  }
+
+  function addLine() {
+    if (readOnly) return;
+    linesManuallyEdited.current = true;
+    setLines((prev) => [...prev, emptyLine()]);
+  }
+
+  function removeLine(index) {
+    if (readOnly) return;
+    linesManuallyEdited.current = true;
+    setLines((prev) =>
+      prev.length <= 2 ? prev : prev.filter((_, i) => i !== index),
+    );
+  }
+
+  

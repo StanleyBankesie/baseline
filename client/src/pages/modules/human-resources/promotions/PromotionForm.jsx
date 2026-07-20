@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
@@ -14,6 +15,7 @@ import { toast } from "react-toastify";
  * @returns {JSX.Element} The rendered component
  */
 export default function PromotionForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
@@ -160,6 +162,8 @@ export default function PromotionForm() {
                 value={form.promotion_date}
                 onChange={(e) => update("promotion_date", e.target.value)}
                 required
+              
+                disabled={isEdit && !hasExceptional("DOCUMENT.EDIT_DATE")}
               />
             </div>
           </div>

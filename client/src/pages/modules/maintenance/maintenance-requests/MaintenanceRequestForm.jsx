@@ -7,6 +7,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "../../../../api/client";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 const DEFAULT_MAINT_TYPES = [
   "Corrective",
@@ -25,6 +26,7 @@ const today = () => new Date().toISOString().slice(0, 10);
  * @returns {JSX.Element} The rendered component
  */
 export default function MaintenanceRequestForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = !!id;
@@ -359,6 +361,8 @@ export default function MaintenanceRequestForm() {
                 value={form.request_date}
                 onChange={(e) => update("request_date", e.target.value)}
                 required
+              
+                disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
               />
             </div>
             <div>
@@ -368,6 +372,8 @@ export default function MaintenanceRequestForm() {
                 type="date"
                 value={form.breakdown_date || ""}
                 onChange={(e) => update("breakdown_date", e.target.value)}
+              
+                disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
               />
             </div>
             <div>

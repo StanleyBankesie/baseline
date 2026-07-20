@@ -182,56 +182,56 @@ export default function CurrenciesPage() {
         <div className="card-body">
           <form
             onSubmit={create}
-            className="grid grid-cols-1 md:grid-cols-6 gap-3"
+            className="flex flex-col md:flex-row flex-wrap items-end gap-4"
           >
-            <div>
+            <div className="w-full md:w-auto flex-1">
               <label className="label">Code *</label>
               <input
-                className="input"
+                className="input w-full"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 required
               />
             </div>
-            <div className="md:col-span-2">
+            <div className="w-full md:w-auto flex-[2]">
               <label className="label">Name *</label>
               <input
-                className="input"
+                className="input w-full"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
               />
             </div>
-            <div>
+            <div className="w-full md:w-auto flex-1">
               <label className="label">Symbol</label>
               <input
-                className="input"
+                className="input w-full"
                 value={symbol}
                 onChange={(e) => setSymbol(e.target.value)}
               />
             </div>
-            <div className="flex items-end">
-              <label className="inline-flex items-center gap-2">
+            <div className="flex items-center h-[42px]">
+              <label className="inline-flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={isBase}
                   onChange={(e) => setIsBase(e.target.checked)}
                 />
-                Set as Base
+                <span className="whitespace-nowrap">Set as Base</span>
               </label>
             </div>
-            <div className="flex items-end">
-              <label className="inline-flex items-center gap-2">
+            <div className="flex items-center h-[42px]">
+              <label className="inline-flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={isActive}
                   onChange={(e) => setIsActive(e.target.checked)}
                 />
-                Active
+                <span className="whitespace-nowrap">Active</span>
               </label>
             </div>
-            <div className="flex items-end">
-              <button className="btn-success">Create</button>
+            <div className="w-full md:w-auto flex items-center h-[42px]">
+              <button className="btn-success w-full">Create</button>
             </div>
           </form>
         </div>
@@ -378,11 +378,11 @@ function RatesSection({ items }) {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
-        <div>
+      <div className="flex flex-col md:flex-row flex-wrap items-end gap-3">
+        <div className="w-full md:w-auto flex-[1.5]">
           <label className="label">From Currency</label>
           <select
-            className="input"
+            className="input w-full"
             value={fltFromId}
             onChange={(e) => setFltFromId(e.target.value)}
           >
@@ -394,10 +394,10 @@ function RatesSection({ items }) {
             ))}
           </select>
         </div>
-        <div>
+        <div className="w-full md:w-auto flex-[1.5]">
           <label className="label">To Currency</label>
           <select
-            className="input"
+            className="input w-full"
             value={fltToId}
             onChange={(e) => setFltToId(e.target.value)}
           >
@@ -409,27 +409,27 @@ function RatesSection({ items }) {
             ))}
           </select>
         </div>
-        <div>
+        <div className="w-full md:w-auto flex-1">
           <label className="label">From Date</label>
           <input
-            className="input"
+            className="input w-full"
             type="date"
             value={fltFromDate}
             onChange={(e) => setFltFromDate(e.target.value)}
           />
         </div>
-        <div>
+        <div className="w-full md:w-auto flex-1">
           <label className="label">To Date</label>
           <input
-            className="input"
+            className="input w-full"
             type="date"
             value={fltToDate}
             onChange={(e) => setFltToDate(e.target.value)}
           />
         </div>
-        <div className="flex items-end">
+        <div className="w-full md:w-auto flex items-center h-[42px]">
           <button
-            className="btn btn-secondary"
+            className="btn btn-secondary w-full"
             onClick={loadRates}
             disabled={loading}
           >
@@ -460,12 +460,12 @@ function RatesSection({ items }) {
             );
           }
         }}
-        className="grid grid-cols-1 md:grid-cols-6 gap-3 mt-2"
+        className="flex flex-col md:flex-row flex-wrap items-end gap-3 mt-2"
       >
-        <div>
+        <div className="w-full md:w-auto flex-[1.5]">
           <label className="label">From *</label>
           <select
-            className="input"
+            className="input w-full"
             value={newFromId}
             onChange={(e) => setNewFromId(e.target.value)}
             required
@@ -478,10 +478,10 @@ function RatesSection({ items }) {
             ))}
           </select>
         </div>
-        <div>
+        <div className="w-full md:w-auto flex-[1.5]">
           <label className="label">To *</label>
           <select
-            className="input"
+            className="input w-full"
             value={newToId}
             onChange={(e) => setNewToId(e.target.value)}
             required
@@ -494,10 +494,10 @@ function RatesSection({ items }) {
             ))}
           </select>
         </div>
-        <div>
+        <div className="w-full md:w-auto flex-[1.5]">
           <label className="label">Rate *</label>
           <input
-            className="input"
+            className="input w-full"
             type="number"
             step="0.000001"
             min="0"
@@ -506,17 +506,17 @@ function RatesSection({ items }) {
             required
           />
         </div>
-        <div>
+        <div className="w-full md:w-auto flex-1">
           <label className="label">Effective Date</label>
           <input
-            className="input"
+            className="input w-full"
             type="date"
             value={newDate}
             onChange={(e) => setNewDate(e.target.value)}
           />
         </div>
-        <div className="flex items-end">
-          <button className="btn-success">Add Rate</button>
+        <div className="w-full md:w-auto flex items-center h-[42px]">
+          <button className="btn-success w-full">Add Rate</button>
         </div>
       </form>
 

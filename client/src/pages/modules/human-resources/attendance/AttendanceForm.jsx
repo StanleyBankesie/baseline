@@ -8,6 +8,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import { filterAndSort } from "../../../../utils/searchUtils.js";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
@@ -15,6 +16,7 @@ import { filterAndSort } from "../../../../utils/searchUtils.js";
  * @returns {JSX.Element} The rendered component
  */
 export default function AttendanceForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
@@ -105,7 +107,9 @@ export default function AttendanceForm() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="label font-semibold">Date *</label>
-              <input className="input" type="date" value={form.attendance_date} onChange={(e) => update('attendance_date', e.target.value)} required />
+              <input className="input" type="date" value={form.attendance_date} onChange={(e) => update('attendance_date', e.target.value)} required 
+                disabled={isEdit && !hasExceptional("DOCUMENT.EDIT_DATE")}
+              />
             </div>
             <div>
               <label className="label font-semibold">Status</label>

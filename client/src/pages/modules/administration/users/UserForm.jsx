@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "api/client";
 import { Eye, EyeOff, Building2, X } from "lucide-react";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
@@ -14,6 +15,7 @@ import { Eye, EyeOff, Building2, X } from "lucide-react";
  * @returns {JSX.Element} The rendered component
  */
 export default function UserForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
@@ -424,6 +426,8 @@ export default function UserForm() {
                   className="input"
                   value={form.validFrom}
                   onChange={(e) => update("validFrom", e.target.value)}
+                
+                  disabled={isEdit && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
 
@@ -435,6 +439,8 @@ export default function UserForm() {
                   className="input"
                   value={form.validTo}
                   onChange={(e) => update("validTo", e.target.value)}
+                
+                  disabled={isEdit && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
 

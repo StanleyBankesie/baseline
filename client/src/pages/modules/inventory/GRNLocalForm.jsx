@@ -17,6 +17,7 @@ import { api } from "api/client";
 import { useUoms } from "@/hooks/useUoms";
 import UnitConversionModal from "@/components/UnitConversionModal";
 import { filterByPrefix } from "@/utils/searchUtils.js";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 function toISODate(v) {
   if (!v) return "";
@@ -37,6 +38,7 @@ export default function GRNLocalForm() {
   const navigate = useNavigate();
   const location = useLocation();
   const isNew = id === "new";
+  const { hasExceptional } = usePermission();
   const isEdit =
     Boolean(id) &&
     id !== "new" &&
@@ -914,6 +916,7 @@ export default function GRNLocalForm() {
                           setFormData({ ...formData, grn_date: e.target.value })
                         }
                         required
+                        disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                       />
                     </div>
                     <div>
@@ -1027,6 +1030,8 @@ export default function GRNLocalForm() {
                           })
                         }
                         required
+                      
+                        disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                       />
                     </div>
                     <div>
@@ -1041,6 +1046,8 @@ export default function GRNLocalForm() {
                             invoice_due_date: e.target.value,
                           })
                         }
+                      
+                        disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                       />
                     </div>
                     <div>
@@ -1069,6 +1076,8 @@ export default function GRNLocalForm() {
                             delivery_date: e.target.value,
                           })
                         }
+                      
+                        disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                       />
                     </div>
                   </div>
@@ -1432,6 +1441,8 @@ export default function GRNLocalForm() {
                                       mfg_date: e.target.value,
                                     })
                                   }
+                                
+                                  disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                                 />
                               </td>
                               <td>
@@ -1444,6 +1455,8 @@ export default function GRNLocalForm() {
                                       expiry_date: e.target.value,
                                     })
                                   }
+                                
+                                  disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                                 />
                               </td>
                               <td>

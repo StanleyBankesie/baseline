@@ -8,6 +8,7 @@ import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "../../../../api/client";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 
 /**
@@ -16,6 +17,7 @@ import { useExchangeRate } from "@/hooks/useExchangeRate";
  * @returns {JSX.Element} The rendered component
  */
 export default function MaintenanceBillForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
   const { getExchangeRate } = useExchangeRate();
@@ -269,8 +271,12 @@ export default function MaintenanceBillForm() {
         <div className="card">
           <div className="card-header bg-brand text-white rounded-t-lg font-semibold">Bill Details</div>
           <div className="card-body grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div><label className="label">Bill Date</label><input className="input w-56" type="date" value={form.bill_date} onChange={e => update("bill_date", e.target.value)} /></div>
-            <div><label className="label">Due Date</label><input className="input w-56" type="date" value={form.due_date} onChange={e => update("due_date", e.target.value)} /></div>
+            <div><label className="label">Bill Date</label><input className="input w-56" type="date" value={form.bill_date} onChange={e => update("bill_date", e.target.value)} 
+              disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+            /></div>
+            <div><label className="label">Due Date</label><input className="input w-56" type="date" value={form.due_date} onChange={e => update("due_date", e.target.value)} 
+              disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+            /></div>
             <div>
               <label className="label">Job Execution</label>
               <select className="input w-56" value={form.execution_id} onChange={e => update("execution_id", e.target.value)}>

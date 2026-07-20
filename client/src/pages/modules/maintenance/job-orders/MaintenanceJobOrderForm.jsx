@@ -8,6 +8,7 @@ import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "../../../../api/client";
 import { FileText, MapPin, Calendar, Users, ClipboardList, Save, X } from "lucide-react";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 const ORDER_TYPES = [
   "Corrective",
@@ -31,6 +32,7 @@ const STATUSES = [
  * @returns {JSX.Element} The rendered component
  */
 export default function MaintenanceJobOrderForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
@@ -203,6 +205,8 @@ export default function MaintenanceJobOrderForm() {
                 value={form.order_date}
                 onChange={(e) => update("order_date", e.target.value)}
                 required
+              
+                disabled={isEdit && !hasExceptional("DOCUMENT.EDIT_DATE")}
               />
             </div>
             <div>
@@ -265,6 +269,8 @@ export default function MaintenanceJobOrderForm() {
                 type="date"
                 value={form.scheduled_date}
                 onChange={(e) => update("scheduled_date", e.target.value)}
+              
+                disabled={isEdit && !hasExceptional("DOCUMENT.EDIT_DATE")}
               />
             </div>
             <div>

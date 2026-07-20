@@ -7,6 +7,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../../../../api/client.js";
 import { toast } from "react-toastify";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 function FilterableSelect({
   value,
@@ -42,6 +43,7 @@ function FilterableSelect({
  * @returns {JSX.Element} The rendered component
  */
 export default function PosReturnForm() {
+  const { hasExceptional } = usePermission();
   const [now, setNow] = useState(new Date());
   const [searchSaleId, setSearchSaleId] = useState("");
   const [searchDate, setSearchDate] = useState(

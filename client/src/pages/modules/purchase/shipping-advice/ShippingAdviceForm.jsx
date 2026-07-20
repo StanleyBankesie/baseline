@@ -8,6 +8,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "api/client";
 import { useAuth } from "../../../../auth/AuthContext.jsx";
 import defaultLogo from "../../../../assets/resources/OMNISUITE_LOGO_FILL.png";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
@@ -15,6 +16,7 @@ import defaultLogo from "../../../../assets/resources/OMNISUITE_LOGO_FILL.png";
  * @returns {JSX.Element} The rendered component
  */
 export default function ShippingAdviceForm() {
+  const { hasExceptional } = usePermission();
   const { id } = useParams();
   const navigate = useNavigate();
   const isNew = !id || id === "new";
@@ -446,6 +448,8 @@ export default function ShippingAdviceForm() {
                   value={formData.advice_date}
                   onChange={handleChange}
                   required
+                
+                  disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
               <div>
@@ -584,6 +588,8 @@ export default function ShippingAdviceForm() {
                   name="etd"
                   value={formData.etd}
                   onChange={handleChange}
+                
+                  disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
               <div>
@@ -594,6 +600,8 @@ export default function ShippingAdviceForm() {
                   name="eta"
                   value={formData.eta}
                   onChange={handleChange}
+                
+                  disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
               <div>

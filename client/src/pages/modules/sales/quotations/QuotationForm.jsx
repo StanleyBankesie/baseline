@@ -22,6 +22,7 @@ import html2canvas from "html2canvas";
 import defaultLogo from "../../../../assets/resources/OMNISUITE_LOGO_FILL.png";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
 import { filterByPrefix } from "@/utils/searchUtils.js";
+import { usePermission } from "../../../../auth/PermissionContext.jsx";
 
 // Ghana Regions and Countries data
 const GHANA_REGIONS = [
@@ -88,6 +89,7 @@ export default function QuotationForm() {
   const isEditMode = !!id;
   const { user } = useAuth();
   const { getExchangeRate } = useExchangeRate();
+  const { hasExceptional } = usePermission();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -1328,6 +1330,7 @@ export default function QuotationForm() {
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0E3646]"
                 required
+                disabled={isEditMode && !hasExceptional("DOCUMENT.EDIT_DATE")}
               />
             </div>
             <div>
@@ -1458,6 +1461,8 @@ export default function QuotationForm() {
                 value={formData.valid_until}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
                 readOnly
+              
+                disabled={readOnly || (isEditMode && !hasExceptional("DOCUMENT.EDIT_DATE"))}
               />
             </div>
             <div className="hidden">

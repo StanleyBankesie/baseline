@@ -111,49 +111,49 @@ export default function FiscalYearsPage() {
         <div className="card-body">
           <form
             onSubmit={create}
-            className="grid grid-cols-1 md:grid-cols-6 gap-3"
+            className="flex flex-col md:flex-row flex-wrap items-end gap-4"
           >
-            <div>
+            <div className="w-full md:w-auto flex-1">
               <label className="label">Code *</label>
               <input
-                className="input"
+                className="input w-full"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 required
               />
             </div>
-            <div>
+            <div className="w-full md:w-auto flex-[1.5]">
               <label className="label">Start Date *</label>
               <input
-                className="input"
+                className="input w-full"
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 required
               />
             </div>
-            <div>
+            <div className="w-full md:w-auto flex-[1.5]">
               <label className="label">End Date *</label>
               <input
-                className="input"
+                className="input w-full"
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 required
               />
             </div>
-            <div className="flex items-end">
-              <label className="inline-flex items-center gap-2">
+            <div className="flex items-center h-[42px]">
+              <label className="inline-flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={isOpen}
                   onChange={(e) => setIsOpen(e.target.checked)}
                 />
-                Set Open
+                <span className="whitespace-nowrap">Set Open</span>
               </label>
             </div>
-            <div className="flex items-end">
-              <button className="btn-success">Create</button>
+            <div className="w-full md:w-auto flex items-center h-[42px]">
+              <button className="btn-success w-full">Create</button>
             </div>
           </form>
         </div>

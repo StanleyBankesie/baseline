@@ -22,6 +22,7 @@ import { api } from "api/client";
 import { useUoms } from "@/hooks/useUoms";
 import UnitConversionModal from "@/components/UnitConversionModal";
 import { filterByPrefix } from "@/utils/searchUtils.js";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 function toISODate(v) {
   if (!v) return "";
@@ -41,6 +42,7 @@ export default function GRNImportForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isNew = id === "new";
+  const { hasExceptional } = usePermission();
   const [searchParams] = useSearchParams();
   const mode = (searchParams.get("mode") || "").toLowerCase();
   const isView = !isNew && mode === "view";
@@ -1051,6 +1053,7 @@ export default function GRNImportForm() {
                     onChange={(e) =>
                       setFormData({ ...formData, grn_date: e.target.value })
                     }
+                    disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                     required
                   />
                 </div>
@@ -1173,6 +1176,8 @@ export default function GRNImportForm() {
                           })
                         }
                         required
+                      
+                        disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                       />
                     </div>
                     <div>
@@ -1187,6 +1192,8 @@ export default function GRNImportForm() {
                             invoice_due_date: e.target.value,
                           })
                         }
+                      
+                        disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                       />
                     </div>
                     <div>
@@ -1215,6 +1222,8 @@ export default function GRNImportForm() {
                             delivery_date: e.target.value,
                           })
                         }
+                      
+                        disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                       />
                     </div>
                   </div>
@@ -1664,6 +1673,8 @@ export default function GRNImportForm() {
                                       mfg_date: e.target.value,
                                     })
                                   }
+                                
+                                  disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                                 />
                               </td>
                               <td>
@@ -1676,6 +1687,8 @@ export default function GRNImportForm() {
                                       expiry_date: e.target.value,
                                     })
                                   }
+                                
+                                  disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                                 />
                               </td>
                               <td>

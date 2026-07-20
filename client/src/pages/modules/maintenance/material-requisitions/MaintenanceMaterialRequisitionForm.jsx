@@ -9,6 +9,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../../../../api/client";
 import { toast } from "react-toastify";
 import { useAuth } from "../../../../auth/AuthContext.jsx";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
@@ -16,6 +17,7 @@ import { useAuth } from "../../../../auth/AuthContext.jsx";
  * @returns {JSX.Element} The rendered component
  */
 export default function MaintenanceMaterialRequisitionForm() {
+  const { hasExceptional } = usePermission();
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();

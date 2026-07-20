@@ -9,6 +9,7 @@ import { useAuth } from "../../../../auth/AuthContext.jsx";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Trash2 } from "lucide-react";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 function toYmd(date) {
   try {
@@ -28,6 +29,7 @@ function toYmd(date) {
  * @returns {JSX.Element} The rendered component
  */
 export default function ServiceOrderForm() {
+  const { hasExceptional } = usePermission();
 
   const navigate = useNavigate();
   const params = useParams();
@@ -1012,6 +1014,8 @@ export default function ServiceOrderForm() {
                         }
                         min={today}
                         required
+                      
+                        disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
                       />
                     </div>
                     <div className="group">
@@ -1538,6 +1542,8 @@ export default function ServiceOrderForm() {
                         }
                         min={today}
                         
+                      
+                        disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
                       />
                     </div>
                     <div className="group">
@@ -1553,6 +1559,8 @@ export default function ServiceOrderForm() {
                         }
                         min={today}
                         
+                      
+                        disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
                       />
                     </div>
                   </div>

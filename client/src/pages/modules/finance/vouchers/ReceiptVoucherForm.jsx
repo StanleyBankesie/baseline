@@ -11,6 +11,7 @@ import { api } from "api/client";
 import { renderHtmlToPdf } from "@/utils/pdfUtils.js";
 import { filterAndSort } from "@/utils/searchUtils.js";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 function emptyLine() {
   return {
@@ -41,6 +42,7 @@ export default function ReceiptVoucherForm() {
   const mode = new URLSearchParams(search).get("mode");
   const readOnly = mode === "view";
   const isEdit = Boolean(id);
+  const { hasExceptional } = usePermission();
   const voucherTypeCode = "RV";
   const title = "Receive Payment";
   const isJV = false;
@@ -1875,6 +1877,17 @@ export default function ReceiptVoucherForm() {
       if (isEdit) {
         const res = await api.put(`/finance/vouchers/${id}`, payload);
         toast.success(res.data?.message || "Updated voucher");
+        navigate("/finance/receipt-voucher", {
+          state: {
+            refresh: true,
+            highlightId: id ? Number(id) : undefined,
+            highlightRef:
+              voucherNoPreview && String(voucherNoPreview).trim()
+                ? String(voucherNoPreview)
+                : undefined,
+          },
+        });
+        return;
       } else {
         const res = await api.post("/finance/vouchers", payload);
         const newId = Number(res?.data?.id || 0) || null;
@@ -3144,7 +3157,7 @@ export default function ReceiptVoucherForm() {
                     value={voucherDate}
                     onChange={(e) => setVoucherDate(e.target.value)}
                     required
-                    disabled={readOnly}
+                    disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                   />
                 </div>
                 {isJV && (
@@ -3809,7 +3822,7 @@ export default function ReceiptVoucherForm() {
                     <input
                       className={`input w-64 ${disabledClass}`}
                       placeholder="Type to search accounts"
-                      value={receivedFromSearch || rvForm.receivedFrom || ""}
+                      value={receivedFromSearch || ""}
                       onChange={(e) => {
                         setReceivedFromSearch(e.target.value);
                         if (!e.target.value) {
@@ -4042,10 +4055,30 @@ export default function ReceiptVoucherForm() {
                     disabled
                   />
                 </div>
-                {paymentType === "AGAINST_BILL" ? (
-                  <div className="md:w-96">
-                    <label className="label">Outstanding Invoices</label>
-                    <div className={`border rounded p-2 md:w-96 min-h-[120px] max-h-[160px] overflow-y-auto bg-white dark:bg-slate-900 ${disabledClass}`}>
+                <div className="md:w-64">
+                  <label className="label">Currency</label>
+                  <input
+                    className="input md:w-64 bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-200 dark:border-blue-700 font-semibold"
+                    value={depositAccountCurrencyCode || ""}
+                    readOnly
+                  />
+                </div>
+                <div className="md:w-64">
+                  <label className="label">Exchange Rate</label>
+                  <input
+                    className="input md:w-64 bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-200 dark:border-blue-700 font-semibold"
+                    value={rvExchangeRate || ""}
+                    readOnly
+                  />
+                </div>
+              </div>
+
+              {paymentType === "AGAINST_BILL" ? (
+                <div className="space-y-3 mt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="md:w-96">
+                      <label className="label">Outstanding Invoices</label>
+                      <div className={`border rounded p-2 md:w-96 min-h-[120px] max-h-[160px] overflow-y-auto bg-white dark:bg-slate-900 ${disabledClass}`}>
                         {customerInvoices.length === 0 && (
                           <div className="text-slate-500 italic p-2 text-sm">
                             No outstanding invoices
@@ -4070,30 +4103,70 @@ export default function ReceiptVoucherForm() {
                                   setSelectedInvoiceRefs(keys);
                                   const selectedInvoices = customerInvoices.filter((i) => keys.includes(String(i.invoice_no)));
                                   
-                                  const items = selectedInvoices.length > 0
-                                    ? selectedInvoices.map((inv) => ({
-                                        description: "",
+                                  const firstTaxCodeId = selectedInvoices.length > 0 ? selectedInvoices[0].tax_code_id || null : null;
+                                  
+                                  if (selectedInvoices.length > 0) {
+                                    const totalAmount = selectedInvoices.reduce((sum, inv) => sum + Number(inv.balance_amount || 0), 0);
+                                    let found = false;
+                                    const updatedItems = rvForm.items.map((it) => {
+                                      if (String(it.accountId) === String(rvForm.payerAccountId)) {
+                                        found = true;
+                                        return {
+                                          ...it,
+                                          description: `Receipt for ${selectedInvoices.length} Invoice(s)`,
+                                          amount: totalAmount,
+                                          referenceNo: selectedInvoices.map(i => i.invoice_no).join(", "),
+                                          currencyCode: getAccountCurrencyCode(rvForm.payerAccountId),
+                                          exchangeRate: "1",
+                                        };
+                                      }
+                                      return it;
+                                    });
+                                    if (!found) {
+                                      updatedItems.push({
+                                        description: `Receipt for ${selectedInvoices.length} Invoice(s)`,
                                         accountId: rvForm.payerAccountId || "",
-                                        amount: Number(inv.balance_amount || 0),
-                                        referenceNo: String(inv.invoice_no),
+                                        amount: totalAmount,
+                                        referenceNo: selectedInvoices.map(i => i.invoice_no).join(", "),
                                         currencyCode: getAccountCurrencyCode(rvForm.payerAccountId),
                                         exchangeRate: "1",
-                                      }))
-                                    : [
-                                        {
+                                      });
+                                    }
+                                    updateRvForm({
+                                      items: updatedItems,
+                                      ...(firstTaxCodeId ? { taxCodeId: String(firstTaxCodeId) } : {}),
+                                    });
+                                  } else {
+                                    let found = false;
+                                    const updatedItems = rvForm.items.map((it) => {
+                                      if (String(it.accountId) === String(rvForm.payerAccountId)) {
+                                        found = true;
+                                        return {
+                                          ...it,
                                           description: "",
-                                          accountId: rvForm.payerAccountId || "",
                                           amount: 0,
                                           referenceNo: "",
                                           currencyCode: getAccountCurrencyCode(rvForm.payerAccountId),
                                           exchangeRate: "1",
-                                        },
-                                      ];
-                                  const firstTaxCodeId = selectedInvoices.length > 0 ? selectedInvoices[0].tax_code_id || null : null;
-                                  updateRvForm({
-                                    items,
-                                    ...(firstTaxCodeId ? { taxCodeId: String(firstTaxCodeId) } : {}),
-                                  });
+                                        };
+                                      }
+                                      return it;
+                                    });
+                                    if (!found) {
+                                      updatedItems.push({
+                                        description: "",
+                                        accountId: rvForm.payerAccountId || "",
+                                        amount: 0,
+                                        referenceNo: "",
+                                        currencyCode: getAccountCurrencyCode(rvForm.payerAccountId),
+                                        exchangeRate: "1",
+                                      });
+                                    }
+                                    updateRvForm({
+                                      items: updatedItems,
+                                      ...(firstTaxCodeId ? { taxCodeId: String(firstTaxCodeId) } : {}),
+                                    });
+                                  }
                                 }}
                               />
                               <span className="text-sm">
@@ -4104,25 +4177,34 @@ export default function ReceiptVoucherForm() {
                           );
                         })}
                       </div>
+                    </div>
+                    {selectedInvoiceRefs.length > 0 && (
+                      <div className="bg-slate-50 dark:bg-slate-800 rounded p-3 text-sm max-h-[160px] overflow-y-auto">
+                        <div className="font-medium mb-1">Selected Invoices Summary</div>
+                        {selectedInvoiceRefs.map(key => {
+                          const inv = customerInvoices.find(i => String(i.invoice_no) === key);
+                          if (!inv) return null;
+                          return (
+                            <div key={key} className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-700 last:border-0">
+                              <span>{inv.invoice_no}</span>
+                              <span className="font-medium">GH₵ {Number(inv.balance_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                            </div>
+                          );
+                        })}
+                        <div className="flex justify-between pt-2 mt-1 border-t border-slate-300 dark:border-slate-600 font-bold">
+                          <span>Total</span>
+                          <span>
+                            GH₵ {customerInvoices
+                              .filter(i => selectedInvoiceRefs.includes(String(i.invoice_no)))
+                              .reduce((sum, i) => sum + Number(i.balance_amount || 0), 0)
+                              .toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                ) : null}
-                <div className="md:w-64">
-                  <label className="label">Currency</label>
-                  <input
-                    className="input md:w-64 bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-200 dark:border-blue-700 font-semibold"
-                    value={depositAccountCurrencyCode || ""}
-                    readOnly
-                  />
                 </div>
-                <div className="md:w-64">
-                  <label className="label">Exchange Rate</label>
-                  <input
-                    className="input md:w-64 bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-200 dark:border-blue-700 font-semibold"
-                    value={rvExchangeRate || ""}
-                    readOnly
-                  />
-                </div>
-              </div>
+              ) : null}
 
               <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
                 {isCN || isDN ? (

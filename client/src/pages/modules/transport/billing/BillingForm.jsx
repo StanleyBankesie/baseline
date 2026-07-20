@@ -24,7 +24,7 @@ import { usePermission } from "../../../../auth/PermissionContext.jsx";
  * @returns {JSX.Element} The rendered component
  */
 export default function BillingForm() {
-  const { canEditDiscount, canAccessPath } = usePermission();
+  const { canEditDiscount, canAccessPath, hasExceptional } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
   const { getExchangeRate } = useExchangeRate();

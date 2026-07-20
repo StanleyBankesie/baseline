@@ -8,6 +8,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "api/client";
 import { useUoms } from "@/hooks/useUoms";
 import { filterByPrefix } from "@/utils/searchUtils.js";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
@@ -15,6 +16,7 @@ import { filterByPrefix } from "@/utils/searchUtils.js";
  * @returns {JSX.Element} The rendered component
  */
 export default function StockTransferForm() {
+  const { hasExceptional } = usePermission();
   const { uoms, loading: uomsLoading } = useUoms();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -500,6 +502,8 @@ export default function StockTransferForm() {
                     setFormData({ ...formData, transferDate: e.target.value })
                   }
                   required
+                
+                  disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
               <div>
@@ -603,6 +607,8 @@ export default function StockTransferForm() {
                   onChange={(e) =>
                     setFormData({ ...formData, deliveryDate: e.target.value })
                   }
+                
+                  disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
             </div>

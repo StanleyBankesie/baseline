@@ -161,7 +161,7 @@ export default function GeneralLedgerReportPage() {
     sortKey,
     sortDir,
     toggle,
-  } = useSort(items, "voucher_date", "desc");
+  } = useSort(items, "voucher_date", "asc");
 
   const groupFilteredAccounts = useMemo(() => {
     if (!groupId) return accounts || [];

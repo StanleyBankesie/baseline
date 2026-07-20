@@ -188,7 +188,7 @@ export default function JournalReportPage() {
                   <SortableHeader label="Voucher No" sortKey="voucher_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <SortableHeader label="Line" sortKey="line_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <SortableHeader label="Account" sortKey="account_code" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                  <SortableHeader label="Description" sortKey="description" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                  <SortableHeader label="Description" sortKey="description" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="w-full" />
                   <SortableHeader label="Debit" sortKey="debit" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-right" />
                   <SortableHeader label="Credit" sortKey="credit" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-right" />
                 </tr>

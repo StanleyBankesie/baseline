@@ -7,6 +7,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../../../../api/client";
 import { useAuth } from "../../../../auth/AuthContext.jsx";
+import { usePermission } from "../../../../auth/PermissionContext.jsx";
 import { ArrowLeft, Save, Search, Truck, CheckCircle } from "lucide-react";
 
 /**
@@ -18,6 +19,7 @@ export default function DeliveryForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
+  const { hasExceptional } = usePermission();
   const { scope } = useAuth();
 
   const [loading, setLoading] = useState(false);
@@ -424,6 +426,7 @@ export default function DeliveryForm() {
                     setFormData({ ...formData, delivery_date: e.target.value })
                   }
                   className="w-full border rounded p-2"
+                  disabled={isEdit && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
               <div className="col-span-2 relative">

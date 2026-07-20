@@ -7,6 +7,7 @@ import React from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
@@ -14,6 +15,7 @@ import { toast } from "react-toastify";
  * @returns {JSX.Element} The rendered component
  */
 export default function RequisitionForm() {
+  const { hasExceptional } = usePermission();
   const { id } = useParams();
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
@@ -239,6 +241,8 @@ export default function RequisitionForm() {
                     setForm((s) => ({ ...s, from_date: e.target.value }))
                   }
                   required
+                
+                  disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
               <div>
@@ -251,6 +255,8 @@ export default function RequisitionForm() {
                     setForm((s) => ({ ...s, to_date: e.target.value }))
                   }
                   required
+                
+                  disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
             </>

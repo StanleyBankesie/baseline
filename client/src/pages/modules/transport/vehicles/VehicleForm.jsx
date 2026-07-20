@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../../../api/client.js";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 export default function VehicleForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const storedTypes = localStorage.getItem("transport_vehicle_types");
   const vehicleTypesList = storedTypes ? storedTypes.split(",").map(s => s.trim()).filter(Boolean) : ["TRUCK", "VAN", "CAR", "MOTORCYCLE"];
@@ -169,6 +171,8 @@ export default function VehicleForm() {
                 className="input input-bordered w-full"
                 value={formData.insurance_expiry}
                 onChange={handleChange}
+              
+                disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
               />
             </div>
           </div>

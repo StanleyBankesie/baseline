@@ -3,7 +3,7 @@
  * Provides functionality for CreditorsLedgerReportPage.
  */
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { api } from "api/client";
@@ -26,6 +26,67 @@ export default function CreditorsLedgerReportPage() {
   const [accounts, setAccounts] = useState([]);
   const [accountId, setAccountId] = useState("");
   const [accountQuery, setAccountQuery] = useState("");
+  const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
+  const accountInputRef = useRef(null);
+  const accountDropdownRef = useRef(null);
+
+  const filteredAccounts = useMemo(() => {
+    // Filter for liability nature accounts (creditors)
+    const creditorsAccounts = accounts.filter(
+      (a) => String(a.group_code || "").toUpperCase() === "CREDITORS"
+    );
+    return filterAndSort(creditorsAccounts, {
+      query: accountQuery,
+      getKeys: (a) => [a.code, a.name],
+    });
+  }, [accounts, accountQuery]);
+
+  const selectedAccountLabel = useMemo(() => {
+    const hit = (accounts || []).find((a) => String(a.id) === String(accountId || ""));
+    return hit ? String(hit.name || "") : "";
+  }, [accounts, accountId]);
+
+  const handleSelectAccount = useCallback((id, name) => {
+    setAccountId(String(id));
+    setAccountQuery(String(name || ""));
+    setAccountDropdownOpen(false);
+  }, []);
+
+  const handleAccountInputChange = useCallback((value) => {
+    setAccountQuery(value);
+    setAccountDropdownOpen(true);
+    if (!String(value || "").trim()) {
+      setAccountId("");
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        accountDropdownRef.current &&
+        !accountDropdownRef.current.contains(e.target) &&
+        accountInputRef.current &&
+        !accountInputRef.current.contains(e.target)
+      ) {
+        setAccountDropdownOpen(false);
+        const v = String(accountQuery || "").trim().toLowerCase();
+        if (!v) {
+          setAccountId("");
+          return;
+        }
+        const hit = (filteredAccounts || []).find((a) => {
+          const label = `${a.name}`.toLowerCase();
+          const code = String(a.code || "").toLowerCase();
+          return label === v || code === v;
+        });
+        if (!hit && selectedAccountLabel) {
+          setAccountQuery(selectedAccountLabel);
+        }
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [accountQuery, filteredAccounts, selectedAccountLabel]);
 
   // Load creditors accounts (LIABILITY group nature = accounts payable/creditors)
   async function loadAccounts() {
@@ -44,16 +105,7 @@ export default function CreditorsLedgerReportPage() {
     loadAccounts();
   }, []);
 
-  const filteredAccounts = useMemo(() => {
-    // Filter for liability nature accounts (creditors)
-    const creditorsAccounts = accounts.filter(
-      (a) => String(a.nature || a.group_nature || "").toUpperCase() === "LIABILITY"
-    );
-    return filterAndSort(creditorsAccounts, {
-      query: accountQuery,
-      getKeys: (a) => [a.code, a.name],
-    });
-  }, [accounts, accountQuery]);
+
 
   const totals = useMemo(() => {
     const debit = items.reduce((sum, r) => sum + Number(r.debit || 0), 0);
@@ -62,7 +114,7 @@ export default function CreditorsLedgerReportPage() {
     return { debit, credit, balance };
   }, [items]);
 
-  const { sorted: sortedItems, sortKey, sortDir, toggle } = useSort(items, "voucher_date", "desc");
+  const { sorted: sortedItems, sortKey, sortDir, toggle } = useSort(items, "voucher_date", "asc");
 
   async function run() {
     try {
@@ -119,24 +171,50 @@ export default function CreditorsLedgerReportPage() {
           <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
             <div className="md:col-span-2">
               <label className="label">Account (Creditors)</label>
-              <input
-                className="input mb-2"
-                placeholder="Search account code/name..."
-                value={accountQuery}
-                onChange={(e) => setAccountQuery(e.target.value)}
-              />
-              <select
-                className="input"
-                value={accountId}
-                onChange={(e) => setAccountId(e.target.value)}
-              >
-                <option value="">All Creditors</option>
-                {filteredAccounts.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.code} — {a.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <input
+                  ref={accountInputRef}
+                  className="input w-full mb-2"
+                  placeholder={accountId ? selectedAccountLabel || "Search account..." : "Search account..."}
+                  value={accountQuery}
+                  onChange={(e) => handleAccountInputChange(e.target.value)}
+                  onFocus={() => { setAccountDropdownOpen(true); }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && filteredAccounts.length > 0) {
+                      const first = filteredAccounts[0];
+                      handleSelectAccount(first.id, first.name);
+                    }
+                    if (e.key === "Escape") setAccountDropdownOpen(false);
+                  }}
+                  autoComplete="off"
+                />
+                {accountDropdownOpen && filteredAccounts.length > 0 ? (
+                  <div ref={accountDropdownRef} className="absolute z-50 mt-1 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg max-h-48 overflow-auto">
+                    {filteredAccounts.slice(0, 20).map((a) => {
+                      const q = String(accountQuery || "").trim().toLowerCase();
+                      const name = String(a.name || "");
+                      const idx = q ? name.toLowerCase().indexOf(q) : -1;
+                      return (
+                        <button
+                          type="button"
+                          key={a.id}
+                          className="block w-full text-left px-3 py-2 hover:bg-brand-50 dark:hover:bg-brand-900/20 text-sm border-b border-slate-50 dark:border-slate-700/50 last:border-0"
+                          onMouseDown={(e) => { e.preventDefault(); handleSelectAccount(a.id, a.name); }}
+                        >
+                          <div className="flex justify-between items-center">
+                            <span>
+                              {idx >= 0 ? (
+                                <>{name.slice(0, idx)}<strong className="text-brand-600 dark:text-brand-400">{name.slice(idx, idx + q.length)}</strong>{name.slice(idx + q.length)}</>
+                              ) : name}
+                            </span>
+                            <span className="font-semibold text-brand-700 dark:text-brand-300 whitespace-nowrap ml-2 text-xs bg-brand-50 dark:bg-brand-900/30 px-1.5 py-0.5 rounded">{a.code}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </div>
             </div>
             <div>
               <label className="label">From</label>
@@ -157,17 +235,7 @@ export default function CreditorsLedgerReportPage() {
               />
             </div>
             <div className="md:col-span-2 flex items-end gap-2">
-              <button
-                type="button"
-                className="btn-success"
-                onClick={() => {
-                  setFrom("");
-                  setTo("");
-                }}
-                disabled={loading}
-              >
-                Clear
-              </button>
+
               <button
                 type="button"
                 className="btn-secondary"
@@ -287,7 +355,7 @@ export default function CreditorsLedgerReportPage() {
               <tbody>
                 {sortedItems.map((r, idx) => {
                   const running = items
-                    .slice(0, idx + 1)
+                    .slice(0, items.indexOf(r) + 1)
                     .reduce(
                       (sum, x) =>
                         sum + Number(x.debit || 0) - Number(x.credit || 0),

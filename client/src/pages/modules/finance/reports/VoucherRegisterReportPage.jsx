@@ -21,6 +21,7 @@ import SortableHeader from "@/components/SortableHeader.jsx";
 export default function VoucherRegisterReportPage() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [type, setType] = useState("");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -28,7 +29,7 @@ export default function VoucherRegisterReportPage() {
     try {
       setLoading(true);
       const res = await api.get("/finance/reports/voucher-register", {
-        params: { from: from || null, to: to || null },
+        params: { from: from || null, to: to || null, type: type || null },
       });
       setItems(res.data?.items || []);
     } catch (e) {
@@ -50,7 +51,7 @@ export default function VoucherRegisterReportPage() {
   useEffect(() => {
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, to]);
+  }, [from, to, type]);
 
   const { sorted: sortedItems, sortKey, sortDir, toggle } = useSort(items, "voucher_date", "desc");
 
@@ -75,7 +76,7 @@ export default function VoucherRegisterReportPage() {
 
       <div className="card">
         <div className="card-body">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
             <div>
               <label className="label">From</label>
               <input
@@ -94,13 +95,32 @@ export default function VoucherRegisterReportPage() {
                 onChange={(e) => setTo(e.target.value)}
               />
             </div>
-            <div className="md:col-span-2 flex items-end gap-2">
+            <div>
+              <label className="label">Type</label>
+              <select
+                className="input"
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+              >
+                <option value="">All Types</option>
+                <option value="JV">JV</option>
+                <option value="PV">PV</option>
+                <option value="SV">SV</option>
+                <option value="CV">CV</option>
+                <option value="RV">RV</option>
+                <option value="PAYV">PAYV</option>
+                <option value="CN">CN</option>
+                <option value="DN">DN</option>
+              </select>
+            </div>
+            <div className="md:col-span-3 flex items-end gap-2">
               <button
                 type="button"
                 className="btn-success"
                 onClick={() => {
                   setFrom("");
                   setTo("");
+                  setType("");
                 }}
                 disabled={loading}
               >
@@ -136,7 +156,7 @@ export default function VoucherRegisterReportPage() {
                   doc.text("Date", 10, y);
                   doc.text("Voucher No", 45, y);
                   doc.text("Type", 95, y);
-                  doc.text("Narration", 125, y);
+                  doc.text("Description", 125, y);
                   doc.text("Debit", 160, y);
                   doc.text("Credit", 180, y);
                   doc.text("Status", 200, y, { align: "right" });
@@ -153,7 +173,7 @@ export default function VoucherRegisterReportPage() {
                       : "-";
                     const no = String(r.voucher_no || "-");
                     const type = String(r.voucher_type_code || "-");
-                    const narr = String(r.narration || "-").slice(0, 35);
+                    const desc = String(r.description || "-").slice(0, 35);
                     const dr = String(
                       Number(r.total_debit || 0).toLocaleString(),
                     );
@@ -164,7 +184,7 @@ export default function VoucherRegisterReportPage() {
                     doc.text(dt, 10, y);
                     doc.text(no, 45, y);
                     doc.text(type, 95, y);
-                    doc.text(narr, 125, y);
+                    doc.text(desc, 125, y);
                     doc.text(dr, 160, y);
                     doc.text(cr, 180, y);
                     doc.text(st, 200, y, { align: "right" });
@@ -187,13 +207,13 @@ export default function VoucherRegisterReportPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table w-full">
               <thead className="sticky top-0 z-10">
                 <tr>
                   <SortableHeader label="Date" sortKey="voucher_date" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <SortableHeader label="Voucher No" sortKey="voucher_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <SortableHeader label="Type" sortKey="voucher_type_code" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                  <SortableHeader label="Narration" sortKey="narration" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                  <SortableHeader label="Description" sortKey="description" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <SortableHeader label="Debit" sortKey="total_debit" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-right" />
                   <SortableHeader label="Credit" sortKey="total_credit" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-right" />
                   <SortableHeader label="Status" sortKey="status" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
@@ -205,7 +225,7 @@ export default function VoucherRegisterReportPage() {
                     <td>{new Date(r.voucher_date).toLocaleDateString()}</td>
                     <td className="font-medium">{r.voucher_no}</td>
                     <td>{r.voucher_type_code}</td>
-                    <td>{r.narration || "-"}</td>
+                    <td>{r.description || "-"}</td>
                     <td className="text-right">
                       {Number(r.total_debit || 0).toLocaleString()}
                     </td>

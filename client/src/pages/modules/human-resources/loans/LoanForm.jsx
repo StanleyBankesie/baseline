@@ -15,6 +15,7 @@ import { Guard } from "../../../../hooks/usePermissions.jsx";
  * @returns {JSX.Element} The rendered component
  */
 export default function LoanForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
@@ -242,6 +243,8 @@ export default function LoanForm() {
                 type="date" 
                 value={form.end_date} 
                 readOnly 
+              
+                disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
               />
             </div>
             <div>
@@ -252,6 +255,8 @@ export default function LoanForm() {
                 value={form.start_date} 
                 onChange={(e) => update('start_date', e.target.value)} 
                 placeholder="loan takes effect when start date is set"
+              
+                disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
               />
               <p className="text-[10px] text-slate-400 mt-1">Loan takes effect when start date is set</p>
             </div>

@@ -7,6 +7,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "../../../../api/client";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 const STATUSES = ["ACTIVE", "INACTIVE", "UNDER_REPAIR", "DECOMMISSIONED"];
 
@@ -16,6 +17,7 @@ const STATUSES = ["ACTIVE", "INACTIVE", "UNDER_REPAIR", "DECOMMISSIONED"];
  * @returns {JSX.Element} The rendered component
  */
 export default function EquipmentForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = !!id;
@@ -306,6 +308,8 @@ export default function EquipmentForm() {
                 type="date"
                 value={form.purchase_date}
                 onChange={(e) => update("purchase_date", e.target.value)}
+              
+                disabled={isEdit && !hasExceptional("DOCUMENT.EDIT_DATE")}
               />
             </div>
             <div>
@@ -315,6 +319,8 @@ export default function EquipmentForm() {
                 type="date"
                 value={form.warranty_expiry}
                 onChange={(e) => update("warranty_expiry", e.target.value)}
+              
+                disabled={isEdit && !hasExceptional("DOCUMENT.EDIT_DATE")}
               />
             </div>
           </div>

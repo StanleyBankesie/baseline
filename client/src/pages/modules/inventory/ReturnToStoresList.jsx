@@ -417,7 +417,7 @@ export default function ReturnToStoresList() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="card p-4 flex items-center justify-between bg-white dark:bg-slate-800">
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+            <p className="text-sm text-brand-100 font-medium">
               Total Returns
             </p>
             <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
@@ -442,7 +442,7 @@ export default function ReturnToStoresList() {
         </div>
         <div className="card p-4 flex items-center justify-between bg-white dark:bg-slate-800">
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+            <p className="text-sm text-brand-100 font-medium">
               Pending Approval
             </p>
             <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">
@@ -467,7 +467,7 @@ export default function ReturnToStoresList() {
         </div>
         <div className="card p-4 flex items-center justify-between bg-white dark:bg-slate-800">
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+            <p className="text-sm text-brand-100 font-medium">
               Approved
             </p>
             <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">
@@ -492,7 +492,7 @@ export default function ReturnToStoresList() {
         </div>
         <div className="card p-4 flex items-center justify-between bg-white dark:bg-slate-800">
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+            <p className="text-sm text-brand-100 font-medium">
               Rejected
             </p>
             <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">
@@ -518,13 +518,13 @@ export default function ReturnToStoresList() {
       </div>
 
       <div className="card">
-        <div className="card-header bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4">
+        <div className="card-header bg-brand text-white rounded-t-lg p-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
               <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <span>↩️</span> Return to Stores
               </h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-sm text-brand-100 mt-1">
                 Manage material returns and approvals
               </p>
             </div>
@@ -927,3 +927,4 @@ export default function ReturnToStoresList() {
     </div>
   );
 }
+

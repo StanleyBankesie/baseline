@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../../../api/client.js";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 export default function TransportRequestForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [vehicles, setVehicles] = useState([]);
@@ -160,6 +162,8 @@ export default function TransportRequestForm() {
                 value={formData.request_date}
                 onChange={handleChange}
                 required
+              
+                disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
               />
             </div>
 
@@ -174,6 +178,8 @@ export default function TransportRequestForm() {
                   className="input input-bordered w-2/3"
                   value={formData.required_date}
                   onChange={handleChange}
+                
+                  disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
                 <input
                   type="time"
@@ -196,6 +202,8 @@ export default function TransportRequestForm() {
                   className="input input-bordered w-2/3"
                   value={formData.return_date}
                   onChange={handleChange}
+                
+                  disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
                 <input
                   type="time"

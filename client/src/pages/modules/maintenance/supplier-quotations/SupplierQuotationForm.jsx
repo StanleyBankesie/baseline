@@ -9,6 +9,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "api/client";
 import { useExchangeRate } from "../../../../hooks/useExchangeRate";
 import { filterByPrefix } from "@/utils/searchUtils.js";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
@@ -16,6 +17,7 @@ import { filterByPrefix } from "@/utils/searchUtils.js";
  * @returns {JSX.Element} The rendered component
  */
 export default function SupplierQuotationForm() {
+  const { hasExceptional } = usePermission();
   const { id } = useParams();
   const navigate = useNavigate();
   const { getExchangeRate } = useExchangeRate();
@@ -696,6 +698,8 @@ export default function SupplierQuotationForm() {
                   value={formData.quotation_date}
                   onChange={handleInputChange}
                   required
+                
+                  disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                 />
               </div>
               <div>
@@ -773,6 +777,8 @@ export default function SupplierQuotationForm() {
                   value={formData.valid_until}
                   onChange={handleInputChange}
                   required
+                
+                  disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                 />
               </div>
               <div className="hidden">
@@ -1051,6 +1057,8 @@ export default function SupplierQuotationForm() {
                             e.target.value,
                           )
                         }
+                      
+                        disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                       />
                     </td>
                     <td>

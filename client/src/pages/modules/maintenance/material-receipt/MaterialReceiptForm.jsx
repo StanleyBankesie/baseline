@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "api/client";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 function normalizeDate(v) {
   if (!v) return new Date().toISOString().split("T")[0];
@@ -20,6 +21,7 @@ function normalizeDate(v) {
  * @returns {JSX.Element} The rendered component
  */
 export default function MaterialReceiptForm() {
+  const { hasExceptional } = usePermission();
   const { id } = useParams();
   const navigate = useNavigate();
   const isNew = id === "new" || !id;
@@ -226,7 +228,9 @@ export default function MaterialReceiptForm() {
               <div>
                 <label className="label">Receipt Date *</label>
                 <input type="date" className="input" value={formData.receiptDate}
-                  onChange={e => setFormData({ ...formData, receiptDate: e.target.value })} required />
+                  onChange={e => setFormData({ ...formData, receiptDate: e.target.value })} required 
+                  disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
+                />
               </div>
               <div>
                 <label className="label">Department / Location</label>
@@ -316,11 +320,15 @@ export default function MaterialReceiptForm() {
                         </td>
                         <td>
                           <input type="date" className="input w-full" value={item.expiryDate}
-                            onChange={e => updateLine(idx, "expiryDate", e.target.value)} />
+                            onChange={e => updateLine(idx, "expiryDate", e.target.value)} 
+                            disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
+                          />
                         </td>
                         <td>
                           <input type="date" className="input w-full" value={item.mfgDate}
-                            onChange={e => updateLine(idx, "mfgDate", e.target.value)} />
+                            onChange={e => updateLine(idx, "mfgDate", e.target.value)} 
+                            disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
+                          />
                         </td>
                         <td>
                           <button type="button" onClick={() => removeLine(idx)}

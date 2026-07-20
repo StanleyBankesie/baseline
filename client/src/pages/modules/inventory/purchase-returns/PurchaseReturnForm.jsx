@@ -8,8 +8,10 @@ import {
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import { Plus, Trash2 } from "lucide-react";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 export default function PurchaseReturnForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();

@@ -24,7 +24,7 @@ import { usePermission } from "../../../../auth/PermissionContext.jsx";
  * @returns {JSX.Element} The rendered component
  */
 export default function InvoiceForm() {
-  const { canEditDiscount, canAccessPath } = usePermission();
+  const { canEditDiscount, canAccessPath, hasExceptional } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
   const { getExchangeRate } = useExchangeRate();
@@ -1523,7 +1523,7 @@ export default function InvoiceForm() {
                   value={form.invoice_date}
                   onChange={(e) => update("invoice_date", e.target.value)}
                   required
-                  disabled={readOnly}
+                  disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                 />
               </div>
               <div className="relative">
@@ -1757,7 +1757,7 @@ export default function InvoiceForm() {
                   readOnly
                 />
               </div>
-              <div>
+              <div className="hidden">
                 <label className="label">City</label>
                 <input
                   className="input bg-gray-50 w-56"
@@ -1767,7 +1767,7 @@ export default function InvoiceForm() {
                   readOnly
                 />
               </div>
-              <div>
+              <div className="hidden">
                 <label className="label">State</label>
                 <input
                   className="input bg-gray-50 w-56"
@@ -1777,7 +1777,7 @@ export default function InvoiceForm() {
                   readOnly
                 />
               </div>
-              <div>
+              <div className="hidden">
                 <label className="label">Country</label>
                 <input
                   className="input bg-gray-50 w-56"
@@ -1787,7 +1787,7 @@ export default function InvoiceForm() {
                   readOnly
                 />
               </div>
-              <div>
+              <div className="hidden">
                 <label className="label">Phone</label>
                 <input
                   className="input bg-gray-50 w-56"

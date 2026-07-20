@@ -58,7 +58,6 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
   const isCN = String(voucherTypeCode).toUpperCase() === "CN";
   const isJV = String(voucherTypeCode).toUpperCase() === "JV";
   const isSV = String(voucherTypeCode).toUpperCase() === "SV";
-  const isPAYV = String(voucherTypeCode).toUpperCase() === "PAYV";
   const [rvForm, setRvForm] = useState({
     receivedFrom: "",
     receivedFromCode: "",

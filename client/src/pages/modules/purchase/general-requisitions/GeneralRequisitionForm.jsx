@@ -8,6 +8,7 @@ import { api } from "../../../../api/client.js";
 import { useNavigate, useParams, useLocation, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { filterByPrefix } from "@/utils/searchUtils.js";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
@@ -15,6 +16,7 @@ import { filterByPrefix } from "@/utils/searchUtils.js";
  * @returns {JSX.Element} The rendered component
  */
 export default function GeneralRequisitionForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const params = useParams();
   const location = useLocation();

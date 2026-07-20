@@ -8,6 +8,7 @@ import { api } from "../../../../api/client";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { filterByPrefix } from "@/utils/searchUtils.js";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 function SectionHeader({ number, title }) {
   return (
@@ -28,6 +29,7 @@ function SectionHeader({ number, title }) {
  * @returns {JSX.Element} The rendered component
  */
 export default function CustomerServiceRequestForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const location = useLocation();
   function normalizeDateString(v) {
@@ -819,6 +821,8 @@ requisitionType: "ITEM",
                   type="date"
                   value={form.preferredDate}
                   onChange={(e) => update("preferredDate", e.target.value)}
+                
+                  disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
               <div>

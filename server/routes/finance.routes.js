@@ -732,6 +732,14 @@ router.delete(
   financeController.deleteBankReconciliationLine,
 );
 
+router.post(
+  "/bank-reconciliations/:id/confirm",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  financeController.confirmBankReconciliation,
+);
+
 router.get(
   "/dashboard/metrics",
   requireAuth,

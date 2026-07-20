@@ -4,9 +4,10 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "api/client";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
@@ -14,8 +15,11 @@ import { api } from "api/client";
  * @returns {JSX.Element} The rendered component
  */
 export default function BankReconciliationForm() {
+  const { hasExceptional } = usePermission();
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isViewMode = new URLSearchParams(location.search).get("mode") === "view";
   const [loading, setLoading] = useState(true);
   const [header, setHeader] = useState(null);
   const [hdrDraft, setHdrDraft] = useState({});
@@ -138,7 +142,7 @@ export default function BankReconciliationForm() {
     );
   }
 
-  const isComplete = header?.status === "COMPLETED";
+  const isComplete = header?.status === "COMPLETED" || isViewMode;
 
   return (
     <div className="space-y-4 p-4">
@@ -149,7 +153,10 @@ export default function BankReconciliationForm() {
             {header?.bank_account_name} ({header?.account_number})
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          {isViewMode && (
+            <span className="badge badge-warning badge-lg font-semibold">View Only</span>
+          )}
           <Link
             to="/finance/bank-reconciliation"
             className="btn btn-sm btn-outline text-white border-white hover:bg-white/20"
@@ -184,6 +191,8 @@ export default function BankReconciliationForm() {
                 onChange={(e) =>
                   setHdrDraft((p) => ({ ...p, statement_from: e.target.value }))
                 }
+              
+                disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
               />
             </div>
             <div className="form-control">
@@ -202,6 +211,8 @@ export default function BankReconciliationForm() {
                 onChange={(e) =>
                   setHdrDraft((p) => ({ ...p, statement_to: e.target.value }))
                 }
+              
+                disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
               />
             </div>
             <div className="form-control">
@@ -239,7 +250,11 @@ export default function BankReconciliationForm() {
                 <option value="COMPLETED">Completed</option>
               </select>
             </div>
-            <button className="btn btn-primary" onClick={saveHeader}>
+            <button
+              className="btn btn-primary"
+              onClick={saveHeader}
+              disabled={isViewMode}
+            >
               Save Header
             </button>
           </div>
@@ -351,8 +366,9 @@ export default function BankReconciliationForm() {
                         type="radio"
                         className="radio radio-success radio-sm"
                         checked={tx.cleared}
-                        onClick={() => toggleCleared(tx)}
-                        readOnly
+                        onClick={() => !isViewMode && toggleCleared(tx)}
+                        readOnly={isViewMode}
+                        style={isViewMode ? { cursor: "not-allowed", opacity: 0.6 } : {}}
                       />
                     </td>
                     <td className="font-medium text-sm">{tx.voucher_no}</td>

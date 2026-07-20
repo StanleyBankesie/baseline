@@ -27,7 +27,7 @@ export default function PMPurchaseRequisitionForm() {
   const [searchParams] = useSearchParams();
   const isNew = !id || id === "new";
   const isViewMode = !isNew && !searchParams.has("edit");
-  const { canEditDiscount } = usePermission();
+  const { canEditDiscount, hasExceptional } = usePermission();
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);

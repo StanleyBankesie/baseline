@@ -39,6 +39,7 @@ function PaymentBadge({ payment }) {
  * @returns {JSX.Element} The rendered component
  */
 export default function TransportationBillForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
@@ -576,7 +577,9 @@ export default function TransportationBillForm() {
         <div className="card-body grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           <div className="form-group">
             <label className="label required">Bill Date</label>
-            <input type="date" className={`input ${disabledClass}`} value={bill.bill_date} onChange={(e) => update("bill_date", e.target.value)} readOnly={readOnly} />
+            <input type="date" className={`input ${disabledClass}`} value={bill.bill_date} onChange={(e) => update("bill_date", e.target.value)} readOnly={readOnly} 
+              disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+            />
           </div>
           <div className="form-group">
             <label className="label required">Supplier</label>
@@ -670,11 +673,15 @@ export default function TransportationBillForm() {
           </div>
           <div className="form-group">
             <label className="label">Due Date</label>
-            <input type="date" className={`input ${disabledClass}`} value={bill.due_date} onChange={(e) => update("due_date", e.target.value)} readOnly={readOnly} />
+            <input type="date" className={`input ${disabledClass}`} value={bill.due_date} onChange={(e) => update("due_date", e.target.value)} readOnly={readOnly} 
+              disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+            />
           </div>
           <div className="form-group">
             <label className="label">Service Date</label>
-            <input type="date" className={`input ${disabledClass}`} value={bill.service_date} onChange={(e) => update("service_date", e.target.value)} readOnly={readOnly} />
+            <input type="date" className={`input ${disabledClass}`} value={bill.service_date} onChange={(e) => update("service_date", e.target.value)} readOnly={readOnly} 
+              disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+            />
           </div>
           <div className="form-group">
             <label className="label">Currency</label>

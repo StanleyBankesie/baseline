@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../../../api/client.js";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 export default function InspectionForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
@@ -102,6 +104,8 @@ export default function InspectionForm() {
                 onChange={handleChange}
                 className="input input-bordered w-full"
                 required
+              
+                disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
               />
             </div>
             

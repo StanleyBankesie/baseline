@@ -7,6 +7,7 @@ import React from "react";
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
@@ -14,6 +15,7 @@ import { useNavigate } from "react-router-dom";
  * @returns {JSX.Element} The rendered component
  */
 export default function LeaveRequestForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const [form, setForm] = React.useState({
     employee_id: "",
@@ -113,6 +115,8 @@ export default function LeaveRequestForm() {
               onChange={(e) =>
                 setForm((s) => ({ ...s, start_date: e.target.value }))
               }
+            
+              disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
             />
           </div>
           <div>
@@ -124,6 +128,8 @@ export default function LeaveRequestForm() {
               onChange={(e) =>
                 setForm((s) => ({ ...s, end_date: e.target.value }))
               }
+            
+              disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
             />
           </div>
           <div>

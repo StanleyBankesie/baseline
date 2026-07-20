@@ -48,7 +48,7 @@ export default function SalesOrderForm() {
   const { id } = useParams();
   const isEditMode = !!id;
   const { user } = useAuth();
-  const { canEditDiscount, canAccessPath } = usePermission();
+  const { canEditDiscount, canAccessPath, hasExceptional } = usePermission();
   const { getExchangeRate } = useExchangeRate();
   const [searchParams] = useSearchParams();
   const isViewMode =
@@ -1407,6 +1407,7 @@ export default function SalesOrderForm() {
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0E3646]"
                       required
+                      disabled={isViewMode || (isEditMode && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                     />
                   </div>
                   <div className="relative">
@@ -1627,6 +1628,8 @@ export default function SalesOrderForm() {
                         onChange={handleInputChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0E3646]"
                         required={formData.payment_type === "CREDIT"}
+                      
+                        disabled={readOnly || (isEditMode && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                       />
                     </div>
                   )}

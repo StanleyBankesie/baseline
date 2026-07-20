@@ -11,6 +11,7 @@ import { api } from "api/client";
 import { renderHtmlToPdf } from "@/utils/pdfUtils.js";
 import { filterAndSort } from "@/utils/searchUtils.js";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 function emptyLine() {
   return {
@@ -41,6 +42,7 @@ export default function PaymentVoucherForm() {
   const mode = new URLSearchParams(search).get("mode");
   const readOnly = mode === "view";
   const isEdit = Boolean(id);
+  const { hasExceptional } = usePermission();
   const voucherTypeCode = "PAYV";
   const title = "Make Payment";
   const isJV = false;
@@ -1870,6 +1872,17 @@ export default function PaymentVoucherForm() {
       if (isEdit) {
         const res = await api.put(`/finance/vouchers/${id}`, payload);
         toast.success(res.data?.message || "Updated voucher");
+        navigate("/finance/payment-voucher", {
+          state: {
+            refresh: true,
+            highlightId: id ? Number(id) : undefined,
+            highlightRef:
+              voucherNoPreview && String(voucherNoPreview).trim()
+                ? String(voucherNoPreview)
+                : undefined,
+          },
+        });
+        return;
       } else {
         const res = await api.post("/finance/vouchers", payload);
         const newId = Number(res?.data?.id || 0) || null;
@@ -2647,16 +2660,14 @@ export default function PaymentVoucherForm() {
       patch.description !== undefined ||
       patch.amount !== undefined
     ) {
-      setTimeout(async () => await autoPopulatePvPostingLines(idx, patch), 0);
+      setTimeout(async () => await autoPopulatePvPostingLines(nextItems), 0);
     }
   }
 
   // Auto-populate posting lines for Payment Voucher based on payment details
-  async function autoPopulatePvPostingLines(changedIdx, changedPatch) {
+  async function autoPopulatePvPostingLines(currentItems = pvForm.items) {
     console.log("DEBUG autoPopulatePvPostingLines called:", {
       isPAYV,
-      changedIdx,
-      changedPatch,
       paymentType,
     });
     if (!isPAYV) {
@@ -2664,59 +2675,22 @@ export default function PaymentVoucherForm() {
       return;
     }
 
-    // Get the changed item details
-    const currentItem = pvForm.items[changedIdx] || {};
-    const updatedItem = { ...currentItem, ...changedPatch };
-    const accountId = updatedItem.accountId || currentItem.accountId || "";
-    const description =
-      updatedItem.description || currentItem.description || "";
-    const amount = Number(updatedItem.amount || currentItem.amount || 0);
-    const itemCurrency =
-      updatedItem.currencyCode ||
-      currentItem.currencyCode ||
-      effectivePaymentCurrencyCode ||
-      "USD";
-
-    console.log("DEBUG: Item details:", {
-      accountId,
-      description,
-      amount,
-      itemCurrency,
-    });
-
     // Calculate total amount from all items
-    const totalAmount = pvForm.items.reduce(
+    const totalAmount = currentItems.reduce(
       (sum, it) => sum + Number(it.amount || 0),
       0,
     );
 
-    console.log("DEBUG: Total amount:", totalAmount, "Items:", pvForm.items);
+    console.log("DEBUG: Total amount:", totalAmount, "Items:", currentItems);
 
     // Get the first item's description for tax components
-    const firstDescription = pvForm.items[0]?.description || description || "";
+    const firstDescription = currentItems[0]?.description || "";
 
     // Build new posting lines array
     const newLines = [];
     console.log("DEBUG: Starting to build lines");
 
-    // 1. Add the selected account from Payment Details to Posting Lines (CREDIT side)
-    // Duplicate account data, description, and amount into credit field
-    console.log("DEBUG: Checking accountId:", accountId);
-    if (accountId) {
-      const acc = accounts.find((a) => String(a.id) === String(accountId));
-      console.log("DEBUG: Found account:", acc);
-      newLines.push({
-        accountId: String(accountId),
-        accountName: acc?.name || "",
-        description: firstDescription || "",
-        currencyCode: itemCurrency,
-        debit: 0,
-        credit: totalAmount,
-      });
-      console.log("DEBUG: Added credit line for account:", accountId);
-    }
-
-    // 2. Calculate and add tax component lines (DEBIT side)
+    // 1. Calculate and add tax component lines (DEBIT side)
     let totalTaxAmount = 0;
     console.log(
       "DEBUG: Checking tax code:",
@@ -2743,7 +2717,7 @@ export default function PaymentVoucherForm() {
             accountName: comp.account_name || "",
             description:
               firstDescription || `Tax - ${comp.component_name || ""}`,
-            currencyCode: itemCurrency,
+            currencyCode: effectivePaymentCurrencyCode || "USD",
             debit: compTaxAmount,
             credit: 0,
           });
@@ -2751,52 +2725,66 @@ export default function PaymentVoucherForm() {
       });
     }
 
-    // 3. Look up pur_suppliers table for purchase/expense account and add to posting lines (DEBIT side)
-    // Net amount = Total - Tax
-    const netAmount = totalAmount - totalTaxAmount;
-    if (accountId && netAmount > 0) {
-      try {
-        // Get account code from selected account
-        const selectedAcc = accounts.find(
-          (a) => String(a.id) === String(accountId),
-        );
-        const accountCode = selectedAcc?.code || "";
-        const accountName = selectedAcc?.name || "";
+    // 2. Add posting lines for each item
+    currentItems.forEach((it) => {
+      const accountId = it.accountId;
+      const description = it.description || "";
+      const amount = Number(it.amount || 0);
+      const itemCurrency =
+        it.currencyCode || effectivePaymentCurrencyCode || "USD";
 
-        // First try to find by exact name match (reliable if codes are duplicated)
-        let supplier = suppliers.find(
-          (s) => String(s.supplier_name || "").trim().toLowerCase() === String(accountName).trim().toLowerCase()
-        );
+      if (accountId) {
+        // CREDIT side
+        const acc = accounts.find((a) => String(a.id) === String(accountId));
+        newLines.push({
+          accountId: String(accountId),
+          accountName: acc?.name || "",
+          description: description || firstDescription || "",
+          currencyCode: itemCurrency,
+          debit: 0,
+          credit: amount,
+        });
 
-        // Fallback to code match if name match fails
-        if (!supplier && accountCode) {
-          supplier = suppliers.find(
-            (s) =>
-              String(s.account_code || s.code || s.supplier_code || "").trim() === String(accountCode).trim()
-          );
+        // DEBIT side (Supplier)
+        // Pro-rate tax or deduct proportionately
+        const itemRatio = totalAmount > 0 ? amount / totalAmount : 0;
+        const itemTax = totalTaxAmount * itemRatio;
+        const netAmount = amount - itemTax;
+
+        if (netAmount > 0) {
+          try {
+            const accountCode = acc?.code || "";
+            const accountName = acc?.name || "";
+
+            let supplier = suppliers.find(
+              (s) => String(s.supplier_name || "").trim().toLowerCase() === String(accountName).trim().toLowerCase()
+            );
+
+            if (!supplier && accountCode) {
+              supplier = suppliers.find(
+                (s) => String(s.account_code || s.code || s.supplier_code || "").trim() === String(accountCode).trim()
+              );
+            }
+
+            if (supplier?.purchase_account_id || supplier?.expense_account_id) {
+              const purchaseAccountId = supplier.purchase_account_id || supplier.expense_account_id;
+              const purchaseAcc = accounts.find((a) => String(a.id) === String(purchaseAccountId));
+              newLines.push({
+                accountId: String(purchaseAccountId),
+                accountName: purchaseAcc?.name || supplier.supplier_name || "",
+                description: description || firstDescription || "",
+                currencyCode: itemCurrency,
+                debit: netAmount,
+                credit: 0,
+              });
+            }
+          } catch {
+            // Silent fail
+          }
         }
-
-        if (supplier?.purchase_account_id || supplier?.expense_account_id) {
-          const purchaseAccountId =
-            supplier.purchase_account_id || supplier.expense_account_id;
-          const purchaseAcc = accounts.find(
-            (a) => String(a.id) === String(purchaseAccountId),
-          );
-          newLines.push({
-            accountId: String(purchaseAccountId),
-            accountName: purchaseAcc?.name || supplier.supplier_name || "",
-            description: firstDescription || "",
-            currencyCode: itemCurrency,
-            debit: netAmount,
-            credit: 0,
-          });
-        }
-      } catch {
-        // Silent fail - if no matching supplier found, skip this line
       }
-    }
+    });
 
-    // Set all posting lines
     console.log(
       "DEBUG: Final newLines count:",
       newLines.length,
@@ -2817,7 +2805,7 @@ export default function PaymentVoucherForm() {
 
     // Trigger full rebuild of posting lines with tax recalculation
     // Always trigger, even with 0 items - tax components will be calculated based on current total
-    await autoPopulatePvPostingLines(0, {});
+    await autoPopulatePvPostingLines(pvForm.items);
   }
 
   function addPvItem() {
@@ -3101,7 +3089,7 @@ export default function PaymentVoucherForm() {
                     value={voucherDate}
                     onChange={(e) => setVoucherDate(e.target.value)}
                     required
-                    disabled={readOnly}
+                    disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                   />
                 </div>
                 {isJV && (
@@ -3780,7 +3768,7 @@ export default function PaymentVoucherForm() {
                     <input
                       className={`input md:w-64 ${disabledClass}`}
                       placeholder="Type to search accounts"
-                      value={paidToSearch || pvForm.payTo || ""}
+                      value={paidToSearch || ""}
                       onChange={(e) => {
                         setPaidToSearch(e.target.value);
                         if (!e.target.value) {
@@ -4051,29 +4039,55 @@ export default function PaymentVoucherForm() {
                                   const selectedBills = outstandingBills.filter((b) => keys.includes(`${b.source}_${b.id}`));
                                   if (selectedBills.length > 0) {
                                     const totalAmount = selectedBills.reduce((sum, b) => sum + Number(b.balance_amount || b.net_amount || 0), 0);
-                                    updatePv({
-                                      items: [
-                                        {
+                                    let found = false;
+                                    const updatedItems = pvForm.items.map((it) => {
+                                      if (String(it.accountId) === String(pvForm.payToAccountId)) {
+                                        found = true;
+                                        return {
+                                          ...it,
                                           description: `Payment for ${selectedBills.length} Bill(s)`,
-                                          accountId: pvForm.payToAccountId || "",
                                           amount: totalAmount,
                                           exchangeRate: "1",
                                           currencyCode: effectivePaymentCurrencyCode,
-                                        },
-                                      ],
+                                        };
+                                      }
+                                      return it;
                                     });
+                                    if (!found) {
+                                      updatedItems.push({
+                                        description: `Payment for ${selectedBills.length} Bill(s)`,
+                                        accountId: pvForm.payToAccountId || "",
+                                        amount: totalAmount,
+                                        exchangeRate: "1",
+                                        currencyCode: effectivePaymentCurrencyCode,
+                                      });
+                                    }
+                                    updatePv({ items: updatedItems });
                                   } else {
-                                    updatePv({
-                                      items: [
-                                        {
+                                    let found = false;
+                                    const updatedItems = pvForm.items.map((it) => {
+                                      if (String(it.accountId) === String(pvForm.payToAccountId)) {
+                                        found = true;
+                                        return {
+                                          ...it,
                                           description: "",
-                                          accountId: pvForm.payToAccountId || "",
                                           amount: 0,
                                           exchangeRate: "1",
                                           currencyCode: effectivePaymentCurrencyCode,
-                                        },
-                                      ],
+                                        };
+                                      }
+                                      return it;
                                     });
+                                    if (!found) {
+                                      updatedItems.push({
+                                        description: "",
+                                        accountId: pvForm.payToAccountId || "",
+                                        amount: 0,
+                                        exchangeRate: "1",
+                                        currencyCode: effectivePaymentCurrencyCode,
+                                      });
+                                    }
+                                    updatePv({ items: updatedItems });
                                   }
                                 }}
                               />

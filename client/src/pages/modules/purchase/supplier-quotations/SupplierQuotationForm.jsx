@@ -9,6 +9,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "api/client";
 import { useExchangeRate } from "../../../../hooks/useExchangeRate";
 import { filterByPrefix } from "@/utils/searchUtils.js";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
@@ -16,6 +17,7 @@ import { filterByPrefix } from "@/utils/searchUtils.js";
  * @returns {JSX.Element} The rendered component
  */
 export default function SupplierQuotationForm() {
+  const { hasExceptional } = usePermission();
   const { id } = useParams();
   const navigate = useNavigate();
   const { getExchangeRate } = useExchangeRate();
@@ -686,6 +688,8 @@ export default function SupplierQuotationForm() {
                   value={formData.quotation_date}
                   onChange={handleInputChange}
                   required
+                
+                  disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                 />
               </div>
               <div>
@@ -763,6 +767,8 @@ export default function SupplierQuotationForm() {
                   value={formData.valid_until}
                   onChange={handleInputChange}
                   required
+                
+                  disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                 />
               </div>
               <div className="hidden">
@@ -780,7 +786,7 @@ export default function SupplierQuotationForm() {
             </div>
           </div>
         <div className="card">
-          <div className="card-header bg-slate-50 text-slate-800 rounded-t-lg border-b border-slate-200">
+          <div className="card-header bg-brand text-white text-slate-800 rounded-t-lg border-b border-slate-200">
             <h2 className="text-lg font-semibold text-slate-800">
               Terms
             </h2>
@@ -1054,6 +1060,8 @@ export default function SupplierQuotationForm() {
                             e.target.value,
                           )
                         }
+                      
+                        disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                       />
                     </td>
                     <td>
@@ -1085,7 +1093,7 @@ export default function SupplierQuotationForm() {
         </div>
 
         <div className="card">
-          <div className="card-header bg-slate-50 text-slate-800 rounded-t-lg border-b border-slate-200">
+          <div className="card-header bg-brand text-white text-slate-800 rounded-t-lg border-b border-slate-200">
             <h2 className="text-lg font-semibold text-slate-800">
               Summary
             </h2>
@@ -1169,7 +1177,7 @@ export default function SupplierQuotationForm() {
         </div>
 
         <div className="card">
-          <div className="card-header bg-slate-50 text-slate-800 rounded-t-lg border-b border-slate-200">
+          <div className="card-header bg-brand text-white text-slate-800 rounded-t-lg border-b border-slate-200">
             <h2 className="text-lg font-semibold text-slate-800">
               Supporting Documents
             </h2>
@@ -1271,3 +1279,4 @@ export default function SupplierQuotationForm() {
     </div>
   );
 }
+

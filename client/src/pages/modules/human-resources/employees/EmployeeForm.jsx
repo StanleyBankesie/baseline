@@ -8,6 +8,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "api/client";
 import { toast } from "react-toastify";
 import * as XLSX from "xlsx";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
@@ -15,6 +16,7 @@ import * as XLSX from "xlsx";
  * @returns {JSX.Element} The rendered component
  */
 export default function EmployeeForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
@@ -457,6 +459,8 @@ export default function EmployeeForm() {
                         type="date"
                         value={form.dob ? form.dob.slice(0, 10) : ""}
                         onChange={(e) => update("dob", e.target.value)}
+                      
+                        disabled={isEdit && !hasExceptional("DOCUMENT.EDIT_DATE")}
                       />
                     </div>
                     <div>
@@ -709,6 +713,8 @@ export default function EmployeeForm() {
                   }
                   onChange={(e) => update("joining_date", e.target.value)}
                   required
+                
+                  disabled={isEdit && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
               <div>

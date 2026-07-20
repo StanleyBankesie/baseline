@@ -5,6 +5,7 @@ import { api } from "api/client";
 import { useUoms } from "@/hooks/useUoms";
 import { filterByPrefix } from "@/utils/searchUtils.js";
 import "./MaterialRequisitionForm.css";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 function normalizeDate(v) {
   if (!v) return new Date().toISOString().split("T")[0];
@@ -13,6 +14,7 @@ function normalizeDate(v) {
 }
 
 export default function MaterialRequisitionForm() {
+  const { hasExceptional } = usePermission();
   const { uoms, loading: uomsLoading } = useUoms();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -419,6 +421,8 @@ export default function MaterialRequisitionForm() {
                     })
                   }
                   required
+                
+                  disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
               <div>

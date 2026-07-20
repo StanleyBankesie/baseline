@@ -10,6 +10,7 @@ import { filterByPrefix } from "@/utils/searchUtils.js";
 
 import { toast } from "react-toastify";
 import { api } from "api/client";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
@@ -17,6 +18,7 @@ import { api } from "api/client";
  * @returns {JSX.Element} The rendered component
  */
 export default function IssueToRequirementForm() {
+  const { hasExceptional } = usePermission();
   const { id } = useParams();
   const navigate = useNavigate();
   const isNew = !id || id === "new";
@@ -423,6 +425,8 @@ export default function IssueToRequirementForm() {
                     setFormData({ ...formData, issueDate: e.target.value })
                   }
                   required
+                
+                  disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
               <div>

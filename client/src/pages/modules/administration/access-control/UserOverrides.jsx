@@ -50,6 +50,10 @@ export default function UserOverrides() {
       code: "POS.CASH_VARIANCE.VIEW",
       label: "POS Day Management - View Cash Variance",
     },
+    {
+      code: "DOCUMENT.EDIT_DATE",
+      label: "Edit Document Date in Edit Mode (All Modules)",
+    },
   ];
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);

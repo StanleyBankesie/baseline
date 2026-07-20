@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../../../api/client.js";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 export default function DriverForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [employees, setEmployees] = useState([]);
@@ -130,6 +132,8 @@ export default function DriverForm() {
                 className="input input-bordered w-full"
                 value={formData.license_expiry}
                 onChange={handleChange}
+              
+                disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
               />
             </div>
           </div>

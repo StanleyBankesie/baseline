@@ -9,6 +9,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "api/client";
 import { useUoms } from "@/hooks/useUoms";
 import { filterByPrefix } from "@/utils/searchUtils.js";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 function normalizeDate(v) {
   if (!v) return new Date().toISOString().split("T")[0];
@@ -22,6 +23,7 @@ function normalizeDate(v) {
  * @returns {JSX.Element} The rendered component
  */
 export default function MaterialUtilizationForm() {
+  const { hasExceptional } = usePermission();
   const { uoms, loading: uomsLoading } = useUoms();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -372,6 +374,8 @@ export default function MaterialUtilizationForm() {
                     })
                   }
                   required
+                
+                  disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
               <div>

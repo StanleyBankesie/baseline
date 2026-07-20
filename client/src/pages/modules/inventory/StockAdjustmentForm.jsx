@@ -16,6 +16,7 @@ import { api } from "api/client";
 import { useUoms } from "@/hooks/useUoms";
 import UnitConversionModal from "@/components/UnitConversionModal";
 import { filterByPrefix } from "@/utils/searchUtils.js";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
@@ -23,6 +24,7 @@ import { filterByPrefix } from "@/utils/searchUtils.js";
  * @returns {JSX.Element} The rendered component
  */
 export default function StockAdjustmentForm() {
+  const { hasExceptional } = usePermission();
   const { uoms, loading: uomsLoading } = useUoms();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -509,6 +511,8 @@ export default function StockAdjustmentForm() {
                         })
                       }
                       required
+                    
+                      disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                     />
                   </div>
                   <div>

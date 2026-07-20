@@ -23,6 +23,7 @@ export default function AccountGroupsPage() {
   const [natureFilter, setNatureFilter] = useState("");
   const [activeFilter, setActiveFilter] = useState("");
   const [showTotals, setShowTotals] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
@@ -109,6 +110,7 @@ export default function AccountGroupsPage() {
       setName("");
       setNature("");
       setParentId("");
+      setShowCreateModal(false);
       load();
     } catch (e2) {
       toast.error(e2?.response?.data?.message || "Failed to create group");
@@ -187,6 +189,13 @@ export default function AccountGroupsPage() {
               <p className="text-sm mt-1">Maintain account group hierarchy</p>
             </div>
             <div className="flex gap-2 items-center">
+              <button
+                type="button"
+                className="btn-success"
+                onClick={() => setShowCreateModal(true)}
+              >
+                + Create New Group
+              </button>
               <Link to="/finance" className="font-sans btn btn-secondary">
                 Return to Menu
               </Link>
@@ -222,60 +231,72 @@ export default function AccountGroupsPage() {
         </div>
       </div>
 
-      <div className="card">
-        <div className="card-body">
-          <form
-            onSubmit={create}
-            className="grid grid-cols-1 md:grid-cols-5 gap-3"
-          >
-            <div className="md:col-span-2">
-              <label className="label">Name *</label>
-              <input
-                className="input"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label className="label">Nature *</label>
-              <select
-                className="input"
-                value={nature}
-                onChange={(e) => setNature(e.target.value)}
-                required
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded shadow-lg max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold dark:text-slate-100">Create New Group</h2>
+              <button
+                type="button"
+                className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-bold text-xl"
+                onClick={() => setShowCreateModal(false)}
               >
-                <option value="">Select nature</option>
-                <option value="ASSET">Asset</option>
-                <option value="LIABILITY">Liability</option>
-                <option value="EQUITY">Equity</option>
-                <option value="INCOME">Income</option>
-                <option value="EXPENSE">Expense</option>
-              </select>
-            </div>
-            <div>
-              <label className="label">Parent</label>
-              <select
-                className="input"
-                value={parentId}
-                onChange={(e) => setParentId(e.target.value)}
-              >
-                <option value="">None</option>
-                {rankedItems.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex items-end justify-end">
-              <button className="btn-success" type="submit">
-                Create Group
+                &times;
               </button>
             </div>
-          </form>
+            <form
+              onSubmit={create}
+              className="flex flex-col md:flex-row flex-wrap items-end gap-4"
+            >
+              <div className="w-full md:w-auto flex-1">
+                <label className="label">Name *</label>
+                <input
+                  className="input w-full"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="w-full md:w-auto flex-1">
+                <label className="label">Nature *</label>
+                <select
+                  className="input w-full"
+                  value={nature}
+                  onChange={(e) => setNature(e.target.value)}
+                  required
+                >
+                  <option value="">Select nature</option>
+                  <option value="ASSET">Asset</option>
+                  <option value="LIABILITY">Liability</option>
+                  <option value="EQUITY">Equity</option>
+                  <option value="INCOME">Income</option>
+                  <option value="EXPENSE">Expense</option>
+                </select>
+              </div>
+              <div className="w-full md:w-auto flex-1">
+                <label className="label">Parent</label>
+                <select
+                  className="input w-full"
+                  value={parentId}
+                  onChange={(e) => setParentId(e.target.value)}
+                >
+                  <option value="">None</option>
+                  {rankedItems.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="w-full md:w-auto flex items-center h-[42px]">
+                <button className="btn-success w-full" type="submit">
+                  Create Group
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="card">
         <div className="card-body">

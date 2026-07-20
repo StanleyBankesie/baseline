@@ -29,7 +29,7 @@ export default function PurchaseOrdersImportForm() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const socket = useSocket();
-  const { canEditDiscount } = usePermission();
+  const { canEditDiscount, hasExceptional } = usePermission();
   const { getExchangeRate } = useExchangeRate();
 
   const isNew = !id || id === "new";
@@ -471,14 +471,14 @@ export default function PurchaseOrdersImportForm() {
 
         setFormData({
           po_no: po.po_no || "",
-          po_date: po.po_date || new Date().toISOString().split("T")[0],
+          po_date: po.po_date ? String(po.po_date).split("T")[0] : new Date().toISOString().split("T")[0],
           supplier_id: po.supplier_id ? String(po.supplier_id) : "",
           po_type: po.po_type || "IMPORT",
           status: po.status || "DRAFT",
           warehouse_id: po.warehouse_id ? String(po.warehouse_id) : "",
           currency: po.currency || "GHS",
           exchange_rate: Number(po.exchange_rate) || 1,
-          delivery_date: po.delivery_date || "",
+          delivery_date: po.delivery_date ? String(po.delivery_date).split("T")[0] : "",
           payment_type: po.payment_type || "CASH",
           payment_terms: po.payment_terms || 30,
           delivery_terms: po.delivery_terms || "",
@@ -499,32 +499,34 @@ export default function PurchaseOrdersImportForm() {
         // Mark data as loaded so the exchange rate effect no longer skips
         dataLoadedRef.current = true;
 
-        setItems(
-          details.length
-            ? details
-                .filter((d) => d)
-                .map((d) => ({
-                  item_id: d.item_id ? String(d.item_id) : "",
-                  qty: Number(d.qty) || 0,
-                  uom: d.uom || "",
-                  unit_price: Number(d.unit_price) || 0,
-                  discount_percent: Number(d.discount_percent) || 0,
-                  tax_code_id: d.tax_code_id ? String(d.tax_code_id) : "",
-                  tax_percent: Number(d.tax_percent) || 0,
-                  line_total: Number(d.line_total) || 0,
-                }))
-            : [
-                {
-                  item_id: "",
-                  qty: 0,
-                  uom: "",
-                  unit_price: 0,
-                  discount_percent: 0,
-                  tax_percent: 0,
-                  line_total: 0,
-                },
-              ],
-        );
+        const newQueries = {};
+        const parsedDetails = details.length
+          ? details.filter((d) => d).map((d, i) => {
+              newQueries[i] = d.item_name || d.name || d.item_code || "";
+              return {
+                item_id: d.item_id ? String(d.item_id) : "",
+                qty: Number(d.qty) || 0,
+                uom: d.uom || "",
+                unit_price: Number(d.unit_price) || 0,
+                discount_percent: Number(d.discount_percent) || 0,
+                tax_code_id: d.tax_code_id ? String(d.tax_code_id) : "",
+                tax_percent: Number(d.tax_percent) || 0,
+                line_total: Number(d.line_total) || 0,
+              };
+            })
+          : [
+              {
+                item_id: "",
+                qty: 0,
+                uom: "",
+                unit_price: 0,
+                discount_percent: 0,
+                tax_percent: 0,
+                line_total: 0,
+              },
+            ];
+        setItemQueries(newQueries);
+        setItems(parsedDetails);
       })
       .catch((e) => {
         if (!mounted) return;
@@ -1373,7 +1375,7 @@ export default function PurchaseOrdersImportForm() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                 <div className="flex flex-col">
-                  <label className="text-[13px] font-bold text-[#0E3646] mb-1.5 required">
+                  <label className="label required">
                     PO Date
                   </label>
                   <input
@@ -1381,22 +1383,23 @@ export default function PurchaseOrdersImportForm() {
                     name="po_date"
                     value={formData.po_date}
                     onChange={handleInputChange}
-                    className="p-2.5 border border-[#dee2e6] rounded-md text-sm focus:outline-none focus:border-[#0E3646] focus:ring-2 focus:ring-[#0E3646]/10"
+                    className="input"
                     required
+                    disabled={isViewMode || (isEditMode && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                 <div className="flex flex-col">
-                  <label className="text-[13px] font-bold text-[#0E3646] mb-1.5 required">
+                  <label className="label required">
                     Supplier
                   </label>
                   <select
                     name="supplier_id"
                     value={formData.supplier_id}
                     onChange={handleInputChange}
-                    className="p-2.5 border border-[#dee2e6] rounded-md text-sm focus:outline-none focus:border-[#0E3646] focus:ring-2 focus:ring-[#0E3646]/10"
+                    className="input"
                     required
                   >
                     <option value="">Select Supplier</option>
@@ -1412,14 +1415,14 @@ export default function PurchaseOrdersImportForm() {
                   </select>
                 </div>
                 <div className="flex flex-col">
-                  <label className="text-[13px] font-bold text-[#0E3646] mb-1.5">
+                  <label className="label">
                     Reference Quotation
                   </label>
                   <select
                     name="quotation_id"
                     value={formData.quotation_id}
                     onChange={handleInputChange}
-                    className="p-2.5 border border-[#dee2e6] rounded-md text-sm focus:outline-none focus:border-[#0E3646] focus:ring-2 focus:ring-[#0E3646]/10"
+                    className="input"
                   >
                     <option value="">Select Quotation</option>
                     {Array.isArray(quotations) &&
@@ -1434,7 +1437,7 @@ export default function PurchaseOrdersImportForm() {
                   </select>
                 </div>
                 <div className="flex flex-col">
-                  <label className="text-[13px] font-bold text-[#0E3646] mb-1.5">
+                  <label className="label">
                     Requisition
                   </label>
                   <select
@@ -1473,7 +1476,7 @@ export default function PurchaseOrdersImportForm() {
                         } catch {}
                       }
                     }}
-                    className="p-2.5 border border-[#dee2e6] rounded-md text-sm focus:outline-none focus:border-[#0E3646] focus:ring-2 focus:ring-[#0E3646]/10"
+                    className="input"
                   >
                     <option value="">Select Approved Requisition</option>
                     {approvedItemRequisitions.map((r) => (
@@ -1485,14 +1488,14 @@ export default function PurchaseOrdersImportForm() {
                   </select>
                 </div>
                 <div className="flex flex-col">
-                  <label className="text-[13px] font-bold text-[#0E3646] mb-1.5 required">
+                  <label className="label required">
                     Warehouse
                   </label>
                   <select
                     name="warehouse_id"
                     value={formData.warehouse_id}
                     onChange={handleInputChange}
-                    className="p-2.5 border border-[#dee2e6] rounded-md text-sm focus:outline-none focus:border-[#0E3646] focus:ring-2 focus:ring-[#0E3646]/10"
+                    className="input"
                   >
                     <option value="">Select Warehouse</option>
                     {Array.isArray(warehouses) &&
@@ -1509,14 +1512,14 @@ export default function PurchaseOrdersImportForm() {
                   </select>
                 </div>
                 <div className="flex flex-col">
-                  <label className="text-[13px] font-bold text-[#0E3646] mb-1.5 required">
+                  <label className="label required">
                     Currency
                   </label>
                   <select
                     name="currency"
                     value={formData.currency}
                     onChange={handleInputChange}
-                    className="p-2.5 border border-[#dee2e6] rounded-md text-sm focus:outline-none focus:border-[#0E3646] focus:ring-2 focus:ring-[#0E3646]/10"
+                    className="input"
                   >
                     {currencies.map((c) => (
                       <option key={c.id} value={c.code || c.currency_code}>
@@ -1527,7 +1530,7 @@ export default function PurchaseOrdersImportForm() {
                   </select>
                 </div>
                 <div className="flex flex-col">
-                  <label className="text-[13px] font-bold text-[#0E3646] mb-1.5">
+                  <label className="label">
                     Exchange Rate
                   </label>
                   <input
@@ -1536,19 +1539,19 @@ export default function PurchaseOrdersImportForm() {
                     value={formData.exchange_rate}
                     onChange={handleInputChange}
                     step="0.01"
-                    className="p-2.5 border border-[#dee2e6] rounded-md text-sm focus:outline-none focus:border-[#0E3646] focus:ring-2 focus:ring-[#0E3646]/10"
+                    className="input"
                     readOnly
                   />
                 </div>
                 <div className="flex flex-col">
-                  <label className="text-[13px] font-bold text-[#0E3646] mb-1.5">
+                  <label className="label">
                     Project
                   </label>
                   <select
                     name="project_id"
                     value={formData.project_id}
                     onChange={handleInputChange}
-                    className="p-2.5 border border-[#dee2e6] rounded-md text-sm focus:outline-none focus:border-[#0E3646] focus:ring-2 focus:ring-[#0E3646]/10"
+                    className="input"
                   >
                     <option value="">-- Select Project --</option>
                     {projects.map((p) => (
@@ -1562,7 +1565,7 @@ export default function PurchaseOrdersImportForm() {
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="flex flex-col">
-                  <label className="text-[13px] font-bold text-[#0E3646] mb-1.5 required">
+                  <label className="label required">
                     Expected Delivery Date
                   </label>
                   <input
@@ -1570,11 +1573,13 @@ export default function PurchaseOrdersImportForm() {
                     name="delivery_date"
                     value={formData.delivery_date}
                     onChange={handleInputChange}
-                    className="p-2.5 border border-[#dee2e6] rounded-md text-sm focus:outline-none focus:border-[#0E3646] focus:ring-2 focus:ring-[#0E3646]/10"
+                    className="input"
+                  
+                    disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                   />
                 </div>
                 <div className="flex flex-col">
-                  <label className="text-[13px] font-bold text-[#0E3646] mb-1.5">
+                  <label className="label">
                     Payment Type
                   </label>
                   <div className="flex items-center gap-6">
@@ -1601,7 +1606,7 @@ export default function PurchaseOrdersImportForm() {
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <label className="text-[13px] font-bold text-[#0E3646] mb-1.5">
+                  <label className="label">
                     Payment Terms (Days)
                   </label>
                   <input
@@ -1612,18 +1617,18 @@ export default function PurchaseOrdersImportForm() {
                     disabled={
                       String(formData.payment_type || "CASH") === "CASH"
                     }
-                    className="p-2.5 border border-[#dee2e6] rounded-md text-sm focus:outline-none focus:border-[#0E3646] focus:ring-2 focus:ring-[#0E3646]/10"
+                    className="input"
                   />
                 </div>
                 <div className="flex flex-col">
-                  <label className="text-[13px] font-bold text-[#0E3646] mb-1.5">
+                  <label className="label">
                     Delivery Terms
                   </label>
                   <select
                     name="delivery_terms"
                     value={formData.delivery_terms}
                     onChange={handleInputChange}
-                    className="p-2.5 border border-[#dee2e6] rounded-md text-sm focus:outline-none focus:border-[#0E3646] focus:ring-2 focus:ring-[#0E3646]/10"
+                    className="input"
                   >
                     <option value="">Select Terms</option>
                     <option value="FOB">FOB - Free on Board</option>
@@ -1648,7 +1653,7 @@ export default function PurchaseOrdersImportForm() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                   <div className="flex flex-col">
-                    <label className="text-[13px] font-bold text-[#0E3646] mb-1.5">
+                    <label className="label">
                       Port of Loading
                     </label>
                     <input
@@ -1657,11 +1662,11 @@ export default function PurchaseOrdersImportForm() {
                       value={formData.port_loading}
                       onChange={handleInputChange}
                       placeholder="e.g., Shanghai, China"
-                      className="p-2.5 border border-[#dee2e6] rounded-md text-sm focus:outline-none focus:border-[#0E3646] focus:ring-2 focus:ring-[#0E3646]/10"
+                      className="input"
                     />
                   </div>
                   <div className="flex flex-col">
-                    <label className="text-[13px] font-bold text-[#0E3646] mb-1.5">
+                    <label className="label">
                       Port of Discharge
                     </label>
                     <input
@@ -1670,18 +1675,18 @@ export default function PurchaseOrdersImportForm() {
                       value={formData.port_discharge}
                       onChange={handleInputChange}
                       placeholder="e.g., Tema Port, Ghana"
-                      className="p-2.5 border border-[#dee2e6] rounded-md text-sm focus:outline-none focus:border-[#0E3646] focus:ring-2 focus:ring-[#0E3646]/10"
+                      className="input"
                     />
                   </div>
                   <div className="flex flex-col">
-                    <label className="text-[13px] font-bold text-[#0E3646] mb-1.5">
+                    <label className="label">
                       Incoterms
                     </label>
                     <select
                       name="incoterms"
                       value={formData.incoterms}
                       onChange={handleInputChange}
-                      className="p-2.5 border border-[#dee2e6] rounded-md text-sm focus:outline-none focus:border-[#0E3646] focus:ring-2 focus:ring-[#0E3646]/10"
+                      className="input"
                     >
                       <option value="">Select</option>
                       <option value="FOB">FOB</option>
@@ -1694,7 +1699,7 @@ export default function PurchaseOrdersImportForm() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="flex flex-col">
-                    <label className="text-[13px] font-bold text-[#0E3646] mb-1.5">
+                    <label className="label">
                       HS Code
                     </label>
                     <input
@@ -1703,11 +1708,11 @@ export default function PurchaseOrdersImportForm() {
                       value={formData.hs_code}
                       onChange={handleInputChange}
                       placeholder="Harmonized System Code"
-                      className="p-2.5 border border-[#dee2e6] rounded-md text-sm focus:outline-none focus:border-[#0E3646] focus:ring-2 focus:ring-[#0E3646]/10"
+                      className="input"
                     />
                   </div>
                   <div className="flex flex-col">
-                    <label className="text-[13px] font-bold text-[#0E3646] mb-1.5">
+                    <label className="label">
                       Expected Shipping Date
                     </label>
                     <input
@@ -1715,11 +1720,13 @@ export default function PurchaseOrdersImportForm() {
                       name="shipping_date"
                       value={formData.shipping_date}
                       onChange={handleInputChange}
-                      className="p-2.5 border border-[#dee2e6] rounded-md text-sm focus:outline-none focus:border-[#0E3646] focus:ring-2 focus:ring-[#0E3646]/10"
+                      className="input"
+                    
+                      disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                     />
                   </div>
                   <div className="flex flex-col">
-                    <label className="text-[13px] font-bold text-[#0E3646] mb-1.5">
+                    <label className="label">
                       Insurance Required
                     </label>
                     <select
@@ -1731,7 +1738,7 @@ export default function PurchaseOrdersImportForm() {
                           insurance_required: e.target.value === "YES",
                         })
                       }
-                      className="p-2.5 border border-[#dee2e6] rounded-md text-sm focus:outline-none focus:border-[#0E3646] focus:ring-2 focus:ring-[#0E3646]/10"
+                      className="input"
                     >
                       <option value="YES">Yes</option>
                       <option value="NO">No</option>
@@ -1848,7 +1855,7 @@ export default function PurchaseOrdersImportForm() {
                                               );
                                               setItemQueries((prev) => ({
                                                 ...prev,
-                                                [idx]: results[0].item_name,
+                                                [idx]: results[0].item_name || results[0].name || results[0].item_code || "",
                                               }));
                                             }
                                           }}
@@ -1899,7 +1906,7 @@ export default function PurchaseOrdersImportForm() {
                                                     );
                                                     setItemQueries((prev) => ({
                                                       ...prev,
-                                                      [idx]: o.item_name,
+                                                      [idx]: o.item_name || o.name || o.item_code || "",
                                                     }));
                                                   }}
                                                 >
@@ -2557,3 +2564,4 @@ export default function PurchaseOrdersImportForm() {
     </div>
   );
 }
+

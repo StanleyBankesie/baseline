@@ -4,12 +4,14 @@ import { toast } from "react-toastify";
 import { api } from "api/client";
 import { Save, Plus, Trash2, ArrowLeft, Check } from "lucide-react";
 import { filterByPrefix } from "@/utils/searchUtils.js";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 export default function StockVerificationForm({
   isModal = false,
   modalId = null,
   onClose = null,
 }) {
+  const { hasExceptional } = usePermission();
   const { id: routeId } = useParams();
   const id = isModal ? modalId : routeId;
   const navigate = useNavigate();
@@ -475,6 +477,8 @@ export default function StockVerificationForm({
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
+                
+                  disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
 

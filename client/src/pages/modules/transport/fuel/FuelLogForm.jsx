@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../../../api/client.js";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 export default function FuelLogForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [vehicles, setVehicles] = useState([]);
@@ -105,6 +107,8 @@ export default function FuelLogForm() {
                 value={formData.log_date}
                 onChange={handleChange}
                 required
+              
+                disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
               />
             </div>
 

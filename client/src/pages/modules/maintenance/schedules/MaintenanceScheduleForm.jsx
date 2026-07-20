@@ -7,6 +7,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "../../../../api/client";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 const FREQUENCIES = [
   "Daily",
@@ -34,6 +35,7 @@ const STATUSES = ["ACTIVE", "INACTIVE", "SUSPENDED"];
  * @returns {JSX.Element} The rendered component
  */
 export default function MaintenanceScheduleForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = !!id;
@@ -396,6 +398,8 @@ export default function MaintenanceScheduleForm() {
                 type="date"
                 value={form.start_date}
                 onChange={(e) => update("start_date", e.target.value)}
+              
+                disabled={isEdit && !hasExceptional("DOCUMENT.EDIT_DATE")}
               />
             </div>
             <div>
@@ -405,6 +409,8 @@ export default function MaintenanceScheduleForm() {
                 type="date"
                 value={form.end_date}
                 onChange={(e) => update("end_date", e.target.value)}
+              
+                disabled={isEdit && !hasExceptional("DOCUMENT.EDIT_DATE")}
               />
             </div>
             <div>

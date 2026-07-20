@@ -15,7 +15,7 @@ import SortableHeader from "@/components/SortableHeader.jsx";
 
 /**
  *  component
- * 
+ *
  * @returns {JSX.Element} The rendered component
  */
 export default function AccountsPage() {
@@ -30,6 +30,7 @@ export default function AccountsPage() {
   const [natureFilter, setNatureFilter] = useState("");
   const [activeFilter, setActiveFilter] = useState("");
   // removed posting filter per request
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const [groupId, setGroupId] = useState("");
   const [name, setName] = useState("");
@@ -102,13 +103,17 @@ export default function AccountsPage() {
       setExchangeRate("1");
       return;
     }
-    const selected = currencies.find(c => String(c.id) === String(currencyId));
-    const base = currencies.find(c => Number(c.is_base) === 1 || c.is_base === true);
+    const selected = currencies.find(
+      (c) => String(c.id) === String(currencyId),
+    );
+    const base = currencies.find(
+      (c) => Number(c.is_base) === 1 || c.is_base === true,
+    );
     if (!selected || !base || selected.code === base.code) {
       setExchangeRate("1");
       return;
     }
-    getExchangeRate(selected.code, base.code).then(rate => {
+    getExchangeRate(selected.code, base.code).then((rate) => {
       if (rate) setExchangeRate(String(rate));
     });
   }, [currencyId, currencies, getExchangeRate]);
@@ -116,13 +121,17 @@ export default function AccountsPage() {
   // Auto-fetch exchange rate for edit account
   useEffect(() => {
     if (!editCurrencyId || !currencies.length || !editId) return;
-    const selected = currencies.find(c => String(c.id) === String(editCurrencyId));
-    const base = currencies.find(c => Number(c.is_base) === 1 || c.is_base === true);
+    const selected = currencies.find(
+      (c) => String(c.id) === String(editCurrencyId),
+    );
+    const base = currencies.find(
+      (c) => Number(c.is_base) === 1 || c.is_base === true,
+    );
     if (!selected || !base || selected.code === base.code) {
       setEditExchangeRate("1");
       return;
     }
-    getExchangeRate(selected.code, base.code).then(rate => {
+    getExchangeRate(selected.code, base.code).then((rate) => {
       if (rate) setEditExchangeRate(String(rate));
     });
   }, [editCurrencyId, currencies, getExchangeRate, editId]);
@@ -167,6 +176,7 @@ export default function AccountsPage() {
       setGroupId("");
       setCurrencyId("");
       setIsPostable(true);
+      setShowCreateModal(false);
     } catch (e2) {
       toast.error(e2?.response?.data?.message || "Failed to create account");
     }
@@ -262,19 +272,32 @@ export default function AccountsPage() {
       getKeys: (a) => [a.code, a.name],
     });
   }, [items, searchTerm]);
-  
+
   const filteredItems = rankedItems;
-  const { sorted: sortedItems, sortKey, sortDir, toggle } = useSort(filteredItems, "code", "asc");
+  const {
+    sorted: sortedItems,
+    sortKey,
+    sortDir,
+    toggle,
+  } = useSort(filteredItems, "code", "asc");
   const baseCurrencyCode = useMemo(() => {
-    return currencies.find(c => Number(c.is_base) === 1 || c.is_base === true)?.code || "Base";
+    return (
+      currencies.find((c) => Number(c.is_base) === 1 || c.is_base === true)
+        ?.code || "Base"
+    );
   }, [currencies]);
 
   const selectedCurrencyCode = useMemo(() => {
-    return currencies.find(c => String(c.id) === String(currencyId))?.code || "";
+    return (
+      currencies.find((c) => String(c.id) === String(currencyId))?.code || ""
+    );
   }, [currencies, currencyId]);
 
   const editSelectedCurrencyCode = useMemo(() => {
-    return currencies.find(c => String(c.id) === String(editCurrencyId))?.code || "";
+    return (
+      currencies.find((c) => String(c.id) === String(editCurrencyId))?.code ||
+      ""
+    );
   }, [currencies, editCurrencyId]);
 
   return (
@@ -289,6 +312,13 @@ export default function AccountsPage() {
               <p className="text-sm mt-1">Create and manage ledger accounts</p>
             </div>
             <div className="flex gap-2 items-center">
+              <button
+                type="button"
+                className="btn-success"
+                onClick={() => setShowCreateModal(true)}
+              >
+                + Create Account
+              </button>
               <Link to="/finance" className="font-sans btn btn-secondary">
                 Return to Menu
               </Link>
@@ -337,73 +367,89 @@ export default function AccountsPage() {
         </div>
       </div>
 
-      <div className="card">
-        <div className="card-body">
-          <form
-            onSubmit={createAccount}
-            className="grid grid-cols-1 md:grid-cols-6 gap-3"
-          >
-            <div className="md:col-span-2">
-              <label className="label">Group *</label>
-              <select
-                className="input"
-                value={groupId}
-                onChange={(e) => setGroupId(e.target.value)}
-                required
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded shadow-lg max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold dark:text-slate-100">
+                Create New Account
+              </h2>
+              <button
+                type="button"
+                className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-bold text-xl"
+                onClick={() => setShowCreateModal(false)}
               >
-                <option value="">Select group</option>
-                {groups.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="md:col-span-2">
-              <label className="label">Name *</label>
-              <input
-                className="input"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label className="label">Currency</label>
-              <select
-                className="input"
-                value={currencyId}
-                onChange={(e) => setCurrencyId(e.target.value)}
-              >
-                <option value="">Default (Base)</option>
-                {currencies.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.code} - {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="hidden md:block"></div>
-            <div>
-              <label className="label">
-                Exchange Rate {selectedCurrencyCode ? `(${baseCurrencyCode} per ${selectedCurrencyCode})` : ""}
-              </label>
-              <input
-                type="number"
-                step="0.000001"
-                className="input"
-                value={exchangeRate}
-                onChange={(e) => setExchangeRate(e.target.value)}
-              />
-            </div>
-            <div className="flex items-end justify-end">
-              <button className="btn-success" type="submit">
-                Create Account
+                &times;
               </button>
             </div>
-          </form>
+            <form
+              onSubmit={createAccount}
+              className="flex flex-col md:flex-row flex-wrap items-end gap-4"
+            >
+              <div className="w-full md:w-auto flex-1">
+                <label className="label">Group *</label>
+                <select
+                  className="input w-full"
+                  value={groupId}
+                  onChange={(e) => setGroupId(e.target.value)}
+                  required
+                >
+                  <option value="">Select group</option>
+                  {groups.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="w-full md:w-auto flex-[1.5]">
+                <label className="label">Name *</label>
+                <input
+                  className="input w-full"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="w-full md:w-auto flex-1">
+                <label className="label">Currency</label>
+                <select
+                  className="input w-full"
+                  value={currencyId}
+                  onChange={(e) => setCurrencyId(e.target.value)}
+                >
+                  <option value="">Default (Base)</option>
+                  {currencies.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.code} - {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="w-full md:w-auto flex-1">
+                <label className="label">
+                  Exchange Rate{" "}
+                  {selectedCurrencyCode
+                    ? `(${baseCurrencyCode} per ${selectedCurrencyCode})`
+                    : ""}
+                </label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  className="input w-full"
+                  value={exchangeRate}
+                  onChange={(e) => setExchangeRate(e.target.value)}
+                />
+              </div>
+              <div className="w-full md:w-auto flex items-center h-[42px]">
+                <button className="btn-success w-full" type="submit">
+                  Create Account
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="card">
         <div className="card-body">
@@ -414,15 +460,69 @@ export default function AccountsPage() {
               <table className="table">
                 <thead>
                   <tr>
-                    <SortableHeader label="ID" sortKey="id" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                    <SortableHeader label="Code" sortKey="code" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                    <SortableHeader label="Name" sortKey="name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                    <SortableHeader label="Group" sortKey="group_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                    <SortableHeader label="Nature" sortKey="nature" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                    <SortableHeader label="Currency" sortKey="currency_code" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                    <SortableHeader label="Rate" sortKey="exchange_rate" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                    <SortableHeader label="Postable" sortKey="is_postable" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                    <SortableHeader label="Active" sortKey="is_active" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                    <SortableHeader
+                      label="ID"
+                      sortKey="id"
+                      currentKey={sortKey}
+                      direction={sortDir}
+                      onToggle={toggle}
+                    />
+                    <SortableHeader
+                      label="Code"
+                      sortKey="code"
+                      currentKey={sortKey}
+                      direction={sortDir}
+                      onToggle={toggle}
+                    />
+                    <SortableHeader
+                      label="Name"
+                      sortKey="name"
+                      currentKey={sortKey}
+                      direction={sortDir}
+                      onToggle={toggle}
+                    />
+                    <SortableHeader
+                      label="Group"
+                      sortKey="group_name"
+                      currentKey={sortKey}
+                      direction={sortDir}
+                      onToggle={toggle}
+                    />
+                    <SortableHeader
+                      label="Nature"
+                      sortKey="nature"
+                      currentKey={sortKey}
+                      direction={sortDir}
+                      onToggle={toggle}
+                    />
+                    <SortableHeader
+                      label="Currency"
+                      sortKey="currency_code"
+                      currentKey={sortKey}
+                      direction={sortDir}
+                      onToggle={toggle}
+                    />
+                    <SortableHeader
+                      label="Rate"
+                      sortKey="exchange_rate"
+                      currentKey={sortKey}
+                      direction={sortDir}
+                      onToggle={toggle}
+                    />
+                    <SortableHeader
+                      label="Postable"
+                      sortKey="is_postable"
+                      currentKey={sortKey}
+                      direction={sortDir}
+                      onToggle={toggle}
+                    />
+                    <SortableHeader
+                      label="Active"
+                      sortKey="is_active"
+                      currentKey={sortKey}
+                      direction={sortDir}
+                      onToggle={toggle}
+                    />
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -479,14 +579,18 @@ export default function AccountsPage() {
                           <td>
                             <label className="label md:hidden">Rate</label>
                             <label className="label hidden md:block text-[10px] text-gray-500">
-                              {editSelectedCurrencyCode ? `(${baseCurrencyCode}/${editSelectedCurrencyCode})` : ""}
+                              {editSelectedCurrencyCode
+                                ? `(${baseCurrencyCode}/${editSelectedCurrencyCode})`
+                                : ""}
                             </label>
                             <input
                               type="number"
                               step="0.000001"
                               className="input"
                               value={editExchangeRate}
-                              onChange={(e) => setEditExchangeRate(e.target.value)}
+                              onChange={(e) =>
+                                setEditExchangeRate(e.target.value)
+                              }
                             />
                           </td>
                           <td>Yes</td>

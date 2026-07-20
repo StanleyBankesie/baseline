@@ -33,6 +33,7 @@ import {
   Eye,
   MessageSquare,
 } from "lucide-react";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 const STEPS_DATA = [
   { label: "Employee Info", icon: User, key: "employee" },
@@ -275,6 +276,7 @@ function EmptyState({ icon: Icon, title, message }) {
  * @returns {JSX.Element} The rendered component
  */
 export default function AppraisalForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = !!id;

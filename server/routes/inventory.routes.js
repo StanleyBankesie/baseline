@@ -312,25 +312,31 @@ async function ensureGRNTables() {
   `);
 }
 
-async function nextPurchaseBillNo(companyId, branchId, billType = "LOCAL") {
-  const prefix =
-    String(billType || "").toUpperCase() === "IMPORT" ? "PBI" : "PBL";
-  const rows = await query(
-    `
-    SELECT bill_no
-    FROM pur_bills
-    WHERE company_id = :companyId
-      AND branch_id = :branchId
-      AND bill_no LIKE :pattern
-    ORDER BY CAST(SUBSTRING(bill_no, 4) AS UNSIGNED) DESC
-    LIMIT 1
-    `,
-    { companyId, branchId, pattern: `${prefix}%` },
-  ).catch(() => []);
-  const prev = String(rows?.[0]?.bill_no || "");
-  const m = prev.match(/(\d+)$/);
-  const nextNum = m ? Number(m[1]) + 1 : 1;
-  return `${prefix}${String(nextNum).padStart(6, "0")}`;
+async function nextPurchaseBillNo(conn, companyId, branchId, billType = "LOCAL") {
+  const prefix = String(billType || "").toUpperCase() === "IMPORT" ? "PBI" : "PBL";
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const [rows] = await conn.execute(
+        `
+        SELECT bill_no
+        FROM pur_bills
+        WHERE company_id = :companyId
+          AND branch_id = :branchId
+          AND bill_no LIKE :pattern
+        ORDER BY CAST(SUBSTRING(bill_no, 4) AS UNSIGNED) DESC
+        LIMIT 1 FOR UPDATE
+        `,
+        { companyId, branchId, pattern: `${prefix}%` },
+      );
+      const prev = String(rows?.[0]?.bill_no || "");
+      const m = prev.match(/(\d+)$/);
+      const nextNum = m ? Number(m[1]) + 1 : 1;
+      return `${prefix}${String(nextNum).padStart(6, "0")}`;
+    } catch (err) {
+      if (attempt === 3) throw err;
+      await new Promise(resolve => setTimeout(resolve, 50 * attempt));
+    }
+  }
 }
 
 async function createPurchaseBillFromGrnTx(
@@ -402,39 +408,53 @@ async function createPurchaseBillFromGrnTx(
 
   const billType =
     String(grnType || "").toUpperCase() === "IMPORT" ? "IMPORT" : "LOCAL";
-  const billNo = await nextPurchaseBillNo(companyId, branchId, billType);
-  const [billHdr] = await conn.execute(
-    `INSERT INTO pur_bills
-      (company_id, branch_id, bill_no, bill_date, supplier_id, po_id, grn_id, bill_type,
-       due_date, currency_id, exchange_rate, payment_terms,
-       total_amount, discount_amount, tax_amount, freight_charges, other_charges, net_amount,
-       status, created_by)
-     VALUES
-      (:companyId, :branchId, :billNo, :billDate, :supplierId, :poId, :grnId, :billType,
-       NULL, :currencyId, :exchangeRate, :paymentTerms,
-       :totalAmount, :discountAmount, :taxAmount, :freightCharges, :otherCharges, :netAmount,
-       'POSTED', :createdBy)`,
-    {
-      companyId,
-      branchId,
-      billNo,
-      billDate: toDateOnly(grnDate),
-      supplierId: supplierId || null,
-      poId,
-      grnId,
-      billType,
-      currencyId: Number(po.currency_id || 0) || null,
-      exchangeRate: Number(po.exchange_rate || 1) || 1,
-      paymentTerms: Number(po.payment_terms || 0) || null,
-      totalAmount,
-      discountAmount,
-      taxAmount,
-      freightCharges,
-      otherCharges,
-      netAmount,
-      createdBy: userId || null,
-    },
-  );
+  
+  let billHdr;
+  let billNo;
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    try {
+      billNo = await nextPurchaseBillNo(conn, companyId, branchId, billType);
+      const [res] = await conn.execute(
+        `INSERT INTO pur_bills
+          (company_id, branch_id, bill_no, bill_date, supplier_id, po_id, grn_id, bill_type,
+           due_date, currency_id, exchange_rate, payment_terms,
+           total_amount, discount_amount, tax_amount, freight_charges, other_charges, net_amount,
+           status, created_by)
+         VALUES
+          (:companyId, :branchId, :billNo, :billDate, :supplierId, :poId, :grnId, :billType,
+           NULL, :currencyId, :exchangeRate, :paymentTerms,
+           :totalAmount, :discountAmount, :taxAmount, :freightCharges, :otherCharges, :netAmount,
+           'POSTED', :createdBy)`,
+        {
+          companyId,
+          branchId,
+          billNo,
+          billDate: toDateOnly(grnDate),
+          supplierId: supplierId || null,
+          poId,
+          grnId,
+          billType,
+          currencyId: Number(po.currency_id || 0) || null,
+          exchangeRate: Number(po.exchange_rate || 1) || 1,
+          paymentTerms: Number(po.payment_terms || 0) || null,
+          totalAmount,
+          discountAmount,
+          taxAmount,
+          freightCharges,
+          otherCharges,
+          netAmount,
+          createdBy: userId || null,
+        },
+      );
+      billHdr = res;
+      break;
+    } catch (err) {
+      if (err.code === "ER_DUP_ENTRY" && attempt < 5) {
+        continue; // Retry
+      }
+      throw err;
+    }
+  }
   const billId = Number(billHdr.insertId || 0);
   for (const d of details) {
     await conn.execute(

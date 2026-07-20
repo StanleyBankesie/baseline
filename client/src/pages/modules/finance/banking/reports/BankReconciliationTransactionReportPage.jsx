@@ -33,15 +33,19 @@ export default function BankReconciliationTransactionReportPage() {
 
   useEffect(() => {
     (async () => {
+      // Load bank accounts (required)
       try {
-        const [baRes, coRes] = await Promise.all([
-          api.get("/finance/bank-accounts"),
-          api.get("/administration/companies/current"),
-        ]);
+        const baRes = await api.get("/finance/bank-accounts");
         setBankAccounts(baRes.data?.items || []);
-        setCompany(coRes.data?.item || null);
       } catch (e) {
-        toast.error("Failed to load initial data");
+        toast.error("Failed to load bank accounts");
+      }
+      // Load company info (optional - used for print header only)
+      try {
+        const coRes = await api.get("/admin/companies/current");
+        setCompany(coRes.data?.item || null);
+      } catch {
+        // Non-critical; company info is only used for print/export headers
       }
     })();
   }, []);
@@ -293,7 +297,6 @@ export default function BankReconciliationTransactionReportPage() {
                 <th className="text-xs font-bold uppercase">Voucher No</th>
                 <th className="text-xs font-bold uppercase">Date</th>
                 <th className="text-xs font-bold uppercase">Narration</th>
-                <th className="text-xs font-bold uppercase">Offset Account</th>
                 <th className="text-right text-xs font-bold uppercase">
                   Debit
                 </th>
@@ -302,7 +305,8 @@ export default function BankReconciliationTransactionReportPage() {
                 </th>
                 <th className="text-xs font-bold uppercase">Cheque No</th>
                 <th className="text-xs font-bold uppercase">Cheque Date</th>
-                <th className="text-xs font-bold uppercase text-center">
+                <th className="text-xs font-bold uppercase">Offset Account</th>
+                <th className="text-xs font-bold uppercase">
                   Status
                 </th>
               </tr>
@@ -332,7 +336,6 @@ export default function BankReconciliationTransactionReportPage() {
                     >
                       {i.narration}
                     </td>
-                    <td className="text-sm">{i.offset_account_name}</td>
                     <td className="text-right text-sm font-mono">
                       {i.debit
                         ? Number(i.debit).toLocaleString(undefined, {
@@ -353,7 +356,8 @@ export default function BankReconciliationTransactionReportPage() {
                     <td className="text-sm">
                       {i.cheque_date ? String(i.cheque_date).slice(0, 10) : "-"}
                     </td>
-                    <td className="text-center">
+                    <td className="text-sm">{i.offset_account_name}</td>
+                    <td className="text-left">
                       <span
                         className={`badge badge-sm font-bold ${
                           i.status === "Reconciled"

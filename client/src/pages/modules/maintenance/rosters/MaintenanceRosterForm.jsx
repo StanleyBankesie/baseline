@@ -19,6 +19,7 @@ import {
   ArrowRight,
   X,
 } from "lucide-react";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /* Thin section label used as visual group separators inside the card body */
 function SectionLabel({ icon: Icon, text }) {
@@ -33,6 +34,7 @@ function SectionLabel({ icon: Icon, text }) {
 }
 
 export default function MaintenanceRosterForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();

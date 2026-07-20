@@ -8,6 +8,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../../../../api/client.js";
 import MaterialRequisitionForm from "../../inventory/MaterialRequisitionForm.jsx";
 import { filterAndSort } from "@/utils/searchUtils.js";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 function toYmd(date) {
   const d = date instanceof Date ? date : new Date(date);
@@ -23,6 +24,7 @@ function toYmd(date) {
  * @returns {JSX.Element} The rendered component
  */
 export default function ServiceExecutionForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [executionId, setExecutionId] = useState(
@@ -516,6 +518,8 @@ export default function ServiceExecutionForm() {
                           type="date"
                           value={executionDate}
                           onChange={(e) => setExecutionDate(e.target.value)}
+                        
+                          disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
                         />
                       </div>
                       <div>
@@ -760,6 +764,8 @@ export default function ServiceExecutionForm() {
                           className="input"
                           value={actualEndDate}
                           onChange={(e) => setActualEndDate(e.target.value)}
+                        
+                          disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
                         />
                       </div>
                       <div>

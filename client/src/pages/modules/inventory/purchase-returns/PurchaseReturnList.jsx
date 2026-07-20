@@ -346,13 +346,13 @@ export default function PurchaseReturnList() {
   return (
     <div className="space-y-6">
       <div className="card">
-        <div className="card-header bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4">
+        <div className="card-header bg-brand text-white rounded-t-lg p-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
               <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <span>↩️</span> Purchase Returns
               </h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-sm text-brand-100 mt-1">
                 Process supplier returns
               </p>
             </div>
@@ -618,3 +618,4 @@ export default function PurchaseReturnList() {
     </div>
   );
 }
+

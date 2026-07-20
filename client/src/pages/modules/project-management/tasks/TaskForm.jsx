@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../../../../api/client.js";
 import DocumentAttachmentsModal from "@/components/attachments/DocumentAttachmentsModal.jsx";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
@@ -14,6 +15,7 @@ import DocumentAttachmentsModal from "@/components/attachments/DocumentAttachmen
  * @returns {JSX.Element} The rendered component
  */
 export default function TaskForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
   const isNew = !id || id === "new";
@@ -196,12 +198,16 @@ export default function TaskForm() {
               <div>
                 <label className="label">Start Date</label>
                 <input type="date" className="input" value={formData.startDate}
-                  onChange={e => setFormData({ ...formData, startDate: e.target.value })} />
+                  onChange={e => setFormData({ ...formData, startDate: e.target.value })} 
+                  disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
+                />
               </div>
               <div>
                 <label className="label">Due Date</label>
                 <input type="date" className="input" value={formData.dueDate}
-                  onChange={e => setFormData({ ...formData, dueDate: e.target.value })} />
+                  onChange={e => setFormData({ ...formData, dueDate: e.target.value })} 
+                  disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
+                />
               </div>
               <div>
                 <label className="label">Estimated Hours</label>

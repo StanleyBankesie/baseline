@@ -9,6 +9,7 @@ import { api } from "../../../../api/client";
 import { toast } from "react-toastify";
 import { filterByPrefix } from "../../../../utils/searchUtils";
 import "./DiscountSchemeList.css";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 function ItemPicker({ items, selectedIds, onChange, label }) {
   const [search, setSearch] = useState("");
@@ -109,6 +110,7 @@ function ItemPicker({ items, selectedIds, onChange, label }) {
  * @returns {JSX.Element} The rendered component
  */
 export default function PurchaseRewardCampaignForm() {
+  const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
@@ -246,11 +248,15 @@ export default function PurchaseRewardCampaignForm() {
           <div className="ds-form-row">
             <div className="ds-form-group">
               <label>Valid From *</label>
-              <input type="date" name="effective_from" value={formData.effective_from} onChange={handleChange} required />
+              <input type="date" name="effective_from" value={formData.effective_from} onChange={handleChange} required 
+                disabled={isEdit && !hasExceptional("DOCUMENT.EDIT_DATE")}
+              />
             </div>
             <div className="ds-form-group">
               <label>Valid To</label>
-              <input type="date" name="effective_to" value={formData.effective_to} onChange={handleChange} />
+              <input type="date" name="effective_to" value={formData.effective_to} onChange={handleChange} 
+                disabled={isEdit && !hasExceptional("DOCUMENT.EDIT_DATE")}
+              />
             </div>
           </div>
 

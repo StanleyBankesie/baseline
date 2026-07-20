@@ -8,6 +8,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "api/client";
 import { toast } from "react-toastify";
 import { Plus, Trash2 } from "lucide-react";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
@@ -21,7 +22,8 @@ export default function SalesReturnForm() {
     returnRouteId && /^\d+$/.test(String(returnRouteId))
       ? Number(returnRouteId)
       : null;
-  const readOnly = Boolean(existingId);
+  const isEdit = Boolean(existingId);
+  const { hasExceptional } = usePermission();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [customers, setCustomers] = useState([]);
@@ -571,7 +573,7 @@ export default function SalesReturnForm() {
                   type="date"
                   className="input"
                   value={formData.returnDate}
-                  disabled={readOnly}
+                  disabled={isEdit && !hasExceptional("DOCUMENT.EDIT_DATE")}
                   onChange={(e) =>
                     setFormData((p) => ({ ...p, returnDate: e.target.value }))
                   }

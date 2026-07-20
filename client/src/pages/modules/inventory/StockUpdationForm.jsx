@@ -11,12 +11,14 @@ import { api } from "api/client";
 import { useUoms } from "@/hooks/useUoms";
 import UnitConversionModal from "@/components/UnitConversionModal";
 import { filterByPrefix } from "@/utils/searchUtils.js";
+import { usePermission } from "@/auth/PermissionContext.jsx";
 
 export default function StockUpdationForm({
   isModal = false,
   modalId = null,
   onClose = null,
 }) {
+  const { hasExceptional } = usePermission();
   const { uoms, loading: uomsLoading } = useUoms();
   const { id: routeId } = useParams();
   const id = isModal ? modalId : routeId;
@@ -499,6 +501,8 @@ export default function StockUpdationForm({
                         })
                       }
                       required
+                    
+                      disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                     />
                   </div>
                   <div>
