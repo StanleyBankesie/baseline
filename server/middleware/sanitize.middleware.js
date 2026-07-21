@@ -8,18 +8,23 @@ const options = {
 
 const myXss = new xss.FilterXSS(options);
 
-const sanitizeValue = (value) => {
+const sanitizeValue = (value, parentKey = null) => {
+  // Do not sanitize HTML template content fields
+  if (parentKey === 'html_content' || parentKey === 'template') {
+    return value;
+  }
+
   if (typeof value === 'string') {
     return myXss.process(value);
   }
   if (Array.isArray(value)) {
-    return value.map(item => sanitizeValue(item));
+    return value.map(item => sanitizeValue(item, parentKey));
   }
   if (value !== null && typeof value === 'object') {
     const sanitizedObj = {};
     for (const key in value) {
       if (Object.prototype.hasOwnProperty.call(value, key)) {
-        sanitizedObj[key] = sanitizeValue(value[key]);
+        sanitizedObj[key] = sanitizeValue(value[key], key);
       }
     }
     return sanitizedObj;

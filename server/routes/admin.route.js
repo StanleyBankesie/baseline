@@ -30,7 +30,7 @@ import {
 import { requirePermission } from "../middleware/requirePermission.js";
 
 // Database Utilities and Error Handling
-import { query } from "../db/pool.js";
+import { query, pool } from "../db/pool.js";
 import { httpError } from "../utils/httpError.js";
 import {
   ensureRoleModulesTable,
@@ -2985,6 +2985,148 @@ router.delete('/exclusive-permissions/:id', requireAuth, async (req, res, next) 
 
     await query("DELETE FROM adm_admin_page_permissions WHERE id = ?", [req.params.id]);
     res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /admin/notification-settings
+router.get("/notification-settings", requireAuth, requireCompanyScope, async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const settings = await query(
+      "SELECT * FROM adm_notification_settings WHERE company_id = ?",
+      [companyId]
+    );
+    res.json({ items: settings });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /admin/notification-settings
+router.post("/notification-settings", requireAuth, requireCompanyScope, async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const { items } = req.body;
+    
+    if (!Array.isArray(items)) {
+      throw httpError(400, "VALIDATION_ERROR", "items array is required");
+    }
+
+    const conn = await pool.getConnection();
+    try {
+      await conn.beginTransaction();
+
+      for (const item of items) {
+        const { module_code, status_trigger, send_email, send_sms, send_whatsapp } = item;
+        if (!module_code || !status_trigger) continue;
+
+        await conn.query(
+          `INSERT INTO adm_notification_settings 
+           (company_id, module_code, status_trigger, send_email, send_sms, send_whatsapp) 
+           VALUES (?, ?, ?, ?, ?, ?)
+           ON DUPLICATE KEY UPDATE 
+           send_email = VALUES(send_email),
+           send_sms = VALUES(send_sms),
+           send_whatsapp = VALUES(send_whatsapp)`,
+          [
+            companyId, module_code, status_trigger, 
+            send_email || 'N', send_sms || 'N', send_whatsapp || 'N'
+          ]
+        );
+      }
+
+      await conn.commit();
+      res.json({ success: true });
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    } finally {
+      conn.release();
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+router.get("/settings/env", requireAuth, async (req, res, next) => {
+  try {
+    if (req.user.id !== 1) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    const fs = await import("fs");
+    const path = await import("path");
+    const envPath = path.resolve(process.cwd(), ".env");
+    let content = "";
+    if (fs.existsSync(envPath)) {
+      content = fs.readFileSync(envPath, "utf-8");
+    }
+    const envVars = {};
+    content.split(/\r?\n/).forEach(line => {
+      const match = line.match(/^([^=]+)=(.*)$/);
+      if (match) {
+        envVars[match[1].trim()] = match[2].trim();
+      }
+    });
+    return res.json({
+      ARKESEL_API_KEY: envVars.ARKESEL_API_KEY ? "********" : "",
+      ARKESEL_SENDER_ID: envVars.ARKESEL_SENDER_ID ? "********" : "",
+      WASENDER_API_TOKEN: envVars.WASENDER_API_TOKEN ? "********" : "",
+      SMTP_HOST: envVars.SMTP_HOST || "",
+      SMTP_PORT: envVars.SMTP_PORT || "",
+      SMTP_USER: envVars.SMTP_USER || "",
+      SMTP_PASS: envVars.SMTP_PASS ? "********" : "",
+      SMTP_FROM: envVars.SMTP_FROM || "",
+      SMTP_SECURE: envVars.SMTP_SECURE || "false",
+      TEMPLATE_SALES_ORDER: envVars.TEMPLATE_SALES_ORDER || "Dear {customer_name},\n\nYour Sales Order {document_no} for {amount} has been {status}.\n\nThank you!",
+      TEMPLATE_PURCHASE_ORDER: envVars.TEMPLATE_PURCHASE_ORDER || "Dear {customer_name},\n\nYour Purchase Order {document_no} for {amount} has been {status}.\n\nThank you!",
+      TEMPLATE_SERVICE_ORDER: envVars.TEMPLATE_SERVICE_ORDER || "Dear {customer_name},\n\nYour Service Order {document_no} for {amount} has been {status}.\n\nThank you!",
+      TEMPLATE_MAINTENANCE_JOB: envVars.TEMPLATE_MAINTENANCE_JOB || "Dear {customer_name},\n\nYour Maintenance Job {document_no} has been {status}.\n\nThank you!",
+      TEMPLATE_PAYMENT_VOUCHER: envVars.TEMPLATE_PAYMENT_VOUCHER || "Dear {customer_name},\n\nYour Payment Voucher {document_no} for {amount} has been {status}.\n\nThank you!",
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/settings/env", requireAuth, async (req, res, next) => {
+  try {
+    if (req.user.id !== 1) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    const fs = await import("fs");
+    const path = await import("path");
+    const envPath = path.resolve(process.cwd(), ".env");
+    
+    let content = "";
+    if (fs.existsSync(envPath)) {
+      content = fs.readFileSync(envPath, "utf-8");
+    }
+
+    const updates = req.body;
+    const allowedKeys = [
+      "ARKESEL_API_KEY", "ARKESEL_SENDER_ID", "WASENDER_API_TOKEN",
+      "SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "SMTP_FROM", "SMTP_SECURE",
+      "TEMPLATE_SALES_ORDER", "TEMPLATE_PURCHASE_ORDER", "TEMPLATE_SERVICE_ORDER", 
+      "TEMPLATE_MAINTENANCE_JOB", "TEMPLATE_PAYMENT_VOUCHER"
+    ];
+    
+    let lines = content.split(/\r?\n/);
+    for (const key of allowedKeys) {
+      if (updates[key] !== undefined && updates[key] !== "********") {
+        const val = String(updates[key]);
+        const index = lines.findIndex(line => line.startsWith(key + "="));
+        if (index >= 0) {
+          lines[index] = `${key}=${val}`;
+        } else {
+          lines.push(`${key}=${val}`);
+        }
+        process.env[key] = val; // Update in-memory
+      }
+    }
+    
+    fs.writeFileSync(envPath, lines.join("\n"));
+    return res.json({ message: "Environment variables updated successfully" });
   } catch (err) {
     next(err);
   }

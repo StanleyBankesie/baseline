@@ -20,6 +20,9 @@ export default function LicenseManagement() {
   const [invoiceTemplate, setInvoiceTemplate] = useState("");
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
+  const [receiptTemplate, setReceiptTemplate] = useState("");
+  const [savingReceiptTemplate, setSavingReceiptTemplate] = useState(false);
+  const [previewReceiptMode, setPreviewReceiptMode] = useState(false);
 
   const [packages, setPackages] = useState([]);
   const { refreshPermissions } = usePermission();
@@ -47,6 +50,21 @@ export default function LicenseManagement() {
 
   const [selectedModules, setSelectedModules] = useState([]);
 
+  const getPreviewHtml = (html) => {
+    if (!html) return "";
+    return html
+      .replace(/\{\{name\}\}/g, "John Doe")
+      .replace(/\{\{email\}\}/g, "john@example.com")
+      .replace(/\{\{plan_name\}\}/g, "Premium Plan")
+      .replace(/\{\{amount\}\}/g, "GHS 1,500.00")
+      .replace(/\{\{new_expiry_date\}\}/g, new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString())
+      .replace(/\{\{date\}\}/g, new Date().toLocaleDateString())
+      .replace(/\{\{invoice_number\}\}/g, "INV-123456")
+      .replace(/\{\{receipt_number\}\}/g, "RCT-123456")
+      .replace(/\{\{company_logo\}\}/g, '<img src="https://via.placeholder.com/150x60?text=Company+Logo" alt="Company Logo" style="max-height: 60px; max-width: 150px;" />')
+      .replace(/\[Insert Logo Here\]/g, '<img src="https://via.placeholder.com/150x60?text=Company+Logo" alt="Company Logo" style="max-height: 60px; max-width: 150px;" />');
+  };
+
   const moduleList = Object.keys(MODULES_REGISTRY || {}).map(key => ({
     code: key,
     name: MODULES_REGISTRY[key].name || key
@@ -63,6 +81,7 @@ export default function LicenseManagement() {
     fetchCompanies();
     fetchPackages();
     fetchInvoiceTemplate();
+    fetchReceiptTemplate();
   }, []);
 
   const fetchInvoiceTemplate = async () => {
@@ -85,6 +104,29 @@ export default function LicenseManagement() {
       toast.error("Failed to save template.");
     } finally {
       setSavingTemplate(false);
+    }
+  };
+
+  const fetchReceiptTemplate = async () => {
+    try {
+      const res = await api.get("/licenses/receipt-template").catch(() => null);
+      if (res?.data?.html_content) {
+        setReceiptTemplate(res.data.html_content);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSaveReceiptTemplate = async () => {
+    setSavingReceiptTemplate(true);
+    try {
+      await api.post("/licenses/receipt-template", { html_content: receiptTemplate });
+      toast.success("Receipt template saved successfully!");
+    } catch (err) {
+      toast.error("Failed to save template.");
+    } finally {
+      setSavingReceiptTemplate(false);
     }
   };
 
@@ -296,6 +338,12 @@ export default function LicenseManagement() {
             >
               Invoice Template
             </button>
+            <button
+              className={`px-4 py-2 font-medium ${activeTab === 'RECEIPT_TEMPLATE' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500 dark:text-slate-500 hover:text-slate-700 dark:text-slate-300'}`}
+              onClick={() => setActiveTab('RECEIPT_TEMPLATE')}
+            >
+              Receipt Template
+            </button>
           </div>
 
           {activeTab === 'DETAILS' && (
@@ -446,6 +494,7 @@ export default function LicenseManagement() {
               <h2 className="text-xl font-bold border-b pb-2">License Renewal Invoice Template</h2>
               <div className="text-sm text-slate-600 dark:text-slate-400 bg-blue-50 p-3 rounded">
                 <strong>Placeholders available:</strong><br />
+                {`{{company_logo}}`} - Company Logo image<br />
                 {`{{name}}`} - User's name<br />
                 {`{{email}}`} - User's email<br />
                 {`{{plan_name}}`} - Name of the renewed plan<br />
@@ -472,7 +521,7 @@ export default function LicenseManagement() {
                         type="button"
                         onClick={() => {
                           const printWindow = window.open('', '', 'width=900,height=800');
-                          printWindow.document.write(invoiceTemplate);
+                          printWindow.document.write(getPreviewHtml(invoiceTemplate));
                           printWindow.document.close();
                           printWindow.focus();
                           setTimeout(() => {
@@ -485,7 +534,7 @@ export default function LicenseManagement() {
                       </button>
                     </div>
                     <iframe
-                      srcDoc={invoiceTemplate}
+                      srcDoc={getPreviewHtml(invoiceTemplate)}
                       className="w-full min-h-[600px] border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800"
                       title="Invoice Preview"
                     ></iframe>
@@ -506,6 +555,77 @@ export default function LicenseManagement() {
                   disabled={savingTemplate}
                 >
                   {savingTemplate ? "Saving..." : "Save Template"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'RECEIPT_TEMPLATE' && (
+            <div className="bg-white dark:bg-slate-800 p-6 rounded shadow space-y-6">
+              <h2 className="text-xl font-bold border-b pb-2">License Renewal Receipt Template</h2>
+              <div className="text-sm text-slate-600 dark:text-slate-400 bg-blue-50 p-3 rounded">
+                <strong>Placeholders available:</strong><br />
+                {`{{company_logo}}`} - Company Logo image<br />
+                {`{{name}}`} - User's name<br />
+                {`{{email}}`} - User's email<br />
+                {`{{plan_name}}`} - Name of the renewed plan<br />
+                {`{{amount}}`} - Amount paid<br />
+                {`{{new_expiry_date}}`} - New license expiry date<br />
+                {`{{date}}`} - Receipt date<br />
+                {`{{receipt_number}}`} - Receipt reference number
+              </div>
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium">HTML Content</label>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewReceiptMode(!previewReceiptMode)}
+                    className="text-sm bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded font-medium"
+                  >
+                    {previewReceiptMode ? "Edit HTML" : "Print Preview"}
+                  </button>
+                </div>
+                {previewReceiptMode ? (
+                  <div className="border rounded p-2 bg-slate-50 dark:bg-slate-800/50 flex flex-col">
+                    <div className="flex justify-end mb-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const printWindow = window.open('', '', 'width=900,height=800');
+                          printWindow.document.write(getPreviewHtml(receiptTemplate));
+                          printWindow.document.close();
+                          printWindow.focus();
+                          setTimeout(() => {
+                            printWindow.print();
+                          }, 500);
+                        }}
+                        className="text-sm bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded border border-blue-200 flex items-center gap-1 font-medium shadow-sm"
+                      >
+                        <i className="fi fi-rr-print"></i> Print
+                      </button>
+                    </div>
+                    <iframe
+                      srcDoc={getPreviewHtml(receiptTemplate)}
+                      className="w-full min-h-[600px] border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800"
+                      title="Receipt Preview"
+                    ></iframe>
+                  </div>
+                ) : (
+                  <textarea
+                    className="w-full border rounded p-3 min-h-[500px] font-mono text-sm dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                    value={receiptTemplate}
+                    onChange={(e) => setReceiptTemplate(e.target.value)}
+                    placeholder="<h1>Receipt for {{name}}</h1>..."
+                  ></textarea>
+                )}
+              </div>
+              <div className="flex justify-end">
+                <button 
+                  onClick={handleSaveReceiptTemplate}
+                  className="bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700 transition"
+                  disabled={savingReceiptTemplate}
+                >
+                  {savingReceiptTemplate ? "Saving..." : "Save Template"}
                 </button>
               </div>
             </div>

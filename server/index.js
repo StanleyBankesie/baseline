@@ -10,7 +10,6 @@ import RedisStore from "rate-limit-redis";
 import helmet from "helmet";
 import morgan from "morgan";
 import { logToCrashReport } from "./utils/crashLogger.js";
-
 import { errorHandler } from "./middleware/errorHandler.js";
 import { notFound } from "./middleware/notFound.js";
 import { sanitizeInput } from "./middleware/sanitize.middleware.js";
@@ -121,15 +120,15 @@ app.set("trust proxy", 1);
 app.use((req, res, next) => {
   const origWriteHead = res.writeHead;
   res.writeHead = function (statusCode, statusMessage, headers) {
-    this.removeHeader('Connection');
-    this.removeHeader('connection');
-    this.removeHeader('Keep-Alive');
-    this.removeHeader('keep-alive');
+    this.removeHeader("Connection");
+    this.removeHeader("connection");
+    this.removeHeader("Keep-Alive");
+    this.removeHeader("keep-alive");
 
     let headersObj = headers;
     let statusMsg = statusMessage;
 
-    if (typeof statusMessage === 'object') {
+    if (typeof statusMessage === "object") {
       headersObj = statusMessage;
       statusMsg = undefined;
     }
@@ -138,15 +137,19 @@ app.use((req, res, next) => {
       if (Array.isArray(headersObj)) {
         for (let i = 0; i < headersObj.length; i++) {
           const key = headersObj[i][0];
-          if (key && (key.toLowerCase() === 'connection' || key.toLowerCase() === 'keep-alive')) {
+          if (
+            key &&
+            (key.toLowerCase() === "connection" ||
+              key.toLowerCase() === "keep-alive")
+          ) {
             headersObj.splice(i, 1);
             i--;
           }
         }
-      } else if (typeof headersObj === 'object') {
+      } else if (typeof headersObj === "object") {
         for (const k of Object.keys(headersObj)) {
           const lower = k.toLowerCase();
-          if (lower === 'connection' || lower === 'keep-alive') {
+          if (lower === "connection" || lower === "keep-alive") {
             delete headersObj[k];
           }
         }
@@ -164,7 +167,8 @@ app.use((req, res, next) => {
     };
     strip(this._headers);
     const sym = Object.getOwnPropertySymbols(this).find(
-      (s) => s.toString().includes("Headers") || s.toString().includes("headers")
+      (s) =>
+        s.toString().includes("Headers") || s.toString().includes("headers"),
     );
     if (sym) strip(this[sym]);
 
@@ -205,10 +209,14 @@ app.use((req, res, next) => {
   res.on("finish", () => {
     const status = Number(res.statusCode || 0) || 0;
     if (status >= 400 && res.locals.__crashLogged !== true) {
-      logToCrashReport(`HTTP_${status}`, `Request failed with status ${status}`, {
-        ...getBaseContext(),
-        status,
-      });
+      logToCrashReport(
+        `HTTP_${status}`,
+        `Request failed with status ${status}`,
+        {
+          ...getBaseContext(),
+          status,
+        },
+      );
       res.locals.__crashLogged = true;
     }
   });
@@ -216,7 +224,11 @@ app.use((req, res, next) => {
   res.on("close", () => {
     if (res.writableEnded) return;
     if (res.locals.__crashLogged === true) return;
-    logToCrashReport("HTTP_CONNECTION_CLOSED", "Connection closed before response finished", getBaseContext());
+    logToCrashReport(
+      "HTTP_CONNECTION_CLOSED",
+      "Connection closed before response finished",
+      getBaseContext(),
+    );
     res.locals.__crashLogged = true;
   });
 
@@ -224,9 +236,10 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
+  const connectSrc = process.env.CSP_CONNECT_SRC || "'self'";
   res.setHeader(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' http://localhost:* ws://localhost:* https://demoserver.omnisuite-erp.com wss://demoserver.omnisuite-erp.com https://demo.omnisuite-erp.com;",
+    `default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src ${connectSrc};`,
   );
   next();
 });
@@ -237,16 +250,20 @@ app.use((req, res, next) => {
 // causing Chrome to immediately drop the connection with ERR_HTTP2_PROTOCOL_ERROR.
 // We MUST forcefully strip 'Connection' and 'Keep-Alive' right before Node writes headers.
 const ORIG_WRITE_HEAD = http.ServerResponse.prototype.writeHead;
-http.ServerResponse.prototype.writeHead = function (statusCode, statusMessage, headers) {
-  this.removeHeader('Connection');
-  this.removeHeader('connection');
-  this.removeHeader('Keep-Alive');
-  this.removeHeader('keep-alive');
+http.ServerResponse.prototype.writeHead = function (
+  statusCode,
+  statusMessage,
+  headers,
+) {
+  this.removeHeader("Connection");
+  this.removeHeader("connection");
+  this.removeHeader("Keep-Alive");
+  this.removeHeader("keep-alive");
 
   let headersObj = headers;
   let statusMsg = statusMessage;
 
-  if (typeof statusMessage === 'object') {
+  if (typeof statusMessage === "object") {
     headersObj = statusMessage;
     statusMsg = undefined;
   }
@@ -255,15 +272,19 @@ http.ServerResponse.prototype.writeHead = function (statusCode, statusMessage, h
     if (Array.isArray(headersObj)) {
       for (let i = 0; i < headersObj.length; i++) {
         const key = headersObj[i][0];
-        if (key && (key.toLowerCase() === 'connection' || key.toLowerCase() === 'keep-alive')) {
+        if (
+          key &&
+          (key.toLowerCase() === "connection" ||
+            key.toLowerCase() === "keep-alive")
+        ) {
           headersObj.splice(i, 1);
           i--;
         }
       }
-    } else if (typeof headersObj === 'object') {
+    } else if (typeof headersObj === "object") {
       for (const k of Object.keys(headersObj)) {
         const lower = k.toLowerCase();
-        if (lower === 'connection' || lower === 'keep-alive') {
+        if (lower === "connection" || lower === "keep-alive") {
           delete headersObj[k];
         }
       }
@@ -281,7 +302,7 @@ http.ServerResponse.prototype.writeHead = function (statusCode, statusMessage, h
   };
   strip(this._headers);
   const sym = Object.getOwnPropertySymbols(this).find(
-    (s) => s.toString().includes("Headers") || s.toString().includes("headers")
+    (s) => s.toString().includes("Headers") || s.toString().includes("headers"),
   );
   if (sym) strip(this[sym]);
 
@@ -308,13 +329,7 @@ const allowedOrigins = (() => {
       .map((s) => s.trim())
       .filter(Boolean);
   }
-  return [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:5174",
-    "http://127.0.0.1:5174",
-    "https://demo.omnisuite-erp.com",
-  ];
+  return [];
 })();
 
 const corsOptions = {
@@ -451,12 +466,17 @@ app.get("/api/ping", (_req, res) => res.json({ ok: true }));
     const salesOrderDeletedAtColumns = await query(
       "SHOW COLUMNS FROM `sal_orders` LIKE 'deleted_at'",
     ).catch(() => []);
-    if (!salesOrderDeletedAtColumns || salesOrderDeletedAtColumns.length === 0) {
+    if (
+      !salesOrderDeletedAtColumns ||
+      salesOrderDeletedAtColumns.length === 0
+    ) {
       console.log("Adding `deleted_at` column to `sal_orders` table...");
       await query(
         "ALTER TABLE `sal_orders` ADD COLUMN `deleted_at` DATETIME NULL",
       );
-      console.log("Successfully added the `deleted_at` column to `sal_orders`.");
+      console.log(
+        "Successfully added the `deleted_at` column to `sal_orders`.",
+      );
     }
 
     // Check if created_by exists in fin_voucher_reversals
@@ -774,7 +794,7 @@ app.get("/api/debug-crash-log", (req, res) => {
   try {
     const p1 = path.join(process.cwd(), "crash_report.txt");
     const p2 = path.join(process.cwd(), "CRASH_REPORT.txt");
-    const file = fs.existsSync(p1) ? p1 : (fs.existsSync(p2) ? p2 : null);
+    const file = fs.existsSync(p1) ? p1 : fs.existsSync(p2) ? p2 : null;
     if (!file) {
       return res.status(404).send("No crash report file found.");
     }
@@ -983,14 +1003,24 @@ if (process.env.NODE_ENV !== "test") {
           const steps = [
             ["pages table", () => ensurePagesTable()],
             ["user permissions table", () => ensureUserPermissionsTable()],
-            ["user permission triggers", () => ensureUserPermissionCacheAndTriggers()],
+            [
+              "user permission triggers",
+              () => ensureUserPermissionCacheAndTriggers(),
+            ],
             ["user branch mapping", () => ensureUserBranchMapping()],
-            ["exceptional permissions", () => ensureExceptionalPermissionsTable()],
+            [
+              "exceptional permissions",
+              () => ensureExceptionalPermissionsTable(),
+            ],
             ["system logs", () => ensureSystemLogsTable()],
           ];
           for (const [name, fn] of steps) {
-            try { await fn(); console.log(`[Prewarm] ✓ ${name}`); }
-            catch (e) { console.warn(`[Prewarm] ⚠ ${name}: ${e?.message || e}`); }
+            try {
+              await fn();
+              console.log(`[Prewarm] ✓ ${name}`);
+            } catch (e) {
+              console.warn(`[Prewarm] ⚠ ${name}: ${e?.message || e}`);
+            }
           }
           console.log("[Prewarm] Schema setup complete.");
         }
@@ -1240,8 +1270,8 @@ if (process.env.NODE_ENV !== "test") {
         `[LowStockScheduler] Initial schedule check failed: ${e?.message || e}`,
       ),
     );
-  });  // closes server.listen callback
-}     // closes if (process.env.NODE_ENV !== "test")
+  }); // closes server.listen callback
+} // closes if (process.env.NODE_ENV !== "test")
 
 // ─── Graceful Shutdown ───────────────────────────────────────────────────────
 async function gracefulShutdown(signal) {
@@ -1274,7 +1304,11 @@ process.on("uncaughtException", (err) => {
   logToCrashReport("UncaughtException", err);
   // Only exit for truly fatal errors (memory corruption, etc.).
   // Do NOT exit for recoverable errors like DB timeouts.
-  if (err && (err.code === "ERR_WORKER_OUT_OF_MEMORY" || err.code === "ERR_INVALID_HANDLE_STATE")) {
+  if (
+    err &&
+    (err.code === "ERR_WORKER_OUT_OF_MEMORY" ||
+      err.code === "ERR_INVALID_HANDLE_STATE")
+  ) {
     console.error("[Process] Fatal error, exiting.");
     logToCrashReport("FatalExit", "Process exiting due to fatal error");
     process.exit(1);

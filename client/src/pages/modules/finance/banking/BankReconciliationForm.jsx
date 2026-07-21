@@ -275,7 +275,7 @@ export default function BankReconciliationForm() {
         <div className="stats shadow border border-slate-200">
           <div className="stat">
             <div className="stat-title text-xs font-bold uppercase">
-              Book Balance
+              Cleared Balance
             </div>
             <div className="stat-value text-2xl">
               {(summary?.endingBookBalance || 0).toLocaleString()}
@@ -340,10 +340,10 @@ export default function BankReconciliationForm() {
                 <th className="text-xs font-bold uppercase">Cheque Date</th>
                 <th className="text-xs font-bold uppercase">Narration</th>
                 <th className="text-xs font-bold uppercase">Account Name</th>
-                <th className="text-right text-xs font-bold uppercase">
+                <th className="text-right text-xs font-bold uppercase w-32">
                   Debit
                 </th>
-                <th className="text-right text-xs font-bold uppercase">
+                <th className="text-right text-xs font-bold uppercase w-32">
                   Credit
                 </th>
               </tr>

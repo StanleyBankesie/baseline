@@ -3670,3 +3670,47 @@ export const sendRFQEmail = async (req, res, next) => {
     next(err);
   }
 };
+
+export const sendJobOrderNotification = async (req, res, next) => {
+  try {
+    const { companyId, branchIdsStr = "" } = req.scope || {};
+    const id = Number(req.params.id);
+    const { type } = req.body;
+    
+    if (!Number.isFinite(id)) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    if (!["email", "sms", "whatsapp", "all"].includes(type)) {
+      throw httpError(400, "VALIDATION_ERROR", "Invalid notification type");
+    }
+
+    const { sendExternalNotification } = await import("../utils/externalNotification.js");
+
+    const [order] = await query(
+      `SELECT o.id, o.job_order_no, o.description,
+              s.item_name AS service_provider, s.email AS provider_email, s.phone AS provider_phone
+       FROM maint_job_orders o
+       LEFT JOIN maint_setup_items s ON (s.id = o.assigned_to_id AND s.item_type = 'SERVICE_PROVIDER')
+       WHERE o.id = :id AND o.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(o.branch_id, :branchIdsStr))
+       LIMIT 1`,
+      { id, companyId, branchIdsStr }
+    );
+
+    if (!order) throw httpError(404, "NOT_FOUND", "Job Order not found");
+
+    const subject = `Job Order ${order.job_order_no} from OmniSuite`;
+    const text = `Dear ${order.service_provider || 'Service Provider'},\n\nPlease find the details regarding Job Order ${order.job_order_no}: ${order.description}\n\nThank you!`;
+    const html = `<p>Dear ${order.service_provider || 'Service Provider'},</p><p>Please find the details regarding Job Order <strong>${order.job_order_no}</strong>: ${order.description}</p><p>Thank you!</p>`;
+
+    const results = await sendExternalNotification({
+      type,
+      recipientEmail: order.provider_email,
+      recipientPhone: order.provider_phone, // assuming phone exists in setup_items, else it will be null and skip
+      subject,
+      text,
+      html
+    });
+
+    res.json(results);
+  } catch (err) {
+    next(err);
+  }
+};

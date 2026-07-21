@@ -6,7 +6,10 @@ import {
 } from "../services/stock.service.js";
 import { applyStockVerificationApprovalTx } from "../services/stock-verification.service.js";
 import { isMailerConfigured, sendMail } from "../utils/mailer.js";
+import { isSMSConfigured, sendSMS } from "../utils/sms.js";
+import { isWhatsAppConfigured, sendWhatsApp } from "../utils/whatsapp.js";
 import { sendDocumentForwardNotification } from "../utils/documentNotification.js";
+import { checkAndSendAutomaticNotification } from "../utils/externalNotification.js";
 import { sendPushToUser } from "../routes/push.routes.js";
 import { createCreditNoteForReturnApprovalTx, createPostedSalesVoucherForInvoiceTx } from "../routes/sales.route.js";
 import { createDebitNoteForReturnApprovalTx } from "../routes/purchase.routes.js";
@@ -320,6 +323,8 @@ const ensureWorkflowTables = async () => {
       max_amount DECIMAL(18,2) DEFAULT NULL,
       default_behavior VARCHAR(20) DEFAULT NULL,
       email_notify TINYINT(1) NOT NULL DEFAULT 1,
+      sms_notify TINYINT(1) NOT NULL DEFAULT 1,
+      whatsapp_notify TINYINT(1) NOT NULL DEFAULT 1,
       is_active TINYINT(1) NOT NULL DEFAULT 1,
       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       PRIMARY KEY (id),
@@ -358,6 +363,16 @@ const ensureWorkflowTables = async () => {
   if (!(await hasColumn("adm_workflows", "email_notify"))) {
     await query(
       `ALTER TABLE adm_workflows ADD COLUMN email_notify TINYINT(1) NOT NULL DEFAULT 1`,
+    );
+  }
+  if (!(await hasColumn("adm_workflows", "sms_notify"))) {
+    await query(
+      `ALTER TABLE adm_workflows ADD COLUMN sms_notify TINYINT(1) NOT NULL DEFAULT 1`,
+    );
+  }
+  if (!(await hasColumn("adm_workflows", "whatsapp_notify"))) {
+    await query(
+      `ALTER TABLE adm_workflows ADD COLUMN whatsapp_notify TINYINT(1) NOT NULL DEFAULT 1`,
     );
   }
   await query(`
@@ -913,7 +928,7 @@ export const debugWorkflowEmailStatus = async (req, res, next) => {
     const { companyId = null } = req.scope || {};
     if (!instanceId) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
     const instRows = await query(
-      `SELECT dw.*, w.email_notify, w.workflow_name,
+      `SELECT dw.*, w.email_notify, w.sms_notify, w.whatsapp_notify, w.workflow_name,
           dw.created_at,
           u.username AS created_by_name
          FROM adm_document_workflows dw
@@ -1012,8 +1027,8 @@ export const createWorkflow = async (req, res, next) => {
 
     const result = await query(
       `INSERT INTO adm_workflows 
-       (company_id, workflow_code, workflow_name, module_key, document_type, document_route, default_behavior, email_notify, is_active)
-       VALUES (:companyId, :workflow_code, :workflow_name, :module_key, :document_type, :document_route, :default_behavior, :email_notify, :is_active)`,
+       (company_id, workflow_code, workflow_name, module_key, document_type, document_route, default_behavior, email_notify, sms_notify, whatsapp_notify, is_active)
+       VALUES (:companyId, :workflow_code, :workflow_name, :module_key, :document_type, :document_route, :default_behavior, :email_notify, :sms_notify, :whatsapp_notify, :is_active)`,
       {
         companyId,
         workflow_code:
@@ -1035,10 +1050,9 @@ export const createWorkflow = async (req, res, next) => {
           )
             ? default_behavior.toUpperCase()
             : null,
-        email_notify:
-          req.body?.email_notify == null
-            ? 1
-            : Number(Boolean(req.body.email_notify)),
+        email_notify: parseBoolFlag(req.body?.email_notify),
+        sms_notify: parseBoolFlag(req.body?.sms_notify),
+        whatsapp_notify: parseBoolFlag(req.body?.whatsapp_notify),
         is_active: is_active === undefined ? 1 : Number(Boolean(is_active)),
       },
     );
@@ -1126,6 +1140,8 @@ export const updateWorkflow = async (req, res, next) => {
            document_route = :document_route,
            default_behavior = :default_behavior,
            email_notify = :email_notify,
+           sms_notify = :sms_notify,
+           whatsapp_notify = :whatsapp_notify,
            is_active = :is_active
        WHERE id = :id`,
       {
@@ -1145,10 +1161,9 @@ export const updateWorkflow = async (req, res, next) => {
           )
             ? default_behavior.toUpperCase()
             : null,
-        email_notify:
-          req.body?.email_notify == null
-            ? 1
-            : Number(Boolean(req.body.email_notify)),
+        email_notify: parseBoolFlag(req.body?.email_notify),
+        sms_notify: parseBoolFlag(req.body?.sms_notify),
+        whatsapp_notify: parseBoolFlag(req.body?.whatsapp_notify),
         is_active: nextIsActive,
       },
     );
@@ -1702,14 +1717,15 @@ export const performAction = async (req, res, next) => {
 
       // Send email notification for workflow status updates
       const wfRows = await query(
-        "SELECT email_notify FROM adm_workflows WHERE id = :id LIMIT 1",
+        "SELECT email_notify, sms_notify, whatsapp_notify FROM adm_workflows WHERE id = :id LIMIT 1",
         { id: instance.workflow_id },
       ).catch(() => []);
       const emailFlag = wfRows.length ? wfRows[0].email_notify : 1;
-      const emailEnabled =
-        (emailFlag === null || emailFlag === undefined
-          ? 1
-          : Number(emailFlag)) === 1;
+      const smsFlag = wfRows.length ? wfRows[0].sms_notify : 1;
+      const whatsappFlag = wfRows.length ? wfRows[0].whatsapp_notify : 1;
+      const emailEnabled = (emailFlag === null || emailFlag === undefined ? 1 : Number(emailFlag)) === 1;
+      const smsEnabled = (smsFlag === null || smsFlag === undefined ? 1 : Number(smsFlag)) === 1;
+      const whatsappEnabled = (whatsappFlag === null || whatsappFlag === undefined ? 1 : Number(whatsappFlag)) === 1;
       const forceEmail = envTrue(process.env.WORKFLOW_FORCE_EMAIL);
       if (!emailEnabled && !forceEmail) {
         // Email disabled, skip
@@ -1717,10 +1733,12 @@ export const performAction = async (req, res, next) => {
       }
 
       let userEmailEnabled = 1;
+      let userSmsEnabled = 1;
+      let userWhatsappEnabled = 1;
       try {
         const prefRows = await query(
           `
-          SELECT email_enabled,
+          SELECT email_enabled, sms_enabled, whatsapp_enabled,
           created_at,
           u.username AS created_by_name
          FROM adm_notification_prefs
@@ -1733,6 +1751,8 @@ export const performAction = async (req, res, next) => {
         );
         if (prefRows.length) {
           userEmailEnabled = Number(prefRows[0].email_enabled) === 1 ? 1 : 0;
+          userSmsEnabled = Number(prefRows[0].sms_enabled) === 1 ? 1 : 0;
+          userWhatsappEnabled = Number(prefRows[0].whatsapp_enabled) === 1 ? 1 : 0;
         }
       } catch (err) {
         console.warn(
@@ -1759,7 +1779,7 @@ export const performAction = async (req, res, next) => {
       }
 
       const userRes = await query(
-        "SELECT username, email FROM adm_users WHERE id = :id AND company_id = :companyId AND is_active = 1 LIMIT 1",
+        "SELECT username, email, telephone FROM adm_users WHERE id = :id AND company_id = :companyId AND is_active = 1 LIMIT 1",
         { id: targetUserId, companyId: req.scope.companyId },
       ).catch(() => []);
 
@@ -1832,6 +1852,27 @@ export const performAction = async (req, res, next) => {
         });
       } catch (err) {
         console.error("Error sending workflow email:", err);
+      }
+
+      // Try sending SMS if configured and user has a phone
+      const phone = userRes[0].telephone;
+      if (phone && isSMSConfigured()) {
+        try {
+          const smsText = `Action Required: ${docType} ${refNo} needs your ${actionLabel}. View: ${linkAbs}`;
+          await sendSMS({ to: phone, message: smsText });
+        } catch (err) {
+          console.error("Error sending workflow SMS:", err);
+        }
+      }
+
+      // Try sending WhatsApp if configured and user has a phone
+      if (phone && isWhatsAppConfigured()) {
+        try {
+          const waText = `*Action Required*\n${docType} ${refNo} needs your ${actionLabel}.\n\nView Document:\n${linkAbs}`;
+          await sendWhatsApp({ to: phone, message: waText });
+        } catch (err) {
+          console.error("Error sending workflow WhatsApp:", err);
+        }
       }
 
       await query(
@@ -3123,9 +3164,9 @@ export const performAction = async (req, res, next) => {
           WHERE id = :docId AND company_id = :companyId LIMIT 1`,
             { docId: wf.document_id, companyId: wf.company_id },
           );
-          if (rows.length && rows[0].status !== "CONFIRMED") {
+          if (rows.length && rows[0].status !== "APPROVED") {
             await query(
-              `UPDATE sal_orders SET status = 'CONFIRMED' WHERE id = :id AND company_id = :companyId`,
+              `UPDATE sal_orders SET status = 'APPROVED' WHERE id = :id AND company_id = :companyId`,
               { id: wf.document_id, companyId: wf.company_id },
             );
           }
@@ -3141,9 +3182,9 @@ export const performAction = async (req, res, next) => {
              WHERE id = :docId AND company_id = :companyId LIMIT 1`,
             { docId: wf.document_id, companyId: wf.company_id },
           );
-          if (rows.length && rows[0].status !== "CONFIRMED") {
+          if (rows.length && rows[0].status !== "APPROVED") {
             await query(
-              `UPDATE pm_orders SET status = 'CONFIRMED' WHERE id = :id AND company_id = :companyId`,
+              `UPDATE pm_orders SET status = 'APPROVED' WHERE id = :id AND company_id = :companyId`,
               { id: wf.document_id, companyId: wf.company_id },
             );
           }
@@ -3269,6 +3310,26 @@ export const performAction = async (req, res, next) => {
         }
       }
     }
+    const finalStatusCheck = await query(
+      `SELECT status, document_type, document_id, company_id FROM adm_document_workflows WHERE id = :id`,
+      { id: instance.id }
+    );
+    const finalWf = finalStatusCheck[0];
+
+    if (finalWf.status === "APPROVED" || finalWf.status === "POSTED") {
+      // In workflow finalization, document_type can be "SALES_ORDER", "Sales Order", etc.
+      let normalizedModuleCode = String(finalWf.document_type || "").toUpperCase().replace(/ /g, '_');
+      let triggerStat = finalWf.status;
+      if (normalizedModuleCode === "PAYMENT_VOUCHER" || normalizedModuleCode === "RECEIPT_VOUCHER") triggerStat = "POSTED";
+      
+      await checkAndSendAutomaticNotification({
+        companyId: finalWf.company_id,
+        moduleCode: normalizedModuleCode,
+        statusTrigger: triggerStat,
+        documentId: finalWf.document_id,
+      }).catch(err => console.error("Auto notification error:", err));
+    }
+
     res.json({ message: "Action processed successfully" });
   } catch (err) {
     next(err);

@@ -24,7 +24,6 @@ const STATUS_CONFIG = {
   POSTED: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
   REJECTED: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
   CANCELLED: "bg-slate-800 text-white dark:bg-slate-900 dark:text-slate-300",
-  CONFIRMED: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
 };
 
 function StatusBadge({ status }) {

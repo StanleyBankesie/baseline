@@ -8,9 +8,6 @@ import { Link, Route, Routes } from "react-router-dom";
 import ModuleDashboard from "../../../components/ModuleDashboard";
 import { api } from "../../../api/client.js";
 import { useAuth } from "../../../auth/AuthContext.jsx";
-import LicenseManagement from "../../admin/LicenseManagement.jsx";
-import PaymentPackages from "../../admin/PaymentPackages.jsx";
-
 import UserList from "./users/UserList.jsx";
 import UserForm from "./users/UserForm.jsx";
 import WorkflowList from "./workflows/WorkflowList.jsx";
@@ -18,23 +15,16 @@ import WorkflowForm from "./workflows/WorkflowForm.jsx";
 import MyApprovals from "./workflows/MyApprovals.jsx";
 import ApprovedDocuments from "./workflows/ApprovedDocuments.jsx";
 import DocumentReview from "./workflows/DocumentReview.jsx";
-import CompanyList from "./companies/CompanyList.jsx";
-import CompanyForm from "./companies/CompanyForm.jsx";
-import BranchList from "./branches/BranchList.jsx";
-import BranchForm from "./branches/BranchForm.jsx";
 import SystemLogBookPage from "./reports/SystemLogBookPage.jsx";
 import UserLoginActivityReportPage from "./reports/UserLoginActivityReportPage.jsx";
 import SettingsPage from "./SettingsPage.jsx";
 import DiagnosticsPage from "./DiagnosticsPage.jsx";
 import DocumentTemplatesPage from "./templates/DocumentTemplatesPage.jsx";
-import BackupPage from "./BackupPage.jsx";
 import RoleManagement from "./access-control/RoleManagementNew.jsx";
 import UserOverrides from "./access-control/UserOverrides.jsx";
 import ExceptionalPermissionsList from "./access-control/ExceptionalPermissionsList.jsx";
 import UserPermissions from "./access-control/UserPermissionsNew.jsx";
-import BackupManagement from "../../admin/BackupManagement.jsx";
-
-import AdminPermissionsPage from "../../admin/AdminPermissionsPage.jsx";
+import NotificationSettings from "./notifications/NotificationSettings.jsx";
 
 function AdministrationLanding() {
   const { user } = useAuth();
@@ -135,30 +125,9 @@ function AdministrationLanding() {
 
   const sections = [
     {
-      title: "System Configuration",
+      title: "System Health & Settings",
       badge: "Core",
       items: [
-        {
-          title: "Company Setup",
-          description: "Manage company information and settings",
-          path: "/administration/companies",
-          icon: "🏢",
-          hidden: false,
-          actions: [],
-        },
-        {
-          title: "Branch Setup",
-          description: "Configure and manage company branches",
-          path: "/administration/branches",
-          icon: "🏪",
-          actions: [
-            {
-              label: "View List",
-              path: "/administration/branches",
-              type: "outline",
-            },
-          ],
-        },
         {
           title: "Settings",
           description: "Push notifications and document templates",
@@ -272,43 +241,6 @@ function AdministrationLanding() {
     },
   ];
 
-  if (Number(user?.id) === 1) {
-    sections.push({
-      title: "Super Admin",
-      badge: "Exclusive",
-      items: [
-        {
-          title: "Admin Permissions",
-          description: "Manage system admin permissions",
-          path: "/administration/admin-permissions",
-          icon: "🛡️",
-          actions: [],
-        },
-        {
-          title: "Backup Settings",
-          description: "Configure system database backups",
-          path: "/administration/backup-settings",
-          icon: "💾",
-          actions: [],
-        },
-        {
-          title: "License Management",
-          description: "Manage client licenses",
-          path: "/administration/licenses",
-          icon: "🔑",
-          actions: [],
-        },
-        {
-          title: "Payment Packages",
-          description: "Manage pricing plans",
-          path: "/administration/payment-packages",
-          icon: "💳",
-          actions: [],
-        },
-      ],
-    });
-  }
-
   return (
     <ModuleDashboard
       title="Administration"
@@ -337,18 +269,13 @@ export default function AdministrationHome() {
       <Route path="/workflows/new" element={<WorkflowForm />} />
       <Route path="/workflows/:id" element={<WorkflowForm />} />
       <Route path="/workflows/approvals" element={<MyApprovals />} />
+      <Route path="/notifications" element={<NotificationSettings />} />
       <Route path="/workflows/approved" element={<ApprovedDocuments />} />
       <Route
         path="/workflows/approvals/:instanceId"
         element={<DocumentReview />}
       />
 
-      <Route path="/companies" element={<CompanyList />} />
-      <Route path="/companies/new" element={<CompanyForm />} />
-      <Route path="/companies/:id" element={<CompanyForm />} />
-      <Route path="/branches" element={<BranchList />} />
-      <Route path="/branches/new" element={<BranchForm />} />
-      <Route path="/branches/:id" element={<BranchForm />} />
       <Route path="/reports/system-log-book" element={<SystemLogBookPage />} />
       <Route
         path="/reports/user-login-activity"
@@ -368,12 +295,6 @@ export default function AdministrationHome() {
         path="/exceptional-permissions"
         element={<ExceptionalPermissionsList />}
       />
-      <Route path="/backups" element={<BackupManagement />} />
-      <Route path="/admin-permissions" element={<AdminPermissionsPage />} />
-      <Route path="/backup-settings" element={<BackupPage />} />
-      <Route path="/backup-settings" element={<BackupPage />} />
-      <Route path="/licenses" element={<LicenseManagement />} />
-      <Route path="/payment-packages" element={<PaymentPackages />} />
     </Routes>
   );
 }
@@ -413,24 +334,6 @@ export const administrationFeatures = [
     module_key: "administration",
     label: "Diagnostics",
     path: "/administration/diagnostics",
-    type: "feature",
-  },
-  {
-    module_key: "administration",
-    label: "System Backups",
-    path: "/administration/backups",
-    type: "feature",
-  },
-  {
-    module_key: "administration",
-    label: "Company Setup",
-    path: "/administration/companies",
-    type: "feature",
-  },
-  {
-    module_key: "administration",
-    label: "Branch Setup",
-    path: "/administration/branches",
     type: "feature",
   },
   {

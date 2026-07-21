@@ -42,6 +42,7 @@ import BusinessIntelligenceHome from "../pages/modules/business-intelligence/Bus
 import ServiceManagementHome from "../pages/modules/service-management/ServiceManagementHome.jsx";
 import TransportLayout from "../pages/modules/transport/TransportLayout.jsx";
 import ExecutiveOverviewRoutes from "../pages/modules/executive-overview/ExecutiveOverviewRoutes.jsx";
+import SystemConfigurationHome from "../pages/modules/system-configuration/SystemConfigurationHome.jsx";
 import NotificationsPage from "../pages/NotificationsPage.jsx";
 import SocialFeedPage from "../pages/social/SocialFeedPage.jsx";
 import RoleSetup from "../pages/admin/RoleSetup.jsx";
@@ -81,7 +82,7 @@ import FloatingChat from "../components/chat/FloatingChat.jsx";
 import FloatingCreateButton from "../components/FloatingCreateButton.jsx";
 import useSocket from "../hooks/useSocket.js";
 
-const AppRoutes = React.memo(function AppRoutes() {
+const AppRoutes = React.memo(function AppRoutes({ user }) {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
@@ -106,11 +107,21 @@ const AppRoutes = React.memo(function AppRoutes() {
       <Route path="/social-feed/:id" element={<SocialFeedPage />} />
       <Route path="/admin/roles" element={<RoleSetup />} />
       <Route path="/admin/user-permissions" element={<UserPermissions />} />
+      <Route 
+        path="/system-configuration/*" 
+        element={(user?.id === 1 || user?.id === 2) ? <SystemConfigurationHome /> : <Navigate to="/" replace />} 
+      />
     </Routes>
   );
 });
 
 const modules = [
+  {
+    key: "system-configuration",
+    label: "System Configuration",
+    path: "/system-configuration",
+    icon: <Settings />,
+  },
   {
     key: "administration",
     label: "Administration",
@@ -1990,6 +2001,9 @@ export default function AppShell() {
             </NavLink>
             {modules
               .filter((m) => {
+                if (m.key === "system-configuration") {
+                  return user?.id === 1 || user?.id === 2;
+                }
                 // Use PermissionContext to check if module should appear in sidebar
                 return canViewModule(m.key);
               })
@@ -2053,7 +2067,9 @@ export default function AppShell() {
                 </div>
               </div>
             ) : (
-              <AppRoutes />
+              <React.Suspense fallback={<div>Loading...</div>}>
+                <AppRoutes user={user} />
+              </React.Suspense>
             )}
           </div>
         </main>

@@ -19,6 +19,7 @@ import { query, pool } from "../db/pool.js";
 // Utility Dependencies
 import { httpError } from "../utils/httpError.js";
 import { ensureSalesOrderColumns } from "../utils/dbUtils.js";
+import { checkAndSendAutomaticNotification } from "../utils/externalNotification.js";
 import {
   getInactiveWorkflowBehavior,
   resolveWorkflowSelection,
@@ -3254,6 +3255,17 @@ router.get(
           o.created_at,
           u.username AS created_by_username,
           u.username AS created_by_name,
+          (
+            SELECT au.username
+            FROM adm_document_workflows dw
+            LEFT JOIN adm_users au ON au.id = dw.assigned_to_user_id
+            WHERE dw.company_id = o.company_id
+              AND dw.document_type = 'SALES_ORDER'
+              AND dw.document_id = o.id
+              AND dw.status = 'PENDING'
+            ORDER BY dw.id DESC
+            LIMIT 1
+          ) AS forwarded_to_username,
           EXISTS(
             SELECT 1 FROM sal_invoices i
             WHERE i.company_id = :companyId
@@ -3775,6 +3787,56 @@ router.put(
 );
 
 router.post(
+  "/orders/:id/send-notification",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  requireAnyPermission(["SAL.ORDER.VIEW"]),
+  async (req, res, next) => {
+    try {
+      const { companyId, branchIdsStr = "" } = req.scope || {};
+      const id = Number(req.params.id);
+      const { type } = req.body; // 'email', 'sms', 'whatsapp', 'all'
+      if (!Number.isFinite(id)) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+      if (!["email", "sms", "whatsapp", "all"].includes(type)) {
+        throw httpError(400, "VALIDATION_ERROR", "Invalid notification type");
+      }
+
+      // Import the utility dynamically or at the top. I'll import it dynamically to avoid modifying imports at top.
+      const { sendExternalNotification } = await import("../utils/externalNotification.js");
+
+      const [order] = await query(
+        `SELECT o.id, o.order_no, o.total_amount, c.customer_name, c.email AS customer_email, c.phone AS customer_phone
+         FROM sal_orders o
+         LEFT JOIN sal_customers c ON c.id = o.customer_id
+         WHERE o.id = :id AND o.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(o.branch_id, :branchIdsStr))
+         LIMIT 1`,
+        { id, companyId, branchIdsStr }
+      );
+
+      if (!order) throw httpError(404, "NOT_FOUND", "Sales Order not found");
+
+      const subject = `Sales Order ${order.order_no} from OmniSuite`;
+      const text = `Dear ${order.customer_name || 'Customer'},\n\nThis is a notification regarding your Sales Order ${order.order_no} for the amount of ${order.total_amount}.\n\nThank you for your business!`;
+      const html = `<p>Dear ${order.customer_name || 'Customer'},</p><p>This is a notification regarding your Sales Order <strong>${order.order_no}</strong> for the amount of ${order.total_amount}.</p><p>Thank you for your business!</p>`;
+
+      const results = await sendExternalNotification({
+        type,
+        recipientEmail: order.customer_email,
+        recipientPhone: order.customer_phone,
+        subject,
+        text,
+        html
+      });
+
+      res.json(results);
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+router.post(
   "/orders/:id/submit",
   requireAuth,
   requireCompanyScope,
@@ -3789,12 +3851,12 @@ router.post(
         throw httpError(400, "VALIDATION_ERROR", "Invalid id");
       const [existing] = await query(
         `
-        SELECT id, status, total_amount,
-          created_at,
+        SELECT sal_orders.id, sal_orders.status, sal_orders.total_amount,
+          sal_orders.created_at,
           u.username AS created_by_name
          FROM sal_orders
-        LEFT JOIN adm_users u ON u.id = created_by
-         WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
+        LEFT JOIN adm_users u ON u.id = sal_orders.created_by
+         WHERE sal_orders.id = :id AND sal_orders.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(sal_orders.branch_id, :branchIdsStr))
         LIMIT 1
         `,
         { id, companyId, branchId, branchIdsStr },
@@ -3856,8 +3918,8 @@ router.post(
           const wfId = wfRows[0].id;
           try {
             await query(
-              `INSERT INTO adm_workflow_steps (workflow_id, step_order, step_name, approver_user_id, approver_role_id, min_amount, max_amount, approval_limit, is_mandatory)
-               VALUES (:wfId, 1, 'Approval', :uid, NULL, NULL, NULL, NULL, 1)
+              `INSERT INTO adm_workflow_steps (workflow_id, step_order, step_name, approver_user_id, is_mandatory)
+               VALUES (:wfId, 1, 'Approval', :uid, 1)
                ON DUPLICATE KEY UPDATE approver_user_id = VALUES(approver_user_id)`,
               { wfId, uid: targetUserId },
             );
@@ -3878,12 +3940,24 @@ router.post(
       if (!activeWf) {
         const behavior = getInactiveWorkflowBehavior(inactiveWorkflow);
         if (behavior && behavior.toUpperCase() !== "AUTO_APPROVE") {
+          await query(
+            `UPDATE sal_orders SET status = 'SUBMITTED' WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(sal_orders.branch_id, :branchIdsStr))`,
+            { id, companyId, branchId, branchIdsStr },
+          );
           return res.json({ id, status: "SUBMITTED" });
         }
         await query(
           `UPDATE sal_orders SET status = 'APPROVED' WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
           { id, companyId, branchId, branchIdsStr },
         );
+        
+        await checkAndSendAutomaticNotification({
+          companyId,
+          moduleCode: "SALES_ORDER",
+          statusTrigger: "APPROVED",
+          documentId: id,
+        }).catch(err => console.error(err));
+
         return res.json({ id, status: "APPROVED" });
       }
 
@@ -3901,6 +3975,14 @@ router.post(
           `UPDATE sal_orders SET status = 'APPROVED' WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
           { id, companyId, branchId, branchIdsStr },
         );
+        
+        await checkAndSendAutomaticNotification({
+          companyId,
+          moduleCode: "SALES_ORDER",
+          statusTrigger: "APPROVED",
+          documentId: id,
+        }).catch(err => console.error(err));
+
         return res.json({ id, status: "APPROVED" });
       }
 

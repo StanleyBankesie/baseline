@@ -119,6 +119,8 @@ async function ensureNotificationPrefsTable() {
       pref_key VARCHAR(100) NOT NULL,
       push_enabled TINYINT(1) NOT NULL DEFAULT 0,
       email_enabled TINYINT(1) NOT NULL DEFAULT 0,
+      sms_enabled TINYINT(1) NOT NULL DEFAULT 0,
+      whatsapp_enabled TINYINT(1) NOT NULL DEFAULT 0,
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       PRIMARY KEY (user_id, pref_key),
@@ -139,9 +141,9 @@ router.get(
       const userId = toNumber(req.query?.user_id || 0) || null;
       if (userId) {
         const rows = await query(
-          `SELECT user_id, pref_key, push_enabled, email_enabled, created_at
-         FROM adm_notification_prefs
-         WHERE user_id = :userId AND pref_key = :key
+          `SELECT user_id, pref_key, push_enabled, email_enabled, sms_enabled, whatsapp_enabled, created_at
+           FROM adm_notification_prefs
+           WHERE user_id = :userId AND pref_key = :key
            LIMIT 1`,
           { userId, key },
         );
@@ -152,14 +154,16 @@ router.get(
               pref_key: key,
               push_enabled: 0,
               email_enabled: 0,
+              sms_enabled: 0,
+              whatsapp_enabled: 0,
             },
           });
         return res.json({ item: rows[0] });
       } else {
         const rows = await query(
-          `SELECT user_id, pref_key, push_enabled, email_enabled, created_at
-         FROM adm_notification_prefs
-         WHERE pref_key = :key`,
+          `SELECT user_id, pref_key, push_enabled, email_enabled, sms_enabled, whatsapp_enabled, created_at
+           FROM adm_notification_prefs
+           WHERE pref_key = :key`,
           { key },
         );
         return res.json({ items: rows });
@@ -179,18 +183,20 @@ router.put(
     try {
       await ensureNotificationPrefsTable();
       const key = String(req.params.key || "low-stock").trim();
-      const { user_id, push_enabled, email_enabled } = req.body || {};
+      const { user_id, push_enabled, email_enabled, sms_enabled, whatsapp_enabled } = req.body || {};
       const userId = toNumber(user_id);
       if (!userId) return res.status(400).json({ message: "Invalid user_id" });
       await query(
-        `INSERT INTO adm_notification_prefs (user_id, pref_key, push_enabled, email_enabled)
-         VALUES (:userId, :key, :push, :email)
-         ON DUPLICATE KEY UPDATE push_enabled = VALUES(push_enabled), email_enabled = VALUES(email_enabled)`,
+        `INSERT INTO adm_notification_prefs (user_id, pref_key, push_enabled, email_enabled, sms_enabled, whatsapp_enabled)
+         VALUES (:userId, :key, :push, :email, :sms, :whatsapp)
+         ON DUPLICATE KEY UPDATE push_enabled = VALUES(push_enabled), email_enabled = VALUES(email_enabled), sms_enabled = VALUES(sms_enabled), whatsapp_enabled = VALUES(whatsapp_enabled)`,
         {
           userId,
           key,
           push: Number(Boolean(push_enabled)),
           email: Number(Boolean(email_enabled)),
+          sms: Number(Boolean(sms_enabled)),
+          whatsapp: Number(Boolean(whatsapp_enabled)),
         },
       );
       res.json({ ok: true });

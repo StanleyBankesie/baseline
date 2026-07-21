@@ -8,6 +8,8 @@ import {
   verifyPaystackPayment,
   getInvoiceTemplate,
   saveInvoiceTemplate,
+  getReceiptTemplate,
+  saveReceiptTemplate,
   getGlobalLicenseStatus
 } from "../controllers/license.controller.js";
 import { requireAuth } from "../middleware/auth.js";
@@ -41,5 +43,7 @@ router.post("/", saveLicense);
 router.post("/company/:companyId/modules", saveModules);
 router.get("/invoice-template", getInvoiceTemplate);
 router.post("/invoice-template", saveInvoiceTemplate);
+router.get("/receipt-template", getReceiptTemplate);
+router.post("/receipt-template", saveReceiptTemplate);
 
 export default router;

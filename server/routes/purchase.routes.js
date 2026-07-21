@@ -21,6 +21,7 @@ import {
 import { query, pool } from "../db/pool.js";
 import { httpError } from "../utils/httpError.js";
 import { updateItemAverageCostTx } from "../services/costing.service.js";
+import { checkAndSendAutomaticNotification } from "../utils/externalNotification.js";
 import {
   recordMovementTx,
   ensureStockBalancesWarehouseInfrastructure,
@@ -3714,6 +3715,55 @@ router.post(
       conn.release();
     }
   },
+);
+
+router.post(
+  "/service-orders/:id/send-notification",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  requireAnyPermission(["PURCHASE.ORDER.VIEW", "PURCHASE.ORDER.MANAGE"]),
+  async (req, res, next) => {
+    try {
+      const { companyId, branchIdsStr = "" } = req.scope || {};
+      const id = Number(req.params.id);
+      const { type } = req.body;
+      if (!Number.isFinite(id)) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+      if (!["email", "sms", "whatsapp", "all"].includes(type)) {
+        throw httpError(400, "VALIDATION_ERROR", "Invalid notification type");
+      }
+
+      const { sendExternalNotification } = await import("../utils/externalNotification.js");
+
+      const [order] = await query(
+        `SELECT o.id, o.order_no, o.total_amount, s.supplier_name, s.email AS supplier_email, s.phone AS supplier_phone
+         FROM pur_service_orders o
+         LEFT JOIN pur_suppliers s ON s.id = o.supplier_id
+         WHERE o.id = :id AND o.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(o.branch_id, :branchIdsStr))
+         LIMIT 1`,
+        { id, companyId, branchIdsStr }
+      );
+
+      if (!order) throw httpError(404, "NOT_FOUND", "Service Order not found");
+
+      const subject = `Service Order ${order.order_no} from OmniSuite`;
+      const text = `Dear ${order.supplier_name || 'Supplier'},\n\nPlease find the details regarding Service Order ${order.order_no} for the amount of ${order.total_amount}.\n\nThank you!`;
+      const html = `<p>Dear ${order.supplier_name || 'Supplier'},</p><p>Please find the details regarding Service Order <strong>${order.order_no}</strong> for the amount of ${order.total_amount}.</p><p>Thank you!</p>`;
+
+      const results = await sendExternalNotification({
+        type,
+        recipientEmail: order.supplier_email,
+        recipientPhone: order.supplier_phone,
+        subject,
+        text,
+        html
+      });
+
+      res.json(results);
+    } catch (e) {
+      next(e);
+    }
+  }
 );
 
 router.put(
@@ -8465,6 +8515,14 @@ router.post(
           `UPDATE pur_orders SET status = 'APPROVED' WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
           { id, companyId, branchId, branchIdsStr },
         );
+        
+        await checkAndSendAutomaticNotification({
+          companyId,
+          moduleCode: "PURCHASE_ORDER",
+          statusTrigger: "APPROVED",
+          documentId: id,
+        }).catch(err => console.error(err));
+
         return res.json({ status: "APPROVED" });
       }
 
@@ -8482,6 +8540,14 @@ router.post(
           `UPDATE pur_orders SET status = 'APPROVED' WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
           { id, companyId, branchId, branchIdsStr },
         );
+        
+        await checkAndSendAutomaticNotification({
+          companyId,
+          moduleCode: "PURCHASE_ORDER",
+          statusTrigger: "APPROVED",
+          documentId: id,
+        }).catch(err => console.error(err));
+
         return res.json({ status: "APPROVED" });
       }
 
@@ -8680,6 +8746,55 @@ router.get(
       next(err);
     }
   },
+);
+
+router.post(
+  "/orders/:id/send-notification",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  requireAnyPermission(["PURCHASE.ORDER.VIEW", "PURCHASE.ORDER.MANAGE"]),
+  async (req, res, next) => {
+    try {
+      const { companyId, branchIdsStr = "" } = req.scope || {};
+      const id = Number(req.params.id);
+      const { type } = req.body; // 'email', 'sms', 'whatsapp', 'all'
+      if (!Number.isFinite(id)) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+      if (!["email", "sms", "whatsapp", "all"].includes(type)) {
+        throw httpError(400, "VALIDATION_ERROR", "Invalid notification type");
+      }
+
+      const { sendExternalNotification } = await import("../utils/externalNotification.js");
+
+      const [order] = await query(
+        `SELECT o.id, o.po_no, o.total_amount, s.supplier_name, s.email AS supplier_email, s.phone AS supplier_phone
+         FROM pur_orders o
+         LEFT JOIN pur_suppliers s ON s.id = o.supplier_id
+         WHERE o.id = :id AND o.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(o.branch_id, :branchIdsStr))
+         LIMIT 1`,
+        { id, companyId, branchIdsStr }
+      );
+
+      if (!order) throw httpError(404, "NOT_FOUND", "Purchase Order not found");
+
+      const subject = `Purchase Order ${order.po_no} from OmniSuite`;
+      const text = `Dear ${order.supplier_name || 'Supplier'},\n\nPlease find the details regarding Purchase Order ${order.po_no} for the amount of ${order.total_amount}.\n\nThank you!`;
+      const html = `<p>Dear ${order.supplier_name || 'Supplier'},</p><p>Please find the details regarding Purchase Order <strong>${order.po_no}</strong> for the amount of ${order.total_amount}.</p><p>Thank you!</p>`;
+
+      const results = await sendExternalNotification({
+        type,
+        recipientEmail: order.supplier_email,
+        recipientPhone: order.supplier_phone,
+        subject,
+        text,
+        html
+      });
+
+      res.json(results);
+    } catch (e) {
+      next(e);
+    }
+  }
 );
 
 router.put(

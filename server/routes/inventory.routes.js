@@ -26,6 +26,7 @@ import {
   ensureStockBalancesWarehouseInfrastructure,
 } from "../services/stock.service.js";
 import { isMailerConfigured, sendMail } from "../utils/mailer.js";
+import { sendExternalNotification } from "../utils/externalNotification.js";
 
 const router = express.Router();
 
@@ -10241,20 +10242,19 @@ router.post(
 
       let recipients = await query(
         `
-        SELECT DISTINCT u.id, u.email,
+        SELECT DISTINCT u.id, u.email, u.phone,
+          np.email_enabled, np.sms_enabled, np.whatsapp_enabled,
           u.created_at,
           cu.username AS created_by_name
          FROM adm_users u
         JOIN adm_notification_prefs np
           ON np.user_id = u.id
          AND np.pref_key = 'low-stock'
-         AND np.email_enabled = 1
         LEFT JOIN adm_users cu ON cu.id = u.created_by
          WHERE u.is_active = 1
           AND u.company_id = :companyId
           AND u.branch_id = :branchId
-          AND u.email IS NOT NULL
-          AND u.email <> ''
+          AND (np.email_enabled = 1 OR np.sms_enabled = 1 OR np.whatsapp_enabled = 1)
         `,
         { companyId, branchId },
       );
@@ -10262,7 +10262,8 @@ router.post(
       if (!recipients.length) {
         recipients = await query(
           `
-          SELECT id, email,
+          SELECT id, email, phone,
+          1 as email_enabled, 0 as sms_enabled, 0 as whatsapp_enabled,
           created_at,
           u.username AS created_by_name
          FROM adm_users
@@ -10271,8 +10272,6 @@ router.post(
             AND company_id = :companyId
             AND branch_id = :branchId
             AND is_active = 1
-            AND email IS NOT NULL
-            AND email <> ''
           LIMIT 1
           `,
           { userId: req.user.sub, companyId, branchId },
@@ -10303,16 +10302,19 @@ router.post(
       const html = `<p>${count} items are at or below reorder levels.</p><table border="1" cellpadding="6" cellspacing="0"><thead><tr><th>Code</th><th>Name</th><th>Qty</th><th>Reorder</th></tr></thead><tbody>${htmlRows}</tbody></table><p><a href="/inventory/alerts/low-stock">Open Alerts</a></p>`;
 
       for (const recipient of recipients) {
-        await sendMail({
-          to: recipient.email,
-          subject,
-          text,
-          html,
-        });
+        if (recipient.email_enabled && recipient.email) {
+          await sendExternalNotification({ type: 'email', recipientEmail: recipient.email, subject, text, html }).catch(()=>null);
+        }
+        if (recipient.sms_enabled && recipient.phone) {
+          await sendExternalNotification({ type: 'sms', recipientPhone: recipient.phone, text }).catch(()=>null);
+        }
+        if (recipient.whatsapp_enabled && recipient.phone) {
+          await sendExternalNotification({ type: 'whatsapp', recipientPhone: recipient.phone, text }).catch(()=>null);
+        }
       }
 
       res.json({
-        message: `Email notification sent to ${recipients.length} recipient${recipients.length === 1 ? "" : "s"}`,
+        message: `Notification dispatched to ${recipients.length} recipient${recipients.length === 1 ? "" : "s"}`,
       });
     } catch (err) {
       next(err);

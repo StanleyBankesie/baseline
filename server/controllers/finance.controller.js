@@ -5016,10 +5016,13 @@ export const listPdcPostings = async (req, res, next) => {
     const items = await query(
       `SELECT p.id, p.company_id, p.branch_id, p.bank_account_id, p.instrument_no,
               p.instrument_date, v.total_debit AS amount, v.voucher_date, p.status,
-              ba.name AS bank_account_name
+              ba.name AS bank_account_name, p.created_at, creator_user.username AS creator_username,
+              v.voucher_no, vt.code AS voucher_type_code
          FROM fin_pdc_postings p
          LEFT JOIN fin_vouchers v ON v.id = p.voucher_id
+         LEFT JOIN fin_voucher_types vt ON vt.id = v.voucher_type_id
          LEFT JOIN fin_bank_accounts ba ON ba.id = p.bank_account_id
+         LEFT JOIN adm_users creator_user ON creator_user.id = p.created_by
         WHERE p.company_id = :companyId
           AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(p.branch_id, :branchIdsStr)))
           AND (:status IS NULL OR p.status = :status)
@@ -5230,7 +5233,7 @@ export const getBankReconciliationSummary = async (req, res, next) => {
     if (!id)
       throw httpError(400, "VALIDATION_ERROR", "Invalid reconciliation id");
     const rows = await query(
-      `SELECT r.id, r.bank_account_id, r.statement_to, r.statement_ending_balance,
+      `SELECT r.id, r.bank_account_id, r.statement_from, r.statement_to, r.statement_ending_balance,
               ba.gl_account_id
          FROM fin_bank_reconciliations r
          JOIN fin_bank_accounts ba ON ba.id = r.bank_account_id
@@ -5249,33 +5252,23 @@ export const getBankReconciliationSummary = async (req, res, next) => {
         WHERE v.company_id = :companyId
           AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(v.branch_id, :branchIdsStr)))
           AND vl.account_id = :accountId
-          AND v.voucher_date < :asOfDate
+          AND v.voucher_date < :statementFrom
           AND COALESCE(v.status, 'DRAFT') NOT IN ('CANCELLED','REVERSED')`,
       {
         companyId,
         branchId: branchId || null, branchIdsStr: branchIdsStr || '',
         accountId: Number(rec.gl_account_id),
-        asOfDate: String(rec.statement_to),
+        statementFrom: rec.statement_from || rec.statement_to,
       },
     );
-    const endingRows = await query(
-      `SELECT COALESCE(SUM(vl.debit - vl.credit), 0) AS ending_book
-         FROM fin_voucher_lines vl
-         JOIN fin_vouchers v ON v.id = vl.voucher_id
-        WHERE v.company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(v.branch_id, :branchIdsStr)))
-          AND vl.account_id = :accountId
-          AND v.voucher_date <= :asOfDate
-          AND COALESCE(v.status, 'DRAFT') NOT IN ('CANCELLED','REVERSED')`,
-      {
-        companyId,
-        branchId: branchId || null, branchIdsStr: branchIdsStr || '',
-        accountId: Number(rec.gl_account_id),
-        asOfDate: String(rec.statement_to),
-      },
+    const clearedRows = await query(
+      `SELECT COALESCE(SUM(amount), 0) AS cleared_amount
+         FROM fin_bank_reconciliation_lines
+        WHERE reconciliation_id = :id AND cleared = 1`,
+      { id },
     );
     const openingBookBalance = Number(openingRows?.[0]?.opening_book || 0);
-    const endingBookBalance = Number(endingRows?.[0]?.ending_book || 0);
+    const endingBookBalance = openingBookBalance + Number(clearedRows?.[0]?.cleared_amount || 0);
     const bankBalance = Number(rec.statement_ending_balance || 0);
     const diffBankVsBook = bankBalance - endingBookBalance;
     res.json({ openingBookBalance, endingBookBalance, diffBankVsBook });

@@ -187,8 +187,8 @@ export default function SalesOrderForm() {
   const statuses = [
     { value: "DRAFT", label: "Draft", color: "bg-gray-100 text-gray-800" },
     {
-      value: "CONFIRMED",
-      label: "Confirmed",
+      value: "APPROVED",
+      label: "Approved",
       color: "bg-blue-100 text-blue-800",
     },
     {
@@ -1221,9 +1221,9 @@ export default function SalesOrderForm() {
     }
   };
 
-  const isConfirmed =
-    String(formData.status || "").toUpperCase() === "CONFIRMED";
-  const viewLocked = isViewMode && isConfirmed;
+  const isApproved =
+    String(formData.status || "").toUpperCase() === "APPROVED";
+  const viewLocked = isViewMode && isApproved;
   return (
     <>
       <div
@@ -1628,8 +1628,7 @@ export default function SalesOrderForm() {
                         onChange={handleInputChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0E3646]"
                         required={formData.payment_type === "CREDIT"}
-                      
-                        disabled={readOnly || (isEditMode && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+                        disabled={isViewMode || (isEditMode && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                       />
                     </div>
                   )}

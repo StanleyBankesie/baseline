@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "api/client";
 import { toast } from "react-toastify";
+import NotificationSettings from "./notifications/NotificationSettings.jsx";
 
 const TABS = [
   { key: "general", label: "General" },
@@ -268,63 +269,6 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
-          <div className="card">
-            <div className="card-body space-y-3">
-              <div className="flex justify-between items-start gap-4">
-                <div>
-                  <div className="text-lg font-semibold">Security & Inactivity</div>
-                  <div className="text-sm text-slate-500">Set how many minutes until an inactive user is automatically logged out. Set to 0 to disable.</div>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2 items-center">
-                <input type="number" min="0" className="input w-32" value={inactivityTimeout}
-                  onChange={e => { const val = e.target.value; setInactivityTimeout(val); try { if (typeof localStorage !== "undefined") localStorage.setItem("omnisuite.inactivityTimeout", val); } catch {} }} />
-                <span className="text-sm text-slate-600">minutes</span>
-              </div>
-            </div>
-          </div>
-          <div className="card">
-            <div className="card-body space-y-3">
-              <div className="text-lg font-semibold">Email</div>
-              <div className="text-sm text-slate-500">Send a test email to verify SMTP settings.</div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-slate-700">Recipient</label>
-                  <input className="input w-full" value={emailTestTo} onChange={e => setEmailTestTo(e.target.value)} placeholder="user@example.com (optional)" />
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button type="button" className="btn-primary" onClick={sendTestEmail} disabled={emailTesting}>{emailTesting ? "Sending..." : "Send Test Email"}</button>
-              </div>
-            </div>
-          </div>
-          <div className="card">
-            <div className="card-body space-y-3">
-              <div className="text-lg font-semibold">Cloudinary Storage</div>
-              <div className="text-sm text-slate-500">Store attachments in Cloudinary; links are saved to document records.</div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-slate-700">Cloud Name</label>
-                  <input className="input w-full" value={cloud.cloud_name} onChange={e => setCloud(p => ({ ...p, cloud_name: e.target.value }))} disabled={cloudLoading || cloudSaving} />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-700">API Key</label>
-                  <input className="input w-full" value={cloud.api_key} onChange={e => setCloud(p => ({ ...p, api_key: e.target.value }))} disabled={cloudLoading || cloudSaving} />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-700">API Secret</label>
-                  <input type="password" placeholder={cloud.has_secret && !cloud.api_secret ? "•••••••• (unchanged)" : ""} className="input w-full" value={cloud.api_secret} onChange={e => setCloud(p => ({ ...p, api_secret: e.target.value }))} disabled={cloudLoading || cloudSaving} />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-700">Folder (optional)</label>
-                  <input className="input w-full" value={cloud.folder} onChange={e => setCloud(p => ({ ...p, folder: e.target.value }))} disabled={cloudLoading || cloudSaving} />
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button type="button" className="btn-primary" onClick={saveCloudinary} disabled={cloudSaving}>{cloudSaving ? "Saving..." : "Save Cloudinary Settings"}</button>
-              </div>
-            </div>
-          </div>
         </div>
       )}
 
@@ -350,6 +294,13 @@ export default function SettingsPage() {
               <div className="text-xs text-slate-500">When enabled, the app registers for push after login and delivers background alerts.</div>
             </div>
           </div>
+
+          <div className="card">
+            <div className="card-body p-0">
+              <NotificationSettings />
+            </div>
+          </div>
+
           <div className="card">
             <div className="card-body space-y-3">
               <div className="text-lg font-semibold">Low Stock Notifications</div>
@@ -394,6 +345,8 @@ function LowStockNotificationSection() {
   const [selectedUserId, setSelectedUserId] = useState("");
   const [pushEnabled, setPushEnabled] = useState(false);
   const [emailEnabled, setEmailEnabled] = useState(false);
+  const [smsEnabled, setSmsEnabled] = useState(false);
+  const [whatsappEnabled, setWhatsappEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -417,7 +370,14 @@ function LowStockNotificationSection() {
         const item = res?.data?.item || null;
         setPushEnabled(Boolean(item?.push_enabled));
         setEmailEnabled(Boolean(item?.email_enabled));
-      } catch { setPushEnabled(false); setEmailEnabled(false); }
+        setSmsEnabled(Boolean(item?.sms_enabled));
+        setWhatsappEnabled(Boolean(item?.whatsapp_enabled));
+      } catch { 
+        setPushEnabled(false); 
+        setEmailEnabled(false); 
+        setSmsEnabled(false); 
+        setWhatsappEnabled(false); 
+      }
       finally { setLoading(false); }
     }
     loadPref();
@@ -427,7 +387,13 @@ function LowStockNotificationSection() {
     if (!selectedUserId) return;
     try {
       setSaving(true);
-      await api.put(`/access/notification-prefs/low-stock`, { user_id: Number(selectedUserId), push_enabled: pushEnabled ? 1 : 0, email_enabled: emailEnabled ? 1 : 0 });
+      await api.put(`/access/notification-prefs/low-stock`, { 
+        user_id: Number(selectedUserId), 
+        push_enabled: pushEnabled ? 1 : 0, 
+        email_enabled: emailEnabled ? 1 : 0,
+        sms_enabled: smsEnabled ? 1 : 0,
+        whatsapp_enabled: whatsappEnabled ? 1 : 0
+      });
     } catch {}
     setSaving(false);
   }
@@ -445,7 +411,7 @@ function LowStockNotificationSection() {
         <div className="space-y-3">
           {loading ? <div className="text-sm text-slate-500">Loading preferences...</div> : (
             <>
-              <div className="flex items-center gap-6">
+              <div className="flex flex-col gap-3">
                 <label className="flex items-center gap-2">
                   <input type="checkbox" className="checkbox" checked={pushEnabled} onChange={e => setPushEnabled(e.target.checked)} />
                   <span className="text-sm">Push notification + app notification</span>
@@ -453,6 +419,14 @@ function LowStockNotificationSection() {
                 <label className="flex items-center gap-2">
                   <input type="checkbox" className="checkbox" checked={emailEnabled} onChange={e => setEmailEnabled(e.target.checked)} />
                   <span className="text-sm">Email notification</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="checkbox" checked={smsEnabled} onChange={e => setSmsEnabled(e.target.checked)} />
+                  <span className="text-sm">SMS notification</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="checkbox" checked={whatsappEnabled} onChange={e => setWhatsappEnabled(e.target.checked)} />
+                  <span className="text-sm">WhatsApp notification</span>
                 </label>
               </div>
               <button className="btn-primary" disabled={saving} onClick={save}>{saving ? "Saving..." : "Save Preference"}</button>

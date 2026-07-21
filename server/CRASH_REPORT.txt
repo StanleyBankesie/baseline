@@ -8743,3 +8743,561 @@ Error: Refresh token is missing
     at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
     at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
 --------------------------------------------------------------------------------
+
+[2026-07-21T08:21:02.964Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/admin/companies/current (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/admin/companies/current
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at getCompanyById (file:///C:/Users/stanl/baseline/server/controllers/companies.controller.js:257:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at file:///C:/Users/stanl/baseline/server/middleware/access.js:248:16
+    at file:///C:/Users/stanl/baseline/server/middleware/requirePermission.js:77:7
+    at file:///C:/Users/stanl/baseline/server/middleware/access.js:66:16
+    at composedMiddleware (file:///C:/Users/stanl/baseline/server/middleware/requirePermission.js:75:5)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+--------------------------------------------------------------------------------
+
+[2026-07-21T10:34:35.759Z] HTTP_500
+Summary: Unknown column 'u.username' in 'field list'
+Request: GET /api/finance/pdc-postings (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/pdc-postings
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'u.username' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:576:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:682:24)
+    at async listPdcPostings (file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:5016:19)
+--------------------------------------------------------------------------------
+
+[2026-07-21T12:31:19.248Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-21T12:34:20.721Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-21T12:35:18.135Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-21T12:37:18.955Z] HTTP_401
+Summary: Authentication required
+Request: POST /api/licenses/invoice-template (status 401)
+Context:
+status: 401
+code: UNAUTHORIZED
+method: POST
+url: /api/licenses/invoice-template
+ip: 127.0.0.1
+origin: 
+userAgent: 
+userId: null
+companyId: null
+branchId: null
+body: {"html_content":"HELLO WORLD INVOICE"}
+query: {}
+Technical details:
+Error: Authentication required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:143:17)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:328:13)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+    at Function.handle (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:175:3)
+    at router (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:47:12)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+--------------------------------------------------------------------------------
+
+[2026-07-21T21:05:21.622Z] HTTP_500
+Summary: newStatus is not defined
+Request: POST /api/workflows/242/action (status 500)
+Context:
+status: 500
+code: null
+method: POST
+url: /api/workflows/242/action
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"APPROVE","comments":"","target_user_id":null}
+query: {}
+Technical details:
+ReferenceError: newStatus is not defined
+    at performAction (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:3313:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-21T21:05:33.442Z] HTTP_403
+Summary: You are not authorized to approve this step (Assigned to someone else)
+Request: POST /api/workflows/242/action (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: POST
+url: /api/workflows/242/action
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"APPROVE","comments":"","target_user_id":null}
+query: {}
+Technical details:
+Error: You are not authorized to approve this step (Assigned to someone else)
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at performAction (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:1628:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-21T21:05:45.443Z] HTTP_403
+Summary: You are not authorized to approve this step (Assigned to someone else)
+Request: POST /api/workflows/242/action (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: POST
+url: /api/workflows/242/action
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"APPROVE","comments":"","target_user_id":null}
+query: {}
+Technical details:
+Error: You are not authorized to approve this step (Assigned to someone else)
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at performAction (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:1628:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-21T21:07:16.886Z] HTTP_403
+Summary: You are not authorized to approve this step (Assigned to someone else)
+Request: POST /api/workflows/242/action (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: POST
+url: /api/workflows/242/action
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"APPROVE","comments":"","target_user_id":null}
+query: {}
+Technical details:
+Error: You are not authorized to approve this step (Assigned to someone else)
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at performAction (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:1628:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-21T21:07:46.359Z] HTTP_403
+Summary: You are not authorized to approve this step (Assigned to someone else)
+Request: POST /api/workflows/242/action (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: POST
+url: /api/workflows/242/action
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"RETURN","comments":"return","target_user_id":null}
+query: {}
+Technical details:
+Error: You are not authorized to approve this step (Assigned to someone else)
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at performAction (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:1628:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-21T21:22:54.907Z] HTTP_500
+Summary: wf is not defined
+Request: POST /api/workflows/243/action (status 500)
+Context:
+status: 500
+code: null
+method: POST
+url: /api/workflows/243/action
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"APPROVE","comments":"","target_user_id":null}
+query: {}
+Technical details:
+ReferenceError: wf is not defined
+    at performAction (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:3313:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-21T21:27:56.571Z] HTTP_403
+Summary: You are not authorized to approve this step (Assigned to someone else)
+Request: POST /api/workflows/243/action (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: POST
+url: /api/workflows/243/action
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"APPROVE","comments":"","target_user_id":null}
+query: {}
+Technical details:
+Error: You are not authorized to approve this step (Assigned to someone else)
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at performAction (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:1628:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-21T21:28:05.190Z] HTTP_403
+Summary: You are not authorized to approve this step (Assigned to someone else)
+Request: POST /api/workflows/243/action (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: POST
+url: /api/workflows/243/action
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"APPROVE","comments":"","target_user_id":null}
+query: {}
+Technical details:
+Error: You are not authorized to approve this step (Assigned to someone else)
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at performAction (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:1628:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-21T21:29:06.209Z] HTTP_403
+Summary: You are not authorized to approve this step (Assigned to someone else)
+Request: POST /api/workflows/243/action (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: POST
+url: /api/workflows/243/action
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"APPROVE","comments":"","target_user_id":null}
+query: {}
+Technical details:
+Error: You are not authorized to approve this step (Assigned to someone else)
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at performAction (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:1628:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-21T21:49:57.066Z] HTTP_403
+Summary: You are not authorized to approve this step (Assigned to someone else)
+Request: POST /api/workflows/245/action (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: POST
+url: /api/workflows/245/action
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"APPROVE","comments":"","target_user_id":null}
+query: {}
+Technical details:
+Error: You are not authorized to approve this step (Assigned to someone else)
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at performAction (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:1628:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-21T21:50:03.759Z] HTTP_403
+Summary: You are not authorized to approve this step (Assigned to someone else)
+Request: POST /api/workflows/245/action (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: POST
+url: /api/workflows/245/action
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"APPROVE","comments":"","target_user_id":null}
+query: {}
+Technical details:
+Error: You are not authorized to approve this step (Assigned to someone else)
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at performAction (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:1628:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-21T21:50:08.021Z] HTTP_403
+Summary: You are not authorized to approve this step (Assigned to someone else)
+Request: POST /api/workflows/244/action (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: POST
+url: /api/workflows/244/action
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"APPROVE","comments":"","target_user_id":null}
+query: {}
+Technical details:
+Error: You are not authorized to approve this step (Assigned to someone else)
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at performAction (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:1628:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-21T21:50:09.209Z] HTTP_403
+Summary: You are not authorized to approve this step (Assigned to someone else)
+Request: POST /api/workflows/244/action (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: POST
+url: /api/workflows/244/action
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"APPROVE","comments":"","target_user_id":null}
+query: {}
+Technical details:
+Error: You are not authorized to approve this step (Assigned to someone else)
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at performAction (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:1628:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-21T22:17:32.333Z] HTTP_404
+Summary: Request failed with status 404
+Request: POST /api/admin/auth/login (status 404)
+Context:
+requestId: mrv7s339-4zmpg0e0
+durationMs: 8
+method: POST
+url: /api/admin/auth/login
+ip: 127.0.0.1
+origin: 
+userAgent: 
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-21T22:17:32.367Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: 127.0.0.1
+remotePort: 54008
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-07-21T22:22:53.978Z] HTTP_403
+Summary: You are not authorized to approve this step (Assigned to someone else)
+Request: POST /api/workflows/248/action (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: POST
+url: /api/workflows/248/action
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"APPROVE","comments":"","target_user_id":null}
+query: {}
+Technical details:
+Error: You are not authorized to approve this step (Assigned to someone else)
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at performAction (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:1628:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-21T22:30:55.258Z] HTTP_404
+Summary: Workflow not found
+Request: GET /api/workflows/24 (status 404)
+Context:
+status: 404
+code: NOT_FOUND
+method: GET
+url: /api/workflows/24
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Workflow not found
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at getWorkflow (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:870:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-21T22:35:09.785Z] HTTP_404
+Summary: Workflow not found
+Request: GET /api/workflows/24 (status 404)
+Context:
+status: 404
+code: NOT_FOUND
+method: GET
+url: /api/workflows/24
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Workflow not found
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at getWorkflow (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:870:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-21T22:35:41.709Z] HTTP_404
+Summary: Workflow not found
+Request: GET /api/workflows/24 (status 404)
+Context:
+status: 404
+code: NOT_FOUND
+method: GET
+url: /api/workflows/24
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Workflow not found
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at getWorkflow (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:870:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-21T22:39:04.058Z] HTTP_400
+Summary: Invalid status
+Request: PUT /api/purchase/general-requisitions/7/status (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: PUT
+url: /api/purchase/general-requisitions/7/status
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"status":"PENDING_APPROVAL"}
+query: {}
+Technical details:
+Error: Invalid status
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/routes/purchase.routes.js:9726:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------

@@ -20,6 +20,7 @@ import {
   ListPdfIconButton,
   ListAttachmentIconButton,
 } from "@/components/list/ListDocActionIconButtons.jsx";
+import NotificationModal from "../../../../components/NotificationModal.jsx";
 
 /**
  *  component
@@ -53,6 +54,8 @@ export default function PurchaseOrdersLocalList() {
   const [hasInactiveWorkflow, setHasInactiveWorkflow] = useState(false);
   const [showAttach, setShowAttach] = useState(false);
   const [activeDocId, setActiveDocId] = useState(null);
+  const [sendingEmailId, setSendingEmailId] = useState(null);
+
   const { canPerformAction, hasExceptional } = usePermission();
   const [cancelDenied, setCancelDenied] = useState(false);
 
@@ -293,6 +296,19 @@ export default function PurchaseOrdersLocalList() {
       }
     } else {
       await computeCandidate();
+    }
+  };
+
+  const sendEmail = async (id) => {
+    if (sendingEmailId) return;
+    setSendingEmailId(id);
+    try {
+      await api.post(`/api/purchase/orders/${id}/send-notification`, { type: 'email' });
+      toast.success("Email sent successfully!");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to send email");
+    } finally {
+      setSendingEmailId(null);
     }
   };
 
@@ -658,6 +674,7 @@ export default function PurchaseOrdersLocalList() {
                 <SortableHeader label="Total Amount" sortKey="total_amount" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-right" />
                 <SortableHeader label="Status" sortKey="status" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                 <th className="text-right">Actions</th>
+                <th className="text-center">Send</th>
                 <SortableHeader label="Created By" sortKey="created_by_username" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                 <SortableHeader label="Created Date" sortKey="created_at" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
               </tr>
@@ -666,7 +683,7 @@ export default function PurchaseOrdersLocalList() {
               {loading ? (
                 <tr>
                   <td
-                    colSpan="8"
+                    colSpan="9"
                     className="text-center py-8 text-slate-500 dark:text-slate-400"
                   >
                     Loading...
@@ -674,7 +691,7 @@ export default function PurchaseOrdersLocalList() {
                 </tr>
               ) : error ? (
                 <tr>
-                  <td colSpan="8" className="text-center py-8 text-red-600">
+                  <td colSpan="9" className="text-center py-8 text-red-600">
                     {error}
                   </td>
                 </tr>
@@ -682,7 +699,7 @@ export default function PurchaseOrdersLocalList() {
               {!loading && filteredOrders.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="8"
+                    colSpan="9"
                     className="text-center py-8 text-slate-500 dark:text-slate-400"
                   >
                     No purchase orders found
@@ -809,6 +826,16 @@ export default function PurchaseOrdersLocalList() {
                           </div>
                         </div>
                       </div>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <button
+                        type="button"
+                        disabled={sendingEmailId === po.id}
+                        className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors h-9 disabled:opacity-50"
+                        onClick={() => sendEmail(po.id)}
+                      >
+                        {sendingEmailId === po.id ? 'Sending...' : 'Send Email'}
+                      </button>
                     </td>
                     <td>{po.created_by_username || po.created_by_name || "-"}</td>
                     <td>{po.created_at ? new Date(po.created_at).toLocaleDateString() : "-"}</td>
@@ -1005,13 +1032,10 @@ export default function PurchaseOrdersLocalList() {
         </div>
       ) : null}
       <DocumentAttachmentsModal
-        open={showAttach}
-        onClose={() => {
-          setShowAttach(false);
-          setActiveDocId(null);
-        }}
-        docType="purchase-order-local"
-        docId={activeDocId}
+        open={!!activeDocId}
+        documentId={activeDocId}
+        documentType="PURCHASE_ORDER"
+        onClose={() => setActiveDocId(null)}
       />
     </div>
   );
