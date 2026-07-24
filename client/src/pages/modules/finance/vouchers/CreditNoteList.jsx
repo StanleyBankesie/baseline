@@ -19,6 +19,8 @@ import ReverseApprovalButton from "../../../../components/ReverseApprovalButton.
 import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
 import { filterAndSort } from "@/utils/searchUtils.js";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 function StatusBadge({ status }) {
   const cls =
@@ -39,6 +41,7 @@ function StatusBadge({ status }) {
  * @returns {JSX.Element} The rendered component
  */
 export default function CreditNoteList() {
+  const [viewMode, setViewMode] = useViewMode();
   const { canPerformAction } = usePermission();
   const location = useLocation();
   const [items, setItems] = useState([]);
@@ -64,6 +67,7 @@ export default function CreditNoteList() {
   const [selectedVoucher, setSelectedVoucher] = useState(null);
   const [wfLoading, setWfLoading] = useState(false);
   const [wfError, setWfError] = useState("");
+  const [forwardComments, setForwardComments] = useState("");
   const [candidateWorkflow, setCandidateWorkflow] = useState(null);
   const [workflowSteps, setWorkflowSteps] = useState([]);
   const [firstApprover, setFirstApprover] = useState(null);
@@ -946,6 +950,7 @@ export default function CreditNoteList() {
     setSelectedVoucher(v);
     setShowForwardModal(true);
     setWfError("");
+                    setForwardComments("");
     if (!workflowsCache) {
       try {
         setWfLoading(true);
@@ -969,6 +974,7 @@ export default function CreditNoteList() {
       setFirstApprover(null);
       setWorkflowSteps([]);
       setWfError("");
+                    setForwardComments("");
       return;
     }
     const route = isPV
@@ -1066,6 +1072,7 @@ export default function CreditNoteList() {
       setFirstApprover(null);
       setWorkflowSteps([]);
       setWfError("");
+                    setForwardComments("");
       return;
     }
     const route = isPV
@@ -1214,6 +1221,7 @@ export default function CreditNoteList() {
           amount,
           workflow_id: candidateWorkflow ? candidateWorkflow.id : null,
           target_user_id: targetApproverId || null,
+        comments: forwardComments,
         },
       );
       const newStatus = res?.data?.status || "PENDING_APPROVAL";
@@ -1351,8 +1359,13 @@ export default function CreditNoteList() {
           ) : sortedVouchers.length === 0 ? (
             <div className="text-center py-12">No vouchers found.</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="table">
+            
+                <>
+<div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+              <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
                 <thead>
                   <tr>
                     <SortableHeader label="Voucher No" sortKey="voucher_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
@@ -1471,7 +1484,7 @@ export default function CreditNoteList() {
                                       </ReverseApprovalButton>
                                     )}
                                   </div>
-                                ) : v.forwarded_to_username ? (
+                                ) : v.forwarded_to_username && !["RETURNED", "DRAFT"].includes(String(v.status || "").toUpperCase()) ? (
                                   <span className="list-approval-forwarded-pill">
                                     Forwarded to {v.forwarded_to_username}
                                   </span>
@@ -1497,7 +1510,9 @@ export default function CreditNoteList() {
                 </tbody>
               </table>
             </div>
-          )}
+          
+</>
+)}
         </div>
       </div>
       {showForwardModal ? (
@@ -1514,6 +1529,7 @@ export default function CreditNoteList() {
                   setTargetApproverId(null);
                   setWorkflowSteps([]);
                   setWfError("");
+                    setForwardComments("");
                 }}
                 className="text-white hover:text-slate-200 text-xl font-bold"
               >
@@ -1606,7 +1622,18 @@ export default function CreditNoteList() {
                 })()}
               </div>
             </div>
-            <div className="p-4 border-t flex justify-end gap-2 bg-gray-50">
+            
+                <div className="mt-4 p-4 border-t border-slate-200">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Comments (Optional)</label>
+                  <textarea
+                    value={forwardComments}
+                    onChange={(e) => setForwardComments(e.target.value)}
+                    className="w-full border-slate-300 rounded-md focus:ring-brand focus:border-brand sm:text-sm"
+                    rows={3}
+                    placeholder="Add any comments for the approver..."
+                  />
+                </div>
+              <div className="p-4 border-t flex justify-end gap-2 bg-gray-50">
               <button
                 type="button"
                 className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
@@ -1618,6 +1645,7 @@ export default function CreditNoteList() {
                   setTargetApproverId(null);
                   setWorkflowSteps([]);
                   setWfError("");
+                    setForwardComments("");
                 }}
               >
                 Cancel

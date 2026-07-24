@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import { api } from "api/client";
 import { toast } from "react-toastify";
 import { Plus, Trash2 } from "lucide-react";
@@ -23,6 +23,8 @@ export default function SalesReturnForm() {
       ? Number(returnRouteId)
       : null;
   const isEdit = Boolean(existingId);
+  const location = useLocation();
+  const readOnly = new URLSearchParams(location.search).get("mode") === "view";
   const { hasExceptional } = usePermission();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");

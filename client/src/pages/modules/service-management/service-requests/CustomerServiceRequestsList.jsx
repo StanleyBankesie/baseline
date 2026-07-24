@@ -14,6 +14,8 @@ import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
 import DocumentAttachmentsModal from "@/components/attachments/DocumentAttachmentsModal.jsx";
 import { ListAttachmentIconButton } from "@/components/list/ListDocActionIconButtons.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -21,6 +23,7 @@ import { ListAttachmentIconButton } from "@/components/list/ListDocActionIconBut
  * @returns {JSX.Element} The rendered component
  */
 export default function CustomerServiceRequestsList() {
+  const [viewMode, setViewMode] = useViewMode();
   const location = useLocation();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,6 +40,7 @@ export default function CustomerServiceRequestsList() {
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [wfLoading, setWfLoading] = useState(false);
   const [wfError, setWfError] = useState("");
+  const [forwardComments, setForwardComments] = useState("");
   const [candidateWorkflow, setCandidateWorkflow] = useState(null);
   const [firstApprover, setFirstApprover] = useState(null);
   const [workflowSteps, setWorkflowSteps] = useState([]);
@@ -166,6 +170,7 @@ export default function CustomerServiceRequestsList() {
       setCandidateWorkflow(null);
       setFirstApprover(null);
       setWfError("");
+                    setForwardComments("");
       setHasInactiveWorkflow(false);
       return;
     }
@@ -215,6 +220,7 @@ export default function CustomerServiceRequestsList() {
     setSelectedDoc(doc);
     setShowForwardModal(true);
     setWfError("");
+                    setForwardComments("");
     setTargetApproverId(null);
     setWfLoading(true);
     await computeCandidateFromList(workflowsCache || []);
@@ -231,6 +237,7 @@ export default function CustomerServiceRequestsList() {
         {
           workflow_id: candidateWorkflow ? candidateWorkflow.id : null,
           target_user_id: targetApproverId || null,
+        comments: forwardComments,
         }
       );
       const newStatus = res?.data?.status || "PENDING_APPROVAL";
@@ -295,8 +302,12 @@ export default function CustomerServiceRequestsList() {
             />
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="table">
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
               <thead>
                 <tr>
                   <SortableHeader label="No" sortKey="request_no" currentKey={currentSortKey} direction={currentSortDir} onToggle={toggle} />
@@ -394,7 +405,7 @@ export default function CustomerServiceRequestsList() {
                                     />
                                   )}
                                 </div>
-                              ) : r.forwarded_to_username ? (
+                              ) : r.forwarded_to_username && !["RETURNED", "DRAFT"].includes(String(r.status || "").toUpperCase()) ? (
                                 <span className="list-approval-forwarded-pill">
                                   Forwarded to {r.forwarded_to_username}
                                 </span>
@@ -514,6 +525,7 @@ export default function CustomerServiceRequestsList() {
                   setCandidateWorkflow(null);
                   setFirstApprover(null);
                   setWfError("");
+                    setForwardComments("");
                 }}
                 className="text-white hover:text-slate-200 text-xl font-bold"
               >
@@ -608,7 +620,18 @@ export default function CustomerServiceRequestsList() {
                 })()}
               </div>
             </div>
-            <div className="p-4 border-t flex justify-end gap-2 bg-gray-50">
+            
+                <div className="mt-4 p-4 border-t border-slate-200">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Comments (Optional)</label>
+                  <textarea
+                    value={forwardComments}
+                    onChange={(e) => setForwardComments(e.target.value)}
+                    className="w-full border-slate-300 rounded-md focus:ring-brand focus:border-brand sm:text-sm"
+                    rows={3}
+                    placeholder="Add any comments for the approver..."
+                  />
+                </div>
+              <div className="p-4 border-t flex justify-end gap-2 bg-gray-50">
               <button
                 type="button"
                 className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
@@ -618,6 +641,7 @@ export default function CustomerServiceRequestsList() {
                   setCandidateWorkflow(null);
                   setFirstApprover(null);
                   setWfError("");
+                    setForwardComments("");
                 }}
               >
                 Cancel

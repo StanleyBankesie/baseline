@@ -7,6 +7,8 @@ import { Link } from "react-router-dom";
 
 import { api } from "api/client";
 import { filterAndSort } from "@/utils/searchUtils.js";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  * WarehousesList component
@@ -15,6 +17,7 @@ import { filterAndSort } from "@/utils/searchUtils.js";
  * @returns {JSX.Element} The warehouse listing page.
  */
 export default function WarehousesList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [searchTerm, setSearchTerm] = useState("");
   const [warehouses, setWarehouses] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -91,8 +94,12 @@ export default function WarehousesList() {
             />
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="table table-fixed">
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={ "table table-fixed " + (viewMode === 'grid' ? 'table-grid-mode' : '') }>
               <thead>
                 <tr>
                   <th>Code</th>

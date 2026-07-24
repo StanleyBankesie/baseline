@@ -5,11 +5,17 @@ import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 export default function TransportExpenseList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [items, setItems] = useState([]);
-  const [trips, setTrips] = useState([]);
+  const [expenseLogs, setExpenseLogs] = useState([]);
   const [vehicles, setVehicles] = useState([]);
+  const [complianceBills, setComplianceBills] = useState([]);
+  const [servicingBills, setServicingBills] = useState([]);
+  const [expenseTypes, setExpenseTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -23,7 +29,7 @@ export default function TransportExpenseList() {
   const [supplierSearch, setSupplierSearch] = useState("");
 
   const [form, setForm] = useState({
-    trip_id: "", vehicle_id: "", expense_date: new Date().toISOString().split('T')[0],
+    expense_log_id: "", vehicle_id: "", compliance_id: "", servicing_id: "", expense_date: new Date().toISOString().split('T')[0],
     amount: "", currency: "GHS", description: "", status: "PENDING",
     supplier_id: "", supplier_name: "", payment_method: "Cash", payment_account_id: "", is_tax_included: false, tax_code_id: "",
     reference_no: "", cheque_date: "", cost_center_id: "", expense_type: "Other"
@@ -48,8 +54,14 @@ export default function TransportExpenseList() {
 
   useEffect(() => {
     fetchExpenses();
-    api.get("/transport/trips").then(r => setTrips(r.data?.data?.items || r.data?.items || [])).catch(() => {});
+    api.get("/transport/expense-logs").then(r => setExpenseLogs(r.data?.data?.items || r.data?.items || [])).catch(() => {});
     api.get("/transport/vehicles").then(r => setVehicles(r.data?.data?.items || r.data?.items || [])).catch(() => {});
+    api.get("/transport/compliance").then(r => setComplianceBills(r.data?.data?.items || r.data?.items || [])).catch(() => {});
+    api.get("/transport/servicing").then(r => setServicingBills(r.data?.data?.items || r.data?.items || [])).catch(() => {});
+    api.get("/transport/setup").then(r => {
+      const items = r.data?.data?.items || r.data?.items || [];
+      setExpenseTypes(items.filter(i => i.setup_type === 'EXPENSE_TYPE' && i.is_active));
+    }).catch(() => {});
     api.get("/purchase/suppliers").then(r => {
       setSuppliers(r.data?.items || r.data?.data?.items || []);
     }).catch(() => {});
@@ -63,8 +75,7 @@ export default function TransportExpenseList() {
 
   const openCreate = () => {
     setEditing(null);
-    setSupplierSearch("");
-    setForm({ trip_id: "", vehicle_id: "", expense_date: new Date().toISOString().split('T')[0], amount: "", currency: "GHS", description: "", status: "PENDING", supplier_id: "", supplier_name: "", payment_method: "Cash", payment_account_id: "", is_tax_included: false, tax_code_id: "", reference_no: "", cheque_date: "", cost_center_id: "", expense_type: "Other" });
+    setForm({ expense_log_id: "", vehicle_id: "", compliance_id: "", servicing_id: "", expense_date: new Date().toISOString().split('T')[0], amount: "", currency: "GHS", description: "", status: "PENDING", supplier_id: "", supplier_name: "", payment_method: "Cash", payment_account_id: "", is_tax_included: false, tax_code_id: "", reference_no: "", cheque_date: "", cost_center_id: "", expense_type: "Other" });
     setShowModal(true);
   };
 
@@ -72,10 +83,12 @@ export default function TransportExpenseList() {
     setEditing(item);
     const matchedSupplier = suppliers.find(s => String(s.id) === String(item.supplier_id));
     setSupplierSearch(matchedSupplier?.supplier_name || "");
-    setForm({ 
-      trip_id: item.trip_id || "", vehicle_id: item.vehicle_id || "", expense_date: item.expense_date?.split('T')[0] || "", amount: item.amount, currency: item.currency || "GHS", description: item.description || "", status: item.status,
-      supplier_id: item.supplier_id || "", supplier_name: matchedSupplier?.supplier_name || "", payment_method: item.payment_method || "Cash", payment_account_id: item.payment_account_id || "", is_tax_included: Boolean(item.is_tax_included), tax_code_id: item.tax_code_id || "",
-      reference_no: item.reference_no || "", cheque_date: item.cheque_date?.split('T')[0] || "", cost_center_id: item.cost_center_id || "", expense_type: item.expense_type || "Other"
+    setForm({
+      expense_type: item.expense_type || "Other",
+      expense_log_id: item.expense_log_id || "", vehicle_id: item.vehicle_id || "", compliance_id: item.compliance_id || "", servicing_id: item.servicing_id || "", 
+      expense_date: item.expense_date?.split('T')[0] || "", amount: item.amount, currency: item.currency || "GHS", description: item.description || "", status: item.status,
+      supplier_id: item.supplier_id || "", supplier_name: item.supplier_name || "", payment_method: item.payment_method || "Cash", payment_account_id: item.payment_account_id || "", is_tax_included: Number(item.is_tax_included)===1, tax_code_id: item.tax_code_id || "",
+      reference_no: item.reference_no || "", cheque_date: item.cheque_date?.split('T')[0] || "", cost_center_id: item.cost_center_id || ""
     });
     setShowModal(true);
   };
@@ -89,18 +102,35 @@ export default function TransportExpenseList() {
     }
 
     setSaving(true);
+    let description = form.description;
+    if (!description) {
+      if (form.expense_type === "Compliance" && form.compliance_id) {
+        const comp = complianceBills.find(p => String(p.id) === String(form.compliance_id));
+        description = `Transportation Expense - Compliance: ${comp?.compliance_type || 'N/A'}`;
+      } else if (form.expense_type === "Servicing" && form.servicing_id) {
+        const srv = servicingBills.find(p => String(p.id) === String(form.servicing_id));
+        description = `Transportation Expense - Servicing: ${srv?.service_no || 'N/A'}`;
+      } else if (form.expense_log_id) {
+        const log = expenseLogs.find(p => String(p.id) === String(form.expense_log_id));
+        description = `Transportation Expense - Log: ${log?.log_no || 'N/A'}`;
+      } else {
+        const vehicle = vehicles.find(v => String(v.id) === String(form.vehicle_id));
+        description = `Transportation Expense - Vehicle: ${vehicle?.registration_number || 'N/A'}`;
+      }
+    }
+    const finalForm = { ...form, description };
+
     try {
       if (editing) {
-        await api.put(`/transport/expenses/${editing.id}`, form);
+        await api.put(`/transport/expenses/${editing.id}`, finalForm);
         toast.success("Expense updated");
       } else {
-        const expRes = await api.post("/transport/expenses", form);
+        const expRes = await api.post("/transport/expenses", finalForm);
         const expId = expRes.data?.id;
         toast.success("Expense recorded");
         
         try {
           const supplier = suppliers.find(s => String(s.id) === String(form.supplier_id));
-          const trip = trips.find(p => String(p.id) === String(form.trip_id));
           const vehicle = vehicles.find(v => String(v.id) === String(form.vehicle_id));
           
           let suppAcc = accounts.find(a => String(a.code) === String(supplier?.supplier_code));
@@ -110,7 +140,6 @@ export default function TransportExpenseList() {
             const totalAmount = Number(form.amount);
             let totalTaxAmount = 0;
             const newLines = [];
-            const description = form.description || `Transportation Expense - Trip: ${trip?.trip_no || 'N/A'}, Vehicle: ${vehicle?.registration_number || 'N/A'}`;
             const currencyCode = form.currency || "GHS";
 
             // 1. Credit the Supplier Account
@@ -179,7 +208,7 @@ export default function TransportExpenseList() {
                 description: description,
                 referenceNo: form.reference_no,
               },
-              narration: `Paid to: ${form.supplier_name} | Method: ${form.payment_method}${form.reference_no ? ` | Ref: ${form.reference_no}` : ''} | ${form.description || ''}`,
+              narration: `Paid to: ${form.supplier_name} | Method: ${form.payment_method}${form.reference_no ? ` | Ref: ${form.reference_no}` : ''} | ${description || ''}`,
               lines: newLines,
               costCenterId: form.cost_center_id
             };
@@ -211,8 +240,50 @@ export default function TransportExpenseList() {
     String(i.description || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const availableServicingBills = servicingBills.filter(p => !items.some(exp => String(exp.servicing_id) === String(p.id)) || String(p.id) === String(form.servicing_id));
+
+  const handleServicingChange = (e) => {
+    const val = e.target.value;
+    const selected = servicingBills.find(p => String(p.id) === String(val));
+    if (selected) {
+      setForm(f => ({ ...f, servicing_id: val, amount: selected.total_cost || f.amount, vehicle_id: selected.vehicle_id || f.vehicle_id }));
+    } else {
+      setForm(f => ({ ...f, servicing_id: val }));
+    }
+  };
+
+  const handleComplianceChange = (e) => {
+    const val = e.target.value;
+    const selected = complianceBills.find(p => String(p.id) === String(val));
+    if (selected) {
+      setForm(f => ({ ...f, compliance_id: val, amount: selected.premium_amount || f.amount, vehicle_id: selected.vehicle_id || f.vehicle_id }));
+    } else {
+      setForm(f => ({ ...f, compliance_id: val }));
+    }
+  };
+
+  const handleExpenseLogChange = (e) => {
+    const val = e.target.value;
+    const selected = expenseLogs.find(p => String(p.id) === String(val));
+    if (selected) {
+      setForm(f => ({ 
+        ...f, 
+        expense_log_id: val, 
+        amount: selected.amount || f.amount, 
+        vehicle_id: selected.vehicle_id || f.vehicle_id,
+        supplier_id: selected.supplier_id || f.supplier_id,
+        supplier_name: selected.supplier_name || f.supplier_name
+      }));
+      if (selected.supplier_name) {
+        setSupplierSearch(selected.supplier_name);
+      }
+    } else {
+      setForm(f => ({ ...f, expense_log_id: val }));
+    }
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="p-4 w-full mx-auto space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold">Transportation Expenses</h2>
@@ -241,8 +312,13 @@ export default function TransportExpenseList() {
         {loading ? (
           <div className="flex justify-center p-8"><Loader2 className="w-8 h-8 animate-spin" /></div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="table w-full">
+          
+                <>
+<div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={ "table w-full " + (viewMode === 'grid' ? 'table-grid-mode' : '') }>
               <thead>
                 <tr>
                   <SortableHeader label="Date" sortKey="expense_date" currentKey={sortKey} direction={sortDir} onToggle={requestSort} />
@@ -288,7 +364,9 @@ export default function TransportExpenseList() {
               </tbody>
             </table>
           </div>
-        )}
+        
+</>
+)}
       </div>
 
       {showModal && (
@@ -302,30 +380,59 @@ export default function TransportExpenseList() {
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="form-control">
-                  <label className="label"><span className="label-text">Trip (Optional)</span></label>
-                  <select className="input input-bordered w-full" value={form.trip_id} onChange={e => setForm({...form, trip_id: e.target.value})}>
-                    <option value="">-- Select Trip --</option>
-                    {trips.map(p => <option key={p.id} value={p.id}>{p.trip_number || p.trip_no}</option>)}
+                  <label className="label"><span className="label-text">Expense Type</span></label>
+                  <select className="input input-bordered w-full" value={form.expense_type} onChange={e => setForm({...form, expense_type: e.target.value, expense_log_id: "", compliance_id: "", servicing_id: ""})}>
+                    {expenseTypes.map(t => (
+                      <option key={t.id} value={t.setup_value}>{t.setup_value}</option>
+                    ))}
+                    <option value="Compliance">Compliance</option>
+                    <option value="Servicing">Servicing</option>
+                    {expenseTypes.length === 0 && (
+                      <>
+                        <option value="Road Worthy">Road Worthy</option>
+                        <option value="Spare Parts">Spare Parts</option>
+                        <option value="Maintenance">Maintenance</option>
+                        <option value="Fuel">Fuel</option>
+                        <option value="Tolls">Tolls</option>
+                        <option value="Other">Other</option>
+                      </>
+                    )}
                   </select>
                 </div>
                 <div className="form-control">
-                  <label className="label"><span className="label-text">Vehicle (Optional)</span></label>
+                  <label className="label"><span className="label-text">Vehicle</span></label>
                   <select className="input input-bordered w-full" value={form.vehicle_id} onChange={e => setForm({...form, vehicle_id: e.target.value})}>
                     <option value="">-- Select Vehicle --</option>
                     {vehicles.map(p => <option key={p.id} value={p.id}>{p.reg_number || p.registration_number}</option>)}
                   </select>
                 </div>
-                <div className="form-control">
-                  <label className="label"><span className="label-text">Expense Type</span></label>
-                  <select className="input input-bordered w-full" value={form.expense_type} onChange={e => setForm({...form, expense_type: e.target.value})}>
-                    <option value="Road Worthy">Road Worthy</option>
-                    <option value="Spare Parts">Spare Parts</option>
-                    <option value="Maintenance">Maintenance</option>
-                    <option value="Tolls">Tolls</option>
-                    <option value="Fuel">Fuel</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
+
+                {form.expense_type === "Compliance" ? (
+                  <div className="form-control">
+                    <label className="label"><span className="label-text">Compliance Record</span></label>
+                    <select className="input input-bordered w-full" value={form.compliance_id} onChange={handleComplianceChange}>
+                      <option value="">-- Select Compliance --</option>
+                      {complianceBills.map(p => <option key={p.id} value={p.id}>{p.compliance_type} ({p.premium_amount})</option>)}
+                    </select>
+                  </div>
+                ) : form.expense_type === "Servicing" ? (
+                  <div className="form-control">
+                    <label className="label"><span className="label-text">Servicing Record</span></label>
+                    <select className="input input-bordered w-full" value={form.servicing_id} onChange={handleServicingChange}>
+                      <option value="">-- Select Servicing --</option>
+                      {availableServicingBills.map(p => <option key={p.id} value={p.id}>{p.service_no} ({p.total_cost})</option>)}
+                    </select>
+                  </div>
+                ) : (
+                  <div className="form-control">
+                    <label className="label"><span className="label-text">Expense Log</span></label>
+                    <select className="input input-bordered w-full" value={form.expense_log_id} onChange={handleExpenseLogChange}>
+                      <option value="">-- Select Expense Log --</option>
+                      {expenseLogs.map(p => <option key={p.id} value={p.id}>{p.expense_type} ({p.amount})</option>)}
+                    </select>
+                  </div>
+                )}
+
                 <div className="form-control">
                   <label className="label"><span className="label-text font-bold">Amount <span className="text-error">*</span></span></label>
                   <div className="relative">

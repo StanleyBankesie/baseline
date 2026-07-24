@@ -3,6 +3,8 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { api } from "../../../../api/client";
 import { usePermission } from "../../../../auth/PermissionContext.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 const CACHE_KEY = "svc-confirmations-cache";
 function readCache() {
@@ -25,6 +27,7 @@ function clearCache() {
 }
 
 export default function ServiceConfirmationsList() {
+  const [viewMode, setViewMode] = useViewMode();
   const location = useLocation();
   const modulePath = location.pathname.startsWith("/purchase")
     ? "/purchase"
@@ -207,8 +210,12 @@ export default function ServiceConfirmationsList() {
             </h2>
           </div>
           <div className="card-body p-0">
-            <div className="overflow-x-auto">
-              <table className="table">
+            
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+              <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
                 <thead>
                   <tr>
                     <th className="whitespace-nowrap">No</th>
@@ -293,7 +300,7 @@ export default function ServiceConfirmationsList() {
           </div>
           <div className="card-body p-0">
             <div className="overflow-x-auto">
-              <table className="table">
+              <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
                 <thead>
                   <tr>
                     <th className="whitespace-nowrap">No</th>
@@ -374,7 +381,7 @@ export default function ServiceConfirmationsList() {
           </div>
           <div className="card-body p-0">
             <div className="overflow-x-auto">
-              <table className="table">
+              <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
                 <thead>
                   <tr>
                     <th className="whitespace-nowrap">SC No</th>

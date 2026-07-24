@@ -13,6 +13,8 @@ import { useAuth } from "../../../../auth/AuthContext.jsx";
 import { usePermission } from "../../../../auth/PermissionContext.jsx";
 import { filterAndSort } from "@/utils/searchUtils.js";
 import QRCode from "qrcode";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 // POS receipt settings are loaded from the database (company/branch scoped)
 
@@ -70,6 +72,7 @@ async function waitForImages(container) {
  * @returns {JSX.Element} The rendered component
  */
 export default function PosInvoiceList() {
+  const [viewMode, setViewMode] = useViewMode();
   const { user } = useAuth();
   const { canPerformAction } = usePermission();
   const [now, setNow] = useState(new Date());
@@ -1004,7 +1007,7 @@ export default function PosInvoiceList() {
 
       <div className="card">
         <div className="card-body overflow-x-auto">
-          <table className="table">
+          <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
             <thead>
               <tr>
                 <th>Invoice No</th>

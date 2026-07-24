@@ -1,33 +1,96 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../../../api/client.js";
+import AddressMapPicker from "../../../../components/common/AddressMapPicker.jsx";
 
 export default function RouteForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
+  const [calculating, setCalculating] = useState(false);
   const [formData, setFormData] = useState({
     route_code: "",
     route_name: "",
     origin: "",
     destination: "",
-    distance_km: "",
-    estimated_hours: "",
-    standard_charge: "",
-    toll_cost: "",
+    distance: "",
+    estimated_time: "",
+    is_active: 1,
     notes: "",
   });
+
+  useEffect(() => {
+    if (id) {
+      setLoading(true);
+      api.get(`/transport/routes/${id}`)
+        .then(res => {
+          const item = res.data?.data?.item || res.data?.item;
+          if (item) {
+            setFormData({
+              route_code: item.route_code || "",
+              route_name: item.route_name || "",
+              origin: item.origin || "",
+              destination: item.destination || "",
+              distance: item.distance || "",
+              estimated_time: item.estimated_time || "",
+              is_active: item.is_active ?? 1,
+              notes: item.notes || "",
+            });
+          }
+        })
+        .catch(err => toast.error("Failed to fetch route"))
+        .finally(() => setLoading(false));
+    }
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const calculateDistance = () => {
+    if (!formData.origin || !formData.destination) {
+      toast.error("Please set both Origin and Destination first.");
+      return;
+    }
+    if (!window.google) {
+      toast.error("Google Maps API is not loaded.");
+      return;
+    }
+    
+    setCalculating(true);
+    const service = new window.google.maps.DistanceMatrixService();
+    service.getDistanceMatrix({
+      origins: [formData.origin],
+      destinations: [formData.destination],
+      travelMode: 'DRIVING',
+    }, (response, status) => {
+      setCalculating(false);
+      if (status !== 'OK') {
+        toast.error('Error calculating distance.');
+        return;
+      }
+      const result = response.rows[0]?.elements[0];
+      if (result && result.status === 'OK') {
+        const distKm = (result.distance.value / 1000).toFixed(2);
+        const timeHrs = (result.duration.value / 3600).toFixed(2);
+        setFormData(prev => ({ ...prev, distance: distKm, estimated_time: timeHrs }));
+        toast.success("Distance and time updated from Google Maps!");
+      } else {
+        toast.error("Could not find a route between these locations.");
+      }
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.route_name || !formData.origin || !formData.destination) {
       toast.error("Please fill all required fields");
+      return;
+    }
+    if (!formData.distance || !formData.estimated_time) {
+      toast.error("Please calculate Distance and Estimated Time using the Maps button before saving.");
       return;
     }
     setLoading(true);
@@ -75,8 +138,9 @@ export default function RouteForm() {
                 name="route_code"
                 value={formData.route_code}
                 onChange={handleChange}
-                className="input input-bordered w-full"
-                placeholder="e.g. ACC-KUM-01"
+                className="input input-bordered w-full bg-slate-50"
+                placeholder="Auto-generated (e.g. RT-000001)"
+                readOnly
               />
             </div>
             <div className="form-control">
@@ -97,27 +161,34 @@ export default function RouteForm() {
               <label className="label">
                 <span className="label-text">Pickup / Origin <span className="text-red-500">*</span></span>
               </label>
-              <input
-                type="text"
-                name="origin"
+              <AddressMapPicker 
                 value={formData.origin}
-                onChange={handleChange}
-                className="input input-bordered w-full"
-                required
+                onChange={(val) => setFormData(p => ({ ...p, origin: val.name }))}
+                placeholder="Enter origin"
+                layout="vertical"
               />
             </div>
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Destination <span className="text-red-500">*</span></span>
               </label>
-              <input
-                type="text"
-                name="destination"
+              <AddressMapPicker 
                 value={formData.destination}
-                onChange={handleChange}
-                className="input input-bordered w-full"
-                required
+                onChange={(val) => setFormData(p => ({ ...p, destination: val.name }))}
+                placeholder="Enter destination"
+                layout="vertical"
               />
+            </div>
+
+            <div className="form-control col-span-1 md:col-span-2">
+              <button 
+                type="button" 
+                onClick={calculateDistance} 
+                disabled={calculating || !formData.origin || !formData.destination}
+                className="btn btn-secondary w-full md:w-auto"
+              >
+                {calculating ? "Calculating..." : "Calculate Distance & Time from Maps"}
+              </button>
             </div>
 
             <div className="form-control">
@@ -126,10 +197,12 @@ export default function RouteForm() {
               </label>
               <input
                 type="number"
-                name="distance_km"
-                value={formData.distance_km}
+                step="0.01"
+                name="distance"
+                value={formData.distance}
                 onChange={handleChange}
                 className="input input-bordered w-full"
+                placeholder="e.g. 250"
               />
             </div>
             <div className="form-control">
@@ -138,38 +211,15 @@ export default function RouteForm() {
               </label>
               <input
                 type="number"
-                name="estimated_hours"
-                value={formData.estimated_hours}
+                step="0.1"
+                name="estimated_time"
+                value={formData.estimated_time}
                 onChange={handleChange}
                 className="input input-bordered w-full"
+                placeholder="e.g. 4.5"
               />
             </div>
-
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Standard Charge</span>
-              </label>
-              <input
-                type="number"
-                name="standard_charge"
-                value={formData.standard_charge}
-                onChange={handleChange}
-                className="input input-bordered w-full"
-              />
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Estimated Toll Cost</span>
-              </label>
-              <input
-                type="number"
-                name="toll_cost"
-                value={formData.toll_cost}
-                onChange={handleChange}
-                className="input input-bordered w-full"
-              />
-            </div>
-
+            
             <div className="form-control md:col-span-2">
               <label className="label">
                 <span className="label-text">Notes</span>

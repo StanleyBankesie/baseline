@@ -12,6 +12,8 @@ import { filterAndSort } from "@/utils/searchUtils.js";
 import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
 import { usePermission } from "../../../auth/PermissionContext.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -19,6 +21,7 @@ import { usePermission } from "../../../auth/PermissionContext.jsx";
  * @returns {JSX.Element} The rendered component
  */
 export default function StockVerificationList() {
+  const [viewMode, setViewMode] = useViewMode();
   const { canReverseApproval } = usePermission();
   const [searchTerm, setSearchTerm] = useState("");
   const [verifications, setVerifications] = useState([]);
@@ -213,8 +216,12 @@ export default function StockVerificationList() {
 
         {/* Verifications Table */}
         <div className="bg-white dark:bg-slate-800 rounded-lg shadow overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={ "w-full " + (viewMode === 'grid' ? 'table-grid-mode' : '') }>
                <thead className="bg-[#0E3646] text-white">
                 <tr>
                   <SortableHeader label="Verification #" sortKey="verification_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
@@ -334,7 +341,7 @@ export default function StockVerificationList() {
                                   </button>
                                 )}
                               </div>
-                            ) : verification.forwarded_to_username ? (
+                            ) : verification.forwarded_to_username && !["RETURNED", "DRAFT"].includes(String(verification.status || "").toUpperCase()) ? (
                               <span
                                 className="list-approval-forwarded-pill"
                                 title="Assigned approver"

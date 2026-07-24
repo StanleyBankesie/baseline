@@ -1275,7 +1275,12 @@ export const PermissionProvider = ({ children }) => {
       if (!c) return false;
       return exceptionalPerms.has(c);
     },
-    canReverseApproval: () => exceptionalPerms.has("WORKFLOW.APPROVAL.REVERSE"),
+    canReverseApproval: () =>
+      exceptionalPerms.has("WORKFLOW.APPROVAL.REVERSE") ||
+      exceptionalPerms.has("WORKFLOW.PENDING_APPROVAL.REVERSE"),
+    canReversePendingApproval: () =>
+      exceptionalPerms.has("WORKFLOW.PENDING_APPROVAL.REVERSE") ||
+      exceptionalPerms.has("WORKFLOW.APPROVAL.REVERSE"),
     canEditDiscount: () => exceptionalPerms.has("SALES.DISCOUNT.ALLOW"),
   };
 

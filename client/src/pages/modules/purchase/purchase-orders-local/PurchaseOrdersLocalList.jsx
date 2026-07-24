@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from "react";
+import PendingApprovalTooltip from "@/components/PendingApprovalTooltip.jsx";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { api } from "api/client";
 import { printDocument, downloadDocumentPdf } from "@/utils/pdfUtils.js";
@@ -21,6 +22,8 @@ import {
   ListAttachmentIconButton,
 } from "@/components/list/ListDocActionIconButtons.jsx";
 import NotificationModal from "../../../../components/NotificationModal.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -28,6 +31,7 @@ import NotificationModal from "../../../../components/NotificationModal.jsx";
  * @returns {JSX.Element} The rendered component
  */
 export default function PurchaseOrdersLocalList() {
+  const [viewMode, setViewMode] = useViewMode();
   const location = useLocation();
   const navigate = useNavigate();
   const [exceptionalAllowed, setExceptionalAllowed] = useState(false);
@@ -41,6 +45,7 @@ export default function PurchaseOrdersLocalList() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showForwardModal, setShowForwardModal] = useState(false);
+  const [forwardComments, setForwardComments] = useState("");
   const [wfLoading, setWfLoading] = useState(false);
   const [wfError, setWfError] = useState("");
   const [candidateWorkflow, setCandidateWorkflow] = useState(null);
@@ -526,7 +531,8 @@ export default function PurchaseOrdersLocalList() {
             : Number(selectedPO.total_amount || 0),
         workflow_id: candidateWorkflow ? candidateWorkflow.id : null,
         target_user_id: targetApproverId || null,
-      });
+        comments: forwardComments,
+        });
       const newStatus = res?.data?.status || "PENDING_APPROVAL";
       let approverName = null;
       try {
@@ -577,11 +583,12 @@ export default function PurchaseOrdersLocalList() {
           selectedPO.total_amount === null
             ? null
             : Number(selectedPO.total_amount || 0);
-        const wfRes = await api.post("/workflows/forward-by-document", {
+        const wfRes = await api.post("/workflows/start", {
           document_type: "PURCHASE_ORDER",
           document_id: selectedPO.id,
           workflow_id: candidateWorkflow ? candidateWorkflow.id : null,
           target_user_id: targetApproverId || null,
+        comments: forwardComments,
           amount,
         });
         const newStatus = wfRes?.data?.status || "PENDING_APPROVAL";
@@ -665,7 +672,7 @@ export default function PurchaseOrdersLocalList() {
           </div>
         </div>
         <div className="card-body overflow-x-auto">
-          <table className="table">
+          <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
             <thead>
               <tr>
                 <SortableHeader label="PO No" sortKey="po_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
@@ -811,9 +818,9 @@ export default function PurchaseOrdersLocalList() {
                                 )}
                               </div>
                             ) : po.status === "PENDING_APPROVAL" || po.forwarded_to_username || forwardedTo[po.id] ? (
-                              <span className="list-approval-forwarded-pill">
+                              <PendingApprovalTooltip documentType="PURCHASE_ORDER" documentId={po.id}><span className="list-approval-forwarded-pill">
                                 Forwarded to {po.forwarded_to_username || forwardedTo[po.id] || "Approver"}
-                              </span>
+                              </span></PendingApprovalTooltip>
                             ) : (
                               <button
                                 type="button"

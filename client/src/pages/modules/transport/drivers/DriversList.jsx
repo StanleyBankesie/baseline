@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { PlusOutlined, EditOutlined, DeleteOutlined, StopOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import api from "../../../../api/client.js";
 import { toast } from "react-toastify";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 export default function DriversList({ isTab = false }) {
+  const [viewMode, setViewMode] = useViewMode();
   const navigate = useNavigate();
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -28,6 +31,16 @@ export default function DriversList({ isTab = false }) {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleStatus = async (id) => {
+    try {
+      await api.patch(`/transport/drivers/${id}/status`);
+      toast.success("Driver status updated");
+      fetchData();
+    } catch (err) {
+      toast.error("Failed to update status");
     }
   };
 
@@ -72,8 +85,12 @@ export default function DriversList({ isTab = false }) {
       )}
       <div className="card">
         <div className="card-body p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={ "w-full text-sm text-left " + (viewMode === 'grid' ? 'table-grid-mode' : '') }>
               <thead className="text-xs text-brand-600 bg-brand-50 border-b border-brand-200">
                 <tr>
                   <th className="px-6 py-4 font-semibold uppercase">Employee Code</th>
@@ -111,10 +128,11 @@ export default function DriversList({ isTab = false }) {
                       <td className="px-6 py-4">{d.license_expiry ? d.license_expiry.split('T')[0] : ''}</td>
                       <td className="px-6 py-4">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          !d.is_active ? 'bg-slate-100 text-slate-800' :
                           d.status === 'AVAILABLE' ? 'bg-green-100 text-green-800' :
                           d.status === 'ON_TRIP' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
                         }`}>
-                          {d.status || 'AVAILABLE'}
+                          {!d.is_active ? 'DISABLED' : (d.status || 'AVAILABLE')}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
@@ -122,9 +140,15 @@ export default function DriversList({ isTab = false }) {
                           <Link to={`/transport/drivers/${d.id}`} className="btn btn-ghost btn-sm text-brand-600">
                             <EditOutlined />
                           </Link>
-                          <button className="btn btn-ghost btn-sm text-red-600">
-                            <DeleteOutlined />
-                          </button>
+                          {d.is_active ? (
+                            <button onClick={() => handleToggleStatus(d.id)} className="btn btn-ghost btn-sm text-red-600" title="Disable">
+                              <StopOutlined />
+                            </button>
+                          ) : (
+                            <button onClick={() => handleToggleStatus(d.id)} className="btn btn-ghost btn-sm text-green-600" title="Enable">
+                              <CheckCircleOutlined />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

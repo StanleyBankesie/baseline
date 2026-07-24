@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import { usePermission } from "@/auth/PermissionContext.jsx";
@@ -15,6 +15,7 @@ import { usePermission } from "@/auth/PermissionContext.jsx";
  * @returns {JSX.Element} The rendered component
  */
 export default function LeaveApplicationForm() {
+  const { id } = useParams();
   const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const [types, setTypes] = useState([]);

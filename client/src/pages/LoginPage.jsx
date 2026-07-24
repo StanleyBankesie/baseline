@@ -19,7 +19,7 @@ import PaymentPackageModal from "../components/PaymentPackageModal.jsx";
 /**
  * LoginPage component
  * Renders the login form, handles API authentication, and manages remembered credentials.
- * 
+ *
  * @returns {JSX.Element} The rendered login page.
  */
 export default function LoginPage() {
@@ -43,7 +43,7 @@ export default function LoginPage() {
   const [usernameQuery, setUsernameQuery] = useState("");
   const [showSuggestion, setShowSuggestion] = useState(false);
   const suggestionRef = useRef(null);
-  
+
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const renewingLicenseRef = useRef(false);
 
@@ -61,11 +61,15 @@ export default function LoginPage() {
     async function checkGlobalLicense() {
       try {
         const res = await api.get("/licenses/global-status");
-        if (res.data?.status === "EXPIRED" || res.data?.status === "INACTIVE" || res.data?.message?.toLowerCase().includes("expired")) {
+        if (
+          res.data?.status === "EXPIRED" ||
+          res.data?.status === "INACTIVE" ||
+          res.data?.message?.toLowerCase().includes("expired")
+        ) {
           // 1. Informational Alert First
           Swal.fire({
             title: "License Expired",
-            text: "Your company license has expired. Please log in using the normal form to renew your license.",
+            text: "The license for your organization has expired. Access to certain features may be restricted until the license is renewed. Please contact your administrator.",
             icon: "warning",
             allowOutsideClick: false,
             allowEscapeKey: false,
@@ -73,13 +77,14 @@ export default function LoginPage() {
             confirmButtonText: "Close",
             buttonsStyling: false,
             customClass: {
-              container: 'backdrop-blur-sm bg-slate-900/40',
-              popup: 'rounded-2xl shadow-2xl border-0 p-6',
-              title: 'text-2xl font-bold text-slate-800 mt-2',
-              htmlContainer: 'text-slate-500 text-base mt-2',
-              confirmButton: 'bg-brand-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-brand-700 transition-all shadow-sm w-full mt-4',
-              icon: 'border-0 text-amber-500'
-            }
+              container: "backdrop-blur-sm bg-slate-900/40",
+              popup: "rounded-2xl shadow-2xl border-0 p-6",
+              title: "text-2xl font-bold text-slate-800 mt-2",
+              htmlContainer: "text-slate-500 text-base mt-2",
+              confirmButton:
+                "bg-brand-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-brand-700 transition-all shadow-sm w-full mt-4",
+              icon: "border-0 text-amber-500",
+            },
           });
         }
       } catch (err) {
@@ -142,12 +147,16 @@ export default function LoginPage() {
     input.dispatchEvent(new Event("input", { bubbles: true }));
   }, []);
 
-  // When user selects the suggested username, fill both fields
+  // When user selects the suggested username, fill username field and focus password
   const handleSelectSuggestion = useCallback(
     (profile) => {
       if (!profile) return;
       setInputValue(usernameRef.current, profile.username);
-      setInputValue(passwordRef.current, profile.password);
+      if (profile.password) {
+        setInputValue(passwordRef.current, profile.password);
+      } else {
+        passwordRef.current?.focus();
+      }
       setUsernameQuery(profile.username);
       setRememberMe(true);
       setShowSuggestion(false);
@@ -161,10 +170,16 @@ export default function LoginPage() {
     return profile.username.toLowerCase().includes(query);
   });
 
-  const shouldShowSuggestion = showSuggestion && usernameQuery.length >= 2 && filteredProfiles.length > 0;
+  const shouldShowSuggestion =
+    showSuggestion && usernameQuery.length >= 2 && filteredProfiles.length > 0;
 
   useEffect(() => {
-    if (initialized && token && !handledStartupRedirect.current && !renewingLicenseRef.current) {
+    if (
+      initialized &&
+      token &&
+      !handledStartupRedirect.current &&
+      !renewingLicenseRef.current
+    ) {
       handledStartupRedirect.current = true;
       navigate("/", { replace: true });
     }
@@ -245,11 +260,11 @@ export default function LoginPage() {
         navigate("/reset-password", { replace: true });
         return;
       }
-      
+
       if (err?.response?.data?.error === "LICENSE_EXPIRED") {
         setLoading(false);
         const canRenew = err.response.data.canRenew;
-        
+
         if (canRenew) {
           Swal.fire({
             title: "License Expired",
@@ -266,29 +281,37 @@ export default function LoginPage() {
             cancelButtonText: "Cancel",
             buttonsStyling: false,
             customClass: {
-              container: 'backdrop-blur-sm bg-slate-900/40',
-              popup: 'rounded-2xl shadow-2xl border-0 p-6',
-              title: 'text-xl font-bold text-slate-800 mt-2',
-              actions: 'w-full flex gap-3 mt-6',
-              confirmButton: 'flex-1 bg-brand-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-brand-700 transition-all shadow-sm',
-              cancelButton: 'flex-1 bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-semibold hover:bg-slate-200 transition-all',
-              icon: 'border-0 text-amber-500'
+              container: "backdrop-blur-sm bg-slate-900/40",
+              popup: "rounded-2xl shadow-2xl border-0 p-6",
+              title: "text-xl font-bold text-slate-800 mt-2",
+              actions: "w-full flex gap-3 mt-6",
+              confirmButton:
+                "flex-1 bg-brand-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-brand-700 transition-all shadow-sm",
+              cancelButton:
+                "flex-1 bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-semibold hover:bg-slate-200 transition-all",
+              icon: "border-0 text-amber-500",
             },
             didOpen: () => {
-              const u = document.getElementById('swal-login-username-retry');
-              const p = document.getElementById('swal-login-password-retry');
+              const u = document.getElementById("swal-login-username-retry");
+              const p = document.getElementById("swal-login-password-retry");
               if (u && !u.value) u.focus();
               else if (p) p.focus();
             },
             preConfirm: () => {
-              const u = document.getElementById('swal-login-username-retry').value;
-              const p = document.getElementById('swal-login-password-retry').value;
+              const u = document.getElementById(
+                "swal-login-username-retry",
+              ).value;
+              const p = document.getElementById(
+                "swal-login-password-retry",
+              ).value;
               if (!u || !p) {
-                Swal.showValidationMessage('Please enter both username and password');
+                Swal.showValidationMessage(
+                  "Please enter both username and password",
+                );
                 return false;
               }
               return { username: u, password: p };
-            }
+            },
           }).then(async (result) => {
             if (result.isConfirmed) {
               setLoading(true);
@@ -298,11 +321,15 @@ export default function LoginPage() {
                   username: result.value.username,
                   password: result.value.password,
                   rememberMe: false,
-                  intent: "renew"
+                  intent: "renew",
                 });
 
-                const branches = Array.isArray(data?.user?.branchIds) ? data.user.branchIds.map(Number).filter(Number.isFinite) : [];
-                const companies = Array.isArray(data?.user?.companyIds) ? data.user.companyIds.map(Number).filter(Number.isFinite) : [];
+                const branches = Array.isArray(data?.user?.branchIds)
+                  ? data.user.branchIds.map(Number).filter(Number.isFinite)
+                  : [];
+                const companies = Array.isArray(data?.user?.companyIds)
+                  ? data.user.companyIds.map(Number).filter(Number.isFinite)
+                  : [];
 
                 if (branches.length === 1) {
                   const branchId = branches[0];
@@ -314,10 +341,14 @@ export default function LoginPage() {
                     branchId: branchId,
                   }));
                 }
-                
+
                 setShowPaymentModal(true);
               } catch (retryErr) {
-                toast.error(retryErr?.response?.data?.message || retryErr?.message || "Renewal login failed");
+                toast.error(
+                  retryErr?.response?.data?.message ||
+                    retryErr?.message ||
+                    "Renewal login failed",
+                );
               } finally {
                 setLoading(false);
               }
@@ -334,13 +365,14 @@ export default function LoginPage() {
             confirmButtonText: "Close",
             buttonsStyling: false,
             customClass: {
-              container: 'backdrop-blur-sm bg-slate-900/40',
-              popup: 'rounded-2xl shadow-2xl border-0 p-6',
-              title: 'text-2xl font-bold text-slate-800 mt-2',
-              htmlContainer: 'text-slate-500 text-base mt-2',
-              confirmButton: 'bg-brand-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-brand-700 transition-all shadow-sm w-full mt-4',
-              icon: 'border-0 text-red-500'
-            }
+              container: "backdrop-blur-sm bg-slate-900/40",
+              popup: "rounded-2xl shadow-2xl border-0 p-6",
+              title: "text-2xl font-bold text-slate-800 mt-2",
+              htmlContainer: "text-slate-500 text-base mt-2",
+              confirmButton:
+                "bg-brand-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-brand-700 transition-all shadow-sm w-full mt-4",
+              icon: "border-0 text-red-500",
+            },
           });
         }
         return;
@@ -433,86 +465,86 @@ export default function LoginPage() {
                   }}
                 >
                   {filteredProfiles.map((profile) => (
-                  <button
-                    key={profile.username}
-                    type="button"
-                    onClick={() => handleSelectSuggestion(profile)}
-                    style={{
-                      width: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      padding: "10px 14px",
-                      border: "none",
-                      backgroundColor: "transparent",
-                      cursor: "pointer",
-                      textAlign: "left",
-                      transition: "background-color 0.15s",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#f1f5f9")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.backgroundColor = "transparent")
-                    }
-                  >
-                    {profile.profilePictureUrl ? (
-                      <img
-                        src={profile.profilePictureUrl}
-                        alt=""
-                        style={{
-                          width: "32px",
-                          height: "32px",
-                          borderRadius: "50%",
-                          objectFit: "cover",
-                          flexShrink: 0,
-                        }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          width: "32px",
-                          height: "32px",
-                          borderRadius: "50%",
-                          background:
-                            profile.avatarColor ||
-                            authStorage.getRememberedAvatarColor(
-                              profile.username,
-                            ),
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: "#fff",
-                          fontWeight: 700,
-                          fontSize: "14px",
-                          flexShrink: 0,
-                        }}
-                      >
-                        {profile.username.charAt(0).toUpperCase()}
+                    <button
+                      key={profile.username}
+                      type="button"
+                      onClick={() => handleSelectSuggestion(profile)}
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        padding: "10px 14px",
+                        border: "none",
+                        backgroundColor: "transparent",
+                        cursor: "pointer",
+                        textAlign: "left",
+                        transition: "background-color 0.15s",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.backgroundColor = "#f1f5f9")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.backgroundColor = "transparent")
+                      }
+                    >
+                      {profile.profilePictureUrl ? (
+                        <img
+                          src={profile.profilePictureUrl}
+                          alt=""
+                          style={{
+                            width: "32px",
+                            height: "32px",
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                            flexShrink: 0,
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: "32px",
+                            height: "32px",
+                            borderRadius: "50%",
+                            background:
+                              profile.avatarColor ||
+                              authStorage.getRememberedAvatarColor(
+                                profile.username,
+                              ),
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "#fff",
+                            fontWeight: 700,
+                            fontSize: "14px",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {profile.username.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div style={{ minWidth: 0 }}>
+                        <div
+                          style={{
+                            fontWeight: 600,
+                            fontSize: "14px",
+                            color: "#1e293b",
+                            lineHeight: 1.3,
+                          }}
+                        >
+                          {profile.username}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            color: "#94a3b8",
+                            lineHeight: 1.3,
+                          }}
+                        >
+                          {"•".repeat(8)}
+                        </div>
                       </div>
-                    )}
-                    <div style={{ minWidth: 0 }}>
-                      <div
-                        style={{
-                          fontWeight: 600,
-                          fontSize: "14px",
-                          color: "#1e293b",
-                          lineHeight: 1.3,
-                        }}
-                      >
-                        {profile.username}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          color: "#94a3b8",
-                          lineHeight: 1.3,
-                        }}
-                      >
-                        {"•".repeat(8)}
-                      </div>
-                    </div>
-                  </button>
+                    </button>
                   ))}
                 </div>
               )}
@@ -575,7 +607,11 @@ export default function LoginPage() {
           </form>
         </div>
       </div>
-      <PaymentPackageModal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)} companyId={scope?.companyId || null} />
+      <PaymentPackageModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        companyId={scope?.companyId || null}
+      />
     </div>
   );
 }

@@ -11,6 +11,8 @@ import { Eye, Mail, Pencil } from "lucide-react";
 import { ListPrintIconButton, ListPdfIconButton, ListAttachmentIconButton } from "../../../../components/list/ListDocActionIconButtons.jsx";
 import DocumentAttachmentsModal from "../../../../components/attachments/DocumentAttachmentsModal.jsx";
 import { Guard } from "../../../../hooks/usePermissions";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 const statusColors = { DRAFT:"bg-slate-100 text-slate-600", SENT:"bg-blue-100 text-blue-700", RESPONDED:"bg-green-100 text-green-700", CLOSED:"bg-slate-200 text-slate-700" };
 function Badge({ value, colorMap }) {
@@ -24,6 +26,7 @@ function Badge({ value, colorMap }) {
  * @returns {JSX.Element} The rendered component
  */
 export default function MaintenanceRFQList() {
+  const [viewMode, setViewMode] = useViewMode();
   const navigate = useNavigate();
   const location = useLocation();
   const [items, setItems] = useState([]);
@@ -64,8 +67,12 @@ export default function MaintenanceRFQList() {
           <div className="p-4 border-b border-slate-200 dark:border-slate-700">
             <input className="input max-w-md" placeholder="Search by no, status, supplier..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={ "min-w-full " + (viewMode === 'grid' ? 'table-grid-mode' : '') }>
               <thead className="bg-[#f8fafc] dark:bg-slate-900/50">
                 <tr className="text-left bg-slate-50 dark:bg-slate-900/50">
                   <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 whitespace-nowrap">RFQ No</th>

@@ -46,7 +46,7 @@ const forgotRequestSchema = Joi.object({
 const resetPasswordSchema = Joi.object({
   username: Joi.string().min(3).max(100).required(),
   otp: Joi.string().length(6).required(),
-  new_password: Joi.string().min(6).max(100).required(),
+  new_password: Joi.string().min(8).max(100).required(),
 }).required();
 
 function createPasswordResetRequiredError() {
@@ -175,7 +175,17 @@ function isPasswordMatch(password, passwordHash, username) {
     hash.startsWith("$2b$") ||
     hash.startsWith("$2y$");
 
-  return isBcryptHash ? bcrypt.compare(password, hash) : password === hash;
+  // SECURITY: Never allow plaintext password comparison.
+  // If the stored hash is not bcrypt, reject the login and log a warning.
+  if (!isBcryptHash) {
+    console.warn(
+      `[SECURITY] User "${username}" has a non-bcrypt password hash. ` +
+      `Plaintext comparison has been disabled for security. ` +
+      `Please reset this user's password to generate a proper bcrypt hash.`
+    );
+    return false;
+  }
+  return bcrypt.compare(password, hash);
 }
 
 async function sendAuthResponse(req, res, session) {
@@ -325,8 +335,10 @@ export const login = async (req, res, next) => {
     const { value, error } = loginSchema.validate(req.body);
     if (error) throw httpError(400, "VALIDATION_ERROR", error.message);
 
+    // SECURITY: Default login backdoor is NEVER allowed in production
+    const isProd = String(process.env.NODE_ENV || "").toLowerCase() === "production";
     const allowDefault =
-      String(process.env.AUTH_ALLOW_DEFAULT_LOGIN || "").trim() === "1";
+      !isProd && String(process.env.AUTH_ALLOW_DEFAULT_LOGIN || "").trim() === "1";
     if (allowDefault) {
       const defUser =
         String(process.env.AUTH_DEFAULT_USER || "").trim() || "admin";
@@ -705,11 +717,11 @@ export const changePassword = async (req, res, next) => {
         "All password fields are required",
       );
     }
-    if (newPassword.length < 6) {
+    if (newPassword.length < 8) {
       throw httpError(
         400,
         "VALIDATION_ERROR",
-        "New password must be at least 6 characters",
+        "New password must be at least 8 characters",
       );
     }
     if (newPassword !== confirmNewPassword) {
@@ -743,6 +755,7 @@ export const changePassword = async (req, res, next) => {
       `UPDATE adm_users SET password_hash = ?, status = 'Y' WHERE id = ?`,
       [hash, user.id],
     );
+    await revokeUserRefreshTokens(user.id);
 
     res.json({ message: "Password changed successfully", status: "Y" });
   } catch (err) {

@@ -325,26 +325,32 @@ export const MODULES_REGISTRY = {
     path: "/transport",
     icon: "🚚",
     features: [
-      { key: "requests", label: "Transport Requests", type: "feature" },
-      { key: "vehicles", label: "Vehicles", type: "feature" },
-      { key: "drivers", label: "Drivers", type: "feature" },
       { key: "trips", label: "Trips & Dispatch", type: "feature" },
-      { key: "tracking", label: "GPS Tracking", type: "feature" },
-      { key: "fuel", label: "Refuelling", type: "feature" },
-      { key: "fuel-bills", label: "Fuel Bills", type: "feature" },
-      { key: "bills", label: "Transportation Bills", type: "feature" },
+      { key: "trip_management", label: "Trip Management", type: "feature" },
+      { key: "trip_returns", label: "Trip Returns", type: "feature" },
+      { key: "tracking", label: "Tracking", type: "feature" },
+      { key: "vehicles", label: "Vehicles", type: "feature" },
+      { key: "compliance", label: "Compliance", type: "feature" },
+      { key: "servicing", label: "Servicing", type: "feature" },
+      { key: "logbooks", label: "Logbooks", type: "feature" },
+      { key: "drivers", label: "Drivers", type: "feature" },
+      { key: "fuel", label: "Fuel Logs", type: "feature" },
+      { key: "fuel_expenses", label: "Fuel Expenses", type: "feature" },
+      { key: "fuel_bills", label: "Fuel Bills", type: "feature" },
+      { key: "transportation_bills", label: "Transportation Bills", type: "feature" },
       { key: "billing", label: "Billing", type: "feature" },
-      { key: "income", label: "Transportation Income", type: "feature" },
-      { key: "expenses", label: "Transportation Expenses", type: "feature" },
       { key: "routes", label: "Routes", type: "feature" },
       { key: "inspections", label: "Inspections", type: "feature" },
-      { key: "maintenance", label: "Maintenance Requests", type: "feature" },
-      { key: "breakdown-logbook", label: "Breakdown Logbook", type: "feature" },
+      { key: "maintenance", label: "Maintenance", type: "feature" },
+      { key: "breakdowns", label: "Breakdowns", type: "feature" },
       { key: "settings", label: "Transport Settings", type: "feature" },
-      { key: "reports", label: "Reports & Analytics", type: "feature" }
+      { key: "reports", label: "Reports & Analytics", type: "feature" },
+      { key: "income", label: "Transportation Income", type: "feature" },
+      { key: "expenses", label: "Transportation Expenses", type: "feature" },
+      { key: "expense_log", label: "Expense Logs", type: "feature" }
     ],
     dashboards: [
-      { key: "dashboard", label: "Transport Dashboard", type: "dashboard" }
+      { key: "transport-dashboard", label: "Transport Dashboard", type: "dashboard" }
     ]
   },
   

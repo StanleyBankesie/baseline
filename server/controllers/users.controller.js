@@ -227,6 +227,7 @@ export const createUser = async (req, res, next) => {
       user_type,
       valid_from,
       valid_to,
+      telephone,
       role_id,
       branch_ids,
     } = req.body || {};
@@ -249,10 +250,10 @@ export const createUser = async (req, res, next) => {
 
     const result = await query(`INSERT INTO adm_users (
         company_id, branch_id, username, email, full_name, password_hash, is_active,
-        profile_picture, is_employee, user_type, valid_from, valid_to, role_id
+        profile_picture, is_employee, user_type, valid_from, valid_to, telephone, role_id
       ) VALUES (
         :company_id, :branch_id, :username, :email, :full_name, :password_hash, :is_active,
-        :profile_picture, :is_employee, :user_type, :valid_from, :valid_to, :role_id
+        :profile_picture, :is_employee, :user_type, :valid_from, :valid_to, :telephone, :role_id
       )`,
       {
         company_id,
@@ -273,6 +274,7 @@ export const createUser = async (req, res, next) => {
         user_type: user_type || "Internal",
         valid_from: valid_from || null,
         valid_to: valid_to || null,
+        telephone: telephone || null,
         role_id: role_id || null,
       },
     );
@@ -324,6 +326,7 @@ export const updateUser = async (req, res, next) => {
       user_type,
       valid_from,
       valid_to,
+      telephone,
       role_id,
       password_hash,
       branch_ids,
@@ -358,6 +361,7 @@ export const updateUser = async (req, res, next) => {
       user_type = :user_type,
       valid_from = :valid_from,
       valid_to = :valid_to,
+      telephone = :telephone,
       role_id = :role_id`;
 
     const params = {
@@ -379,6 +383,7 @@ export const updateUser = async (req, res, next) => {
       user_type: user_type || "Internal",
       valid_from: valid_from || null,
       valid_to: valid_to || null,
+      telephone: telephone || null,
       role_id: role_id || null,
     };
 
@@ -443,6 +448,7 @@ export const patchUser = async (req, res, next) => {
       "user_type",
       "valid_from",
       "valid_to",
+      "telephone",
       "role_id",
     ];
     const updates = [];

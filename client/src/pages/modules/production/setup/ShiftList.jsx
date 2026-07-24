@@ -16,6 +16,8 @@ import {
 import { Link } from "react-router-dom";
 import { api } from "api/client";
 import { toast } from "react-toastify";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -23,6 +25,7 @@ import { toast } from "react-toastify";
  * @returns {JSX.Element} The rendered component
  */
 export default function ShiftList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -100,8 +103,12 @@ export default function ShiftList() {
       </div>
 
       <div className="card overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="table">
+        
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+          <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
             <thead>
               <tr>
                 <th>Shift Name</th>

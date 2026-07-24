@@ -1,4 +1,4 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -836,4 +836,152 @@
 }
 .btn-brand-solid:hover:not(:disabled) {
   background-color: #215876;
+}
+
+/* Table Grid Mode Engine */
+/* ========================================================================
+   A universal, pattern-agnostic grid layout engine for all List pages.
+   ======================================================================== */
+
+/* ── Core Grid ── */
+.table-grid-mode {
+  display: grid !important;
+  grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  gap: 1rem !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 0.75rem !important;
+}
+@media (min-width: 640px)  { .table-grid-mode { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+@media (min-width: 1024px) { .table-grid-mode { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
+@media (min-width: 1400px) { .table-grid-mode { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; } }
+
+/* ── Hide Table Structure ── */
+.table-grid-mode thead  { display: none !important; }
+.table-grid-mode tbody  { display: contents !important; }
+.table-grid-mode tfoot  { display: none !important; }
+
+/* ── Card (each <tr>) ── */
+.table-grid-mode tr {
+  display: flex !important;
+  flex-direction: column !important;
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 0.75rem !important;
+  padding: 0.875rem 1rem !important;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.06), 0 1px 2px -1px rgba(0,0,0,0.06) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+  height: auto !important;
+}
+.table-grid-mode tr:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px -5px rgba(0,0,0,0.1), 0 4px 10px -6px rgba(0,0,0,0.06) !important;
+}
+
+/* ── Data Cells ── */
+.table-grid-mode td {
+  display: block !important;
+  padding: 0.15rem 0 !important;
+  border: none !important;
+  font-size: 0.85rem !important;
+  width: 100% !important;
+  color: #334155 !important;
+  line-height: 1.5 !important;
+}
+
+/* First cell = card title */
+.table-grid-mode td:first-child {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  padding-bottom: 0.4rem !important;
+  margin-bottom: 0.3rem !important;
+  border-bottom: 1.5px solid #f1f5f9 !important;
+}
+
+/* ── Actions Cell (always the last TD) ── */
+.table-grid-mode td:last-child {
+  order: 99 !important;
+  margin-top: auto !important;
+  padding-top: 0.8rem !important;
+  border-top: 1px solid #f1f5f9 !important;
+}
+
+/* Flex container inside actions cell */
+.table-grid-mode td:last-child > div[class*="flex"] {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.5rem !important;
+  width: 100% !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+}
+
+/* Remove margins and overrides on wrappers */
+.table-grid-mode td:last-child > div > div {
+  margin: 0 !important;
+  min-width: 0 !important;
+  width: auto !important;
+  flex: 0 0 auto !important;
+}
+
+/* Hide empty wrappers */
+.table-grid-mode td:last-child > div > div:empty,
+.table-grid-mode td:last-child > div > div:has(> div:only-child:empty),
+.table-grid-mode td:last-child > div > div:not(:has(button)):not(:has(a)):not(:has(span)):not(:has(svg)) {
+  display: none !important;
+}
+
+/* ── Push workflow and cancel buttons to their own line ── */
+.table-grid-mode td:last-child > div > div[class*="min-w-[160px]"],
+.table-grid-mode td:last-child > div > div:has(.list-approval-slot) {
+  flex-basis: 100% !important;
+  order: 50 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+.table-grid-mode td:last-child > div > div:has(.bg-\[\#990000\]),
+.table-grid-mode td:last-child > div > div:has(button:contains("Cancel")) {
+  order: 51 !important;
+}
+
+/* ── Button Cleanups (let Tailwind handle styling, just fix heights) ── */
+.table-grid-mode td:last-child button,
+.table-grid-mode td:last-child a {
+  height: 32px !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+}
+
+/* Text Buttons (View, Edit) */
+.table-grid-mode td:last-child button:not(.list-doc-action-btn):not([class*="rounded-full"]):not([class*="p-1"]),
+.table-grid-mode td:last-child a:not(.list-doc-action-btn) {
+  padding: 0 0.75rem !important;
+  width: auto !important;
+}
+
+/* Icon Buttons */
+.table-grid-mode td:last-child .list-doc-action-btn,
+.table-grid-mode td:last-child button[title="Print"],
+.table-grid-mode td:last-child button[title="Download PDF"],
+.table-grid-mode td:last-child button[title="Attachments"] {
+  width: 32px !important;
+  padding: 0 !important;
+}
+
+/* Workflow slot layout */
+.table-grid-mode td:last-child .list-approval-slot {
+  display: flex !important;
+  gap: 0.5rem !important;
+  width: 100% !important;
+  align-items: center !important;
+}
+
+/* ── Hide "Created By" and "Created Date" columns in grid mode ── */
+.table-grid-mode td.grid-created-by-cell,
+.table-grid-mode td.grid-created-date-cell {
+  display: none !important;
 }

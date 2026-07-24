@@ -1,1 +1,8 @@
-import http from 'http'; http.get('http://localhost:3000/api/purchase/service-bills?companyId=1', (res) => { let data = ''; res.on('data', chunk => { data += chunk; }); res.on('end', () => { console.log('Status: ' + res.statusCode); console.log(data); }); }).on('error', (err) => { console.error(err.message); });
+import fetch from 'node-fetch'; // wait, no, I'll just use http.
+import http from 'http';
+
+http.get('http://localhost:5000/api/transport/trips/2/locations', (res) => {
+  let data = '';
+  res.on('data', (chunk) => data += chunk);
+  res.on('end', () => console.log(data));
+}).on('error', (err) => console.log("Error: ", err.message));

@@ -15,7 +15,7 @@ import {
   ChevronDown,
   Info
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "api/client";
 import { toast } from "react-toastify";
 import { usePermission } from "@/auth/PermissionContext.jsx";
@@ -26,6 +26,7 @@ import { usePermission } from "@/auth/PermissionContext.jsx";
  * @returns {JSX.Element} The rendered component
  */
 export default function MaterialReceiptForm() {
+  const { id } = useParams();
   const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);

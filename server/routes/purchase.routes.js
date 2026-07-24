@@ -5388,7 +5388,7 @@ router.post(
           dwId: instanceId,
           stepOrder: first.step_order,
           actor: req.user.sub,
-          comments: "",
+          comments: req.body?.comments || "",
         },
       );
 
@@ -8631,7 +8631,7 @@ router.post(
           dwId: instanceId,
           stepOrder: first.step_order,
           actor: req.user.sub,
-          comments: "",
+          comments: req.body?.comments || "",
         },
       );
 
@@ -9866,7 +9866,7 @@ router.post(
           dwId: instanceId,
           stepOrder: first.step_order,
           actor: req.user.sub,
-          comments: "",
+          comments: req.body?.comments || "",
         },
       );
       await query(

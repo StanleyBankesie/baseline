@@ -9,14 +9,29 @@ import {
   listTransportationBills, getTransportationBill, createTransportationBill, updateTransportationBill, deleteTransportationBill, getNextTransportationBillNo
 } from "../controllers/transport.controller.js";
 import {
+  listCompliances, getComplianceById, createCompliance, updateCompliance, deleteCompliance
+} from "../controllers/transport-compliance.controller.js";
+import {
+  listServicing, getServicingById, createServicing, updateServicing, deleteServicing
+} from "../controllers/transport-servicing.controller.js";
+import {
+  listLogbooks, getLogbookById, createLogbook, updateLogbook, deleteLogbook
+} from "../controllers/transport-logbook.controller.js";
+import {
+  listSetupItems, createSetupItem, updateSetupItem, deleteSetupItem
+} from "../controllers/transport-setup.controller.js";
+import {
+  listRoutes, getRoute, createRoute, updateRoute, toggleRouteStatus
+} from "../controllers/transport-routes.controller.js";
+import {
   listFuelBills, getFuelBill, createFuelBill, updateFuelBill, deleteFuelBill,
   getNextBillingNo,
   getBilling, createBilling, updateBilling, deleteBilling, submitBilling,
   getTransportDashboardStats,
   listVehicles, createVehicle,
-  listDrivers, createDriver,
+  listDrivers, createDriver, getDriver, updateDriver, toggleDriverStatus,
   listRequests, createRequest, updateRequestStatus,
-  listTrips, createTrip, returnTrip,
+  listTrips, getTrip, createTrip, startTrip, returnTrip,
   listFuelLogs, createFuelLog,
   listFuelExpenses, createFuelExpense,
   listBilling,
@@ -36,9 +51,34 @@ router.get("/dashboard", requireAuth, requireCompanyScope, getTransportDashboard
 router.get("/vehicles", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.VEHICLES.VIEW"), listVehicles);
 router.post("/vehicles", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.VEHICLES.CREATE"), createVehicle);
 
+// Vehicle Compliance
+router.get("/compliance", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.VEHICLES.VIEW"), listCompliances);
+router.get("/compliance/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.VEHICLES.VIEW"), getComplianceById);
+router.post("/compliance", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.VEHICLES.CREATE"), createCompliance);
+router.put("/compliance/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.VEHICLES.CREATE"), updateCompliance);
+router.delete("/compliance/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.VEHICLES.CREATE"), deleteCompliance);
+
+// Vehicle Servicing
+router.get("/servicing", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.VEHICLES.VIEW"), listServicing);
+router.get("/servicing/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.VEHICLES.VIEW"), getServicingById);
+router.post("/servicing", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.VEHICLES.CREATE"), createServicing);
+router.put("/servicing/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.VEHICLES.CREATE"), updateServicing);
+router.delete("/servicing/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.VEHICLES.CREATE"), deleteServicing);
+
 // Drivers
 router.get("/drivers", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.DRIVERS.VIEW"), listDrivers);
 router.post("/drivers", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.DRIVERS.CREATE"), createDriver);
+router.get("/drivers/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.DRIVERS.VIEW"), getDriver);
+router.put("/drivers/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.DRIVERS.EDIT"), updateDriver);
+router.patch("/drivers/:id/status", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.DRIVERS.DELETE"), toggleDriverStatus);
+
+
+// Driver Logbooks
+router.get("/logbooks", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.DRIVERS.VIEW"), listLogbooks);
+router.get("/logbooks/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.DRIVERS.VIEW"), getLogbookById);
+router.post("/logbooks", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.DRIVERS.CREATE"), createLogbook);
+router.put("/logbooks/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.DRIVERS.CREATE"), updateLogbook);
+router.delete("/logbooks/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.DRIVERS.CREATE"), deleteLogbook);
 
 // Requests
 router.get("/requests", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.REQUESTS.VIEW"), listRequests);
@@ -47,7 +87,9 @@ router.put("/requests/:id/status", requireAuth, requireCompanyScope, requirePerm
 
 // Trips
 router.get("/trips", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.TRIPS.VIEW"), listTrips);
+router.get("/trips/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.TRIPS.VIEW"), getTrip);
 router.post("/trips", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.TRIPS.CREATE"), createTrip);
+router.put("/trips/:id/start", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.TRIPS.EDIT"), startTrip);
 router.put("/trips/:id/return", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.TRIPS.EDIT"), returnTrip);
 
 // Fuel Logs
@@ -107,6 +149,19 @@ router.post("/expense-logs", requireAuth, requireCompanyScope, requirePermission
 router.put("/expense-logs/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.EXPENSE_LOG.EDIT"), updateExpenseLog);
 router.delete("/expense-logs/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.EXPENSE_LOG.DELETE"), deleteExpenseLog);
 router.put("/expense-logs/:id/voucher", requireAuth, requireCompanyScope, updateExpenseLogVoucherId);
+
+// Setup / Settings
+router.get("/setup", requireAuth, requireCompanyScope, listSetupItems);
+router.post("/setup", requireAuth, requireCompanyScope, createSetupItem);
+router.put("/setup/:id", requireAuth, requireCompanyScope, updateSetupItem);
+router.delete("/setup/:id", requireAuth, requireCompanyScope, deleteSetupItem);
+
+// Routes
+router.get("/routes", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.ROUTES.VIEW"), listRoutes);
+router.post("/routes", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.ROUTES.CREATE"), createRoute);
+router.get("/routes/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.ROUTES.VIEW"), getRoute);
+router.put("/routes/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.ROUTES.EDIT"), updateRoute);
+router.put("/routes/:id/toggle", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.ROUTES.EDIT"), toggleRouteStatus);
 
 export default router;
 

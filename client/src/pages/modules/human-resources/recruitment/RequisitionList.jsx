@@ -7,6 +7,8 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -14,6 +16,7 @@ import { toast } from "react-toastify";
  * @returns {JSX.Element} The rendered component
  */
 export default function RequisitionList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [items, setItems] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const navigate = useNavigate();
@@ -48,7 +51,10 @@ export default function RequisitionList() {
         </Link>
       </div>
       <div className="bg-white dark:bg-slate-800 rounded shadow-sm">
-        <table className="min-w-full">
+        <div className="flex justify-end mb-4">
+          <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+        </div>
+        <table className={"min-w-full " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
           <thead className="bg-[var(--table-header-bg)] dark:bg-slate-900/50">
             <tr className="text-left">
               <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Req No</th>

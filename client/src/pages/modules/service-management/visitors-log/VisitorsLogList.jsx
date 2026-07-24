@@ -6,6 +6,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../../../../api/client.js";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -13,6 +15,7 @@ import { api } from "../../../../api/client.js";
  * @returns {JSX.Element} The rendered component
  */
 export default function VisitorsLogList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -238,8 +241,12 @@ export default function VisitorsLogList() {
 
           {error && <div className="text-red-600 text-sm mb-3">{error}</div>}
 
-          <div className="overflow-x-auto">
-            <table className="table">
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
               <thead>
                 <tr>
                   <th className="whitespace-nowrap">Visitor Name</th>

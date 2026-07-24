@@ -13,6 +13,7 @@ import { logToCrashReport } from "./utils/crashLogger.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { notFound } from "./middleware/notFound.js";
 import { sanitizeInput } from "./middleware/sanitize.middleware.js";
+import { requireAuth as requireAuthMiddleware } from "./middleware/auth.js";
 import adminRoutes from "./routes/admin.route.js";
 import backupRoutes from "./routes/backup.routes.js";
 import salesRoutes from "./routes/sales.route.js";
@@ -184,8 +185,21 @@ app.use((req, res, next) => {
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+    referrerPolicy: {
+      policy: "strict-origin-when-cross-origin",
+    },
   }),
 );
+
+app.use((req, res, next) => {
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  next();
+});
 app.use(morgan("dev"));
 
 app.use((req, res, next) => {
@@ -236,10 +250,14 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
+  const isProd = String(process.env.NODE_ENV || "").toLowerCase() === "production";
   const connectSrc = process.env.CSP_CONNECT_SRC || "'self'";
+  const scriptSrc = isProd && String(process.env.CSP_ALLOW_EVAL || "").trim() !== "1"
+    ? "'self'"
+    : "'self' 'unsafe-eval'";
   res.setHeader(
     "Content-Security-Policy",
-    `default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src ${connectSrc};`,
+    `default-src 'self'; script-src ${scriptSrc}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src ${connectSrc};`,
   );
   next();
 });
@@ -353,8 +371,9 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+const bodyLimit = process.env.MAX_BODY_LIMIT || "10mb";
+app.use(express.json({ limit: bodyLimit }));
+app.use(express.urlencoded({ extended: true, limit: bodyLimit }));
 app.use(sanitizeInput);
 
 /* ---------------- RATE LIMITING ---------------- */
@@ -397,6 +416,21 @@ function setupRateLimiter() {
 }
 setupRateLimiter();
 app.use("/api", apiLimiter);
+
+/* SECURITY: Stricter rate limiting for authentication endpoints */
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 attempts per 15 minutes per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: "TOO_MANY_REQUESTS",
+    message: "Too many authentication attempts, please try again later",
+  },
+});
+app.use("/api/login", authLimiter);
+app.use("/api/auth/refresh", authLimiter);
+app.use("/api/forgot-password", authLimiter);
 
 app.head("/api/ping", (_req, res) => res.status(200).end());
 app.get("/api/ping", (_req, res) => res.json({ ok: true }));
@@ -790,7 +824,12 @@ app.use(
     path.join(path.dirname(fileURLToPath(import.meta.url)), "uploads"),
   ),
 );
-app.get("/api/debug-crash-log", (req, res) => {
+// SECURITY: Debug endpoints require authentication
+app.get("/api/debug-crash-log", requireAuthMiddleware, (req, res) => {
+  // SECURITY: Only allow admin users (ID 1) to access crash reports
+  if (Number(req.user?.id) !== 1) {
+    return res.status(403).json({ error: "FORBIDDEN", message: "Admin access required" });
+  }
   try {
     const p1 = path.join(process.cwd(), "crash_report.txt");
     const p2 = path.join(process.cwd(), "CRASH_REPORT.txt");
@@ -802,7 +841,7 @@ app.get("/api/debug-crash-log", (req, res) => {
     res.setHeader("Content-Type", "text/plain");
     res.send(content);
   } catch (err) {
-    res.status(500).send("Error reading crash report: " + err.message);
+    res.status(500).json({ error: "INTERNAL_ERROR", message: "Error reading crash report" });
   }
 });
 

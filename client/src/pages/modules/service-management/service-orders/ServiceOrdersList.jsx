@@ -10,6 +10,8 @@ import { usePermission } from "../../../../auth/PermissionContext.jsx";
 import { filterAndSort } from "@/utils/searchUtils.js";
 import { toast } from "react-toastify";
 import { ListAttachmentIconButton } from "@/components/list/ListDocActionIconButtons.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -17,6 +19,7 @@ import { ListAttachmentIconButton } from "@/components/list/ListDocActionIconBut
  * @returns {JSX.Element} The rendered component
  */
 export default function ServiceOrdersList() {
+  const [viewMode, setViewMode] = useViewMode();
   const location = useLocation();
   const { canPerformAction } = usePermission();
   const [items, setItems] = useState([]);
@@ -33,7 +36,7 @@ export default function ServiceOrdersList() {
       try {
         const resp = await api.get("/purchase/service-orders");
         const rows = Array.isArray(resp.data?.items) ? resp.data.items : [];
-        if (mounted) setItems(rows);
+        if (mounted) setItems(Array.isArray(rows) ? rows : []);
       } catch (e) {
         if (mounted) {
           setError("No service order API found. Showing placeholder list.");
@@ -98,8 +101,12 @@ export default function ServiceOrdersList() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <div className="overflow-x-auto">
-            <table className="table">
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
               <thead>
                 <tr>
                   <th className="whitespace-nowrap">Order No</th>

@@ -172,6 +172,7 @@ export const checkAndSendAutomaticNotification = async ({
     const moduleTemplate = process.env[`TEMPLATE_${moduleCode}`];
     const customText = parseTemplate(moduleTemplate, text);
 
+    // 1. Send to Document's Customer/Supplier
     if (setting.send_email === 'Y' && recipientEmail) {
       await sendExternalNotification({ type: 'email', recipientEmail, subject, text, html }).catch(()=>null);
     }
@@ -180,6 +181,33 @@ export const checkAndSendAutomaticNotification = async ({
     }
     if (setting.send_whatsapp === 'Y' && recipientPhone) {
       await sendExternalNotification({ type: 'whatsapp', recipientPhone, text: customText }).catch(()=>null);
+    }
+
+    // 2. Send to Configured Recipients in adm_notification_settings
+    if (setting.recipients && setting.recipients.trim() !== '') {
+      const recipientIds = setting.recipients.split(',').map(id => id.trim()).filter(Boolean);
+      if (recipientIds.length > 0) {
+        let extraRecipients = [];
+        if (moduleCode === "SALES_ORDER") {
+          [extraRecipients] = await query(`SELECT email, phone FROM sal_customers WHERE id IN (?)`, [recipientIds]);
+        } else if (["PURCHASE_ORDER", "SERVICE_ORDER", "MAINTENANCE_JOB", "PAYMENT_VOUCHER"].includes(moduleCode)) {
+          [extraRecipients] = await query(`SELECT email, phone FROM pur_suppliers WHERE id IN (?)`, [recipientIds]);
+        }
+        
+        for (const ext of extraRecipients) {
+          if (setting.send_email === 'Y' && ext.email && ext.email !== recipientEmail) {
+            await sendExternalNotification({ type: 'email', recipientEmail: ext.email, subject, text, html }).catch(()=>null);
+          }
+          if (ext.phone && ext.phone !== recipientPhone) {
+            if (setting.send_sms === 'Y') {
+              await sendExternalNotification({ type: 'sms', recipientPhone: ext.phone, text: customText }).catch(()=>null);
+            }
+            if (setting.send_whatsapp === 'Y') {
+              await sendExternalNotification({ type: 'whatsapp', recipientPhone: ext.phone, text: customText }).catch(()=>null);
+            }
+          }
+        }
+      }
     }
 
   } catch (err) {

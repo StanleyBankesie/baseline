@@ -51,6 +51,7 @@ export default function GRNImportForm() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [showForwardModal, setShowForwardModal] = useState(false);
+  const [forwardComments, setForwardComments] = useState("");
   const [wfLoading, setWfLoading] = useState(false);
   const [wfError, setWfError] = useState("");
   const [candidateWorkflow, setCandidateWorkflow] = useState(null);
@@ -803,6 +804,8 @@ export default function GRNImportForm() {
           port_clearance_id: formData.port_clearance_id
             ? Number(formData.port_clearance_id)
             : null,
+        
+          comments: forwardComments || "Forwarded for Approval",
         });
       } else {
         await api.put(`/inventory/grn/${id}`, {
@@ -840,7 +843,8 @@ export default function GRNImportForm() {
             : Number(formData.invoice_amount || 0),
         workflow_id: candidateWorkflow ? candidateWorkflow.id : null,
         target_user_id: targetApproverId || null,
-      });
+        comments: forwardComments,
+        });
       setFormData((prev) => ({ ...prev, status: newStatus }));
       setShowForwardModal(false);
       toast.success("Import GRN submitted for approval successfully");

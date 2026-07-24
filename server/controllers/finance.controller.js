@@ -1292,6 +1292,17 @@ export const submitVoucher = async (req, res, next) => {
         `UPDATE fin_pdc_postings SET status = 'POSTED' WHERE voucher_id = :id AND company_id = :companyId`,
         { id: voucherId, companyId },
       );
+      try {
+        await query(
+          `UPDATE trans_expense_logs 
+           SET status = 'PAID' 
+           WHERE id IN (
+             SELECT expense_log_id FROM trn_transport_expenses 
+             WHERE voucher_id = :id AND company_id = :companyId AND expense_log_id IS NOT NULL
+           ) AND company_id = :companyId`,
+          { id: voucherId, companyId },
+        );
+      } catch (e) {}
       res.json({ status: "APPROVED" });
       return;
     }
@@ -4754,12 +4765,19 @@ export const generalLedgerReport = async (req, res, next) => {
     const from = req.query.from ? String(req.query.from) : null;
     const to = req.query.to ? String(req.query.to) : null;
     const accountId = req.query.accountId ? Number(req.query.accountId) : null;
+    const groupId = req.query.groupId ? Number(req.query.groupId) : null;
 
-    const accountFilter = accountId ? "AND vl.account_id = :accountId" : "";
+    let accountFilter = "";
+    if (accountId) {
+      accountFilter = "AND vl.account_id = :accountId";
+    } else if (groupId) {
+      accountFilter = "AND a.group_id = :groupId";
+    }
+
     const orderBy = accountId
       ? "v.voucher_date ASC, v.id ASC, vl.line_no ASC"
       : "a.code ASC, v.voucher_date ASC, v.id ASC, vl.line_no ASC";
-    const params = { companyId, branchId: branchId || null, branchIdsStr, from, to, accountId };
+    const params = { companyId, branchId: branchId || null, branchIdsStr, from, to, accountId, groupId };
 
     let account = null;
     let openingBalance = 0;

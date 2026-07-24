@@ -16,7 +16,11 @@ export const sendSMS = async ({ to, message }) => {
     const senderId = process.env.ARKESEL_SENDER_ID;
 
     // Remove any non-numeric characters from the phone number
-    const cleanNumber = to.replace(/\D/g, "");
+    let cleanNumber = to.replace(/\D/g, "");
+    // Fix for Ghana numbers with country code and local 0
+    if (cleanNumber.startsWith("2330") && cleanNumber.length === 13) {
+      cleanNumber = "233" + cleanNumber.substring(4);
+    }
 
     const response = await _fetch("https://sms.arkesel.com/api/v2/sms/send", {
       method: "POST",

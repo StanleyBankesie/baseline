@@ -8,6 +8,8 @@ import { Link } from "react-router-dom";
 
 import { api } from "api/client";
 import { filterAndSort } from "@/utils/searchUtils.js";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -15,6 +17,7 @@ import { filterAndSort } from "@/utils/searchUtils.js";
  * @returns {JSX.Element} The rendered component
  */
 export default function ServiceConfirmationsList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [searchTerm, setSearchTerm] = useState("");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -96,8 +99,12 @@ export default function ServiceConfirmationsList() {
             />
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="table">
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
               <thead>
                 <tr>
                   <th>No</th>

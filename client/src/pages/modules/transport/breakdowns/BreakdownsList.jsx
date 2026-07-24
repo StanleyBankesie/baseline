@@ -3,8 +3,11 @@ import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { PlusOutlined, WarningOutlined } from "@ant-design/icons";
 import api from "../../../../api/client.js";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 export default function BreakdownsList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [breakdowns, setBreakdowns] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -48,8 +51,12 @@ export default function BreakdownsList() {
       </div>
 
       <div className="card bg-base-100 shadow-sm border border-base-200">
-        <div className="overflow-x-auto">
-          <table className="table table-zebra w-full">
+        
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+          <table className={ "table table-zebra w-full " + (viewMode === 'grid' ? 'table-grid-mode' : '') }>
             <thead>
               <tr className="bg-base-200">
                 <th>Defect Date</th>

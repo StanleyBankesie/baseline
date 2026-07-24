@@ -269,6 +269,7 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
+
         </div>
       )}
 
@@ -287,11 +288,16 @@ export default function SettingsPage() {
                 </label>
               </div>
               <div className="flex gap-2">
-                <button type="button" className="btn-secondary" onClick={requestPushPermission}>Request Permission</button>
-                <button type="button" className="btn-primary" onClick={subscribePushNow} disabled={!pushEnabled}>Subscribe Now</button>
-                <button type="button" className="btn-outline" onClick={unsubscribePushNow}>Unsubscribe</button>
+                <div className="flex flex-col gap-1 w-1/3">
+                  <button type="button" className="btn-secondary" onClick={requestPushPermission}>Request Permission</button>
+                </div>
+                <div className="flex flex-col gap-1 w-1/3">
+                  <button type="button" className="btn-primary" onClick={subscribePushNow} disabled={!pushEnabled}>Subscribe Now</button>
+                </div>
+                <div className="flex flex-col gap-1 w-1/3">
+                  <button type="button" className="btn-outline" onClick={unsubscribePushNow}>Unsubscribe</button>
+                </div>
               </div>
-              <div className="text-xs text-slate-500">When enabled, the app registers for push after login and delivers background alerts.</div>
             </div>
           </div>
 
@@ -399,40 +405,46 @@ function LowStockNotificationSection() {
   }
 
   return (
-    <div className="space-y-3">
-      <div className="max-w-md">
-        <label className="text-xs font-medium text-slate-700">User</label>
-        <select className="input w-full" value={selectedUserId} onChange={e => setSelectedUserId(e.target.value)}>
-          <option value="">Choose a user...</option>
-          {users.map(u => <option key={u.id} value={u.id}>{u.username || u.full_name || `User #${u.id}`}</option>)}
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-2">
+        <select className="input flex-1" value={selectedUserId} onChange={e => setSelectedUserId(e.target.value)}>
+          <option value="">Select a user...</option>
+          {users.map(u => (
+            <option key={u.id} value={u.id}>{u.first_name} {u.last_name} ({u.email})</option>
+          ))}
         </select>
       </div>
+
       {selectedUserId && (
-        <div className="space-y-3">
-          {loading ? <div className="text-sm text-slate-500">Loading preferences...</div> : (
-            <>
-              <div className="flex flex-col gap-3">
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" className="checkbox" checked={pushEnabled} onChange={e => setPushEnabled(e.target.checked)} />
-                  <span className="text-sm">Push notification + app notification</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" className="checkbox" checked={emailEnabled} onChange={e => setEmailEnabled(e.target.checked)} />
-                  <span className="text-sm">Email notification</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" className="checkbox" checked={smsEnabled} onChange={e => setSmsEnabled(e.target.checked)} />
-                  <span className="text-sm">SMS notification</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" className="checkbox" checked={whatsappEnabled} onChange={e => setWhatsappEnabled(e.target.checked)} />
-                  <span className="text-sm">WhatsApp notification</span>
-                </label>
+        <>
+          {loading ? (
+            <div className="text-sm text-slate-500 py-2">Loading...</div>
+          ) : (
+            <div className="space-y-3 bg-slate-50 p-4 rounded-lg border border-slate-100">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" className="toggle toggle-sm" checked={pushEnabled} onChange={e => setPushEnabled(e.target.checked)} />
+                <span className="text-sm">In-App Push</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" className="toggle toggle-sm" checked={emailEnabled} onChange={e => setEmailEnabled(e.target.checked)} />
+                <span className="text-sm">Email</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" className="toggle toggle-sm" checked={smsEnabled} onChange={e => setSmsEnabled(e.target.checked)} />
+                <span className="text-sm">SMS</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" className="toggle toggle-sm" checked={whatsappEnabled} onChange={e => setWhatsappEnabled(e.target.checked)} />
+                <span className="text-sm">WhatsApp</span>
+              </label>
+              <div className="pt-2">
+                <button className="btn-primary w-full" onClick={save} disabled={saving}>
+                  {saving ? "Saving..." : "Save Preferences"}
+                </button>
               </div>
-              <button className="btn-primary" disabled={saving} onClick={save}>{saving ? "Saving..." : "Save Preference"}</button>
-            </>
+            </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );

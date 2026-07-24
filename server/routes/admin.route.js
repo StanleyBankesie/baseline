@@ -2791,6 +2791,62 @@ router.post(
   },
 );
 
+router.get(
+  "/settings/google-maps",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensureSystemSettingsTable();
+      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const rows = await query(
+        `
+        SELECT setting_key, setting_value
+         FROM adm_system_settings
+         WHERE (company_id = :companyId OR company_id IS NULL)
+          AND ((:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
+          AND setting_key = 'GOOGLE_MAPS_API_KEY'
+        ORDER BY company_id DESC, branch_id DESC
+        LIMIT 1
+        `,
+        { companyId: companyId ?? null, branchId: branchId ?? null, branchIdsStr },
+      );
+      res.json({
+        data: {
+          api_key: rows.length > 0 ? rows[0].setting_value : "",
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.post(
+  "/settings/google-maps",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensureSystemSettingsTable();
+      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const api_key = String(req.body?.api_key || "").trim();
+      
+      await query(
+        `
+        INSERT INTO adm_system_settings (company_id, branch_id, setting_key, setting_value)
+        VALUES (:companyId, :branchId, 'GOOGLE_MAPS_API_KEY', :api_key)
+        ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
+        `,
+        { companyId: companyId ?? null, branchId: branchId ?? null, branchIdsStr, api_key },
+      );
+      res.json({ success: true });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
 router.post("/email/test", requireAuth, async (req, res, next) => {
   try {
     const to =
@@ -3019,20 +3075,22 @@ router.post("/notification-settings", requireAuth, requireCompanyScope, async (r
       await conn.beginTransaction();
 
       for (const item of items) {
-        const { module_code, status_trigger, send_email, send_sms, send_whatsapp } = item;
+        const { module_code, status_trigger, send_email, send_sms, send_whatsapp, recipients } = item;
         if (!module_code || !status_trigger) continue;
 
         await conn.query(
           `INSERT INTO adm_notification_settings 
-           (company_id, module_code, status_trigger, send_email, send_sms, send_whatsapp) 
-           VALUES (?, ?, ?, ?, ?, ?)
+           (company_id, module_code, status_trigger, send_email, send_sms, send_whatsapp, recipients) 
+           VALUES (?, ?, ?, ?, ?, ?, ?)
            ON DUPLICATE KEY UPDATE 
            send_email = VALUES(send_email),
            send_sms = VALUES(send_sms),
-           send_whatsapp = VALUES(send_whatsapp)`,
+           send_whatsapp = VALUES(send_whatsapp),
+           recipients = VALUES(recipients)`,
           [
             companyId, module_code, status_trigger, 
-            send_email || 'N', send_sms || 'N', send_whatsapp || 'N'
+            send_email || 'N', send_sms || 'N', send_whatsapp || 'N',
+            recipients || null
           ]
         );
       }
@@ -3049,6 +3107,68 @@ router.post("/notification-settings", requireAuth, requireCompanyScope, async (r
     next(err);
   }
 });
+// GET /admin/settings/compliance-template
+router.get("/settings/compliance-template", requireAuth, requireCompanyScope, async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const [row] = await query(
+      "SELECT setting_value FROM adm_system_settings WHERE company_id = ? AND setting_key = 'compliance_notification_template'",
+      [companyId]
+    );
+    res.json({ template: row ? row.setting_value : "" });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /admin/settings/compliance-template
+router.post("/settings/compliance-template", requireAuth, requireCompanyScope, async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const { template } = req.body;
+    await query(
+      `INSERT INTO adm_system_settings (company_id, setting_key, setting_value) 
+       VALUES (?, 'compliance_notification_template', ?)
+       ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)`,
+      [companyId, template]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /admin/settings/servicing-template
+router.get("/settings/servicing-template", requireAuth, requireCompanyScope, async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const [row] = await query(
+      "SELECT setting_value FROM adm_system_settings WHERE company_id = ? AND setting_key = 'servicing_notification_template'",
+      [companyId]
+    );
+    res.json({ template: row ? row.setting_value : "" });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /admin/settings/servicing-template
+router.post("/settings/servicing-template", requireAuth, requireCompanyScope, async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const { template } = req.body;
+    await query(
+      `INSERT INTO adm_system_settings (company_id, setting_key, setting_value) 
+       VALUES (?, 'servicing_notification_template', ?)
+       ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)`,
+      [companyId, template]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get("/settings/env", requireAuth, async (req, res, next) => {
   try {
     if (req.user.id !== 1) {
@@ -3071,7 +3191,8 @@ router.get("/settings/env", requireAuth, async (req, res, next) => {
     return res.json({
       ARKESEL_API_KEY: envVars.ARKESEL_API_KEY ? "********" : "",
       ARKESEL_SENDER_ID: envVars.ARKESEL_SENDER_ID ? "********" : "",
-      WASENDER_API_TOKEN: envVars.WASENDER_API_TOKEN ? "********" : "",
+      GREEN_API_ID_INSTANCE: envVars.GREEN_API_ID_INSTANCE || "",
+      GREEN_API_TOKEN_INSTANCE: envVars.GREEN_API_TOKEN_INSTANCE ? "********" : "",
       SMTP_HOST: envVars.SMTP_HOST || "",
       SMTP_PORT: envVars.SMTP_PORT || "",
       SMTP_USER: envVars.SMTP_USER || "",
@@ -3105,7 +3226,7 @@ router.post("/settings/env", requireAuth, async (req, res, next) => {
 
     const updates = req.body;
     const allowedKeys = [
-      "ARKESEL_API_KEY", "ARKESEL_SENDER_ID", "WASENDER_API_TOKEN",
+      "ARKESEL_API_KEY", "ARKESEL_SENDER_ID", "GREEN_API_ID_INSTANCE", "GREEN_API_TOKEN_INSTANCE",
       "SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "SMTP_FROM", "SMTP_SECURE",
       "TEMPLATE_SALES_ORDER", "TEMPLATE_PURCHASE_ORDER", "TEMPLATE_SERVICE_ORDER", 
       "TEMPLATE_MAINTENANCE_JOB", "TEMPLATE_PAYMENT_VOUCHER"

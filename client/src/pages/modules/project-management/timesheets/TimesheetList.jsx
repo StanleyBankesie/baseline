@@ -11,6 +11,8 @@ import { toast } from "react-toastify";
 import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
 import DocumentAttachmentsModal from "@/components/attachments/DocumentAttachmentsModal.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -18,6 +20,7 @@ import DocumentAttachmentsModal from "@/components/attachments/DocumentAttachmen
  * @returns {JSX.Element} The rendered component
  */
 export default function TimesheetList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -120,8 +123,12 @@ export default function TimesheetList() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="table">
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
               <thead>
                 <tr>
                   <SortableHeader label="Work Reference" sortKey="task_title" currentKey={sortKey} direction={sortDir} onToggle={toggle} />

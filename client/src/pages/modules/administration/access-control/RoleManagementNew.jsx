@@ -519,7 +519,6 @@ export default function RoleManagementNew() {
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {getAllModuleKeys()
-                    .filter((moduleKey) => allowedModules.has(moduleKey))
                     .map((moduleKey) => {
                     const moduleInfo = MODULES_REGISTRY[moduleKey];
                     return (
@@ -550,7 +549,6 @@ export default function RoleManagementNew() {
               {/* Features Section */}
               <div className="space-y-6">
                 {getAllModuleKeys()
-                  .filter((moduleKey) => allowedModules.has(moduleKey))
                   .map((moduleKey) => {
                   const moduleInfo = MODULES_REGISTRY[moduleKey];
                   const isModuleSelected = selectedModules.has(moduleKey);

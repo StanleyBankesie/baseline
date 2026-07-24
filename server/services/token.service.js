@@ -235,7 +235,10 @@ export async function lookupGraceToken(oldAccessToken) {
  * @returns {Object|null} The decoded token payload if valid, otherwise null.
  */
 export function verifyAccessToken(token) {
-  const payload = jwt.verify(String(token || ""), getJwtSecret());
+  // SECURITY: Explicitly restrict to HS256 to prevent algorithm confusion attacks
+  const payload = jwt.verify(String(token || ""), getJwtSecret(), {
+    algorithms: ["HS256"],
+  });
   if (
     !payload ||
     typeof payload !== "object" ||

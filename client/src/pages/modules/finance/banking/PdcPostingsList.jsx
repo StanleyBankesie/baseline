@@ -7,6 +7,8 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "api/client";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -14,6 +16,7 @@ import { api } from "api/client";
  * @returns {JSX.Element} The rendered component
  */
 export default function PdcPostingsList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [items, setItems] = useState([]);
   const [bankAccounts, setBankAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -364,8 +367,12 @@ export default function PdcPostingsList() {
             </div>
 
             <div className="card-body p-0">
-              <div className="overflow-x-auto">
-                <table className="table table-zebra w-full">
+              
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+                <table className={ "table table-zebra w-full " + (viewMode === 'grid' ? 'table-grid-mode' : '') }>
                   <thead className="bg-slate-50 text-slate-600">
                     <tr>
                       <th className="text-xs font-bold uppercase">

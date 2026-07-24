@@ -7,6 +7,8 @@ import { httpError } from "../utils/httpError.js";
 import { createPostedSalesVoucherForInvoiceTx } from "../routes/sales.route.js";
 import { toNumber } from "../utils/dbUtils.js";
 import { resolveWorkflowSelection, getInactiveWorkflowBehavior } from "../utils/workflowResolution.js";
+import { getIO } from "../utils/socket.js";
+import { sendDocumentForwardNotification } from "../utils/documentNotification.js";
 
 // === DASHBOARD STATS ===
 export const getTransportDashboardStats = async (req, res, next) => {
@@ -109,23 +111,67 @@ export const createDriver = async (req, res, next) => {
   try {
     const { companyId, branchIdStr } = req.scope;
     const branchId = toNumber(branchIdStr) || 1;
-    const { employee_name, license_number, license_type, license_expiry } = req.body;
+    const { employee_name, license_number, license_type, license_expiry, user_id } = req.body;
     
     if (!employee_name || !license_number) {
       throw httpError(400, "VALIDATION_ERROR", "Employee Name and License number are required");
     }
 
     const result = await query(
-      `INSERT INTO trans_drivers (company_id, branch_id, employee_name, license_number, license_type, license_expiry, created_by) 
-       VALUES (:companyId, :branchId, :employee_name, :license_number, :license_type, :license_expiry, :userId)`,
+      `INSERT INTO trans_drivers (company_id, branch_id, employee_name, user_id, license_number, license_type, license_expiry, created_by) 
+       VALUES (:companyId, :branchId, :employee_name, :user_id, :license_number, :license_type, :license_expiry, :userId)`,
       {
-        companyId, branchId, employee_name, license_number, license_type, license_expiry,
+        companyId, branchId, employee_name, user_id: user_id || null, license_number, license_type, license_expiry,
         userId: req.user?.id || null
       }
     );
     res.status(201).json({ success: true, data: { id: result.insertId } });
   } catch (err) {
     console.error("createDriver Error:", err);
+    next(err);
+  }
+};
+
+export const getDriver = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { companyId } = req.scope;
+    const [driver] = await query("SELECT * FROM trans_drivers WHERE id = :id AND company_id = :companyId", { id, companyId });
+    if (!driver) throw httpError(404, "NOT_FOUND", "Driver not found");
+    res.json({ success: true, data: { driver } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateDriver = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { companyId } = req.scope;
+    const { employee_name, license_number, license_type, license_expiry, user_id } = req.body;
+    
+    await query(
+      `UPDATE trans_drivers 
+       SET employee_name = :employee_name, user_id = :user_id, license_number = :license_number, license_type = :license_type, license_expiry = :license_expiry
+       WHERE id = :id AND company_id = :companyId`,
+      { id, companyId, employee_name, user_id: user_id || null, license_number, license_type, license_expiry }
+    );
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const toggleDriverStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { companyId } = req.scope;
+    await query(
+      "UPDATE trans_drivers SET is_active = NOT is_active WHERE id = :id AND company_id = :companyId",
+      { id, companyId }
+    );
+    res.json({ success: true });
+  } catch (err) {
     next(err);
   }
 };
@@ -212,21 +258,52 @@ export const createTrip = async (req, res, next) => {
   try {
     const { companyId, branchIdStr } = req.scope;
     const branchId = toNumber(branchIdStr) || 1;
-    const { request_id, vehicle_id, driver_id, start_time, start_odometer } = req.body;
+    const { request_id, vehicle_id, driver_id, start_time, start_odometer, origin_name, origin_lat, origin_lng, destination_name, destination_lat, destination_lng, distance, estimated_time } = req.body;
     
     if (!vehicle_id || !driver_id) {
       throw httpError(400, "VALIDATION_ERROR", "Vehicle and Driver are required");
     }
+
+    let route_id = null;
+    if (origin_name && destination_name) {
+      const [existingRoute] = await query("SELECT id FROM trans_routes WHERE company_id = :companyId AND origin = :origin_name AND destination = :destination_name LIMIT 1", { companyId, origin_name, destination_name });
+      if (existingRoute) {
+        route_id = existingRoute.id;
+      } else {
+        const lastRoute = await query("SELECT id FROM trans_routes ORDER BY id DESC LIMIT 1");
+        const nextRouteId = (lastRoute && lastRoute.length > 0) ? Number(lastRoute[0].id) + 1 : 1;
+        const route_code = "RT-" + String(nextRouteId).padStart(4, '0');
+        const route_name = `${origin_name.substring(0, 100)} to ${destination_name.substring(0, 100)}`;
+        const routeResult = await query(
+          `INSERT INTO trans_routes (company_id, branch_id, route_code, route_name, origin, destination, distance, estimated_time, created_by)
+           VALUES (:companyId, :branchId, :route_code, :route_name, :origin_name, :destination_name, :distance, :estimated_time, :userId)`,
+          {
+            companyId, branchId, route_code, route_name, origin_name, destination_name,
+            distance: distance ? Number(distance) : null,
+            estimated_time: estimated_time ? Number(estimated_time) : null,
+            userId: req.user?.id || null
+          }
+        );
+        route_id = routeResult.insertId;
+      }
+    }
+
     const lastTripResult = await query("SELECT id FROM trans_trips ORDER BY id DESC LIMIT 1");
     const nextId = (lastTripResult && lastTripResult.length > 0) ? Number(lastTripResult[0].id) + 1 : 1;
     const trip_number = "TRP-" + String(nextId).padStart(6, '0');
     const result = await query(
-      `INSERT INTO trans_trips (company_id, branch_id, trip_number, request_id, vehicle_id, driver_id, start_time, start_odometer, created_by) 
-       VALUES (:companyId, :branchId, :trip_number, :request_id, :vehicle_id, :driver_id, :start_time, :start_odometer, :userId)`,
+      `INSERT INTO trans_trips (company_id, branch_id, trip_number, request_id, route_id, vehicle_id, driver_id, start_time, start_odometer, origin_name, origin_lat, origin_lng, destination_name, destination_lat, destination_lng, created_by) 
+       VALUES (:companyId, :branchId, :trip_number, :request_id, :route_id, :vehicle_id, :driver_id, :start_time, :start_odometer, :origin_name, :origin_lat, :origin_lng, :destination_name, :destination_lat, :destination_lng, :userId)`,
       {
         companyId, branchId, trip_number, 
-        request_id: request_id || null, vehicle_id, driver_id, start_time: start_time || null,
+        request_id: request_id || null, route_id, vehicle_id, driver_id, start_time: start_time || null,
         start_odometer: start_odometer ? Number(start_odometer) : null,
+        origin_name: origin_name || null,
+        origin_lat: origin_lat ? Number(origin_lat) : null,
+        origin_lng: origin_lng ? Number(origin_lng) : null,
+        destination_name: destination_name || null,
+        destination_lat: destination_lat ? Number(destination_lat) : null,
+        destination_lng: destination_lng ? Number(destination_lng) : null,
         userId: req.user?.id || null
       }
     );
@@ -237,6 +314,21 @@ export const createTrip = async (req, res, next) => {
 
     if (request_id) {
       await query("UPDATE trans_requests SET status = 'SCHEDULED' WHERE id = :request_id", { request_id });
+    }
+
+    // Auto-forward trip document to linked driver user account
+    const [driverRow] = await query("SELECT user_id FROM trans_drivers WHERE id = :driver_id LIMIT 1", { driver_id });
+    if (driverRow && driverRow.user_id) {
+      await sendDocumentForwardNotification({
+        userId: driverRow.user_id,
+        companyId,
+        documentType: 'TRIP',
+        documentId: result.insertId,
+        documentRef: trip_number,
+        title: "New Trip Assigned",
+        message: `You have been assigned to trip ${trip_number}.`,
+        req
+      });
     }
 
     res.status(201).json({ success: true, data: { id: result.insertId, trip_number } });
@@ -342,12 +434,66 @@ export const listBilling = async (req, res, next) => {
 export const addTripLocation = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { latitude, longitude, speed, heading, accuracy, recorded_at } = req.body;
+    const { latitude, longitude, speed, heading, accuracy, recorded_at, is_initial, origin_name } = req.body;
+
     await query(
-      "INSERT INTO trans_trip_locations (trip_id, latitude, longitude, speed, heading, accuracy, recorded_at) VALUES (:id, :latitude, :longitude, :speed, :heading, :accuracy, :recorded_at)",
+      `INSERT INTO trans_trip_locations (trip_id, latitude, longitude, speed, heading, accuracy, recorded_at)
+       VALUES (:id, :latitude, :longitude, :speed, :heading, :accuracy, :recorded_at)`,
       { id, latitude, longitude, speed: speed || 0, heading: heading || 0, accuracy: accuracy || 0, recorded_at: recorded_at || new Date() }
     );
-    res.json({ success: true });
+
+    if (is_initial) {
+      let finalOriginName = origin_name;
+      
+      if (!finalOriginName) {
+        try {
+          const [setting] = await query("SELECT setting_value FROM settings WHERE setting_key = 'google_maps_api_key'");
+          if (setting && setting.setting_value) {
+            const geoRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${setting.setting_value}`);
+            const geoData = await geoRes.json();
+            if (geoData.results && geoData.results[0]) {
+              finalOriginName = geoData.results[0].formatted_address;
+            }
+          }
+        } catch (e) {
+          console.error("Backend geocoding failed", e);
+        }
+      }
+
+      await query(
+        `UPDATE trans_trips SET origin_lat = :lat, origin_lng = :lng, origin_name = IFNULL(:name, origin_name) WHERE id = :id`,
+        { lat: latitude, lng: longitude, name: finalOriginName, id }
+      );
+      
+      const [trip] = await query(`SELECT route_id FROM trans_trips WHERE id = :id`, { id });
+      if (trip && trip.route_id && finalOriginName) {
+        await query(
+          `UPDATE trans_routes SET origin = :name WHERE id = :rid`,
+          { name: finalOriginName, rid: trip.route_id }
+        );
+      }
+    }
+
+    try {
+      const io = getIO();
+      if (io) {
+        io.emit("TRIP_LOCATION_UPDATE", {
+          tripId: id,
+          location: {
+            latitude: parseFloat(latitude),
+            longitude: parseFloat(longitude),
+            speed: speed ? parseFloat(speed) : 0,
+            heading: heading ? parseFloat(heading) : 0,
+            accuracy: accuracy ? parseFloat(accuracy) : 0,
+            recorded_at: recorded_at || new Date().toISOString()
+          }
+        });
+      }
+    } catch (e) {
+      console.error("Socket emit failed", e);
+    }
+
+    res.json({ success: true, message: "Location added successfully" });
   } catch (err) {
     next(err);
   }
@@ -576,13 +722,16 @@ export const createTransportExpense = async (req, res, next) => {
     const branchId = toNumber(branchIdStr) || 1;
     const b = req.body;
     if (!b.amount) throw httpError(400, "VALIDATION_ERROR", "amount required");
-    const r = await query(`INSERT INTO trn_transport_expenses (company_id, branch_id, trip_id, vehicle_id, expense_date, category, amount, currency, description, recorded_by, status, supplier_id, payment_method, payment_account_id, is_tax_included, tax_code_id, reference_no, cheque_date, cost_center_id)
-      VALUES (:companyId, :branchId, :tripId, :vehicleId, :expenseDate, :category, :amount, :currency, :description, :recordedBy, :status, :supplierId, :paymentMethod, :paymentAccountId, :isTaxIncluded, :taxCodeId, :referenceNo, :chequeDate, :costCenterId)`, {
+    const r = await query(`INSERT INTO trn_transport_expenses (company_id, branch_id, expense_log_id, vehicle_id, compliance_id, servicing_id, expense_type, expense_date, category, amount, currency, description, recorded_by, status, supplier_id, payment_method, payment_account_id, is_tax_included, tax_code_id, reference_no, cheque_date, cost_center_id)
+      VALUES (:companyId, :branchId, :expenseLogId, :vehicleId, :complianceId, :servicingId, :expenseType, :expenseDate, :category, :amount, :currency, :description, :recordedBy, :status, :supplierId, :paymentMethod, :paymentAccountId, :isTaxIncluded, :taxCodeId, :referenceNo, :chequeDate, :costCenterId)`, {
       companyId, branchId,
-      tripId: toNumber(b.trip_id) || null,
+      expenseLogId: toNumber(b.expense_log_id) || null,
       vehicleId: toNumber(b.vehicle_id) || null,
+      complianceId: toNumber(b.compliance_id) || null,
+      servicingId: toNumber(b.servicing_id) || null,
+      expenseType: b.expense_type || 'Other',
       expenseDate: b.expense_date || new Date().toISOString().split('T')[0],
-      category: b.category || 'OTHER',
+      category: b.category || b.expense_type || 'OTHER',
       amount: Number(b.amount || 0),
       currency: b.currency || 'GHS',
       description: b.description || null,
@@ -597,6 +746,15 @@ export const createTransportExpense = async (req, res, next) => {
       chequeDate: b.cheque_date || null,
       costCenterId: toNumber(b.cost_center_id) || null,
     });
+
+    if (b.expense_log_id && b.status) {
+      await query(`UPDATE trans_expense_logs SET status = :status WHERE id = :logId AND company_id = :companyId`, {
+        status: b.status,
+        logId: toNumber(b.expense_log_id),
+        companyId
+      });
+    }
+
     res.status(201).json({ id: r.insertId });
   } catch (err) { next(err); }
 };
@@ -607,16 +765,19 @@ export const updateTransportExpense = async (req, res, next) => {
     const id = toNumber(req.params.id);
     const b = req.body;
     await query(`UPDATE trn_transport_expenses SET
-      trip_id = :tripId, vehicle_id = :vehicleId, expense_date = :expenseDate, category = :category, amount = :amount, currency = :currency,
+      expense_log_id = :expenseLogId, vehicle_id = :vehicleId, compliance_id = :complianceId, servicing_id = :servicingId, expense_type = :expenseType, expense_date = :expenseDate, category = :category, amount = :amount, currency = :currency,
       description = :description, status = :status, supplier_id = :supplierId, payment_method = :paymentMethod,
       payment_account_id = :paymentAccountId, is_tax_included = :isTaxIncluded, tax_code_id = :taxCodeId,
       reference_no = :referenceNo, cheque_date = :chequeDate, cost_center_id = :costCenterId
       WHERE id = :id AND company_id = :companyId`, {
       id, companyId,
-      tripId: toNumber(b.trip_id) || null,
+      expenseLogId: toNumber(b.expense_log_id) || null,
       vehicleId: toNumber(b.vehicle_id) || null,
+      complianceId: toNumber(b.compliance_id) || null,
+      servicingId: toNumber(b.servicing_id) || null,
+      expenseType: b.expense_type || 'Other',
       expenseDate: b.expense_date || new Date().toISOString().split('T')[0],
-      category: b.category || 'OTHER',
+      category: b.category || b.expense_type || 'OTHER',
       amount: Number(b.amount || 0),
       currency: b.currency || 'GHS',
       description: b.description || null,
@@ -630,6 +791,15 @@ export const updateTransportExpense = async (req, res, next) => {
       chequeDate: b.cheque_date || null,
       costCenterId: toNumber(b.cost_center_id) || null,
     });
+
+    if (b.expense_log_id && b.status) {
+      await query(`UPDATE trans_expense_logs SET status = :status WHERE id = :logId AND company_id = :companyId`, {
+        status: b.status,
+        logId: toNumber(b.expense_log_id),
+        companyId
+      });
+    }
+
     res.json({ ok: true });
   } catch (err) { next(err); }
 };
@@ -691,7 +861,53 @@ export const createFuelExpense = async (req, res, next) => {
         userId: req.user?.id || null
       }
     );
-    res.status(201).json({ success: true, data: { id: result.insertId } });
+    res.status(201).json({ success: true, message: "Trip created", data: { id: result.insertId } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getTrip = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const companyId = req.scope.companyId;
+
+    const [trip] = await query(`
+      SELECT t.*, v.reg_number, d.employee_name, r.request_number
+      FROM trans_trips t
+      LEFT JOIN trans_vehicles v ON t.vehicle_id = v.id
+      LEFT JOIN trans_drivers d ON t.driver_id = d.id
+      LEFT JOIN trans_requests r ON t.request_id = r.id
+      WHERE t.id = :id AND t.company_id = :companyId
+    `, { id, companyId });
+
+    if (!trip) {
+      return res.status(404).json({ success: false, message: "Trip not found" });
+    }
+
+    res.json({ success: true, data: { trip } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const startTrip = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const { id } = req.params;
+    const { start_odometer } = req.body;
+
+    const [trip] = await query("SELECT id, vehicle_id, driver_id FROM trans_trips WHERE id = :id AND company_id = :companyId", { id, companyId });
+    if (!trip) throw httpError(404, "NOT_FOUND", "Trip not found");
+
+    await query("UPDATE trans_trips SET status = 'STARTED', start_odometer = :start_odometer, start_time = NOW() WHERE id = :id", {
+      id, start_odometer: start_odometer ? Number(start_odometer) : null
+    });
+
+    await query("UPDATE trans_vehicles SET status = 'ON_TRIP' WHERE id = :vehicle_id", { vehicle_id: trip.vehicle_id });
+    await query("UPDATE trans_drivers SET status = 'ON_TRIP' WHERE id = :driver_id", { driver_id: trip.driver_id });
+
+    res.json({ success: true, message: "Trip started successfully" });
   } catch (err) {
     next(err);
   }
@@ -717,6 +933,9 @@ export const returnTrip = async (req, res, next) => {
       await query(`UPDATE trans_vehicles SET status = 'AVAILABLE' WHERE id = :vid`, { vid: trip.vehicle_id });
       await query(`UPDATE trans_drivers SET status = 'AVAILABLE' WHERE id = :did`, { did: trip.driver_id });
     }
+
+    // Clear tracking coordinates
+    await query(`DELETE FROM trans_trip_locations WHERE trip_id = :id`, { id });
 
     res.json({ success: true, message: "Trip returned successfully" });
   } catch (err) {

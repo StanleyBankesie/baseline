@@ -6,7 +6,7 @@
 import React from "react";
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
@@ -15,6 +15,7 @@ import { usePermission } from "@/auth/PermissionContext.jsx";
  * @returns {JSX.Element} The rendered component
  */
 export default function LeaveRequestForm() {
+  const { id } = useParams();
   const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const [form, setForm] = React.useState({

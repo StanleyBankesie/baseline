@@ -735,6 +735,18 @@ async function ensureShippingAdviceETDColumn() {
   }
 }
 
+async function ensureShippingAdviceCreatedByColumn() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
+  const hasCreatedBy = await hasColumn("pur_shipping_advices", "created_by");
+  if (!hasCreatedBy) {
+    try {
+      await pool.query(
+        "ALTER TABLE pur_shipping_advices ADD COLUMN created_by INT NULL",
+      );
+    } catch {}
+  }
+}
+
 async function ensurePortClearanceStatusEnum() {
   if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   const rows = await query(`SELECT column_type, column_default
@@ -827,7 +839,13 @@ export const listShippingAdvices = async (req, res, next) => {
         "ALTER TABLE pur_shipping_advices ADD COLUMN deleted_at DATETIME NULL",
       ).catch(() => {});
     }
+    if (!(await hasColumn("pur_shipping_advices", "created_by"))) {
+      await query(
+        "ALTER TABLE pur_shipping_advices ADD COLUMN created_by INT NULL",
+      ).catch(() => {});
+    }
     let sql = `SELECT sa.*, s.supplier_name, p.po_no, p.po_type,
+         u.username AS created_by_name,
          EXISTS(
            SELECT 1 FROM pur_port_clearances pc
             WHERE pc.company_id = sa.company_id 
@@ -838,6 +856,7 @@ export const listShippingAdvices = async (req, res, next) => {
          FROM pur_shipping_advices sa
          JOIN pur_suppliers s ON s.id = sa.supplier_id
          JOIN pur_orders p ON p.id = sa.po_id
+         LEFT JOIN adm_users u ON u.id = sa.created_by
          WHERE sa.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(sa.branch_id, :branchIdsStr))
            AND COALESCE(sa.is_active,'Y') = 'Y'`;
     if (status) sql += ` AND sa.status = :status`;
@@ -935,6 +954,7 @@ export const createShippingAdvice = async (req, res, next) => {
     const body = req.body || {};
     await ensureShippingAdviceStatusEnum();
     await ensureShippingAdviceETDColumn();
+    await ensureShippingAdviceCreatedByColumn();
     const adviceNo = body.advice_no || nextDocNo("SA");
     const adviceDate = body.advice_date || new Date();
     const poId = toNumber(body.po_id);

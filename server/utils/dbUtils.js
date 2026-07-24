@@ -234,6 +234,9 @@ export async function ensureUserColumns() {
   if (!(await hasColumn(table, "valid_from"))) {
     await query(`ALTER TABLE ${table} ADD COLUMN valid_from DATETIME NULL`);
   }
+  if (!(await hasColumn(table, "telephone"))) {
+    await query(`ALTER TABLE ${table} ADD COLUMN telephone VARCHAR(20) NULL`);
+  }
   if (!(await hasColumn(table, "valid_to"))) {
     await query(`ALTER TABLE ${table} ADD COLUMN valid_to DATETIME NULL`);
   }

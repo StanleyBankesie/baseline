@@ -16,6 +16,8 @@ import { usePermission } from "../../../../auth/PermissionContext.jsx";
 import defaultLogo from "../../../../assets/resources/OMNISUITE_LOGO_FILL.png";
 import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 function escapeHtml(v) {
   return String(v ?? "")
@@ -186,6 +188,7 @@ async function waitForImages(rootEl) {
  * @returns {JSX.Element} The rendered component
  */
 export default function DeliveryList() {
+  const [viewMode, setViewMode] = useViewMode();
   const { canPerformAction } = usePermission();
   const navigate = useNavigate();
   const [items, setItems] = useState([]);
@@ -636,8 +639,13 @@ export default function DeliveryList() {
           ) : filtered.length === 0 ? (
             <div className="text-center py-12">No deliveries found.</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="table">
+            
+                <>
+<div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+              <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
                 <thead>
                   <tr>
                     <SortableHeader label="Delivery No" sortKey="delivery_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
@@ -693,7 +701,9 @@ export default function DeliveryList() {
                 </tbody>
               </table>
             </div>
-          )}
+          
+</>
+)}
         </div>
       </div>
     </div>

@@ -11,6 +11,8 @@ import {
   ChevronRight, Eye, Edit2
 } from "lucide-react";
 import { Guard } from "../../../../hooks/usePermissions";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 const STATUS_CONFIG = {
   ACTIVE   : { cls: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" },
@@ -156,6 +158,7 @@ function RosterDetailModal({ group, onClose, onConfirm, confirming }) {
 
 // ── Main Component ─────────────────────────────────────────────────
 export default function MaintenanceRosterList() {
+  const [viewMode, setViewMode] = useViewMode();
   const navigate = useNavigate();
   const location = useLocation();
   const [items,        setItems]       = useState([]);

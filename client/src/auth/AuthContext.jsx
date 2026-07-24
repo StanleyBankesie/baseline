@@ -41,11 +41,12 @@ function resolveScope(userCandidate, preferredScope = {}) {
       userCandidate?.company_id ??
       userCandidate?.companyId,
   );
-  let branchId = toPositiveNumber(
-    preferredScope?.branchId ??
-      userCandidate?.branch_id ??
-      userCandidate?.branchId,
-  );
+  let branchId = toPositiveNumber(preferredScope?.branchId);
+  if (!branchId) {
+    branchId = toPositiveNumber(
+      userCandidate?.branch_id ?? userCandidate?.branchId
+    );
+  }
 
   if (allowedCompanyIds.length && !allowedCompanyIds.includes(companyId)) {
     companyId = allowedCompanyIds[0] || null;
@@ -117,9 +118,10 @@ export function AuthProvider({ children }) {
           ),
         });
         const nextUser = res?.data?.user || null;
+        const currentStored = readStoredAuth(); // Read fresh in case it changed
         const nextScope = resolveScope(
           nextUser,
-          res?.data?.scope || current?.scope,
+          currentStored?.scope || current?.scope || res?.data?.scope,
         );
         if (!active) return;
         if (!nextUser?.id) {
@@ -195,6 +197,10 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (scope?.companyId || scope?.branchId) {
       setScopeHeaders(scope);
+      const current = readStoredAuth();
+      if (current) {
+        writeStoredAuth({ ...current, scope });
+      }
     }
   }, [scope]);
 

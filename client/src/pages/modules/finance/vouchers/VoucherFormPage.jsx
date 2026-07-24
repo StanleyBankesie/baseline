@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import PendingApprovalTooltip from "@/components/PendingApprovalTooltip.jsx";
 import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -110,6 +111,7 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
   const [receivedFromSearch, setReceivedFromSearch] = useState("");
   const [paidToSearch, setPaidToSearch] = useState("");
   const [showForwardModal, setShowForwardModal] = useState(false);
+  const [forwardComments, setForwardComments] = useState("");
   const [wfLoading, setWfLoading] = useState(false);
   const [wfError, setWfError] = useState("");
   const [candidateWorkflow, setCandidateWorkflow] = useState(null);
@@ -699,7 +701,9 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
         next_number: 1,
         requires_approval: 0,
         is_active: 1,
-      });
+      
+          comments: forwardComments || "Forwarded for Approval",
+        });
       const res2 = await api.get("/finance/voucher-types", {
         params: { code: upper },
       });
@@ -3573,7 +3577,8 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
                             ? candidateWorkflow.id
                             : null,
                           target_user_id: targetApproverId || null,
-                        },
+        comments: forwardComments,
+        },
                       );
                       const newStatus = res?.data?.status || "PENDING_APPROVAL";
                       setVoucherStatus(newStatus);
@@ -4655,7 +4660,8 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
                             ? candidateWorkflow.id
                             : null,
                           target_user_id: targetApproverId || null,
-                        },
+        comments: forwardComments,
+        },
                       );
                       const newStatus = res?.data?.status || "PENDING_APPROVAL";
                       setVoucherStatus(newStatus);
@@ -5763,7 +5769,8 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
                             ? candidateWorkflow.id
                             : null,
                           target_user_id: targetApproverId || null,
-                        },
+        comments: forwardComments,
+        },
                       );
                       const newStatus = res?.data?.status || "PENDING_APPROVAL";
                       setVoucherStatus(newStatus);
@@ -6238,7 +6245,8 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
                             ? candidateWorkflow.id
                             : null,
                           target_user_id: targetApproverId || null,
-                        },
+        comments: forwardComments,
+        },
                       );
                       const newStatus = res?.data?.status || "PENDING_APPROVAL";
                       setVoucherStatus(newStatus);

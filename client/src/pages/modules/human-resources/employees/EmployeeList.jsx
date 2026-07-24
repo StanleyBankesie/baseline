@@ -8,6 +8,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { api } from "api/client";
 import { usePermission } from "../../../../auth/PermissionContext.jsx";
 import { filterAndSort } from "@/utils/searchUtils.js";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -15,6 +17,7 @@ import { filterAndSort } from "@/utils/searchUtils.js";
  * @returns {JSX.Element} The rendered component
  */
 export default function EmployeeList() {
+  const [viewMode, setViewMode] = useViewMode();
   const navigate = useNavigate();
   const { canPerformAction } = usePermission();
   const [employees, setEmployees] = useState([]);
@@ -169,8 +172,13 @@ export default function EmployeeList() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="table">
+            
+                <>
+<div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+              <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
                 <thead className="bg-[var(--table-header-bg)] dark:bg-slate-900/50">
                   <tr>
                     <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Photo</th>
@@ -273,7 +281,9 @@ export default function EmployeeList() {
                 </tbody>
               </table>
             </div>
-          )}
+          
+</>
+)}
         </div>
       </div>
     </div>

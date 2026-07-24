@@ -27,7 +27,8 @@ export default function GeneralSettingsPage() {
   const [envVars, setEnvVars] = useState({
     ARKESEL_API_KEY: "",
     ARKESEL_SENDER_ID: "",
-    WASENDER_API_TOKEN: "",
+    GREEN_API_ID_INSTANCE: "",
+    GREEN_API_TOKEN_INSTANCE: "",
     SMTP_HOST: "",
     SMTP_PORT: "",
     SMTP_USER: "",
@@ -42,6 +43,10 @@ export default function GeneralSettingsPage() {
   });
   const [envLoading, setEnvLoading] = useState(false);
   const [envSaving, setEnvSaving] = useState(false);
+  
+  const [googleMapsApiKey, setGoogleMapsApiKey] = useState("");
+  const [googleMapsLoading, setGoogleMapsLoading] = useState(false);
+  const [googleMapsSaving, setGoogleMapsSaving] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -63,7 +68,8 @@ export default function GeneralSettingsPage() {
         setEnvVars({
           ARKESEL_API_KEY: res.data.ARKESEL_API_KEY || "",
           ARKESEL_SENDER_ID: res.data.ARKESEL_SENDER_ID || "",
-          WASENDER_API_TOKEN: res.data.WASENDER_API_TOKEN || "",
+          GREEN_API_ID_INSTANCE: res.data.GREEN_API_ID_INSTANCE || "",
+          GREEN_API_TOKEN_INSTANCE: res.data.GREEN_API_TOKEN_INSTANCE || "",
           SMTP_HOST: res.data.SMTP_HOST || "",
           SMTP_PORT: res.data.SMTP_PORT || "",
           SMTP_USER: res.data.SMTP_USER || "",
@@ -82,6 +88,17 @@ export default function GeneralSettingsPage() {
         if (mounted) setEnvLoading(false);
       }
     })();
+
+    (async () => {
+      try {
+        setGoogleMapsLoading(true);
+        const res = await api.get("/admin/settings/google-maps");
+        if (mounted && res?.data?.data?.api_key) {
+          setGoogleMapsApiKey(res.data.data.api_key);
+        }
+      } catch {} finally { if (mounted) setGoogleMapsLoading(false); }
+    })();
+
     return () => { mounted = false; };
   }, []);
 
@@ -188,6 +205,16 @@ export default function GeneralSettingsPage() {
     }
   }
 
+  async function saveGoogleMaps() {
+    try {
+      setGoogleMapsSaving(true);
+      await api.post("/admin/settings/google-maps", { api_key: googleMapsApiKey });
+      toast.success("Google Maps settings saved");
+    } catch (e) {
+      toast.error(e?.response?.data?.message || e?.message || "Failed to save settings");
+    } finally { setGoogleMapsSaving(false); }
+  }
+
   if (user?.id !== 1) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-slate-500">
@@ -218,7 +245,7 @@ export default function GeneralSettingsPage() {
             <div className="flex justify-between items-start gap-4">
               <div>
                 <div className="text-lg font-semibold text-gray-800">SMS & WhatsApp APIs</div>
-                <div className="text-sm text-slate-500">Configure credentials for Arkesel (SMS) and WaSender (WhatsApp)</div>
+                <div className="text-sm text-slate-500">Configure credentials for Arkesel (SMS) and Meta Cloud API (WhatsApp)</div>
               </div>
             </div>
             {envLoading ? (
@@ -234,8 +261,12 @@ export default function GeneralSettingsPage() {
                   <input className="input w-full" value={envVars.ARKESEL_SENDER_ID} onChange={e => setEnvVars(p => ({ ...p, ARKESEL_SENDER_ID: e.target.value }))} disabled={envSaving} />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-slate-700">WaSender API Token</label>
-                  <input className="input w-full" value={envVars.WASENDER_API_TOKEN} onChange={e => setEnvVars(p => ({ ...p, WASENDER_API_TOKEN: e.target.value }))} disabled={envSaving} />
+                  <label className="text-xs font-medium text-slate-700">Green API Id Instance</label>
+                  <input className="input w-full" value={envVars.GREEN_API_ID_INSTANCE} onChange={e => setEnvVars(p => ({ ...p, GREEN_API_ID_INSTANCE: e.target.value }))} disabled={envSaving} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-700">Green API Token Instance</label>
+                  <input className="input w-full" value={envVars.GREEN_API_TOKEN_INSTANCE} onChange={e => setEnvVars(p => ({ ...p, GREEN_API_TOKEN_INSTANCE: e.target.value }))} disabled={envSaving} />
                 </div>
               </div>
             )}
@@ -371,7 +402,165 @@ export default function GeneralSettingsPage() {
             </div>
           </div>
         </div>
+
+        <div className="card">
+          <div className="card-body space-y-3">
+            <div>
+              <div className="text-lg font-semibold">Google Maps</div>
+              <div className="text-sm text-slate-500">Enter your Google Maps API Key to enable map features.</div>
+            </div>
+            {googleMapsLoading ? <div className="text-sm text-slate-500">Loading...</div> : (
+              <div className="max-w-md space-y-3">
+                <div>
+                  <label className="text-xs font-medium text-slate-700">API Key</label>
+                  <input type="text" className="input w-full" placeholder="AIzaSy..." value={googleMapsApiKey} onChange={e => setGoogleMapsApiKey(e.target.value)} disabled={googleMapsSaving} />
+                </div>
+                <div className="flex gap-2">
+                  <button type="button" className="btn-primary" disabled={googleMapsSaving} onClick={saveGoogleMaps}>
+                    {googleMapsSaving ? "Saving..." : "Save Google Maps Settings"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-body space-y-3">
+            <div className="text-lg font-semibold">Compliance Notification Template</div>
+            <div className="text-sm text-slate-500">Message template sent when a vehicle compliance document is expiring soon or expired.</div>
+            <ComplianceTemplateSection />
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-body space-y-3">
+            <div className="text-lg font-semibold">Servicing Notification Template</div>
+            <div className="text-sm text-slate-500">Message template sent when a vehicle is due for servicing.</div>
+            <ServicingTemplateSection />
+          </div>
+        </div>
       </div>
+    </div>
+  );
+}
+
+function ComplianceTemplateSection() {
+  const [template, setTemplate] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        setLoading(true);
+        const res = await api.get("/admin/settings/compliance-template");
+        setTemplate(res?.data?.template || "Your {{compliance_type}} for {{vehicle_reg}} is {{status}}. Please renew as soon as possible.");
+      } catch (err) {
+        toast.error("Failed to load compliance template");
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  async function save() {
+    try {
+      setSaving(true);
+      await api.post("/admin/settings/compliance-template", { template });
+      toast.success("Compliance template saved successfully");
+    } catch (err) {
+      toast.error("Failed to save compliance template");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {loading ? (
+        <div className="text-sm text-slate-500">Loading...</div>
+      ) : (
+        <>
+          <div className="bg-blue-50 border border-blue-200 p-3 rounded text-sm text-blue-800">
+            <strong>Available Placeholders:</strong> <code>{"{{vehicle_reg}}"}</code>, <code>{"{{compliance_type}}"}</code>, <code>{"{{status}}"}</code>, <code>{"{{expiry_date}}"}</code>
+          </div>
+          <textarea
+            className="input w-full min-h-[100px]"
+            value={template}
+            onChange={(e) => setTemplate(e.target.value)}
+            placeholder="Template message..."
+          ></textarea>
+          <button
+            className="btn-primary"
+            onClick={save}
+            disabled={saving}
+          >
+            {saving ? "Saving..." : "Save Template"}
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+function ServicingTemplateSection() {
+  const [template, setTemplate] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        setLoading(true);
+        const res = await api.get("/admin/settings/servicing-template");
+        setTemplate(res?.data?.template || "Your vehicle {{vehicle_reg}} is due for {{service_type}} servicing. Please schedule an appointment.");
+      } catch (err) {
+        toast.error("Failed to load servicing template");
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  async function save() {
+    try {
+      setSaving(true);
+      await api.post("/admin/settings/servicing-template", { template });
+      toast.success("Servicing template saved successfully");
+    } catch (err) {
+      toast.error("Failed to save servicing template");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {loading ? (
+        <div className="text-sm text-slate-500">Loading...</div>
+      ) : (
+        <>
+          <div className="bg-blue-50 border border-blue-200 p-3 rounded text-sm text-blue-800">
+            <strong>Available Placeholders:</strong> <code>{"{{vehicle_reg}}"}</code>, <code>{"{{service_type}}"}</code>, <code>{"{{due_date}}"}</code>
+          </div>
+          <textarea
+            className="input w-full min-h-[100px]"
+            value={template}
+            onChange={(e) => setTemplate(e.target.value)}
+            placeholder="Template message..."
+          ></textarea>
+          <button
+            className="btn-primary"
+            onClick={save}
+            disabled={saving}
+          >
+            {saving ? "Saving..." : "Save Template"}
+          </button>
+        </>
+      )}
     </div>
   );
 }

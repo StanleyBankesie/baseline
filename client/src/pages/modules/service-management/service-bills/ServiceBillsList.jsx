@@ -9,6 +9,8 @@ import { api } from "../../../../api/client";
 import { usePermission } from "../../../../auth/PermissionContext.jsx";
 import { filterAndSort } from "@/utils/searchUtils.js";
 import { toast } from "react-toastify";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -16,6 +18,7 @@ import { toast } from "react-toastify";
  * @returns {JSX.Element} The rendered component
  */
 export default function ServiceBillsList() {
+  const [viewMode, setViewMode] = useViewMode();
   const location = useLocation();
   const { canPerformAction, exceptionalPerms } = usePermission();
   const successMsg = location.state?.success || "";
@@ -109,8 +112,12 @@ export default function ServiceBillsList() {
             </select>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="table">
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
               <thead>
                 <tr>
                   <th className="whitespace-nowrap">No</th>

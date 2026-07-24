@@ -15,10 +15,11 @@ import { api } from "api/client";
  * 
  * @returns {JSX.Element} The item form view.
  */
-export default function ItemForm() {
-  const { id } = useParams();
+export default function ItemForm({ isModal = false, modalItemId, onClose, onSaveSuccess }) {
+  const params = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const id = isModal ? (modalItemId || "new") : params.id;
   const isNew = id === "new";
   const returnTo = location.state?.from || "/inventory/items";
 
@@ -58,7 +59,7 @@ export default function ItemForm() {
     vat_on_sales_id: "",
     purchase_account_id: "",
     sales_account_id: "",
-    service_item: false,
+    service_item: isModal && isNew ? true : false,
     is_stockable: true,
     is_sellable: true,
     is_purchasable: true,
@@ -371,7 +372,11 @@ export default function ItemForm() {
         await api.put(`/inventory/items/${id}`, payload);
       }
 
-      navigate(returnTo);
+      if (isModal && onSaveSuccess) {
+        onSaveSuccess();
+      } else {
+        navigate(returnTo);
+      }
     } catch (e2) {
       setError(e2?.response?.data?.message || "Failed to save item");
     } finally {
@@ -380,35 +385,37 @@ export default function ItemForm() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg">
-          <div className="flex flex-col md:flex-row justify-between items-center text-white gap-4">
-            <div>
-              <h1 className="text-2xl font-bold dark:text-brand-300">
-                {isNew ? "New Item" : "Edit Item"}
-              </h1>
-              <p className="text-sm mt-1">
-                Define item attributes, pricing and stock rules
-              </p>
+    <div className={isModal ? "" : "space-y-6"}>
+      <div className={isModal ? "" : "card"}>
+        {!isModal && (
+          <div className="card-header bg-brand text-white rounded-t-lg">
+            <div className="flex flex-col md:flex-row justify-between items-center text-white gap-4">
+              <div>
+                <h1 className="text-2xl font-bold dark:text-brand-300">
+                  {isNew ? "New Item" : "Edit Item"}
+                </h1>
+                <p className="text-sm mt-1">
+                  Define item attributes, pricing and stock rules
+                </p>
+              </div>
+              <Link
+                to={returnTo}
+                className="btn-success w-full md:w-auto text-center"
+              >
+                Back to List
+              </Link>
             </div>
-            <Link
-              to={returnTo}
-              className="btn-success w-full md:w-auto text-center"
-            >
-              Back to List
-            </Link>
           </div>
-        </div>
+        )}
 
-        <div className="card-body">
+        <div className={isModal ? "" : "card-body"}>
           <form onSubmit={handleSubmit} className="space-y-6">
             {loading ? <div className="text-sm">Loading...</div> : null}
             {error ? <div className="text-sm text-red-600">{error}</div> : null}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="label">
                       Item Code * (System Generated)
@@ -432,7 +439,7 @@ export default function ItemForm() {
                       required
                     />
                   </div>
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="label">Barcode</label>
                     <input
                       type="text"
@@ -835,7 +842,7 @@ export default function ItemForm() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <label className="label">Min Stock Level</label>
                 <input
@@ -892,7 +899,7 @@ export default function ItemForm() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="flex items-center gap-2 p-2 border rounded">
                 <input
                   type="checkbox"
@@ -939,12 +946,22 @@ export default function ItemForm() {
             </div>
 
             <div className="flex flex-col-reverse md:flex-row justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-              <Link
-                to={returnTo}
-                className="btn-secondary w-full md:w-auto text-center"
-              >
-                Cancel
-              </Link>
+              {isModal ? (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="btn-secondary w-full md:w-auto text-center"
+                >
+                  Cancel
+                </button>
+              ) : (
+                <Link
+                  to={returnTo}
+                  className="btn-secondary w-full md:w-auto text-center"
+                >
+                  Cancel
+                </Link>
+              )}
               <button
                 type="submit"
                 className="btn-primary w-full md:w-auto"

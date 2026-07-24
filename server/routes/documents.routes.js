@@ -1445,8 +1445,8 @@ async function loadData(type, id, companyId, branchId) {
     const [po] = await query(`
       SELECT 
         p.id, p.po_no, p.po_date, p.status, p.po_type,
-        p.supplier_id, s.supplier_name, s.address AS supplier_address, s.phone AS supplier_phone, s.email AS supplier_email,
-        p.currency, p.exchange_rate, p.warehouse_id, p.remarks, p.total_amount,
+        p.supplier_id, s.supplier_name, s.address AS supplier_address, s.city AS supplier_city, s.state AS supplier_state, s.country AS supplier_country, s.phone AS supplier_phone, s.email AS supplier_email,
+        p.currency, p.exchange_rate, p.warehouse_id, p.remarks, p.total_amount, p.delivery_date, p.payment_type,
           p.created_at,
           u.username AS created_by_name
          FROM pur_orders p
@@ -1484,6 +1484,16 @@ async function loadData(type, id, companyId, branchId) {
     const items = Array.isArray(details) ? details : [];
     const poObj = {
       company: company || {},
+      vendor: {
+        name: po.supplier_name,
+        address: po.supplier_address || "",
+        address2: "",
+        city: po.supplier_city || "",
+        state: po.supplier_state || "",
+        country: po.supplier_country || "",
+        phone: po.supplier_phone || "",
+        email: po.supplier_email || "",
+      },
       supplier: {
         name: po.supplier_name,
         address: po.supplier_address || "",
@@ -1496,6 +1506,8 @@ async function loadData(type, id, companyId, branchId) {
         date: po.po_date ? String(po.po_date).slice(0, 10) : null,
         status: po.status,
         remarks: po.remarks || "",
+        delivery_date: po.delivery_date || null,
+        payment_terms: po.payment_type || "",
         total: po.total_amount || 0,
         items: items.map((d) => ({
           name: d.item_name,
@@ -1623,7 +1635,7 @@ async function loadData(type, id, companyId, branchId) {
   }
   if (type === "purchase-bill") {
     const [hdr] = await query(`
-      SELECT b.*, s.supplier_name, s.address AS supplier_address, s.phone AS supplier_phone, s.email AS supplier_email,
+      SELECT b.*, s.supplier_name, s.address AS supplier_address, s.city AS supplier_city, s.state AS supplier_state, s.country AS supplier_country, s.phone AS supplier_phone, s.email AS supplier_email,
           b.created_at,
           u.username AS created_by_name
          FROM pur_bills b
@@ -1663,6 +1675,16 @@ async function loadData(type, id, companyId, branchId) {
     const items = Array.isArray(details) ? details : [];
     const billObj = {
       company: company || {},
+      vendor: {
+        name: hdr.supplier_name,
+        address: hdr.supplier_address || "",
+        address2: "",
+        city: hdr.supplier_city || "",
+        state: hdr.supplier_state || "",
+        country: hdr.supplier_country || "",
+        phone: hdr.supplier_phone || "",
+        email: hdr.supplier_email || "",
+      },
       supplier: {
         name: hdr.supplier_name,
         address: hdr.supplier_address || "",
@@ -2037,6 +2059,7 @@ async function loadData(type, id, companyId, branchId) {
   if (type === "purchase-order") {
     const [po] = await query(`
       SELECT h.*, s.supplier_name, s.address AS supplier_address, s.email AS supplier_email, s.telephone AS supplier_phone,
+          s.city, s.state, s.country,
           h.created_at,
           u.username AS created_by_name
          FROM pur_orders h
@@ -2075,10 +2098,21 @@ async function loadData(type, id, companyId, branchId) {
       company: company || {},
       supplier: {
         name: po.supplier_name,
+        vendor_name: po.supplier_name,
         address: po.supplier_address,
         email: po.supplier_email,
         phone: po.supplier_phone,
+        city: po.city,
+        state: po.state,
+        country: po.country,
+        county: po.country
       },
+      vendor_name: po.supplier_name,
+      address: po.supplier_address,
+      city: po.city,
+      state: po.state,
+      country: po.country,
+      county: po.country,
       purchase_order: {
         id: po.id,
         number: po.po_no,

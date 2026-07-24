@@ -1,17 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { api } from "../../../../api/client.js";
+import { Select } from "antd";
 
 const defaultSettings = [
-  { module_code: "SALES_ORDER", status_trigger: "APPROVED", send_email: "N", send_sms: "N", send_whatsapp: "N" },
-  { module_code: "PURCHASE_ORDER", status_trigger: "APPROVED", send_email: "N", send_sms: "N", send_whatsapp: "N" },
-  { module_code: "SERVICE_ORDER", status_trigger: "APPROVED", send_email: "N", send_sms: "N", send_whatsapp: "N" },
-  { module_code: "MAINTENANCE_JOB", status_trigger: "APPROVED", send_email: "N", send_sms: "N", send_whatsapp: "N" },
-  { module_code: "PAYMENT_VOUCHER", status_trigger: "POSTED", send_email: "N", send_sms: "N", send_whatsapp: "N" },
+  { module_code: "SALES_ORDER", status_trigger: "APPROVED", send_email: "N", send_sms: "N", send_whatsapp: "N", recipients: "" },
+  { module_code: "PURCHASE_ORDER", status_trigger: "APPROVED", send_email: "N", send_sms: "N", send_whatsapp: "N", recipients: "" },
+  { module_code: "SERVICE_ORDER", status_trigger: "APPROVED", send_email: "N", send_sms: "N", send_whatsapp: "N", recipients: "" },
+  { module_code: "MAINTENANCE_JOB", status_trigger: "APPROVED", send_email: "N", send_sms: "N", send_whatsapp: "N", recipients: "" },
+  { module_code: "PAYMENT_VOUCHER", status_trigger: "POSTED", send_email: "N", send_sms: "N", send_whatsapp: "N", recipients: "" },
+  { module_code: "VEHICLE_COMPLIANCE", status_trigger: "EXPIRING_SOON", send_email: "N", send_sms: "N", send_whatsapp: "N", recipients: "" },
+  { module_code: "VEHICLE_COMPLIANCE", status_trigger: "EXPIRED", send_email: "N", send_sms: "N", send_whatsapp: "N", recipients: "" },
+  { module_code: "VEHICLE_SERVICING", status_trigger: "DUE", send_email: "N", send_sms: "N", send_whatsapp: "N", recipients: "" },
+  { module_code: "VEHICLE_SERVICING", status_trigger: "OVERDUE", send_email: "N", send_sms: "N", send_whatsapp: "N", recipients: "" },
 ];
 
 export default function NotificationSettings() {
   const [settings, setSettings] = useState(defaultSettings);
+  const [users, setUsers] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -22,8 +30,16 @@ export default function NotificationSettings() {
   const fetchSettings = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/admin/notification-settings");
+      const [res, usersRes, customersRes, suppliersRes] = await Promise.all([
+        api.get("/admin/notification-settings"),
+        api.get("/admin/users"),
+        api.get("/sales/customers"),
+        api.get("/purchase/suppliers")
+      ]);
       const fetched = res.data?.items || [];
+      setUsers(Array.isArray(usersRes.data?.items) ? usersRes.data.items : Array.isArray(usersRes.data?.data?.items) ? usersRes.data.data.items : []);
+      setCustomers(Array.isArray(customersRes.data?.items) ? customersRes.data.items : Array.isArray(customersRes.data?.data?.items) ? customersRes.data.data.items : []);
+      setSuppliers(Array.isArray(suppliersRes.data?.items) ? suppliersRes.data.items : Array.isArray(suppliersRes.data?.data?.items) ? suppliersRes.data.data.items : []);
       
       // Merge fetched with defaults
       const merged = defaultSettings.map(ds => {
@@ -42,6 +58,12 @@ export default function NotificationSettings() {
   const handleToggle = (index, field) => {
     const updated = [...settings];
     updated[index][field] = updated[index][field] === 'Y' ? 'N' : 'Y';
+    setSettings(updated);
+  };
+
+  const handleChange = (index, field, value) => {
+    const updated = [...settings];
+    updated[index][field] = value;
     setSettings(updated);
   };
 
@@ -80,6 +102,7 @@ export default function NotificationSettings() {
               <th className="px-6 py-4 font-medium text-center">Email</th>
               <th className="px-6 py-4 font-medium text-center">SMS</th>
               <th className="px-6 py-4 font-medium text-center">WhatsApp</th>
+              <th className="px-6 py-4 font-medium min-w-[200px]">Recipients</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -118,6 +141,54 @@ export default function NotificationSettings() {
                     checked={item.send_whatsapp === 'Y'}
                     onChange={() => handleToggle(idx, 'send_whatsapp')}
                   />
+                </td>
+                <td className="px-6 py-4">
+                  {(() => {
+                    let options = [];
+                    let sourceTable = "";
+                    if (item.module_code === 'SALES_ORDER') {
+                      options = customers.map(c => ({ label: c.customer_name, value: String(c.id) }));
+                      sourceTable = "customers";
+                    } else if (item.module_code === 'SERVICE_ORDER') {
+                      options = [
+                        ...customers.map(c => ({ label: `(Customer) ${c.customer_name}`, value: `C_${c.id}` })),
+                        ...suppliers.map(s => ({ label: `(Supplier) ${s.supplier_name}`, value: `S_${s.id}` }))
+                      ];
+                      sourceTable = "customers, suppliers";
+                    } else if (['PURCHASE_ORDER', 'PAYMENT_VOUCHER', 'MAINTENANCE_JOB'].includes(item.module_code)) {
+                      options = suppliers.map(s => ({ label: s.supplier_name, value: String(s.id) }));
+                      sourceTable = "suppliers";
+                    } else {
+                      options = users.map(u => ({ label: u.full_name || u.username, value: String(u.id) }));
+                      sourceTable = "users";
+                    }
+
+                    return (
+                      <div className="flex flex-col gap-1">
+                        <Select
+                          mode="multiple"
+                          style={{ width: '100%', minWidth: '250px' }}
+                          placeholder="Select recipients"
+                          value={(item.recipients || '').split(',').filter(Boolean)}
+                          onChange={(values) => {
+                            if (values.includes('ALL')) {
+                              handleChange(idx, 'recipients', options.map(o => o.value).join(','));
+                            } else {
+                              handleChange(idx, 'recipients', values.join(','));
+                            }
+                          }}
+                          options={[{ label: '-- Select All --', value: 'ALL' }, ...options]}
+                          filterOption={(input, option) =>
+                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                          }
+                          maxTagCount="responsive"
+                        />
+                        <div className="text-[11px] text-gray-400 font-medium tracking-wide">
+                          Data from: <span className="text-gray-500 font-mono bg-gray-100 px-1 py-0.5 rounded">{sourceTable}</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </td>
               </tr>
             ))}

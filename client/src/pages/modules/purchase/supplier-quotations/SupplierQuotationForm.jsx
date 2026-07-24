@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 
 import { api } from "api/client";
 import { useExchangeRate } from "../../../../hooks/useExchangeRate";
@@ -20,8 +20,10 @@ export default function SupplierQuotationForm() {
   const { hasExceptional } = usePermission();
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { getExchangeRate } = useExchangeRate();
-  const isEdit = Boolean(id) && id !== "new";
+  const isEdit = Boolean(id) && id !== "new" && (location.pathname.endsWith("/edit") || new URLSearchParams(location.search).get("mode") === "edit");
+  const isView = Boolean(id) && id !== "new" && !isEdit;
 
   const [formData, setFormData] = useState({
     quotation_no: "",
@@ -689,7 +691,7 @@ export default function SupplierQuotationForm() {
                   onChange={handleInputChange}
                   required
                 
-                  disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+                  disabled={isView || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                 />
               </div>
               <div>
@@ -768,7 +770,7 @@ export default function SupplierQuotationForm() {
                   onChange={handleInputChange}
                   required
                 
-                  disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+                  disabled={isView || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                 />
               </div>
               <div className="hidden">
@@ -1061,7 +1063,7 @@ export default function SupplierQuotationForm() {
                           )
                         }
                       
-                        disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+                        disabled={isView || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                       />
                     </td>
                     <td>

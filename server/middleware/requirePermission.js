@@ -56,15 +56,6 @@ export function requireModule(moduleKey) {
 export function requirePermission(permissionKey) {
   return function composedMiddleware(req, res, next) {
     const url = String(req.baseUrl || req.originalUrl || "");
-    // Allow read-only GET requests for specific common modules to bypass strict permission checks
-    if (
-      req.method === "GET" &&
-      (url.includes("/api/sales") ||
-        url.includes("/api/purchase") ||
-        url.includes("/api/finance"))
-    ) {
-      return next();
-    }
     // Map the required permission key to a module and action
     const { moduleKey, action } =
       mapPermissionKeyToModuleAndAction(permissionKey);
@@ -86,15 +77,6 @@ export function requireAnyPermission(permissionKeys) {
     : [permissionKeys].filter(Boolean);
   return async function composedAnyMiddleware(req, res, next) {
     const url = String(req.baseUrl || req.originalUrl || "");
-    // Allow read-only GET requests for specific common modules to bypass checks
-    if (
-      req.method === "GET" &&
-      (url.includes("/api/sales") ||
-        url.includes("/api/purchase") ||
-        url.includes("/api/finance"))
-    ) {
-      return next();
-    }
     if (!keys.length) return next();
     try {
       // Iterate over each permission key to find at least one valid access

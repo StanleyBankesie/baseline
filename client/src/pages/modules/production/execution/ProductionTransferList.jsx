@@ -20,6 +20,8 @@ import { api } from "api/client";
 import { toast } from "react-toastify";
 import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -27,6 +29,7 @@ import SortableHeader from "@/components/SortableHeader.jsx";
  * @returns {JSX.Element} The rendered component
  */
 export default function ProductionTransferList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -70,8 +73,12 @@ export default function ProductionTransferList() {
       </div>
 
       <div className="card overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="table">
+        
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+          <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
             <thead>
               <tr>
                 <th>Transfer No</th>

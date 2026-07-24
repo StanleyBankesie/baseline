@@ -34,10 +34,10 @@ export default function TripHistoryReport() {
       <div className="card">
         <div className="card-header bg-slate-800 text-white rounded-t-lg flex justify-between items-center p-4">
           <div>
-            <h1 className="text-2xl font-bold dark:text-slate-100">Trip History & Tracking</h1>
+            <h1 className="text-2xl font-bold dark:text-slate-100">Trip History & Tracking report</h1>
             <p className="text-sm mt-1 text-slate-300">Detailed logs of all fleet trips</p>
           </div>
-          <Link to="/transport/reports" className="btn btn-secondary btn-sm">Return to Reports</Link>
+          <Link to="/transport" className="btn btn-secondary btn-sm">Return to Menu</Link>
         </div>
         <div className="card-body p-4 bg-slate-50 border-b flex flex-wrap gap-4 items-center justify-between">
           <div className="flex gap-4">
@@ -86,7 +86,7 @@ export default function TripHistoryReport() {
                     <td className="px-6 py-4 font-medium">{trip.trip_number}</td>
                     <td className="px-6 py-4">{trip.vehicle_name || trip.reg_number || trip.vehicle_id}</td>
                     <td className="px-6 py-4">{trip.driver_name || trip.driver_id}</td>
-                    <td className="px-6 py-4">{trip.origin || "Origin"} &rarr; {trip.destination || "Dest"}</td>
+                    <td className="px-6 py-4">{trip.origin_name || "-"} &rarr; {trip.destination_name || "-"}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-xs">
                       <div><span className="font-semibold">Start:</span> {trip.start_time ? new Date(trip.start_time).toLocaleString() : '-'}</div>
                       <div><span className="font-semibold">End:</span> {trip.end_time ? new Date(trip.end_time).toLocaleString() : '-'}</div>

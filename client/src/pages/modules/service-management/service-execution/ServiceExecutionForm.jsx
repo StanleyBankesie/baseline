@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams, useParams } from "react-router-dom";
 import { api } from "../../../../api/client.js";
 import MaterialRequisitionForm from "../../inventory/MaterialRequisitionForm.jsx";
 import { filterAndSort } from "@/utils/searchUtils.js";
@@ -24,6 +24,7 @@ function toYmd(date) {
  * @returns {JSX.Element} The rendered component
  */
 export default function ServiceExecutionForm() {
+  const { id } = useParams();
   const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

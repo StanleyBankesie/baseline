@@ -43,6 +43,7 @@ export default function TransportationBillForm() {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
+  const isEdit = id && id !== "new";
   const { getExchangeRate } = useExchangeRate();
   const readOnly =
     String(new URLSearchParams(location.search).get("mode") || "").toLowerCase() === "view";
@@ -518,7 +519,6 @@ export default function TransportationBillForm() {
         total_amount: Number(totals.total || 0),
       };
 
-      const isEdit = id && id !== "new";
       if (isEdit) {
         await api.put(`/transport/transportation-bills/${id}`, payload);
       } else {

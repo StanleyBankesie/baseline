@@ -3,8 +3,11 @@ import { Link } from "react-router-dom";
 import { CheckCircleOutlined, CloseOutlined } from "@ant-design/icons";
 import api from "../../../../api/client.js";
 import { toast } from "react-toastify";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 export default function TripReturnList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -78,7 +81,10 @@ export default function TripReturnList() {
       
       <div className="card">
         <div className="card-body p-0 overflow-x-auto">
-          <table className="w-full text-sm text-left">
+          <div className="flex justify-end mb-4">
+            <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+          </div>
+          <table className={"w-full text-sm text-left " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
             <thead className="text-xs text-brand-600 bg-brand-50 border-b border-brand-200 uppercase">
               <tr>
                 <th className="px-6 py-4">Trip No</th>
@@ -100,7 +106,7 @@ export default function TripReturnList() {
                     <td className="px-6 py-4 font-medium">{trip.trip_number}</td>
                     <td className="px-6 py-4">{trip.vehicle_name || trip.reg_number || trip.vehicle_id}</td>
                     <td className="px-6 py-4">{trip.driver_name || trip.driver_id}</td>
-                    <td className="px-6 py-4">{trip.origin} &rarr; {trip.destination}</td>
+                    <td className="px-6 py-4">{trip.origin_name} &rarr; {trip.destination_name}</td>
                     <td className="px-6 py-4">
                       <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
                         {trip.status}

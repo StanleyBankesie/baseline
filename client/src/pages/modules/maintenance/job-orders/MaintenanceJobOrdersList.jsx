@@ -15,6 +15,8 @@ import {
   ListAttachmentIconButton,
 } from "../../../../components/list/ListDocActionIconButtons.jsx";
 import DocumentAttachmentsModal from "../../../../components/attachments/DocumentAttachmentsModal.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 const statusColors = {
   DRAFT: "bg-slate-100 text-slate-600",
@@ -40,6 +42,7 @@ function Badge({ value, colorMap }) {
  * @returns {JSX.Element} The rendered component
  */
 export default function MaintenanceJobOrdersList() {
+  const [viewMode, setViewMode] = useViewMode();
   const navigate = useNavigate();
   const location = useLocation();
   const [items, setItems] = useState([]);
@@ -138,8 +141,12 @@ export default function MaintenanceJobOrdersList() {
         </div>
 
         <div className="card overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="table">
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
               <thead>
                 <tr>
                   <th className="whitespace-nowrap">Order No</th>

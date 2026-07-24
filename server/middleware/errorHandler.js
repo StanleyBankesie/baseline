@@ -53,13 +53,14 @@ export function errorHandler(err, req, res, next) {
     query: sanitizeBody(req.query),
   });
 
+  const isProd = String(process.env.NODE_ENV || "").toLowerCase() === "production";
   const payload = {
     error: err.code || "INTERNAL_ERROR",
-    message: err.message || "Internal server error",
+    message: isProd && status === 500 ? "Internal server error" : (err.message || "Internal server error"),
     companyId: err.companyId,
     canRenew: err.canRenew,
-    stack: err.stack,
-    sqlMessage: err.sqlMessage,
+    // SECURITY: Never expose stack traces or SQL errors to clients in production
+    ...(isProd ? {} : { stack: err.stack, sqlMessage: err.sqlMessage }),
   };
   res.status(status).json(payload);
 }

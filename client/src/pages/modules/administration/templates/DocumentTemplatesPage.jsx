@@ -278,10 +278,7 @@ const FEATURE_PAGES = [
         "label": "AssetList",
         "value": "asset-list"
       },
-      {
-        "label": "DowntimeLogList",
-        "value": "downtime-log-list"
-      },
+
       {
         "label": "MaintenanceContractList",
         "value": "maintenance-contract-list"

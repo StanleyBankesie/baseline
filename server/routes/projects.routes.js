@@ -1048,7 +1048,7 @@ router.post(
       await query(
         `INSERT INTO adm_workflow_logs (document_workflow_id, step_order, action, actor_user_id, comments)
          VALUES (:dwId, :stepOrder, 'SUBMIT', :actor, :comments)`,
-        { dwId: instanceId, stepOrder: first.step_order, actor: req.user.sub, comments: "" },
+        { dwId: instanceId, stepOrder: first.step_order, actor: req.user.sub, comments: req.body?.comments || "" },
       );
 
       await query(

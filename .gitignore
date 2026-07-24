@@ -1,0 +1,46 @@
+# ── Environment files (CRITICAL: Contains secrets) ──
+.env
+.env.*
+.env.local
+.env.production
+!.env.example
+
+# ── Dependencies ──
+node_modules/
+
+# ── Build outputs ──
+dist/
+build/
+
+# ── Debug/diagnostic files ──
+.dbg/
+*.log
+CRASH_REPORT.txt
+crash_report.txt
+vite_log.txt
+vite_err.txt
+debug_output*.txt
+debug_error.txt
+
+# ── Uploads (user-generated content) ──
+uploads/
+
+# ── Temporary/scratch files ──
+scratch/
+tmp/
+*.tmp
+
+# ── Editor/IDE ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── OS files ──
+.DS_Store
+Thumbs.db
+
+# ── Backup files ──
+*.bak
+backups/

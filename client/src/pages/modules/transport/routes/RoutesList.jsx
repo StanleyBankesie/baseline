@@ -4,8 +4,12 @@ import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import api from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import { Spin } from "antd";
+import DataTable from "../../../../components/common/DataTable.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 export default function RoutesList() {
+  const [viewMode, setViewMode] = useViewMode();
   const navigate = useNavigate();
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -28,21 +32,66 @@ export default function RoutesList() {
     fetchRoutes();
   }, []);
 
+  const toggleRouteStatus = async (id) => {
+    try {
+      await api.put(`/transport/routes/${id}/toggle`);
+      toast.success("Route status updated");
+      fetchRoutes();
+    } catch (err) {
+      toast.error("Failed to update route status");
+    }
+  };
+
   const handleAdd = () => {
     navigate("/transport/routes/new");
   };
 
+  const columns = [
+    { header: "Route Code", accessor: "route_code" },
+    { header: "Route Name", accessor: "route_name", render: (r) => <span className="font-semibold text-brand-700">{r.route_name}</span> },
+    { header: "Origin", accessor: "origin" },
+    { header: "Destination", accessor: "destination" },
+    { header: "Distance", accessor: "distance", render: (r) => r.distance ? `${r.distance} km` : '-' },
+    { header: "Estimated Time (hrs)", accessor: "estimated_time", render: (r) => r.estimated_time ? `${r.estimated_time} hrs` : '-' },
+    {
+      header: "Status",
+      accessor: "is_active",
+      render: (r) => (
+        r.is_active ? (
+          <span className="badge badge-success badge-sm">Enabled</span>
+        ) : (
+          <span className="badge badge-neutral badge-sm">Disabled</span>
+        )
+      )
+    },
+    {
+      header: "Actions",
+      filterable: false,
+      sortable: false,
+      render: (r) => (
+        <div className="flex justify-end gap-2">
+          <Link to={`/transport/routes/${r.id}`} className="btn btn-ghost btn-sm text-brand-600">
+            <EditOutlined />
+          </Link>
+          <button 
+            className={`btn btn-ghost btn-sm ${r.is_active ? 'text-red-600' : 'text-green-600'}`}
+            onClick={() => toggleRouteStatus(r.id)}
+            title={r.is_active ? "Disable Route" : "Enable Route"}
+          >
+            {r.is_active ? "Disable" : "Enable"}
+          </button>
+        </div>
+      )
+    }
+  ];
+
   return (
     <div className="space-y-4">
       <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg flex justify-between items-center">
+        <div className="flex justify-between items-center bg-brand p-6">
           <div>
-            <h1 className="text-2xl font-bold dark:text-brand-300">
-              Transport Routes
-            </h1>
-            <p className="text-sm mt-1">
-              Manage predefined transport routes and standard charges
-            </p>
+            <h1 className="text-3xl font-bold text-white mb-2">Transport Routes</h1>
+            <p className="text-brand-100">Manage standard travel routes and distances</p>
           </div>
           <div className="flex gap-2">
             <Link to="/transport" className="btn btn-secondary">
@@ -56,61 +105,11 @@ export default function RoutesList() {
       </div>
       <div className="card">
         <div className="card-body p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs text-brand-600 bg-brand-50 border-b border-brand-200">
-                <tr>
-                  <th className="px-6 py-4 font-bold">Route Code</th>
-                  <th className="px-6 py-4 font-bold">Route Name</th>
-                  <th className="px-6 py-4 font-bold">Origin</th>
-                  <th className="px-6 py-4 font-bold">Destination</th>
-                  <th className="px-6 py-4 font-bold">Distance</th>
-                  <th className="px-6 py-4 font-bold text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {loading ? (
-                  <tr>
-                    <td colSpan="6" className="px-6 py-8 text-center">
-                      <Spin size="large" />
-                    </td>
-                  </tr>
-                ) : routes.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
-                      <div className="flex flex-col items-center justify-center">
-                        <span className="text-4xl mb-2">🛣️</span>
-                        <p>No routes found.</p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  routes.map((r) => (
-                    <tr
-                      key={r.id}
-                      className="hover:bg-brand-50/50 transition-colors"
-                    >
-                      <td className="px-6 py-4 font-medium">{r.route_code}</td>
-                      <td className="px-6 py-4 font-semibold text-brand-700">{r.route_name}</td>
-                      <td className="px-6 py-4">{r.origin}</td>
-                      <td className="px-6 py-4">{r.destination}</td>
-                      <td className="px-6 py-4">{r.distance_km ? `${r.distance_km} km` : '-'}</td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end gap-2">
-                          <Link to={`/transport/routes/${r.id}`} className="btn btn-ghost btn-sm text-brand-600">
-                            <EditOutlined />
-                          </Link>
-                          <button className="btn btn-ghost btn-sm text-red-600">
-                            <DeleteOutlined />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+          {loading ? (
+            <div className="p-8 text-center"><Spin size="large" /></div>
+          ) : (
+            <DataTable data={routes} columns={columns} defaultSortColumn="Route Code" />
+          )}
         </div>
       </div>
     </div>

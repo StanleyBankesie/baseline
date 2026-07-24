@@ -5,10 +5,14 @@ import { PlusOutlined, EditOutlined, EnvironmentOutlined } from "@ant-design/ico
 import api from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import LiveTrackingMap from "./LiveTrackingMap.jsx";
+import DataTable from "../../../../components/common/DataTable.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 const { Option } = Select;
 
 export default function TripsList() {
+  const [viewMode, setViewMode] = useViewMode();
   const navigate = useNavigate();
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -33,6 +37,55 @@ export default function TripsList() {
   const handleAdd = () => {
     navigate("/transport/trips/new");
   };
+
+  const columns = [
+    { header: "Trip #", accessor: "trip_number" },
+    { header: "Vehicle", accessor: "reg_number" },
+    { header: "Driver", accessor: (t) => t.employee_name || 'Unnamed Driver' },
+    { 
+      header: "Origin → Dest", 
+      accessor: (t) => `${t.origin_name} ${t.destination_name}`,
+      render: (t) => `${t.origin_name || "-"} → ${t.destination_name || "-"}`
+    },
+    { 
+      header: "Start Time", 
+      accessor: "start_time",
+      render: (t) => t.start_time ? new Date(t.start_time).toLocaleString() : ''
+    },
+    {
+      header: "Status",
+      accessor: "status",
+      render: (t) => (
+        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+          t.status === 'IN_TRANSIT' ? 'bg-blue-100 text-blue-800' :
+          t.status === 'COMPLETED' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-800'
+        }`}>
+          {t.status || 'SCHEDULED'}
+        </span>
+      )
+    },
+    {
+      header: "Actions",
+      filterable: false,
+      sortable: false,
+      render: (t) => (
+        <div className="flex justify-end gap-2">
+          <Link to={`/transport/trips/${t.id}`} className="btn btn-ghost btn-sm text-brand-600">
+            <EditOutlined />
+          </Link>
+          <Link
+            to={`/transport/tracking/${t.id}`}
+            className="btn btn-ghost btn-sm text-green-600"
+            title="Live Tracking"
+          >
+            <EnvironmentOutlined />
+          </Link>
+        </div>
+      )
+    }
+  ];
+
+  const filteredTrips = trips.filter(t => activeTab === 'ALL' || t.status === activeTab);
 
   return (
     <div className="space-y-4">
@@ -77,71 +130,11 @@ export default function TripsList() {
               ))}
             </nav>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs text-brand-600 bg-brand-50 border-b border-brand-200">
-                <tr>
-                  <th className="px-6 py-4 font-semibold uppercase">Trip #</th>
-                  <th className="px-6 py-4 font-semibold uppercase">Vehicle</th>
-                  <th className="px-6 py-4 font-semibold uppercase">Driver</th>
-                  <th className="px-6 py-4 font-semibold uppercase">Origin &rarr; Dest</th>
-                  <th className="px-6 py-4 font-semibold uppercase">Start Time</th>
-                  <th className="px-6 py-4 font-semibold uppercase">Status</th>
-                  <th className="px-6 py-4 font-semibold uppercase text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan="6" className="px-6 py-8 text-center text-slate-500">
-                      Loading trips...
-                    </td>
-                  </tr>
-                ) : trips.filter(t => activeTab === 'ALL' || t.status === activeTab).length === 0 ? (
-                  <tr>
-                    <td colSpan="6" className="px-6 py-8 text-center text-slate-500">
-                      No trips found for this filter
-                    </td>
-                  </tr>
-                ) : (
-                  trips.filter(t => activeTab === 'ALL' || t.status === activeTab).map((t) => (
-                    <tr
-                      key={t.id}
-                      className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
-                    >
-                      <td className="px-6 py-4 font-medium">{t.trip_number}</td>
-                      <td className="px-6 py-4">{t.reg_number}</td>
-                      <td className="px-6 py-4">{t.employee_name || 'Unnamed Driver'}</td>
-                      <td className="px-6 py-4">{t.origin || "Origin"} &rarr; {t.destination || "Dest"}</td>
-                      <td className="px-6 py-4">{t.start_time ? new Date(t.start_time).toLocaleString() : ''}</td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          t.status === 'IN_TRANSIT' ? 'bg-blue-100 text-blue-800' :
-                          t.status === 'COMPLETED' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-800'
-                        }`}>
-                          {t.status || 'SCHEDULED'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end gap-2">
-                          <Link to={`/transport/trips/${t.id}`} className="btn btn-ghost btn-sm text-brand-600">
-                            <EditOutlined />
-                          </Link>
-                          <Link
-                            to={`/transport/tracking/${t.id}`}
-                            className="btn btn-ghost btn-sm text-green-600"
-                            title="Live Tracking"
-                          >
-                            <EnvironmentOutlined />
-                          </Link>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+          {loading ? (
+            <div className="p-8 text-center text-slate-500">Loading trips...</div>
+          ) : (
+            <DataTable data={filteredTrips} columns={columns} defaultSortColumn="Start Time" />
+          )}
         </div>
       </div>
     </div>

@@ -150,13 +150,7 @@ export default function ServiceOrderForm() {
   const [customers, setCustomers] = useState([]);
   const [customerSearch, setCustomerSearch] = useState("");
 
-  const [permissions, setPermissions] = useState({});
 
-  useEffect(() => {
-    api.get("/inventory/permissions").then((res) => {
-      setPermissions(res.data?.permissions || {});
-    });
-  }, []);
 
   function generateOrderNo() {
     return `ORD-${Date.now().toString().slice(-8)}`;
@@ -230,7 +224,7 @@ export default function ServiceOrderForm() {
     }
     async function fetchProjects() {
       try {
-        const resp = await api.get("/projects");
+        const resp = await api.get("/projects/projects");
         const rows = Array.isArray(resp.data?.items) ? resp.data.items : [];
         if (mounted) setProjects(rows);
       } catch {
@@ -1015,7 +1009,7 @@ export default function ServiceOrderForm() {
                         min={today}
                         required
                       
-                        disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
+                        disabled={!!editId && !hasExceptional("DOCUMENT.EDIT_DATE")}
                       />
                     </div>
                     <div className="group">
@@ -1543,7 +1537,7 @@ export default function ServiceOrderForm() {
                         min={today}
                         
                       
-                        disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
+                        disabled={!!editId && !hasExceptional("DOCUMENT.EDIT_DATE")}
                       />
                     </div>
                     <div className="group">
@@ -1560,7 +1554,7 @@ export default function ServiceOrderForm() {
                         min={today}
                         
                       
-                        disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
+                        disabled={!!editId && !hasExceptional("DOCUMENT.EDIT_DATE")}
                       />
                     </div>
                   </div>

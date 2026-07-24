@@ -14,6 +14,7 @@ import { api } from "../../../../api/client";
 import { useGhanaCities } from "../../../../hooks/useGhanaCities";
 import { useDispatch } from "react-redux";
 import { setRefresh } from "../../../../store/ui/refreshSlice.js";
+import PhoneInput from "../../../../components/PhoneInput.jsx";
 
 /**
  *  component
@@ -350,18 +351,18 @@ export default function CustomerForm() {
                     </div>
                     <div>
                       <label className="label">Phone</label>
-                      <input
-                        className="input"
+                      <PhoneInput
+                        className="w-60"
                         value={form.phone || ""}
-                        onChange={(e) => update("phone", e.target.value)}
+                        onChange={(v) => update("phone", v)}
                       />
                     </div>
                     <div>
                       <label className="label">Mobile</label>
-                      <input
-                        className="input"
+                      <PhoneInput
+                        className="w-60"
                         value={form.mobile || ""}
-                        onChange={(e) => update("mobile", e.target.value)}
+                        onChange={(v) => update("mobile", v)}
                       />
                     </div>
                     <div>

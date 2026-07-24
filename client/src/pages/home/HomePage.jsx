@@ -1481,9 +1481,11 @@ export default function HomePage() {
                     Current Step:{" "}
                     <span className="font-semibold">{modalData.step_name}</span>
                   </div>
-                  <div className="text-sm text-slate-700">
-                    Amount:{" "}
-                    <span className="font-semibold">
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-slate-500">
+                      Amount
+                    </label>
+                    <span className="font-semibold text-lg text-slate-800">
                       {modalData.amount != null
                         ? Number(modalData.amount).toLocaleString("en-US", {
                             minimumFractionDigits: 2,
@@ -1492,6 +1494,24 @@ export default function HomePage() {
                         : "N/A"}
                     </span>
                   </div>
+
+                  {(() => {
+                    const previousCommentLog = (modalData.logs || [])
+                      .slice()
+                      .reverse()
+                      .find(log => log.comments && log.comments.trim() !== "" && log.comments !== "Workflow started");
+                    return previousCommentLog ? (
+                      <div className="mb-2">
+                        <label className="block text-sm font-medium mb-1">
+                          Previous Comment (from {previousCommentLog.actor_name || "Unknown"})
+                        </label>
+                        <div className="p-3 bg-amber-50 text-amber-800 rounded border border-amber-200 text-sm">
+                          "{previousCommentLog.comments}"
+                        </div>
+                      </div>
+                    ) : null;
+                  })()}
+
                   <div>
                     <label className="block text-sm font-medium mb-1">
                       Comments

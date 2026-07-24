@@ -7,6 +7,8 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -14,6 +16,7 @@ import { toast } from "react-toastify";
  * @returns {JSX.Element} The rendered component
  */
 export default function ExceptionalPermissionsList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -90,8 +93,13 @@ export default function ExceptionalPermissionsList() {
               No exceptional permissions found.
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="table w-full">
+            
+                <>
+<div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+              <table className={ "table w-full " + (viewMode === 'grid' ? 'table-grid-mode' : '') }>
                 <thead>
                   <tr>
                     <th>User</th>
@@ -134,7 +142,9 @@ export default function ExceptionalPermissionsList() {
                 </tbody>
               </table>
             </div>
-          )}
+          
+</>
+)}
         </div>
       </div>
     </div>

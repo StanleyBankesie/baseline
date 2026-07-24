@@ -9301,3 +9301,2558 @@ Error: Invalid status
     at file:///C:/Users/stanl/baseline/server/routes/purchase.routes.js:9726:15
     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
 --------------------------------------------------------------------------------
+
+[2026-07-22T00:45:09.801Z] HTTP_500
+Summary: branchIdsStr is not defined
+Request: POST /api/sales/prices/best-price (status 500)
+Context:
+status: 500
+code: null
+method: POST
+url: /api/sales/prices/best-price
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"product_id":1,"quantity":1,"date":"2026-07-22","price_type":"Retail","only_standard":true,"customer_id":"19"}
+query: {}
+Technical details:
+ReferenceError: branchIdsStr is not defined
+    at resolveBestPrice (file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6748:32)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6396:22
+--------------------------------------------------------------------------------
+
+[2026-07-22T01:31:51.764Z] HTTP_500
+Summary: branchIdsStr is not defined
+Request: POST /api/sales/prices/best-price (status 500)
+Context:
+status: 500
+code: null
+method: POST
+url: /api/sales/prices/best-price
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"product_id":15,"quantity":1,"date":"2026-07-22","price_type":"Retail","only_standard":true,"customer_id":"19"}
+query: {}
+Technical details:
+ReferenceError: branchIdsStr is not defined
+    at resolveBestPrice (file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6766:32)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6414:22
+--------------------------------------------------------------------------------
+
+[2026-07-22T07:52:29.381Z] HTTP_401
+Summary: Authentication required
+Request: GET /api/sales/orders?page=1&limit=50 (status 401)
+Context:
+status: 401
+code: UNAUTHORIZED
+method: GET
+url: /api/sales/orders?page=1&limit=50
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"page":"1","limit":"50"}
+Technical details:
+Error: Authentication required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:143:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-22T07:52:41.572Z] HTTP_401
+Summary: Refresh token is missing
+Request: POST /api/auth/refresh (status 401)
+Context:
+status: 401
+code: INVALID_REFRESH_TOKEN
+method: POST
+url: /api/auth/refresh
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Refresh token is missing
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at refreshAccessToken (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:483:13)
+    at file:///C:/Users/stanl/baseline/server/routes/auth.routes.js:20:50
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+--------------------------------------------------------------------------------
+
+[2026-07-22T08:49:49.011Z] HTTP_500
+Summary: Unknown column 'e.sign_off_date' in 'field list'
+Request: GET /api/maintenance/job-executions (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/maintenance/job-executions
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'e.sign_off_date' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async listJobExecutions (file:///C:/Users/stanl/baseline/server/controllers/maintenance.controller.js:1695:19)
+--------------------------------------------------------------------------------
+
+[2026-07-22T08:50:20.984Z] HTTP_500
+Summary: Unknown column 'e.sign_off_date' in 'field list'
+Request: GET /api/maintenance/job-executions (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/maintenance/job-executions
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'e.sign_off_date' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async listJobExecutions (file:///C:/Users/stanl/baseline/server/controllers/maintenance.controller.js:1695:19)
+--------------------------------------------------------------------------------
+
+[2026-07-22T08:50:33.660Z] HTTP_500
+Summary: Unknown column 'e.sign_off_date' in 'field list'
+Request: GET /api/maintenance/job-executions (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/maintenance/job-executions
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'e.sign_off_date' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async listJobExecutions (file:///C:/Users/stanl/baseline/server/controllers/maintenance.controller.js:1695:19)
+--------------------------------------------------------------------------------
+
+[2026-07-22T08:52:23.068Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=PAYV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=PAYV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"PAYV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:235:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-22T08:52:33.284Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=RV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=RV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"RV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:235:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-22T10:23:51.864Z] HTTP_500
+Summary: branchIdsStr is not defined
+Request: POST /api/sales/prices/best-price (status 500)
+Context:
+status: 500
+code: null
+method: POST
+url: /api/sales/prices/best-price
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"product_id":15,"quantity":1,"price_type":"1","only_standard":true}
+query: {}
+Technical details:
+ReferenceError: branchIdsStr is not defined
+    at resolveBestPrice (file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6749:32)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6397:22
+--------------------------------------------------------------------------------
+
+[2026-07-22T10:23:55.193Z] HTTP_500
+Summary: branchIdsStr is not defined
+Request: POST /api/sales/prices/best-price (status 500)
+Context:
+status: 500
+code: null
+method: POST
+url: /api/sales/prices/best-price
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"product_id":1,"quantity":1,"price_type":"1","only_standard":true}
+query: {}
+Technical details:
+ReferenceError: branchIdsStr is not defined
+    at resolveBestPrice (file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6749:32)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6397:22
+--------------------------------------------------------------------------------
+
+[2026-07-22T10:24:00.457Z] HTTP_500
+Summary: branchIdsStr is not defined
+Request: POST /api/sales/prices/best-price (status 500)
+Context:
+status: 500
+code: null
+method: POST
+url: /api/sales/prices/best-price
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"product_id":17,"quantity":1,"price_type":"1","only_standard":true}
+query: {}
+Technical details:
+ReferenceError: branchIdsStr is not defined
+    at resolveBestPrice (file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6749:32)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6397:22
+--------------------------------------------------------------------------------
+
+[2026-07-22T10:24:14.955Z] HTTP_500
+Summary: branchIdsStr is not defined
+Request: POST /api/sales/prices/best-price (status 500)
+Context:
+status: 500
+code: null
+method: POST
+url: /api/sales/prices/best-price
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"product_id":14,"quantity":1,"price_type":"1","only_standard":true}
+query: {}
+Technical details:
+ReferenceError: branchIdsStr is not defined
+    at resolveBestPrice (file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6749:32)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6397:22
+--------------------------------------------------------------------------------
+
+[2026-07-22T10:24:20.011Z] HTTP_500
+Summary: branchIdsStr is not defined
+Request: POST /api/sales/prices/best-price (status 500)
+Context:
+status: 500
+code: null
+method: POST
+url: /api/sales/prices/best-price
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"product_id":31,"quantity":1,"price_type":"1","only_standard":true}
+query: {}
+Technical details:
+ReferenceError: branchIdsStr is not defined
+    at resolveBestPrice (file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6749:32)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6397:22
+--------------------------------------------------------------------------------
+
+[2026-07-22T10:24:33.621Z] HTTP_500
+Summary: branchIdsStr is not defined
+Request: POST /api/sales/prices/best-price (status 500)
+Context:
+status: 500
+code: null
+method: POST
+url: /api/sales/prices/best-price
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"product_id":3,"quantity":1,"price_type":"1","only_standard":true}
+query: {}
+Technical details:
+ReferenceError: branchIdsStr is not defined
+    at resolveBestPrice (file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6749:32)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6397:22
+--------------------------------------------------------------------------------
+
+[2026-07-22T10:24:40.250Z] HTTP_500
+Summary: branchIdsStr is not defined
+Request: POST /api/sales/prices/best-price (status 500)
+Context:
+status: 500
+code: null
+method: POST
+url: /api/sales/prices/best-price
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"product_id":6,"quantity":1,"price_type":"1","only_standard":true}
+query: {}
+Technical details:
+ReferenceError: branchIdsStr is not defined
+    at resolveBestPrice (file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6749:32)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6397:22
+--------------------------------------------------------------------------------
+
+[2026-07-22T10:24:49.723Z] HTTP_500
+Summary: branchIdsStr is not defined
+Request: POST /api/sales/prices/best-price (status 500)
+Context:
+status: 500
+code: null
+method: POST
+url: /api/sales/prices/best-price
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"product_id":35,"quantity":1,"price_type":"1","only_standard":true}
+query: {}
+Technical details:
+ReferenceError: branchIdsStr is not defined
+    at resolveBestPrice (file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6749:32)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///C:/Users/stanl/baseline/server/routes/sales.route.js:6397:22
+--------------------------------------------------------------------------------
+
+[2026-07-22T10:42:31.283Z] HTTP_500
+Summary: branchIdsStr is not defined
+Request: GET /api/purchase/returns/next-no (status 500)
+Context:
+status: 500
+code: null
+method: GET
+url: /api/purchase/returns/next-no
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+ReferenceError: branchIdsStr is not defined
+    at nextPurchaseReturnNo (file:///C:/Users/stanl/baseline/server/routes/purchase.routes.js:3982:28)
+    at file:///C:/Users/stanl/baseline/server/routes/purchase.routes.js:5010:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-22T12:03:49.494Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/inventory/permissions (status 404)
+Context:
+requestId: mrw1ap08-aqqthn6t
+durationMs: 94
+method: GET
+url: /api/inventory/permissions
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Mobile Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-22T12:03:50.669Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/projects (status 404)
+Context:
+requestId: mrw1apnn-rr2ywgyu
+durationMs: 426
+method: GET
+url: /api/projects
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Mobile Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-22T13:24:42.565Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-22T15:45:51.523Z] HTTP_401
+Summary: Authentication required
+Request: GET /api/transport/trips (status 401)
+Context:
+status: 401
+code: UNAUTHORIZED
+method: GET
+url: /api/transport/trips
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.19041.6456
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Authentication required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:143:17)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+    at Function.handle (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:175:3)
+--------------------------------------------------------------------------------
+
+[2026-07-22T15:45:52.041Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: 127.0.0.1
+remotePort: 54274
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-07-22T15:47:51.186Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/1 (status 404)
+Context:
+requestId: mrw9asr1-8k56h41i
+durationMs: 5
+method: GET
+url: /api/transport/trips/1
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-22T16:46:11.893Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-22T17:21:25.593Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-22T17:28:45.831Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-22T17:41:17.072Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-22T17:41:43.879Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-22T17:50:45.608Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-22T17:56:57.802Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-22T18:37:07.126Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-23T00:33:44.544Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/2 (status 404)
+Context:
+requestId: mrws33gq-g1qjei04
+durationMs: 21
+method: GET
+url: /api/transport/trips/2
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T00:40:02.748Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/2 (status 404)
+Context:
+requestId: mrwsb7ac-1srkrrw5
+durationMs: 24
+method: GET
+url: /api/transport/trips/2
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T00:41:18.748Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/2 (status 404)
+Context:
+requestId: mrwscty0-d1lve3dt
+durationMs: 4
+method: GET
+url: /api/transport/trips/2
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T00:41:25.772Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/1 (status 404)
+Context:
+requestId: mrwsczcx-e78agekh
+durationMs: 11
+method: GET
+url: /api/transport/trips/1
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T00:48:17.632Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/1 (status 404)
+Context:
+requestId: mrwslt5o-lg2flqh6
+durationMs: 4
+method: GET
+url: /api/transport/trips/1
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T00:54:15.563Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/2 (status 404)
+Context:
+requestId: mrwsthc8-7csuinmb
+durationMs: 3
+method: GET
+url: /api/transport/trips/2
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T00:55:46.447Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/2 (status 404)
+Context:
+requestId: mrwsvfgr-zi6ovz81
+durationMs: 4
+method: GET
+url: /api/transport/trips/2
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T00:56:05.072Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/2 (status 404)
+Context:
+requestId: mrwsvtu4-wbpttzni
+durationMs: 4
+method: GET
+url: /api/transport/trips/2
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T00:56:26.345Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/2 (status 404)
+Context:
+requestId: mrwswa8o-np118euq
+durationMs: 17
+method: GET
+url: /api/transport/trips/2
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T00:56:27.718Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/2 (status 404)
+Context:
+requestId: mrwswbb5-t7j8hy3b
+durationMs: 5
+method: GET
+url: /api/transport/trips/2
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T00:56:29.197Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/2 (status 404)
+Context:
+requestId: mrwswcfy-plz72one
+durationMs: 15
+method: GET
+url: /api/transport/trips/2
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T00:57:38.296Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/2 (status 404)
+Context:
+requestId: mrwsxtqa-017614lq
+durationMs: 53
+method: GET
+url: /api/transport/trips/2
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T00:57:40.118Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/2 (status 404)
+Context:
+requestId: mrwsxv3i-qnewjw14
+durationMs: 104
+method: GET
+url: /api/transport/trips/2
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T00:58:12.029Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/2 (status 404)
+Context:
+requestId: mrwsyjso-o3udf3rh
+durationMs: 5
+method: GET
+url: /api/transport/trips/2
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T00:58:31.956Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/2 (status 404)
+Context:
+requestId: mrwsyz5r-7dxasbrc
+durationMs: 21
+method: GET
+url: /api/transport/trips/2
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T01:00:30.620Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/1 (status 404)
+Context:
+requestId: mrwt1iqf-5bm6regf
+durationMs: 4
+method: GET
+url: /api/transport/trips/1
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T01:02:37.978Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/2 (status 404)
+Context:
+requestId: mrwt4908-jz8znonb
+durationMs: 2
+method: GET
+url: /api/transport/trips/2
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T01:03:36.964Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/2 (status 404)
+Context:
+requestId: mrwt5iiq-somcwara
+durationMs: 2
+method: GET
+url: /api/transport/trips/2
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Mobile Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T01:04:10.067Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/2 (status 404)
+Context:
+requestId: mrwt681y-3d8rbwuw
+durationMs: 13
+method: GET
+url: /api/transport/trips/2
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Mobile Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T01:08:08.251Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/trips/2 (status 404)
+Context:
+requestId: mrwtbbmu-cnruul45
+durationMs: 277
+method: GET
+url: /api/transport/trips/2
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Mobile Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T07:55:49.665Z] HTTP_401
+Summary: Authentication required
+Request: GET /api/transport/trips/2/locations (status 401)
+Context:
+status: 401
+code: UNAUTHORIZED
+method: GET
+url: /api/transport/trips/2/locations
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Authentication required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:143:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-23T07:55:49.682Z] HTTP_401
+Summary: Authentication required
+Request: GET /api/transport/trips (status 401)
+Context:
+status: 401
+code: UNAUTHORIZED
+method: GET
+url: /api/transport/trips
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Authentication required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:143:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-23T07:55:49.737Z] HTTP_401
+Summary: Refresh token is missing
+Request: POST /api/auth/refresh (status 401)
+Context:
+status: 401
+code: INVALID_REFRESH_TOKEN
+method: POST
+url: /api/auth/refresh
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Refresh token is missing
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at refreshAccessToken (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:483:13)
+    at file:///C:/Users/stanl/baseline/server/routes/auth.routes.js:20:50
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+--------------------------------------------------------------------------------
+
+[2026-07-23T07:55:49.816Z] HTTP_401
+Summary: Refresh token is missing
+Request: POST /api/auth/refresh (status 401)
+Context:
+status: 401
+code: INVALID_REFRESH_TOKEN
+method: POST
+url: /api/auth/refresh
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Refresh token is missing
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at refreshAccessToken (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:483:13)
+    at file:///C:/Users/stanl/baseline/server/routes/auth.routes.js:20:50
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+--------------------------------------------------------------------------------
+
+[2026-07-23T10:33:02.170Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-23T10:52:53.473Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-23T11:04:03.351Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/routes/sales.route.js:4348:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/baseline/server/middleware/requirePermission.js:96:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:235:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-23T12:44:42.503Z] HTTP_500
+Summary: Column 'branch_id' cannot be null
+Request: POST /api/transport/logbooks (status 500)
+Context:
+status: 500
+code: ER_BAD_NULL_ERROR
+method: POST
+url: /api/transport/logbooks
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"vehicle_id":"1","driver_id":"1","trip_date":"2026-07-23","department":"Projects","purpose":"testing","origin":"JV9C+H33, Boundary Rd, Accra, Ghana","destination":"87 Spintex Rd, Accra, Ghana","planned_route":"JV9C+H33, Boundary Rd, Accra, Ghana -&gt; 87 Spintex Rd, Accra, Ghana","departure_time":"2026-07-23T12:40","expected_return_time":"","actual_return_time":"2026-07-23T12:44","trip_status":"Planned","beginning_mileage":3475758,"ending_mileage":383445757,"fuel_level_departure":"3/4","fuel_level_return":"1/2","fuel_issued":0,"fuel_cost":0,"fuel_station":"","num_passengers":0,"passenger_names":"","driver_remarks":"","incident_report":"","traffic_offence":"","breakdown_details":"","requested_by":"","approved_by":"","approval_status":"Pending"}
+query: {}
+Technical details:
+Error: Column 'branch_id' cannot be null
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async createLogbook (file:///C:/Users/stanl/baseline/server/controllers/transport-logbook.controller.js:126:9)
+--------------------------------------------------------------------------------
+
+[2026-07-23T13:15:52.407Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/routes (status 404)
+Context:
+requestId: mrxjb7bf-pb9yyfkq
+durationMs: 11
+method: GET
+url: /api/transport/routes
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T13:16:18.722Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/routes (status 404)
+Context:
+requestId: mrxjbrm6-v9a1wxv4
+durationMs: 19
+method: GET
+url: /api/transport/routes
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T13:22:49.158Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/routes (status 404)
+Context:
+requestId: mrxjk4uu-7dmowv19
+durationMs: 48
+method: GET
+url: /api/transport/routes
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T15:08:43.062Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/inspections (status 404)
+Context:
+requestId: mrxncbl9-pmo41868
+durationMs: 8
+method: GET
+url: /api/transport/inspections
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-23T15:34:07.563Z] HTTP_500
+Summary: Unknown column 'u.first_name' in 'field list'
+Request: GET /api/transport/logbooks (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/transport/logbooks
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'u.first_name' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async listLogbooks (file:///C:/Users/stanl/baseline/server/controllers/transport-logbook.controller.js:41:19)
+--------------------------------------------------------------------------------
+
+[2026-07-23T18:36:09.558Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/services/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/services/invoices/next-no
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/routes/srv_invoices.route.js:4122:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/baseline/server/middleware/requirePermission.js:116:18)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-23T20:04:28.933Z] HTTP_401
+Summary: Authentication required
+Request: GET /api/access/dashboard-permissions/version (status 401)
+Context:
+status: 401
+code: UNAUTHORIZED
+method: GET
+url: /api/access/dashboard-permissions/version
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Authentication required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:143:17)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+    at Function.handle (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:175:3)
+--------------------------------------------------------------------------------
+
+[2026-07-23T20:04:29.066Z] HTTP_401
+Summary: Refresh token is missing
+Request: POST /api/auth/refresh (status 401)
+Context:
+status: 401
+code: INVALID_REFRESH_TOKEN
+method: POST
+url: /api/auth/refresh
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Refresh token is missing
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at refreshAccessToken (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:483:13)
+    at file:///C:/Users/stanl/baseline/server/routes/auth.routes.js:20:50
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+--------------------------------------------------------------------------------
+
+[2026-07-23T21:15:12.451Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-23T21:40:03.554Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-23T21:40:18.460Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-23T23:34:26.671Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-23T23:47:44.294Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-24T00:03:53.081Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:02:17.654Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:02:52.767Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:04:36.193Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:05:30.512Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: 127.0.0.1
+remotePort: 59149
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:05:30.530Z] HTTP_CONNECTION_CLOSED
+Summary: Connection closed before response finished
+Request: GET /api/auth/me
+Context:
+requestId: mry8nr58-gd2ezmi7
+durationMs: 2166
+method: GET
+url: /api/auth/me
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:14:50.669Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:23:01.984Z] HTTP_403
+Summary: Request failed with status 403
+Request: PUT /api/access/roles/5/features (status 403)
+Context:
+requestId: mry9ac38-2pclzpim
+durationMs: 44
+method: PUT
+url: /api/access/roles/5/features
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:23:01.993Z] HTTP_403
+Summary: Request failed with status 403
+Request: PUT /api/access/roles/5/permissions (status 403)
+Context:
+requestId: mry9ac3e-y0os9nte
+durationMs: 47
+method: PUT
+url: /api/access/roles/5/permissions
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:23:04.592Z] HTTP_403
+Summary: Request failed with status 403
+Request: PUT /api/access/roles/5 (status 403)
+Context:
+requestId: mry9ae4e-1hl13uny
+durationMs: 18
+method: PUT
+url: /api/access/roles/5
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:23:11.522Z] HTTP_403
+Summary: Request failed with status 403
+Request: PUT /api/access/roles/5 (status 403)
+Context:
+requestId: mry9ajgw-4jre585s
+durationMs: 18
+method: PUT
+url: /api/access/roles/5
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:23:11.735Z] HTTP_403
+Summary: Request failed with status 403
+Request: PUT /api/access/roles/5 (status 403)
+Context:
+requestId: mry9ajmt-v5o05yfh
+durationMs: 18
+method: PUT
+url: /api/access/roles/5
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:23:11.938Z] HTTP_403
+Summary: Request failed with status 403
+Request: PUT /api/access/roles/5 (status 403)
+Context:
+requestId: mry9ajs5-ka6ltdcf
+durationMs: 28
+method: PUT
+url: /api/access/roles/5
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:23:35.916Z] HTTP_403
+Summary: Request failed with status 403
+Request: PUT /api/access/roles/5 (status 403)
+Context:
+requestId: mry9b28d-wvvxulny
+durationMs: 95
+method: PUT
+url: /api/access/roles/5
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:23:36.882Z] HTTP_403
+Summary: Request failed with status 403
+Request: PUT /api/access/roles/5 (status 403)
+Context:
+requestId: mry9b2z2-kwx7r4zb
+durationMs: 100
+method: PUT
+url: /api/access/roles/5
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:23:37.024Z] HTTP_403
+Summary: Request failed with status 403
+Request: PUT /api/access/roles/5 (status 403)
+Context:
+requestId: mry9b335-udr1wa9y
+durationMs: 95
+method: PUT
+url: /api/access/roles/5
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:23:37.179Z] HTTP_403
+Summary: Request failed with status 403
+Request: PUT /api/access/roles/5 (status 403)
+Context:
+requestId: mry9b37f-8qg2bone
+durationMs: 96
+method: PUT
+url: /api/access/roles/5
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:23:37.339Z] HTTP_403
+Summary: Request failed with status 403
+Request: PUT /api/access/roles/5 (status 403)
+Context:
+requestId: mry9b3bq-7jh1zi36
+durationMs: 101
+method: PUT
+url: /api/access/roles/5
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:27:37.682Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:34:47.299Z] HTTP_403
+Summary: Request failed with status 403
+Request: GET /api/access/roles (status 403)
+Context:
+requestId: mry9pga6-kyfqkist
+durationMs: 78
+method: GET
+url: /api/access/roles
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:52:12.632Z] HTTP_403
+Summary: Request failed with status 403
+Request: GET /api/access/roles (status 403)
+Context:
+requestId: mryabuwb-q1ync6lg
+durationMs: 44
+method: GET
+url: /api/access/roles
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T01:55:51.480Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-24T02:06:02.531Z] HTTP_403
+Summary: Request failed with status 403
+Request: GET /api/access/roles (status 403)
+Context:
+requestId: mryatn90-6ncmojvl
+durationMs: 46
+method: GET
+url: /api/access/roles
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T02:07:32.558Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-24T02:10:23.931Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-24T02:10:58.137Z] HTTP_403
+Summary: Request failed with status 403
+Request: GET /api/admin/settings/env (status 403)
+Context:
+requestId: mryazzc5-q4552196
+durationMs: 51
+method: GET
+url: /api/admin/settings/env
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: null
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T02:19:14.491Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-24T02:21:44.404Z] HTTP_403
+Summary: Request failed with status 403
+Request: GET /api/access/roles/1/modules (status 403)
+Context:
+requestId: mrybdu0d-tcnleu2e
+durationMs: 39
+method: GET
+url: /api/access/roles/1/modules
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T02:21:44.413Z] HTTP_403
+Summary: Request failed with status 403
+Request: GET /api/access/roles/1/features (status 403)
+Context:
+requestId: mrybdu0g-5ix4s383
+durationMs: 45
+method: GET
+url: /api/access/roles/1/features
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T02:21:47.130Z] HTTP_403
+Summary: Request failed with status 403
+Request: GET /api/access/roles/18/modules (status 403)
+Context:
+requestId: mrybdw48-4zaxnqoh
+durationMs: 34
+method: GET
+url: /api/access/roles/18/modules
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T02:21:47.136Z] HTTP_403
+Summary: Request failed with status 403
+Request: GET /api/access/roles/18/features (status 403)
+Context:
+requestId: mrybdw4b-fcz3dpxu
+durationMs: 37
+method: GET
+url: /api/access/roles/18/features
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T02:21:48.689Z] HTTP_403
+Summary: Request failed with status 403
+Request: GET /api/access/roles/5/modules (status 403)
+Context:
+requestId: mrybdxbh-typpiaus
+durationMs: 35
+method: GET
+url: /api/access/roles/5/modules
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T02:21:48.696Z] HTTP_403
+Summary: Request failed with status 403
+Request: GET /api/access/roles/5/features (status 403)
+Context:
+requestId: mrybdxbl-e53oji1m
+durationMs: 39
+method: GET
+url: /api/access/roles/5/features
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: null
+status: 403
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-24T02:27:43.520Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-24T02:28:54.828Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-24T02:29:08.219Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:00:56.635Z] HTTP_500
+Summary: branchIdsStr is not defined
+Request: GET /api/purchase/returns/next-no (status 500)
+Context:
+status: 500
+code: null
+method: GET
+url: /api/purchase/returns/next-no
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+ReferenceError: branchIdsStr is not defined
+    at nextPurchaseReturnNo (file:///C:/Users/stanl/baseline/server/routes/purchase.routes.js:3982:28)
+    at file:///C:/Users/stanl/baseline/server/routes/purchase.routes.js:5010:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:07:09.991Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=JV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=JV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"JV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:234:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:07:16.454Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=PAYV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=PAYV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"PAYV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:234:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:07:24.852Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=PAYV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=PAYV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"PAYV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:234:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:07:32.802Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=RV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=RV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"RV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:234:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:07:38.218Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=RV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=RV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"RV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:234:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:08:45.815Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=CN (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=CN
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"CN"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:234:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:08:58.137Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=DN (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=DN
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"DN"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:234:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:08:58.167Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=CN (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=CN
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"CN"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:234:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:09:04.106Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=DN (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=DN
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"DN"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:234:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:09:04.124Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=CN (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=CN
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"CN"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:234:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:09:32.638Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=SV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=SV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"SV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:234:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:09:38.297Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=PV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=PV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"PV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:234:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:09:46.542Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=CV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=CV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"CV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:234:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:25:26.022Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=RV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=RV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"RV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:234:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:26:43.029Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=RV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=RV
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"RV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:234:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:29:38.868Z] HTTP_404
+Summary: Not found
+Request: GET /api/maintenance/assets/downtime (status 404)
+Context:
+status: 404
+code: NOT_FOUND
+method: GET
+url: /api/maintenance/assets/downtime
+ip: 127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Not found
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at getAssetById (file:///C:/Users/stanl/baseline/server/controllers/maintenance.controller.js:968:29)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:35:16.981Z] HTTP_403
+Summary: You are not authorized to approve this step (Assigned to someone else)
+Request: POST /api/workflows/269/action (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: POST
+url: /api/workflows/269/action
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"APPROVE","comments":"approved","target_user_id":null}
+query: {}
+Technical details:
+Error: You are not authorized to approve this step (Assigned to someone else)
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at performAction (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:1651:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:35:31.470Z] HTTP_403
+Summary: You are not authorized to approve this step (Assigned to someone else)
+Request: POST /api/workflows/269/action (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: POST
+url: /api/workflows/269/action
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"APPROVE","comments":"approved","target_user_id":null}
+query: {}
+Technical details:
+Error: You are not authorized to approve this step (Assigned to someone else)
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at performAction (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:1651:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:35:51.347Z] HTTP_403
+Summary: You are not authorized to approve this step (Assigned to someone else)
+Request: POST /api/workflows/269/action (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: POST
+url: /api/workflows/269/action
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"APPROVE","comments":"approved","target_user_id":null}
+query: {}
+Technical details:
+Error: You are not authorized to approve this step (Assigned to someone else)
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at performAction (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:1651:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:36:09.102Z] HTTP_403
+Summary: You are not authorized to approve this step (Assigned to someone else)
+Request: POST /api/workflows/269/action (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: POST
+url: /api/workflows/269/action
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"RETURN","comments":"test","target_user_id":null}
+query: {}
+Technical details:
+Error: You are not authorized to approve this step (Assigned to someone else)
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at performAction (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:1651:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T16:36:13.127Z] HTTP_403
+Summary: You are not authorized to approve this step (Assigned to someone else)
+Request: POST /api/workflows/269/action (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: POST
+url: /api/workflows/269/action
+ip: 127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"APPROVE","comments":"test","target_user_id":null}
+query: {}
+Technical details:
+Error: You are not authorized to approve this step (Assigned to someone else)
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at performAction (file:///C:/Users/stanl/baseline/server/controllers/workflow.controller.js:1651:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-24T17:13:40.173Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-07-24T17:18:04.653Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use 127.0.0.1:4002
+Technical details:
+Error: listen EADDRINUSE: address already in use 127.0.0.1:4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------

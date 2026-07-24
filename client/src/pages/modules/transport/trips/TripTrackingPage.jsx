@@ -18,31 +18,21 @@ export default function TripTrackingPage() {
   }, [id]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
-            <Link
-              to="/transport/trips"
-              className="btn btn-ghost btn-sm px-2 text-slate-500"
-            >
-              ← Back
-            </Link>
-            Live Tracking {trip ? `- ${trip.trip_number}` : ""}
-          </h1>
-        </div>
+    <div className="fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-900 flex flex-col">
+      <div className="flex-none p-4 bg-white dark:bg-slate-800 shadow-sm z-10 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
+          <Link
+            to="/transport/trip-management"
+            className="btn btn-ghost btn-sm px-2 text-slate-500"
+          >
+            ← Back
+          </Link>
+          Live Tracking {trip ? `- ${trip.trip_number}` : ""}
+        </h1>
       </div>
 
-      <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg">
-          <h2 className="text-xl font-bold dark:text-brand-300">
-            GPS Tracker
-          </h2>
-          <p className="text-sm mt-1">Real-time location monitoring</p>
-        </div>
-        <div className="card-body p-6">
-          <LiveTrackingMap tripId={id} />
-        </div>
+      <div className="flex-1 w-full bg-slate-200 dark:bg-slate-900 relative">
+        <LiveTrackingMap tripId={id} trip={trip} height="100%" />
       </div>
     </div>
   );

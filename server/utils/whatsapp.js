@@ -2,7 +2,7 @@
 const _fetch = global.fetch;
 
 export const isWhatsAppConfigured = () => {
-  return !!process.env.WASENDER_API_TOKEN;
+  return !!process.env.GREEN_API_ID_INSTANCE && !!process.env.GREEN_API_TOKEN_INSTANCE;
 };
 
 export const sendWhatsApp = async ({ to, message }) => {
@@ -12,33 +12,45 @@ export const sendWhatsApp = async ({ to, message }) => {
   }
 
   try {
-    const apiUrl = process.env.WHATSAPP_API_URL || "https://api.wasender.io/send"; // Adjust default URL if needed, or leave dynamic.
-    const apiToken = process.env.WASENDER_API_TOKEN;
+    const idInstance = process.env.GREEN_API_ID_INSTANCE;
+    const apiTokenInstance = process.env.GREEN_API_TOKEN_INSTANCE;
+    const apiUrl = `https://api.green-api.com/waInstance${idInstance}/sendMessage/${apiTokenInstance}`; 
 
-    // Remove any non-numeric characters from the phone number
-    const cleanNumber = to.replace(/\D/g, "");
+    // Clean phone number (Meta/Green API expects pure digits, no '+')
+    let cleanNumber = to.replace(/[^\d+]/g, "");
+    
+    // Fix for Ghana numbers with country code and local 0
+    if (cleanNumber.startsWith("+2330") && cleanNumber.length === 14) {
+      cleanNumber = "233" + cleanNumber.substring(5);
+    } else if (cleanNumber.startsWith("2330") && cleanNumber.length === 13) {
+      cleanNumber = "233" + cleanNumber.substring(4);
+    } else if (cleanNumber.startsWith("+")) {
+      cleanNumber = cleanNumber.substring(1);
+    } else if (cleanNumber.startsWith("0") && cleanNumber.length === 10) {
+      // Assuming it's a local Ghana number without country code
+      cleanNumber = "233" + cleanNumber.substring(1);
+    }
 
-    // wasenderapi.com payload structure
+    const payload = {
+      chatId: `${cleanNumber}@c.us`,
+      message: message
+    };
+
     const response = await _fetch(apiUrl, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiToken}`
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        number: cleanNumber,
-        type: "text",
-        message: message
-      }),
+      body: JSON.stringify(payload),
     });
 
     const data = await response.json().catch(() => ({}));
     
     if (!response.ok) {
-      throw new Error(`WhatsApp API Error: ${data.message || data.error || response.statusText}`);
+      throw new Error(`Green API Error: ${data.message || response.statusText}`);
     }
 
-    console.log(`[WHATSAPP] Sent successfully to ${cleanNumber}`);
+    console.log(`[WHATSAPP] Sent successfully via Green API to ${cleanNumber}`);
     return data;
   } catch (error) {
     console.error("[WHATSAPP ERROR]", error.message);

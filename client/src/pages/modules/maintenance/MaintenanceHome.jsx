@@ -34,8 +34,6 @@ import EquipmentForm from "./equipment/EquipmentForm.jsx";
 import MaintenanceContractList from "./contracts/MaintenanceContractList.jsx";
 import MaintenanceContractForm from "./contracts/MaintenanceContractForm.jsx";
 import MaintenanceSetupPage from "./setup/MaintenanceSetupPage";
-import DowntimeLogList from "./assets/DowntimeLogList.jsx";
-import DowntimeLogForm from "./assets/DowntimeLogForm.jsx";
 import DowntimeAnalysisReport from "./reports/DowntimeAnalysisReport.jsx";
 import MaintenanceMaterialRequisitionList from "./material-requisitions/MaintenanceMaterialRequisitionList.jsx";
 import MaintenanceMaterialRequisitionForm from "./material-requisitions/MaintenanceMaterialRequisitionForm.jsx";
@@ -106,12 +104,6 @@ function MaintenanceLanding() {
     {
       title: "Master Data",
       items: [
-        buildFeature(
-          "Downtime Tracking",
-          "/maintenance/assets/downtime",
-          "Log and analyze asset downtime",
-          "⏱️",
-        ),
         buildFeature(
           "Equipment",
           "/maintenance/equipment",
@@ -258,8 +250,6 @@ export default function MaintenanceHome() {
       <Route path="/assets" element={<AssetList />} />
       <Route path="/assets/new" element={<AssetForm />} />
       <Route path="/assets/:id" element={<AssetForm />} />
-      <Route path="/assets/downtime" element={<DowntimeLogList />} />
-      <Route path="/assets/downtime/new" element={<DowntimeLogForm />} />
 
       <Route
         path="/maintenance-requests"

@@ -19,6 +19,8 @@ import {
   ListPdfIconButton,
   ListAttachmentIconButton,
 } from "@/components/list/ListDocActionIconButtons.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -26,6 +28,7 @@ import {
  * @returns {JSX.Element} The rendered component
  */
 export default function SalesOrderList() {
+  const [viewMode, setViewMode] = useViewMode();
   const navigate = useNavigate();
   const location = useLocation();
   const {
@@ -1133,8 +1136,11 @@ export default function SalesOrderList() {
             </div>
           ) : (
             <>
+              <div className="flex justify-end mb-4">
+                <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+              </div>
               <div className="overflow-x-auto">
-                <table className="table">
+                <table className={"table " + (viewMode === "grid" ? "table-grid-mode" : "")}>
                 <thead>
                   <tr>
                     <SortableHeader

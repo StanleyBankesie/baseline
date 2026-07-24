@@ -3103,7 +3103,7 @@ export default function ReceiptVoucherForm() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Link to=".." className="btn-success">
+                <Link to="/finance/receipt-voucher" className="btn-success">
                   Back
                 </Link>
                 {voucherStatus === "APPROVED" ? (
@@ -3666,7 +3666,7 @@ export default function ReceiptVoucherForm() {
               </div>
 
               <div className="flex justify-end gap-3">
-                <Link to=".." className="btn-success">
+                <Link to="/finance/receipt-voucher" className="btn-success">
                   Cancel
                 </Link>
                 <button
@@ -3700,7 +3700,7 @@ export default function ReceiptVoucherForm() {
                 <p className="text-sm mt-1">Record incoming payments</p>
               </div>
               <div className="flex gap-2">
-                <Link to=".." className="btn-success">
+                <Link to="/finance/receipt-voucher" className="btn-success">
                   Back
                 </Link>
                 {voucherStatus === "APPROVED" ? (
@@ -4701,7 +4701,7 @@ export default function ReceiptVoucherForm() {
               </div>
 
               <div className="flex flex-col md:flex-row gap-2">
-                <Link to=".." className="btn-success">
+                <Link to="/finance/receipt-voucher" className="btn-success">
                   Cancel
                 </Link>
                 <button

@@ -8,10 +8,11 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "api/client";
 import { Eye, EyeOff, Building2, X } from "lucide-react";
 import { usePermission } from "@/auth/PermissionContext.jsx";
+import PhoneInput from "@/components/PhoneInput.jsx";
 
 /**
  *  component
- * 
+ *
  * @returns {JSX.Element} The rendered component
  */
 export default function UserForm() {
@@ -28,6 +29,7 @@ export default function UserForm() {
     branchIds: [],
     username: "",
     email: "",
+    telephone: "",
     fullName: "",
     password: "",
     isActive: true,
@@ -105,6 +107,7 @@ export default function UserForm() {
           branchIds: u.branch_id ? [String(u.branch_id)] : [],
           username: u.username || "",
           email: u.email || "",
+          telephone: u.telephone || "",
           fullName: u.full_name || "",
           isActive: Boolean(u.is_active),
           password: "", // Don't populate password
@@ -204,6 +207,7 @@ export default function UserForm() {
         branch_ids: form.branchIds.map((x) => Number(x)),
         username: form.username,
         email: form.email,
+        telephone: form.telephone,
         full_name: form.fullName,
         is_active: form.isActive,
         profile_picture: form.profilePicture || null,
@@ -242,8 +246,12 @@ export default function UserForm() {
     ? branches.filter((b) => String(b.company_id) === String(form.companyId))
     : [];
 
-  const superbranches = filteredBranches.filter((b) => Number(b.is_superbranch) === 1);
-  const regularBranches = filteredBranches.filter((b) => Number(b.is_superbranch) !== 1);
+  const superbranches = filteredBranches.filter(
+    (b) => Number(b.is_superbranch) === 1,
+  );
+  const regularBranches = filteredBranches.filter(
+    (b) => Number(b.is_superbranch) !== 1,
+  );
 
   // Filter roles based on selected company (assuming roles are company-specific)
   const filteredRoles = roles.filter((r) => {
@@ -273,12 +281,11 @@ export default function UserForm() {
             {error && <div className="alert alert-error mb-4">{error}</div>}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
               {/* Company */}
               <div>
                 <label className="label">Company *</label>
                 <select
-                  className="input"
+                  className="input w-60"
                   value={form.companyId}
                   onChange={(e) => {
                     update("companyId", e.target.value);
@@ -311,11 +318,22 @@ export default function UserForm() {
               <div>
                 <label className="label">Email *</label>
                 <input
-                  className="input"
+                  className="input w-60"
                   type="email"
                   value={form.email}
                   onChange={(e) => update("email", e.target.value)}
                   required
+                />
+              </div>
+
+              {/* Telephone */}
+              <div>
+                <label className="label ">Telephone</label>
+                <PhoneInput
+                  className="w-60"
+                  value={form.telephone}
+                  onChange={(v) => update("telephone", v)}
+                  placeholder="234567890"
                 />
               </div>
 
@@ -334,7 +352,7 @@ export default function UserForm() {
               <div>
                 <label className="label">Role</label>
                 <select
-                  className="input"
+                  className="input w-60"
                   value={form.roleId}
                   onChange={(e) => update("roleId", e.target.value)}
                   disabled={!form.companyId}
@@ -352,7 +370,7 @@ export default function UserForm() {
               <div>
                 <label className="label">User Type</label>
                 <select
-                  className="input"
+                  className="input w-60"
                   value={form.userType}
                   onChange={(e) => update("userType", e.target.value)}
                 >
@@ -423,10 +441,9 @@ export default function UserForm() {
                 <label className="label">Valid From</label>
                 <input
                   type="date"
-                  className="input"
+                  className="input w-60"
                   value={form.validFrom}
                   onChange={(e) => update("validFrom", e.target.value)}
-                
                   disabled={isEdit && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
@@ -436,10 +453,9 @@ export default function UserForm() {
                 <label className="label">Valid To</label>
                 <input
                   type="date"
-                  className="input"
+                  className="input w-60"
                   value={form.validTo}
                   onChange={(e) => update("validTo", e.target.value)}
-                
                   disabled={isEdit && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
@@ -453,7 +469,7 @@ export default function UserForm() {
                 </label>
                 <div className="relative">
                   <input
-                    className="input pr-8"
+                    className="input pr-8 w-60"
                     type={showPassword ? "text" : "password"}
                     value={form.password}
                     onChange={(e) => update("password", e.target.value)}
@@ -466,7 +482,9 @@ export default function UserForm() {
                     type="button"
                     className="absolute inset-y-0 right-2 flex items-center text-slate-500"
                     onClick={() => setShowPassword((v) => !v)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -482,20 +500,19 @@ export default function UserForm() {
                 <button
                   type="button"
                   onClick={() => setIsBranchModalOpen(true)}
-                  className="w-full text-left px-4 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex justify-between items-center hover:border-brand transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-60 text-left px-4 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex justify-between items-center hover:border-brand transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={!form.companyId}
                 >
                   <span className="text-sm">
                     {form.branchIds.length > 0
                       ? `${form.branchIds.length} branch(es) selected`
                       : form.companyId
-                      ? "Click to select branches..."
-                      : "Select a company first"}
+                        ? "Click to select branches..."
+                        : "Select a company first"}
                   </span>
                   <Building2 className="w-4 h-4 text-slate-400 flex-shrink-0" />
                 </button>
               </div>
-
             </div>
 
             {/* Branch Selection Modal */}
@@ -534,7 +551,9 @@ export default function UserForm() {
                             </div>
                             <div className="p-4 space-y-4">
                               {superbranches.map((b) => {
-                                const checked = form.branchIds.includes(String(b.id));
+                                const checked = form.branchIds.includes(
+                                  String(b.id),
+                                );
                                 return (
                                   <div key={b.id} className="space-y-2">
                                     <label className="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
@@ -551,10 +570,13 @@ export default function UserForm() {
                                             } else {
                                               arr.delete(String(b.id));
                                               regularBranches.forEach((c) =>
-                                                arr.delete(String(c.id))
+                                                arr.delete(String(c.id)),
                                               );
                                             }
-                                            return { ...prev, branchIds: Array.from(arr) };
+                                            return {
+                                              ...prev,
+                                              branchIds: Array.from(arr),
+                                            };
                                           });
                                         }}
                                       />
@@ -571,9 +593,10 @@ export default function UserForm() {
                                           Sub-branches accessible via {b.name}:
                                         </p>
                                         {regularBranches.map((child) => {
-                                          const childChecked = form.branchIds.includes(
-                                            String(child.id)
-                                          );
+                                          const childChecked =
+                                            form.branchIds.includes(
+                                              String(child.id),
+                                            );
                                           return (
                                             <label
                                               key={child.id}
@@ -584,16 +607,22 @@ export default function UserForm() {
                                                 className="w-3.5 h-3.5 text-brand rounded focus:ring-brand"
                                                 checked={childChecked}
                                                 onChange={(e) => {
-                                                  const isChecked = e.target.checked;
+                                                  const isChecked =
+                                                    e.target.checked;
                                                   setForm((prev) => {
-                                                    const arr = new Set(prev.branchIds);
+                                                    const arr = new Set(
+                                                      prev.branchIds,
+                                                    );
                                                     if (isChecked)
                                                       arr.add(String(child.id));
                                                     else
-                                                      arr.delete(String(child.id));
+                                                      arr.delete(
+                                                        String(child.id),
+                                                      );
                                                     return {
                                                       ...prev,
-                                                      branchIds: Array.from(arr),
+                                                      branchIds:
+                                                        Array.from(arr),
                                                     };
                                                   });
                                                 }}
@@ -624,12 +653,15 @@ export default function UserForm() {
                                 Regular Branches
                               </span>
                               <p className="text-xs text-slate-500 mt-0.5">
-                                User can switch between these directly from their profile
+                                User can switch between these directly from
+                                their profile
                               </p>
                             </div>
                             <div className="p-4 space-y-2 max-h-60 overflow-auto">
                               {regularBranches.map((b) => {
-                                const checked = form.branchIds.includes(String(b.id));
+                                const checked = form.branchIds.includes(
+                                  String(b.id),
+                                );
                                 return (
                                   <label
                                     key={b.id}
@@ -645,7 +677,10 @@ export default function UserForm() {
                                           const arr = new Set(prev.branchIds);
                                           if (isChecked) arr.add(String(b.id));
                                           else arr.delete(String(b.id));
-                                          return { ...prev, branchIds: Array.from(arr) };
+                                          return {
+                                            ...prev,
+                                            branchIds: Array.from(arr),
+                                          };
                                         });
                                       }}
                                     />

@@ -3247,7 +3247,7 @@ export default function DebitNoteForm() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Link to=".." className="btn-success">
+                <Link to="/finance/debit-note" className="btn-success">
                   Back
                 </Link>
                 {voucherStatus === "APPROVED" ? (
@@ -3981,7 +3981,7 @@ export default function DebitNoteForm() {
               </div>
 
               <div className="flex justify-end gap-3">
-                <Link to=".." className="btn-success">
+                <Link to="/finance/debit-note" className="btn-success">
                   Cancel
                 </Link>
                 <button

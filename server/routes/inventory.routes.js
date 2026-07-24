@@ -2960,7 +2960,7 @@ router.post(
           dwId: instanceId || null,
           stepOrder: first?.step_order || null,
           actor: req.user?.sub || null,
-          comments: "",
+          comments: req.body?.comments || "",
         },
       );
       await query(
@@ -3722,7 +3722,7 @@ router.post(
           dwId: instanceId,
           stepOrder: first.step_order,
           actor: req.user?.sub || null,
-          comments: "",
+          comments: req.body?.comments || "",
         },
       ).catch(() => {});
 
@@ -4342,7 +4342,7 @@ router.post(
           dwId: instanceId,
           stepOrder: first.step_order,
           actor: req.user?.sub || null,
-          comments: "",
+          comments: req.body?.comments || "",
         },
       ).catch(() => {});
 

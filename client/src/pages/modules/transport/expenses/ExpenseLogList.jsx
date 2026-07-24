@@ -5,6 +5,8 @@ import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 function filterByPrefix(items, { query, searchFields }) {
   if (!query) return items;
@@ -19,12 +21,14 @@ function filterByPrefix(items, { query, searchFields }) {
 }
 
 export default function ExpenseLogList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [items, setItems] = useState([]);
   const [trips, setTrips] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [invItems, setInvItems] = useState([]);
   const [currencies, setCurrencies] = useState([]);
+  const [expenseTypes, setExpenseTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -57,6 +61,10 @@ export default function ExpenseLogList() {
     api.get("/purchase/suppliers").then(r => setSuppliers(r.data?.data?.items || r.data?.items || [])).catch(() => {});
     api.get("/inventory/items").then(r => setInvItems(r.data?.items || r.data?.data?.items || [])).catch(() => {});
     api.get("/finance/currencies").then(r => setCurrencies(r.data?.items || r.data?.data?.items || [])).catch(() => {});
+    api.get("/transport/setup").then(r => {
+      const items = r.data?.data?.items || r.data?.items || [];
+      setExpenseTypes(items.filter(i => i.setup_type === 'EXPENSE_TYPE' && i.is_active));
+    }).catch(() => {});
   }, []);
 
   const openCreate = () => {
@@ -182,8 +190,13 @@ export default function ExpenseLogList() {
         {loading ? (
           <div className="flex justify-center p-8"><Loader2 className="w-8 h-8 animate-spin" /></div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="table w-full">
+          
+                <>
+<div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={ "table w-full " + (viewMode === 'grid' ? 'table-grid-mode' : '') }>
               <thead>
                 <tr>
                   <SortableHeader label="Date" sortKey="expense_date" currentKey={sortKey} direction={sortDir} onToggle={requestSort} />
@@ -229,7 +242,9 @@ export default function ExpenseLogList() {
               </tbody>
             </table>
           </div>
-        )}
+        
+</>
+)}
       </div>
 
       {showModal && (
@@ -275,12 +290,19 @@ export default function ExpenseLogList() {
                 <div className="form-control">
                   <label className="label"><span className="label-text">Expense Type</span></label>
                   <select className="input input-bordered w-full" value={form.expense_type} onChange={e => setForm({...form, expense_type: e.target.value})}>
-                    <option value="Road Worthy">Road Worthy</option>
-                    <option value="Spare Parts">Spare Parts</option>
-                    <option value="Maintenance">Maintenance</option>
-                    <option value="Tolls">Tolls</option>
-                    <option value="Fuel">Fuel</option>
-                    <option value="Other">Other</option>
+                    {expenseTypes.map(t => (
+                      <option key={t.id} value={t.setup_value}>{t.setup_value}</option>
+                    ))}
+                    {expenseTypes.length === 0 && (
+                      <>
+                        <option value="Road Worthy">Road Worthy</option>
+                        <option value="Spare Parts">Spare Parts</option>
+                        <option value="Maintenance">Maintenance</option>
+                        <option value="Fuel">Fuel</option>
+                        <option value="Tolls">Tolls</option>
+                        <option value="Other">Other</option>
+                      </>
+                    )}
                   </select>
                 </div>
                 <div className="form-control">
@@ -292,7 +314,7 @@ export default function ExpenseLogList() {
               {/* Items Section */}
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <h3 className="text-sm font-semibold text-[#0E3646] mb-3">Add Line Item</h3>
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3">
+                <div className="grid grid-cols-1 md:grid-cols-6 gap-3 mb-3">
                   <div className="md:col-span-2 relative">
                     <label className="block text-xs font-medium text-gray-700 mb-1">Item</label>
                     <input
@@ -335,6 +357,10 @@ export default function ExpenseLogList() {
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
                     <input type="number" min="1" className="input w-full" value={newItem.quantity} onChange={e => setNewItem({...newItem, quantity: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">UOM</label>
+                    <input type="text" placeholder="PCS" className="input w-full uppercase" value={newItem.uom} onChange={e => setNewItem({...newItem, uom: e.target.value.toUpperCase()})} />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Unit Price ({form.currency})</label>

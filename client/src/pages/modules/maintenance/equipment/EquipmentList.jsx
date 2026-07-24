@@ -10,6 +10,8 @@ import { api } from "../../../../api/client";
 import { Eye } from "lucide-react";
 import { ListPrintIconButton, ListPdfIconButton, ListAttachmentIconButton } from "../../../../components/list/ListDocActionIconButtons.jsx";
 import DocumentAttachmentsModal from "../../../../components/attachments/DocumentAttachmentsModal.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 const statusColors = { ACTIVE:"bg-green-100 text-green-700", INACTIVE:"bg-slate-100 text-slate-600", DECOMMISSIONED:"bg-red-100 text-red-600" };
 
@@ -19,6 +21,7 @@ const statusColors = { ACTIVE:"bg-green-100 text-green-700", INACTIVE:"bg-slate-
  * @returns {JSX.Element} The rendered component
  */
 export default function EquipmentList() {
+  const [viewMode, setViewMode] = useViewMode();
   const navigate = useNavigate();
   const location = useLocation();
   const [items, setItems] = useState([]);
@@ -58,8 +61,12 @@ export default function EquipmentList() {
         </div>
         <div className="card-body">
           <div className="mb-4"><input className="input max-w-md" placeholder="Search by code, name, category, location..." value={search} onChange={e => setSearch(e.target.value)} /></div>
-          <div className="overflow-x-auto">
-            <table className="table">
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
               <thead><tr><th className="whitespace-nowrap">Code</th><th className="whitespace-nowrap">Name</th><th className="whitespace-nowrap">Category</th><th className="whitespace-nowrap">Location</th><th className="whitespace-nowrap">Serial No</th><th className="whitespace-nowrap">Warranty Expiry</th><th className="whitespace-nowrap">Status</th><th className="whitespace-nowrap">Created By</th><th className="whitespace-nowrap">Created Date</th><th className="whitespace-nowrap">Actions</th></tr></thead>
               <tbody>
                 {loading && <tr><td colSpan="10" className="text-center py-8 text-slate-500 whitespace-nowrap">Loading...</td></tr>}

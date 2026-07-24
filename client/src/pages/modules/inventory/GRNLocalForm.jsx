@@ -59,6 +59,7 @@ export default function GRNLocalForm() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [showForwardModal, setShowForwardModal] = useState(false);
+  const [forwardComments, setForwardComments] = useState("");
   const [wfLoading, setWfLoading] = useState(false);
   const [wfError, setWfError] = useState("");
   const [candidateWorkflow, setCandidateWorkflow] = useState(null);
@@ -698,7 +699,8 @@ export default function GRNLocalForm() {
             : Number(formData.invoice_amount || 0),
         workflow_id: candidateWorkflow ? candidateWorkflow.id : null,
         target_user_id: targetApproverId || null,
-      });
+        comments: forwardComments,
+        });
       setFormData((prev) => ({ ...prev, status: newStatus }));
       setShowForwardModal(false);
       toast.success("GRN submitted for approval successfully");

@@ -7,6 +7,8 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -14,6 +16,7 @@ import { toast } from "react-toastify";
  * @returns {JSX.Element} The rendered component
  */
 export default function LeaveSetupList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -48,8 +51,12 @@ export default function LeaveSetupList() {
       </div>
 
       <div className="bg-white dark:bg-slate-800 p-4 rounded shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="min-w-full">
+        
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+          <table className={ "min-w-full " + (viewMode === 'grid' ? 'table-grid-mode' : '') }>
             <thead className="bg-[var(--table-header-bg)] dark:bg-slate-900/50">
               <tr className="text-left bg-slate-50 dark:bg-slate-900/50">
                 <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Type Name</th>

@@ -1451,6 +1451,16 @@ export default function PosSalesEntry() {
     };
   }, [entryBarcode, products]);
 
+    useEffect(() => {
+      if (cartRef.current) {
+        cartRef.current.scrollTop = cartRef.current.scrollHeight;
+      }
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+      }
+    }, [cart]);
+
+
   const [searchParams, setSearchParams] = useSearchParams();
   const resumeId = searchParams.get("resume");
   const resumeLoadedRef = useRef(false);
@@ -2386,27 +2396,32 @@ export default function PosSalesEntry() {
                   />
                 </div>
               </div>
-              <div>
-                <div className="text-lg font-semibold text-slate-900 mb-2">
-                  Item Information
-                </div>
+            </div>
+          </div>
+
+          <div className="card flex-1 min-h-[400px] flex flex-col">
+            <div className="card-body flex flex-col space-y-4 h-full">
+              <div className="text-lg font-semibold text-slate-900 shrink-0">
+                Item Information
+              </div>
+              <div className="flex-1 min-h-0 overflow-y-auto">
                 {selectedItems.length ? (
-                  <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+                  <div className="overflow-x-auto overflow-y-auto max-h-[400px] rounded-lg border border-slate-200 bg-white">
                     <table className="min-w-full text-sm font-bold">
                       <thead>
                         <tr className="bg-slate-50 text-slate-700">
-                          <th className="px-3 py-2 text-left">Item Code</th>
-                          <th className="px-3 py-2 text-left">Item Name</th>
+                          <th className="px-3 py-2 text-left sticky top-0 bg-slate-50 shadow-sm z-10">Item Code</th>
+                          <th className="px-3 py-2 text-left sticky top-0 bg-slate-50 shadow-sm z-10">Item Name</th>
                           
-                          <th className="px-3 py-2 text-right">Price</th>
-                          <th className="px-3 py-2 text-right">QTY</th>
-                          <th className="px-3 py-2 text-right">Discount</th>
-                          <th className="px-3 py-2 text-right">Total</th>
-                          <th className="px-3 py-2 text-right">Actions</th>
+                          <th className="px-3 py-2 text-right sticky top-0 bg-slate-50 shadow-sm z-10">Price</th>
+                          <th className="px-3 py-2 text-right sticky top-0 bg-slate-50 shadow-sm z-10">QTY</th>
+                          <th className="px-3 py-2 text-right sticky top-0 bg-slate-50 shadow-sm z-10">Discount</th>
+                          <th className="px-3 py-2 text-right sticky top-0 bg-slate-50 shadow-sm z-10">Total</th>
+                          <th className="px-3 py-2 text-right sticky top-0 bg-slate-50 shadow-sm z-10">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {selectedItems.map((it) => {
+                        {[...selectedItems].reverse().map((it) => {
                           const cartItem =
                             cart.find((c) => c.id === it.id) || null;
                           const qty = Number(cartItem?.quantity || 0);

@@ -10,6 +10,8 @@ import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 const STATUS_STYLES = {
   PLANNING:    "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
@@ -31,6 +33,7 @@ const StatusBadge = ({ status }) => (
  * @returns {JSX.Element} The rendered component
  */
 export default function ProjectList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -101,8 +104,12 @@ export default function ProjectList() {
             />
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="table">
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
               <thead>
                 <tr>
                   <SortableHeader label="Project"          sortKey="project_name"       currentKey={sortKey} direction={sortDir} onToggle={toggle} />

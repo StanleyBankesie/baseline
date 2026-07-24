@@ -21,6 +21,8 @@ import { api } from "api/client";
 import { toast } from "react-toastify";
 import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 const StatusBadge = ({ status }) => {
   const styles = {
@@ -42,6 +44,7 @@ const StatusBadge = ({ status }) => {
  * @returns {JSX.Element} The rendered component
  */
 export default function WorkOrderList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -103,8 +106,12 @@ export default function WorkOrderList() {
       </div>
 
       <div className="card overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="table">
+        
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+          <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
             <thead>
               <tr>
                 <SortableHeader label="Order No" sortKey="work_order_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />

@@ -5,7 +5,7 @@
 
 import React, { useMemo, useState, useEffect } from "react";
 import { api } from "../../../../api/client";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { filterByPrefix } from "@/utils/searchUtils.js";
 import { usePermission } from "@/auth/PermissionContext.jsx";
@@ -29,6 +29,7 @@ function SectionHeader({ number, title }) {
  * @returns {JSX.Element} The rendered component
  */
 export default function CustomerServiceRequestForm() {
+  const { id } = useParams();
   const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const location = useLocation();

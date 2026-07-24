@@ -7,6 +7,9 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { filterAndSort } from "@/utils/searchUtils.js";
 import api from "@/api/client.js";
+import DataTable from "@/components/common/DataTable.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -14,6 +17,7 @@ import api from "@/api/client.js";
  * @returns {JSX.Element} The rendered component
  */
 export default function UserList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -85,6 +89,71 @@ export default function UserList() {
     }
   };
 
+  const columns = [
+    {
+      header: "User",
+      accessor: "full_name",
+      render: (user) => {
+        const initials = (user.full_name || user.username || "?")
+          .substring(0, 2)
+          .toUpperCase();
+        return (
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-slate-700 dark:text-slate-300 overflow-hidden">
+              {user.profile_picture_url ? (
+                <img
+                  src={user.profile_picture_url}
+                  alt={user.username}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                initials
+              )}
+            </div>
+            <span className="font-semibold text-slate-800 dark:text-slate-200">
+              {user.full_name || "N/A"}
+            </span>
+          </div>
+        );
+      }
+    },
+    { header: "Username", accessor: "username" },
+    { header: "Email", accessor: "email" },
+    { header: "Company", accessor: (u) => u.company_name || "N/A" },
+    { header: "Branch", accessor: (u) => u.branch_name || "N/A" },
+    {
+      header: "Status",
+      accessor: "is_active",
+      render: (u) => (
+        <span
+          className={`badge ${
+            u.is_active ? "badge-success" : "badge-danger"
+          }`}
+        >
+          {u.is_active ? "Active" : "Inactive"}
+        </span>
+      )
+    },
+    {
+      header: "Created Date",
+      accessor: "created_at",
+      render: (u) => u.created_at ? new Date(u.created_at).toLocaleDateString() : "N/A"
+    },
+    {
+      header: "Actions",
+      filterable: false,
+      sortable: false,
+      render: (u) => (
+        <Link
+          to={`/administration/users/${u.id}`}
+          className="btn btn-sm btn-primary"
+        >
+          ✏️ Edit
+        </Link>
+      )
+    }
+  ];
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -105,35 +174,6 @@ export default function UserList() {
         </div>
       </div>
 
-      <div className="card">
-        <div className="card-body">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="label">Search by Name/Email</label>
-              <input
-                type="text"
-                className="input w-full"
-                placeholder="Enter name or email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="label">Status</label>
-              <select
-                className="input w-full"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="card p-4 border rounded-lg bg-slate-50 dark:bg-slate-800">
           <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400">Total Users</h3>
@@ -151,92 +191,13 @@ export default function UserList() {
 
       <div className="card">
         <div className="card-body">
-          <div className="overflow-x-auto">
-            {loading ? (
-              <div className="text-center py-8">Loading users...</div>
-            ) : error ? (
-              <div className="text-center py-8 text-red-500">{error}</div>
-            ) : (
-              <table className="table w-full">
-                <thead>
-                  <tr>
-                    <th>User</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Company</th>
-                    <th>Branch</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredUsers.length === 0 ? (
-                    <tr>
-                      <td colSpan="8" className="text-center py-4">
-                        No users found
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredUsers.map((user) => {
-                      const initials = (user.full_name || user.username || "?")
-                        .substring(0, 2)
-                        .toUpperCase();
-
-                      return (
-                        <tr key={user.id}>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-slate-700 dark:text-slate-300 overflow-hidden">
-                                {user.profile_picture_url ? (
-                                  <img
-                                    src={user.profile_picture_url}
-                                    alt={user.username}
-                                    className="w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  initials
-                                )}
-                              </div>
-                              <span className="font-semibold text-slate-800 dark:text-slate-200">
-                                {user.full_name || "N/A"}
-                              </span>
-                            </div>
-                          </td>
-                          <td>{user.username}</td>
-                          <td>{user.email}</td>
-                          <td>{user.company_name || "N/A"}</td>
-                          <td>{user.branch_name || "N/A"}</td>
-                          <td>
-                            <span
-                              className={`badge ${
-                                user.is_active ? "badge-success" : "badge-danger"
-                              }`}
-                            >
-                              {user.is_active ? "Active" : "Inactive"}
-                            </span>
-                          </td>
-                          <td>
-                            {user.created_at
-                              ? new Date(user.created_at).toLocaleDateString()
-                              : "N/A"}
-                          </td>
-                          <td>
-                            <Link
-                              to={`/administration/users/${user.id}`}
-                              className="btn btn-sm btn-primary"
-                            >
-                              ✏️ Edit
-                            </Link>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            )}
-          </div>
+          {loading ? (
+            <div className="text-center py-8">Loading users...</div>
+          ) : error ? (
+            <div className="text-center py-8 text-red-500">{error}</div>
+          ) : (
+            <DataTable data={users} columns={columns} defaultSortColumn="Created Date" />
+          )}
         </div>
       </div>
     </div>

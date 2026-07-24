@@ -56,6 +56,7 @@ export default function PurchaseOrdersLocalForm() {
   const [showForwardModal, setShowForwardModal] = useState(false);
   const [wfLoading, setWfLoading] = useState(false);
   const [wfError, setWfError] = useState("");
+  const [forwardComments, setForwardComments] = useState("");
   const [candidateWorkflow, setCandidateWorkflow] = useState(null);
   const [firstApprover, setFirstApprover] = useState(null);
   const [workflowSteps, setWorkflowSteps] = useState([]);
@@ -1003,7 +1004,8 @@ export default function PurchaseOrdersLocalForm() {
             amount: summary.grandTotal ?? null,
             workflow_id: candidateWorkflow ? candidateWorkflow.id : null,
             target_user_id: targetApproverId || null,
-          });
+        comments: forwardComments,
+        });
         } else {
           const resp = await api.post("/purchase/orders", payload);
           const createdId = resp?.data?.id;
@@ -1012,7 +1014,8 @@ export default function PurchaseOrdersLocalForm() {
               amount: summary.grandTotal ?? null,
               workflow_id: candidateWorkflow ? candidateWorkflow.id : null,
               target_user_id: targetApproverId || null,
-            });
+        comments: forwardComments,
+        });
           }
         }
         navigate("/purchase/purchase-orders-local");
@@ -1065,6 +1068,7 @@ export default function PurchaseOrdersLocalForm() {
   const openForwardModal = async () => {
     setShowForwardModal(true);
     setWfError("");
+                    setForwardComments("");
     if (!workflowsCache) {
       try {
         setWfLoading(true);
@@ -1087,6 +1091,7 @@ export default function PurchaseOrdersLocalForm() {
       setCandidateWorkflow(null);
       setFirstApprover(null);
       setWfError("");
+                    setForwardComments("");
       return;
     }
     const route = "/purchase/purchase-orders-local";
@@ -1149,6 +1154,7 @@ export default function PurchaseOrdersLocalForm() {
       setCandidateWorkflow(null);
       setFirstApprover(null);
       setWfError("");
+                    setForwardComments("");
       return;
     }
     const route = "/purchase/purchase-orders-local";
@@ -1215,7 +1221,8 @@ export default function PurchaseOrdersLocalForm() {
         amount: summary.grandTotal ?? null,
         workflow_id: candidateWorkflow ? candidateWorkflow.id : null,
         target_user_id: targetApproverId || null,
-      });
+        comments: forwardComments,
+        });
       const newStatus = res?.data?.status || "PENDING_APPROVAL";
       setFormData((prev) => ({ ...prev, status: newStatus }));
       try {
@@ -1506,7 +1513,7 @@ export default function PurchaseOrdersLocalForm() {
                     onChange={handleInputChange}
                     className="input"
                     required
-                    disabled={isViewMode || (isEditMode && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+                    disabled={isView || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                   />
                 </div>
               </div>
@@ -1696,7 +1703,7 @@ export default function PurchaseOrdersLocalForm() {
                     onChange={handleInputChange}
                     className="input"
                   
-                    disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+                    disabled={isView || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
                   />
                 </div>
                 <div className="flex flex-col">
@@ -2259,6 +2266,7 @@ export default function PurchaseOrdersLocalForm() {
                   setCandidateWorkflow(null);
                   setFirstApprover(null);
                   setWfError("");
+                    setForwardComments("");
                 }}
                 className="text-white hover:text-slate-200 text-xl font-bold"
               >
@@ -2353,7 +2361,18 @@ export default function PurchaseOrdersLocalForm() {
                 })()}
               </div>
             </div>
-            <div className="p-4 border-t flex justify-end gap-2 bg-gray-50">
+            
+                <div className="mt-4 p-4 border-t border-slate-200">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Comments (Optional)</label>
+                  <textarea
+                    value={forwardComments}
+                    onChange={(e) => setForwardComments(e.target.value)}
+                    className="w-full border-slate-300 rounded-md focus:ring-brand focus:border-brand sm:text-sm"
+                    rows={3}
+                    placeholder="Add any comments for the approver..."
+                  />
+                </div>
+              <div className="p-4 border-t flex justify-end gap-2 bg-gray-50">
               <button
                 type="button"
                 className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
@@ -2362,6 +2381,7 @@ export default function PurchaseOrdersLocalForm() {
                   setCandidateWorkflow(null);
                   setFirstApprover(null);
                   setWfError("");
+                    setForwardComments("");
                 }}
               >
                 Cancel

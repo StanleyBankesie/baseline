@@ -501,11 +501,18 @@ async function requireSuperAdmin(req, res, next) {
     else if (req.path.includes('overrides')) featureKey = 'user-overrides';
 
     if (featureKey) {
+      // Check if user has the feature in their JWT permissions (handles exceptional user permissions)
+      const hasPermission = req.user?.permissions?.some(p => p.endsWith(`:${featureKey}`) || p === featureKey || p === '*');
+      if (hasPermission) return next();
+
       const perm = await query(
         "SELECT 1 FROM adm_role_permissions WHERE role_id = ? AND feature_key = ? LIMIT 1",
         [roleId, featureKey]
       );
       if (perm.length > 0) return next();
+      console.log(`[requireSuperAdmin] Forbidden: roleId=${roleId}, featureKey=${featureKey}, perm.length=0. Path=${req.path}`);
+    } else {
+      console.log(`[requireSuperAdmin] Forbidden: roleId=${roleId}, no featureKey matched for Path=${req.path}`);
     }
 
     return res.status(403).json({ message: "Forbidden: Access restricted" });
@@ -514,12 +521,11 @@ async function requireSuperAdmin(req, res, next) {
   }
 }
 
-// Roles CRUD (hybrid)
+// Roles CRUD
 router.get(
   "/roles",
   requireAuth,
   requireCompanyScope,
-  requireSuperAdmin,
   async (req, res, next) => {
     try {
       const items = await query(
@@ -970,8 +976,25 @@ router.get(
           path: "/transport",
           features: [
             { key: "trips", name: "Trips", path: "/transport/trips" },
+            { key: "trip_management", name: "Trip Management", path: "/transport/trip-management" },
+            { key: "trip_returns", name: "Trip Returns", path: "/transport/trip-returns" },
+            { key: "tracking", name: "Tracking", path: "/transport/tracking" },
             { key: "vehicles", name: "Vehicles", path: "/transport/vehicles" },
+            { key: "compliance", name: "Compliance", path: "/transport/compliance" },
+            { key: "servicing", name: "Servicing", path: "/transport/servicing" },
+            { key: "logbooks", name: "Logbooks", path: "/transport/logbooks" },
             { key: "drivers", name: "Drivers", path: "/transport/drivers" },
+            { key: "fuel", name: "Fuel Logs", path: "/transport/fuel" },
+            { key: "fuel_expenses", name: "Fuel Expenses", path: "/transport/fuel-expenses" },
+            { key: "fuel_bills", name: "Fuel Bills", path: "/transport/fuel-bills" },
+            { key: "transportation_bills", name: "Transportation Bills", path: "/transport/transportation-bills" },
+            { key: "billing", name: "Billing", path: "/transport/billing" },
+            { key: "routes", name: "Routes", path: "/transport/routes" },
+            { key: "inspections", name: "Inspections", path: "/transport/inspections" },
+            { key: "maintenance", name: "Maintenance", path: "/transport/maintenance" },
+            { key: "breakdowns", name: "Breakdowns", path: "/transport/breakdowns" },
+            { key: "settings", name: "Settings", path: "/transport/settings" },
+            { key: "reports", name: "Reports", path: "/transport/reports" },
             { key: "income", name: "Income", path: "/transport/income" },
             { key: "expenses", name: "Transportation Expenses", path: "/transport/expenses" },
             { key: "expense_log", name: "Expense Logs", path: "/transport/expense-logs" },

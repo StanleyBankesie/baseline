@@ -5,6 +5,9 @@ import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import VehiclesList from "../vehicles/VehiclesList.jsx";
 import DriversList from "../drivers/DriversList.jsx";
+import PhoneInput from "../../../../components/PhoneInput.jsx";
+import ComplianceSettingsTab from "./ComplianceSettingsTab.jsx";
+import ItemSettingsTab from "./ItemSettingsTab.jsx";
 
 
 /* ─────────────────────────────────────── helpers ─── */
@@ -12,7 +15,7 @@ function ModalForm({ open, onClose, title, children }) {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={onClose}>
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b">
           <h3 className="font-semibold">{title}</h3>
           <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600"><X size={18} /></button>
@@ -79,6 +82,8 @@ const TAB_LABELS = [
   { key: "notifications", label: "Notifications" },
   { key: "vehicles", label: "Vehicles" },
   { key: "drivers", label: "Drivers" },
+  { key: "compliance", label: "Lookups / Setup Data" },
+  { key: "items", label: "Item Setup" },
   { key: "suppliers", label: "Suppliers" },
   { key: "clients", label: "Clients" },
 ];
@@ -86,17 +91,8 @@ const TAB_LABELS = [
 export default function TransportSettings() {
   const [activeTab, setActiveTab] = useState("general");
   const [loading, setLoading] = useState(false);
-  const [vehicleTypes, setVehicleTypes] = useState(
-    localStorage.getItem("transport_vehicle_types") || "TRUCK, VAN, CAR, MOTORCYCLE"
-  );
-  const [expenseTypes, setExpenseTypes] = useState(
-    localStorage.getItem("transport_expense_types") || "FUEL, MAINTENANCE, TOLL, PARKING, OTHER"
-  );
-
   const handleSave = () => {
     setLoading(true);
-    localStorage.setItem("transport_vehicle_types", vehicleTypes);
-    localStorage.setItem("transport_expense_types", expenseTypes);
     setTimeout(() => {
       setLoading(false);
       toast.success("Transport settings saved successfully");
@@ -327,7 +323,7 @@ export default function TransportSettings() {
           </div>
           <div>
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Phone</label>
-            <input type="text" className="input w-full" value={supForm.phone} onChange={e => setSupForm(p => ({ ...p, phone: e.target.value }))} />
+            <PhoneInput value={supForm.phone} onChange={v => setSupForm(p => ({ ...p, phone: v }))} />
           </div>
           <div className="sm:col-span-2 pt-2 border-t flex justify-end gap-2 mt-4">
             <button type="button" className="btn-secondary" onClick={() => setSupModal(false)}>Cancel</button>
@@ -392,7 +388,7 @@ export default function TransportSettings() {
           </div>
           <div>
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Phone</label>
-            <input type="text" className="input w-full" placeholder="+233..." value={clientForm.phone} onChange={e => setClientForm(p => ({ ...p, phone: e.target.value }))} />
+            <PhoneInput value={clientForm.phone} onChange={v => setClientForm(p => ({ ...p, phone: v }))} />
           </div>
           <div className="sm:col-span-2">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Address</label>
@@ -486,53 +482,29 @@ export default function TransportSettings() {
 
 
   const renderGeneral = () => (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
       <div className="card">
         <div className="card-header bg-slate-100 dark:bg-slate-800 rounded-t-lg p-4">
           <h2 className="font-bold text-lg">General Settings</h2>
         </div>
         <div className="card-body p-6 space-y-4">
           <div className="form-control">
-            <label className="label cursor-pointer">
-              <span className="label-text">Enable GPS Tracking Integration</span> 
+            <label className="label cursor-pointer flex justify-start gap-4">
               <input type="checkbox" className="toggle toggle-primary" defaultChecked />
+              <span className="label-text font-medium text-slate-700 dark:text-slate-200">Enable GPS Tracking Integration</span> 
             </label>
           </div>
           <div className="form-control">
-            <label className="label cursor-pointer">
-              <span className="label-text">Require Pre-Trip Inspections</span> 
+            <label className="label cursor-pointer flex justify-start gap-4">
               <input type="checkbox" className="toggle toggle-primary" defaultChecked />
+              <span className="label-text font-medium text-slate-700 dark:text-slate-200">Require Pre-Trip Inspections</span> 
             </label>
           </div>
           <div className="form-control">
-            <label className="label cursor-pointer">
-              <span className="label-text">Require Post-Trip Inspections</span> 
+            <label className="label cursor-pointer flex justify-start gap-4">
               <input type="checkbox" className="toggle toggle-primary" />
+              <span className="label-text font-medium text-slate-700 dark:text-slate-200">Require Post-Trip Inspections</span> 
             </label>
-          </div>
-          <div className="form-control mt-4">
-            <label className="label">
-              <span className="label-text font-semibold">Vehicle Types</span>
-              <span className="label-text-alt text-slate-500">Comma separated list</span>
-            </label>
-            <textarea 
-              className="textarea textarea-bordered h-24"
-              value={vehicleTypes}
-              onChange={(e) => setVehicleTypes(e.target.value)}
-              placeholder="e.g. TRUCK, VAN, CAR, MOTORCYCLE"
-            ></textarea>
-          </div>
-          <div className="form-control mt-4">
-            <label className="label">
-              <span className="label-text font-semibold">Expense Types</span>
-              <span className="label-text-alt text-slate-500">Comma separated list</span>
-            </label>
-            <textarea 
-              className="textarea textarea-bordered h-24"
-              value={expenseTypes}
-              onChange={(e) => setExpenseTypes(e.target.value)}
-              placeholder="e.g. FUEL, MAINTENANCE, TOLL"
-            ></textarea>
           </div>
         </div>
       </div>
@@ -549,28 +521,28 @@ export default function TransportSettings() {
   );
 
   const renderNotifications = () => (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
       <div className="card">
         <div className="card-header bg-slate-100 dark:bg-slate-800 rounded-t-lg p-4">
           <h2 className="font-bold text-lg">Notifications</h2>
         </div>
         <div className="card-body p-6 space-y-4">
           <div className="form-control">
-            <label className="label cursor-pointer">
-              <span className="label-text">Email customer on Dispatch</span> 
+            <label className="label cursor-pointer flex justify-start gap-4">
               <input type="checkbox" className="checkbox checkbox-primary" defaultChecked />
+              <span className="label-text font-medium text-slate-700 dark:text-slate-200">Email customer on Dispatch</span> 
             </label>
           </div>
           <div className="form-control">
-            <label className="label cursor-pointer">
-              <span className="label-text">Email driver on Route Assignment</span> 
+            <label className="label cursor-pointer flex justify-start gap-4">
               <input type="checkbox" className="checkbox checkbox-primary" defaultChecked />
+              <span className="label-text font-medium text-slate-700 dark:text-slate-200">Email driver on Route Assignment</span> 
             </label>
           </div>
           <div className="form-control">
-            <label className="label cursor-pointer">
-              <span className="label-text">Alert manager on Over-budget Expenses</span> 
+            <label className="label cursor-pointer flex justify-start gap-4">
               <input type="checkbox" className="checkbox checkbox-primary" defaultChecked />
+              <span className="label-text font-medium text-slate-700 dark:text-slate-200">Alert manager on Over-budget Expenses</span> 
             </label>
           </div>
         </div>
@@ -593,8 +565,10 @@ export default function TransportSettings() {
       case "notifications": return renderNotifications();
       case "vehicles": return <VehiclesList isTab={true} />;
       case "drivers": return <DriversList isTab={true} />;
+      case "compliance": return <ComplianceSettingsTab />;
+      case "items": return <ItemSettingsTab />;
       case "suppliers": return renderSuppliers();
-        case "clients": return renderClients();
+      case "clients": return renderClients();
       default: return null;
     }
   };

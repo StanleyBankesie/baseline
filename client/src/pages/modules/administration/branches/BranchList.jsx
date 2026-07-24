@@ -9,6 +9,8 @@ import { api } from "api/client";
 import "../../../../styles/BranchSetup.css";
 import { filterAndSort } from "@/utils/searchUtils.js";
 import { useAuth } from "@/auth/AuthContext.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 // Sub-component for User Assignment
 function UserAssignmentTab({ branches, companies, onUpdate }) {
@@ -112,7 +114,11 @@ function UserAssignmentTab({ branches, companies, onUpdate }) {
         {loading ? (
           <div className="p-8 text-center">Loading users...</div>
         ) : (
-          <table className="branch-table">
+          <>
+          <div className="flex justify-end mb-4">
+            <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+          </div>
+          <table className={"branch-table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
             <thead>
               <tr>
                 <th>User</th>
@@ -150,6 +156,7 @@ function UserAssignmentTab({ branches, companies, onUpdate }) {
               )}
             </tbody>
           </table>
+          </>
         )}
       </div>
 
@@ -262,6 +269,7 @@ function UserAssignmentTab({ branches, companies, onUpdate }) {
  * @returns {JSX.Element} The rendered component
  */
 export default function BranchList() {
+  const [viewMode, setViewMode] = useViewMode();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("branches"); // Default to branches as requested by sync task
   const [branches, setBranches] = useState([]);
@@ -482,7 +490,7 @@ export default function BranchList() {
             ) : error ? (
               <div className="p-8 text-center text-red-500">{error}</div>
             ) : (
-              <table className="branch-table">
+              <table className={"branch-table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
                 <thead>
                   <tr>
                     <th>Code</th>

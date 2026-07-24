@@ -1378,6 +1378,7 @@ export async function submitRequisition(req, res, next) {
           message: `Job Requisition #${reqRow.req_no || id} forwarded for approval.`,
           action: "APPROVE",
           senderName: req.user?.name || req.user?.username || "System",
+          req: req,
         });
       }
     } catch {}

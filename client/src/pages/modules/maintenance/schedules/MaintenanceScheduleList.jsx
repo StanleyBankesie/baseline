@@ -11,6 +11,8 @@ import { Eye } from "lucide-react";
 import { ListPrintIconButton, ListPdfIconButton, ListAttachmentIconButton } from "../../../../components/list/ListDocActionIconButtons.jsx";
 import DocumentAttachmentsModal from "../../../../components/attachments/DocumentAttachmentsModal.jsx";
 import { Guard } from "../../../../hooks/usePermissions";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -18,6 +20,7 @@ import { Guard } from "../../../../hooks/usePermissions";
  * @returns {JSX.Element} The rendered component
  */
 export default function MaintenanceScheduleList() {
+  const [viewMode, setViewMode] = useViewMode();
   const navigate = useNavigate();
   const location = useLocation();
   const [items, setItems] = useState([]);
@@ -70,8 +73,12 @@ export default function MaintenanceScheduleList() {
           <div className="p-4 border-b border-slate-200 dark:border-slate-700">
             <input className="input max-w-md" placeholder="Search schedules..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={ "min-w-full " + (viewMode === 'grid' ? 'table-grid-mode' : '') }>
               <thead className="bg-[#f8fafc] dark:bg-slate-900/50">
                 <tr className="text-left bg-slate-50 dark:bg-slate-900/50">
                   <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 whitespace-nowrap">Schedule Name</th>

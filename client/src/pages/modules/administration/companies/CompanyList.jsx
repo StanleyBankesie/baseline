@@ -7,6 +7,9 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "api/client";
 import { useAuth } from "@/auth/AuthContext.jsx";
+import DataTable from "@/components/common/DataTable.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -14,6 +17,7 @@ import { useAuth } from "@/auth/AuthContext.jsx";
  * @returns {JSX.Element} The rendered component
  */
 export default function CompanyList() {
+  const [viewMode, setViewMode] = useViewMode();
   const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +50,38 @@ export default function CompanyList() {
     );
   }
 
+  const columns = [
+    { header: "Code", accessor: "code" },
+    { header: "Name", accessor: "name" },
+    { 
+      header: "Status", 
+      accessor: "is_active",
+      render: (c) => c.is_active ? <span className="badge badge-success">Active</span> : <span className="badge badge-error">Inactive</span>
+    },
+    { 
+      header: "Created By", 
+      accessor: (c) => c.created_by_name || "-" 
+    },
+    { 
+      header: "Created Date", 
+      accessor: "created_at",
+      render: (c) => c.created_at ? new Date(c.created_at).toLocaleDateString() : "-"
+    },
+    {
+      header: "Actions",
+      filterable: false,
+      sortable: false,
+      render: (c) => (
+        <Link
+          to={`/administration/companies/${c.id}`}
+          className="text-brand hover:text-brand-600 text-sm font-medium"
+        >
+          Edit
+        </Link>
+      )
+    }
+  ];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -72,56 +108,7 @@ export default function CompanyList() {
           ) : error ? (
             <div className="text-red-500 py-4">{error}</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Code</th>
-                    <th>Name</th>
-                    <th>Status</th>
-                    <th />
-                                    <th>Created By</th>
-                  <th>Created Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.length === 0 ? (
-                    <tr>
-                      <td
-                        colspan="4"
-                        className="text-center py-4 text-gray-500"
-                      >
-                        No companies found
-                      </td>
-                    </tr>
-                  ) : (
-                    items.map((c) => (
-                      <tr key={c.id}>
-                        <td className="font-medium">{c.code}</td>
-                        <td>{c.name}</td>
-                        <td>
-                          {c.is_active ? (
-                            <span className="badge badge-success">Active</span>
-                          ) : (
-                            <span className="badge badge-error">Inactive</span>
-                          )}
-                        </td>
-                        <td>
-                          <Link
-                            to={`/administration/companies/${c.id}`}
-                            className="text-brand hover:text-brand-600 text-sm font-medium"
-                          >
-                            Edit
-                          </Link>
-                        </td>
-                        <td>{c.created_by_name || "-"}</td>
-                        <td>{c.created_at ? new Date(c.created_at).toLocaleDateString() : "-"}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+            <DataTable data={items} columns={columns} defaultSortColumn="Created Date" />
           )}
         </div>
       </div>

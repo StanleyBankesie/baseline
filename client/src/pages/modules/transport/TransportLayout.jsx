@@ -10,10 +10,18 @@ import TransportRequestForm from "./requests/TransportRequestForm.jsx";
 import VehiclesList from "./vehicles/VehiclesList.jsx";
 import VehicleForm from "./vehicles/VehicleForm.jsx";
 import TripsList from "./trips/TripsList.jsx";
+import TripManagementPage from "./trips/TripManagementPage.jsx";
 import TripReturnList from "./trips/TripReturnList.jsx";
 import TripHistoryReport from "./reports/TripHistoryReport.jsx";
+import TransportRevenueReport from "./reports/TransportRevenueReport.jsx";
+import TripProfitabilityReport from "./reports/TripProfitabilityReport.jsx";
+import FuelConsumptionReport from "./reports/FuelConsumptionReport.jsx";
+import VehicleUtilizationReport from "./reports/VehicleUtilizationReport.jsx";
+import DriverPerformanceReport from "./reports/DriverPerformanceReport.jsx";
+import TripDelaysReport from "./reports/TripDelaysReport.jsx";
 import TripForm from "./trips/TripForm.jsx";
 import TripTrackingPage from "./trips/TripTrackingPage.jsx";
+import TripTrackingList from "./trips/TripTrackingList.jsx";
 import DriversList from "./drivers/DriversList.jsx";
 import DriverForm from "./drivers/DriverForm.jsx";
 import FuelLogsList from "./fuel/FuelLogsList.jsx";
@@ -22,6 +30,12 @@ import BillingList from "./billing/BillingList.jsx";
 import BillingForm from "./billing/BillingForm.jsx";
 import RoutesList from "./routes/RoutesList.jsx";
 import RouteForm from "./routes/RouteForm.jsx";
+import VehicleComplianceList from "./compliance/VehicleComplianceList.jsx";
+import VehicleComplianceForm from "./compliance/VehicleComplianceForm.jsx";
+import VehicleServicingList from "./servicing/VehicleServicingList.jsx";
+import VehicleServicingForm from "./servicing/VehicleServicingForm.jsx";
+import LogbookList from "./logbook/LogbookList.jsx";
+import LogbookForm from "./logbook/LogbookForm.jsx";
 import InspectionsList from "./inspections/InspectionsList.jsx";
 import InspectionForm from "./inspections/InspectionForm.jsx";
 import MaintenanceList from "./maintenance/MaintenanceList.jsx";
@@ -141,6 +155,16 @@ function TransportLanding() {
           ]
         },
         { 
+          title: "Live Trip Management", 
+          path: "/transport/trip-management", 
+          feature_key: "trips", 
+          description: "Monitor scheduled and active trips on a dashboard",
+          icon: "🚀",
+          actions: [
+            <ActionButton key="view" label="Live Dashboard" path="/transport/trip-management" type="primary" featureKey="transport:trips" action="view" />
+          ]
+        },
+        { 
           title: "Trip & Dispatch Returns", 
           path: "/transport/trip-returns", 
           feature_key: "trips", 
@@ -150,24 +174,26 @@ function TransportLanding() {
             <ActionButton key="view" label="Manage Returns" path="/transport/trip-returns" type="primary" featureKey="transport:trips" action="view" />
           ]
         },
-        { 
-          title: "Trip History & Tracking", 
-          path: "/transport/reports/trip-history", 
-          feature_key: "trips", 
-          description: "Detailed history logs and tracking of fleet trips",
-          icon: "📜",
-          actions: [
-            <ActionButton key="view" label="View Report" path="/transport/reports/trip-history" type="primary" featureKey="transport:trips" action="view" />
-          ]
-        },
+
         { 
           title: "GPS Tracking", 
-          path: "/transport/trips", 
+          path: "/transport/tracking", 
           feature_key: "tracking", 
           description: "Monitor live vehicle locations via GPS",
           icon: "📍",
           actions: [
-            <ActionButton key="view" label="View Map" path="/transport/trips" type="primary" featureKey="transport:trips" action="view" />
+            <ActionButton key="view" label="View Map" path="/transport/tracking" type="primary" featureKey="transport:trips" action="view" />
+          ]
+        },
+        { 
+          title: "Driver's Logbook", 
+          path: "/transport/logbooks", 
+          feature_key: "drivers", 
+          description: "Track vehicle trips, mileages, fuel usage, and driver activities",
+          icon: "📓",
+          actions: [
+            <ActionButton key="view" label="View" path="/transport/logbooks" type="outline" featureKey="transport:drivers" action="view" />,
+            <ActionButton key="new" label="New" path="/transport/logbooks/new" type="primary" featureKey="transport:drivers" action="create" />
           ]
         },
         { 
@@ -186,6 +212,28 @@ function TransportLanding() {
     {
       title: "Fleet Management",
       items: [
+        { 
+          title: "Vehicle Compliance", 
+          path: "/transport/compliance", 
+          feature_key: "vehicles", 
+          description: "Manage vehicle insurance, roadworthy, and licenses",
+          icon: "🛡️",
+          actions: [
+            <ActionButton key="view" label="View" path="/transport/compliance" type="outline" featureKey="transport:vehicles" action="view" />,
+            <ActionButton key="new" label="New" path="/transport/compliance/new" type="primary" featureKey="transport:vehicles" action="create" />
+          ]
+        },
+        { 
+          title: "Vehicle Servicing", 
+          path: "/transport/servicing", 
+          feature_key: "vehicles", 
+          description: "Manage vehicle servicing, maintenance, and history",
+          icon: "🔧",
+          actions: [
+            <ActionButton key="view" label="View" path="/transport/servicing" type="outline" featureKey="transport:vehicles" action="view" />,
+            <ActionButton key="new" label="New" path="/transport/servicing/new" type="primary" featureKey="transport:vehicles" action="create" />
+          ]
+        },
         { 
           title: "Inspections", 
           path: "/transport/inspections", 
@@ -267,6 +315,81 @@ function TransportLanding() {
       ],
     },
     {
+      title: "Reports & Analytics",
+      items: [
+        { 
+          title: "Trip History & Tracking", 
+          path: "/transport/reports/trip-history", 
+          feature_key: "reports", 
+          description: "Detailed history logs and tracking of fleet trips",
+          icon: "📜",
+          actions: [
+            <ActionButton key="view" label="View Report" path="/transport/reports/trip-history" type="primary" featureKey="transport:reports" action="view" />
+          ]
+        },
+        { 
+          title: "Transport Revenue", 
+          path: "/transport/reports/revenue", 
+          feature_key: "reports", 
+          description: "Revenue generated from transport operations",
+          icon: "💰",
+          actions: [
+            <ActionButton key="view" label="View Report" path="/transport/reports/revenue" type="primary" featureKey="transport:reports" action="view" />
+          ]
+        },
+        { 
+          title: "Trip Profitability", 
+          path: "/transport/reports/profitability", 
+          feature_key: "reports", 
+          description: "Profitability analysis for individual trips",
+          icon: "📈",
+          actions: [
+            <ActionButton key="view" label="View Report" path="/transport/reports/profitability" type="primary" featureKey="transport:reports" action="view" />
+          ]
+        },
+        { 
+          title: "Fuel Consumption", 
+          path: "/transport/reports/fuel", 
+          feature_key: "reports", 
+          description: "Fuel usage and efficiency across the fleet",
+          icon: "⛽",
+          actions: [
+            <ActionButton key="view" label="View Report" path="/transport/reports/fuel" type="primary" featureKey="transport:reports" action="view" />
+          ]
+        },
+        { 
+          title: "Vehicle Utilization", 
+          path: "/transport/reports/utilization", 
+          feature_key: "reports", 
+          description: "Usage rates and downtime of vehicles",
+          icon: "🚛",
+          actions: [
+            <ActionButton key="view" label="View Report" path="/transport/reports/utilization" type="primary" featureKey="transport:reports" action="view" />
+          ]
+        },
+        { 
+          title: "Driver Performance", 
+          path: "/transport/reports/driver-performance", 
+          feature_key: "reports", 
+          description: "Performance metrics for transport drivers",
+          icon: "🧑‍✈️",
+          actions: [
+            <ActionButton key="view" label="View Report" path="/transport/reports/driver-performance" type="primary" featureKey="transport:reports" action="view" />
+          ]
+        },
+        { 
+          title: "Trip Delays & Issues", 
+          path: "/transport/reports/delays", 
+          feature_key: "reports", 
+          description: "Analysis of delays and issues during trips",
+          icon: "⚠️",
+          actions: [
+            <ActionButton key="view" label="View Report" path="/transport/reports/delays" type="primary" featureKey="transport:reports" action="view" />
+          ]
+        },
+      ],
+    },
+    {
       title: "Configuration",
       items: [
         { 
@@ -305,16 +428,32 @@ export default function TransportLayout() {
       <Route path="vehicles" element={<VehiclesList />} />
       <Route path="vehicles/new" element={<VehicleForm />} />
       <Route path="vehicles/:id" element={<VehicleForm />} />
+      <Route path="compliance" element={<VehicleComplianceList />} />
+      <Route path="compliance/new" element={<VehicleComplianceForm />} />
+      <Route path="compliance/:id" element={<VehicleComplianceForm />} />
+      <Route path="logbooks" element={<LogbookList />} />
+      <Route path="logbooks/new" element={<LogbookForm />} />
+      <Route path="logbooks/:id" element={<LogbookForm />} />
+      <Route path="servicing" element={<VehicleServicingList />} />
+      <Route path="servicing/new" element={<VehicleServicingForm />} />
+      <Route path="servicing/:id" element={<VehicleServicingForm />} />
       <Route path="drivers" element={<DriversList />} />
       <Route path="drivers/new" element={<DriverForm />} />
       <Route path="drivers/:id" element={<DriverForm />} />
       <Route path="trips" element={<TripsList />} />
+      <Route path="trip-management" element={<TripManagementPage />} />
       <Route path="trip-returns" element={<TripReturnList />} />
       <Route path="reports/trip-history" element={<TripHistoryReport />} />
+      <Route path="reports/revenue" element={<TransportRevenueReport />} />
+      <Route path="reports/profitability" element={<TripProfitabilityReport />} />
+      <Route path="reports/fuel" element={<FuelConsumptionReport />} />
+      <Route path="reports/utilization" element={<VehicleUtilizationReport />} />
+      <Route path="reports/driver-performance" element={<DriverPerformanceReport />} />
+      <Route path="reports/delays" element={<TripDelaysReport />} />
       <Route path="trips/new" element={<TripForm />} />
       <Route path="trips/:id" element={<TripForm />} />
       <Route path="tracking/:id" element={<TripTrackingPage />} />
-      <Route path="tracking" element={<Navigate to="/transport/trips" replace />} />
+      <Route path="tracking" element={<TripTrackingList />} />
       <Route path="fuel" element={<FuelLogsList />} />
       <Route path="fuel/new" element={<FuelLogForm />} />
       <Route path="fuel/:id" element={<FuelLogForm />} />

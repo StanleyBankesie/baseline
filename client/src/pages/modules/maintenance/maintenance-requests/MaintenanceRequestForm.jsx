@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "../../../../api/client";
 import { usePermission } from "@/auth/PermissionContext.jsx";
@@ -30,6 +30,8 @@ export default function MaintenanceRequestForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = !!id;
+  const location = useLocation();
+  const readOnly = new URLSearchParams(location.search).get("mode") === "view";
   const [form, setForm] = useState({
     request_no: "",
     request_date: today(),

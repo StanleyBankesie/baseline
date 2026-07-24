@@ -6,6 +6,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Guard } from "../../../../hooks/usePermissions.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 const CONFIG_CARDS = [
   {
@@ -34,6 +36,7 @@ const CONFIG_CARDS = [
  * @returns {JSX.Element} The rendered component
  */
 export default function SalaryConfigList() {
+  const [viewMode, setViewMode] = useViewMode();
   return (
     <Guard moduleKey="human-resources">
       <div className="p-4 md:p-8 space-y-8">

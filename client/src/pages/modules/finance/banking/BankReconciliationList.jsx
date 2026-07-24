@@ -7,6 +7,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "api/client";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -14,6 +16,7 @@ import { api } from "api/client";
  * @returns {JSX.Element} The rendered component
  */
 export default function BankReconciliationList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [bankAccounts, setBankAccounts] = useState([]);
   const [recons, setRecons] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -211,7 +214,10 @@ export default function BankReconciliationList() {
           </span>
         </div>
         <div className="card-body p-0 overflow-x-auto">
-          <table className="table table-zebra w-full">
+          <div className="flex justify-end mb-4">
+            <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+          </div>
+          <table className={"table table-zebra w-full " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
             <thead className="bg-slate-50">
               <tr>
                 <th className="text-left text-xs font-bold uppercase">Bank</th>

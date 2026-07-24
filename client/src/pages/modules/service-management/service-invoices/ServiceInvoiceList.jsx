@@ -15,6 +15,8 @@ import DocumentAttachmentsModal from "@/components/attachments/DocumentAttachmen
 import ReverseApprovalButton from "../../../../components/ReverseApprovalButton.jsx";
 import useSort from "../../../../hooks/useSort.js";
 import SortableHeader from "../../../../components/SortableHeader.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 import {
   ListPrintIconButton,
   ListPdfIconButton,
@@ -27,6 +29,7 @@ import {
  * @returns {JSX.Element} The rendered component
  */
 export default function InvoiceList() {
+  const [viewMode, setViewMode] = useViewMode();
   const navigate = useNavigate();
   const { canPerformAction, exceptionalPerms, canReverseApproval, hasExceptional } = usePermission();
   const [showForwardModal, setShowForwardModal] = useState(false);
@@ -36,6 +39,7 @@ export default function InvoiceList() {
   const [targetApproverId, setTargetApproverId] = useState(null);
   const [workflowSteps, setWorkflowSteps] = useState([]);
   const [wfError, setWfError] = useState("");
+  const [forwardComments, setForwardComments] = useState("");
   const [invoices, setInvoices] = useState([]);
   const [currencies, setCurrencies] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
@@ -437,6 +441,7 @@ export default function InvoiceList() {
   const openForwardModal = async (doc) => {
     setSelectedDoc(doc);
     setWfError("");
+                    setForwardComments("");
     setShowForwardModal(true);
     try {
       const res = await api.get("/workflows", { params: { document_type: "INVOICE" } });
@@ -457,7 +462,8 @@ export default function InvoiceList() {
       await api.post(`/services/invoices/${selectedDoc.id}/submit`, {
         workflow_id: candidateWorkflow ? candidateWorkflow.id : null,
         target_approver_id: targetApproverId || null,
-      });
+        comments: forwardComments,
+        });
       toast.success("Invoice forwarded for approval");
       setInvoices((prev) =>
         prev.map((x) =>
@@ -551,8 +557,13 @@ export default function InvoiceList() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="table">
+            
+                <>
+<div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+              <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
                 <thead>
                   <tr>
                     <SortableHeader label="Invoice No" sortKey="invoice_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
@@ -645,7 +656,7 @@ export default function InvoiceList() {
                                   </ReverseApprovalButton>
                                 )}
                               </div>
-                            ) : inv.forwarded_to_username ? (
+                            ) : inv.forwarded_to_username && !["RETURNED", "DRAFT"].includes(String(inv.status || "").toUpperCase()) ? (
                               <span className="list-approval-forwarded-pill">
                                 Forwarded to {inv.forwarded_to_username}
                               </span>
@@ -694,7 +705,9 @@ export default function InvoiceList() {
                 </tbody>
               </table>
             </div>
-          )}
+          
+</>
+)}
         </div>
       </div>
       <DocumentAttachmentsModal
@@ -717,6 +730,7 @@ export default function InvoiceList() {
                   setSelectedDoc(null);
                   setCandidateWorkflow(null);
                   setWfError("");
+                    setForwardComments("");
                 }}
                 className="text-white hover:text-slate-200 text-xl font-bold"
               >
@@ -752,7 +766,19 @@ export default function InvoiceList() {
                   </select>
                 </div>
               )}
-              <div className="flex justify-end gap-2 pt-2">
+              
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Comments (Optional)</label>
+                  <textarea
+                    value={forwardComments}
+                    onChange={(e) => setForwardComments(e.target.value)}
+                    className="w-full border-slate-300 rounded-md focus:ring-brand focus:border-brand sm:text-sm"
+                    rows={3}
+                    placeholder="Add any comments for the approver..."
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
                 <button
                   className="btn btn-secondary"
                   onClick={() => {

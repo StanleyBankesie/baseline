@@ -12,6 +12,8 @@ import { filterAndSort } from "../../../../utils/searchUtils.js";
 import useSort from "../../../../hooks/useSort.js";
 import SortableHeader from "../../../../components/SortableHeader.jsx";
 import { Plus } from "lucide-react";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 import {
   ListPrintIconButton,
   ListPdfIconButton,
@@ -42,6 +44,7 @@ function StatusBadge({ status }) {
  * @returns {JSX.Element} The rendered component
  */
 export default function ProjectOrderList() {
+  const [viewMode, setViewMode] = useViewMode();
   const navigate = useNavigate();
   const { canCreateOnPage } = usePermission();
   const [orders, setOrders] = useState([]);
@@ -212,8 +215,12 @@ export default function ProjectOrderList() {
             </div>
           )}
 
-          <div className="overflow-x-auto">
-            <table className="table">
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
                 <thead>
                   <tr>
                     <SortableHeader

@@ -11,6 +11,8 @@ import { Eye, Edit } from "lucide-react";
 import { ListPrintIconButton, ListPdfIconButton, ListAttachmentIconButton } from "../../../../components/list/ListDocActionIconButtons.jsx";
 import DocumentAttachmentsModal from "../../../../components/attachments/DocumentAttachmentsModal.jsx";
 import { usePermission } from "../../../../auth/PermissionContext.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 const paymentColors = { UNPAID:"bg-amber-100 text-amber-700", PAID:"bg-green-100 text-green-700", OVERDUE:"bg-red-100 text-red-700" };
 const statusColors = { DRAFT:"bg-slate-100 text-slate-600", PENDING:"bg-amber-100 text-amber-700", APPROVED:"bg-green-100 text-green-700" };
@@ -25,6 +27,7 @@ function Badge({ value, colorMap }) {
  * @returns {JSX.Element} The rendered component
  */
 export default function MaintenanceBillList() {
+  const [viewMode, setViewMode] = useViewMode();
   const { canPerformAction, exceptionalPerms } = usePermission();
   const navigate = useNavigate();
   const location = useLocation();
@@ -63,8 +66,12 @@ export default function MaintenanceBillList() {
         </div>
         <div className="card-body">
           <div className="mb-4"><input className="input max-w-md" placeholder="Search by bill no, supplier, status..." value={search} onChange={e => setSearch(e.target.value)} /></div>
-          <div className="overflow-x-auto">
-            <table className="table">
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
               <thead><tr><th className="whitespace-nowrap">Bill No</th><th className="whitespace-nowrap">Bill Date</th><th className="whitespace-nowrap">Due Date</th><th className="whitespace-nowrap">Supplier</th><th className="text-right whitespace-nowrap">Total</th><th className="whitespace-nowrap">Currency</th><th className="whitespace-nowrap">Payment</th><th className="whitespace-nowrap">Status</th><th className="whitespace-nowrap">Actions</th>                    <th className="whitespace-nowrap">Created By</th>
                     <th className="whitespace-nowrap">Created Date</th>
                     </tr></thead>

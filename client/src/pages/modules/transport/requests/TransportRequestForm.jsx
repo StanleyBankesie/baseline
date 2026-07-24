@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../../../api/client.js";
 import { usePermission } from "@/auth/PermissionContext.jsx";
 
 export default function TransportRequestForm() {
+  const { id } = useParams();
   const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);

@@ -10,6 +10,8 @@ import { usePermission } from "../../../../auth/PermissionContext";
 import { Plus } from "lucide-react";
 import { filterAndSort } from "../../../../utils/searchUtils.js";
 import { toast } from "react-toastify";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 const statuses = [
   { value: "DRAFT", label: "Draft", color: "bg-slate-100 text-slate-600" },
@@ -26,6 +28,7 @@ const statuses = [
  * @returns {JSX.Element} The rendered component
  */
 export default function PMPurchaseRequisitionList() {
+  const [viewMode, setViewMode] = useViewMode();
   const navigate = useNavigate();
   const { canPerformAction } = usePermission();
   const [items, setItems] = useState([]);
@@ -93,8 +96,12 @@ export default function PMPurchaseRequisitionList() {
             <button className="btn btn-secondary" onClick={fetchList}>Refresh</button>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="table">
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
               <thead>
                 <tr>
                   <th className="cursor-pointer select-none" onClick={() => toggleSort("requisition_no")}>Requisition No</th>

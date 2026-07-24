@@ -24,6 +24,8 @@ import { api } from "../../../../api/client";
 import { toast } from "react-toastify";
 import { ListPrintIconButton, ListPdfIconButton, ListAttachmentIconButton } from "../../../../components/list/ListDocActionIconButtons.jsx";
 import DocumentAttachmentsModal from "../../../../components/attachments/DocumentAttachmentsModal.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 const StatusBadge = ({ level }) => {
   const colors = {
@@ -45,6 +47,7 @@ const StatusBadge = ({ level }) => {
  * @returns {JSX.Element} The rendered component
  */
 export default function DowntimeLogList() {
+  const [viewMode, setViewMode] = useViewMode();
   const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -126,8 +129,12 @@ export default function DowntimeLogList() {
       </div>
 
       <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
+        
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+          <table className={ "w-full text-left " + (viewMode === 'grid' ? 'table-grid-mode' : '') }>
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-900/50">
                 <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Asset & Reason</th>

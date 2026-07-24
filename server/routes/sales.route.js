@@ -4061,7 +4061,7 @@ router.post(
           dwId: instanceId,
           stepOrder: first.step_order,
           actor: (req.user?.id || req.user?.sub),
-          comments: "",
+          comments: req.body?.comments || "",
         },
       );
 
@@ -4069,6 +4069,7 @@ router.post(
         `UPDATE sal_orders SET status = 'PENDING_APPROVAL' WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
         { id, companyId, branchId, branchIdsStr },
       );
+
       res.json({ id, status: "PENDING_APPROVAL" });
     } catch (e) {
       next(e);
@@ -5633,7 +5634,7 @@ router.post(
           dwId: instanceId,
           stepOrder: first.step_order,
           actor: (req.user?.id || req.user?.sub),
-          comments: "",
+          comments: req.body?.comments || "",
         },
       );
 
@@ -6701,6 +6702,7 @@ async function resolveBestPrice(
   quantity,
 ) {
   let basePrice = null;
+  const branchIdsStr = ""; // fallback to empty string
 
   // Cascade 1: customer price (with price_type_id)
   if (Number.isFinite(customerId) && customerId > 0 && priceTypeId != null) {
@@ -8959,7 +8961,7 @@ router.post(
           dwId: instanceId,
           stepOrder: first.step_order,
           actor: (req.user?.id || req.user?.sub),
-          comments: "",
+          comments: req.body?.comments || "",
         },
       );
       await query(

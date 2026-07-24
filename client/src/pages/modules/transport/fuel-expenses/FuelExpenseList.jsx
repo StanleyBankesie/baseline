@@ -3,8 +3,11 @@ import { Link } from "react-router-dom";
 import { PlusOutlined, DeleteOutlined, CloseOutlined } from "@ant-design/icons";
 import api from "../../../../api/client.js";
 import { toast } from "react-toastify";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 export default function FuelExpenseList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -105,7 +108,10 @@ export default function FuelExpenseList() {
       
       <div className="card">
         <div className="card-body p-0 overflow-x-auto">
-          <table className="w-full text-sm text-left">
+          <div className="flex justify-end mb-4">
+            <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+          </div>
+          <table className={"w-full text-sm text-left " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
             <thead className="text-xs text-brand-600 bg-brand-50 border-b border-brand-200 uppercase">
               <tr>
                 <th className="px-6 py-4">Vehicle No</th>

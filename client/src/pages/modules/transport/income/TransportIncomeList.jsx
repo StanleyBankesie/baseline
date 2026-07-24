@@ -5,8 +5,11 @@ import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 export default function TransportIncomeList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [items, setItems] = useState([]);
   const [trips, setTrips] = useState([]);
   const [vehicles, setVehicles] = useState([]);
@@ -245,8 +248,13 @@ export default function TransportIncomeList() {
         {loading ? (
           <div className="flex justify-center p-8"><Loader2 className="w-8 h-8 animate-spin" /></div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="table w-full">
+          
+                <>
+<div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={ "table w-full " + (viewMode === 'grid' ? 'table-grid-mode' : '') }>
               <thead>
                 <tr>
                   <SortableHeader label="Date" sortKey="income_date" currentKey={sortKey} direction={sortDir} onToggle={requestSort} />
@@ -290,7 +298,9 @@ export default function TransportIncomeList() {
               </tbody>
             </table>
           </div>
-        )}
+        
+</>
+)}
       </div>
 
       {showModal && (

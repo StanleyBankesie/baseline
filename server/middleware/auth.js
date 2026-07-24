@@ -154,7 +154,7 @@ export async function requireAuth(req, res, next) {
 
 /**
  * Middleware to enforce company scope based on headers.
- * Ensures the user has a selected company.
+ * Ensures the user has access to the requested company.
  *
  * @param {import('express').Request} req - Express request.
  * @param {import('express').Response} res - Express response.
@@ -165,35 +165,34 @@ export function requireCompanyScope(req, res, next) {
     return next(httpError(401, "UNAUTHORIZED", "Authentication required"));
   }
 
-  // Check if user is an admin (ID 1) and bypass company restrictions
+  req.scope = req.scope || {};
+
+  // Admin (ID 1) can access any requested company
   if (Number(req.user.id) === 1) {
     const companyId = Number(
-      req.headers["x-company-id"] || req.query.companyId || 1,
+      req.headers["x-company-id"] || req.query.companyId || req.user?.company_id || 1,
     );
-    req.scope = req.scope || {};
     req.scope.companyId = companyId;
     return next();
   }
 
-  // Determine company ID from headers, query, or user's allowed companies
-  const companyId = Number(
-    req.headers["x-company-id"] ||
-      req.query.companyId ||
-      req.user?.companyIds?.[0] ||
-      1,
-  );
-  req.scope = req.scope || {};
-  req.scope.companyId = companyId;
-  const allowedCompanies = Array.isArray(req.user?.companyIds)
+  // Determine allowed company IDs for non-admin user
+  const allowedCompanies = Array.isArray(req.user?.companyIds) && req.user.companyIds.length > 0
     ? req.user.companyIds.map(Number)
-    : [];
-  // Validate that the user's allowed companies include the requested company ID
-  if (
-    allowedCompanies.length &&
-    !allowedCompanies.includes(Number(companyId))
-  ) {
+    : req.user?.company_id ? [Number(req.user.company_id)] : [];
+
+  // Default company ID fallback
+  const defaultCompanyId = allowedCompanies[0] || 1;
+  const requestedCompanyId = Number(
+    req.headers["x-company-id"] || req.query.companyId || defaultCompanyId
+  );
+
+  // Validate that user has access to the requested company
+  if (allowedCompanies.length > 0 && !allowedCompanies.includes(requestedCompanyId)) {
     return next(httpError(403, "FORBIDDEN", "Company access denied"));
   }
+
+  req.scope.companyId = requestedCompanyId;
   return next();
 }
 

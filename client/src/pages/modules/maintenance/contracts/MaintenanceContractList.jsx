@@ -10,6 +10,8 @@ import { api } from "../../../../api/client";
 import { Eye } from "lucide-react";
 import { ListPrintIconButton, ListPdfIconButton, ListAttachmentIconButton } from "../../../../components/list/ListDocActionIconButtons.jsx";
 import DocumentAttachmentsModal from "../../../../components/attachments/DocumentAttachmentsModal.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 const statusColors = { ACTIVE:"bg-green-100 text-green-700", EXPIRED:"bg-red-100 text-red-600", CANCELLED:"bg-slate-100 text-slate-600", PENDING:"bg-amber-100 text-amber-700" };
 
@@ -19,6 +21,7 @@ const statusColors = { ACTIVE:"bg-green-100 text-green-700", EXPIRED:"bg-red-100
  * @returns {JSX.Element} The rendered component
  */
 export default function MaintenanceContractList() {
+  const [viewMode, setViewMode] = useViewMode();
   const navigate = useNavigate();
   const location = useLocation();
   const [items, setItems] = useState([]);
@@ -67,8 +70,12 @@ export default function MaintenanceContractList() {
         </div>
         <div className="card-body">
           <div className="mb-4"><input className="input max-w-md" placeholder="Search by no, supplier, status..." value={search} onChange={e => setSearch(e.target.value)} /></div>
-          <div className="overflow-x-auto">
-            <table className="table">
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
               <thead><tr><th className="whitespace-nowrap">Contract No</th><th className="whitespace-nowrap">Supplier</th><th className="whitespace-nowrap">Assets Covered</th><th className="whitespace-nowrap">Start</th><th className="whitespace-nowrap">End</th><th className="text-right whitespace-nowrap">Value</th><th className="whitespace-nowrap">Status</th><th className="whitespace-nowrap">Created By</th><th className="whitespace-nowrap">Created Date</th><th className="whitespace-nowrap">Actions</th></tr></thead>
               <tbody>
                 {loading && <tr><td colSpan="10" className="text-center py-8 text-slate-500 whitespace-nowrap">Loading...</td></tr>}

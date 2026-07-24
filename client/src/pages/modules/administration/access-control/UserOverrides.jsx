@@ -18,6 +18,10 @@ export default function UserOverrides() {
   const STANDARD_EXCEPTIONS = [
     { code: "SALES.DISCOUNT.ALLOW", label: "Permission to give discount" },
     { code: "WORKFLOW.APPROVAL.REVERSE", label: "Reversal of approval" },
+    {
+      code: "WORKFLOW.PENDING_APPROVAL.REVERSE",
+      label: "Reversal of pending approval document to draft",
+    },
     { code: "SALES.ORDER.CANCEL", label: "Sales Order Cancellations" },
     { code: "SALES.QUOTATION.CANCEL", label: "Sales Quotation Cancellation" },
     { code: "PURCHASE.ORDER.CANCEL", label: "Purchase Order Cancellations" },

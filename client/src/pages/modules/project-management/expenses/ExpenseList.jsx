@@ -10,6 +10,8 @@ import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 
 /**
  *  component
@@ -17,6 +19,7 @@ import SortableHeader from "@/components/SortableHeader.jsx";
  * @returns {JSX.Element} The rendered component
  */
 export default function ExpenseList() {
+  const [viewMode, setViewMode] = useViewMode();
   const [items, setItems] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -261,8 +264,12 @@ export default function ExpenseList() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="table table-fixed w-full">
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={ "table table-fixed w-full " + (viewMode === 'grid' ? 'table-grid-mode' : '') }>
               <thead>
                 <tr>
                   <SortableHeader label="Project" sortKey="project_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="w-[15%]" />

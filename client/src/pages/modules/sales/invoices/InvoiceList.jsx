@@ -14,6 +14,8 @@ import DocumentAttachmentsModal from "@/components/attachments/DocumentAttachmen
 import ReverseApprovalButton from "../../../../components/ReverseApprovalButton.jsx";
 import useSort from "../../../../hooks/useSort.js";
 import SortableHeader from "../../../../components/SortableHeader.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
 import {
   ListPrintIconButton,
   ListPdfIconButton,
@@ -26,6 +28,7 @@ import {
  * @returns {JSX.Element} The rendered component
  */
 export default function InvoiceList() {
+  const [viewMode, setViewMode] = useViewMode();
   const navigate = useNavigate();
   const { canPerformAction, exceptionalPerms, canReverseApproval, hasExceptional } = usePermission();
   const [showForwardModal, setShowForwardModal] = useState(false);
@@ -35,6 +38,7 @@ export default function InvoiceList() {
   const [targetApproverId, setTargetApproverId] = useState(null);
   const [workflowSteps, setWorkflowSteps] = useState([]);
   const [wfError, setWfError] = useState("");
+  const [forwardComments, setForwardComments] = useState("");
   const [wfLoading, setWfLoading] = useState(false);
   const [submittingForward, setSubmittingForward] = useState(false);
   const [invoices, setInvoices] = useState([]);
@@ -446,6 +450,7 @@ export default function InvoiceList() {
   const openForwardModal = async (doc) => {
     setSelectedDoc(doc);
     setWfError("");
+                    setForwardComments("");
     setShowForwardModal(true);
     try {
       const res = await api.get("/workflows");
@@ -481,6 +486,7 @@ export default function InvoiceList() {
     if (!selectedDoc) return;
     setSubmittingForward(true);
     setWfError("");
+                    setForwardComments("");
     try {
       let optimisticApprover = null;
       try {
@@ -494,7 +500,8 @@ export default function InvoiceList() {
       const res = await api.post(`/sales/invoices/${selectedDoc.id}/submit`, {
         workflow_id: candidateWorkflow ? candidateWorkflow.id : null,
         target_user_id: targetApproverId || null,
-      });
+        comments: forwardComments,
+        });
       const newStatus = res?.data?.status || "PENDING_APPROVAL";
       if (newStatus === "POSTED") {
         toast.success("Invoice automatically approved and posted");
@@ -600,8 +607,12 @@ export default function InvoiceList() {
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <table className="table">
+              
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+                <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
                 <thead>
                   <tr>
                     <SortableHeader label="Invoice No" sortKey="invoice_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
@@ -809,6 +820,7 @@ export default function InvoiceList() {
                   setSelectedDoc(null);
                   setCandidateWorkflow(null);
                   setWfError("");
+                    setForwardComments("");
                 }}
                 className="text-white hover:text-slate-200 text-xl font-bold"
               >
@@ -876,6 +888,17 @@ export default function InvoiceList() {
                   );
                 })()}
               </div>
+              
+                <div className="mt-4 p-4 border-t border-slate-200">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Comments (Optional)</label>
+                  <textarea
+                    value={forwardComments}
+                    onChange={(e) => setForwardComments(e.target.value)}
+                    className="w-full border-slate-300 rounded-md focus:ring-brand focus:border-brand sm:text-sm"
+                    rows={3}
+                    placeholder="Add any comments for the approver..."
+                  />
+                </div>
               <div className="mt-5 flex justify-end gap-2 border-t border-slate-100 pt-4">
                 <button
                   type="button"
@@ -886,6 +909,7 @@ export default function InvoiceList() {
                     setCandidateWorkflow(null);
                     setWorkflowSteps([]);
                     setWfError("");
+                    setForwardComments("");
                   }}
                   disabled={submittingForward}
                 >
