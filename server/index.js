@@ -1370,6 +1370,14 @@ process.on("uncaughtException", (err) => {
   console.error(`[Process] Uncaught Exception: ${err?.message || err}`);
   console.error(err?.stack || "(no stack)");
   logToCrashReport("UncaughtException", err);
+  
+  // If the server hasn't successfully bound to a port yet (e.g., module import failure),
+  // we MUST exit. Otherwise Phusion Passenger will hang for 90 seconds.
+  if (err?.code === "MODULE_NOT_FOUND" || !server.listening) {
+    console.error("[Process] Fatal startup error, exiting.");
+    process.exit(1);
+  }
+
   // Only exit for truly fatal errors (memory corruption, etc.).
   // Do NOT exit for recoverable errors like DB timeouts.
   if (
