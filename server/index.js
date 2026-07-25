@@ -1042,14 +1042,6 @@ if (process.env.NODE_ENV !== "test" && !socketsDisabled) {
 export { ioInstance as io };
 
 if (process.env.NODE_ENV !== "test") {
-  const _originalListen = server.listen.bind(server);
-  server.listen = function (port, callback) {
-    const p = isNaN(Number(port)) ? port : Number(port);
-    if (typeof p === "number") {
-      return _originalListen(p, "127.0.0.1", callback);
-    }
-    return _originalListen(p, callback);
-  };
 
   server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
