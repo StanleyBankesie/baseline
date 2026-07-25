@@ -240,7 +240,7 @@ export const listTrips = async (req, res, next) => {
   try {
     const { companyId } = req.scope;
     const items = await query(`
-      SELECT t.*, v.reg_number, IFNULL(d.employee_name, CONCAT(e.first_name, ' ', e.last_name)) as employee_name
+      SELECT t.*, v.reg_number, d.user_id AS driver_user_id, IFNULL(d.employee_name, CONCAT(e.first_name, ' ', e.last_name)) as employee_name
       FROM trans_trips t
       LEFT JOIN trans_vehicles v ON t.vehicle_id = v.id
       LEFT JOIN trans_drivers d ON t.driver_id = d.id

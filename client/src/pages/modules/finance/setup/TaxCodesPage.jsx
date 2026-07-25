@@ -563,34 +563,42 @@ export default function TaxCodesPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold dark:text-brand-300">
-              Tax Codes & Deductions
-            </h1>
-            <p className="text-sm mt-1">
-              Configure tax and deduction codes used across modules
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              className="btn btn-success shadow-sm"
-              onClick={() => setShowCreateModal(true)}
-            >
-              + Create Tax Code
-            </button>
-            <Link to="/finance" className="font-sans btn btn-secondary">
-              Return to Menu
-            </Link>
-            <button
-              className="btn btn-secondary"
-              onClick={load}
-              disabled={loading}
-            >
-              Refresh
-            </button>
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Header Banner */}
+      <div className="card shadow-md">
+        <div className="card-header bg-brand text-white rounded-t-lg p-5">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <Link
+                to="/finance"
+                className="inline-flex items-center gap-1.5 text-xs text-white/80 hover:text-white transition-colors mb-2"
+              >
+                ← Back to Accounting Setup
+              </Link>
+              <h1 className="text-2xl font-bold flex items-center gap-2">
+                Tax Codes & Deductions Setup
+              </h1>
+              <p className="text-sm mt-0.5 opacity-90">
+                Configure tax codes, compound rates, component splits & module applicability
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                className="btn-success text-xs px-3.5 py-2 flex items-center gap-1.5 font-bold"
+                onClick={() => setShowCreateModal(true)}
+              >
+                + Create Tax Code
+              </button>
+              <button
+                type="button"
+                className="px-3.5 py-2 text-xs font-semibold bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors flex items-center gap-1.5"
+                onClick={load}
+                disabled={loading}
+              >
+                Refresh
+              </button>
+            </div>
           </div>
         </div>
       </div>

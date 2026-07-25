@@ -40,6 +40,8 @@ async function ensureProjectTables(companyId, branchId) {
   // Add columns if missing on existing tables
   try { await query(`ALTER TABLE pm_tasks ADD COLUMN reason_for_delay TEXT AFTER actual_hours`); } catch (e) {}
   try { await query(`ALTER TABLE pm_tasks ADD COLUMN completion_percent DECIMAL(5,2) DEFAULT 0 AFTER reason_for_delay`); } catch (e) {}
+  try { await query(`ALTER TABLE pm_tasks ADD COLUMN is_active VARCHAR(10) DEFAULT 'Y' AFTER completion_percent`); } catch (e) {}
+  try { await query(`ALTER TABLE pm_tasks ADD COLUMN due_status VARCHAR(50) DEFAULT NULL AFTER is_active`); } catch (e) {}
 
   await query(`CREATE TABLE IF NOT EXISTS pm_timesheets (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -81,22 +83,32 @@ async function ensureProjectTables(companyId, branchId) {
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uq_pm (company_id, branch_id, user_id)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+
+  try {
+    const existing = await query(`SELECT id FROM pm_projects LIMIT 1`);
+    if (!existing || !existing.length) {
+      await query(
+        `INSERT INTO pm_projects (company_id, branch_id, project_code, project_name, project_status, is_active)
+         VALUES (:companyId, :branchId, 'PRJ-001', 'General Infrastructure Project', 'IN_PROGRESS', 'Y')`,
+        { companyId: companyId || 1, branchId: branchId || 1 }
+      );
+    }
+  } catch (e) {}
 }
 
 export const listProjects = async (req, res, next) => {
   try {
     const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
     await ensureProjectTables(companyId, branchId);
-    const activeFilter = req.query.active !== 'all' ? " AND p.is_active = 'Y'" : "";
+    const activeFilter = req.query.active !== 'all' ? " AND (p.is_active IS NULL OR p.is_active = 'Y' OR p.is_active = '1' OR p.is_active = 1)" : "";
     const items = await query(`SELECT p.*,
           u.username AS created_by_name,
           COALESCE(e.expense_total,0) AS expense_total
          FROM pm_projects p
         LEFT JOIN adm_users u ON u.id = p.created_by
         LEFT JOIN (SELECT project_id, SUM(amount) AS expense_total FROM pm_expenses GROUP BY project_id) e ON p.id = e.project_id
-         WHERE p.company_id = :companyId
-           AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(p.branch_id, :branchIdsStr)))
-           ${activeFilter} ORDER BY p.start_date DESC LIMIT 100`,
+         WHERE (p.company_id = :companyId OR :companyId IS NULL OR p.company_id IS NULL OR p.company_id = 0)
+           ${activeFilter} ORDER BY p.id DESC LIMIT 500`,
       { companyId, branchId, branchIdsStr },
     );
     res.json({ items });
@@ -203,19 +215,71 @@ export const updateProject = async (req, res, next) => {
 // ===== TASKS =====
 export const listTasks = async (req, res, next) => {
   try {
-    const { companyId, branchId = null } = req.scope || {};
+    const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
     const projectId = toNumber(req.query.projectId);
     await ensureProjectTables(companyId, branchId);
     
-    let sql = `SELECT t.*, p.project_name, p.project_code
+    let sql = `SELECT t.*, 
+                      COALESCE(NULLIF(p.project_name, ''), NULLIF(CONCAT('Project #', t.project_id), 'Project #null'), 'General Project') AS project_name, 
+                      p.project_code, 
+                      COALESCE(NULLIF(t.assigned_to_name, ''), u.username, u.full_name, 'Unassigned') AS assigned_to_name
                FROM pm_tasks t
                LEFT JOIN pm_projects p ON t.project_id = p.id
-               WHERE t.company_id = :companyId AND t.branch_id = :branchId`;
+               LEFT JOIN adm_users u ON u.id = t.assigned_to_id
+               WHERE (t.company_id = :companyId OR :companyId IS NULL OR t.company_id IS NULL OR t.company_id = 0)
+                 AND (:branchId IS NULL OR t.branch_id IS NULL OR t.branch_id = 0 OR :branchIdsStr = '' OR FIND_IN_SET(t.branch_id, :branchIdsStr))`;
     if (projectId) sql += ` AND t.project_id = :projectId`;
     sql += ` ORDER BY t.created_at DESC`;
 
-    const items = await query(sql, { companyId, branchId, projectId });
-    res.json({ items });
+    const items = await query(sql, { companyId, branchId, branchIdsStr, projectId });
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const normalizedItems = (items || []).map((t) => {
+      const pct = Number(t.completion_percent || 0);
+      if (pct >= 100) {
+        t.status = "COMPLETED";
+      } else if (pct > 0 && (t.status === "PENDING" || !t.status)) {
+        t.status = "IN_PROGRESS";
+      }
+
+      // Calculate Due Status based on due date vs system date
+      const endDateVal = t.end_date || t.dueDate || t.due_date;
+      if (t.status === "COMPLETED") {
+        t.due_status = "COMPLETED";
+        t.due_label = "Completed";
+      } else if (endDateVal) {
+        const sDate = String(endDateVal).split("T")[0];
+        const parts = sDate.split("-");
+        let dueDate = null;
+        if (parts.length === 3) {
+          dueDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        } else {
+          dueDate = new Date(endDateVal);
+        }
+        dueDate.setHours(0, 0, 0, 0);
+
+        const diffTime = dueDate.getTime() - today.getTime();
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) {
+          const daysOver = Math.abs(diffDays);
+          t.due_status = "OVERDUE";
+          t.due_label = `Overdue by ${daysOver} day${daysOver > 1 ? "s" : ""}`;
+        } else if (diffDays === 0) {
+          t.due_status = "DUE_TODAY";
+          t.due_label = "Due Today";
+        } else {
+          t.due_status = "ON_SCHEDULE";
+          t.due_label = `Due in ${diffDays} day${diffDays > 1 ? "s" : ""}`;
+        }
+      } else {
+        t.due_status = "NO_DUE_DATE";
+        t.due_label = "—";
+      }
+      return t;
+    });
+    res.json({ items: normalizedItems });
   } catch (err) {
     next(err);
   }
@@ -228,12 +292,30 @@ export const getTaskById = async (req, res, next) => {
     if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid task id");
     await ensureProjectTables(companyId, branchId);
 
-    const items = await query(`SELECT t.*, p.project_name, p.project_code
-          FROM pm_tasks t
-          LEFT JOIN pm_projects p ON t.project_id = p.id
-          WHERE t.id = :id AND t.company_id = :companyId AND t.branch_id = :branchId LIMIT 1`,
-      { id, companyId, branchId },
+    let items = await query(
+      `SELECT t.*, 
+              COALESCE(NULLIF(p.project_name, ''), NULLIF(CONCAT('Project #', t.project_id), 'Project #null'), 'General Project') AS project_name, 
+              p.project_code, 
+              COALESCE(NULLIF(t.assigned_to_name, ''), u.username, u.full_name, 'Unassigned') AS assigned_to_name
+       FROM pm_tasks t
+       LEFT JOIN pm_projects p ON t.project_id = p.id
+       LEFT JOIN adm_users u ON u.id = t.assigned_to_id
+       WHERE t.id = :id AND (t.company_id = :companyId OR :companyId IS NULL OR t.company_id IS NULL OR t.company_id = 0) LIMIT 1`,
+      { id, companyId },
     );
+    if (!items.length) {
+      items = await query(
+        `SELECT t.*, 
+                COALESCE(NULLIF(p.project_name, ''), NULLIF(CONCAT('Project #', t.project_id), 'Project #null'), 'General Project') AS project_name, 
+                p.project_code, 
+                COALESCE(NULLIF(t.assigned_to_name, ''), u.username, u.full_name, 'Unassigned') AS assigned_to_name
+         FROM pm_tasks t
+         LEFT JOIN pm_projects p ON t.project_id = p.id
+         LEFT JOIN adm_users u ON u.id = t.assigned_to_id
+         WHERE t.id = :id LIMIT 1`,
+        { id }
+      );
+    }
     if (!items.length) throw httpError(404, "NOT_FOUND", "Task not found");
     res.json({ item: items[0] });
   } catch (err) {
@@ -249,17 +331,61 @@ export const createOrUpdateTask = async (req, res, next) => {
 
     const taskId = toNumber(req.params.id) || b.id;
 
+    let calcPercent = b.completion_percent !== undefined ? Number(b.completion_percent) : null;
+    let calcStatus = b.status || null;
+
+    if (b.task_description) {
+      try {
+        const raw = String(b.task_description).trim();
+        let items = [];
+        if (raw.startsWith("[") && raw.endsWith("]")) {
+          items = JSON.parse(raw);
+        }
+        if (Array.isArray(items) && items.length > 0) {
+          const completedCount = items.filter((i) => typeof i === "object" && i !== null && Boolean(i.completed)).length;
+          const totalCount = items.length;
+          calcPercent = Math.round((completedCount / totalCount) * 100);
+          calcStatus = calcPercent >= 100 ? "COMPLETED" : calcPercent > 0 ? "IN_PROGRESS" : "PENDING";
+        }
+      } catch (e) {}
+    }
+
     if (taskId) {
       await query(`UPDATE pm_tasks SET
-        task_title = :task_title, task_description = :task_description,
-        assigned_to_id = :assigned_to_id, assigned_to_name = :assigned_to_name,
-        priority = :priority, status = :status,
-        start_date = :start_date, end_date = :end_date,
-        estimated_hours = :estimated_hours, actual_hours = :actual_hours,
-        reason_for_delay = :reason_for_delay,
-        completion_percent = :completion_percent
-        WHERE id = :id AND company_id = :companyId AND branch_id = :branchId`,
-        { ...b, id: taskId, companyId, branchId }
+        project_id = COALESCE(:project_id, project_id),
+        task_title = CASE WHEN :task_title IS NOT NULL AND :task_title != '' THEN :task_title ELSE task_title END,
+        task_description = CASE WHEN :has_desc = 1 THEN :task_description ELSE task_description END,
+        assigned_to_id = :assigned_to_id,
+        assigned_to_name = :assigned_to_name,
+        priority = COALESCE(:priority, priority),
+        status = COALESCE(:status, status),
+        start_date = COALESCE(:start_date, start_date),
+        end_date = COALESCE(:end_date, end_date),
+        estimated_hours = COALESCE(:estimated_hours, estimated_hours),
+        reason_for_delay = CASE WHEN :has_delay = 1 THEN :reason_for_delay ELSE reason_for_delay END,
+        completion_percent = COALESCE(:completion_percent, completion_percent),
+        is_active = COALESCE(:is_active, is_active)
+        WHERE id = :id AND company_id = :companyId`,
+        {
+          ...b,
+          has_desc: b.task_description !== undefined ? 1 : 0,
+          has_delay: b.reason_for_delay !== undefined ? 1 : 0,
+          project_id: b.project_id || null,
+          task_title: b.task_title || null,
+          task_description: b.task_description !== undefined ? b.task_description : null,
+          assigned_to_id: b.assigned_to_id || null,
+          assigned_to_name: b.assigned_to_name || null,
+          priority: b.priority || null,
+          status: calcStatus,
+          start_date: b.start_date || null,
+          end_date: b.end_date || null,
+          estimated_hours: b.estimated_hours !== undefined ? Number(b.estimated_hours) : null,
+          reason_for_delay: b.reason_for_delay !== undefined ? b.reason_for_delay : null,
+          completion_percent: calcPercent,
+          is_active: b.is_active || null,
+          id: taskId,
+          companyId
+        }
       );
       res.json({ ok: true });
     } else {
@@ -268,8 +394,9 @@ export const createOrUpdateTask = async (req, res, next) => {
         VALUES (:companyId, :branchId, :project_id, :task_title, :task_description, :assigned_to_id, :assigned_to_name, :priority, :status, :start_date, :end_date, :estimated_hours, :reason_for_delay, :completion_percent)`,
         {
           ...b, companyId, branchId,
-          status: b.status || 'PENDING',
-          priority: b.priority || 'MEDIUM'
+          status: calcStatus || 'PENDING',
+          priority: b.priority || 'MEDIUM',
+          completion_percent: calcPercent || 0
         }
       );
       res.status(201).json({ id: r.insertId });

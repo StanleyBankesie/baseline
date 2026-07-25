@@ -1,6 +1,6 @@
 /**
  * @fileoverview OpeningBalancesPage component.
- * Provides functionality for OpeningBalancesPage.
+ * Standard Modern UI Opening Balances setup for managing initial ledger balances.
  */
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -10,12 +10,18 @@ import { api } from "api/client";
 import { Link } from "react-router-dom";
 import { filterAndSort } from "@/utils/searchUtils.js";
 import { useAuth } from "@/auth/AuthContext.jsx";
+import { 
+  Scale, 
+  ArrowLeft, 
+  RefreshCw, 
+  Download, 
+  Upload, 
+  Save, 
+  Search, 
+  AlertCircle,
+  CheckCircle2
+} from "lucide-react";
 
-/**
- *  component
- * 
- * @returns {JSX.Element} The rendered component
- */
 export default function OpeningBalancesPage() {
   const { scope, user } = useAuth();
   const [accessAllowed, setAccessAllowed] = useState(null);
@@ -69,7 +75,6 @@ export default function OpeningBalancesPage() {
     }
     if (user?.id) checkAccess();
   }, [scope?.branchId, user?.id]);
-
 
   async function loadData() {
     if (!selectedFyId) return;
@@ -133,6 +138,7 @@ export default function OpeningBalancesPage() {
       };
     });
   }, [accounts, openingMap, searchTerm]);
+
   function setValue(id, field, val) {
     const rawVal = String(val || "").replace(/,/g, "").trim();
     const parsed = parseFloat(rawVal);
@@ -194,6 +200,7 @@ export default function OpeningBalancesPage() {
   function onPickFile() {
     if (fileRef.current) fileRef.current.click();
   }
+
   async function onFileChange(e) {
     const file = e.target.files?.[0] || null;
     if (!file) return;
@@ -258,58 +265,51 @@ export default function OpeningBalancesPage() {
       if (fileRef.current) fileRef.current.value = "";
     }
   }
+
   if (accessAllowed === false) {
     return (
-      <div className="p-8 text-center">
-        <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
-        <p className="text-slate-600 dark:text-slate-400">
-          You do not have permission to access the Opening Balances page.
-          Please contact your system administrator.
+      <div className="p-8 text-center max-w-lg mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl mt-12 space-y-4">
+        <AlertCircle className="w-12 h-12 text-rose-500 mx-auto" />
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Access Restricted</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-400">
+          You do not have administrative permission to access Opening Balances setup for this branch.
         </p>
-        <Link to="/finance" className="btn btn-secondary mt-4 inline-block">← Back to Finance</Link>
+        <Link to="/finance" className="btn btn-secondary text-xs px-4 py-2 inline-flex items-center gap-1.5">
+          <ArrowLeft size={14} /> Return to Finance
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg">
-          <div className="flex items-center justify-between">
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Header Banner */}
+      <div className="card shadow-md">
+        <div className="card-header bg-brand text-white rounded-t-lg p-5">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold">Opening Balances</h1>
-              <p className="text-sm mt-1">
-                Update opening balances for all ledger accounts
+              <Link
+                to="/finance"
+                className="inline-flex items-center gap-1.5 text-xs text-white/80 hover:text-white transition-colors mb-2"
+              >
+                <ArrowLeft size={14} /> Back to Accounting Setup
+              </Link>
+              <h1 className="text-2xl font-bold flex items-center gap-2">
+                <Scale className="w-6 h-6" /> Opening Balances Setup
+              </h1>
+              <p className="text-sm mt-0.5 opacity-90">
+                Configure initial opening debit & credit balances across Chart of Accounts
               </p>
             </div>
-            <div className="flex gap-2 items-center">
-              <Link to="/finance" className="font-sans btn btn-secondary py-1.5 px-3 text-sm h-auto">
-                Return to Menu
-              </Link>
-              <input
-                className="input w-64"
-                placeholder="Search code or name..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <select
-                className="input py-1.5 text-sm h-auto"
-                value={selectedFyId}
-                onChange={(e) => setSelectedFyId(e.target.value)}
-              >
-                <option value="">Select Fiscal Year</option>
-                {fiscalYears.map((fy) => (
-                  <option key={fy.id} value={fy.id}>
-                    {fy.code}
-                  </option>
-                ))}
-              </select>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2">
               <button
-                className="btn py-1.5 px-3 text-sm h-auto"
+                className="px-3.5 py-2 text-xs font-semibold bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50"
                 onClick={() => downloadTemplate()}
                 disabled={!selectedFyId}
               >
-                Download Excel Template
+                <Download size={14} /> Download Template
               </button>
               <input
                 ref={fileRef}
@@ -319,90 +319,143 @@ export default function OpeningBalancesPage() {
                 onChange={onFileChange}
               />
               <button
-                className="btn py-1.5 px-3 text-sm h-auto"
+                className="px-3.5 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50"
                 onClick={onPickFile}
                 disabled={!rows.length}
               >
-                Import From Excel
+                <Upload size={14} /> Import Excel
               </button>
               <button
-                className="btn-success py-1.5 px-3 text-sm h-auto"
+                className="px-4 py-2 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50"
                 onClick={saveAll}
                 disabled={saving || !selectedFyId}
               >
-                Save All
+                <Save size={14} /> {saving ? "Saving..." : "Save All Balances"}
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="card">
-        <div className="card-body">
-          {loading ? (
-            <div className="text-center py-10">Loading...</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Code</th>
-                    <th>Name</th>
-                    <th>Group</th>
-                    <th>Nature</th>
-                    <th className="text-right">
-                      {`Opening Debit${baseCurrencyCode ? ` (${baseCurrencyCode})` : ""}`}
-                    </th>
-                    <th className="text-right">
-                      {`Opening Credit${baseCurrencyCode ? ` (${baseCurrencyCode})` : ""}`}
-                    </th>
-                    <th className="text-left">
-                      {`Opening Balance${baseCurrencyCode ? ` (${baseCurrencyCode})` : ""}`}
-                    </th>
+      {/* Filter & Fiscal Year Selector */}
+      <div className="card p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="relative w-full sm:w-80">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              className="input w-full pl-9 text-sm"
+              placeholder="Search account code or name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">
+              Fiscal Period:
+            </label>
+            <select
+              className="input text-sm font-semibold"
+              value={selectedFyId}
+              onChange={(e) => setSelectedFyId(e.target.value)}
+            >
+              <option value="">Select Fiscal Year</option>
+              {fiscalYears.map((fy) => (
+                <option key={fy.id} value={fy.id}>
+                  {fy.code} {Number(fy.is_open) === 1 ? "(Active)" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Table */}
+      <div className="card shadow-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="table w-full">
+            <thead>
+              <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider">
+                <th className="py-3 px-4 text-left">Code</th>
+                <th className="py-3 px-4 text-left">Account Name</th>
+                <th className="py-3 px-4 text-left">Group</th>
+                <th className="py-3 px-4 text-left">Nature</th>
+                <th className="py-3 px-4 text-right">
+                  Opening Debit {baseCurrencyCode ? `(${baseCurrencyCode})` : ""}
+                </th>
+                <th className="py-3 px-4 text-right">
+                  Opening Credit {baseCurrencyCode ? `(${baseCurrencyCode})` : ""}
+                </th>
+                <th className="py-3 px-4 text-left">Net Opening Balance</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="text-center py-10 text-slate-400">
+                    <RefreshCw className="animate-spin w-6 h-6 mx-auto mb-2" />
+                    Loading opening balances...
+                  </td>
+                </tr>
+              ) : rows.length > 0 ? (
+                rows.map((r) => (
+                  <tr key={r.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                    <td className="py-3 px-4 font-mono font-bold text-brand dark:text-brand-300">
+                      {r.code}
+                    </td>
+                    <td className="py-3 px-4 font-semibold text-slate-900 dark:text-slate-100">
+                      {r.name}
+                    </td>
+                    <td className="py-3 px-4 text-slate-600 dark:text-slate-400 text-xs">
+                      {r.group || "—"}
+                    </td>
+                    <td className="py-3 px-4 text-xs font-semibold">
+                      <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded border border-slate-200 dark:border-slate-700">
+                        {r.nature || "—"}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <input
+                        className="input text-right font-mono text-sm max-w-[140px]"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={r.debit || ""}
+                        placeholder="0.00"
+                        onChange={(e) =>
+                          setValue(r.id, "debit", e.target.value)
+                        }
+                      />
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <input
+                        className="input text-right font-mono text-sm max-w-[140px]"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={r.credit || ""}
+                        placeholder="0.00"
+                        onChange={(e) =>
+                          setValue(r.id, "credit", e.target.value)
+                        }
+                      />
+                    </td>
+                    <td className="py-3 px-4 text-left font-mono font-bold">
+                      <span className={r.opening_balance_type === "Dr" ? "text-blue-600 dark:text-blue-400" : "text-purple-600 dark:text-purple-400"}>
+                        {Number(r.opening_balance_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })} {r.opening_balance_type}
+                      </span>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {rows.map((r) => (
-                    <tr key={r.id}>
-                      <td className="font-medium">{r.code}</td>
-                      <td>{r.name}</td>
-                      <td>{r.group}</td>
-                      <td>{r.nature}</td>
-                      <td className="text-right">
-                        <input
-                          className="input text-right"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={r.debit || ""}
-                          placeholder="0.00"
-                          onChange={(e) =>
-                            setValue(r.id, "debit", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td className="text-right">
-                        <input
-                          className="input text-right"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={r.credit || ""}
-                          placeholder="0.00"
-                          onChange={(e) =>
-                            setValue(r.id, "credit", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td className="text-left font-bold text-gray-800">
-                        {Number(r.opening_balance_amount || 0).toFixed(2)} {r.opening_balance_type}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="text-center py-10 text-slate-400">
+                    No accounts found for selected fiscal period.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

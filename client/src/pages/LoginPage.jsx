@@ -47,14 +47,36 @@ export default function LoginPage() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const renewingLicenseRef = useRef(false);
 
-  // Load remembered credentials on mount
+  const setInputValue = useCallback((input, value) => {
+    if (!input) return;
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+      HTMLInputElement.prototype,
+      "value",
+    ).set;
+    nativeInputValueSetter.call(input, value);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  }, []);
+
+  // Load remembered credentials on mount and auto-populate fields
   useEffect(() => {
     const profiles = authStorage.readRememberedCredentialProfiles?.() || [];
     if (profiles.length) {
       setSavedProfiles(profiles);
       setRememberMe(true);
+      const primary = profiles[0];
+      if (primary) {
+        setTimeout(() => {
+          if (usernameRef.current) {
+            setInputValue(usernameRef.current, primary.username);
+            setUsernameQuery(primary.username);
+          }
+          if (primary.password && passwordRef.current) {
+            setInputValue(passwordRef.current, primary.password);
+          }
+        }, 50);
+      }
     }
-  }, []);
+  }, [setInputValue]);
 
   // Check global license status on mount
   useEffect(() => {
@@ -137,27 +159,19 @@ export default function LoginPage() {
     }
   }, [savedProfiles]);
 
-  const setInputValue = useCallback((input, value) => {
-    if (!input) return;
-    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-      HTMLInputElement.prototype,
-      "value",
-    ).set;
-    nativeInputValueSetter.call(input, value);
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-  }, []);
-
   // When user selects the suggested username, fill username field and focus password
   const handleSelectSuggestion = useCallback(
     (profile) => {
       if (!profile) return;
-      setInputValue(usernameRef.current, profile.username);
-      if (profile.password) {
-        setInputValue(passwordRef.current, profile.password);
-      } else {
-        passwordRef.current?.focus();
+      if (usernameRef.current) {
+        usernameRef.current.value = profile.username || "";
+        setInputValue(usernameRef.current, profile.username || "");
       }
-      setUsernameQuery(profile.username);
+      if (passwordRef.current && profile.password) {
+        passwordRef.current.value = profile.password;
+        setInputValue(passwordRef.current, profile.password);
+      }
+      setUsernameQuery(profile.username || "");
       setRememberMe(true);
       setShowSuggestion(false);
     },
@@ -171,7 +185,7 @@ export default function LoginPage() {
   });
 
   const shouldShowSuggestion =
-    showSuggestion && usernameQuery.length >= 2 && filteredProfiles.length > 0;
+    showSuggestion && filteredProfiles.length > 0;
 
   useEffect(() => {
     if (
@@ -435,14 +449,23 @@ export default function LoginPage() {
                 type="text"
                 className="login-input"
                 ref={usernameRef}
-                autoComplete="off"
+                autoComplete="username"
                 required
                 defaultValue=""
                 onFocus={handleUsernameFocus}
                 onClick={handleUsernameFocus}
                 onChange={(e) => {
-                  setUsernameQuery(e.target.value);
-                  if (savedProfiles.length) setShowSuggestion(true);
+                  const val = e.target.value;
+                  setUsernameQuery(val);
+                  if (savedProfiles.length) {
+                    setShowSuggestion(true);
+                    const matched = savedProfiles.find(
+                      (p) => p.username.toLowerCase() === val.trim().toLowerCase(),
+                    );
+                    if (matched && matched.password && passwordRef.current) {
+                      setInputValue(passwordRef.current, matched.password);
+                    }
+                  }
                 }}
               />
 
@@ -468,7 +491,16 @@ export default function LoginPage() {
                     <button
                       key={profile.username}
                       type="button"
-                      onClick={() => handleSelectSuggestion(profile)}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleSelectSuggestion(profile);
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleSelectSuggestion(profile);
+                      }}
                       style={{
                         width: "100%",
                         display: "flex",

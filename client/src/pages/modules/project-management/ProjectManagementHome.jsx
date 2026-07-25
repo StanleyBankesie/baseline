@@ -13,6 +13,7 @@ import ProjectForm from "./projects/ProjectForm.jsx";
 import ProjectDetailDashboard from "./projects/ProjectDetailDashboard.jsx";
 import TaskList from "./tasks/TaskList.jsx";
 import TaskForm from "./tasks/TaskForm.jsx";
+import TaskExecution from "./tasks/TaskExecution.jsx";
 import ProjectReports from "./reports/ProjectReports.jsx";
 import TimesheetList from "./timesheets/TimesheetList.jsx";
 import ExpenseList from "./expenses/ExpenseList.jsx";
@@ -136,10 +137,16 @@ function ProjectManagementLanding() {
       badge: "Tracking",
       items: [
         {
-          title: "Task Board",
+          title: "Task Management",
           path: "/project-management/tasks",
           description: "WBS and task assignment",
           icon: "✅",
+        },
+        {
+          title: "Task Execution",
+          path: "/project-management/tasks/execution",
+          description: "Checklist execution & progress odometer",
+          icon: "⚡",
         },
         {
           title: "Project Timeline",
@@ -267,6 +274,7 @@ export default function ProjectManagementHome() {
       />
 
       <Route path="/tasks" element={<TaskList />} />
+      <Route path="/tasks/execution" element={<TaskExecution />} />
       <Route path="/tasks/new" element={<TaskForm />} />
       <Route path="/tasks/:id" element={<TaskForm />} />
 
@@ -337,8 +345,14 @@ export const projectManagementFeatures = [
   },
   {
     module_key: "project-management",
-    label: "Tasks",
+    label: "Task Assignment",
     path: "/project-management/tasks",
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Task Execution",
+    path: "/project-management/tasks/execution",
     type: "feature",
   },
   {

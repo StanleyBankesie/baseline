@@ -3202,17 +3202,17 @@ export const auditTrailReport = async (req, res, next) => {
     const from = req.query.from ? String(req.query.from) : null;
     const to = req.query.to ? String(req.query.to) : null;
     const items = await query(
-      `SELECT v.id, v.updated_at AS action_time, u.username AS user_name, 
-              IF(v.updated_at = v.created_at, 'CREATE', 'UPDATE') AS action, 
-              CONCAT('Voucher ', v.voucher_no, ' ', IF(v.updated_at = v.created_at, 'created', 'updated'), ' (Status: ', v.status, ')') AS details, 
+      `SELECT v.id, v.created_at AS action_time, u.username AS user_name, 
+              'CREATE' AS action, 
+              CONCAT('Voucher ', v.voucher_no, ' created (Status: ', v.status, ')') AS details, 
               v.voucher_no AS ref_no, '/finance/vouchers' AS page_visited, 
               'Finance' AS module_name, v.created_at, 'Financial' AS entity
          FROM fin_vouchers v
-         LEFT JOIN adm_users u ON u.id = v.updated_by OR (v.updated_by IS NULL AND u.id = v.created_by)
+         LEFT JOIN adm_users u ON u.id = v.created_by
         WHERE v.company_id = :companyId
-          AND (:from IS NULL OR v.updated_at >= :from)
-          AND (:to IS NULL OR v.updated_at <= :to)
-        ORDER BY v.updated_at DESC`,
+          AND (:from IS NULL OR v.created_at >= :from)
+          AND (:to IS NULL OR v.created_at <= :to)
+        ORDER BY v.created_at DESC`,
       { companyId, from, to },
     );
     res.json({ items });

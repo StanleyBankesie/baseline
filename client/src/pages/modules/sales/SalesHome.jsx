@@ -658,6 +658,16 @@ export default function SalesHome() {
       <Route path="/bulk-upload" element={<BulkCustomerUpload />} />
       {/* Additional sales report routes */}
       <Route
+        path="/reports"
+        element={
+          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+            {React.createElement(
+              React.lazy(() => import("./reports/SalesReports.jsx")),
+            )}
+          </React.Suspense>
+        }
+      />
+      <Route
         path="/reports/prospect-customer-list"
         element={
           <React.Suspense fallback={<div className="p-4">Loading...</div>}>

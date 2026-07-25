@@ -426,10 +426,16 @@ export default function ProjectManagementDashboardPage() {
                   icon: "📁",
                 },
                 {
-                  label: "Tasks",
+                  label: "Task Assignment",
                   path: "/project-management/tasks",
                   description: "Inspect task backlog and assignments.",
                   icon: "✅",
+                },
+                {
+                  label: "Task Execution",
+                  path: "/project-management/tasks/execution",
+                  description: "Checklist execution and odometer gauge.",
+                  icon: "⚡",
                 },
                 {
                   label: "Timesheets",

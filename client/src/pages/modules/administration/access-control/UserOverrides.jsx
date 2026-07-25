@@ -58,6 +58,14 @@ export default function UserOverrides() {
       code: "DOCUMENT.EDIT_DATE",
       label: "Edit Document Date in Edit Mode (All Modules)",
     },
+    {
+      code: "TASK.REASSIGN",
+      label: "Task Management - Reassign Task to Users",
+    },
+    {
+      code: "TRANSPORT.TRIP.REASSIGN",
+      label: "Trip Management - Reassign Trip to Drivers / Users",
+    },
   ];
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);

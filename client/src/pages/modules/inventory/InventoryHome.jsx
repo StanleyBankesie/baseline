@@ -56,6 +56,7 @@ import StockValueReportPage from "./reports/StockValueReportPage.jsx";
 import MaterialReturnReportPage from "./reports/MaterialReturnReportPage.jsx";
 import StockAdjustmentReportPage from "./reports/StockAdjustmentReportPage.jsx";
 import LowStockNotificationsPage from "./LowStockNotificationsPage.jsx";
+import InventoryReportsPage from "./reports/InventoryReportsPage.jsx";
 // Removed Sales Return from Inventory, and moved Purchase Return to Purchase module
 
 function InventoryFeaturePage({ title, description }) {
@@ -659,6 +660,7 @@ export default function InventoryHome() {
       <Route path="warehouses" element={<WarehousesList />} />
       <Route path="warehouses/:id" element={<WarehouseForm />} />
 
+      <Route path="reports" element={<InventoryReportsPage />} />
       <Route
         path="reports/health-monitor"
         element={<InventoryHealthMonitorPage />}

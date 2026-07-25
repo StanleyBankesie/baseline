@@ -24,6 +24,7 @@ import ServiceConfirmationForm from "./service-confirmations/ServiceConfirmation
 import ServiceInvoiceList from "./service-invoices/ServiceInvoiceList.jsx";
 import ServiceInvoiceForm from "./service-invoices/ServiceInvoiceForm.jsx";
 import ServiceParametersPage from "./setup/ServiceParametersPage.jsx";
+import ServiceReportsPage from "./reports/ServiceReportsPage.jsx";
 
 function ServiceManagementLanding() {
   const [stats, setStats] = React.useState([
@@ -344,6 +345,7 @@ export default function ServiceManagementHome() {
           </React.Suspense>
         }
       />
+      <Route path="reports" element={<ServiceReportsPage />} />
       <Route
         path="reports/service-request-summary"
         element={

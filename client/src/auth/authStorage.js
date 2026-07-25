@@ -160,6 +160,7 @@ function normalizeRememberedCredentialPayload(payload) {
   return rows
     .map((row) => ({
       username: String(row?.username || row?.u || "").trim(),
+      password: decode(String(row?.password || row?.p || "")),
       profilePictureUrl: String(row?.profilePictureUrl || ""),
       avatarColor: String(row?.avatarColor || ""),
       updatedAt: Number(row?.updatedAt || 0),
@@ -218,6 +219,7 @@ export function saveRememberedCredentials(username, password, profile = {}) {
     const existing = readRememberedCredentialProfiles();
     const nextProfile = {
       username: cleanUsername,
+      password: encode(String(password || "")),
       profilePictureUrl: String(profile?.profilePictureUrl || ""),
       avatarColor: getRememberedAvatarColor(cleanUsername),
       updatedAt: Date.now(),
@@ -247,7 +249,7 @@ export function readRememberedCredentialProfiles() {
 export function readRememberedCredentials() {
   const first = readRememberedCredentialProfiles()[0] || null;
   return first
-    ? { username: first.username }
+    ? { username: first.username, password: first.password }
     : null;
 }
 
