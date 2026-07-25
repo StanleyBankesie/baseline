@@ -13185,3 +13185,14 @@ Error: Refresh token is missing
     at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
     at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
 --------------------------------------------------------------------------------
+
+[2026-07-25T22:30:45.954Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/baseline/server/index.js:1046:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------

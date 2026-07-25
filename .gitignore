@@ -2,7 +2,7 @@
 .env
 .env.*
 .env.local
-.env.production
+# .env.production
 !.env.example
 
 # ── Dependencies ──
