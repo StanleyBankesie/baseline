@@ -917,9 +917,16 @@ if (serveFrontendFlag) {
   if (frontendPath && fs.existsSync(frontendPath)) {
     app.use(express.static(frontendPath));
   }
+  // Return 404 for missing static assets in /assets or matching file extensions (prevents MIME type errors)
+  app.use("/assets", (req, res) => {
+    res.status(404).type("text/plain").send("Static asset not found");
+  });
   app.get("*", (req, res, next) => {
-    if (req.url.startsWith("/api")) {
+    if (req.url.startsWith("/api") || req.url.startsWith("/uploads") || req.url.startsWith("/socket.io")) {
       return next();
+    }
+    if (/\.(js|css|png|jpg|jpeg|gif|ico|json|svg|woff|woff2|ttf|map)$/i.test(req.path)) {
+      return res.status(404).type("text/plain").send("Static file not found");
     }
     const indexPath = path.join(frontendPath, "index.html");
     if (fs.existsSync(indexPath)) {

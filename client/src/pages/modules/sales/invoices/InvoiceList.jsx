@@ -428,13 +428,19 @@ export default function InvoiceList() {
     }
   }
   const getStatusBadge = (status) => {
-    const statusClasses = {
-      DRAFT: "badge badge-warning",
-      POSTED: "badge badge-success",
-      CANCELLED: "badge badge-error",
-      PENDING_APPROVAL: "badge bg-blue-100 text-blue-700",
+    const badges = {
+      DRAFT: "badge-warning",
+      PENDING_APPROVAL: "badge-warning",
+      APPROVED: "badge-success",
+      POSTED: "badge-success",
+      CANCELLED: "badge-error",
+      RETURNED: "badge-error",
     };
-    return <span className={statusClasses[status] || "badge"}>{status}</span>;
+    return (
+      <span className={`badge ${badges[status] || "badge-info"}`}>
+        {status}
+      </span>
+    );
   };
 
   const getPaymentStatusBadge = (pstatus) => {
@@ -618,17 +624,17 @@ export default function InvoiceList() {
                     <SortableHeader label="Invoice No" sortKey="invoice_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                     <SortableHeader label="Date" sortKey="invoice_date" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                     <SortableHeader label="Customer" sortKey="customer_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                    <th>Payment</th>
+                    <th className="grid-payment-status-cell">Payment</th>
                     <SortableHeader label="Status" sortKey="status" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                     <SortableHeader label="Net Amount" sortKey="net_amount" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                     <th className="text-right">Actions</th>
-                    <SortableHeader label="Created By" sortKey="created_by_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                    <SortableHeader label="Created Date" sortKey="created_at" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                    <th>Payment Type</th>
-                    <th>Price Type</th>
-                    <SortableHeader label="Warehouse" sortKey="warehouse_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                    <SortableHeader label="Balance" sortKey="balance_amount" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-right" />
-                    <SortableHeader label="Remarks" sortKey="remarks" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                    <SortableHeader label="Created By" sortKey="created_by_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="grid-created-by-cell" />
+                    <SortableHeader label="Created Date" sortKey="created_at" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="grid-created-date-cell" />
+                    <th className="grid-payment-type-cell">Payment Type</th>
+                    <th className="grid-price-type-cell">Price Type</th>
+                    <SortableHeader label="Warehouse" sortKey="warehouse_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="grid-warehouse-cell" />
+                    <SortableHeader label="Balance" sortKey="balance_amount" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-right grid-balance-cell" />
+                    <SortableHeader label="Remarks" sortKey="remarks" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="grid-remarks-cell" />
                   </tr>
                 </thead>
                 <tbody>
@@ -637,7 +643,7 @@ export default function InvoiceList() {
                       <td className="font-medium">{inv.invoice_no}</td>
                       <td>{new Date(inv.invoice_date).toLocaleDateString()}</td>
                       <td>{inv.customer_name}</td>
-                      <td>{getPaymentStatusBadge(inv.payment_status)}</td>
+                      <td className="grid-payment-status-cell">{getPaymentStatusBadge(inv.payment_status)}</td>
                       <td>{getStatusBadge(inv.status)}</td>
                       <td className="font-semibold">
                         {inv.net_amount.toLocaleString("en-US", {
@@ -759,15 +765,15 @@ export default function InvoiceList() {
                         </div>
                       </div>
                     </td>
-                    <td>{inv.created_by_name || "-"}</td>
-                    <td>{inv.created_at ? new Date(inv.created_at).toLocaleDateString() : "-"}</td>
-                      <td>{inv.payment_type || ""}</td>
-                      <td>{inv.price_type || ""}</td>
-                      <td>{warehouses.find((w) => String(w.id) === String(inv.warehouse_id))?.warehouse_name || ""}</td>
-                      <td className="text-right">
-                        {Number(inv.balance_amount || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                      </td>
-                      <td>{inv.remarks || ""}</td>
+                    <td className="grid-created-by-cell">{inv.created_by_name || "-"}</td>
+                    <td className="grid-created-date-cell">{inv.created_at ? new Date(inv.created_at).toLocaleDateString() : "-"}</td>
+                    <td className="grid-payment-type-cell">{inv.payment_type || ""}</td>
+                    <td className="grid-price-type-cell">{inv.price_type || ""}</td>
+                    <td className="grid-warehouse-cell">{warehouses.find((w) => String(w.id) === String(inv.warehouse_id))?.warehouse_name || ""}</td>
+                    <td className="text-right grid-balance-cell">
+                      {Number(inv.balance_amount || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    </td>
+                    <td className="grid-remarks-cell">{inv.remarks || ""}</td>
                     </tr>
                   ))}
                 </tbody>

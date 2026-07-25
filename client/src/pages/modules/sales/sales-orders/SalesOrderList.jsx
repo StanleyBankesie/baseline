@@ -1360,12 +1360,12 @@ export default function SalesOrderList() {
                           </div>
                         </div>
                       </td>
-                      <td>
+                      <td className="grid-created-by-cell">
                         {order.created_by_username ||
                           order.created_by_name ||
                           "-"}
                       </td>
-                      <td>
+                      <td className="grid-created-date-cell">
                         {order.created_at
                           ? new Date(order.created_at).toLocaleDateString()
                           : "-"}

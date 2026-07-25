@@ -968,8 +968,8 @@ export default function QuotationList() {
                         )}
                       </div>
                     </td>
-                    <td>{quot.created_by_username || quot.created_by_name || "-"}</td>
-                    <td>{quot.created_at ? new Date(quot.created_at).toLocaleDateString() : "-"}</td>
+                    <td className="grid-created-by-cell">{quot.created_by_username || quot.created_by_name || "-"}</td>
+                    <td className="grid-created-date-cell">{quot.created_at ? new Date(quot.created_at).toLocaleDateString() : "-"}</td>
                     </tr>
                   ))}
                 </tbody>

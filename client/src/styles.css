@@ -944,9 +944,15 @@
   border-bottom-color: #1e293b !important;
 }
 
-/* ── Completely Hide "Created By" and "Created Date" cells in grid mode ── */
+/* ── Completely Hide Secondary Cells in grid mode (matching Sales Order grid card layout) ── */
 .table-grid-mode td.grid-created-by-cell,
 .table-grid-mode td.grid-created-date-cell,
+.table-grid-mode td.grid-price-type-cell,
+.table-grid-mode td.grid-payment-status-cell,
+.table-grid-mode td.grid-payment-type-cell,
+.table-grid-mode td.grid-warehouse-cell,
+.table-grid-mode td.grid-balance-cell,
+.table-grid-mode td.grid-remarks-cell,
 .table-grid-mode tr > td:nth-last-child(2),
 .table-grid-mode tr > td:last-child:not(:has(button)):not(:has(a)) {
   display: none !important;
