@@ -160,7 +160,8 @@ export async function ensureSystemLogsTable() {
 }
 
 // Track tables that have already been verified to avoid redundant checks
-const verifiedTables = new Set();
+// Exported so other modules can share this singleton cache and skip DDL queries
+export const verifiedTables = new Set();
 
 /**
  * Ensure the adm_branches table has all expected columns.
@@ -233,6 +234,9 @@ export async function ensureUserColumns() {
   if (!(await hasColumn(table, "valid_from"))) {
     await query(`ALTER TABLE ${table} ADD COLUMN valid_from DATETIME NULL`);
   }
+  if (!(await hasColumn(table, "telephone"))) {
+    await query(`ALTER TABLE ${table} ADD COLUMN telephone VARCHAR(20) NULL`);
+  }
   if (!(await hasColumn(table, "valid_to"))) {
     await query(`ALTER TABLE ${table} ADD COLUMN valid_to DATETIME NULL`);
   }
@@ -262,7 +266,11 @@ export async function ensureUserColumns() {
  * @returns {Promise<void>}
  */
 export async function ensurePagesTable() {
-  if (verifiedTables.has("adm_pages")) return;
+  const table = "adm_pages";
+  if (verifiedTables.has(table)) return;
+  if (pendingEnsures.has(table)) return pendingEnsures.get(table);
+  const promise = (async () => {
+    try {
   await query(`
     CREATE TABLE IF NOT EXISTS adm_pages (
       id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -332,7 +340,13 @@ export async function ensurePagesTable() {
       },
     );
   }
-  verifiedTables.add("adm_pages");
+    verifiedTables.add(table);
+    } finally {
+      pendingEnsures.delete(table);
+    }
+  })();
+  pendingEnsures.set(table, promise);
+  return promise;
 }
 
 /**
@@ -1397,84 +1411,110 @@ export async function ensureRolePagesTable() {
 }
 
 export async function ensureUserPermissionsTable() {
-  await query(`
-    CREATE TABLE IF NOT EXISTS adm_user_permissions (
-      id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-      user_id BIGINT UNSIGNED NOT NULL,
-      page_id BIGINT UNSIGNED NOT NULL,
-      can_view TINYINT(1) DEFAULT 0,
-      can_create TINYINT(1) DEFAULT 0,
-      can_edit TINYINT(1) DEFAULT 0,
-      can_delete TINYINT(1) DEFAULT 0,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      PRIMARY KEY (id),
-      UNIQUE KEY uq_user_page (user_id, page_id),
-      FOREIGN KEY (user_id) REFERENCES adm_users(id) ON DELETE CASCADE,
-      FOREIGN KEY (page_id) REFERENCES adm_pages(id) ON DELETE CASCADE
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-  `);
+  const table = "adm_user_permissions";
+  if (verifiedTables.has(table)) return;
+  if (pendingEnsures.has(table)) return pendingEnsures.get(table);
+  const promise = (async () => {
+    try {
+      await query(`
+        CREATE TABLE IF NOT EXISTS adm_user_permissions (
+          id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+          user_id BIGINT UNSIGNED NOT NULL,
+          page_id BIGINT UNSIGNED NOT NULL,
+          can_view TINYINT(1) DEFAULT 0,
+          can_create TINYINT(1) DEFAULT 0,
+          can_edit TINYINT(1) DEFAULT 0,
+          can_delete TINYINT(1) DEFAULT 0,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          PRIMARY KEY (id),
+          UNIQUE KEY uq_user_page (user_id, page_id),
+          FOREIGN KEY (user_id) REFERENCES adm_users(id) ON DELETE CASCADE,
+          FOREIGN KEY (page_id) REFERENCES adm_pages(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+      `);
+      verifiedTables.add(table);
+    } finally {
+      pendingEnsures.delete(table);
+    }
+  })();
+  pendingEnsures.set(table, promise);
+  return promise;
 }
 
+export const pendingEnsures = new Map();
+
 export async function ensureUserPermissionCacheAndTriggers() {
-  await query(`
-    CREATE TABLE IF NOT EXISTS adm_page_permission_effective (
-      user_id BIGINT UNSIGNED NOT NULL,
-      page_id BIGINT UNSIGNED NOT NULL,
-      can_view TINYINT(1) NOT NULL DEFAULT 0,
-      can_create TINYINT(1) NOT NULL DEFAULT 0,
-      can_edit TINYINT(1) NOT NULL DEFAULT 0,
-      can_delete TINYINT(1) NOT NULL DEFAULT 0,
-      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      PRIMARY KEY (user_id, page_id),
-      KEY idx_page (page_id),
-      CONSTRAINT fk_e_user FOREIGN KEY (user_id) REFERENCES adm_users(id) ON DELETE CASCADE,
-      CONSTRAINT fk_e_page FOREIGN KEY (page_id) REFERENCES adm_pages(id) ON DELETE CASCADE
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-  `);
-  // Recreate triggers idempotently
-  await query(`DROP TRIGGER IF EXISTS trg_adm_user_permissions_ai`);
-  await query(`DROP TRIGGER IF EXISTS trg_adm_user_permissions_au`);
-  await query(`DROP TRIGGER IF EXISTS trg_adm_user_permissions_ad`);
-  await query(`
-    CREATE TRIGGER trg_adm_user_permissions_ai
-    AFTER INSERT ON adm_user_permissions
-    FOR EACH ROW
-    BEGIN
-      INSERT INTO adm_page_permission_effective (user_id, page_id, can_view, can_create, can_edit, can_delete, updated_at)
-      VALUES (NEW.user_id, NEW.page_id, NEW.can_view, NEW.can_create, NEW.can_edit, NEW.can_delete, NOW())
-      ON DUPLICATE KEY UPDATE
-        can_view = VALUES(can_view),
-        can_create = VALUES(can_create),
-        can_edit = VALUES(can_edit),
-        can_delete = VALUES(can_delete),
-        updated_at = NOW();
-    END
-  `);
-  await query(`
-    CREATE TRIGGER trg_adm_user_permissions_au
-    AFTER UPDATE ON adm_user_permissions
-    FOR EACH ROW
-    BEGIN
-      INSERT INTO adm_page_permission_effective (user_id, page_id, can_view, can_create, can_edit, can_delete, updated_at)
-      VALUES (NEW.user_id, NEW.page_id, NEW.can_view, NEW.can_create, NEW.can_edit, NEW.can_delete, NOW())
-      ON DUPLICATE KEY UPDATE
-        can_view = VALUES(can_view),
-        can_create = VALUES(can_create),
-        can_edit = VALUES(can_edit),
-        can_delete = VALUES(can_delete),
-        updated_at = NOW();
-    END
-  `);
-  await query(`
-    CREATE TRIGGER trg_adm_user_permissions_ad
-    AFTER DELETE ON adm_user_permissions
-    FOR EACH ROW
-    BEGIN
-      DELETE FROM adm_page_permission_effective
-      WHERE user_id = OLD.user_id AND page_id = OLD.page_id;
-    END
-  `);
+  const table = "adm_page_permission_effective_triggers";
+  if (verifiedTables.has(table)) return;
+  if (pendingEnsures.has(table)) return pendingEnsures.get(table);
+  const promise = (async () => {
+    try {
+      await query(`
+        CREATE TABLE IF NOT EXISTS adm_page_permission_effective (
+          user_id BIGINT UNSIGNED NOT NULL,
+          page_id BIGINT UNSIGNED NOT NULL,
+          can_view TINYINT(1) NOT NULL DEFAULT 0,
+          can_create TINYINT(1) NOT NULL DEFAULT 0,
+          can_edit TINYINT(1) NOT NULL DEFAULT 0,
+          can_delete TINYINT(1) NOT NULL DEFAULT 0,
+          updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          PRIMARY KEY (user_id, page_id),
+          KEY idx_page (page_id),
+          CONSTRAINT fk_e_user FOREIGN KEY (user_id) REFERENCES adm_users(id) ON DELETE CASCADE,
+          CONSTRAINT fk_e_page FOREIGN KEY (page_id) REFERENCES adm_pages(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+      `);
+      // Recreate triggers idempotently
+      await query(`DROP TRIGGER IF EXISTS trg_adm_user_permissions_ai`);
+      await query(`DROP TRIGGER IF EXISTS trg_adm_user_permissions_au`);
+      await query(`DROP TRIGGER IF EXISTS trg_adm_user_permissions_ad`);
+      await query(`
+        CREATE TRIGGER trg_adm_user_permissions_ai
+        AFTER INSERT ON adm_user_permissions
+        FOR EACH ROW
+        BEGIN
+          INSERT INTO adm_page_permission_effective (user_id, page_id, can_view, can_create, can_edit, can_delete, updated_at)
+          VALUES (NEW.user_id, NEW.page_id, NEW.can_view, NEW.can_create, NEW.can_edit, NEW.can_delete, NOW())
+          ON DUPLICATE KEY UPDATE
+            can_view = VALUES(can_view),
+            can_create = VALUES(can_create),
+            can_edit = VALUES(can_edit),
+            can_delete = VALUES(can_delete),
+            updated_at = NOW();
+        END
+      `);
+      await query(`
+        CREATE TRIGGER trg_adm_user_permissions_au
+        AFTER UPDATE ON adm_user_permissions
+        FOR EACH ROW
+        BEGIN
+          INSERT INTO adm_page_permission_effective (user_id, page_id, can_view, can_create, can_edit, can_delete, updated_at)
+          VALUES (NEW.user_id, NEW.page_id, NEW.can_view, NEW.can_create, NEW.can_edit, NEW.can_delete, NOW())
+          ON DUPLICATE KEY UPDATE
+            can_view = VALUES(can_view),
+            can_create = VALUES(can_create),
+            can_edit = VALUES(can_edit),
+            can_delete = VALUES(can_delete),
+            updated_at = NOW();
+        END
+      `);
+      await query(`
+        CREATE TRIGGER trg_adm_user_permissions_ad
+        AFTER DELETE ON adm_user_permissions
+        FOR EACH ROW
+        BEGIN
+          DELETE FROM adm_page_permission_effective
+          WHERE user_id = OLD.user_id AND page_id = OLD.page_id;
+        END
+      `);
+      verifiedTables.add(table);
+    } finally {
+      pendingEnsures.delete(table);
+    }
+  })();
+  pendingEnsures.set(table, promise);
+  return promise;
 }
 
 export async function ensureErrorLogsTable() {
@@ -1517,6 +1557,7 @@ export async function ensureExceptionalPermissionsTable() {
 }
 
 export async function ensureUserBranchMapping() {
+  if (verifiedTables.has("adm_user_branches")) return;
   await query(`
     CREATE TABLE IF NOT EXISTS adm_user_branches (
       user_id BIGINT UNSIGNED NOT NULL,
@@ -1530,6 +1571,7 @@ export async function ensureUserBranchMapping() {
       CONSTRAINT fk_ub_branch FOREIGN KEY (branch_id) REFERENCES adm_branches(id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
   `);
+  verifiedTables.add("adm_user_branches");
 }
 
 export async function logError({

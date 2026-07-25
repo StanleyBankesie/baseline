@@ -26,6 +26,7 @@ import {
   ensureStockBalancesWarehouseInfrastructure,
 } from "../services/stock.service.js";
 import { isMailerConfigured, sendMail } from "../utils/mailer.js";
+import { sendExternalNotification } from "../utils/externalNotification.js";
 
 const router = express.Router();
 
@@ -312,25 +313,31 @@ async function ensureGRNTables() {
   `);
 }
 
-async function nextPurchaseBillNo(companyId, branchId, billType = "LOCAL") {
-  const prefix =
-    String(billType || "").toUpperCase() === "IMPORT" ? "PBI" : "PBL";
-  const rows = await query(
-    `
-    SELECT bill_no
-    FROM pur_bills
-    WHERE company_id = :companyId
-      AND branch_id = :branchId
-      AND bill_no LIKE :pattern
-    ORDER BY CAST(SUBSTRING(bill_no, 4) AS UNSIGNED) DESC
-    LIMIT 1
-    `,
-    { companyId, branchId, pattern: `${prefix}%` },
-  ).catch(() => []);
-  const prev = String(rows?.[0]?.bill_no || "");
-  const m = prev.match(/(\d+)$/);
-  const nextNum = m ? Number(m[1]) + 1 : 1;
-  return `${prefix}${String(nextNum).padStart(6, "0")}`;
+async function nextPurchaseBillNo(conn, companyId, branchId, billType = "LOCAL") {
+  const prefix = String(billType || "").toUpperCase() === "IMPORT" ? "PBI" : "PBL";
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const [rows] = await conn.execute(
+        `
+        SELECT bill_no
+        FROM pur_bills
+        WHERE company_id = :companyId
+          AND branch_id = :branchId
+          AND bill_no LIKE :pattern
+        ORDER BY CAST(SUBSTRING(bill_no, 4) AS UNSIGNED) DESC
+        LIMIT 1 FOR UPDATE
+        `,
+        { companyId, branchId, pattern: `${prefix}%` },
+      );
+      const prev = String(rows?.[0]?.bill_no || "");
+      const m = prev.match(/(\d+)$/);
+      const nextNum = m ? Number(m[1]) + 1 : 1;
+      return `${prefix}${String(nextNum).padStart(6, "0")}`;
+    } catch (err) {
+      if (attempt === 3) throw err;
+      await new Promise(resolve => setTimeout(resolve, 50 * attempt));
+    }
+  }
 }
 
 async function createPurchaseBillFromGrnTx(
@@ -402,39 +409,53 @@ async function createPurchaseBillFromGrnTx(
 
   const billType =
     String(grnType || "").toUpperCase() === "IMPORT" ? "IMPORT" : "LOCAL";
-  const billNo = await nextPurchaseBillNo(companyId, branchId, billType);
-  const [billHdr] = await conn.execute(
-    `INSERT INTO pur_bills
-      (company_id, branch_id, bill_no, bill_date, supplier_id, po_id, grn_id, bill_type,
-       due_date, currency_id, exchange_rate, payment_terms,
-       total_amount, discount_amount, tax_amount, freight_charges, other_charges, net_amount,
-       status, created_by)
-     VALUES
-      (:companyId, :branchId, :billNo, :billDate, :supplierId, :poId, :grnId, :billType,
-       NULL, :currencyId, :exchangeRate, :paymentTerms,
-       :totalAmount, :discountAmount, :taxAmount, :freightCharges, :otherCharges, :netAmount,
-       'POSTED', :createdBy)`,
-    {
-      companyId,
-      branchId,
-      billNo,
-      billDate: toDateOnly(grnDate),
-      supplierId: supplierId || null,
-      poId,
-      grnId,
-      billType,
-      currencyId: Number(po.currency_id || 0) || null,
-      exchangeRate: Number(po.exchange_rate || 1) || 1,
-      paymentTerms: Number(po.payment_terms || 0) || null,
-      totalAmount,
-      discountAmount,
-      taxAmount,
-      freightCharges,
-      otherCharges,
-      netAmount,
-      createdBy: userId || null,
-    },
-  );
+  
+  let billHdr;
+  let billNo;
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    try {
+      billNo = await nextPurchaseBillNo(conn, companyId, branchId, billType);
+      const [res] = await conn.execute(
+        `INSERT INTO pur_bills
+          (company_id, branch_id, bill_no, bill_date, supplier_id, po_id, grn_id, bill_type,
+           due_date, currency_id, exchange_rate, payment_terms,
+           total_amount, discount_amount, tax_amount, freight_charges, other_charges, net_amount,
+           status, created_by)
+         VALUES
+          (:companyId, :branchId, :billNo, :billDate, :supplierId, :poId, :grnId, :billType,
+           NULL, :currencyId, :exchangeRate, :paymentTerms,
+           :totalAmount, :discountAmount, :taxAmount, :freightCharges, :otherCharges, :netAmount,
+           'POSTED', :createdBy)`,
+        {
+          companyId,
+          branchId,
+          billNo,
+          billDate: toDateOnly(grnDate),
+          supplierId: supplierId || null,
+          poId,
+          grnId,
+          billType,
+          currencyId: Number(po.currency_id || 0) || null,
+          exchangeRate: Number(po.exchange_rate || 1) || 1,
+          paymentTerms: Number(po.payment_terms || 0) || null,
+          totalAmount,
+          discountAmount,
+          taxAmount,
+          freightCharges,
+          otherCharges,
+          netAmount,
+          createdBy: userId || null,
+        },
+      );
+      billHdr = res;
+      break;
+    } catch (err) {
+      if (err.code === "ER_DUP_ENTRY" && attempt < 5) {
+        continue; // Retry
+      }
+      throw err;
+    }
+  }
   const billId = Number(billHdr.insertId || 0);
   for (const d of details) {
     await conn.execute(
@@ -1699,7 +1720,7 @@ router.get(
                r.warehouse_id,
                r.department_id,
                w.warehouse_name,
-               dep.dept_name AS department_name,
+               dep.name AS department_name,
                COUNT(d.id) AS item_count,
                fu.username AS forwarded_to_username,
           r.created_at,
@@ -1707,7 +1728,7 @@ router.get(
          FROM inv_material_requisitions r
         LEFT JOIN inv_material_requisition_details d ON d.requisition_id = r.id
         LEFT JOIN inv_warehouses w ON w.id = r.warehouse_id
-        LEFT JOIN hr_departments dep ON dep.id = r.department_id
+        LEFT JOIN adm_departments dep ON dep.id = r.department_id
         LEFT JOIN (
           SELECT t.document_id, t.assigned_to_user_id
           FROM adm_document_workflows t
@@ -1748,6 +1769,171 @@ router.get(
       });
     } catch (err) {
       next(err);
+    }
+  },
+);
+
+
+// ─── Fast Moving Items Report ────────────────────────────────────────────────
+router.get(
+  "/reports/fast-moving",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const from = req.query?.from || null;
+      const to = req.query?.to || null;
+      const params = { companyId, branchIdsStr };
+      const where = [
+        "r.company_id = :companyId",
+        "(:branchIdsStr = '' OR FIND_IN_SET(r.branch_id, :branchIdsStr))"
+      ];
+      if (from) { where.push("DATE(r.issue_date) >= :from"); params.from = from; }
+      if (to) { where.push("DATE(r.issue_date) <= :to"); params.to = to; }
+      const rows = await query(
+        `SELECT 
+           d.item_id, 
+           i.item_code, 
+           i.item_name, 
+           SUM(d.qty_issued) AS issued_qty, 
+           SUM(d.qty_issued * d.cost_price) AS turnover 
+         FROM inv_issue_to_requirement r 
+         JOIN inv_issue_to_requirement_details d ON d.issue_id = r.id 
+         JOIN inv_items i ON i.id = d.item_id 
+         WHERE ${where.join(" AND ")} 
+         GROUP BY d.item_id, i.item_code, i.item_name 
+         HAVING issued_qty > 0 
+         ORDER BY turnover DESC, issued_qty DESC 
+         LIMIT 100`,
+        params
+      );
+      res.json({ items: rows || [] });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+// ─── Slow Moving Items Report ────────────────────────────────────────────────
+router.get(
+  "/reports/slow-moving",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const from = req.query?.from || null;
+      const to = req.query?.to || null;
+      const params = { companyId, branchIdsStr };
+      const where = [
+        "r.company_id = :companyId",
+        "(:branchIdsStr = '' OR FIND_IN_SET(r.branch_id, :branchIdsStr))"
+      ];
+      if (from) { where.push("DATE(r.issue_date) >= :from"); params.from = from; }
+      if (to) { where.push("DATE(r.issue_date) <= :to"); params.to = to; }
+      const rows = await query(
+        `SELECT 
+           d.item_id, 
+           i.item_code, 
+           i.item_name, 
+           SUM(d.qty_issued) AS issued_qty, 
+           SUM(d.qty_issued * d.cost_price) AS turnover 
+         FROM inv_issue_to_requirement r 
+         JOIN inv_issue_to_requirement_details d ON d.issue_id = r.id 
+         JOIN inv_items i ON i.id = d.item_id 
+         WHERE ${where.join(" AND ")} 
+         GROUP BY d.item_id, i.item_code, i.item_name 
+         HAVING issued_qty > 0 
+         ORDER BY turnover ASC, issued_qty ASC 
+         LIMIT 100`,
+        params
+      );
+      res.json({ items: rows || [] });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+// ─── Non Moving Items Report ─────────────────────────────────────────────────
+router.get(
+  "/reports/non-moving",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const asOf = req.query?.asOf || null;
+      const params = { companyId, branchIdsStr };
+      const where = [
+        "b.company_id = :companyId",
+        "(:branchIdsStr = '' OR FIND_IN_SET(b.branch_id, :branchIdsStr))",
+        "b.qty > 0"
+      ];
+      
+      const rows = await query(
+        `SELECT 
+           b.item_id, 
+           i.item_code, 
+           i.item_name, 
+           SUM(b.qty) AS available_qty,
+           DATEDIFF(IFNULL(:asOf, CURDATE()), MAX(t.transaction_date)) AS days_since_last
+         FROM inv_stock_balances b 
+         JOIN inv_items i ON i.id = b.item_id 
+         LEFT JOIN v_inv_stock_ledger_computed t ON t.item_id = b.item_id AND t.company_id = b.company_id
+         WHERE ${where.join(" AND ")} 
+         GROUP BY b.item_id, i.item_code, i.item_name 
+         HAVING days_since_last IS NULL OR days_since_last > 90
+         ORDER BY days_since_last DESC, available_qty DESC 
+         LIMIT 100`,
+        { ...params, asOf }
+      );
+      res.json({ items: rows || [] });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+// ─── Stock Aging Analysis Report ─────────────────────────────────────────────
+router.get(
+  "/reports/stock-aging-analysis",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const asOf = req.query?.asOf || null;
+      const params = { companyId, branchIdsStr, asOf };
+      const where = [
+        "b.company_id = :companyId",
+        "(:branchIdsStr = '' OR FIND_IN_SET(b.branch_id, :branchIdsStr))",
+        "b.qty > 0"
+      ];
+      
+      const rows = await query(
+        `SELECT 
+           b.item_id, 
+           i.item_code, 
+           i.item_name,
+           SUM(CASE WHEN DATEDIFF(IFNULL(:asOf, CURDATE()), IFNULL((SELECT MAX(transaction_date) FROM v_inv_stock_ledger_computed t WHERE t.item_id = b.item_id AND t.company_id = b.company_id AND type='GRN'), b.created_at)) <= 30 THEN b.qty ELSE 0 END) AS bucket_0_30,
+           SUM(CASE WHEN DATEDIFF(IFNULL(:asOf, CURDATE()), IFNULL((SELECT MAX(transaction_date) FROM v_inv_stock_ledger_computed t WHERE t.item_id = b.item_id AND t.company_id = b.company_id AND type='GRN'), b.created_at)) BETWEEN 31 AND 60 THEN b.qty ELSE 0 END) AS bucket_31_60,
+           SUM(CASE WHEN DATEDIFF(IFNULL(:asOf, CURDATE()), IFNULL((SELECT MAX(transaction_date) FROM v_inv_stock_ledger_computed t WHERE t.item_id = b.item_id AND t.company_id = b.company_id AND type='GRN'), b.created_at)) BETWEEN 61 AND 90 THEN b.qty ELSE 0 END) AS bucket_61_90,
+           SUM(CASE WHEN DATEDIFF(IFNULL(:asOf, CURDATE()), IFNULL((SELECT MAX(transaction_date) FROM v_inv_stock_ledger_computed t WHERE t.item_id = b.item_id AND t.company_id = b.company_id AND type='GRN'), b.created_at)) > 90 THEN b.qty ELSE 0 END) AS bucket_90_plus
+         FROM inv_stock_balances b 
+         JOIN inv_items i ON i.id = b.item_id 
+         WHERE ${where.join(" AND ")} 
+         GROUP BY b.item_id, i.item_code, i.item_name`,
+        params
+      );
+      res.json({ items: rows || [] });
+    } catch (e) {
+      next(e);
     }
   },
 );
@@ -2180,17 +2366,65 @@ router.get(
           v.remaining_qty,
           i.item_code,
           i.item_name,
-          d.dept_name AS department_name,
+          d.name AS department_name,
           v.created_at,
           u.username AS created_by_name
          FROM v_inv_issue_register v
         LEFT JOIN inv_items i ON i.id = v.item_id
-        LEFT JOIN hr_departments d ON d.id = v.department_id
+        LEFT JOIN adm_departments d ON d.id = v.department_id
          WHERE ${where.join(" AND ")}
         ORDER BY v.issue_date DESC, v.issue_id DESC
         `,
         params,
       );
+      res.json({ items: rows || [] });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+// ─── Stock Transfer Register Report ────────────────────────────────────────────
+router.get(
+  "/reports/stock-transfer-register",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      const { companyId, branchIdsStr = '' } = req.scope || {};
+      const from = toDateOnly(req.query?.from) || null;
+      const to = toDateOnly(req.query?.to) || null;
+      const params = { companyId, branchIdsStr };
+      const where = [
+        "t.company_id = :companyId",
+        "(:branchIdsStr = '' OR FIND_IN_SET(t.branch_id, :branchIdsStr))"
+      ];
+      if (from) { where.push("DATE(t.transfer_date) >= :from"); params.from = from; }
+      if (to)   { where.push("DATE(t.transfer_date) <= :to");   params.to   = to;   }
+      const rows = await query(
+        `SELECT
+           t.id,
+           t.transfer_no,
+           DATE(t.transfer_date) AS transfer_date,
+           fw.warehouse_name AS from_warehouse_name,
+           tw.warehouse_name AS to_warehouse_name,
+           d.item_id,
+           i.item_name,
+           i.item_code,
+           d.qty,
+           d.uom,
+           t.status,
+           t.remarks
+         FROM inv_stock_transfers t
+         LEFT JOIN inv_stock_transfer_details d ON d.transfer_id = t.id
+         LEFT JOIN inv_warehouses fw ON fw.id = t.from_warehouse_id
+         LEFT JOIN inv_warehouses tw ON tw.id = t.to_warehouse_id
+         LEFT JOIN inv_items i ON i.id = d.item_id
+         WHERE ${where.join(" AND ")}
+         ORDER BY t.transfer_date DESC, t.id DESC`,
+        params
+      ).catch(() => []);
       res.json({ items: rows || [] });
     } catch (e) {
       next(e);
@@ -2243,10 +2477,14 @@ router.get(
           v.uom,
           i.item_code,
           i.item_name,
+          d.name AS department_name,
+          w.warehouse_name,
           v.created_at,
           u.username AS created_by_name
          FROM v_inv_material_returns v
         LEFT JOIN inv_items i ON i.id = v.item_id
+        LEFT JOIN adm_departments d ON d.id = v.department_id
+        LEFT JOIN inv_warehouses w ON w.id = v.warehouse_id
          WHERE ${where.join(" AND ")}
         ORDER BY v.rts_date DESC, v.rts_id DESC
         `,
@@ -2722,7 +2960,7 @@ router.post(
           dwId: instanceId || null,
           stepOrder: first?.step_order || null,
           actor: req.user?.sub || null,
-          comments: "",
+          comments: req.body?.comments || "",
         },
       );
       await query(
@@ -2801,13 +3039,13 @@ router.get(
                CASE WHEN iw.has_inactive_pending = 1 THEN 'APPROVED' ELSE r.status END AS status,
                r.return_type,
                w.warehouse_name,
-               d.dept_name AS department_name,
+               d.name AS department_name,
                (SELECT COUNT(*) FROM inv_return_to_stores_details WHERE rts_id = r.id) as item_count,
                dw.assigned_to_user_id,
                fu.username as forwarded_to_username
         FROM inv_return_to_stores r
         LEFT JOIN inv_warehouses w ON w.id = r.warehouse_id
-        LEFT JOIN hr_departments d ON d.id = r.department_id
+        LEFT JOIN adm_departments d ON d.id = r.department_id
         LEFT JOIN adm_document_workflows dw 
           ON dw.document_id = r.id 
           AND dw.document_type = 'RETURN_TO_STORES'
@@ -3064,7 +3302,7 @@ async function ensureReportingViews() {
       r.warehouse_id,
       r.department_id,
       d.item_id,
-      d.qty,
+      d.qty_returned AS qty,
       d.uom,
       r.created_at,
       r.created_by,
@@ -3484,7 +3722,7 @@ router.post(
           dwId: instanceId,
           stepOrder: first.step_order,
           actor: req.user?.sub || null,
-          comments: "",
+          comments: req.body?.comments || "",
         },
       ).catch(() => {});
 
@@ -4104,7 +4342,7 @@ router.post(
           dwId: instanceId,
           stepOrder: first.step_order,
           actor: req.user?.sub || null,
-          comments: "",
+          comments: req.body?.comments || "",
         },
       ).catch(() => {});
 
@@ -6357,11 +6595,11 @@ router.get(
         SELECT i.id, i.issue_no, i.issue_date, i.warehouse_id, i.issued_to,
                i.department_id, i.status, i.remarks, i.issue_type,
                i.requisition_id, i.created_by, i.created_at, i.updated_at,
-               w.warehouse_name, d.dept_name AS department_name,
+               w.warehouse_name, d.name AS department_name,
                COALESCE(u.username, ru.username) AS created_by_name
          FROM inv_issue_to_requirement i
         LEFT JOIN inv_warehouses w ON w.id = i.warehouse_id
-        LEFT JOIN hr_departments d ON d.id = i.department_id
+        LEFT JOIN adm_departments d ON d.id = i.department_id
         LEFT JOIN inv_material_requisitions r ON r.id = i.requisition_id
         LEFT JOIN adm_users u ON u.id = i.created_by
         LEFT JOIN adm_users ru ON ru.id = r.created_by
@@ -6393,12 +6631,12 @@ router.get(
 
       const [hdr] = await query(
         `
-        SELECT i.*, w.warehouse_name, d.dept_name AS department_name, u.username AS created_by_username,
+        SELECT i.*, w.warehouse_name, d.name AS department_name, u.username AS created_by_username,
           i.created_at,
           COALESCE(u.username, ru.username) AS created_by_name
          FROM inv_issue_to_requirement i
         LEFT JOIN inv_warehouses w ON w.id = i.warehouse_id
-        LEFT JOIN hr_departments d ON d.id = i.department_id
+        LEFT JOIN adm_departments d ON d.id = i.department_id
         LEFT JOIN inv_material_requisitions r ON r.id = i.requisition_id
         LEFT JOIN adm_users u ON u.id = i.created_by
         LEFT JOIN adm_users ru ON ru.id = r.created_by
@@ -6834,12 +7072,12 @@ router.get(
       if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
       const [hdr] = await query(
         `
-        SELECT r.*, w.warehouse_name, d.dept_name AS department_name,
+        SELECT r.*, w.warehouse_name, d.name AS department_name,
           r.created_at,
           u.username AS created_by_name
          FROM inv_return_to_stores r
         LEFT JOIN inv_warehouses w ON w.id = r.warehouse_id
-        LEFT JOIN hr_departments d ON d.id = r.department_id
+        LEFT JOIN adm_departments d ON d.id = r.department_id
         LEFT JOIN adm_users u ON u.id = r.created_by
          WHERE r.id = :id
         LIMIT 1
@@ -8644,7 +8882,7 @@ router.post(
   async (req, res, next) => {
     try {
       await ensureItemsTable();
-      const { companyId = null } = req.scope || {};
+      const { companyId = null, branchId = null } = req.scope || {};
       const userId = toNumber(req.scope?.userId ?? req.user?.sub) || null;
       const body = req.body || {};
       let itemCode = body.item_code ? String(body.item_code).trim() : null;
@@ -8764,14 +9002,19 @@ router.post(
       if (openingQuantity > 0 && openingWarehouseId) {
         const updationNo = `UPD-OP-${Date.now()}`;
         
+        // Fetch warehouse branch_id
+        const whRes = await query('SELECT branch_id FROM inv_warehouses WHERE id = :warehouseId', { warehouseId: openingWarehouseId });
+        const actualBranchId = whRes && whRes.length > 0 ? whRes[0].branch_id : null;
+        
         // 1. Create Stock Updation Header
         const updRaw = await query(
           `INSERT INTO inv_stock_updations 
-             (company_id, warehouse_id, updation_no, updation_date, reason, status, created_by)
+             (company_id, branch_id, warehouse_id, updation_no, updation_date, reason, status, created_by)
            VALUES 
-             (:companyId, :warehouseId, :updationNo, NOW(), 'Opening Balance', 'APPROVED', :createdBy)`,
+             (:companyId, :branchId, :warehouseId, :updationNo, NOW(), 'Opening Balance', 'APPROVED', :createdBy)`,
           {
             companyId: companyId || null,
+            branchId: actualBranchId,
             warehouseId: openingWarehouseId,
             updationNo,
             createdBy: userId
@@ -8811,8 +9054,8 @@ router.post(
         } else {
           await query(
             `INSERT INTO inv_stock_balances (company_id, branch_id, warehouse_id, item_id, qty)
-             VALUES (:companyId, NULL, :warehouseId, :itemId, :qty)`,
-            { companyId: companyId || null, warehouseId: openingWarehouseId, itemId, qty: openingQuantity }
+             VALUES (:companyId, :branchId, :warehouseId, :itemId, :qty)`,
+            { companyId: companyId || null, branchId: actualBranchId, warehouseId: openingWarehouseId, itemId, qty: openingQuantity }
           );
         }
       }
@@ -9999,20 +10242,19 @@ router.post(
 
       let recipients = await query(
         `
-        SELECT DISTINCT u.id, u.email,
+        SELECT DISTINCT u.id, u.email, u.phone,
+          np.email_enabled, np.sms_enabled, np.whatsapp_enabled,
           u.created_at,
           cu.username AS created_by_name
          FROM adm_users u
         JOIN adm_notification_prefs np
           ON np.user_id = u.id
          AND np.pref_key = 'low-stock'
-         AND np.email_enabled = 1
         LEFT JOIN adm_users cu ON cu.id = u.created_by
          WHERE u.is_active = 1
           AND u.company_id = :companyId
           AND u.branch_id = :branchId
-          AND u.email IS NOT NULL
-          AND u.email <> ''
+          AND (np.email_enabled = 1 OR np.sms_enabled = 1 OR np.whatsapp_enabled = 1)
         `,
         { companyId, branchId },
       );
@@ -10020,7 +10262,8 @@ router.post(
       if (!recipients.length) {
         recipients = await query(
           `
-          SELECT id, email,
+          SELECT id, email, phone,
+          1 as email_enabled, 0 as sms_enabled, 0 as whatsapp_enabled,
           created_at,
           u.username AS created_by_name
          FROM adm_users
@@ -10029,8 +10272,6 @@ router.post(
             AND company_id = :companyId
             AND branch_id = :branchId
             AND is_active = 1
-            AND email IS NOT NULL
-            AND email <> ''
           LIMIT 1
           `,
           { userId: req.user.sub, companyId, branchId },
@@ -10061,16 +10302,19 @@ router.post(
       const html = `<p>${count} items are at or below reorder levels.</p><table border="1" cellpadding="6" cellspacing="0"><thead><tr><th>Code</th><th>Name</th><th>Qty</th><th>Reorder</th></tr></thead><tbody>${htmlRows}</tbody></table><p><a href="/inventory/alerts/low-stock">Open Alerts</a></p>`;
 
       for (const recipient of recipients) {
-        await sendMail({
-          to: recipient.email,
-          subject,
-          text,
-          html,
-        });
+        if (recipient.email_enabled && recipient.email) {
+          await sendExternalNotification({ type: 'email', recipientEmail: recipient.email, subject, text, html }).catch(()=>null);
+        }
+        if (recipient.sms_enabled && recipient.phone) {
+          await sendExternalNotification({ type: 'sms', recipientPhone: recipient.phone, text }).catch(()=>null);
+        }
+        if (recipient.whatsapp_enabled && recipient.phone) {
+          await sendExternalNotification({ type: 'whatsapp', recipientPhone: recipient.phone, text }).catch(()=>null);
+        }
       }
 
       res.json({
-        message: `Email notification sent to ${recipients.length} recipient${recipients.length === 1 ? "" : "s"}`,
+        message: `Notification dispatched to ${recipients.length} recipient${recipients.length === 1 ? "" : "s"}`,
       });
     } catch (err) {
       next(err);
@@ -10141,7 +10385,7 @@ router.get(
   requireBranchScope,
   async (req, res, next) => {
     try {
-      const { companyId, branchId = null } = req.scope || {};
+      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
       const [items] = await query(
         "SELECT COUNT(*) as count FROM inv_items WHERE company_id = :companyId AND is_active = 1",
         { companyId },
@@ -10161,8 +10405,8 @@ router.get(
       const [lowStock] = await query(
         `SELECT COUNT(*) as count FROM inv_items i
        WHERE i.company_id = :companyId AND i.is_active = 1 AND i.reorder_level > 0
-       AND i.reorder_level > (SELECT COALESCE(SUM(sb.qty), 0) FROM inv_stock_balances sb WHERE sb.item_id = i.id AND sb.branch_id = :branchId)`,
-        { companyId, branchId },
+       AND i.reorder_level > (SELECT COALESCE(SUM(sb.qty), 0) FROM inv_stock_balances sb WHERE sb.item_id = i.id AND (:branchIdsStr = '' OR FIND_IN_SET(sb.branch_id, :branchIdsStr)))`,
+        { companyId, branchIdsStr },
       ).catch(() => [{ count: 0 }]);
       const [adjustments] = await query(
         "SELECT COUNT(*) as count FROM inv_stock_adjustments WHERE company_id = :companyId AND branch_id = :branchId AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)",

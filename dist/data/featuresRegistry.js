@@ -305,6 +305,30 @@ export const FEATURES_REGISTRY = {
       { feature_key: "service-management:billing-analytics", type: "dashboard", label: "Billing Analytics Dashboard", path: "/service-management/billing-analytics" },
     ],
   },
+  
+  // Transport Module
+  transport: {
+    features: [
+      { feature_key: "transport:requests", type: "feature", label: "Transport Requests", path: "/transport/requests" },
+      { feature_key: "transport:vehicles", type: "feature", label: "Vehicles", path: "/transport/vehicles" },
+      { feature_key: "transport:drivers", type: "feature", label: "Drivers", path: "/transport/drivers" },
+      { feature_key: "transport:trips", type: "feature", label: "Trips & Dispatch", path: "/transport/trips" },
+      { feature_key: "transport:fuel", type: "feature", label: "Refuelling", path: "/transport/fuel" },
+      { feature_key: "transport:fuel-bills", type: "feature", label: "Fuel Bills", path: "/transport/fuel-bills" },
+      { feature_key: "transport:bills", type: "feature", label: "Transportation Bills", path: "/transport/transportation-bills" },
+      { feature_key: "transport:billing", type: "feature", label: "Billing", path: "/transport/billing" },
+      { feature_key: "transport:income", type: "feature", label: "Transportation Income", path: "/transport/income" },
+      { feature_key: "transport:expenses", type: "feature", label: "Transportation Expenses", path: "/transport/expenses" },
+      { feature_key: "transport:routes", type: "feature", label: "Routes", path: "/transport/routes" },
+      { feature_key: "transport:inspections", type: "feature", label: "Inspections", path: "/transport/inspections" },
+      { feature_key: "transport:maintenance", type: "feature", label: "Maintenance Requests", path: "/transport/maintenance" },
+      { feature_key: "transport:settings", type: "feature", label: "Transport Settings", path: "/transport/settings" },
+      { feature_key: "transport:reports", type: "feature", label: "Reports & Analytics", path: "/transport/reports" }
+    ],
+    dashboards: [
+      { feature_key: "transport:overview", type: "dashboard", label: "Transport Overview Dashboard", path: "/transport/overview" }
+    ],
+  },
 };
 
 /**

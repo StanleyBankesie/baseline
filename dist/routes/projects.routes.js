@@ -232,6 +232,53 @@ router.delete(
   projectsController.deleteExpense
 );
 
+router.put(
+  "/expenses/:id/voucher",
+  requireAuth,
+  requireCompanyScope,
+  projectsController.updateExpenseVoucherId
+);
+
+// ===== INCOME =====
+router.get(
+  "/income",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  projectsController.listIncome
+);
+
+router.post(
+  "/income",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  projectsController.createIncome
+);
+
+router.put(
+  "/income/:id",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  projectsController.updateIncome
+);
+
+router.delete(
+  "/income/:id",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  projectsController.deleteIncome
+);
+
+router.put(
+  "/income/:id/voucher",
+  requireAuth,
+  requireCompanyScope,
+  projectsController.updateIncomeVoucherId
+);
+
 // ===== DASHBOARD DETAIL =====
 router.get(
   "/dashboard/detail",
@@ -1001,7 +1048,7 @@ router.post(
       await query(
         `INSERT INTO adm_workflow_logs (document_workflow_id, step_order, action, actor_user_id, comments)
          VALUES (:dwId, :stepOrder, 'SUBMIT', :actor, :comments)`,
-        { dwId: instanceId, stepOrder: first.step_order, actor: req.user.sub, comments: "" },
+        { dwId: instanceId, stepOrder: first.step_order, actor: req.user.sub, comments: req.body?.comments || "" },
       );
 
       await query(

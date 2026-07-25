@@ -813,21 +813,37 @@ if (boolEnv(process.env.DISABLE_KEEP_ALIVE)) {
 }
 
 /* --- Serve frontend static assets EARLY (before API routes) --- */
-// This ensures /assets/*.js files are served with correct MIME types
-// even when Nginx/Passenger forwards requests to Node.js.
-const _earlyDistPath = path.join(__dirname, "../client/dist");
-if (fs.existsSync(_earlyDistPath)) {
-  app.use(
-    express.static(_earlyDistPath, {
-      // Set correct MIME types explicitly for module scripts
-      setHeaders: (res, filePath) => {
-        if (filePath.endsWith(".js") || filePath.endsWith(".mjs")) {
-          res.setHeader("Content-Type", "application/javascript; charset=utf-8");
-        }
-      },
-    }),
+// This ensures /assets/*.js files are served with correct MIME types.
+// Check multiple possible locations for the frontend build:
+//   1. ../client/dist  (local development)
+//   2. ./public        (production build via scripts/build.js)
+//   3. cwd()/public    (Plesk/Passenger deployment)
+const _staticOpts = {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith(".js") || filePath.endsWith(".mjs")) {
+      res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+    }
+  },
+};
+const _frontendCandidates = [
+  path.join(__dirname, "../client/dist"),
+  path.join(__dirname, "public"),
+  path.join(process.cwd(), "public"),
+];
+let _earlyFrontendPath = null;
+for (const candidate of _frontendCandidates) {
+  if (fs.existsSync(path.join(candidate, "index.html"))) {
+    _earlyFrontendPath = candidate;
+    break;
+  }
+}
+if (_earlyFrontendPath) {
+  app.use(express.static(_earlyFrontendPath, _staticOpts));
+  console.log(`[STATIC] Serving frontend assets from ${_earlyFrontendPath}`);
+} else {
+  console.warn(
+    `[STATIC] Frontend build not found. Checked: ${_frontendCandidates.join(", ")}`,
   );
-  console.log(`[STATIC] Serving frontend assets from ${_earlyDistPath}`);
 }
 
 app.use(
@@ -898,43 +914,32 @@ app.use("/api/email-test", emailTestRoutes);
 app.use("/api/visitors", visitorsRoutes);
 
 /* ---------------- STATIC FILES & SPA FALLBACK ---------------- */
+// Use the frontend path already discovered by the early static block above.
+// Also allow SERVE_FRONTEND / ENABLE_SPA to force-enable SPA fallback even if
+// the path was overridden by STATIC_DIR / PUBLIC_DIR env vars.
 const serveFrontendFlag = (() => {
   const v1 = String(process.env.SERVE_FRONTEND || "").toLowerCase();
   const v2 = String(process.env.ENABLE_SPA || "").toLowerCase();
   return v1 === "1" || v1 === "true" || v2 === "1" || v2 === "true";
 })();
-if (serveFrontendFlag) {
-  let frontendPath = null;
-  const overrideDir =
-    String(process.env.STATIC_DIR || process.env.PUBLIC_DIR || "").trim() ||
-    null;
-  if (overrideDir) {
-    const abs =
-      path.isAbsolute(overrideDir) === true
-        ? overrideDir
-        : path.join(process.cwd(), overrideDir);
-    if (fs.existsSync(path.join(abs, "index.html"))) {
-      frontendPath = abs;
-    }
+// Resolve override directory from env, if any
+const _overrideDir =
+  String(process.env.STATIC_DIR || process.env.PUBLIC_DIR || "").trim() || null;
+let _spaFrontendPath = _earlyFrontendPath; // already discovered above
+if (_overrideDir) {
+  const abs = path.isAbsolute(_overrideDir)
+    ? _overrideDir
+    : path.join(process.cwd(), _overrideDir);
+  if (fs.existsSync(path.join(abs, "index.html"))) {
+    _spaFrontendPath = abs;
   }
-  const distPath = path.join(__dirname, "../client/dist");
-  const distIndex = path.join(distPath, "index.html");
-  const publicPath = path.join(__dirname, "public");
-  const publicIndex = path.join(publicPath, "index.html");
-  if (!frontendPath && fs.existsSync(distIndex)) {
-    frontendPath = distPath;
-    console.log("Serving frontend from ../client/dist");
-  } else if (!frontendPath && fs.existsSync(publicIndex)) {
-    frontendPath = publicPath;
-    console.log("Serving frontend from ./public");
-  } else if (!frontendPath) {
-    frontendPath = fs.existsSync(distPath) ? distPath : publicPath;
-    console.warn(
-      "Frontend build not found (index.html missing) in ./public or ../client/dist",
-    );
-  }
+}
+if (_spaFrontendPath || serveFrontendFlag) {
+  const frontendPath = _spaFrontendPath;
   if (frontendPath && fs.existsSync(frontendPath)) {
-    app.use(express.static(frontendPath));
+    // Static already registered early; register again here just in case
+    // (express.static is idempotent for the same path)
+    app.use(express.static(frontendPath, _staticOpts));
   }
   // Return 404 for missing static assets in /assets or matching file extensions (prevents MIME type errors)
   app.use("/assets", (req, res) => {
@@ -947,12 +952,13 @@ if (serveFrontendFlag) {
     if (/\.(js|css|png|jpg|jpeg|gif|ico|json|svg|woff|woff2|ttf|map)$/i.test(req.path)) {
       return res.status(404).type("text/plain").send("Static file not found");
     }
-    const indexPath = path.join(frontendPath, "index.html");
-    if (fs.existsSync(indexPath)) {
-      res.sendFile(indexPath);
-    } else {
-      res.status(404).send("Frontend not built or index.html missing.");
+    if (frontendPath) {
+      const indexPath = path.join(frontendPath, "index.html");
+      if (fs.existsSync(indexPath)) {
+        return res.sendFile(indexPath);
+      }
     }
+    res.status(404).send("Frontend not built or index.html missing.");
   });
 } else {
   app.get("/", (req, res) => {

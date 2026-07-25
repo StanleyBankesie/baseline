@@ -22,6 +22,7 @@ async function hasColumn(tableName, columnName) {
 }
 
 async function ensureItemFlagColumns() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   if (!(await hasColumn("inv_items", "service_item"))) {
     await query(
       "ALTER TABLE inv_items ADD COLUMN service_item CHAR(1) NOT NULL DEFAULT 'N'",
@@ -1344,6 +1345,7 @@ export const getUnitConversionById = async (req, res, next) => {
 export const createUnitConversion = async (req, res, next) => {
   try {
     const { companyId = null } = req.scope || {};
+    const userId = req.user?.id || null;
     const body = req.body || {};
     const itemId = Number(body.item_id || 0);
     const fromUom = String(body.from_uom || "").trim();
@@ -1364,10 +1366,10 @@ export const createUnitConversion = async (req, res, next) => {
       );
     }
     const ins = await query(`
-      INSERT INTO inv_unit_conversions (company_id, item_id, from_uom, to_uom, conversion_factor, is_active)
-      VALUES (:companyId, :itemId, :fromUom, :toUom, :conversionFactor, :isActive)
+      INSERT INTO inv_unit_conversions (company_id, item_id, from_uom, to_uom, conversion_factor, is_active, created_by)
+      VALUES (:companyId, :itemId, :fromUom, :toUom, :conversionFactor, :isActive, :userId)
       `,
-      { companyId, itemId, fromUom, toUom, conversionFactor, isActive },
+      { companyId, itemId, fromUom, toUom, conversionFactor, isActive, userId },
     );
     res.status(201).json({ id: ins.insertId });
   } catch (err) {

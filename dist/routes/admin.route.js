@@ -30,12 +30,13 @@ import {
 import { requirePermission } from "../middleware/requirePermission.js";
 
 // Database Utilities and Error Handling
-import { query } from "../db/pool.js";
+import { query, pool } from "../db/pool.js";
 import { httpError } from "../utils/httpError.js";
 import {
   ensureRoleModulesTable,
   ensureRolePermissionsTable,
   ensureRoleFeaturesTable,
+  verifiedTables,
 } from "../utils/dbUtils.js";
 import { ensureUserPermissionCacheAndTriggers } from "../utils/dbUtils.js";
 import {
@@ -383,12 +384,30 @@ async function ensureUserColumns() {
       `ALTER TABLE ${table} ADD COLUMN branch_id BIGINT UNSIGNED NULL`,
     );
   }
+
+  // Ensure user ID 1 cannot be deleted
+  try {
+    await query(`DROP TRIGGER IF EXISTS trg_prevent_delete_user_1`);
+    await query(`
+      CREATE TRIGGER trg_prevent_delete_user_1
+      BEFORE DELETE ON adm_users
+      FOR EACH ROW
+      BEGIN
+        IF OLD.id = 1 THEN
+          SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cannot delete super admin user id 1';
+        END IF;
+      END;
+    `);
+  } catch (err) {
+    console.error("Failed to create trigger for user 1 deletion prevention:", err.message);
+  }
 }
 
 /**
  * Ensures the adm_pages table exists to define application modules and features.
  */
 async function ensurePagesTable() {
+  if (verifiedTables.has("adm_pages")) return;
   await query(`
     CREATE TABLE IF NOT EXISTS adm_pages (
       id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -410,6 +429,7 @@ async function ensurePagesTable() {
       `ALTER TABLE adm_pages ADD COLUMN feature_key VARCHAR(150) NULL AFTER path`,
     );
   }
+  verifiedTables.add("adm_pages");
 }
 
 /**
@@ -1442,6 +1462,7 @@ async function ensureRolePagesTable() {
  * Ensures the adm_user_permissions table exists for fine-grained user access control to pages.
  */
 async function ensureUserPermissionsTable() {
+  if (verifiedTables.has("adm_user_permissions")) return;
   await query(`
     CREATE TABLE IF NOT EXISTS adm_user_permissions (
       id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -1459,6 +1480,7 @@ async function ensureUserPermissionsTable() {
       FOREIGN KEY (page_id) REFERENCES adm_pages(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
+  verifiedTables.add("adm_user_permissions");
 }
 
 function deriveActionAndBase(page) {
@@ -1513,6 +1535,7 @@ function requirePageAccess(path, action = "view") {
       if (!Number.isFinite(userId) || userId <= 0) {
         return next(httpError(401, "UNAUTHORIZED", "Invalid user"));
       }
+      if (userId === 1) return next();
       const rows = await query(
         `SELECT id, module, name, path,
           created_at,
@@ -1641,6 +1664,7 @@ async function logError({
 }
 
 async function ensureUserBranchMapping() {
+  if (verifiedTables.has("adm_user_branches")) return;
   await query(`
     CREATE TABLE IF NOT EXISTS adm_user_branches (
       user_id BIGINT UNSIGNED NOT NULL,
@@ -1654,6 +1678,7 @@ async function ensureUserBranchMapping() {
       CONSTRAINT fk_ub_branch FOREIGN KEY (branch_id) REFERENCES adm_branches(id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
   `);
+  verifiedTables.add("adm_user_branches");
 }
 
 const logoUpload = multer({
@@ -2528,9 +2553,18 @@ router.get("/user-permissions", requireAuth, async (req, res, next) => {
       return res.json({ modules: [], permissions: [] });
     }
 
-    // Get user's role
+    if (userId === 1) {
+      return res.json({
+        modules: ["*"],
+        permissions: [{ module_key: "*", feature_key: "*", can_view: 1, can_create: 1, can_edit: 1, can_delete: 1 }],
+        role_features: ["*"],
+        licensed_modules: ["*"],
+      });
+    }
+
+    // Get user's role and company
     const roleResult = await query(
-      `SELECT role_id
+      `SELECT role_id, company_id
          FROM adm_users
         WHERE id = :userId`,
       { userId },
@@ -2588,25 +2622,64 @@ router.get("/user-permissions", requireAuth, async (req, res, next) => {
       .map((row) => normalizeFeatureKey(row.feature_key))
       .filter(Boolean);
 
-    const inferredModules = new Set(
+    const explicitModules = new Set(
       modules
         .map((row) => normalizeModuleKey(row.module_key))
         .filter(Boolean),
     );
-    for (const row of normalizedPermissions) {
-      if (row.module_key) inferredModules.add(row.module_key);
-      const [featureModule] = String(row.feature_key || "").split(":");
-      if (featureModule) inferredModules.add(featureModule);
-    }
-    for (const featureKey of normalizedRoleFeatures) {
-      const [featureModule] = String(featureKey || "").split(":");
-      if (featureModule) inferredModules.add(featureModule);
+
+    // Fetch exclusive permissions for this user
+    const exclusivePerms = await query(
+      `SELECT module_key, feature_key FROM adm_admin_page_permissions WHERE user_id = :userId`,
+      { userId }
+    );
+    for (const ep of exclusivePerms) {
+      const mk = normalizeModuleKey(ep.module_key);
+      const fk = normalizeFeatureKey(ep.feature_key, mk);
+      explicitModules.add(mk);
+      normalizedRoleFeatures.push(fk);
+      normalizedPermissions.push({
+        module_key: mk,
+        feature_key: fk,
+        can_view: 1,
+        can_create: 1,
+        can_edit: 1,
+        can_delete: 1,
+      });
     }
 
+    const inferredModules = new Set(explicitModules);
+
+    const companyId = Number(roleResult?.[0]?.company_id || 0);
+    let licensedModules = null;
+    if (companyId) {
+      const licenseQuery = await query(`SELECT id FROM adm_company_licenses WHERE company_id = :companyId ORDER BY id DESC LIMIT 1`, { companyId });
+      if (licenseQuery && licenseQuery.length > 0) {
+        const licenseId = licenseQuery[0].id;
+        const lm = await query(`SELECT module_code FROM adm_license_modules WHERE license_id = :licenseId`, { licenseId });
+        licensedModules = new Set(lm.map(x => x.module_code));
+      }
+    }
+
+    let finalModules = Array.from(inferredModules);
+    let finalPermissions = normalizedPermissions;
+    let finalRoleFeatures = normalizedRoleFeatures;
+
+    // Only filter by modules explicitly assigned to the role.
+    // License enforcement happens at role-assignment time (in saveRoleModules).
+    // Do NOT strip role-assigned modules by license here — that causes enabled modules
+    // (e.g. transport) to disappear from sidebar even when checked in role setup.
+    finalPermissions = finalPermissions.filter(p => explicitModules.has(p.module_key));
+    finalRoleFeatures = finalRoleFeatures.filter(f => {
+      const [m] = f.split(":");
+      return explicitModules.has(m);
+    });
+
     res.json({
-      modules: Array.from(inferredModules),
-      permissions: normalizedPermissions,
-      role_features: normalizedRoleFeatures,
+      modules: finalModules,
+      permissions: finalPermissions,
+      role_features: finalRoleFeatures,
+      licensed_modules: Array.from(licensedModules || []),
     });
   } catch (err) {
     next(err);
@@ -2710,6 +2783,62 @@ router.post(
         ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
         `,
         { companyId: companyId ?? null, branchId: branchId ?? null, branchIdsStr, folder },
+      );
+      res.json({ success: true });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.get(
+  "/settings/google-maps",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensureSystemSettingsTable();
+      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const rows = await query(
+        `
+        SELECT setting_key, setting_value
+         FROM adm_system_settings
+         WHERE (company_id = :companyId OR company_id IS NULL)
+          AND ((:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
+          AND setting_key = 'GOOGLE_MAPS_API_KEY'
+        ORDER BY company_id DESC, branch_id DESC
+        LIMIT 1
+        `,
+        { companyId: companyId ?? null, branchId: branchId ?? null, branchIdsStr },
+      );
+      res.json({
+        data: {
+          api_key: rows.length > 0 ? rows[0].setting_value : "",
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.post(
+  "/settings/google-maps",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensureSystemSettingsTable();
+      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const api_key = String(req.body?.api_key || "").trim();
+      
+      await query(
+        `
+        INSERT INTO adm_system_settings (company_id, branch_id, setting_key, setting_value)
+        VALUES (:companyId, :branchId, 'GOOGLE_MAPS_API_KEY', :api_key)
+        ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
+        `,
+        { companyId: companyId ?? null, branchId: branchId ?? null, branchIdsStr, api_key },
       );
       res.json({ success: true });
     } catch (err) {
@@ -2854,5 +2983,274 @@ router.post(
     }
   },
 );
+
+
+// ==========================================
+// Admin Page Permissions Routes
+// ==========================================
+
+router.get('/exclusive-permissions', requireAuth, async (req, res, next) => {
+  try {
+    const rows = await query(`
+      SELECT p.*, u.username, u.full_name 
+      FROM adm_admin_page_permissions p
+      JOIN adm_users u ON p.user_id = u.id
+      ORDER BY p.created_at DESC
+    `);
+    res.json({ items: rows });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/exclusive-permissions', requireAuth, async (req, res, next) => {
+  try {
+    const { user_id, module_key, feature_key } = req.body;
+    if (!user_id || !module_key || !feature_key) {
+      throw httpError(400, "Missing required fields");
+    }
+    
+    // Check super admin 
+    const superRes = await query("SELECT value FROM app_settings WHERE `key` = 'super_admin_id'").catch(()=>[]);
+    const superIdVal = superRes[0]?.value || (superRes.rows && superRes.rows[0]?.value);
+    const superId = superIdVal ? parseInt(superIdVal, 10) : 1;
+    if (req.user.id !== superId) {
+       throw httpError(403, "Only Super Admin can assign page permissions");
+    }
+
+    await query(
+      `INSERT INTO adm_admin_page_permissions (user_id, module_key, feature_key) VALUES (?, ?, ?)
+       ON DUPLICATE KEY UPDATE module_key=VALUES(module_key)`,
+      [user_id, module_key, feature_key]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/exclusive-permissions/:id', requireAuth, async (req, res, next) => {
+  try {
+    // Check super admin 
+    const superRes = await query("SELECT value FROM app_settings WHERE `key` = 'super_admin_id'").catch(()=>[]);
+    const superIdVal = superRes[0]?.value || (superRes.rows && superRes.rows[0]?.value);
+    const superId = superIdVal ? parseInt(superIdVal, 10) : 1;
+    if (req.user.id !== superId) {
+       throw httpError(403, "Only Super Admin can delete page permissions");
+    }
+
+    await query("DELETE FROM adm_admin_page_permissions WHERE id = ?", [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /admin/notification-settings
+router.get("/notification-settings", requireAuth, requireCompanyScope, async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const settings = await query(
+      "SELECT * FROM adm_notification_settings WHERE company_id = ?",
+      [companyId]
+    );
+    res.json({ items: settings });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /admin/notification-settings
+router.post("/notification-settings", requireAuth, requireCompanyScope, async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const { items } = req.body;
+    
+    if (!Array.isArray(items)) {
+      throw httpError(400, "VALIDATION_ERROR", "items array is required");
+    }
+
+    const conn = await pool.getConnection();
+    try {
+      await conn.beginTransaction();
+
+      for (const item of items) {
+        const { module_code, status_trigger, send_email, send_sms, send_whatsapp, recipients } = item;
+        if (!module_code || !status_trigger) continue;
+
+        await conn.query(
+          `INSERT INTO adm_notification_settings 
+           (company_id, module_code, status_trigger, send_email, send_sms, send_whatsapp, recipients) 
+           VALUES (?, ?, ?, ?, ?, ?, ?)
+           ON DUPLICATE KEY UPDATE 
+           send_email = VALUES(send_email),
+           send_sms = VALUES(send_sms),
+           send_whatsapp = VALUES(send_whatsapp),
+           recipients = VALUES(recipients)`,
+          [
+            companyId, module_code, status_trigger, 
+            send_email || 'N', send_sms || 'N', send_whatsapp || 'N',
+            recipients || null
+          ]
+        );
+      }
+
+      await conn.commit();
+      res.json({ success: true });
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    } finally {
+      conn.release();
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+// GET /admin/settings/compliance-template
+router.get("/settings/compliance-template", requireAuth, requireCompanyScope, async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const [row] = await query(
+      "SELECT setting_value FROM adm_system_settings WHERE company_id = ? AND setting_key = 'compliance_notification_template'",
+      [companyId]
+    );
+    res.json({ template: row ? row.setting_value : "" });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /admin/settings/compliance-template
+router.post("/settings/compliance-template", requireAuth, requireCompanyScope, async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const { template } = req.body;
+    await query(
+      `INSERT INTO adm_system_settings (company_id, setting_key, setting_value) 
+       VALUES (?, 'compliance_notification_template', ?)
+       ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)`,
+      [companyId, template]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /admin/settings/servicing-template
+router.get("/settings/servicing-template", requireAuth, requireCompanyScope, async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const [row] = await query(
+      "SELECT setting_value FROM adm_system_settings WHERE company_id = ? AND setting_key = 'servicing_notification_template'",
+      [companyId]
+    );
+    res.json({ template: row ? row.setting_value : "" });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /admin/settings/servicing-template
+router.post("/settings/servicing-template", requireAuth, requireCompanyScope, async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const { template } = req.body;
+    await query(
+      `INSERT INTO adm_system_settings (company_id, setting_key, setting_value) 
+       VALUES (?, 'servicing_notification_template', ?)
+       ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)`,
+      [companyId, template]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/settings/env", requireAuth, async (req, res, next) => {
+  try {
+    if (req.user.id !== 1) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    const fs = await import("fs");
+    const path = await import("path");
+    const envPath = path.resolve(process.cwd(), ".env");
+    let content = "";
+    if (fs.existsSync(envPath)) {
+      content = fs.readFileSync(envPath, "utf-8");
+    }
+    const envVars = {};
+    content.split(/\r?\n/).forEach(line => {
+      const match = line.match(/^([^=]+)=(.*)$/);
+      if (match) {
+        envVars[match[1].trim()] = match[2].trim();
+      }
+    });
+    return res.json({
+      ARKESEL_API_KEY: envVars.ARKESEL_API_KEY ? "********" : "",
+      ARKESEL_SENDER_ID: envVars.ARKESEL_SENDER_ID ? "********" : "",
+      GREEN_API_ID_INSTANCE: envVars.GREEN_API_ID_INSTANCE || "",
+      GREEN_API_TOKEN_INSTANCE: envVars.GREEN_API_TOKEN_INSTANCE ? "********" : "",
+      SMTP_HOST: envVars.SMTP_HOST || "",
+      SMTP_PORT: envVars.SMTP_PORT || "",
+      SMTP_USER: envVars.SMTP_USER || "",
+      SMTP_PASS: envVars.SMTP_PASS ? "********" : "",
+      SMTP_FROM: envVars.SMTP_FROM || "",
+      SMTP_SECURE: envVars.SMTP_SECURE || "false",
+      TEMPLATE_SALES_ORDER: envVars.TEMPLATE_SALES_ORDER || "Dear {customer_name},\n\nYour Sales Order {document_no} for {amount} has been {status}.\n\nThank you!",
+      TEMPLATE_PURCHASE_ORDER: envVars.TEMPLATE_PURCHASE_ORDER || "Dear {customer_name},\n\nYour Purchase Order {document_no} for {amount} has been {status}.\n\nThank you!",
+      TEMPLATE_SERVICE_ORDER: envVars.TEMPLATE_SERVICE_ORDER || "Dear {customer_name},\n\nYour Service Order {document_no} for {amount} has been {status}.\n\nThank you!",
+      TEMPLATE_MAINTENANCE_JOB: envVars.TEMPLATE_MAINTENANCE_JOB || "Dear {customer_name},\n\nYour Maintenance Job {document_no} has been {status}.\n\nThank you!",
+      TEMPLATE_PAYMENT_VOUCHER: envVars.TEMPLATE_PAYMENT_VOUCHER || "Dear {customer_name},\n\nYour Payment Voucher {document_no} for {amount} has been {status}.\n\nThank you!",
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/settings/env", requireAuth, async (req, res, next) => {
+  try {
+    if (req.user.id !== 1) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    const fs = await import("fs");
+    const path = await import("path");
+    const envPath = path.resolve(process.cwd(), ".env");
+    
+    let content = "";
+    if (fs.existsSync(envPath)) {
+      content = fs.readFileSync(envPath, "utf-8");
+    }
+
+    const updates = req.body;
+    const allowedKeys = [
+      "ARKESEL_API_KEY", "ARKESEL_SENDER_ID", "GREEN_API_ID_INSTANCE", "GREEN_API_TOKEN_INSTANCE",
+      "SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "SMTP_FROM", "SMTP_SECURE",
+      "TEMPLATE_SALES_ORDER", "TEMPLATE_PURCHASE_ORDER", "TEMPLATE_SERVICE_ORDER", 
+      "TEMPLATE_MAINTENANCE_JOB", "TEMPLATE_PAYMENT_VOUCHER"
+    ];
+    
+    let lines = content.split(/\r?\n/);
+    for (const key of allowedKeys) {
+      if (updates[key] !== undefined && updates[key] !== "********") {
+        const val = String(updates[key]);
+        const index = lines.findIndex(line => line.startsWith(key + "="));
+        if (index >= 0) {
+          lines[index] = `${key}=${val}`;
+        } else {
+          lines.push(`${key}=${val}`);
+        }
+        process.env[key] = val; // Update in-memory
+      }
+    }
+    
+    fs.writeFileSync(envPath, lines.join("\n"));
+    return res.json({ message: "Environment variables updated successfully" });
+  } catch (err) {
+    next(err);
+  }
+});
 
 export default router;

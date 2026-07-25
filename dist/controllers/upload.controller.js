@@ -93,7 +93,7 @@ async function getCloudinaryConfig(scope) {
     branchId,
   );
   const folder =
-    (await getSystemSetting("CLOUDINARY_UPLOAD_FOLDER", companyId, branchId, branchIdsStr)) ||
+    (await getSystemSetting("CLOUDINARY_UPLOAD_FOLDER", companyId, branchId)) ||
     null;
   if (cloud_name && api_key && api_secret) {
     return { cloud_name, api_key, api_secret, folder };
@@ -114,7 +114,8 @@ export const uploadFile = async (req, res, next) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
     const reqFolder = req.body?.folder || req.query?.folder || null;
-    // Try Cloudinary first if configured
+    
+    // Cloudinary exclusively
     const cfg = await getCloudinaryConfig(req.scope || {});
     if (cfg) {
       try {
@@ -169,12 +170,20 @@ export const uploadFile = async (req, res, next) => {
         } catch {}
         return;
       } catch (e) {
+        // Cleanup local temp file on error
+        try { fs.unlinkSync(req.file.path); } catch {}
         next(e);
         return;
       }
     }
-    return next(new Error("Cloudinary is not configured"));
+    
+    // Cleanup local temp file since Cloudinary is not configured
+    try { fs.unlinkSync(req.file.path); } catch {}
+    return next(new Error("Cloudinary is not configured. All uploads must use Cloudinary."));
   } catch (e) {
+    if (req.file) {
+      try { fs.unlinkSync(req.file.path); } catch {}
+    }
     next(e);
   }
 };

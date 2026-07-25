@@ -6,6 +6,7 @@ import { query } from "../db/pool.js";
 import { httpError } from "../utils/httpError.js";
 import { cacheDel } from "../utils/redis.js";
 import { isMailerConfigured, sendMail } from "../utils/mailer.js";
+import { validateCompanyLicense, getCompanyLicense } from "../services/license.service.js";
 import {
   clearRefreshTokenCookie,
   buildAuthUserPayload,
@@ -34,6 +35,7 @@ const loginSchema = Joi.object({
     .falsy("0")
     .falsy("false")
     .default(false),
+  intent: Joi.string().optional(),
 }).required();
 
 const forgotRequestSchema = Joi.object({
@@ -44,7 +46,7 @@ const forgotRequestSchema = Joi.object({
 const resetPasswordSchema = Joi.object({
   username: Joi.string().min(3).max(100).required(),
   otp: Joi.string().length(6).required(),
-  new_password: Joi.string().min(6).max(100).required(),
+  new_password: Joi.string().min(8).max(100).required(),
 }).required();
 
 function createPasswordResetRequiredError() {
@@ -94,6 +96,7 @@ function postDebugEvent(hypothesisId, location, msg, data = {}) {
 
 let _loginLogsTableEnsured = false;
 async function ensureLoginLogsTable() {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
   if (_loginLogsTableEnsured) return;
   _loginLogsTableEnsured = true;
   await query(`
@@ -172,7 +175,17 @@ function isPasswordMatch(password, passwordHash, username) {
     hash.startsWith("$2b$") ||
     hash.startsWith("$2y$");
 
-  return isBcryptHash ? bcrypt.compare(password, hash) : password === hash;
+  // SECURITY: Never allow plaintext password comparison.
+  // If the stored hash is not bcrypt, reject the login and log a warning.
+  if (!isBcryptHash) {
+    console.warn(
+      `[SECURITY] User "${username}" has a non-bcrypt password hash. ` +
+      `Plaintext comparison has been disabled for security. ` +
+      `Please reset this user's password to generate a proper bcrypt hash.`
+    );
+    return false;
+  }
+  return bcrypt.compare(password, hash);
 }
 
 async function sendAuthResponse(req, res, session) {
@@ -322,8 +335,10 @@ export const login = async (req, res, next) => {
     const { value, error } = loginSchema.validate(req.body);
     if (error) throw httpError(400, "VALIDATION_ERROR", error.message);
 
+    // SECURITY: Default login backdoor is NEVER allowed in production
+    const isProd = String(process.env.NODE_ENV || "").toLowerCase() === "production";
     const allowDefault =
-      String(process.env.AUTH_ALLOW_DEFAULT_LOGIN || "").trim() === "1";
+      !isProd && String(process.env.AUTH_ALLOW_DEFAULT_LOGIN || "").trim() === "1";
     if (allowDefault) {
       const defUser =
         String(process.env.AUTH_DEFAULT_USER || "").trim() || "admin";
@@ -410,6 +425,37 @@ export const login = async (req, res, next) => {
       throw httpError(401, "INVALID_CREDENTIALS", "Invalid credentials");
     }
 
+    if (user.company_id) {
+      const licenseStatus = await validateCompanyLicense(user.company_id);
+      if (!licenseStatus.valid) {
+        const licenseData = await getCompanyLicense(user.company_id);
+        
+        // If the intent is explicitly "renew" from the login page, bypass the login block
+        // to allow them inside where they are forcibly redirected to the renewal modal
+        if (value.intent === "renew" && licenseData && licenseData.exists && (licenseData.status === 'EXPIRED' || licenseData.status === 'INACTIVE' || licenseStatus.reason.includes('expired'))) {
+          user.licenseExpired = true;
+        } else if (licenseData && licenseData.exists && (licenseData.status === 'EXPIRED' || licenseData.status === 'INACTIVE' || licenseStatus.reason.includes('expired')) && licenseData.allow_login_renewal === 0) {
+          // Bypass login block to allow them inside where modules are hidden
+          user.licenseExpired = true;
+        } else {
+          const permCheck = await query(
+            "SELECT 1 FROM adm_admin_page_permissions WHERE user_id = ? AND feature_key = 'system:license-renewal'", 
+            [user.id]
+          );
+          const superRes = await query("SELECT value FROM app_settings WHERE `key` = 'super_admin_id'").catch(()=>({rows:[]}));
+          const superIdVal = superRes[0]?.value || (superRes.rows && superRes.rows[0]?.value);
+          const superId = superIdVal ? parseInt(superIdVal, 10) : 1;
+          
+          const canRenew = (user.id === superId) || (permCheck && permCheck.length > 0);
+
+          const error = httpError(403, "LICENSE_EXPIRED", licenseStatus.reason || "Your company license has expired. Please contact your administrator to renew.");
+          error.companyId = user.company_id;
+          error.canRenew = canRenew;
+          throw error;
+        }
+      }
+    }
+
     await completeLogin(req, res, user, Boolean(value.rememberMe));
     // #region debug-point A:login-success
     postDebugEvent(
@@ -431,6 +477,7 @@ export const login = async (req, res, next) => {
       {
         elapsedMs: Date.now() - loginStartedAt,
         errorCode: err?.code || null,
+        companyId: err?.companyId || null,
         errorMessage: err?.message || String(err),
         sqlMessage: err?.sqlMessage || null,
       },
@@ -670,11 +717,11 @@ export const changePassword = async (req, res, next) => {
         "All password fields are required",
       );
     }
-    if (newPassword.length < 6) {
+    if (newPassword.length < 8) {
       throw httpError(
         400,
         "VALIDATION_ERROR",
-        "New password must be at least 6 characters",
+        "New password must be at least 8 characters",
       );
     }
     if (newPassword !== confirmNewPassword) {
@@ -708,6 +755,7 @@ export const changePassword = async (req, res, next) => {
       `UPDATE adm_users SET password_hash = ?, status = 'Y' WHERE id = ?`,
       [hash, user.id],
     );
+    await revokeUserRefreshTokens(user.id);
 
     res.json({ message: "Password changed successfully", status: "Y" });
   } catch (err) {
