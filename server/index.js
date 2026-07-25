@@ -185,6 +185,10 @@ app.use((req, res, next) => {
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
+    // Disable COEP — Vite adds crossorigin to all <script> tags, which makes
+    // the browser fetch in CORS mode.  Under require-corp, express.static
+    // responses (which lack CORS headers) are blocked with net::ERR_FAILED.
+    crossOriginEmbedderPolicy: false,
     hsts: {
       maxAge: 31536000,
       includeSubDomains: true,
@@ -251,13 +255,13 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
   const isProd = String(process.env.NODE_ENV || "").toLowerCase() === "production";
-  const connectSrc = process.env.CSP_CONNECT_SRC || "'self'";
+  const connectSrc = process.env.CSP_CONNECT_SRC || "'self' wss: ws:";
   const scriptSrc = isProd && String(process.env.CSP_ALLOW_EVAL || "").trim() !== "1"
     ? "'self'"
     : "'self' 'unsafe-eval'";
   res.setHeader(
     "Content-Security-Policy",
-    `default-src 'self'; script-src ${scriptSrc}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src ${connectSrc};`,
+    `default-src 'self'; script-src ${scriptSrc}; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' data: https://cdn.jsdelivr.net; connect-src ${connectSrc};`,
   );
   next();
 });
