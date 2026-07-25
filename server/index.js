@@ -345,13 +345,18 @@ const boolEnv = (v) => {
 /* ---------------- CORS ---------------- */
 const allowedOrigins = (() => {
   const raw = String(process.env.CORS_ALLOWED_ORIGINS || "").trim();
-  if (raw) {
-    return raw
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
+  const origins = raw
+    ? raw
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+  
+  // Always allow the production frontend domain by default
+  if (!origins.includes("https://demo.omnisuite-erp.com")) {
+    origins.push("https://demo.omnisuite-erp.com");
   }
-  return [];
+  return origins;
 })();
 
 const corsOptions = {
@@ -939,7 +944,7 @@ if (_overrideDir) {
     _spaFrontendPath = abs;
   }
 }
-if (_spaFrontendPath || serveFrontendFlag) {
+if (_spaFrontendPath && serveFrontendFlag) {
   const frontendPath = _spaFrontendPath;
   if (frontendPath && fs.existsSync(frontendPath)) {
     // Static already registered early; register again here just in case
