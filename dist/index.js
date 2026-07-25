@@ -824,6 +824,7 @@ if (boolEnv(process.env.DISABLE_KEEP_ALIVE)) {
 //   3. cwd()/public    (Plesk/Passenger deployment)
 const _staticOpts = {
   setHeaders: (res, filePath) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
     if (filePath.endsWith(".js") || filePath.endsWith(".mjs")) {
       res.setHeader("Content-Type", "application/javascript; charset=utf-8");
     }
