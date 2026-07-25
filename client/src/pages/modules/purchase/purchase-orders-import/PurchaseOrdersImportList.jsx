@@ -754,7 +754,8 @@ export default function PurchaseOrdersImportList() {
           </h1>
           <p className="text-sm mt-1">Manage import purchase orders</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
           <Link to="/purchase" className="btn btn-secondary">
             Return to Menu
           </Link>

@@ -629,7 +629,8 @@ export default function PurchaseOrdersLocalList() {
           </h1>
           <p className="text-sm mt-1">Manage local purchase orders</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
           <Link to="/purchase" className="btn btn-secondary">
             Return to Menu
           </Link>
@@ -681,7 +682,6 @@ export default function PurchaseOrdersLocalList() {
                 <SortableHeader label="Total Amount" sortKey="total_amount" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-right" />
                 <SortableHeader label="Status" sortKey="status" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                 <th className="text-right">Actions</th>
-                <th className="text-center">Send</th>
                 <SortableHeader label="Created By" sortKey="created_by_username" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                 <SortableHeader label="Created Date" sortKey="created_at" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
               </tr>
@@ -832,17 +832,19 @@ export default function PurchaseOrdersLocalList() {
                             )}
                           </div>
                         </div>
+
+                        {/* Slot 7: Send Email */}
+                        <div className="min-w-[80px]">
+                          <button
+                            type="button"
+                            disabled={sendingEmailId === po.id}
+                            className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors h-9 disabled:opacity-50"
+                            onClick={() => sendEmail(po.id)}
+                          >
+                            {sendingEmailId === po.id ? 'Sending...' : 'Send Email'}
+                          </button>
+                        </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <button
-                        type="button"
-                        disabled={sendingEmailId === po.id}
-                        className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors h-9 disabled:opacity-50"
-                        onClick={() => sendEmail(po.id)}
-                      >
-                        {sendingEmailId === po.id ? 'Sending...' : 'Send Email'}
-                      </button>
                     </td>
                     <td>{po.created_by_username || po.created_by_name || "-"}</td>
                     <td>{po.created_at ? new Date(po.created_at).toLocaleDateString() : "-"}</td>

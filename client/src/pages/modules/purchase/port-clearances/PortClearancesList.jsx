@@ -154,7 +154,8 @@ export default function PortClearancesList() {
           </h1>
           <p className="text-sm mt-1">Manage customs and port clearances</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
           <Link to="/purchase" className="btn btn-secondary">
             Return to Menu
           </Link>

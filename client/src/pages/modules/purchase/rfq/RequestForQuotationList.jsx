@@ -86,7 +86,8 @@ export default function RequestForQuotationList() {
             Create and send RFQs to suppliers for competitive bidding
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
           <Link to="/purchase" className="btn btn-secondary">
             Return to Menu
           </Link>

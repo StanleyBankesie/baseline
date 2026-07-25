@@ -77,6 +77,9 @@ export default function ItemBatchesList() {
             Track item batches, costs, quantities and expiry dates. Soon-to-expire: {soonToExpire}
           </p>
         </div>
+        <div className="flex gap-2 items-center">
+          <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+        </div>
       </div>
 
       <div className="card">

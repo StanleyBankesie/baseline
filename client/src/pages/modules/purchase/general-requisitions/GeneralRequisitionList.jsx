@@ -462,9 +462,12 @@ export default function GeneralRequisitionList() {
           <h1 className="text-2xl font-bold mt-2">Purchase Requisitions</h1>
           <p className="text-sm text-slate-600">Request items for purchase or services to be rendered</p>
         </div>
-        <button className="btn btn-primary" onClick={() => navigate("/purchase/general-requisitions/new")}>
-          + New Requisition
-        </button>
+        <div className="flex gap-2 items-center">
+          <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+          <button className="btn btn-primary" onClick={() => navigate("/purchase/general-requisitions/new")}>
+            + New Requisition
+          </button>
+        </div>
       </div>
 
       <div className="card">
