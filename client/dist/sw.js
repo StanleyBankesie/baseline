@@ -14,8 +14,14 @@ if (!DEV_MODE) {
       (async () => {
         const cache = await caches.open(ASSET_CACHE);
         await cache.addAll([
-        "/assets/index-eMyIGqo6.js"
-]);
+          "/",
+          "/index.html",
+          "/manifest.webmanifest",
+          "/pwa-192x192.png",
+          "/pwa-512x512.png",
+          "/apple-touch-icon.png",
+          "/OMNISUITE_ICON_BLUE.png",
+        ]);
       })(),
     );
   });
