@@ -3,6 +3,9 @@ RewriteBase /
 
 # Serve index.html for all non-file, non-directory requests (SPA fallback)
 RewriteRule ^index\.html$ - [L]
+
+# Prevent static assets from being rewritten to index.html (returns proper 404 instead of MIME error)
+RewriteCond %{REQUEST_URI} !\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$ [NC]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule . /index.html [L]
