@@ -811,6 +811,25 @@ if (boolEnv(process.env.DISABLE_KEEP_ALIVE)) {
     next();
   });
 }
+
+/* --- Serve frontend static assets EARLY (before API routes) --- */
+// This ensures /assets/*.js files are served with correct MIME types
+// even when Nginx/Passenger forwards requests to Node.js.
+const _earlyDistPath = path.join(__dirname, "../client/dist");
+if (fs.existsSync(_earlyDistPath)) {
+  app.use(
+    express.static(_earlyDistPath, {
+      // Set correct MIME types explicitly for module scripts
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith(".js") || filePath.endsWith(".mjs")) {
+          res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+        }
+      },
+    }),
+  );
+  console.log(`[STATIC] Serving frontend assets from ${_earlyDistPath}`);
+}
+
 app.use(
   "/uploads",
   express.static(
