@@ -36,6 +36,9 @@ export default function TripManagementPage() {
   const startTracking = (tripId) => {
     if (trackingIntervals.current[tripId]) return;
     
+    // Remember tracking state for this device in case of page reload
+    localStorage.setItem('tracking_trip_' + tripId, 'true');
+
     let isFirstPing = true;
 
     if (navigator.geolocation) {
@@ -72,7 +75,8 @@ export default function TripManagementPage() {
         },
         (err) => {
           console.error("Tracking error:", err);
-          toast.error("Error getting location: " + err.message);
+          // Only show toast if it's explicitly started by a user click right now, not on background resume
+          // toast.error("Error getting location: " + err.message);
         },
         { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
       );
@@ -83,11 +87,25 @@ export default function TripManagementPage() {
   };
 
   const stopTracking = (tripId) => {
-    if (trackingIntervals.current[tripId]) {
+    localStorage.removeItem('tracking_trip_' + tripId);
+    if (trackingIntervals.current[tripId] && navigator.geolocation) {
       navigator.geolocation.clearWatch(trackingIntervals.current[tripId]);
       delete trackingIntervals.current[tripId];
     }
   };
+
+  // Resume tracking automatically for active trips started on this device
+  useEffect(() => {
+    trips.forEach(trip => {
+      if (['STARTED', 'IN_TRANSIT'].includes(trip.status?.toUpperCase())) {
+        if (localStorage.getItem('tracking_trip_' + trip.id) === 'true') {
+          startTracking(trip.id);
+        }
+      } else {
+        stopTracking(trip.id);
+      }
+    });
+  }, [trips]);
 
   const handleStartTrip = async () => {
     if (!startTripModal.odometer) {
