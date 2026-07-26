@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { GoogleMap, useJsApiLoader, Marker, Autocomplete } from '@react-google-maps/api';
 import { toast } from "react-toastify";
+import { Navigation } from "lucide-react";
 import api from "../../api/client.js";
 
 const containerStyle = {
@@ -106,6 +107,47 @@ function AddressMapPickerInner({ apiKey, value, onChange, placeholder, label, la
     }
   };
 
+  const handleLiveLocation = () => {
+    if (navigator.geolocation) {
+      toast.info("Fetching your location...", { autoClose: 2000, toastId: "fetch-loc" });
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          let name = "Current Location";
+
+          try {
+            if (window.google) {
+              const geocoder = new window.google.maps.Geocoder();
+              const res = await geocoder.geocode({ location: { lat, lng } });
+              if (res.results && res.results[0]) {
+                name = res.results[0].formatted_address;
+              }
+            }
+          } catch (e) {
+            console.error("Geocoding failed", e);
+          }
+
+          setInputValue(name);
+          const newPos = { lat, lng };
+          setMarkerPos(newPos);
+          setMapCenter(newPos);
+
+          if (onChange) {
+            onChange({ name, lat, lng });
+          }
+          toast.success("Live location found");
+        },
+        (err) => {
+          toast.error("Error getting location: " + err.message);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    } else {
+      toast.error("Geolocation is not supported by your browser.");
+    }
+  };
+
   if (loadError) {
     return <div className="text-red-500 py-4">Error loading Google Maps. Check your API Key.</div>;
   }
@@ -128,9 +170,20 @@ function AddressMapPickerInner({ apiKey, value, onChange, placeholder, label, la
             onChange={(e) => setInputValue(e.target.value)}
           />
         </Autocomplete>
-        <p className="text-xs text-slate-500 mt-2">
-          Search for an address or click anywhere on the map to drop a pin.
-        </p>
+        
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 gap-2">
+          <p className="text-xs text-slate-500">
+            Search for an address or click anywhere on the map to drop a pin.
+          </p>
+          <button 
+            type="button"
+            onClick={handleLiveLocation}
+            className="btn btn-xs btn-outline border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-800 hover:border-slate-400 font-medium flex items-center gap-1 transition-colors"
+          >
+            <Navigation className="w-3 h-3" />
+            Live Location
+          </button>
+        </div>
       </div>
 
       <div className={`rounded-md overflow-hidden border border-slate-300 relative z-10 ${layout === 'vertical' ? 'w-full min-h-[256px]' : 'flex-1 h-64'}`}>

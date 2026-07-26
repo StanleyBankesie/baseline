@@ -65,7 +65,7 @@ export default function TripManagementPage() {
             recorded_at: new Date().toISOString(),
             is_initial: isFirstPing,
             origin_name: originName
-          }).catch(() => {});
+          }).catch((err) => { console.error("Failed to post GPS location:", err); });
           
           isFirstPing = false;
         },

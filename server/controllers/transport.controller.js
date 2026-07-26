@@ -439,7 +439,7 @@ export const addTripLocation = async (req, res, next) => {
     await query(
       `INSERT INTO trans_trip_locations (trip_id, latitude, longitude, speed, heading, accuracy, recorded_at)
        VALUES (:id, :latitude, :longitude, :speed, :heading, :accuracy, :recorded_at)`,
-      { id, latitude, longitude, speed: speed || 0, heading: heading || 0, accuracy: accuracy || 0, recorded_at: recorded_at || new Date() }
+      { id, latitude, longitude, speed: speed || 0, heading: heading || 0, accuracy: accuracy || 0, recorded_at: recorded_at ? new Date(recorded_at) : new Date() }
     );
 
     if (is_initial) {
