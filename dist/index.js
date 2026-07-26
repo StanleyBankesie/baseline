@@ -345,13 +345,18 @@ const boolEnv = (v) => {
 /* ---------------- CORS ---------------- */
 const allowedOrigins = (() => {
   const raw = String(process.env.CORS_ALLOWED_ORIGINS || "").trim();
-  if (raw) {
-    return raw
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
+  const origins = raw
+    ? raw
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+  
+  // Always allow the production frontend domain by default
+  if (!origins.includes("https://demo.omnisuite-erp.com")) {
+    origins.push("https://demo.omnisuite-erp.com");
   }
-  return [];
+  return origins;
 })();
 
 const corsOptions = {
@@ -421,10 +426,10 @@ function setupRateLimiter() {
 setupRateLimiter();
 app.use("/api", apiLimiter);
 
-/* SECURITY: Stricter rate limiting for authentication endpoints */
+/* SECURITY: Rate limiting for authentication endpoints */
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // 10 attempts per 15 minutes per IP
+  windowMs: Number(process.env.AUTH_RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
+  max: Number(process.env.AUTH_RATE_LIMIT_MAX) || 60, // 60 attempts per 15 minutes per IP
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -433,7 +438,6 @@ const authLimiter = rateLimit({
   },
 });
 app.use("/api/login", authLimiter);
-app.use("/api/auth/refresh", authLimiter);
 app.use("/api/forgot-password", authLimiter);
 
 app.head("/api/ping", (_req, res) => res.status(200).end());
@@ -474,6 +478,35 @@ app.get("/api/ping", (_req, res) => res.json({ ok: true }));
       console.log(
         "Successfully added the `created_by` column to `fin_pdc_postings`.",
       );
+    }
+
+    // Migration for adm_license_renewals table fields (tax, subtotal, discount, tax_rate, payment_method)
+    try {
+      const renewTableCheck = await query("SHOW TABLES LIKE 'adm_license_renewals'");
+      if (renewTableCheck && renewTableCheck.length > 0) {
+        const taxCols = await query("SHOW COLUMNS FROM `adm_license_renewals` LIKE 'tax'");
+        if (!taxCols || taxCols.length === 0) {
+          await query("ALTER TABLE `adm_license_renewals` ADD COLUMN `tax` DECIMAL(18,2) NOT NULL DEFAULT 0.00");
+        }
+        const subtotalCols = await query("SHOW COLUMNS FROM `adm_license_renewals` LIKE 'subtotal'");
+        if (!subtotalCols || subtotalCols.length === 0) {
+          await query("ALTER TABLE `adm_license_renewals` ADD COLUMN `subtotal` DECIMAL(18,2) NOT NULL DEFAULT 0.00");
+        }
+        const discountCols = await query("SHOW COLUMNS FROM `adm_license_renewals` LIKE 'discount'");
+        if (!discountCols || discountCols.length === 0) {
+          await query("ALTER TABLE `adm_license_renewals` ADD COLUMN `discount` DECIMAL(18,2) NOT NULL DEFAULT 0.00");
+        }
+        const taxRateCols = await query("SHOW COLUMNS FROM `adm_license_renewals` LIKE 'tax_rate'");
+        if (!taxRateCols || taxRateCols.length === 0) {
+          await query("ALTER TABLE `adm_license_renewals` ADD COLUMN `tax_rate` DECIMAL(18,2) NOT NULL DEFAULT 0.00");
+        }
+        const payMethodCols = await query("SHOW COLUMNS FROM `adm_license_renewals` LIKE 'payment_method'");
+        if (!payMethodCols || payMethodCols.length === 0) {
+          await query("ALTER TABLE `adm_license_renewals` ADD COLUMN `payment_method` VARCHAR(100) NULL DEFAULT NULL");
+        }
+      }
+    } catch (migErr) {
+      console.warn("[Migration] adm_license_renewals migration warning:", migErr.message);
     }
 
     // Check if created_by exists in fin_vouchers
@@ -827,24 +860,43 @@ const _staticOpts = {
     res.setHeader("Access-Control-Allow-Origin", "*");
     if (filePath.endsWith(".js") || filePath.endsWith(".mjs")) {
       res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    } else if (filePath.endsWith(".css")) {
+      res.setHeader("Content-Type", "text/css; charset=utf-8");
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
     }
   },
 };
 const _frontendCandidates = [
   path.join(__dirname, "../client/dist"),
+  path.join(process.cwd(), "client/dist"),
   path.join(__dirname, "public"),
   path.join(process.cwd(), "public"),
+  path.join(__dirname, "../public"),
+  path.join(process.cwd(), "dist/public"),
+  path.join(__dirname, "dist/public"),
 ];
+
 let _earlyFrontendPath = null;
+const _activeFrontendPaths = [];
+
 for (const candidate of _frontendCandidates) {
-  if (fs.existsSync(path.join(candidate, "index.html"))) {
-    _earlyFrontendPath = candidate;
-    break;
+  if (fs.existsSync(candidate)) {
+    _activeFrontendPaths.push(candidate);
+    app.use(express.static(candidate, _staticOpts));
+    const assetsSubdir = path.join(candidate, "assets");
+    if (fs.existsSync(assetsSubdir)) {
+      app.use("/assets", express.static(assetsSubdir, _staticOpts));
+    }
+    if (!_earlyFrontendPath && fs.existsSync(path.join(candidate, "index.html"))) {
+      _earlyFrontendPath = candidate;
+    }
   }
 }
+
 if (_earlyFrontendPath) {
-  app.use(express.static(_earlyFrontendPath, _staticOpts));
-  console.log(`[STATIC] Serving frontend assets from ${_earlyFrontendPath}`);
+  console.log(`[STATIC] Serving primary frontend index.html from ${_earlyFrontendPath}`);
+  console.log(`[STATIC] Active asset directories: ${_activeFrontendPaths.join(", ")}`);
 } else {
   console.warn(
     `[STATIC] Frontend build not found. Checked: ${_frontendCandidates.join(", ")}`,
@@ -925,8 +977,10 @@ app.use("/api/visitors", visitorsRoutes);
 const serveFrontendFlag = (() => {
   const v1 = String(process.env.SERVE_FRONTEND || "").toLowerCase();
   const v2 = String(process.env.ENABLE_SPA || "").toLowerCase();
-  return v1 === "1" || v1 === "true" || v2 === "1" || v2 === "true";
+  if (v1 === "0" || v1 === "false" || v2 === "0" || v2 === "false") return false;
+  return true; // Default to true if a frontend build is present
 })();
+
 // Resolve override directory from env, if any
 const _overrideDir =
   String(process.env.STATIC_DIR || process.env.PUBLIC_DIR || "").trim() || null;
@@ -939,27 +993,46 @@ if (_overrideDir) {
     _spaFrontendPath = abs;
   }
 }
-if (_spaFrontendPath || serveFrontendFlag) {
+
+if (_spaFrontendPath && serveFrontendFlag) {
   const frontendPath = _spaFrontendPath;
-  if (frontendPath && fs.existsSync(frontendPath)) {
-    // Static already registered early; register again here just in case
-    // (express.static is idempotent for the same path)
-    app.use(express.static(frontendPath, _staticOpts));
+  for (const candidate of _activeFrontendPaths) {
+    app.use(express.static(candidate, _staticOpts));
+    const assetsSubdir = path.join(candidate, "assets");
+    if (fs.existsSync(assetsSubdir)) {
+      app.use("/assets", express.static(assetsSubdir, _staticOpts));
+    }
   }
-  // Return 404 for missing static assets in /assets or matching file extensions (prevents MIME type errors)
-  app.use("/assets", (req, res) => {
-    res.status(404).type("text/plain").send("Static asset not found");
-  });
+
   app.get("*", (req, res, next) => {
     if (req.url.startsWith("/api") || req.url.startsWith("/uploads") || req.url.startsWith("/socket.io")) {
       return next();
     }
+
+    // Check if the requested path is a static asset file (.js, .css, .png, etc.)
     if (/\.(js|css|png|jpg|jpeg|gif|ico|json|svg|woff|woff2|ttf|map)$/i.test(req.path)) {
+      // Try to find the file in any of our active static candidate directories
+      const relativePath = req.path.replace(/^\//, "");
+      for (const candidate of _activeFrontendPaths) {
+        const fullFilePath = path.join(candidate, relativePath);
+        if (fs.existsSync(fullFilePath) && fs.statSync(fullFilePath).isFile()) {
+          if (fullFilePath.endsWith(".js") || fullFilePath.endsWith(".mjs")) {
+            res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+          } else if (fullFilePath.endsWith(".css")) {
+            res.setHeader("Content-Type", "text/css; charset=utf-8");
+          }
+          return res.sendFile(fullFilePath);
+        }
+      }
       return res.status(404).type("text/plain").send("Static file not found");
     }
+
     if (frontendPath) {
       const indexPath = path.join(frontendPath, "index.html");
       if (fs.existsSync(indexPath)) {
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0");
+        res.setHeader("Pragma", "no-cache");
+        res.setHeader("Expires", "0");
         return res.sendFile(indexPath);
       }
     }
@@ -1042,14 +1115,6 @@ if (process.env.NODE_ENV !== "test" && !socketsDisabled) {
 export { ioInstance as io };
 
 if (process.env.NODE_ENV !== "test") {
-  const _originalListen = server.listen.bind(server);
-  server.listen = function (port, callback) {
-    const p = isNaN(Number(port)) ? port : Number(port);
-    if (typeof p === "number") {
-      return _originalListen(p, "127.0.0.1", callback);
-    }
-    return _originalListen(p, callback);
-  };
 
   server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
@@ -1378,6 +1443,14 @@ process.on("uncaughtException", (err) => {
   console.error(`[Process] Uncaught Exception: ${err?.message || err}`);
   console.error(err?.stack || "(no stack)");
   logToCrashReport("UncaughtException", err);
+  
+  // If the server hasn't successfully bound to a port yet (e.g., module import failure),
+  // we MUST exit. Otherwise Phusion Passenger will hang for 90 seconds.
+  if (err?.code === "MODULE_NOT_FOUND" || !server.listening) {
+    console.error("[Process] Fatal startup error, exiting.");
+    process.exit(1);
+  }
+
   // Only exit for truly fatal errors (memory corruption, etc.).
   // Do NOT exit for recoverable errors like DB timeouts.
   if (
