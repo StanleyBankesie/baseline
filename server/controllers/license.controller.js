@@ -268,12 +268,17 @@ export async function initializePaystackPayment(req, res) {
 
     const reference = data.data.reference;
 
+    const finalSubtotal = Number(req.body.subtotal) || finalAmount;
+    const finalTaxRate = Number(req.body.tax_rate) || 0;
+    const finalDiscount = Number(req.body.discount) || 0;
+    const finalTax = Number(req.body.tax) || ((finalSubtotal - finalDiscount) * (finalTaxRate / 100));
+
     // Insert into adm_license_renewals
     await query(
       `INSERT INTO adm_license_renewals 
-        (company_id, initiator_name, initiator_email, initiator_mobile, amount, plan_name, status, reference) 
-       VALUES (?, ?, ?, ?, ?, ?, 'PENDING', ?)`,
-      [companyId, finalName, finalEmail, finalMobile, finalAmount, finalPlan, reference]
+        (company_id, initiator_name, initiator_email, initiator_mobile, amount, subtotal, tax, discount, tax_rate, plan_name, status, reference, payment_method) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', ?, 'Online Payment')`,
+      [companyId, finalName, finalEmail, finalMobile, finalAmount, finalSubtotal, finalTax, finalDiscount, finalTaxRate, finalPlan, reference]
     );
 
     return res.json({ 
@@ -352,6 +357,8 @@ export async function verifyPaystackPayment(req, res) {
       paystackMobile = auth.bin + auth.last4;
     }
 
+    const paystackChannelName = auth.channel === 'card' ? 'Card' : auth.channel === 'mobile_money' ? 'Mobile Money' : (auth.channel || 'Online Payment');
+
     // Generate Invoice Number
     const companyRow = await query(`SELECT code FROM adm_companies WHERE id = ?`, [companyId]);
     const companyCode = companyRow?.[0]?.code || 'INV';
@@ -375,13 +382,13 @@ export async function verifyPaystackPayment(req, res) {
     const invoiceNo = `${prefix}${String(seq).padStart(3, '0')}`;
 
     if (paystackMobile && paystackMobile !== '0000000000') {
-      await query(`UPDATE adm_license_renewals SET status = 'SUCCESS', initiator_mobile = ?, invoice_no = ? WHERE reference = ?`, [paystackMobile, invoiceNo, reference]);
+      await query(`UPDATE adm_license_renewals SET status = 'SUCCESS', initiator_mobile = ?, invoice_no = ?, payment_method = ? WHERE reference = ?`, [paystackMobile, invoiceNo, paystackChannelName, reference]);
     } else {
-      await query(`UPDATE adm_license_renewals SET status = 'SUCCESS', invoice_no = ? WHERE reference = ?`, [invoiceNo, reference]);
+      await query(`UPDATE adm_license_renewals SET status = 'SUCCESS', invoice_no = ?, payment_method = ? WHERE reference = ?`, [invoiceNo, paystackChannelName, reference]);
     }
 
-    // Fetch the renewal entry to get initiator_name, initiator_email, amount, and plan_name
-    const renewalEntryRow = await query(`SELECT initiator_name, initiator_email, amount, plan_name FROM adm_license_renewals WHERE reference = ?`, [reference]);
+    // Fetch full renewal entry (including created_at, subtotal, tax, discount, payment_method)
+    const renewalEntryRow = await query(`SELECT *, created_at FROM adm_license_renewals WHERE reference = ?`, [reference]);
     
     let durationMonths = parseInt(data.data.metadata?.duration) || 1;
     let renewalEntry = null;
@@ -397,7 +404,8 @@ export async function verifyPaystackPayment(req, res) {
     }
     
     // Calculate new expiry date using duration_months
-    const licenseInfoRow = await query(`SELECT expiry_date FROM adm_company_licenses WHERE company_id = ?`, [companyId]);
+    const licenseInfoRow = await query(`SELECT id, license_key, license_type, max_users, start_date, expiry_date FROM adm_company_licenses WHERE company_id = ?`, [companyId]);
+    const licenseData = licenseInfoRow?.[0] || {};
     
     let newExpiryDateStr = "";
     if (licenseInfoRow && licenseInfoRow.length > 0) {
@@ -415,20 +423,20 @@ export async function verifyPaystackPayment(req, res) {
       await invalidateLicenseCache(companyId);
     }
 
-    // Generate Invoice HTML and Email it
+    // Generate Receipt HTML and Email it
     if (renewalEntry && renewalEntry.initiator_email) {
-      const templates = await query("SELECT html_content, template FROM adm_document_templates WHERE doc_type = 'LICENSE_RENEWAL_INVOICE' LIMIT 1");
+      const templates = await query("SELECT html_content, template FROM adm_document_templates WHERE doc_type = 'LICENSE_RENEWAL_RECEIPT' LIMIT 1");
       let htmlTemplate = `<!DOCTYPE html>
 <html>
 <head>
 <style>
   body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9fafb; margin: 0; padding: 20px; }
-  .invoice-box { max-width: 800px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); padding: 40px; }
+  .receipt-box { max-width: 800px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); padding: 40px; }
   .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #e5e7eb; padding-bottom: 20px; margin-bottom: 30px; }
   .logo-placeholder { width: 150px; height: 60px; background-color: #f3f4f6; border: 1px dashed #9ca3af; display: flex; align-items: center; justify-content: center; color: #6b7280; font-weight: bold; border-radius: 4px; }
   .company-info { text-align: right; color: #4b5563; }
   .company-info h2 { margin: 0 0 5px 0; color: #111827; font-size: 24px; }
-  .invoice-title { font-size: 32px; color: #2563eb; margin: 0 0 20px 0; text-transform: uppercase; letter-spacing: 1px; }
+  .receipt-title { font-size: 32px; color: #16a34a; margin: 0 0 20px 0; text-transform: uppercase; letter-spacing: 1px; }
   .details-section { display: flex; justify-content: space-between; margin-bottom: 40px; }
   .billed-to h3 { margin: 0 0 10px 0; color: #374151; font-size: 16px; text-transform: uppercase; }
   .info-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
@@ -436,34 +444,35 @@ export async function verifyPaystackPayment(req, res) {
   .info-table td { padding: 15px 12px; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
   .total-row { font-weight: bold; font-size: 18px; }
   .total-row td { border-top: 2px solid #e2e8f0; }
-  .total-amount { color: #2563eb; }
+  .total-amount { color: #16a34a; }
   .footer { margin-top: 50px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 14px; }
   .status-badge { display: inline-block; padding: 6px 12px; background-color: #dcfce7; color: #166534; border-radius: 9999px; font-weight: 600; font-size: 14px; margin-bottom: 15px; }
 </style>
 </head>
 <body>
-  <div class="invoice-box">
+  <div class="receipt-box">
     <div class="header">
       <div class="logo-placeholder">
         [Insert Logo Here]
       </div>
       <div class="company-info">
-        <h2>OmniSuite Inc.</h2>
-        <p>123 Business Avenue<br>Tech District, 10001<br>contact@omnisuite.com<br>+1 (555) 123-4567</p>
+        <h2>{{company_name}}</h2>
+        <p>OmniSuite ERP Services<br>contact@omnisuite-erp.com</p>
       </div>
     </div>
     
-    <h1 class="invoice-title">Invoice</h1>
+    <h1 class="receipt-title">Payment Receipt</h1>
     <div class="status-badge">PAID</div>
     
     <div class="details-section">
       <div class="billed-to">
-        <h3>Billed To:</h3>
+        <h3>Payment From:</h3>
         <p><strong>{{name}}</strong><br>{{email}}</p>
       </div>
-      <div class="invoice-details">
-        <p><strong>Date:</strong> {{date}}</p>
-        <p><strong>Invoice #:</strong> {{invoice_number}}</p>
+      <div class="receipt-details">
+        <p><strong>Date:</strong> {{payment_date}}</p>
+        <p><strong>Receipt #:</strong> {{receipt_number}}</p>
+        <p><strong>License Key:</strong> {{license_key}}</p>
         <p><strong>New Expiry:</strong> {{new_expiry_date}}</p>
       </div>
     </div>
@@ -477,18 +486,30 @@ export async function verifyPaystackPayment(req, res) {
       </thead>
       <tbody>
         <tr>
-          <td>License Renewal - <strong>{{plan_name}}</strong></td>
-          <td style="text-align: right;">{{amount}}</td>
+          <td>License Renewal - <strong>{{plan_name}}</strong> (Max Users: {{max_users}})</td>
+          <td style="text-align: right;">{{unit_price}}</td>
+        </tr>
+        <tr class="total-row">
+          <td style="text-align: right;">Subtotal</td>
+          <td style="text-align: right;">{{subtotal}}</td>
+        </tr>
+        <tr>
+          <td style="text-align: right;">Tax ({{tax_rate}}%)</td>
+          <td style="text-align: right;">{{tax_amount}}</td>
+        </tr>
+        <tr>
+          <td style="text-align: right;">Discount</td>
+          <td style="text-align: right;">{{discount_amount}}</td>
         </tr>
         <tr class="total-row">
           <td style="text-align: right;">Total Paid</td>
-          <td class="total-amount" style="text-align: right;">{{amount}}</td>
+          <td class="total-amount" style="text-align: right;">{{amount_paid}}</td>
         </tr>
       </tbody>
     </table>
 
     <div class="footer">
-      <p>Thank you for choosing OmniSuite. If you have any questions, contact our support team.</p>
+      <p>Thank you for choosing {{company_name}}. If you have any questions, contact support.</p>
     </div>
   </div>
 </body>
@@ -496,32 +517,74 @@ export async function verifyPaystackPayment(req, res) {
       if (templates && templates.length > 0 && (templates[0].html_content || templates[0].template)) {
         htmlTemplate = templates[0].html_content || templates[0].template;
       }
-      
-      const formattedDate = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+
+      // Calculations:
+      // subtotal = sum(amount)
+      // tax = calculated tax
+      // amount_paid = (subtotal - discount) + tax
+      const subtotalVal = Number(renewalEntry?.subtotal || renewalEntry?.amount || 0);
+      const taxRateVal = Number(renewalEntry?.tax_rate || 0);
+      const discountVal = Number(renewalEntry?.discount || 0);
+      const taxVal = Number(renewalEntry?.tax || ((subtotalVal - discountVal) * (taxRateVal / 100)));
+      const amountPaidVal = (subtotalVal - discountVal) + taxVal;
+      const balanceDueVal = 0.0;
+
+      const paymentDateFormatted = renewalEntry?.created_at
+        ? new Date(renewalEntry.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+        : new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+
       const newExpiryFormatted = newExpiryDateStr ? new Date(newExpiryDateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
+      const startDateFormatted = licenseData.start_date ? new Date(licenseData.start_date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
       
-      let finalHtml = htmlTemplate
-        .replace(/\{\{name\}\}/g, renewalEntry.initiator_name || 'Customer')
-        .replace(/\{\{email\}\}/g, renewalEntry.initiator_email)
-        .replace(/\{\{date\}\}/g, formattedDate)
-        .replace(/\{\{invoice_number\}\}/g, invoiceNo)
-        .replace(/\{\{new_expiry_date\}\}/g, newExpiryFormatted)
-        .replace(/\{\{plan_name\}\}/g, renewalEntry.plan_name || 'Renewal')
-        .replace(/\{\{amount\}\}/g, `GHS ${renewalEntry.amount || 0}`);
-        
+      const paymentMethodStr = renewalEntry?.payment_method || paystackChannelName || 'Online Payment';
+      const transactionIdStr = reference;
+
+      let companyName = "OmniSuite";
+      let companyLogoImg = "";
       try {
-        const companyRowLogo = await query(`SELECT logo FROM adm_companies WHERE id = ? LIMIT 1`, [companyId]);
-        if (companyRowLogo && companyRowLogo.length > 0 && companyRowLogo[0].logo) {
-          const base64Logo = Buffer.from(companyRowLogo[0].logo).toString('base64');
-          const logoImg = `<img src="data:image/png;base64,${base64Logo}" alt="Company Logo" style="max-height: 60px; max-width: 150px;" />`;
-          finalHtml = finalHtml.replace(/\[Insert Logo Here\]/g, logoImg).replace(/\{\{company_logo\}\}/g, logoImg);
-        } else {
-          finalHtml = finalHtml.replace(/\{\{company_logo\}\}/g, '');
+        const companyRowLogo = await query(`SELECT name, logo FROM adm_companies WHERE id = ? LIMIT 1`, [companyId]);
+        if (companyRowLogo && companyRowLogo.length > 0) {
+          if (companyRowLogo[0].name) companyName = companyRowLogo[0].name;
+          if (companyRowLogo[0].logo) {
+            const base64Logo = Buffer.from(companyRowLogo[0].logo).toString('base64');
+            companyLogoImg = `<img src="data:image/png;base64,${base64Logo}" alt="Company Logo" style="max-height: 60px; max-width: 150px;" />`;
+          }
         }
       } catch (err) {
-        console.error("Failed to inject logo into invoice:", err);
+        console.error("Failed to fetch company details for receipt:", err);
       }
 
+      let finalHtml = htmlTemplate
+        .replace(/\{\{payment_date\}\}/g, paymentDateFormatted)
+        .replace(/\{\{payment_method\}\}/g, paymentMethodStr)
+        .replace(/\{\{transaction_id\}\}/g, transactionIdStr)
+        .replace(/\{\{quantity\}\}/g, String(durationMonths || 1))
+        .replace(/\{\{unit_price\}\}/g, `GHS ${subtotalVal.toFixed(2)}`)
+        .replace(/\{\{line_amount\}\}/g, `GHS ${subtotalVal.toFixed(2)}`)
+        .replace(/\{\{subtotal\}\}/g, `GHS ${subtotalVal.toFixed(2)}`)
+        .replace(/\{\{tax_rate\}\}/g, taxRateVal.toFixed(2))
+        .replace(/\{\{tax_amount\}\}/g, `GHS ${taxVal.toFixed(2)}`)
+        .replace(/\{\{discount_amount\}\}/g, `GHS ${discountVal.toFixed(2)}`)
+        .replace(/\{\{amount_paid\}\}/g, `GHS ${amountPaidVal.toFixed(2)}`)
+        .replace(/\{\{balance_due\}\}/g, `GHS ${balanceDueVal.toFixed(2)}`)
+        .replace(/\{\{name\}\}/g, renewalEntry?.initiator_name || 'Customer')
+        .replace(/\{\{email\}\}/g, renewalEntry?.initiator_email || '')
+        .replace(/\{\{date\}\}/g, paymentDateFormatted)
+        .replace(/\{\{invoice_number\}\}/g, invoiceNo)
+        .replace(/\{\{receipt_number\}\}/g, invoiceNo)
+        .replace(/\{\{new_expiry_date\}\}/g, newExpiryFormatted)
+        .replace(/\{\{expiry_date\}\}/g, newExpiryFormatted)
+        .replace(/\{\{start_date\}\}/g, startDateFormatted)
+        .replace(/\{\{license_key\}\}/g, licenseData.license_key || 'N/A')
+        .replace(/\{\{license_type\}\}/g, licenseData.license_type || 'STANDARD')
+        .replace(/\{\{max_users\}\}/g, String(licenseData.max_users || 5))
+        .replace(/\{\{company_name\}\}/g, companyName)
+        .replace(/\{\{plan_name\}\}/g, renewalEntry?.plan_name || licenseData.license_type || 'Renewal')
+        .replace(/\{\{amount\}\}/g, `GHS ${amountPaidVal.toFixed(2)}`)
+        .replace(/\[Insert Logo Here\]/g, companyLogoImg)
+        .replace(/\{\{company_logo\}\}/g, companyLogoImg);
+
+      console.log(`[Receipt Mail] Preparing receipt email for: ${renewalEntry.initiator_email} (Ref: ${invoiceNo})`);
       try {
         const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
         const page = await browser.newPage();
@@ -529,26 +592,34 @@ export async function verifyPaystackPayment(req, res) {
         const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
         await browser.close();
 
-        sendMail({
+        const mailResult = await sendMail({
           to: renewalEntry.initiator_email,
-          subject: `License Renewal Invoice - ${invoiceNo}`,
+          subject: `License Renewal Receipt - ${invoiceNo}`,
           html: finalHtml,
           attachments: [
             {
-              filename: `Invoice_${invoiceNo}.pdf`,
+              filename: `Receipt_${invoiceNo}.pdf`,
               content: pdfBuffer,
               contentType: 'application/pdf'
             }
           ]
-        }).catch(err => console.error("Failed to send invoice email with PDF", err));
+        });
+        console.log(`[Receipt Mail] Sent receipt with PDF to ${renewalEntry.initiator_email}. Result:`, mailResult);
       } catch (pdfErr) {
-        console.error("Failed to generate invoice PDF:", pdfErr);
-        sendMail({
-          to: renewalEntry.initiator_email,
-          subject: `License Renewal Invoice - ${invoiceNo}`,
-          html: finalHtml
-        }).catch(err => console.error("Failed to send invoice email without PDF", err));
+        console.error("[Receipt Mail] Failed to generate receipt PDF or send with PDF:", pdfErr);
+        try {
+          const mailResult = await sendMail({
+            to: renewalEntry.initiator_email,
+            subject: `License Renewal Receipt - ${invoiceNo}`,
+            html: finalHtml
+          });
+          console.log(`[Receipt Mail] Sent fallback HTML receipt without PDF to ${renewalEntry.initiator_email}. Result:`, mailResult);
+        } catch (mailErr) {
+          console.error(`[Receipt Mail] Failed to send HTML receipt to ${renewalEntry.initiator_email}:`, mailErr);
+        }
       }
+    } else {
+      console.warn("[Receipt Mail] Skipped sending receipt: renewalEntry or initiator_email is missing.", renewalEntry);
     }
 
     res.json({

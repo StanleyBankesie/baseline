@@ -426,10 +426,10 @@ function setupRateLimiter() {
 setupRateLimiter();
 app.use("/api", apiLimiter);
 
-/* SECURITY: Stricter rate limiting for authentication endpoints */
+/* SECURITY: Rate limiting for authentication endpoints */
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // 10 attempts per 15 minutes per IP
+  windowMs: Number(process.env.AUTH_RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
+  max: Number(process.env.AUTH_RATE_LIMIT_MAX) || 60, // 60 attempts per 15 minutes per IP
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -438,7 +438,6 @@ const authLimiter = rateLimit({
   },
 });
 app.use("/api/login", authLimiter);
-app.use("/api/auth/refresh", authLimiter);
 app.use("/api/forgot-password", authLimiter);
 
 app.head("/api/ping", (_req, res) => res.status(200).end());
@@ -479,6 +478,35 @@ app.get("/api/ping", (_req, res) => res.json({ ok: true }));
       console.log(
         "Successfully added the `created_by` column to `fin_pdc_postings`.",
       );
+    }
+
+    // Migration for adm_license_renewals table fields (tax, subtotal, discount, tax_rate, payment_method)
+    try {
+      const renewTableCheck = await query("SHOW TABLES LIKE 'adm_license_renewals'");
+      if (renewTableCheck && renewTableCheck.length > 0) {
+        const taxCols = await query("SHOW COLUMNS FROM `adm_license_renewals` LIKE 'tax'");
+        if (!taxCols || taxCols.length === 0) {
+          await query("ALTER TABLE `adm_license_renewals` ADD COLUMN `tax` DECIMAL(18,2) NOT NULL DEFAULT 0.00");
+        }
+        const subtotalCols = await query("SHOW COLUMNS FROM `adm_license_renewals` LIKE 'subtotal'");
+        if (!subtotalCols || subtotalCols.length === 0) {
+          await query("ALTER TABLE `adm_license_renewals` ADD COLUMN `subtotal` DECIMAL(18,2) NOT NULL DEFAULT 0.00");
+        }
+        const discountCols = await query("SHOW COLUMNS FROM `adm_license_renewals` LIKE 'discount'");
+        if (!discountCols || discountCols.length === 0) {
+          await query("ALTER TABLE `adm_license_renewals` ADD COLUMN `discount` DECIMAL(18,2) NOT NULL DEFAULT 0.00");
+        }
+        const taxRateCols = await query("SHOW COLUMNS FROM `adm_license_renewals` LIKE 'tax_rate'");
+        if (!taxRateCols || taxRateCols.length === 0) {
+          await query("ALTER TABLE `adm_license_renewals` ADD COLUMN `tax_rate` DECIMAL(18,2) NOT NULL DEFAULT 0.00");
+        }
+        const payMethodCols = await query("SHOW COLUMNS FROM `adm_license_renewals` LIKE 'payment_method'");
+        if (!payMethodCols || payMethodCols.length === 0) {
+          await query("ALTER TABLE `adm_license_renewals` ADD COLUMN `payment_method` VARCHAR(100) NULL DEFAULT NULL");
+        }
+      }
+    } catch (migErr) {
+      console.warn("[Migration] adm_license_renewals migration warning:", migErr.message);
     }
 
     // Check if created_by exists in fin_vouchers

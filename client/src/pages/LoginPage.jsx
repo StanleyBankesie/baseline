@@ -57,25 +57,25 @@ export default function LoginPage() {
     input.dispatchEvent(new Event("input", { bubbles: true }));
   }, []);
 
-  // Load remembered credentials on mount and auto-populate fields
+  const isAutoFillingRef = useRef(false);
+
+  // Automatically clear all fields when login page is loaded or refreshed
   useEffect(() => {
     const profiles = authStorage.readRememberedCredentialProfiles?.() || [];
     if (profiles.length) {
       setSavedProfiles(profiles);
       setRememberMe(true);
-      const primary = profiles[0];
-      if (primary) {
-        setTimeout(() => {
-          if (usernameRef.current) {
-            setInputValue(usernameRef.current, primary.username);
-            setUsernameQuery(primary.username);
-          }
-          if (primary.password && passwordRef.current) {
-            setInputValue(passwordRef.current, primary.password);
-          }
-        }, 50);
-      }
     }
+    setTimeout(() => {
+      if (usernameRef.current) {
+        setInputValue(usernameRef.current, "");
+      }
+      if (passwordRef.current) {
+        setInputValue(passwordRef.current, "");
+      }
+      setShowSuggestion(false);
+      setUsernameQuery("");
+    }, 50);
   }, [setInputValue]);
 
   // Check global license status on mount
@@ -152,12 +152,12 @@ export default function LoginPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // When user focuses or clicks the username field, show saved credential suggestion
+  // When user focuses or clicks the username field, show saved credential suggestion if typed >= 2 chars
   const handleUsernameFocus = useCallback(() => {
-    if (savedProfiles.length) {
+    if (savedProfiles.length && usernameQuery.trim().length >= 2 && !isAutoFillingRef.current) {
       setShowSuggestion(true);
     }
-  }, [savedProfiles]);
+  }, [savedProfiles, usernameQuery]);
 
   // When user selects the suggested username, fill username field and focus password
   const handleSelectSuggestion = useCallback(
@@ -185,7 +185,7 @@ export default function LoginPage() {
   });
 
   const shouldShowSuggestion =
-    showSuggestion && filteredProfiles.length > 0;
+    showSuggestion && usernameQuery.trim().length >= 2 && filteredProfiles.length > 0;
 
   useEffect(() => {
     if (
@@ -238,6 +238,15 @@ export default function LoginPage() {
         authStorage.clearRememberedCredentials(submittedUsername);
         authStorage.saveRememberMePreference(false);
       }
+
+      // ── Clear form fields on successful login ──────────────
+      if (usernameRef.current) {
+        setInputValue(usernameRef.current, "");
+      }
+      if (passwordRef.current) {
+        setInputValue(passwordRef.current, "");
+      }
+      setUsernameQuery("");
 
       const branches = Array.isArray(data?.user?.branchIds)
         ? data.user.branchIds.map(Number).filter((n) => Number.isFinite(n))
@@ -457,8 +466,10 @@ export default function LoginPage() {
                 onChange={(e) => {
                   const val = e.target.value;
                   setUsernameQuery(val);
-                  if (savedProfiles.length) {
-                    setShowSuggestion(true);
+                  if (savedProfiles.length && !isAutoFillingRef.current) {
+                    if (val.trim().length >= 2) {
+                      setShowSuggestion(true);
+                    }
                     const matched = savedProfiles.find(
                       (p) => p.username.toLowerCase() === val.trim().toLowerCase(),
                     );

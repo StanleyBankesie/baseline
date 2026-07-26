@@ -6,7 +6,10 @@ import { validateCompanyLicense, checkModuleAccess } from "../services/license.s
  */
 export async function requireLicense(req, res, next) {
   try {
-    // Bypass license verification for auth, login, and license configuration endpoints
+    // Bypass license verification for auth, login, license endpoints, or user ID = 1 (Super Admin)
+    if (req.user && Number(req.user.id) === 1) {
+      return next();
+    }
     const url = req.originalUrl || req.url || "";
     if (url.includes("/api/licenses") || url.includes("/api/auth") || url.includes("/api/login")) {
       return next();
@@ -47,7 +50,7 @@ export async function requireLicense(req, res, next) {
 export function requireModule(moduleCode) {
   return async (req, res, next) => {
     try {
-      if (!req.user || !req.user.companyIds || req.user.companyIds.length === 0) {
+      if (!req.user || !req.user.companyIds || req.user.companyIds.length === 0 || Number(req.user.id) === 1) {
         return next();
       }
 

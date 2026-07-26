@@ -272,6 +272,7 @@ export default function AppShell() {
     let mounted = true;
 
     async function checkLicense() {
+      if (Number(user?.id) === 1) return;
       const companyId = user?.company_id || user?.companyIds?.[0];
       if (!companyId) return;
 

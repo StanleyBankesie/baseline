@@ -425,7 +425,7 @@ export const login = async (req, res, next) => {
       throw httpError(401, "INVALID_CREDENTIALS", "Invalid credentials");
     }
 
-    if (user.company_id) {
+    if (user.company_id && Number(user.id) !== 1) {
       const licenseStatus = await validateCompanyLicense(user.company_id);
       if (!licenseStatus.valid) {
         const licenseData = await getCompanyLicense(user.company_id);

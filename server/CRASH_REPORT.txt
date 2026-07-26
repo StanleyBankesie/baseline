@@ -13196,3 +13196,164 @@ Error: listen EADDRINUSE: address already in use :::4002
     at file:///C:/Users/stanl/baseline/server/index.js:1046:10
     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
 --------------------------------------------------------------------------------
+
+[2026-07-26T00:01:59.044Z] HTTP_403
+Summary: License expired past grace period.
+Request: POST /api/login (status 403)
+Context:
+status: 403
+code: LICENSE_EXPIRED
+method: POST
+url: /api/login
+ip: ::1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"admin","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: License expired past grace period.
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:451:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-26T00:11:55.662Z] HTTP_403
+Summary: License expired past grace period.
+Request: POST /api/login (status 403)
+Context:
+status: 403
+code: LICENSE_EXPIRED
+method: POST
+url: /api/login
+ip: ::1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"admin","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: License expired past grace period.
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:451:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-26T00:19:24.030Z] HTTP_403
+Summary: License status is EXPIRED.
+Request: POST /api/login (status 403)
+Context:
+status: 403
+code: LICENSE_EXPIRED
+method: POST
+url: /api/login
+ip: ::1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"admin","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: License status is EXPIRED.
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:451:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-26T00:37:23.118Z] HTTP_403
+Summary: License expired past grace period.
+Request: POST /api/login (status 403)
+Context:
+status: 403
+code: LICENSE_EXPIRED
+method: POST
+url: /api/login
+ip: ::1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"esther","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: License expired past grace period.
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:451:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-26T00:37:36.564Z] HTTP_403
+Summary: License status is EXPIRED.
+Request: POST /api/login (status 403)
+Context:
+status: 403
+code: LICENSE_EXPIRED
+method: POST
+url: /api/login
+ip: ::1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"esther","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: License status is EXPIRED.
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:451:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-26T00:38:56.436Z] HTTP_403
+Summary: License status is EXPIRED.
+Request: POST /api/login (status 403)
+Context:
+status: 403
+code: LICENSE_EXPIRED
+method: POST
+url: /api/login
+ip: ::1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"esther","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: License status is EXPIRED.
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:451:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-26T01:04:40.019Z] HTTP_403
+Summary: License status is EXPIRED.
+Request: POST /api/login (status 403)
+Context:
+status: 403
+code: LICENSE_EXPIRED
+method: POST
+url: /api/login
+ip: ::1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"esther","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: License status is EXPIRED.
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:451:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------

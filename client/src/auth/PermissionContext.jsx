@@ -515,18 +515,13 @@ export const PermissionProvider = ({ children }) => {
         next.delete(base);
         return next;
       });
-      try {
-        window.dispatchEvent(new Event("rbac:updated"));
-      } catch {}
       return perms;
     } catch (err) {
-      if (isTransientBackendError(err)) {
-        setPagePermRetryAfter((prev) => {
-          const next = new Map(prev);
-          next.set(base, Date.now() + PAGE_PERM_RETRY_MS);
-          return next;
-        });
-      }
+      setPagePermRetryAfter((prev) => {
+        const next = new Map(prev);
+        next.set(base, Date.now() + (PAGE_PERM_RETRY_MS || 10000));
+        return next;
+      });
       return null;
     } finally {
       setPagePermsPending((prev) => {
