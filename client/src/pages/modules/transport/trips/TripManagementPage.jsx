@@ -17,6 +17,7 @@ export default function TripManagementPage() {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [searchTerm, setSearchTerm] = useState("");
   const [startTripModal, setStartTripModal] = useState({ open: false, tripId: null, odometer: "" });
+  const [endTripModal, setEndTripModal] = useState({ open: false, tripId: null, odometer: "" });
   const [reassignModal, setReassignModal] = useState({ open: false, tripId: null, driverId: "" });
   const [reassigning, setReassigning] = useState(false);
   const trackingIntervals = React.useRef({});
@@ -105,12 +106,13 @@ export default function TripManagementPage() {
     }
   };
 
-  const handleEndTrip = async (tripId) => {
-    if (!window.confirm("Are you sure you want to end this trip?")) return;
+  const handleEndTripSubmit = async () => {
     try {
-      await api.put(`/transport/trips/${tripId}/return`, { end_time: new Date().toISOString() });
+      const tripId = endTripModal.tripId;
+      await api.put(`/transport/trips/${tripId}/return`, { end_time: new Date().toISOString(), end_odometer: endTripModal.odometer });
       toast.success("Trip ended successfully");
       stopTracking(tripId);
+      setEndTripModal({ open: false, tripId: null, odometer: "" });
       fetchData();
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to end trip");
@@ -393,7 +395,7 @@ export default function TripManagementPage() {
                     )}
                     {trip.status?.toUpperCase() !== 'SCHEDULED' && (
                       <button 
-                        onClick={() => handleEndTrip(trip.id)}
+                        onClick={() => setEndTripModal({ open: true, tripId: trip.id, odometer: "" })}
                         className="py-2 px-3 border border-rose-800/80 bg-rose-950/40 text-rose-300 hover:bg-rose-900/60 rounded-xl transition-all font-bold flex items-center gap-1.5 text-xs shrink-0"
                         title="End Trip"
                       >
@@ -439,6 +441,43 @@ export default function TripManagementPage() {
                 onClick={handleStartTrip}
               >
                 Confirm & Start
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* End Trip Modal */}
+      {endTripModal.open && (
+        <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 text-slate-100 rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-4">
+            <h3 className="text-lg sm:text-xl font-extrabold text-brand flex items-center gap-2">
+              <CheckCircleOutlined /> End Trip Execution
+            </h3>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-300 block">
+                Ending Odometer Reading <span className="text-rose-500">*</span>
+              </label>
+              <input 
+                type="number" 
+                className="input input-bordered w-full bg-slate-950 border-slate-800 text-white text-xs sm:text-sm rounded-xl focus:border-brand focus:outline-none" 
+                placeholder="e.g. 154500"
+                value={endTripModal.odometer}
+                onChange={e => setEndTripModal(prev => ({ ...prev, odometer: e.target.value }))}
+              />
+            </div>
+            <div className="flex gap-2 justify-end pt-3 border-t border-slate-800">
+              <button 
+                className="px-4 py-2 rounded-xl font-bold text-xs text-slate-400 hover:bg-slate-800 transition-colors"
+                onClick={() => setEndTripModal({ open: false, tripId: null, odometer: "" })}
+              >
+                Cancel
+              </button>
+              <button 
+                className="px-4 py-2 rounded-xl font-bold text-xs bg-brand text-white hover:bg-brand-600 transition-colors shadow-md"
+                onClick={handleEndTripSubmit}
+              >
+                Confirm & End
               </button>
             </div>
           </div>

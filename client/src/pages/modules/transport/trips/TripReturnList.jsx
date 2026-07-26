@@ -24,7 +24,7 @@ export default function TripReturnList() {
     setLoading(true);
     try {
       const res = await api.get("/transport/trips");
-      const activeTrips = (res.data?.data?.items || []).filter(t => ['SCHEDULED', 'IN_TRANSIT'].includes(t.status));
+      const activeTrips = (res.data?.data?.items || []).filter(t => !['COMPLETED', 'CANCELLED'].includes(t.status?.toUpperCase()));
       setTrips(activeTrips);
     } catch (err) {
       toast.error("Failed to fetch active trips");
