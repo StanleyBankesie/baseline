@@ -860,24 +860,43 @@ const _staticOpts = {
     res.setHeader("Access-Control-Allow-Origin", "*");
     if (filePath.endsWith(".js") || filePath.endsWith(".mjs")) {
       res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    } else if (filePath.endsWith(".css")) {
+      res.setHeader("Content-Type", "text/css; charset=utf-8");
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
     }
   },
 };
 const _frontendCandidates = [
   path.join(__dirname, "../client/dist"),
+  path.join(process.cwd(), "client/dist"),
   path.join(__dirname, "public"),
   path.join(process.cwd(), "public"),
+  path.join(__dirname, "../public"),
+  path.join(process.cwd(), "dist/public"),
+  path.join(__dirname, "dist/public"),
 ];
+
 let _earlyFrontendPath = null;
+const _activeFrontendPaths = [];
+
 for (const candidate of _frontendCandidates) {
-  if (fs.existsSync(path.join(candidate, "index.html"))) {
-    _earlyFrontendPath = candidate;
-    break;
+  if (fs.existsSync(candidate)) {
+    _activeFrontendPaths.push(candidate);
+    app.use(express.static(candidate, _staticOpts));
+    const assetsSubdir = path.join(candidate, "assets");
+    if (fs.existsSync(assetsSubdir)) {
+      app.use("/assets", express.static(assetsSubdir, _staticOpts));
+    }
+    if (!_earlyFrontendPath && fs.existsSync(path.join(candidate, "index.html"))) {
+      _earlyFrontendPath = candidate;
+    }
   }
 }
+
 if (_earlyFrontendPath) {
-  app.use(express.static(_earlyFrontendPath, _staticOpts));
-  console.log(`[STATIC] Serving frontend assets from ${_earlyFrontendPath}`);
+  console.log(`[STATIC] Serving primary frontend index.html from ${_earlyFrontendPath}`);
+  console.log(`[STATIC] Active asset directories: ${_activeFrontendPaths.join(", ")}`);
 } else {
   console.warn(
     `[STATIC] Frontend build not found. Checked: ${_frontendCandidates.join(", ")}`,
@@ -974,15 +993,14 @@ if (_overrideDir) {
 }
 if (_spaFrontendPath && serveFrontendFlag) {
   const frontendPath = _spaFrontendPath;
-  if (frontendPath && fs.existsSync(frontendPath)) {
-    // Static already registered early; register again here just in case
-    // (express.static is idempotent for the same path)
-    app.use(express.static(frontendPath, _staticOpts));
+  for (const candidate of _activeFrontendPaths) {
+    app.use(express.static(candidate, _staticOpts));
+    const assetsSubdir = path.join(candidate, "assets");
+    if (fs.existsSync(assetsSubdir)) {
+      app.use("/assets", express.static(assetsSubdir, _staticOpts));
+    }
   }
-  // Return 404 for missing static assets in /assets or matching file extensions (prevents MIME type errors)
-  app.use("/assets", (req, res) => {
-    res.status(404).type("text/plain").send("Static asset not found");
-  });
+
   app.get("*", (req, res, next) => {
     if (req.url.startsWith("/api") || req.url.startsWith("/uploads") || req.url.startsWith("/socket.io")) {
       return next();
