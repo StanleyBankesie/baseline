@@ -13357,3 +13357,83 @@ Error: License status is EXPIRED.
     at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:451:25)
     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
 --------------------------------------------------------------------------------
+
+[2026-07-26T01:13:12.168Z] HTTP_500
+Summary: Duplicate entry '1-stanleyetornam@gmail.com' for key 'uq_user_company_email'
+Request: PUT /api/admin/users/7 (status 500)
+Context:
+status: 500
+code: ER_DUP_ENTRY
+method: PUT
+url: /api/admin/users/7
+ip: ::1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: null
+branchId: null
+body: {"company_id":1,"branch_id":1,"branch_ids":[1],"username":"esther","email":"stanleyetornam@gmail.com","telephone":"","full_name":"esther dag","is_active":true,"profile_picture":null,"is_employee":true,"user_type":"Internal","valid_from":"2026-05-21","valid_to":"2027-12-21","role_id":5}
+query: {}
+Technical details:
+Error: Duplicate entry '1-stanleyetornam@gmail.com' for key 'uq_user_company_email'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async updateUser (file:///C:/Users/stanl/baseline/server/controllers/users.controller.js:397:20)
+--------------------------------------------------------------------------------
+
+[2026-07-26T01:15:06.591Z] HTTP_403
+Summary: License expired past grace period.
+Request: POST /api/login (status 403)
+Context:
+status: 403
+code: LICENSE_EXPIRED
+method: POST
+url: /api/login
+ip: ::1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"esther","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: License expired past grace period.
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:451:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-26T13:29:27.787Z] HTTP_401
+Summary: Authentication required
+Request: GET /api/pos/payment-modes (status 401)
+Context:
+status: 401
+code: UNAUTHORIZED
+method: GET
+url: /api/pos/payment-modes
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Authentication required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:143:17)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+    at Function.handle (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:175:3)
+--------------------------------------------------------------------------------

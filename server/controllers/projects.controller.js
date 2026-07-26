@@ -1916,3 +1916,180 @@ export const getProjectExpenseReport = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+export const getTaskExecutionAnalyticsReport = async (req, res, next) => {
+  try {
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+    const projectId = req.query.project_id ? toNumber(req.query.project_id) : null;
+    const priority = req.query.priority ? String(req.query.priority).toUpperCase() : null;
+    const status = req.query.status ? String(req.query.status).toUpperCase() : null;
+
+    await ensureProjectTables(companyId, branchId);
+
+    const projects = await query(
+      `SELECT p.id, p.project_code, p.project_name
+       FROM pm_projects p
+       WHERE p.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(p.branch_id, :branchIdsStr))
+       ORDER BY p.project_name`,
+      { companyId, branchIdsStr }
+    );
+
+    let sql = `SELECT t.*, 
+                      COALESCE(NULLIF(p.project_name, ''), NULLIF(CONCAT('Project #', t.project_id), 'Project #null'), 'General Project') AS project_name, 
+                      p.project_code, 
+                      COALESCE(NULLIF(t.assigned_to_name, ''), u.username, u.full_name, 'Unassigned') AS assigned_to_name
+               FROM pm_tasks t
+               LEFT JOIN pm_projects p ON t.project_id = p.id
+               LEFT JOIN adm_users u ON u.id = t.assigned_to_id
+               WHERE (t.company_id = :companyId OR :companyId IS NULL OR t.company_id IS NULL OR t.company_id = 0)
+                 AND (:branchId IS NULL OR t.branch_id IS NULL OR t.branch_id = 0 OR :branchIdsStr = '' OR FIND_IN_SET(t.branch_id, :branchIdsStr))`;
+
+    if (projectId) sql += ` AND t.project_id = :projectId`;
+    if (priority) sql += ` AND UPPER(t.priority) = :priority`;
+    if (status) sql += ` AND UPPER(t.status) = :status`;
+
+    sql += ` ORDER BY t.created_at DESC`;
+
+    const items = await query(sql, { companyId, branchId, branchIdsStr, projectId, priority, status });
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let totalTasks = 0;
+    let completedTasks = 0;
+    let inProgressTasks = 0;
+    let pendingTasks = 0;
+    let blockedTasks = 0;
+    let reviewTasks = 0;
+    let overdueTasks = 0;
+    let dueTodayTasks = 0;
+    let onScheduleTasks = 0;
+    let onTimeCompletedTasks = 0;
+
+    const priorityCounts = { LOW: 0, MEDIUM: 0, HIGH: 0, URGENT: 0 };
+    const assigneeMap = {};
+    const projectMap = {};
+
+    const normalizedItems = (items || []).map((t) => {
+      totalTasks++;
+
+      const pct = Number(t.completion_percent || 0);
+      let effectiveStatus = (t.status || "PENDING").toUpperCase();
+      if (pct >= 100) effectiveStatus = "COMPLETED";
+      else if (pct > 0 && effectiveStatus === "PENDING") effectiveStatus = "IN_PROGRESS";
+      t.status = effectiveStatus;
+
+      if (effectiveStatus === "COMPLETED") completedTasks++;
+      else if (effectiveStatus === "IN_PROGRESS") inProgressTasks++;
+      else if (effectiveStatus === "BLOCKED") blockedTasks++;
+      else if (effectiveStatus === "REVIEW") reviewTasks++;
+      else pendingTasks++;
+
+      const taskPriority = (t.priority || "MEDIUM").toUpperCase();
+      if (priorityCounts[taskPriority] !== undefined) {
+        priorityCounts[taskPriority]++;
+      } else {
+        priorityCounts.MEDIUM++;
+      }
+
+      // Calculate Due Status
+      const endDateVal = t.end_date || t.dueDate || t.due_date;
+      if (effectiveStatus === "COMPLETED") {
+        t.due_status = "COMPLETED";
+        t.due_label = "Completed";
+        onTimeCompletedTasks++;
+      } else if (endDateVal) {
+        const sDate = String(endDateVal).split("T")[0];
+        const parts = sDate.split("-");
+        let dueDate = null;
+        if (parts.length === 3) {
+          dueDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        } else {
+          dueDate = new Date(endDateVal);
+        }
+        dueDate.setHours(0, 0, 0, 0);
+
+        const diffTime = dueDate.getTime() - today.getTime();
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) {
+          const daysOver = Math.abs(diffDays);
+          t.due_status = "OVERDUE";
+          t.due_label = `Overdue by ${daysOver} d`;
+          overdueTasks++;
+        } else if (diffDays === 0) {
+          t.due_status = "DUE_TODAY";
+          t.due_label = "Due Today";
+          dueTodayTasks++;
+        } else {
+          t.due_status = "ON_SCHEDULE";
+          t.due_label = `Due in ${diffDays} d`;
+          onScheduleTasks++;
+        }
+      } else {
+        t.due_status = "NO_DUE_DATE";
+        t.due_label = "—";
+      }
+
+      // Assignee aggregation
+      const assigneeName = t.assigned_to_name || "Unassigned";
+      if (!assigneeMap[assigneeName]) {
+        assigneeMap[assigneeName] = { name: assigneeName, total: 0, completed: 0, overdue: 0, blocked: 0 };
+      }
+      assigneeMap[assigneeName].total++;
+      if (effectiveStatus === "COMPLETED") assigneeMap[assigneeName].completed++;
+      if (t.due_status === "OVERDUE") assigneeMap[assigneeName].overdue++;
+      if (effectiveStatus === "BLOCKED") assigneeMap[assigneeName].blocked++;
+
+      // Project aggregation
+      const projName = t.project_name || "General Project";
+      if (!projectMap[projName]) {
+        projectMap[projName] = { name: projName, code: t.project_code || "PRJ", total: 0, completed: 0, overdue: 0 };
+      }
+      projectMap[projName].total++;
+      if (effectiveStatus === "COMPLETED") projectMap[projName].completed++;
+      if (t.due_status === "OVERDUE") projectMap[projName].overdue++;
+
+      return t;
+    });
+
+    const completionRate = totalTasks > 0 ? ((completedTasks / totalTasks) * 100).toFixed(1) : "0.0";
+    const overdueRate = totalTasks > 0 ? ((overdueTasks / totalTasks) * 100).toFixed(1) : "0.0";
+    const onTimeRate = completedTasks > 0 ? ((onTimeCompletedTasks / completedTasks) * 100).toFixed(1) : "0.0";
+
+    const assigneeWorkload = Object.values(assigneeMap).map((a) => ({
+      ...a,
+      completionRate: a.total > 0 ? ((a.completed / a.total) * 100).toFixed(1) : "0.0",
+    })).sort((a, b) => b.total - a.total);
+
+    const projectExecutionBreakdown = Object.values(projectMap).map((p) => ({
+      ...p,
+      completionRate: p.total > 0 ? ((p.completed / p.total) * 100).toFixed(1) : "0.0",
+    })).sort((a, b) => b.total - a.total);
+
+    res.json({
+      projects,
+      items: normalizedItems,
+      analytics: {
+        totalTasks,
+        completedTasks,
+        inProgressTasks,
+        pendingTasks,
+        blockedTasks,
+        reviewTasks,
+        overdueTasks,
+        dueTodayTasks,
+        onScheduleTasks,
+        completionRate: Number(completionRate),
+        overdueRate: Number(overdueRate),
+        onTimeRate: Number(onTimeRate),
+        priorityDistribution: priorityCounts,
+        assigneeWorkload,
+        projectExecutionBreakdown
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+

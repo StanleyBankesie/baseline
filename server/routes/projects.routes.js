@@ -435,6 +435,15 @@ router.get(
   projectsController.getProjectExpenseReport
 );
 
+// ===== TASK EXECUTION ANALYTICS REPORT =====
+router.get(
+  "/reports/task-execution",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  projectsController.getTaskExecutionAnalyticsReport
+);
+
 // ===== DASHBOARD =====
 router.get(
   "/dashboard/stats",

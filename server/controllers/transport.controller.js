@@ -447,9 +447,13 @@ export const addTripLocation = async (req, res, next) => {
       
       if (!finalOriginName) {
         try {
-          const [setting] = await query("SELECT setting_value FROM settings WHERE setting_key = 'google_maps_api_key'");
-          if (setting && setting.setting_value) {
-            const geoRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${setting.setting_value}`);
+          let mapsKey = process.env.GOOGLE_MAPS_API_KEY || process.env.VITE_GOOGLE_MAPS_API_KEY || "";
+          if (!mapsKey) {
+            const [setting] = await query("SELECT setting_value FROM adm_system_settings WHERE setting_key = 'GOOGLE_MAPS_API_KEY'");
+            if (setting && setting.setting_value) mapsKey = setting.setting_value;
+          }
+          if (mapsKey) {
+            const geoRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${mapsKey}`);
             const geoData = await geoRes.json();
             if (geoData.results && geoData.results[0]) {
               finalOriginName = geoData.results[0].formatted_address;
@@ -1594,3 +1598,262 @@ export const updateExpenseLogVoucherId = async (req, res, next) => {
     next(err);
   }
 };
+
+// === COMPREHENSIVE TRANSPORT & TRIP EXECUTION ANALYTICS REPORT ===
+export const getTransportFullAnalyticsReport = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const vehicleId = req.query.vehicle_id ? toNumber(req.query.vehicle_id) : null;
+    const driverId = req.query.driver_id ? toNumber(req.query.driver_id) : null;
+    const status = req.query.status ? String(req.query.status).toUpperCase() : null;
+
+    // 1. Fetch Vehicles
+    const vehicleRows = await query(
+      "SELECT id, registration_number, make, model, status, capacity, fuel_type FROM trans_vehicles WHERE company_id = :companyId ORDER BY registration_number",
+      { companyId }
+    ).catch(() => []);
+
+    // 2. Fetch Drivers
+    const driverRows = await query(
+      "SELECT id, driver_name, license_number, status, phone FROM trans_drivers WHERE company_id = :companyId ORDER BY driver_name",
+      { companyId }
+    ).catch(() => []);
+
+    // 3. Query Trips
+    let tripSql = `
+      SELECT t.*, 
+             COALESCE(NULLIF(v.registration_number, ''), NULLIF(CONCAT(v.make, ' ', v.model), ' '), CONCAT('Vehicle #', t.vehicle_id)) AS vehicle_name,
+             v.registration_number AS reg_number,
+             COALESCE(NULLIF(d.driver_name, ''), 'Unassigned Driver') AS driver_name
+      FROM trans_trips t
+      LEFT JOIN trans_vehicles v ON v.id = t.vehicle_id
+      LEFT JOIN trans_drivers d ON d.id = t.driver_id
+      WHERE (t.company_id = :companyId OR :companyId IS NULL OR t.company_id = 0)`;
+
+    if (vehicleId) tripSql += ` AND t.vehicle_id = :vehicleId`;
+    if (driverId) tripSql += ` AND t.driver_id = :driverId`;
+    if (status) tripSql += ` AND UPPER(t.status) = :status`;
+
+    tripSql += ` ORDER BY t.created_at DESC, t.id DESC`;
+
+    const rawTrips = await query(tripSql, { companyId, vehicleId, driverId, status }).catch(() => []);
+
+    // 4. Query Fuel Logs
+    const fuelRows = await query(
+      "SELECT f.*, v.registration_number AS reg_number FROM trans_fuel_logs f LEFT JOIN trans_vehicles v ON v.id = f.vehicle_id WHERE f.company_id = :companyId ORDER BY f.log_date DESC",
+      { companyId }
+    ).catch(() => []);
+
+    // 5. Query Expenses / Bills
+    const expenseRows = await query(
+      "SELECT * FROM trans_expense_logs WHERE company_id = :companyId AND (deleted_at IS NULL)",
+      { companyId }
+    ).catch(() => []);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let totalTrips = 0;
+    let completedTrips = 0;
+    let inTransitTrips = 0;
+    let scheduledTrips = 0;
+    let delayedTrips = 0;
+    let cancelledTrips = 0;
+    let totalDistanceKm = 0;
+    let totalRevenue = 0;
+    let totalTripCost = 0;
+    let onTimeCompletedTrips = 0;
+
+    const driverMap = {};
+    const vehicleMap = {};
+
+    const items = (rawTrips || []).map((t) => {
+      totalTrips++;
+
+      const currentStatus = (t.status || "SCHEDULED").toUpperCase();
+      t.status = currentStatus;
+
+      if (currentStatus === "COMPLETED") completedTrips++;
+      else if (currentStatus === "IN_TRANSIT") inTransitTrips++;
+      else if (currentStatus === "SCHEDULED") scheduledTrips++;
+      else if (currentStatus === "DELAYED") delayedTrips++;
+      else if (currentStatus === "CANCELLED") cancelledTrips++;
+
+      const dist = Number(t.total_distance_km || t.distance_km || 0);
+      const rev = Number(t.revenue || t.total_amount || 0);
+      const cost = Number(t.trip_cost || t.total_cost || 0);
+
+      totalDistanceKm += dist;
+      totalRevenue += rev;
+      totalTripCost += cost;
+
+      t.profit = rev - cost;
+      t.total_distance_km = dist;
+      t.revenue = rev;
+      t.trip_cost = cost;
+
+      // Calculate SLA & Due Status
+      const endDateVal = t.end_time || t.end_date || t.scheduled_end;
+      if (currentStatus === "COMPLETED") {
+        t.due_status = "COMPLETED";
+        t.due_label = "Completed";
+        onTimeCompletedTrips++;
+      } else if (currentStatus === "DELAYED") {
+        t.due_status = "OVERDUE";
+        t.due_label = "Delayed Schedule";
+      } else if (endDateVal) {
+        const sDate = String(endDateVal).split("T")[0];
+        const parts = sDate.split("-");
+        let dueDate = null;
+        if (parts.length === 3) {
+          dueDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        } else {
+          dueDate = new Date(endDateVal);
+        }
+        dueDate.setHours(0, 0, 0, 0);
+
+        const diffTime = dueDate.getTime() - today.getTime();
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) {
+          const daysOver = Math.abs(diffDays);
+          t.due_status = "OVERDUE";
+          t.due_label = `Overdue by ${daysOver} d`;
+          if (currentStatus !== "CANCELLED") delayedTrips++;
+        } else if (diffDays === 0) {
+          t.due_status = "DUE_TODAY";
+          t.due_label = "Due Today";
+        } else {
+          t.due_status = "ON_SCHEDULE";
+          t.due_label = `In ${diffDays} d`;
+        }
+      } else {
+        t.due_status = "NO_DUE_DATE";
+        t.due_label = "—";
+      }
+
+      // Aggregations
+      const dName = t.driver_name || "Unassigned Driver";
+      if (!driverMap[dName]) {
+        driverMap[dName] = { name: dName, total: 0, completed: 0, delayed: 0, distance: 0, revenue: 0 };
+      }
+      driverMap[dName].total++;
+      driverMap[dName].distance += dist;
+      driverMap[dName].revenue += rev;
+      if (currentStatus === "COMPLETED") driverMap[dName].completed++;
+      if (t.due_status === "OVERDUE" || currentStatus === "DELAYED") driverMap[dName].delayed++;
+
+      const vName = t.vehicle_name || "Unassigned Vehicle";
+      if (!vehicleMap[vName]) {
+        vehicleMap[vName] = { name: vName, reg: t.reg_number || "", total: 0, completed: 0, delayed: 0, distance: 0, cost: 0 };
+      }
+      vehicleMap[vName].total++;
+      vehicleMap[vName].distance += dist;
+      vehicleMap[vName].cost += cost;
+      if (currentStatus === "COMPLETED") vehicleMap[vName].completed++;
+      if (t.due_status === "OVERDUE" || currentStatus === "DELAYED") vehicleMap[vName].delayed++;
+
+      return t;
+    });
+
+    // Fleet Status Aggregation
+    const totalFleet = vehicleRows.length;
+    let availableVehicles = 0;
+    let inTransitVehicles = 0;
+    let maintenanceVehicles = 0;
+    let outOfServiceVehicles = 0;
+
+    vehicleRows.forEach((v) => {
+      const st = (v.status || "AVAILABLE").toUpperCase();
+      if (st === "AVAILABLE" || st === "ACTIVE" || st === "READY") availableVehicles++;
+      else if (st === "IN_TRANSIT" || st === "ON_TRIP") inTransitVehicles++;
+      else if (st === "MAINTENANCE" || st === "SERVICING") maintenanceVehicles++;
+      else outOfServiceVehicles++;
+    });
+
+    // Driver Status Aggregation
+    const totalDrivers = driverRows.length;
+    let availableDrivers = 0;
+    let onTripDrivers = 0;
+    let offDutyDrivers = 0;
+
+    driverRows.forEach((d) => {
+      const st = (d.status || "AVAILABLE").toUpperCase();
+      if (st === "AVAILABLE" || st === "ACTIVE" || st === "READY") availableDrivers++;
+      else if (st === "ON_TRIP" || st === "IN_TRANSIT") onTripDrivers++;
+      else offDutyDrivers++;
+    });
+
+    // Fuel Aggregation
+    let totalFuelLiters = 0;
+    let totalFuelCost = 0;
+    fuelRows.forEach((f) => {
+      totalFuelLiters += Number(f.liters || f.quantity || 0);
+      totalFuelCost += Number(f.total_cost || f.amount || 0);
+    });
+
+    const completionRate = totalTrips > 0 ? ((completedTrips / totalTrips) * 100).toFixed(1) : "0.0";
+    const onTimeRate = completedTrips > 0 ? ((onTimeCompletedTrips / completedTrips) * 100).toFixed(1) : "0.0";
+    const delayRate = totalTrips > 0 ? ((delayedTrips / totalTrips) * 100).toFixed(1) : "0.0";
+    const fleetUtilizationRate = totalFleet > 0 ? (((inTransitVehicles + availableVehicles) / totalFleet) * 100).toFixed(1) : "0.0";
+
+    const driverPerformance = Object.values(driverMap).map((d) => ({
+      ...d,
+      completionRate: d.total > 0 ? ((d.completed / d.total) * 100).toFixed(1) : "0.0"
+    })).sort((a, b) => b.total - a.total);
+
+    const vehicleUtilization = Object.values(vehicleMap).map((v) => ({
+      ...v,
+      completionRate: v.total > 0 ? ((v.completed / v.total) * 100).toFixed(1) : "0.0"
+    })).sort((a, b) => b.total - a.total);
+
+    res.json({
+      success: true,
+      vehicles: vehicleRows,
+      drivers: driverRows,
+      items,
+      analytics: {
+        totalTrips,
+        completedTrips,
+        inTransitTrips,
+        scheduledTrips,
+        delayedTrips,
+        cancelledTrips,
+        completionRate: Number(completionRate),
+        onTimeRate: Number(onTimeRate),
+        delayRate: Number(delayRate),
+        totalDistanceKm,
+        totalRevenue,
+        totalTripCost,
+        netProfitability: totalRevenue - totalTripCost,
+        
+        // Fleet
+        totalFleet,
+        availableVehicles,
+        inTransitVehicles,
+        maintenanceVehicles,
+        outOfServiceVehicles,
+        fleetUtilizationRate: Number(fleetUtilizationRate),
+
+        // Drivers
+        totalDrivers,
+        availableDrivers,
+        onTripDrivers,
+        offDutyDrivers,
+
+        // Fuel
+        totalFuelLiters,
+        totalFuelCost,
+        avgFuelCostPerLiter: totalFuelLiters > 0 ? (totalFuelCost / totalFuelLiters).toFixed(2) : "0.00",
+        fuelKmPerLiter: totalFuelLiters > 0 ? (totalDistanceKm / totalFuelLiters).toFixed(1) : "0.0",
+
+        // Performance Tables
+        driverPerformance,
+        vehicleUtilization
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+

@@ -39,13 +39,16 @@ import {
   listBreakdowns, createBreakdown,
   listTransportIncome, createTransportIncome, updateTransportIncome, deleteTransportIncome, updateTransportIncomeVoucherId,
   listTransportExpenses, createTransportExpense, updateTransportExpense, deleteTransportExpense, updateTransportExpenseVoucherId,
-  listExpenseLogs, createExpenseLog, updateExpenseLog, deleteExpenseLog, updateExpenseLogVoucherId
+  listExpenseLogs, createExpenseLog, updateExpenseLog, deleteExpenseLog, updateExpenseLogVoucherId,
+  getTransportFullAnalyticsReport
 } from "../controllers/transport.controller.js";
 
 const router = express.Router();
 
-// Dashboard
+// Dashboard & Analytics
 router.get("/dashboard", requireAuth, requireCompanyScope, getTransportDashboardStats);
+router.get("/reports/analytics", requireAuth, requireCompanyScope, getTransportFullAnalyticsReport);
+router.get("/reports/trip-execution", requireAuth, requireCompanyScope, getTransportFullAnalyticsReport);
 
 // Vehicles
 router.get("/vehicles", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.VEHICLES.VIEW"), listVehicles);

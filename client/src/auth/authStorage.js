@@ -229,7 +229,7 @@ export function saveRememberedCredentials(username, password, profile = {}) {
       ...existing.filter(
         (row) => row.username.toLowerCase() !== cleanUsername.toLowerCase(),
       ),
-    ].slice(0, 10);
+    ].slice(0, 500);
     writeRememberedCredentialProfiles(next);
   } catch {}
 }

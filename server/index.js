@@ -993,6 +993,9 @@ if (_spaFrontendPath && serveFrontendFlag) {
     if (frontendPath) {
       const indexPath = path.join(frontendPath, "index.html");
       if (fs.existsSync(indexPath)) {
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0");
+        res.setHeader("Pragma", "no-cache");
+        res.setHeader("Expires", "0");
         return res.sendFile(indexPath);
       }
     }

@@ -50,6 +50,7 @@ import FuelBillsList from "./fuel-bills/FuelBillsList.jsx";
 import FuelBillForm from "./fuel-bills/FuelBillForm.jsx";
 import TransportationBillsList from "./transportation-bills/TransportationBillsList.jsx";
 import TransportationBillForm from "./transportation-bills/TransportationBillForm.jsx";
+import TripExecutionReportPage from "./reports/TripExecutionReportPage.jsx";
 
 const ActionButton = ({ label, path, type, featureKey, action }) => {
   const { canPerformAction } = usePermission();
@@ -443,6 +444,7 @@ export default function TransportLayout() {
       <Route path="trips" element={<TripsList />} />
       <Route path="trip-management" element={<TripManagementPage />} />
       <Route path="trip-returns" element={<TripReturnList />} />
+      <Route path="reports/trip-execution" element={<TripExecutionReportPage />} />
       <Route path="reports/trip-history" element={<TripHistoryReport />} />
       <Route path="reports/revenue" element={<TransportRevenueReport />} />
       <Route path="reports/profitability" element={<TripProfitabilityReport />} />

@@ -2797,23 +2797,31 @@ router.get(
   requireCompanyScope,
   async (req, res, next) => {
     try {
-      await ensureSystemSettingsTable();
-      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
-      const rows = await query(
-        `
-        SELECT setting_key, setting_value
-         FROM adm_system_settings
-         WHERE (company_id = :companyId OR company_id IS NULL)
-          AND ((:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
-          AND setting_key = 'GOOGLE_MAPS_API_KEY'
-        ORDER BY company_id DESC, branch_id DESC
-        LIMIT 1
-        `,
-        { companyId: companyId ?? null, branchId: branchId ?? null, branchIdsStr },
-      );
+      let apiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.VITE_GOOGLE_MAPS_API_KEY || "";
+      
+      if (!apiKey) {
+        await ensureSystemSettingsTable();
+        const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+        const rows = await query(
+          `
+          SELECT setting_key, setting_value
+           FROM adm_system_settings
+           WHERE (company_id = :companyId OR company_id IS NULL)
+            AND ((:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
+            AND setting_key = 'GOOGLE_MAPS_API_KEY'
+          ORDER BY company_id DESC, branch_id DESC
+          LIMIT 1
+          `,
+          { companyId: companyId ?? null, branchId: branchId ?? null, branchIdsStr },
+        );
+        if (rows.length > 0 && rows[0].setting_value) {
+          apiKey = rows[0].setting_value;
+        }
+      }
+
       res.json({
         data: {
-          api_key: rows.length > 0 ? rows[0].setting_value : "",
+          api_key: apiKey,
         },
       });
     } catch (err) {
@@ -2828,10 +2836,42 @@ router.post(
   requireCompanyScope,
   async (req, res, next) => {
     try {
+      const api_key = String(req.body?.api_key || "").trim();
+
+      // 1. Update in-memory process.env
+      process.env.GOOGLE_MAPS_API_KEY = api_key;
+
+      // 2. Write to server/.env and root .env files
+      const fs = await import("fs");
+      const path = await import("path");
+      
+      const envPaths = [
+        path.resolve(process.cwd(), ".env"),
+        path.resolve(process.cwd(), "server", ".env"),
+      ];
+
+      for (const envPath of envPaths) {
+        try {
+          let content = "";
+          if (fs.existsSync(envPath)) {
+            content = fs.readFileSync(envPath, "utf-8");
+          }
+          let lines = content ? content.split(/\r?\n/) : [];
+          const index = lines.findIndex(line => line.startsWith("GOOGLE_MAPS_API_KEY="));
+          if (index >= 0) {
+            lines[index] = `GOOGLE_MAPS_API_KEY=${api_key}`;
+          } else {
+            lines.push(`GOOGLE_MAPS_API_KEY=${api_key}`);
+          }
+          fs.writeFileSync(envPath, lines.join("\n"));
+        } catch (e) {
+          console.error(`Failed writing GOOGLE_MAPS_API_KEY to ${envPath}:`, e);
+        }
+      }
+
+      // 3. Dual-storage sync to DB
       await ensureSystemSettingsTable();
       const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
-      const api_key = String(req.body?.api_key || "").trim();
-      
       await query(
         `
         INSERT INTO adm_system_settings (company_id, branch_id, setting_key, setting_value)
@@ -2840,7 +2880,8 @@ router.post(
         `,
         { companyId: companyId ?? null, branchId: branchId ?? null, branchIdsStr, api_key },
       );
-      res.json({ success: true });
+
+      res.json({ success: true, message: "Google Maps API Key saved to .env file and environment." });
     } catch (err) {
       next(err);
     }
@@ -3189,6 +3230,7 @@ router.get("/settings/env", requireAuth, async (req, res, next) => {
       }
     });
     return res.json({
+      GOOGLE_MAPS_API_KEY: envVars.GOOGLE_MAPS_API_KEY ? "********" : "",
       ARKESEL_API_KEY: envVars.ARKESEL_API_KEY ? "********" : "",
       ARKESEL_SENDER_ID: envVars.ARKESEL_SENDER_ID ? "********" : "",
       GREEN_API_ID_INSTANCE: envVars.GREEN_API_ID_INSTANCE || "",
@@ -3226,7 +3268,7 @@ router.post("/settings/env", requireAuth, async (req, res, next) => {
 
     const updates = req.body;
     const allowedKeys = [
-      "ARKESEL_API_KEY", "ARKESEL_SENDER_ID", "GREEN_API_ID_INSTANCE", "GREEN_API_TOKEN_INSTANCE",
+      "GOOGLE_MAPS_API_KEY", "ARKESEL_API_KEY", "ARKESEL_SENDER_ID", "GREEN_API_ID_INSTANCE", "GREEN_API_TOKEN_INSTANCE",
       "SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "SMTP_FROM", "SMTP_SECURE",
       "TEMPLATE_SALES_ORDER", "TEMPLATE_PURCHASE_ORDER", "TEMPLATE_SERVICE_ORDER", 
       "TEMPLATE_MAINTENANCE_JOB", "TEMPLATE_PAYMENT_VOUCHER"

@@ -70,9 +70,21 @@ export default function ProjectReports() {
       ) : null}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Link to="/project-management/reports/task-execution" className="group bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-brand-200 dark:hover:border-brand-900 transition-all duration-300 flex items-start gap-4">
+          <div className="p-3 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-purple-600 shadow-sm group-hover:scale-105 transition-transform">
+            <Activity size={20} />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-slate-900 dark:text-white group-hover:text-purple-600 transition-colors">Task Execution & Analytics</h3>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 uppercase">New</span>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Throughput velocity, SLA risk monitoring, assignee workload, and operational task metrics</p>
+          </div>
+        </Link>
         <Link to="/project-management/reports/project-status" className="group bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-brand-200 dark:hover:border-brand-900 transition-all duration-300 flex items-start gap-4">
           <div className="p-3 rounded-xl bg-brand-50 dark:bg-brand-900/30 text-brand-600 shadow-sm group-hover:scale-105 transition-transform">
-            <Activity size={20} />
+            <Briefcase size={20} />
           </div>
           <div className="flex-1">
             <h3 className="font-bold text-slate-900 dark:text-white group-hover:text-brand-600 transition-colors">Project Status Report</h3>

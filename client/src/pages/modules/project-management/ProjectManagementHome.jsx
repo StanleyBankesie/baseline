@@ -32,6 +32,7 @@ import PMPurchaseRequisitionList from "./purchase-requisitions/PMPurchaseRequisi
 import PMPurchaseRequisitionForm from "./purchase-requisitions/PMPurchaseRequisitionForm.jsx";
 import ProjectIncomeReport from "./reports/ProjectIncomeReport.jsx";
 import ProjectExpenseReport from "./reports/ProjectExpenseReport.jsx";
+import TaskExecutionReportPage from "./reports/TaskExecutionReportPage.jsx";
 import ProjectManagementDashboardPage from "./ProjectManagementDashboardPage.jsx";
 
 function ProjectManagementLanding() {
@@ -283,6 +284,7 @@ export default function ProjectManagementHome() {
       <Route path="/income" element={<ProjectIncomeList />} />
 
       <Route path="/reports" element={<ProjectReports />} />
+      <Route path="/reports/task-execution" element={<TaskExecutionReportPage />} />
       <Route path="/reports/project-status" element={<ProjectStatusReport />} />
       <Route path="/reports/project-income" element={<ProjectIncomeReport />} />
       <Route path="/reports/project-expense" element={<ProjectExpenseReport />} />

@@ -495,7 +495,8 @@ export default function LoginPage() {
                     border: "1px solid #e2e8f0",
                     borderRadius: "8px",
                     boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
-                    overflow: "hidden",
+                    overflowY: "auto",
+                    maxHeight: "220px",
                   }}
                 >
                   {filteredProfiles.map((profile) => (
