@@ -977,8 +977,10 @@ app.use("/api/visitors", visitorsRoutes);
 const serveFrontendFlag = (() => {
   const v1 = String(process.env.SERVE_FRONTEND || "").toLowerCase();
   const v2 = String(process.env.ENABLE_SPA || "").toLowerCase();
-  return v1 === "1" || v1 === "true" || v2 === "1" || v2 === "true";
+  if (v1 === "0" || v1 === "false" || v2 === "0" || v2 === "false") return false;
+  return true; // Default to true if a frontend build is present
 })();
+
 // Resolve override directory from env, if any
 const _overrideDir =
   String(process.env.STATIC_DIR || process.env.PUBLIC_DIR || "").trim() || null;
@@ -991,6 +993,7 @@ if (_overrideDir) {
     _spaFrontendPath = abs;
   }
 }
+
 if (_spaFrontendPath && serveFrontendFlag) {
   const frontendPath = _spaFrontendPath;
   for (const candidate of _activeFrontendPaths) {
@@ -1005,9 +1008,25 @@ if (_spaFrontendPath && serveFrontendFlag) {
     if (req.url.startsWith("/api") || req.url.startsWith("/uploads") || req.url.startsWith("/socket.io")) {
       return next();
     }
+
+    // Check if the requested path is a static asset file (.js, .css, .png, etc.)
     if (/\.(js|css|png|jpg|jpeg|gif|ico|json|svg|woff|woff2|ttf|map)$/i.test(req.path)) {
+      // Try to find the file in any of our active static candidate directories
+      const relativePath = req.path.replace(/^\//, "");
+      for (const candidate of _activeFrontendPaths) {
+        const fullFilePath = path.join(candidate, relativePath);
+        if (fs.existsSync(fullFilePath) && fs.statSync(fullFilePath).isFile()) {
+          if (fullFilePath.endsWith(".js") || fullFilePath.endsWith(".mjs")) {
+            res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+          } else if (fullFilePath.endsWith(".css")) {
+            res.setHeader("Content-Type", "text/css; charset=utf-8");
+          }
+          return res.sendFile(fullFilePath);
+        }
+      }
       return res.status(404).type("text/plain").send("Static file not found");
     }
+
     if (frontendPath) {
       const indexPath = path.join(frontendPath, "index.html");
       if (fs.existsSync(indexPath)) {
