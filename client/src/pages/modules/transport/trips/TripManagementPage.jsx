@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { EnvironmentOutlined, ArrowLeftOutlined, EditOutlined, PlayCircleOutlined, CheckCircleOutlined, UserOutlined, SwapOutlined, CarOutlined, SearchOutlined } from "@ant-design/icons";
+import { EnvironmentOutlined, ArrowLeftOutlined, EditOutlined, PlayCircleOutlined, CheckCircleOutlined, UserOutlined, SwapOutlined, CarOutlined, SearchOutlined, CompassOutlined } from "@ant-design/icons";
 import api from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import { useAuth } from "@/auth/AuthContext.jsx";
@@ -404,12 +404,24 @@ export default function TripManagementPage() {
                         <PlayCircleOutlined /> Start Trip
                       </button>
                     ) : (
-                      <Link 
-                        to={`/transport/tracking/${trip.id}`} 
-                        className="flex-1 py-2 px-3 bg-brand hover:bg-brand-600 text-white rounded-xl font-bold transition-all flex justify-center items-center gap-2 text-xs shadow-md shadow-brand/20 text-center"
-                      >
-                        <EnvironmentOutlined /> Live Map
-                      </Link>
+                      <>
+                        <Link 
+                          to={`/transport/tracking/${trip.id}`} 
+                          className="flex-1 py-2 px-3 bg-brand hover:bg-brand-600 text-white rounded-xl font-bold transition-all flex justify-center items-center gap-2 text-xs shadow-md shadow-brand/20 text-center"
+                        >
+                          <EnvironmentOutlined /> Live Map
+                        </Link>
+                        {trip.destination_lat && trip.destination_lng && (
+                          <a 
+                            href={`https://www.google.com/maps/dir/?api=1&destination=${trip.destination_lat},${trip.destination_lng}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all flex justify-center items-center gap-2 text-xs shadow-md shadow-blue-900/20 text-center"
+                          >
+                            <CompassOutlined /> Navigate
+                          </a>
+                        )}
+                      </>
                     )}
                     {trip.status?.toUpperCase() !== 'SCHEDULED' && (
                       <button 
