@@ -8,15 +8,36 @@ export default defineConfig({
   build: {
     sourcemap: false,
     target: "esnext",
+    chunkSizeWarningLimit: 2000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          react: ["react", "react-dom", "react-router-dom"],
-          ui: ["antd", "@ant-design/icons", "lucide-react", "react-toastify"],
-          state: ["@reduxjs/toolkit", "react-redux"],
-          docs: ["jspdf", "jspdf-autotable", "html2canvas", "xlsx"],
-          flows: ["reactflow", "dagre"],
-          socket: ["socket.io-client"],
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("antd") || id.includes("@ant-design")) {
+              return "antd";
+            }
+            if (id.includes("jspdf") || id.includes("jspdf-autotable") || id.includes("html2canvas") || id.includes("xlsx")) {
+              return "docs";
+            }
+            if (id.includes("leaflet") || id.includes("react-leaflet") || id.includes("@react-google-maps")) {
+              return "maps";
+            }
+            if (id.includes("reactflow") || id.includes("dagre")) {
+              return "flows";
+            }
+            if (id.includes("lucide-react")) {
+              return "lucide";
+            }
+            if (
+              id.includes("react") ||
+              id.includes("react-dom") ||
+              id.includes("react-router") ||
+              id.includes("@reduxjs") ||
+              id.includes("react-redux")
+            ) {
+              return "vendor-core";
+            }
+          }
         },
       },
     },
