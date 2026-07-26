@@ -86,6 +86,9 @@ function LiveTrackingMapInner({ apiKey, tripId, trip, height = 400 }) {
 
   useEffect(() => {
     fetchLocations();
+    // Fallback: poll every 10 seconds in case WebSockets (Socket.io) are disabled in production
+    const intervalId = setInterval(fetchLocations, 10000);
+    return () => clearInterval(intervalId);
   }, [tripId]);
 
   useEffect(() => {
