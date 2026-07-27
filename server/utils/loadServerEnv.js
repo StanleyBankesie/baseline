@@ -119,6 +119,13 @@ export function loadServerEnv(metaUrl = import.meta.url) {
     for (const filePath of localCandidates) {
       loadIfExists(filePath, true);
     }
+  } else {
+    // AGGRESSIVE FALLBACK: If we have no local env and are not explicitly prod,
+    // but .env.production exists on disk, assume we are in production and load it.
+    // This fixes issues where Passenger/Nginx drops NODE_ENV=production.
+    for (const filePath of prodCandidates) {
+      loadIfExists(filePath, true);
+    }
   }
 
   if (originalPort !== undefined && String(originalPort).trim() !== "") {

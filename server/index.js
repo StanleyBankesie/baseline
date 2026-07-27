@@ -91,6 +91,9 @@ if (forceLocal && fs.existsSync(localPath)) {
   dotenv.config({ path: prodPath, override: true });
 } else if (fs.existsSync(localPath)) {
   dotenv.config({ path: localPath, override: true });
+} else if (fs.existsSync(prodPath)) {
+  // AGGRESSIVE FALLBACK
+  dotenv.config({ path: prodPath, override: true });
 }
 
 if (originalPort !== undefined && String(originalPort).trim() !== "") {
