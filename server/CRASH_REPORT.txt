@@ -13994,3 +13994,124 @@ status: 404
 Technical details:
 (no stack)
 --------------------------------------------------------------------------------
+
+[2026-07-27T19:27:32.257Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/baseline/server/index.js:1122:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-27T19:28:35.397Z] HTTP_400
+Summary: "username" is required
+Request: POST /api/login (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/login
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.19041.6456
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: "username" is required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:336:22)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-27T19:28:35.918Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 56645
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-07-27T19:29:25.029Z] HTTP_400
+Summary: "username" is required
+Request: POST /api/login (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/login
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.19041.6456
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: "username" is required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:336:22)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-27T19:29:25.382Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 56693
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-07-27T19:29:55.951Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/baseline/server/index.js:1122:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-27T19:29:59.115Z] HTTP_400
+Summary: "username" is required
+Request: POST /api/login (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/login
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.19041.6456
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: "username" is required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:336:22)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-27T19:29:59.868Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 56882
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
