@@ -6,6 +6,7 @@
 import React from "react";
 import { Link, Route, Routes } from "react-router-dom";
 import ModuleDashboard from "../../../components/ModuleDashboard";
+import ModuleLayout from "../../../components/ModuleLayout";
 
 import CompanyList from "../administration/companies/CompanyList.jsx";
 import CompanyForm from "../administration/companies/CompanyForm.jsx";

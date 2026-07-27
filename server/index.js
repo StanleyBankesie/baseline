@@ -1071,8 +1071,11 @@ server.on("clientError", (err, socket) => {
     remoteAddress: socket?.remoteAddress || null,
     remotePort: socket?.remotePort || null,
   });
+  // Do not write raw HTTP/1.1 strings to the socket, as this breaks HTTP/2 streams
   try {
-    socket.end("HTTP/1.1 400 Bad Request\r\n\r\n");
+    if (socket.writable) {
+      socket.destroy();
+    }
   } catch {}
 });
 

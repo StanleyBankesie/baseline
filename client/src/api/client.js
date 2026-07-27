@@ -458,7 +458,7 @@ export function setUserHeader(user) {
 const inflightGets = new Map();
 const MAX_CONCURRENT_GETS = Math.max(
   1,
-  Number(import.meta.env.VITE_MAX_CONCURRENT_GETS || 4),
+  Number(import.meta.env.VITE_MAX_CONCURRENT_GETS || 2), // Reduced from 4 to 2 to bypass strict ModSecurity rules
 );
 const GET_RETRY_LIMIT = Math.max(
   0,
