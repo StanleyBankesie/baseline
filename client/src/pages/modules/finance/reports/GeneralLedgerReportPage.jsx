@@ -19,6 +19,12 @@ import SortableHeader from "@/components/SortableHeader.jsx";
  * @returns {JSX.Element} The rendered component
  */
 export default function GeneralLedgerReportPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [searchParams] = useSearchParams();
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -129,7 +135,7 @@ export default function GeneralLedgerReportPage() {
   useEffect(() => {
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, to, accountId, groupId]);
+  }, [from, to, accountId, groupId, pollingCounter]);
 
   // If selected account falls outside selected group, clear selection.
   useEffect(() => {

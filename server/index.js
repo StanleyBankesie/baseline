@@ -113,6 +113,13 @@ try {
   }
 } catch {}
 
+const serveFrontendFlag = (() => {
+  const v1 = String(process.env.SERVE_FRONTEND || "").toLowerCase();
+  const v2 = String(process.env.ENABLE_SPA || "").toLowerCase();
+  if (v1 === "0" || v1 === "false" || v2 === "0" || v2 === "false") return false;
+  return true; // Default to true if a frontend build is present
+})();
+
 const app = express();
 app.set("trust proxy", 1);
 
@@ -883,10 +890,12 @@ const _activeFrontendPaths = [];
 for (const candidate of _frontendCandidates) {
   if (fs.existsSync(candidate)) {
     _activeFrontendPaths.push(candidate);
-    app.use(express.static(candidate, _staticOpts));
-    const assetsSubdir = path.join(candidate, "assets");
-    if (fs.existsSync(assetsSubdir)) {
-      app.use("/assets", express.static(assetsSubdir, _staticOpts));
+    if (serveFrontendFlag) {
+      app.use(express.static(candidate, _staticOpts));
+      const assetsSubdir = path.join(candidate, "assets");
+      if (fs.existsSync(assetsSubdir)) {
+        app.use("/assets", express.static(assetsSubdir, _staticOpts));
+      }
     }
     if (!_earlyFrontendPath && fs.existsSync(path.join(candidate, "index.html"))) {
       _earlyFrontendPath = candidate;
@@ -974,12 +983,6 @@ app.use("/api/visitors", visitorsRoutes);
 // Use the frontend path already discovered by the early static block above.
 // Also allow SERVE_FRONTEND / ENABLE_SPA to force-enable SPA fallback even if
 // the path was overridden by STATIC_DIR / PUBLIC_DIR env vars.
-const serveFrontendFlag = (() => {
-  const v1 = String(process.env.SERVE_FRONTEND || "").toLowerCase();
-  const v2 = String(process.env.ENABLE_SPA || "").toLowerCase();
-  if (v1 === "0" || v1 === "false" || v2 === "0" || v2 === "false") return false;
-  return true; // Default to true if a frontend build is present
-})();
 
 // Resolve override directory from env, if any
 const _overrideDir =

@@ -95,6 +95,12 @@ const getLayoutedElements = (nodes, edges, direction = "TB") => {
  * @returns {JSX.Element} The rendered component
  */
 export default function GraphicalChartOfAccountsPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [loading, setLoading] = useState(false);
@@ -201,7 +207,7 @@ export default function GraphicalChartOfAccountsPage() {
 
   useEffect(() => {
     load();
-  }, [direction]);
+  }, [direction, pollingCounter]);
 
   const onSearch = (e) => {
     const val = e.target.value;

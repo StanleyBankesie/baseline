@@ -11,6 +11,66 @@ function fmt(n) {
   return `₵${Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+export const financeSections = [
+  {
+    title: "Voucher Management",
+    items: [
+      { title: "Journal Entry", path: "/finance/journal-voucher", description: "General ledger journal entries", icon: "📒" },
+      { title: "Make Payment", path: "/finance/payment-voucher", description: "Record outgoing payments", icon: "💸" },
+      { title: "Receive Payment", path: "/finance/receipt-voucher", description: "Record incoming payments", icon: "💰" },
+      { title: "Credit Note", path: "/finance/credit-note", description: "Customer credit notes", icon: "🧾" },
+      { title: "Debit Note", path: "/finance/debit-note", description: "Supplier debit notes", icon: "🧾" },
+      { title: "Sales Voucher", path: "/finance/sales-voucher", description: "Sales transaction vouchers", icon: "🛍" },
+      { title: "Purchase Voucher", path: "/finance/purchase-voucher", description: "Purchase transaction vouchers", icon: "🧺" },
+      { title: "Account Transfer", path: "/finance/contra-voucher", description: "Bank or ledger transfers", icon: "🔁" },
+      { title: "Import Vouchers", path: "/finance/import", description: "Bulk import vouchers from Excel template", icon: "📥" },
+      { title: "Voucher Register Report", path: "/finance/reports", description: "Voucher listing with filters (report)", icon: "📊" },
+    ],
+  },
+  {
+    title: "Accounting Setup",
+    items: [
+      { title: "Chart of Account Groups", path: "/finance/account-groups", description: "Setup account group hierarchy", icon: "🗂" },
+      { title: "Accounts Creation", path: "/finance/accounts", description: "Create and manage accounts", icon: "🏦" },
+      { title: "Cost Centers", path: "/finance/cost-centers", description: "Define and manage cost centers", icon: "🏷️" },
+      { title: "Tax Codes & Deductions", path: "/finance/tax-codes", description: "Configure tax and deduction codes", icon: "🧮" },
+      { title: "Currencies", path: "/finance/currencies", description: "Manage currencies and base currency", icon: "💱" },
+      { title: "Fiscal Years", path: "/finance/fiscal-years", description: "Open/close fiscal periods", icon: "📅" },
+      { title: "Opening Balances", path: "/finance/opening-balances", description: "Set beginning balances for all accounts", icon: "🧮" },
+    ],
+  },
+  {
+    title: "Reports & Analysis",
+    items: [
+      { title: "Voucher Register", path: "/finance/reports/voucher-register", description: "Voucher listing with filters", icon: "📊" },
+      { title: "Payment Due", path: "/finance/reports/payment-due", description: "Upcoming and overdue payables", icon: "⏰" },
+      { title: "Outstanding Receivable", path: "/finance/reports/outstanding-receivable", description: "Upcoming and overdue receivables", icon: "📆" },
+      { title: "Customer Outstanding", path: "/finance/reports/customer-outstanding", description: "Receivables outstanding by customer", icon: "👤" },
+      { title: "Trial Balance", path: "/finance/reports/trial-balance", description: "Debits and credits summary", icon: "⚖️" },
+      { title: "Audit Trail", path: "/finance/reports/audit-trail", description: "System activity on finance transactions", icon: "🕵️" },
+      { title: "Journal Report", path: "/finance/reports/journals", description: "Journal entries by range", icon: "📒" },
+      { title: "Bank Reconciliation Detailed", path: "/finance/reports/bank-reconciliation-transactions", description: "Reconciled vs Unreconciled transactions", icon: "🏦" },
+      { title: "Bank Reconciliations Summary", path: "/finance/reports/bank-reconciliations", description: "Summary of completed reconciliations", icon: "📄" },
+      { title: "General Ledger", path: "/finance/reports/general-ledger", description: "Account ledger movements", icon: "📘" },
+      { title: "Debtors Ledger", path: "/finance/reports/debtors-ledger", description: "Customer ledger with running balance", icon: "📗" },
+      { title: "Creditors Ledger", path: "/finance/reports/creditors-ledger", description: "Supplier ledger with running balance", icon: "📕" },
+      { title: "Supplier Outstanding", path: "/finance/reports/supplier-outstanding", description: "Payables outstanding by supplier", icon: "🏷️" },
+      { title: "Profit & Loss", path: "/finance/reports/profit-and-loss", description: "Income vs. expenses summary", icon: "💹" },
+      { title: "Balance Sheet", path: "/finance/reports/balance-sheet", description: "Assets, liabilities, and equity", icon: "🧮" },
+      { title: "Cash Flow", path: "/finance/reports/cash-flow", description: "Operating, investing, financing flows", icon: "💵" },
+      { title: "Ratio Analysis", path: "/finance/reports/ratio-analysis", description: "Key performance ratios", icon: "📈" },
+      { title: "Graphical Chart of Accounts", path: "/finance/reports/chart-of-accounts-graphical", description: "Hierarchical visual view of accounts", icon: "🌳" },
+    ],
+  },
+  {
+    title: "Banking",
+    items: [
+      { title: "Bank Reconciliation", path: "/finance/bank-reconciliation", description: "Match bank statements with ledger, mark cleared", icon: "🏦" },
+      { title: "Post-Dated Cheques (PDC)", path: "/finance/pdc-postings", description: "Register instruments and track status", icon: "🧾" },
+    ],
+  },
+];
+
 export default function FinanceHome() {
   const [stats, setStats] = React.useState([
     {
@@ -93,251 +153,6 @@ export default function FinanceHome() {
     };
   }, []);
 
-  const sections = [
-    {
-      title: "Voucher Management",
-      features: [
-        {
-          name: "Journal Entry",
-          path: "/finance/journal-voucher",
-          description: "General ledger journal entries",
-          icon: "📒",
-        },
-        {
-          name: "Make Payment",
-          path: "/finance/payment-voucher",
-          description: "Record outgoing payments",
-          icon: "💸",
-        },
-        {
-          name: "Receive Payment",
-          path: "/finance/receipt-voucher",
-          description: "Record incoming payments",
-          icon: "💰",
-        },
-        {
-          name: "Credit Note",
-          path: "/finance/credit-note",
-          description: "Customer credit notes",
-          icon: "🧾",
-        },
-        {
-          name: "Debit Note",
-          path: "/finance/debit-note",
-          description: "Supplier debit notes",
-          icon: "🧾",
-        },
-        {
-          name: "Sales Voucher",
-          path: "/finance/sales-voucher",
-          description: "Sales transaction vouchers",
-          icon: "🛍",
-        },
-        {
-          name: "Purchase Voucher",
-          path: "/finance/purchase-voucher",
-          description: "Purchase transaction vouchers",
-          icon: "🧺",
-        },
-        {
-          name: "Account Transfer",
-          path: "/finance/contra-voucher",
-          description: "Bank or ledger transfers",
-          icon: "🔁",
-        },
-        {
-          name: "Import Vouchers",
-          path: "/finance/import",
-          description: "Bulk import vouchers from Excel template",
-          icon: "📥",
-        },
-        {
-          name: "Voucher Register Report",
-          path: "/finance/reports",
-          description: "Voucher listing with filters (report)",
-          icon: "📊",
-        },
-      ],
-    },
-    {
-      title: "Accounting Setup",
-      features: [
-        {
-          name: "Chart of Account Groups",
-          path: "/finance/account-groups",
-          description: "Setup account group hierarchy",
-          icon: "🗂",
-        },
-        {
-          name: "Accounts Creation",
-          path: "/finance/accounts",
-          description: "Create and manage accounts",
-          icon: "🏦",
-        },
-        {
-          name: "Cost Centers",
-          path: "/finance/cost-centers",
-          description: "Define and manage cost centers",
-          icon: "🏷️",
-        },
-        {
-          name: "Tax Codes & Deductions",
-          path: "/finance/tax-codes",
-          description: "Configure tax and deduction codes",
-          icon: "🧮",
-        },
-        {
-          name: "Currencies",
-          path: "/finance/currencies",
-          description: "Manage currencies and base currency",
-          icon: "💱",
-        },
-        {
-          name: "Fiscal Years",
-          path: "/finance/fiscal-years",
-          description: "Open/close fiscal periods",
-          icon: "📅",
-        },
-        {
-          name: "Opening Balances",
-          path: "/finance/opening-balances",
-          description: "Set beginning balances for all accounts",
-          icon: "🧮",
-        },
-      ],
-    },
-    {
-      title: "Reports & Analysis",
-      features: [
-        {
-          name: "Voucher Register",
-          path: "/finance/reports/voucher-register",
-          description: "Voucher listing with filters",
-          icon: "📊",
-        },
-        {
-          name: "Payment Due",
-          path: "/finance/reports/payment-due",
-          description: "Upcoming and overdue payables",
-          icon: "⏰",
-        },
-        {
-          name: "Outstanding Receivable",
-          path: "/finance/reports/outstanding-receivable",
-          description: "Upcoming and overdue receivables",
-          icon: "📆",
-        },
-        {
-          name: "Customer Outstanding",
-          path: "/finance/reports/customer-outstanding",
-          description: "Receivables outstanding by customer",
-          icon: "👤",
-        },
-        {
-          name: "Trial Balance",
-          path: "/finance/reports/trial-balance",
-          description: "Debits and credits summary",
-          icon: "⚖️",
-        },
-        {
-          name: "Audit Trail",
-          path: "/finance/reports/audit-trail",
-          description: "System activity on finance transactions",
-          icon: "🕵️",
-        },
-        {
-          name: "Journal Report",
-          path: "/finance/reports/journals",
-          description: "Journal entries by range",
-          icon: "📒",
-        },
-        {
-          name: "Bank Reconciliation Detailed",
-          path: "/finance/reports/bank-reconciliation-transactions",
-          description: "Reconciled vs Unreconciled transactions",
-          icon: "🏦",
-        },
-        {
-          name: "Bank Reconciliations Summary",
-          path: "/finance/reports/bank-reconciliations",
-          description: "Summary of completed reconciliations",
-          icon: "📄",
-        },
-        {
-          name: "General Ledger",
-          path: "/finance/reports/general-ledger",
-          description: "Account ledger movements",
-          icon: "📘",
-        },
-        {
-          name: "Debtors Ledger",
-          path: "/finance/reports/debtors-ledger",
-          description: "Customer ledger with running balance",
-          icon: "📗",
-        },
-        {
-          name: "Creditors Ledger",
-          path: "/finance/reports/creditors-ledger",
-          description: "Supplier ledger with running balance",
-          icon: "📕",
-        },
-        {
-          name: "Supplier Outstanding",
-          path: "/finance/reports/supplier-outstanding",
-          description: "Payables outstanding by supplier",
-          icon: "🏷️",
-        },
-        {
-          name: "Profit & Loss",
-          path: "/finance/reports/profit-and-loss",
-          description: "Income vs. expenses summary",
-          icon: "💹",
-        },
-        {
-          name: "Balance Sheet",
-          path: "/finance/reports/balance-sheet",
-          description: "Assets, liabilities, and equity",
-          icon: "🧮",
-        },
-        {
-          name: "Cash Flow",
-          path: "/finance/reports/cash-flow",
-          description: "Operating, investing, financing flows",
-          icon: "💵",
-        },
-        {
-          name: "Ratio Analysis",
-          path: "/finance/reports/ratio-analysis",
-          description: "Key performance ratios",
-          icon: "📈",
-        },
-        {
-          name: "Graphical Chart of Accounts",
-          path: "/finance/reports/chart-of-accounts-graphical",
-          description: "Hierarchical visual view of accounts",
-          icon: "🌳",
-        },
-      ],
-    },
-    {
-      title: "Banking",
-      features: [
-        {
-          name: "Bank Reconciliation",
-          path: "/finance/bank-reconciliation",
-          description: "Match bank statements with ledger, mark cleared",
-          icon: "🏦",
-        },
-        {
-          name: "Post-Dated Cheques (PDC)",
-          path: "/finance/pdc-postings",
-          description: "Register instruments and track status",
-          icon: "🧾",
-        },
-      ],
-    },
-  ];
-
   return (
     <ModuleDashboard
       title="Finance Module"
@@ -346,7 +161,7 @@ export default function FinanceHome() {
       headerActions={[
         { label: "Dashboard", path: "/finance/dashboard", icon: "📊" },
       ]}
-      sections={sections}
+      sections={financeSections}
       features={financeFeatures}
     />
   );

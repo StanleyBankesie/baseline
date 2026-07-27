@@ -17,6 +17,12 @@ const fmt = (n) => Number(n || 0).toLocaleString(undefined, { minimumFractionDig
  * @returns {JSX.Element} The rendered component
  */
 export default function ExecOutstandingPayablesPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [items, setItems] = useState([]);
@@ -40,7 +46,7 @@ export default function ExecOutstandingPayablesPage() {
     setFrom(jan1.toISOString().slice(0, 10));
     setTo(today.toISOString().slice(0, 10));
   }, []);
-  useEffect(() => { run(); }, [from, to]); // eslint-disable-line
+  useEffect(() => { run(); }, [from, to, pollingCounter]); // eslint-disable-line
 
   return (
     <div className="space-y-6 p-4">

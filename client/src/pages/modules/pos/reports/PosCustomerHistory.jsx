@@ -32,6 +32,12 @@ function yearEnd() {
  * @returns {JSX.Element} The rendered component
  */
 export default function PosCustomerHistory() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, []);
+
   const [customerId, setCustomerId] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [fromDate, setFromDate] = useState(yearStart());
@@ -102,7 +108,7 @@ export default function PosCustomerHistory() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [pollingCounter]);
 
   function fmt(n) {
     return `${currencySymbol} ${Number(n || 0).toLocaleString(undefined, {

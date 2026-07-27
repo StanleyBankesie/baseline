@@ -6,6 +6,7 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import ModuleDashboard from "../../../components/ModuleDashboard";
+import ModuleLayout from "../../../components/ModuleLayout.jsx";
 import { api } from "../../../api/client.js";
 
 import CustomerServiceRequestsList from "./service-requests/CustomerServiceRequestsList.jsx";
@@ -26,6 +27,137 @@ import ServiceInvoiceForm from "./service-invoices/ServiceInvoiceForm.jsx";
 import ServiceParametersPage from "./setup/ServiceParametersPage.jsx";
 import ServiceReportsPage from "./reports/ServiceReportsPage.jsx";
 
+export const serviceManagementSections = [
+  {
+    title: "Service Requests",
+    items: [
+      {
+        title: "Service Requests",
+        desc: "Manage customer service requests.",
+        path: "/service-management/customer-service-requests",
+        permission: "SERVICE.MANAGE",
+      },
+      {
+        title: "Service Invoices",
+        description: "Issue invoices to customers for completed services.",
+        path: "/service-management/service-invoices",
+        icon: "🧾",
+      },
+      {
+        title: "Supplier Service Requests",
+        desc: "Manage vendor service requests.",
+        path: "/service-management/supplier-service-requests",
+        permission: "SERVICE.MANAGE",
+      },
+    ],
+  },
+  {
+    title: "Service Orders & Execution",
+    items: [
+      {
+        title: "Service Orders",
+        desc: "View and process service orders.",
+        path: "/service-management/service-orders",
+        permission: "SERVICE.MANAGE",
+      },
+      {
+        title: "Service Executions",
+        desc: "Track execution of service orders.",
+        path: "/service-management/service-executions",
+        permission: "SERVICE.MANAGE",
+      },
+      {
+        title: "Service Confirmations",
+        desc: "Review and approve service confirmations.",
+        path: "/service-management/service-confirmations",
+        permission: "SERVICE.MANAGE",
+      },
+      {
+        title: "Service Bills",
+        desc: "Manage supplier service bills.",
+        path: "/service-management/service-bills",
+        permission: "SERVICE.MANAGE",
+      },
+    ],
+  },
+  {
+    title: "Visitors Log",
+    items: [
+      {
+        title: "Visitors Log",
+        description: "Record and manage site visitors",
+        path: "/service-management/visitors-log",
+        icon: "📝",
+      },
+      {
+        title: "New Visitor Entry",
+        description: "Register a new site visitor",
+        path: "/service-management/visitors-log/new",
+        icon: "➕",
+      },
+    ],
+  },
+  {
+    title: "Reports & Parameters",
+    items: [
+      {
+        title: "Service Reports",
+        description: "Comprehensive service performance and SLA reports",
+        path: "/service-management/reports",
+        icon: "📊",
+      },
+      {
+        title: "Service Parameters",
+        description: "Configure SLAs, categories, and service settings",
+        path: "/service-management/setup/parameters",
+        icon: "⚙️",
+      },
+      {
+        title: "Service Delivery Report",
+        description: "Detailed report of completed service deliveries",
+        path: "/service-management/reports/delivery",
+        icon: "📄",
+      },
+      {
+        title: "SLA Performance Report",
+        description: "Track service level agreement compliance",
+        path: "/service-management/reports/sla",
+        icon: "⏱️",
+      },
+      {
+        title: "Technician Utilization",
+        description: "Analyze technician workloads and efficiency",
+        path: "/service-management/reports/technician-utilization",
+        icon: "👨‍🔧",
+      },
+      {
+        title: "Service Cost Analysis",
+        description: "Cost breakdown of service operations",
+        path: "/service-management/reports/service-cost-analysis",
+        icon: "💰",
+      },
+      {
+        title: "Repeat Requests Analysis",
+        description: "Identify recurring service issues",
+        path: "/service-management/reports/repeat-requests",
+        icon: "🔄",
+      },
+      {
+        title: "Service Type Performance",
+        description: "Performance metrics by service type",
+        path: "/service-management/reports/service-type-performance",
+        icon: "📈",
+      },
+      {
+        title: "Visitors Log Report",
+        description: "Summary of visitor activity and statistics",
+        path: "/service-management/reports/visitors-log",
+        icon: "📋",
+      },
+    ],
+  },
+];
+
 function ServiceManagementLanding() {
   const [stats, setStats] = React.useState([
     {
@@ -39,7 +171,7 @@ function ServiceManagementLanding() {
     {
       rbac_key: "open-orders",
       value: "—",
-      label: "Open Orders",
+      label: "Open Service Orders",
       change: "Loading…",
       changeType: "neutral",
       path: "/service-management/service-orders",
@@ -47,42 +179,41 @@ function ServiceManagementLanding() {
     {
       rbac_key: "executions",
       value: "—",
-      label: "Executions",
+      label: "Service Executions",
       change: "Loading…",
       changeType: "neutral",
       path: "/service-management/service-executions",
     },
     {
-      rbac_key: "confirmed-services",
+      rbac_key: "confirmations",
       value: "—",
-      label: "Confirmed Services",
+      label: "Confirmations",
       change: "Loading…",
       changeType: "neutral",
-      path: "/service-management/service-confirmation",
+      path: "/service-management/service-confirmations",
     },
   ]);
 
   React.useEffect(() => {
     let mounted = true;
-    let timer;
     async function load() {
       try {
-        const resp = await api.get("/purchase/service/dashboard/metrics");
-        const c = resp?.data?.cards;
+        const resp = await api.get("/service-management/dashboard-stats");
+        const c = resp?.data?.data;
         if (c && mounted) {
           setStats((prev) => {
             const next = [...prev];
             next[0] = {
               ...next[0],
-              value: String(c.ytd_requests ?? "—"),
+              value: String(c.open_requests ?? "—"),
               change: `${c.mtd_requests ?? 0} this month`,
-              changeType: c.ytd_requests > 0 ? "positive" : "neutral",
+              changeType: c.mtd_requests > 0 ? "positive" : "neutral",
             };
             next[1] = {
               ...next[1],
-              value: String(c.ytd_orders ?? "—"),
-              change: `${c.wtd_orders ?? 0} this week`,
-              changeType: c.ytd_orders > 0 ? "positive" : "neutral",
+              value: String(c.open_orders ?? "—"),
+              change: `${c.mtd_orders ?? 0} this month`,
+              changeType: c.mtd_orders > 0 ? "positive" : "neutral",
             };
             next[2] = {
               ...next[2],
@@ -107,144 +238,6 @@ function ServiceManagementLanding() {
     };
   }, []);
 
-  const sections = [
-    {
-      title: "Requests",
-      items: [
-        {
-          title: "Service Requests",
-          desc: "Manage customer service requests.",
-          path: "/service-management/customer-service-requests",
-          permission: "SERVICE.MANAGE",
-        },
-        {
-          title: "Service Invoices",
-          description: "Issue invoices to customers for completed services.",
-          path: "/service-management/service-invoices",
-          icon: "🧾",
-        },
-        {
-          title: "Supplier Service Requests",
-          description: "Internal material and supplier service requisitions",
-          path: "/service-management/supplier-service-requests",
-          icon: "📦",
-        },
-        {
-          title: "Service Orders",
-          description: "Create internal/external service orders",
-          path: "/service-management/service-orders",
-          icon: "🧾",
-        },
-        {
-          title: "Service Execution",
-          description: "Execute, verify and close service orders",
-          path: "/service-management/service-executions",
-          icon: "⚙️",
-        },
-        {
-          title: "Service Confirmation",
-          description: "Confirm delivered services from suppliers",
-          path: "/service-management/service-confirmation",
-          icon: "✅",
-        },
-        {
-          title: "Service Bills",
-          description: "Prepare and issue service bills",
-          path: "/service-management/service-bills",
-          icon: "💵",
-        },
-        {
-          title: "Service Setup",
-          description: "Configure work locations, service types, categories",
-          path: "/service-management/setup",
-          icon: "⚙️",
-        },
-        {
-          title: "Visitors Log Book",
-          description: "Track and manage visitor records",
-          path: "/service-management/visitors-log",
-          icon: "📝",
-        },
-      ],
-    },
-    {
-      title: "Reports",
-      items: [
-        {
-          title: "Service Request Summary",
-          description: "Monitor incoming service demand",
-          path: "/service-management/reports/service-request-summary",
-          icon: "📥",
-        },
-        {
-          title: "Service Order Status",
-          description: "Track service order progress",
-          path: "/service-management/reports/service-order-status",
-          icon: "📋",
-        },
-        {
-          title: "Execution Performance",
-          description: "Measure technician productivity",
-          path: "/service-management/reports/execution-performance",
-          icon: "⚙️",
-        },
-        {
-          title: "SLA Compliance",
-          description: "Monitor SLA performance",
-          path: "/service-management/reports/sla-compliance",
-          icon: "⏱️",
-        },
-        {
-          title: "Service Revenue",
-          description: "Financial performance tracking",
-          path: "/service-management/reports/service-revenue",
-          icon: "💵",
-        },
-        {
-          title: "Outstanding Service Bills",
-          description: "Accounts receivable tracking",
-          path: "/service-management/reports/outstanding-bills",
-          icon: "📑",
-        },
-        {
-          title: "Service Confirmation",
-          description: "Confirm customer acceptance",
-          path: "/service-management/reports/service-confirmation",
-          icon: "✅",
-        },
-        {
-          title: "Technician Utilization",
-          description: "Workforce efficiency",
-          path: "/service-management/reports/technician-utilization",
-          icon: "👷",
-        },
-        {
-          title: "Service Cost Analysis",
-          description: "Profitability per job",
-          path: "/service-management/reports/service-cost-analysis",
-          icon: "📊",
-        },
-        {
-          title: "Repeat Service Requests",
-          description: "Identify recurring issues",
-          path: "/service-management/reports/repeat-requests",
-          icon: "🔁",
-        },
-        {
-          title: "Service Type Performance",
-          description: "Which services generate most revenue",
-          path: "/service-management/reports/service-type-performance",
-          icon: "🏷️",
-        },
-        {
-          title: "Visitors Log Report",
-          description: "Summary of visitor activity and statistics",
-          path: "/service-management/reports/visitors-log",
-          icon: "📋",
-        },
-      ],
-    },
-  ];
 
   return (
     <ModuleDashboard
@@ -259,7 +252,7 @@ function ServiceManagementLanding() {
           icon: "📊",
         },
       ]}
-      sections={sections}
+      sections={serviceManagementSections}
       features={serviceManagementFeatures}
     />
   );
@@ -272,8 +265,9 @@ function ServiceManagementLanding() {
  */
 export default function ServiceManagementHome() {
   return (
-    <Routes>
-      <Route path="/" element={<ServiceManagementLanding />} />
+    <ModuleLayout sections={serviceManagementSections} moduleKey="service-management">
+      <Routes>
+        <Route path="/" element={<ServiceManagementLanding />} />
       <Route
         path="dashboard"
         element={
@@ -484,7 +478,8 @@ export default function ServiceManagementHome() {
           </React.Suspense>
         }
       />
-    </Routes>
+      </Routes>
+    </ModuleLayout>
   );
 }
 

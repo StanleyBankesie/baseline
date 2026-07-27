@@ -6,6 +6,7 @@
 import React from "react";
 import { Link, Route, Routes } from "react-router-dom";
 import ModuleDashboard from "../../../components/ModuleDashboard";
+import ModuleLayout from "../../../components/ModuleLayout.jsx";
 import { api } from "../../../api/client.js";
 
 import ProjectList from "./projects/ProjectList.jsx";
@@ -33,7 +34,149 @@ import PMPurchaseRequisitionForm from "./purchase-requisitions/PMPurchaseRequisi
 import ProjectIncomeReport from "./reports/ProjectIncomeReport.jsx";
 import ProjectExpenseReport from "./reports/ProjectExpenseReport.jsx";
 import TaskExecutionReportPage from "./reports/TaskExecutionReportPage.jsx";
+import TaskManagementAndExecutionPage from "./reports/TaskManagementAndExecutionPage.jsx";
 import ProjectManagementDashboardPage from "./ProjectManagementDashboardPage.jsx";
+
+export const projectManagementSections = [
+  {
+    title: "Portfolio",
+    badge: "Planning",
+    items: [
+      {
+        title: "Projects",
+        path: "/project-management/projects",
+        description: "Manage end-to-end project lifecycles",
+        icon: "📁",
+      },
+      {
+        title: "Project Orders",
+        path: "/project-management/project-orders",
+        description: "Client project engagements and orders",
+        icon: "📜",
+      },
+      {
+        title: "Setup & WBS",
+        path: "/project-management/setup",
+        description: "Project categories, types, and WBS templates",
+        icon: "⚙️",
+      },
+    ],
+  },
+  {
+    title: "Execution & Tasks",
+    badge: "Operations",
+    items: [
+      {
+        title: "Task Assignments",
+        path: "/project-management/tasks",
+        description: "Assign work items and milestones",
+        icon: "📋",
+      },
+      {
+        title: "Task Execution Dashboard",
+        path: "/project-management/tasks/execution",
+        description: "Work log, progress updates, and task timer",
+        icon: "⏱️",
+      },
+      {
+        title: "Timesheets",
+        path: "/project-management/timesheets",
+        description: "Log labor hours against project tasks",
+        icon: "⌛",
+      },
+    ],
+  },
+  {
+    title: "Materials & Procurement",
+    badge: "Resources",
+    items: [
+      {
+        title: "Purchase Requisitions",
+        path: "/project-management/purchase-requisitions",
+        description: "Request external items for project work",
+        icon: "🛒",
+      },
+      {
+        title: "Material Requisitions",
+        path: "/project-management/material-requisitions",
+        description: "Request stock from main warehouse",
+        icon: "📦",
+      },
+      {
+        title: "Material Receipts",
+        path: "/project-management/material-receipts",
+        description: "Receive requested items on site",
+        icon: "📥",
+      },
+      {
+        title: "Material Utilization",
+        path: "/project-management/material-utilization",
+        description: "Track site material consumption against tasks",
+        icon: "🔨",
+      },
+    ],
+  },
+  {
+    title: "Financials & Expenses",
+    badge: "Costing",
+    items: [
+      {
+        title: "Project Direct Expenses",
+        path: "/project-management/expenses",
+        description: "Record site petty cash and out-of-pocket costs",
+        icon: "💸",
+      },
+      {
+        title: "Project Billings & Income",
+        path: "/project-management/income",
+        description: "Project milestone billings and income tracking",
+        icon: "💵",
+      },
+    ],
+  },
+  {
+    title: "Reports & Analytics",
+    badge: "BI",
+    items: [
+      {
+        title: "Project Reports Hub",
+        path: "/project-management/reports",
+        description: "All project analytical and financial reports",
+        icon: "📊",
+      },
+      {
+        title: "Project Status Report",
+        path: "/project-management/reports/project-status",
+        description: "Schedule, budget vs actual variance analysis",
+        icon: "📈",
+      },
+      {
+        title: "Task Management Report",
+        path: "/project-management/reports/task-management",
+        description: "Task completion metrics and assignee workloads",
+        icon: "📉",
+      },
+      {
+        title: "Task Execution Log",
+        path: "/project-management/reports/task-execution",
+        description: "Detailed timesheet and daily work log summary",
+        icon: "📝",
+      },
+      {
+        title: "Project Income Report",
+        path: "/project-management/reports/project-income",
+        description: "Receipt vouchers linked to projects",
+        icon: "💰",
+      },
+      {
+        title: "Project Expense Report",
+        path: "/project-management/reports/project-expense",
+        description: "Payment vouchers linked to projects",
+        icon: "💳",
+      },
+    ],
+  },
+];
 
 function ProjectManagementLanding() {
   const [stats, setStats] = React.useState([
@@ -46,9 +189,9 @@ function ProjectManagementLanding() {
       path: "/project-management/projects",
     },
     {
-      rbac_key: "active-tasks",
+      rbac_key: "open-tasks",
       value: "—",
-      label: "Active Tasks",
+      label: "Open Tasks",
       change: "Loading…",
       changeType: "neutral",
       path: "/project-management/tasks",
@@ -56,41 +199,40 @@ function ProjectManagementLanding() {
     {
       rbac_key: "total-budget",
       value: "—",
-      label: "Total Budget",
+      label: "Total Project Budget",
       change: "Loading…",
       changeType: "neutral",
       path: "/project-management/reports",
     },
     {
-      rbac_key: "logged-hours",
+      rbac_key: "total-hours",
       value: "—",
-      label: "Logged Hours",
+      label: "Total Logged Hours",
       change: "Loading…",
       changeType: "neutral",
-      path: "/project-management/reports",
+      path: "/project-management/timesheets",
     },
   ]);
 
   React.useEffect(() => {
     let mounted = true;
-    let timer;
     async function load() {
       try {
-        const resp = await api.get("/projects/dashboard/stats");
-        const d = resp.data;
-        if (mounted) {
+        const resp = await api.get("/project-management/dashboard-stats");
+        const d = resp?.data?.data;
+        if (d && mounted) {
           setStats((prev) => [
             {
               ...prev[0],
               value: String(d.totalProjects ?? "—"),
-              change: `${d.completedProjects ?? 0} completed`,
+              change: `${d.activeProjects ?? 0} active`,
               changeType: "positive",
             },
             {
               ...prev[1],
-              value: String(d.activeTasks ?? "—"),
-              change: `${d.completedTasks ?? 0} done`,
-              changeType: d.activeTasks > 0 ? "warning" : "positive",
+              value: String(d.openTasks ?? "—"),
+              change: `${d.overdueTasks ?? 0} overdue`,
+              changeType: d.overdueTasks > 0 ? "warning" : "positive",
             },
             {
               ...prev[2],
@@ -114,127 +256,6 @@ function ProjectManagementLanding() {
     };
   }, []);
 
-  const sections = [
-    {
-      title: "Portfolio",
-      badge: "Planning",
-      items: [
-        {
-          title: "Projects",
-          path: "/project-management/projects",
-          description: "Manage end-to-end project lifecycles",
-          icon: "📁",
-        },
-        {
-          title: "Project Setup",
-          path: "/project-management/setup",
-          description: "Configure project managers and settings",
-          icon: "⚙️",
-        },
-      ],
-    },
-    {
-      title: "Execution",
-      badge: "Tracking",
-      items: [
-        {
-          title: "Task Management",
-          path: "/project-management/tasks",
-          description: "WBS and task assignment",
-          icon: "✅",
-        },
-        {
-          title: "Task Execution",
-          path: "/project-management/tasks/execution",
-          description: "Checklist execution & progress odometer",
-          icon: "⚡",
-        },
-        {
-          title: "Project Timeline",
-          path: "/project-management/timesheets",
-          description: "Log and track work hours",
-          icon: "⏱️",
-        },
-        {
-          title: "Material Requisition",
-          path: "/project-management/material-requisitions",
-          description: "Request materials with approval workflow",
-          icon: "📋",
-        },
-        {
-          title: "Material Utilization",
-          path: "/project-management/material-utilizations",
-          description: "Track material consumption",
-          icon: "📦",
-        },
-        {
-          title: "Materials Receipt",
-          path: "/project-management/material-receipts",
-          description: "Receive materials from inventory",
-          icon: "📥",
-        },
-        {
-          title: "Project Orders",
-          path: "/project-management/project-orders",
-          description: "Order materials with approval workflow",
-          icon: "📋",
-        },
-        {
-          title: "Purchase Requisition",
-          path: "/project-management/purchase-requisitions",
-          description: "Request materials for procurement",
-          icon: "📋",
-        },
-      ],
-    },
-    {
-      title: "Finance",
-      items: [
-        {
-          title: "Project Income",
-          path: "/project-management/income",
-          description: "Track project-related revenues",
-          icon: "💰",
-        },
-        {
-          title: "Project Expenses",
-          path: "/project-management/expenses",
-          description: "Track project-related costs",
-          icon: "💵",
-        },
-      ],
-    },
-    {
-      title: "Reporting",
-      items: [
-        {
-          title: "Analytics",
-          path: "/project-management/reports",
-          description: "Project profitability and KPIs",
-          icon: "📊",
-        },
-        {
-          title: "Project Status Report",
-          path: "/project-management/reports/project-status",
-          description: "Completion metrics and task breakdown",
-          icon: "📈",
-        },
-        {
-          title: "Project Income Report",
-          path: "/project-management/reports/project-income",
-          description: "Receipt vouchers linked to projects",
-          icon: "💰",
-        },
-        {
-          title: "Project Expense Report",
-          path: "/project-management/reports/project-expense",
-          description: "Payment vouchers linked to projects",
-          icon: "💳",
-        },
-      ],
-    },
-  ];
-
   return (
     <ModuleDashboard
       title="Project Management"
@@ -248,7 +269,7 @@ function ProjectManagementLanding() {
           icon: "📊",
         },
       ]}
-      sections={sections}
+      sections={projectManagementSections}
       features={projectManagementFeatures}
     />
   );
@@ -261,8 +282,9 @@ function ProjectManagementLanding() {
  */
 export default function ProjectManagementHome() {
   return (
-    <Routes>
-      <Route path="/" element={<ProjectManagementLanding />} />
+    <ModuleLayout sections={projectManagementSections} moduleKey="project-management">
+      <Routes>
+        <Route path="/" element={<ProjectManagementLanding />} />
       <Route path="dashboard" element={<ProjectManagementDashboardPage />} />
 
       <Route path="/projects" element={<ProjectList />} />
@@ -279,7 +301,6 @@ export default function ProjectManagementHome() {
       <Route path="/tasks/new" element={<TaskForm />} />
       <Route path="/tasks/:id" element={<TaskForm />} />
 
-      <Route path="/timesheets" element={<TimesheetList />} />
       <Route path="/expenses" element={<ExpenseList />} />
       <Route path="/income" element={<ProjectIncomeList />} />
 
@@ -288,6 +309,7 @@ export default function ProjectManagementHome() {
       <Route path="/reports/project-status" element={<ProjectStatusReport />} />
       <Route path="/reports/project-income" element={<ProjectIncomeReport />} />
       <Route path="/reports/project-expense" element={<ProjectExpenseReport />} />
+      <Route path="/reports/task-management-and-execution" element={<TaskManagementAndExecutionPage />} />
 
       <Route path="/setup" element={<PMSetup />} />
 
@@ -334,7 +356,8 @@ export default function ProjectManagementHome() {
       <Route path="/purchase-requisitions" element={<PMPurchaseRequisitionList />} />
       <Route path="/purchase-requisitions/new" element={<PMPurchaseRequisitionForm />} />
       <Route path="/purchase-requisitions/:id" element={<PMPurchaseRequisitionForm />} />
-    </Routes>
+      </Routes>
+    </ModuleLayout>
   );
 }
 
@@ -355,12 +378,6 @@ export const projectManagementFeatures = [
     module_key: "project-management",
     label: "Task Execution",
     path: "/project-management/tasks/execution",
-    type: "feature",
-  },
-  {
-    module_key: "project-management",
-    label: "Project Timeline",
-    path: "/project-management/timesheets",
     type: "feature",
   },
   {

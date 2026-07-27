@@ -47,6 +47,10 @@ export default function UserOverrides() {
       label: "General Requisition Cancellations",
     },
     {
+      code: "PM.PR.CANCEL",
+      label: "Project Purchase Requisition Cancellations",
+    },
+    {
       code: "POS.EXPECTED_CASH.VIEW",
       label: "POS Day Management - View Expected Cash",
     },

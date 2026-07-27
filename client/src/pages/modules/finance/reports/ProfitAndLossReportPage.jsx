@@ -18,6 +18,12 @@ const fmt = (n) => Number(n || 0).toLocaleString(undefined, { minimumFractionDig
  * @returns {JSX.Element} The rendered component
  */
 export default function ProfitAndLossReportPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [income, setIncome] = useState({ items: [], total: 0 });
@@ -96,7 +102,7 @@ export default function ProfitAndLossReportPage() {
   useEffect(() => {
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, to]);
+  }, [from, to, pollingCounter]);
 
   // Flatten tree for export purposes
   function flattenTree(nodes, maxLevel = 99, rows = [], section = "") {

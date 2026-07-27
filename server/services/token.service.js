@@ -294,25 +294,25 @@ export async function ensureAuthTables() {
     await query(
       `ALTER TABLE adm_users
         ADD COLUMN failed_attempts INT NOT NULL DEFAULT 0`,
-    );
+    ).catch(() => {});
   }
   if (!(await hasColumn("adm_users", "last_failed_attempt"))) {
     await query(
       `ALTER TABLE adm_users
         ADD COLUMN last_failed_attempt DATETIME NULL`,
-    );
+    ).catch(() => {});
   }
   if (!(await hasColumn("adm_users", "status"))) {
     await query(
       `ALTER TABLE adm_users
         ADD COLUMN status CHAR(1) NOT NULL DEFAULT 'N'`,
-    );
+    ).catch(() => {});
   }
   if (!(await hasColumn("adm_users", "valid_to"))) {
     await query(
       `ALTER TABLE adm_users
         ADD COLUMN valid_to DATE NULL`,
-    );
+    ).catch(() => {});
   }
 
   const [trigRows] = await query(
@@ -475,7 +475,7 @@ export async function buildAuthUserPayload(user, permissions = []) {
     username: user.username,
     email: user.email,
     full_name: user.full_name || "",
-    permissions: (Array.isArray(permissions) && (permissions.includes("*") || permissions.length > 100)) ? ["*"] : (Array.isArray(permissions) ? permissions : []),
+    permissions: (Array.isArray(permissions) && permissions.includes("*")) ? ["*"] : (Array.isArray(permissions) ? permissions : []),
     companyIds: allCompanyIds,
     branchIds: allBranchIds,
     companyName: user.company_name || "",

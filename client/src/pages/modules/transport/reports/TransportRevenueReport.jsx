@@ -9,6 +9,12 @@ import { ArrowLeft, RefreshCw, Printer, DollarSign, TrendingUp, CreditCard } fro
 import api from "../../../../api/client.js";
 
 export default function TransportRevenueReport() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 

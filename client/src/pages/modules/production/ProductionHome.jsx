@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, Route, Routes, Navigate } from "react-router-dom";
 import ModuleDashboard from "../../../components/ModuleDashboard.jsx";
+import ModuleLayout from "../../../components/ModuleLayout.jsx";
 import { api } from "api/client";
 import { FileText, Layers, Calendar, Clock } from "lucide-react";
 
@@ -44,6 +45,144 @@ import StockJournalForm from "./inventory/StockJournalForm";
 
 import ProductionSetup from "./setup/ProductionSetup";
 
+export const productionSections = [
+  {
+    title: "Manufacturing Masters",
+    features: [
+      {
+        name: "Bill of Materials (BOM)",
+        path: "/production/boms",
+        description:
+          "Define multi-level product recipes, assembly structures, and scrap factors",
+        icon: "📜",
+      },
+      {
+        name: "Routing & Operations",
+        path: "/production/routings",
+        description:
+          "Operational sequence definitions, standard times, and resource requirements",
+        icon: "🗺️",
+      },
+      {
+        name: "Work Centers & Machines",
+        path: "/production/setup/machines",
+        description:
+          "Register factory assets, production lines, and monitor equipment status",
+        icon: "⚙️",
+      },
+      {
+        name: "Manufacturing Setup",
+        path: "/production/setup",
+        description:
+          "Global manufacturing parameters, processes, and shift configurations",
+        icon: "🛠️",
+      },
+    ],
+  },
+  {
+    title: "Planning & Scheduling",
+    features: [
+      {
+        name: "Master Daily Plan",
+        path: "/production/planning/daily-plans",
+        description:
+          "Daily factory scheduling, target outputs, and line assignments",
+        icon: "📅",
+      },
+      {
+        name: "Production Orders",
+        path: "/production/work-orders",
+        description:
+          "Authorizing manufacturing runs, batch tracking, and status monitoring",
+        icon: "🏭",
+      },
+    ],
+  },
+  {
+    title: "Shop Floor Execution",
+    features: [
+      {
+        name: "Job Cards & Dispatch",
+        path: "/production/execution/job-cards",
+        description:
+          "Operator job cards, real-time activity logging, and step progress",
+        icon: "📑",
+      },
+      {
+        name: "Material Requisitions",
+        path: "/production/execution/material-requisition",
+        description:
+          "Request raw materials from main warehouse to shop floor",
+        icon: "📦",
+      },
+      {
+        name: "Material Receipts",
+        path: "/production/execution/material-receipt",
+        description:
+          "Confirm raw material arrival at work center or production line",
+        icon: "📥",
+      },
+      {
+        name: "Goods Receipt (FG Transfer)",
+        path: "/production/execution/transfer",
+        description:
+          "Transfer completed finished goods back to inventory stock",
+        icon: "🚚",
+      },
+      {
+        name: "Quality Inspections",
+        path: "/production/execution/quality",
+        description:
+          "Perform in-line and final QC checks against tolerance standards",
+        icon: "🔬",
+      },
+    ],
+  },
+  {
+    title: "Inventory & Stock Updation",
+    features: [
+      {
+        name: "Stock Journal Entries",
+        path: "/production/inventory/stock-journals",
+        description:
+          "Log raw material consumption and finished goods production movements",
+        icon: "📔",
+      },
+      {
+        name: "Inventory Reconciliation",
+        path: "/production/inventory/updation",
+        description:
+          "Verify and update production floor physical stock levels",
+        icon: "🧮",
+      },
+    ],
+  },
+  {
+    title: "Intelligence & Analytics",
+    features: [
+      {
+        name: "Production Dashboard",
+        path: "/production/reports",
+        description: "Comprehensive manufacturing report repository and KPIs",
+        icon: "📊",
+      },
+      {
+        name: "Efficiency Analysis",
+        path: "/production/reports/efficiency",
+        description: "Monitor planned vs actual performance and throughput",
+        icon: "📈",
+      },
+      {
+        name: "Variance Reports",
+        path: "/production/reports/variance",
+        description:
+          "Track differences between estimated and actual material usage",
+        icon: "📉",
+      },
+    ],
+  },
+];
+
 function ProductionHomeIndex() {
   const [stats, setStats] = useState([
     {
@@ -58,22 +197,22 @@ function ProductionHomeIndex() {
       label: "Open Job Cards",
       value: "0",
       change: "Shop Floor",
-      icon: "🏷️",
+      icon: "📑",
       path: "/production/execution/job-cards",
-      color: "from-indigo-600 to-indigo-700",
+      color: "from-amber-600 to-amber-700",
     },
     {
       label: "Pending Requisitions",
       value: "0",
-      change: "Materials",
-      icon: "📝",
+      change: "Warehouse",
+      icon: "📦",
       path: "/production/execution/material-requisition",
-      color: "from-amber-600 to-amber-700",
+      color: "from-purple-600 to-purple-700",
     },
     {
-      label: "BOM Master Records",
+      label: "Active BOMs",
       value: "0",
-      change: "Masters",
+      change: "Engineering",
       icon: "📜",
       path: "/production/boms",
       color: "from-emerald-600 to-emerald-700",
@@ -82,16 +221,21 @@ function ProductionHomeIndex() {
 
   useEffect(() => {
     let mounted = true;
-    let timer;
     async function load() {
       try {
-        const res = await api.get("/production/dashboard/stats");
-        const d = res.data;
-        if (mounted) {
+        const resp = await api.get("/production/dashboard/stats");
+        const d = resp?.data?.data;
+        if (d && mounted) {
           setStats((prev) => {
             const next = [...prev];
-            next[0] = { ...next[0], value: String(d.activeOrders ?? "—") };
-            next[1] = { ...next[1], value: String(d.jobCards ?? "—") };
+            next[0] = {
+              ...next[0],
+              value: String(d.activeWorkOrders ?? "—"),
+            };
+            next[1] = {
+              ...next[1],
+              value: String(d.openJobCards ?? "—"),
+            };
             next[2] = {
               ...next[2],
               value: String(d.pendingRequisitions ?? "—"),
@@ -108,157 +252,12 @@ function ProductionHomeIndex() {
     };
   }, []);
 
-  const sections = [
-    {
-      title: "Manufacturing Masters",
-      features: [
-        {
-          name: "Bill of Materials (BOM)",
-          path: "/production/boms",
-          description:
-            "Define multi-level product recipes, assembly structures, and scrap factors",
-          icon: "📜",
-        },
-        {
-          name: "Routing & Operations",
-          path: "/production/routings",
-          description:
-            "Standardize process sequences and detailed operation instructions",
-          icon: "🔄",
-        },
-        {
-          name: "Work Centers & Machines",
-          path: "/production/setup/machines",
-          description:
-            "Register factory assets, production lines, and monitor equipment status",
-          icon: "⚙️",
-        },
-        {
-          name: "Manufacturing Setup",
-          path: "/production/setup",
-          description:
-            "Global manufacturing parameters, processes, and shift configurations",
-          icon: "🛠️",
-        },
-      ],
-    },
-    {
-      title: "Planning & Control",
-      features: [
-        {
-          name: "Work Orders",
-          path: "/production/work-orders",
-          description:
-            "Generate and track manufacturing orders through the entire lifecycle",
-          icon: "📋",
-        },
-        {
-          name: "Daily Production Plan",
-          path: "/production/planning/daily",
-          description:
-            "Manage daily manufacturing targets and shop floor schedules",
-          icon: "📅",
-        },
-        {
-          name: "Production Timeline",
-          path: "/production/planning/schedule",
-          description:
-            "Visual scheduling and resource allocation for production runs",
-          icon: "⏳",
-        },
-      ],
-    },
-    {
-      title: "Shop Floor Execution",
-      features: [
-        {
-          name: "Job Cards Execution",
-          path: "/production/execution/job-cards",
-          description:
-            "Real-time labor tracking and progress monitoring by work center",
-          icon: "🏷️",
-        },
-        {
-          name: "Material Requisition",
-          path: "/production/execution/material-requisition",
-          description:
-            "Request raw materials from warehouse based on production demand",
-          icon: "📝",
-        },
-        {
-          name: "Finished Goods Receipt",
-          path: "/production/execution/material-receipt",
-          description:
-            "Record production output and move finished items to inventory",
-          icon: "📥",
-        },
-        {
-          name: "Production Transfers",
-          path: "/production/execution/transfer",
-          description:
-            "Internal movement of WIP materials between production zones",
-          icon: "🚚",
-        },
-      ],
-    },
-    {
-      title: "Inventory & Journaling",
-      features: [
-        {
-          name: "Stock Journal",
-          path: "/production/inventory/journal",
-          description:
-            "Adjust stock levels for production waste, scrap, or consumption",
-          icon: "📒",
-        },
-        {
-          name: "Quality Inspections",
-          path: "/production/execution/quality",
-          description:
-            "Implement rigorous quality control checks for materials and products",
-          icon: "🛡️",
-        },
-        {
-          name: "Inventory Reconciliation",
-          path: "/production/inventory/updation",
-          description:
-            "Verify and update production floor physical stock levels",
-          icon: "🧮",
-        },
-      ],
-    },
-    {
-      title: "Intelligence & Analytics",
-      features: [
-        {
-          name: "Production Dashboard",
-          path: "/production/reports",
-          description: "Comprehensive manufacturing report repository and KPIs",
-          icon: "📊",
-        },
-        {
-          name: "Efficiency Analysis",
-          path: "/production/reports/efficiency",
-          description: "Monitor planned vs actual performance and throughput",
-          icon: "📈",
-        },
-        {
-          name: "Variance Reports",
-          path: "/production/reports/variance",
-          description:
-            "Track differences between estimated and actual material usage",
-          icon: "📉",
-        },
-      ],
-    },
-  ];
-
   return (
     <ModuleDashboard
       title="Production Management"
       description="Modern industrial suite for end-to-end manufacturing control, from design and planning to shop floor execution."
       stats={stats}
-      sections={sections}
+      sections={productionSections}
       features={productionFeatures}
       showAll={true}
     />
@@ -295,8 +294,9 @@ function ProductionPlaceholder({ title }) {
  */
 export default function ProductionHome() {
   return (
-    <Routes>
-      <Route index element={<ProductionHomeIndex />} />
+    <ModuleLayout sections={productionSections} moduleKey="production">
+      <Routes>
+        <Route index element={<ProductionHomeIndex />} />
 
       {/* Existing Modules */}
       <Route path="boms" element={<BomList />} />
@@ -376,7 +376,8 @@ export default function ProductionHome() {
       <Route path="setup/shifts" element={<ShiftList />} />
 
       <Route path="*" element={<Navigate to="/production" replace />} />
-    </Routes>
+      </Routes>
+    </ModuleLayout>
   );
 }
 

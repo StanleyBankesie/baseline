@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useState, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, NavLink } from "react-router-dom";
 import { api } from "../../../api/client.js";
 import { usePermission } from "../../../auth/PermissionContext.jsx";
 import { 
@@ -26,8 +26,60 @@ import {
   Building2, 
   ArrowUpRight, 
   ChevronRight,
-  Activity
+  Activity,
+  ArrowLeft,
+  ChevronDown
 } from "lucide-react";
+
+function ExecNavDropdown({ label, items, navigate }) {
+  const [open, setOpen] = useState(false);
+  const ref = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    function handler(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  if (!items || items.length === 0) return null;
+
+  return (
+    <div ref={ref} className="relative flex-shrink-0">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:text-brand-700 dark:hover:text-brand-300 transition-colors whitespace-nowrap"
+      >
+        <span>{label}</span>
+        <ChevronDown size={14} className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div
+          className="absolute left-0 top-full mt-1.5 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-erp-lg overflow-hidden"
+          style={{ minWidth: 220 }}
+        >
+          <div className="p-1.5 grid grid-cols-1 gap-0.5 max-h-80 overflow-y-auto">
+            {items.map((item, idx) => (
+              <button
+                key={item.path || item.key || idx}
+                onClick={() => {
+                  if (item.path) navigate(item.path);
+                  setOpen(false);
+                }}
+                className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-sm font-medium text-left text-slate-700 dark:text-slate-300 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:text-brand-700 dark:hover:text-brand-300 transition-colors"
+              >
+                <span className="truncate">{item.label || item.title || item.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const fmt = (n) => Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -263,7 +315,31 @@ export default function ExecutiveOverviewHome() {
   ];
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto p-4 sm:p-6">
+    <div className="space-y-6">
+      {/* Upper Top Sticky Navigation Bar (Identical layout to BI Module) */}
+      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 shadow-sm px-4 py-2">
+        <div className="flex items-center gap-1.5 overflow-x-auto">
+          <NavLink
+            to="/"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-brand-700 dark:hover:text-brand-300 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors flex-shrink-0"
+          >
+            <ArrowLeft size={14} />
+            Modules
+          </NavLink>
+          <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1.5 flex-shrink-0" />
+          <NavLink
+            to="/executive-overview"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-brand-900 text-white whitespace-nowrap flex-shrink-0"
+          >
+            <BarChart3 size={14} />
+            Executive Overview
+          </NavLink>
+          <ExecNavDropdown label="Key Performance Indicators" items={KPI_CARDS} navigate={navigate} />
+          <ExecNavDropdown label="Enterprise Modules" items={enabledModules} navigate={navigate} />
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
       {/* Header Banner */}
       <div className="card shadow-md">
         <div className="card-header bg-brand text-white rounded-t-lg p-6">
@@ -483,6 +559,7 @@ export default function ExecutiveOverviewHome() {
           })}
         </div>
       </div>
+    </div>
     </div>
   );
 }

@@ -3,6 +3,12 @@ import { Link } from "react-router-dom";
 import api from "../../../../api/client.js";
 
 export default function TripHistoryReport() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, []);
+
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filterStatus, setFilterStatus] = useState("");
@@ -14,7 +20,7 @@ export default function TripHistoryReport() {
       .then(res => setTrips(res.data?.data?.items || []))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [pollingCounter]);
 
   const filteredTrips = trips.filter(t => {
     if (filterStatus && t.status !== filterStatus) return false;
@@ -37,7 +43,7 @@ export default function TripHistoryReport() {
             <h1 className="text-2xl font-bold dark:text-slate-100">Trip History & Tracking report</h1>
             <p className="text-sm mt-1 text-slate-300">Detailed logs of all fleet trips</p>
           </div>
-          <Link to="/transport" className="btn btn-secondary btn-sm">Return to Menu</Link>
+          <div className="flex items-center gap-3"><div className="flex items-center gap-2" title="Live Auto-Refresh Active"><span className="relative flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span></span><span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Live</span></div><Link to="/transport" className="btn btn-secondary btn-sm">Return to Menu</Link></div>
         </div>
         <div className="card-body p-4 bg-slate-50 border-b flex flex-wrap gap-4 items-center justify-between">
           <div className="flex gap-4">

@@ -24,6 +24,12 @@ const statusStyles = {
  * @returns {JSX.Element} The rendered component
  */
 export default function ProjectExpenseReport() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);
   const [summary, setSummary] = useState({ count: 0, total: 0 });

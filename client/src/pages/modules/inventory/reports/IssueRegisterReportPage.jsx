@@ -18,6 +18,12 @@ import jsPDF from "jspdf";
  * @returns {JSX.Element} The rendered component
  */
 export default function IssueRegisterReportPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const today = new Date().toISOString().slice(0, 10);
   const jan1 = new Date(new Date().getFullYear(), 0, 1).toISOString().slice(0, 10);
   const [from, setFrom] = useState(jan1);
@@ -41,7 +47,7 @@ export default function IssueRegisterReportPage() {
 
   useEffect(() => {
     run();
-  }, [from, to]);
+  }, [from, to, pollingCounter]);
 
 
   const { sorted: sorted_items, sortKey, sortDir, toggle } = useSort(items, "date", "desc");

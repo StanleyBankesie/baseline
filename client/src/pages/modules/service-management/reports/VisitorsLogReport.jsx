@@ -13,6 +13,12 @@ import { api } from "../../../../api/client.js";
  * @returns {JSX.Element} The rendered component
  */
 export default function VisitorsLogReport() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [items, setItems] = useState([]);
   const [summary, setSummary] = useState({
     total_visitors: 0,

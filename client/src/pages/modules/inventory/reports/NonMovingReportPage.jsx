@@ -18,6 +18,12 @@ import jsPDF from "jspdf";
  * @returns {JSX.Element} The rendered component
  */
 export default function NonMovingReportPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [asOf, setAsOf] = useState(new Date().toISOString().slice(0, 10));
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -38,7 +44,7 @@ export default function NonMovingReportPage() {
 
   useEffect(() => {
     run();
-  }, [asOf]);
+  }, [asOf, pollingCounter]);
 
 
   const { sorted: sorted_items, sortKey, sortDir, toggle } = useSort(items, "date", "desc");

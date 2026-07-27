@@ -17,6 +17,12 @@ const fmt = (n) => Number(n || 0).toLocaleString(undefined, { minimumFractionDig
  * @returns {JSX.Element} The rendered component
  */
 export default function ExecSalesThisMonthPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, []);
+
   const [items, setItems] = useState([]);
   const [cards, setCards] = useState({});
   const [loading, setLoading] = useState(false);
@@ -39,7 +45,7 @@ export default function ExecSalesThisMonthPage() {
     }
     load();
     return () => { mounted = false; };
-  }, []);
+  }, [pollingCounter]);
 
   const monthName = new Date().toLocaleDateString("en-GB", { month: "long", year: "numeric" });
 

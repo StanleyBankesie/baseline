@@ -17,6 +17,12 @@ const fmt = (n) => Number(n || 0).toLocaleString(undefined, { minimumFractionDig
  * @returns {JSX.Element} The rendered component
  */
 export default function ExecSalesTodayPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, []);
+
   const [items, setItems] = useState([]);
   const [cards, setCards] = useState({});
   const [loading, setLoading] = useState(false);
@@ -37,7 +43,7 @@ export default function ExecSalesTodayPage() {
     }
     load();
     return () => { mounted = false; };
-  }, []);
+  }, [pollingCounter]);
 
   return (
     <div className="space-y-6 p-4">

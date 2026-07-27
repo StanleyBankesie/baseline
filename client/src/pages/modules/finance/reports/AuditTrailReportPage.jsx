@@ -23,6 +23,12 @@ import {
 } from "lucide-react";
 
 export default function AuditTrailReportPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [items, setItems] = useState([]);
@@ -50,12 +56,12 @@ export default function AuditTrailReportPage() {
     setTo(today.toISOString().slice(0, 10));
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [pollingCounter]);
 
   useEffect(() => {
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, to]);
+  }, [from, to, pollingCounter]);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">

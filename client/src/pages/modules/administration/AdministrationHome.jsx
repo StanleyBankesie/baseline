@@ -6,6 +6,7 @@
 import React from "react";
 import { Link, Route, Routes } from "react-router-dom";
 import ModuleDashboard from "../../../components/ModuleDashboard";
+import ModuleLayout from "../../../components/ModuleLayout.jsx";
 import { api } from "../../../api/client.js";
 import { useAuth } from "../../../auth/AuthContext.jsx";
 import UserList from "./users/UserList.jsx";
@@ -26,6 +27,129 @@ import ExceptionalPermissionsList from "./access-control/ExceptionalPermissionsL
 import UserPermissions from "./access-control/UserPermissionsNew.jsx";
 import NotificationSettings from "./notifications/NotificationSettings.jsx";
 
+export const administrationSections = [
+  {
+    title: "System Health & Settings",
+    badge: "Core",
+    items: [
+      {
+        title: "Settings",
+        description: "Push notifications and document templates",
+        path: "/administration/settings",
+        icon: "⚙️",
+        actions: [],
+      },
+      {
+        title: "Diagnostics",
+        description: "Health checks, database, and system diagnostics",
+        path: "/administration/diagnostics",
+        icon: "🩺",
+        actions: [],
+      },
+      {
+        title: "Document Templates",
+        description: "Manage print headers, logos, and layouts",
+        path: "/administration/settings/templates",
+        icon: "📄",
+        actions: [],
+      },
+    ],
+  },
+  {
+    title: "User Management & Access Control",
+    badge: "Security",
+    items: [
+      {
+        title: "User Accounts",
+        description: "Add, edit, or deactivate system users",
+        path: "/administration/users",
+        icon: "👤",
+        actions: [
+          {
+            label: "Add User",
+            path: "/administration/users/new",
+            type: "primary",
+          },
+        ],
+      },
+      {
+        title: "Role Setup",
+        description: "Manage system roles and feature permissions",
+        path: "/administration/access/roles",
+        icon: "🛡️",
+        actions: [],
+      },
+      {
+        title: "User Permissions Matrix",
+        description: "Configure direct feature permissions per user",
+        path: "/administration/access/user-permissions",
+        icon: "🔐",
+        actions: [],
+      },
+      {
+        title: "Exceptional Permissions",
+        description: "Review special permission overrides",
+        path: "/administration/access/user-overrides",
+        icon: "⭐",
+        actions: [],
+      },
+    ],
+  },
+  {
+    title: "Workflow Engine",
+    badge: "Automation",
+    items: [
+      {
+        title: "My Approvals",
+        description: "View and process pending approval requests",
+        path: "/administration/workflows/approvals",
+        icon: "✅",
+        actions: [],
+      },
+      {
+        title: "Approved Documents",
+        description: "History of fully approved workflows",
+        path: "/administration/workflows/approved",
+        icon: "📁",
+        actions: [],
+      },
+      {
+        title: "Workflow Configurations",
+        description: "Define multi-stage approval rules and triggers",
+        path: "/administration/workflows",
+        icon: "🔀",
+        actions: [
+          {
+            label: "Create Workflow",
+            path: "/administration/workflows/new",
+            type: "primary",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    title: "Audit & Logs",
+    badge: "Compliance",
+    items: [
+      {
+        title: "System Log Book",
+        description: "Complete audit trail of system events",
+        path: "/administration/reports/system-log-book",
+        icon: "📖",
+        actions: [],
+      },
+      {
+        title: "User Login Activity",
+        description: "Track user login sessions and IP addresses",
+        path: "/administration/reports/user-login-activity",
+        icon: "📊",
+        actions: [],
+      },
+    ],
+  },
+];
+
 function AdministrationLanding() {
   const { user } = useAuth();
   const [stats, setStats] = React.useState([
@@ -38,25 +162,17 @@ function AdministrationLanding() {
       path: "/administration/users",
     },
     {
-      rbac_key: "roles-pages",
+      rbac_key: "active-roles",
       value: "—",
-      label: "Roles & Pages",
+      label: "Active Roles",
       change: "Loading…",
       changeType: "neutral",
       path: "/administration/access/roles",
     },
     {
-      rbac_key: "active-sessions",
+      rbac_key: "pending-approvals",
       value: "—",
-      label: "Active Sessions (24h)",
-      change: "Loading…",
-      changeType: "neutral",
-      path: "/administration/reports/user-login-activity",
-    },
-    {
-      rbac_key: "pending-workflows",
-      value: "—",
-      label: "Pending Workflows",
+      label: "Pending Approvals",
       change: "Loading…",
       changeType: "neutral",
       path: "/administration/workflows/approvals",
@@ -78,7 +194,6 @@ function AdministrationLanding() {
 
   React.useEffect(() => {
     let mounted = true;
-    let timer;
     async function load() {
       try {
         const resp = await api.get("/admin/dashboard-stats");
@@ -94,19 +209,12 @@ function AdministrationLanding() {
             };
             next[1] = {
               ...next[1],
-              value: `${d.rolesCount ?? 0}/${d.pagesCount ?? 0}`,
-              label: "Roles / Pages",
-              change: `${d.activeExceptionsCount ?? 0} active exceptions`,
-              changeType: d.activeExceptionsCount > 0 ? "warning" : "positive",
+              value: String(d.rolesCount ?? "—"),
+              change: "System roles",
+              changeType: "neutral",
             };
             next[2] = {
               ...next[2],
-              value: String(d.activeSessions ?? "—"),
-              change: "Active in last 24h",
-              changeType: d.activeSessions > 0 ? "positive" : "neutral",
-            };
-            next[3] = {
-              ...next[3],
               value: String(d.pendingWorkflows ?? "—"),
               change:
                 d.pendingWorkflows > 0 ? "Requires approval" : "All clear",
@@ -123,131 +231,13 @@ function AdministrationLanding() {
     };
   }, []);
 
-  const sections = [
-    {
-      title: "System Health & Settings",
-      badge: "Core",
-      items: [
-        {
-          title: "Settings",
-          description: "Push notifications and document templates",
-          path: "/administration/settings",
-          icon: "⚙️",
-          actions: [],
-        },
-        {
-          title: "Diagnostics",
-          description: "Check system health and permission issues",
-          path: "/administration/diagnostics",
-          icon: "🩺",
-          actions: [],
-        },
-        
-      ],
-    },
-    {
-      title: "User Management",
-      badge: "Access Control",
-      items: [
-        {
-          title: "Role Setup",
-          description:
-            "Create roles and assign modules, features, and dashboards",
-          module_key: "administration",
-          feature_key: "roles",
-          path: "/administration/access/roles",
-          icon: "�️",
-          actions: [],
-        },
-        {
-          title: "User Permissions",
-          description: "Set granular CRUD permissions for individual users",
-          module_key: "administration",
-          feature_key: "user-permissions",
-          path: "/administration/access/user-permissions",
-          icon: "✅",
-          actions: [],
-        },
-        {
-          title: "Dashboard Permissions",
-          description: "Grant and override access for dashboards",
-          module_key: "administration",
-          feature_key: "user-permissions",
-          path: "/administration/access/dashboard-permissions",
-          icon: "📊",
-          actions: [],
-        },
-        {
-          title: "Exceptional Permissions",
-          description: "Set exceptional permissions and overrides per user",
-          module_key: "administration",
-          feature_key: "user-overrides",
-          path: "/administration/access/user-overrides",
-          icon: "✨",
-          actions: [],
-        },
-        {
-          title: "User Management",
-          description:
-            "Create and manage user accounts with detailed permissions",
-          path: "/administration/users",
-          icon: "👤",
-          actions: [
-            {
-              label: "View Users",
-              path: "/administration/users",
-              type: "outline",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      title: "Process & Reporting",
-      items: [
-        {
-          title: "Workflow Configuration",
-          description: "Define and configure approval workflows for documents",
-          path: "/administration/workflows",
-          icon: "🔄",
-          actions: [],
-        },
-        {
-          title: "Workflow Approvals",
-          description: "Approve pending documents",
-          path: "/administration/workflows/approvals",
-          icon: "✅",
-        },
-        {
-          title: "Document Review",
-          description: "Review documents awaiting action",
-          path: "/administration/workflows/approvals",
-          icon: "📝",
-        },
-
-        {
-          title: "System Log Book Report",
-          description: "Audit logs and system activity",
-          path: "/administration/reports/system-log-book",
-          icon: "📘",
-        },
-        {
-          title: "User Login Activity Report",
-          description: "Recent user sign-ins and sessions",
-          path: "/administration/reports/user-login-activity",
-          icon: "👤",
-        },
-      ],
-    },
-  ];
-
   return (
     <ModuleDashboard
       title="Administration"
       description="System configuration and user management"
       stats={stats}
       quickActions={quickActions}
-      sections={sections}
+      sections={administrationSections}
       features={administrationFeatures}
     />
   );
@@ -260,8 +250,9 @@ function AdministrationLanding() {
  */
 export default function AdministrationHome() {
   return (
-    <Routes>
-      <Route path="/" element={<AdministrationLanding />} />
+    <ModuleLayout sections={administrationSections} moduleKey="administration">
+      <Routes>
+        <Route path="/" element={<AdministrationLanding />} />
       <Route path="/users" element={<UserList />} />
       <Route path="/users/new" element={<UserForm />} />
       <Route path="/users/:id" element={<UserForm />} />
@@ -295,7 +286,8 @@ export default function AdministrationHome() {
         path="/exceptional-permissions"
         element={<ExceptionalPermissionsList />}
       />
-    </Routes>
+      </Routes>
+    </ModuleLayout>
   );
 }
 

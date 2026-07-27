@@ -71,8 +71,12 @@ export default function DashboardPage() {
       }
     }
     load();
+    const interval = setInterval(() => {
+      if (mounted) load();
+    }, 15000); // Live polling every 15 seconds
     return () => {
       mounted = false;
+      clearInterval(interval);
     };
   }, []);
 
@@ -113,13 +117,22 @@ export default function DashboardPage() {
           </span>
         </div>
         <div className="card-body">
-          <p className="text-slate-600 dark:text-slate-400 mb-2">
-            Welcome back,{" "}
-            <span className="font-semibold text-brand dark:text-brand-300">
-              {user?.email}
-            </span>
-            .
-          </p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-slate-600 dark:text-slate-400">
+              Welcome back,{" "}
+              <span className="font-semibold text-brand dark:text-brand-300">
+                {user?.email}
+              </span>
+              .
+            </p>
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+              </span>
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Live</span>
+            </div>
+          </div>
           {error ? <p className="text-sm text-red-600 mt-1">{error}</p> : null}
         </div>
       </div>

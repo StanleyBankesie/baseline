@@ -15,6 +15,12 @@ import { api } from "api/client";
  * @returns {JSX.Element} The rendered component
  */
 export default function MaterialReturnReportPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [items, setItems] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -59,12 +65,12 @@ export default function MaterialReturnReportPage() {
   useEffect(() => {
     loadFilters();
     run();
-  }, []);
+  }, [pollingCounter]);
 
   useEffect(() => {
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, to, warehouseId, departmentId]);
+  }, [from, to, warehouseId, departmentId, pollingCounter]);
 
 
   const { sorted: sorted_items, sortKey, sortDir, toggle } = useSort(items, "date", "desc");

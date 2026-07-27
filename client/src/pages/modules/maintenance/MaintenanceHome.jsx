@@ -12,6 +12,7 @@ import PmScheduleList from "./pm-schedules/PmScheduleList.jsx";
 import PmScheduleForm from "./pm-schedules/PmScheduleForm.jsx";
 import MaintenanceReports from "./reports/MaintenanceReports.jsx";
 import ModuleDashboard from "../../../components/ModuleDashboard.jsx";
+import ModuleLayout from "../../../components/ModuleLayout.jsx";
 import { api } from "../../../api/client.js";
 import MaintenanceRequestsList from "./maintenance-requests/MaintenanceRequestsList.jsx";
 import MaintenanceRequestForm from "./maintenance-requests/MaintenanceRequestForm.jsx";
@@ -41,6 +42,138 @@ import MaterialReceiptList from "./material-receipt/MaterialReceiptList.jsx";
 import MaterialReceiptForm from "./material-receipt/MaterialReceiptForm.jsx";
 import MaintenanceDashboardPage from "./MaintenanceDashboardPage.jsx";
 
+const buildFeature = (title, path, description, icon) => ({
+  title,
+  path,
+  description,
+  icon,
+});
+
+export const maintenanceSections = [
+  {
+    title: "Master Data",
+    items: [
+      buildFeature(
+        "Equipment",
+        "/maintenance/equipment",
+        "Equipment setup",
+        "🧰",
+      ),
+      buildFeature(
+        "Maintenance Contracts",
+        "/maintenance/contracts",
+        "Contract management",
+        "📄",
+      ),
+      buildFeature(
+        "Maintenance Assets",
+        "/maintenance/assets",
+        "Manage assets and equipment details",
+        "🏗️",
+      ),
+    ],
+  },
+  {
+    title: "Operations & Schedules",
+    items: [
+      buildFeature(
+        "PM Schedules",
+        "/maintenance/pm-schedules",
+        "Preventive maintenance schedules",
+        "📅",
+      ),
+      buildFeature(
+        "Maintenance Requests",
+        "/maintenance/maintenance-requests",
+        "Service/repair requests",
+        "📋",
+      ),
+      buildFeature(
+        "Maintenance Rosters",
+        "/maintenance/rosters",
+        "Technician rosters and shift schedules",
+        "🗓️",
+      ),
+      buildFeature(
+        "Job Orders",
+        "/maintenance/job-orders",
+        "Job orders and work tickets",
+        "📑",
+      ),
+      buildFeature(
+        "Job Execution",
+        "/maintenance/job-executions",
+        "Track active job execution",
+        "⚙️",
+      ),
+      buildFeature(
+        "Maintenance Schedules",
+        "/maintenance/schedules",
+        "Master calendar for maintenance",
+        "📆",
+      ),
+    ],
+  },
+  {
+    title: "Procurement & Materials",
+    items: [
+      buildFeature(
+        "Maintenance RFQ",
+        "/maintenance/rfqs",
+        "Request for quotation for maintenance items/services",
+        "📜",
+      ),
+      buildFeature(
+        "Supplier Quotations",
+        "/maintenance/supplier-quotations",
+        "Quotations received from suppliers",
+        "🏷️",
+      ),
+      buildFeature(
+        "Maintenance Bills",
+        "/maintenance/maintenance-bills",
+        "Vendor bills for maintenance services",
+        "💵",
+      ),
+      buildFeature(
+        "Material Requisition",
+        "/maintenance/material-requisition",
+        "Requisition spare parts from main inventory",
+        "📦",
+      ),
+      buildFeature(
+        "Material Receipt",
+        "/maintenance/material-receipt",
+        "Confirm arrival of spare parts at maintenance site",
+        "📥",
+      ),
+    ],
+  },
+  {
+    title: "Reports & Setup",
+    items: [
+      buildFeature(
+        "Maintenance Reports",
+        "/maintenance/reports",
+        "Asset performance and cost reports",
+        "📊",
+      ),
+      buildFeature(
+        "Downtime Analysis",
+        "/maintenance/reports/downtime",
+        "Analyze MTBF, MTTR, and asset downtime",
+        "📈",
+      ),
+      buildFeature(
+        "Maintenance Setup",
+        "/maintenance/setup",
+        "Configure maintenance categories, work centers, and parameters",
+        "🛠️",
+      ),
+    ],
+  },
+];
+
 function MaintenanceLanding() {
   const [stats, setStats] = React.useState([
     {
@@ -52,36 +185,66 @@ function MaintenanceLanding() {
       path: "/maintenance/maintenance-requests",
     },
     {
-      rbac_key: "active-jobs",
+      rbac_key: "active-orders",
       value: "—",
-      label: "Jobs In Progress",
+      label: "Active Work Orders",
       change: "Loading…",
       changeType: "neutral",
       path: "/maintenance/job-orders",
     },
     {
-      rbac_key: "overdue-pms",
+      rbac_key: "overdue-pm",
       value: "—",
-      label: "Overdue PMs",
+      label: "Overdue PM Schedules",
       change: "Loading…",
       changeType: "neutral",
       path: "/maintenance/pm-schedules",
+    },
+    {
+      rbac_key: "total-assets",
+      value: "—",
+      label: "Tracked Assets",
+      change: "Loading…",
+      changeType: "neutral",
+      path: "/maintenance/assets",
     },
   ]);
 
   React.useEffect(() => {
     let mounted = true;
-    let timer;
     async function load() {
       try {
-        const resp = await api.get("/maintenance/dashboard/stats");
-        const d = resp.data;
-        if (mounted) {
+        const resp = await api.get("/maintenance/dashboard-stats");
+        const d = resp?.data?.data;
+        if (d && mounted) {
           setStats((prev) => {
             const next = [...prev];
-            next[0] = { ...next[0], value: String(d.openRequests ?? "—") };
-            next[1] = { ...next[1], value: String(d.activeJobs ?? "—") };
-            next[2] = { ...next[2], value: String(d.overduePm ?? "—") };
+            next[0] = {
+              ...next[0],
+              value: String(d.openRequests ?? "—"),
+              change:
+                d.openRequests > 0 ? "Requires action" : "All clear",
+              changeType: d.openRequests > 0 ? "warning" : "positive",
+            };
+            next[1] = {
+              ...next[1],
+              value: String(d.activeJobOrders ?? "—"),
+              change: `${d.inProgressJobs ?? 0} in progress`,
+              changeType: "neutral",
+            };
+            next[2] = {
+              ...next[2],
+              value: String(d.overduePmCount ?? "—"),
+              change:
+                d.overduePmCount > 0 ? "Overdue maintenance" : "On schedule",
+              changeType: d.overduePmCount > 0 ? "negative" : "positive",
+            };
+            next[3] = {
+              ...next[3],
+              value: String(d.totalAssets ?? "—"),
+              change: `${d.activeAssets ?? 0} operational`,
+              changeType: "positive",
+            };
             return next;
           });
         }
@@ -92,130 +255,6 @@ function MaintenanceLanding() {
       mounted = false;
     };
   }, []);
-
-  const buildFeature = (title, path, description, icon) => ({
-    title,
-    path,
-    description,
-    icon,
-  });
-
-  const sections = [
-    {
-      title: "Master Data",
-      items: [
-        buildFeature(
-          "Equipment",
-          "/maintenance/equipment",
-          "Equipment setup",
-          "🧰",
-        ),
-        buildFeature(
-          "Maintenance Contracts",
-          "/maintenance/contracts",
-          "Manage service contracts",
-          "📄",
-        ),
-      ],
-    },
-    {
-      title: "Requests & Orders",
-      items: [
-        buildFeature(
-          "Maintenance Requests",
-          "/maintenance/maintenance-requests",
-          "Review submitted requests and track follow-up work",
-          "📝",
-        ),
-        buildFeature(
-          "Job Orders",
-          "/maintenance/job-orders",
-          "Create and track job orders",
-          "🛠",
-        ),
-        buildFeature(
-          "Material Requisitions",
-          "/maintenance/material-requisitions",
-          "Request materials from warehouse",
-          "📦",
-        ),
-        buildFeature(
-          "Material Receipts",
-          "/maintenance/material-receipts",
-          "Receive materials issued from inventory",
-          "📥",
-        ),
-      ],
-    },
-    {
-      title: "External Service",
-      items: [
-        buildFeature(
-          "RFQs",
-          "/maintenance/rfq",
-          "Request quotations from suppliers",
-          "📣",
-        ),
-        buildFeature(
-          "Supplier Quotations",
-          "/maintenance/supplier-quotations",
-          "Record quotations received",
-          "📑",
-        ),
-      ],
-    },
-    {
-      title: "Execution & Billing",
-      items: [
-        buildFeature(
-          "Job Executions",
-          "/maintenance/job-executions",
-          "Record execution progress and completion",
-          "⚙️",
-        ),
-        buildFeature(
-          "Maintenance Bills",
-          "/maintenance/bills",
-          "Raise bills for finance",
-          "💳",
-        ),
-      ],
-    },
-    {
-      title: "Preventive Maintenance",
-      items: [
-        buildFeature(
-          "Maintenance Schedules",
-          "/maintenance/schedules",
-          "Manage ad-hoc schedules",
-          "🗓",
-        ),
-        buildFeature(
-          "Maintenance Rosters",
-          "/maintenance/rosters",
-          "Plan maintenance rosters",
-          "📋",
-        ),
-      ],
-    },
-    {
-      title: "Reports",
-      items: [
-        buildFeature(
-          "Maintenance Reports",
-          "/maintenance/reports",
-          "Asset and maintenance KPIs",
-          "📊",
-        ),
-        buildFeature(
-          "Setup",
-          "/maintenance/setup",
-          "Configure maintenance parameters",
-          "🛠️",
-        ),
-      ],
-    },
-  ];
 
   return (
     <ModuleDashboard
@@ -230,7 +269,7 @@ function MaintenanceLanding() {
           icon: "📊",
         },
       ]}
-      sections={sections}
+      sections={maintenanceSections}
       features={maintenanceFeatures}
     />
   );
@@ -243,8 +282,9 @@ function MaintenanceLanding() {
  */
 export default function MaintenanceHome() {
   return (
-    <Routes>
-      <Route path="/" element={<MaintenanceLanding />} />
+    <ModuleLayout sections={maintenanceSections} moduleKey="maintenance">
+      <Routes>
+        <Route path="/" element={<MaintenanceLanding />} />
       <Route path="dashboard" element={<MaintenanceDashboardPage />} />
 
       <Route path="/assets" element={<AssetList />} />
@@ -322,7 +362,8 @@ export default function MaintenanceHome() {
 
       <Route path="/reports" element={<MaintenanceReports />} />
       <Route path="/reports/downtime" element={<DowntimeAnalysisReport />} />
-    </Routes>
+      </Routes>
+    </ModuleLayout>
   );
 }
 

@@ -26,7 +26,13 @@ import {
 } from "lucide-react";
 import { api } from "../../../../api/client.js";
 
-export default function TaskExecutionReportPage() {
+export default function TaskExecutionReportPage({ isEmbedded = false }) {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -128,15 +134,16 @@ export default function TaskExecutionReportPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
       {/* Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
-        <div className="flex items-center gap-4">
-          <Link
-            to="/project-management/reports"
-            className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-          >
-            <ArrowLeft size={20} />
-          </Link>
-          <div>
+      {!isEmbedded && (
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
+          <div className="flex items-center gap-4">
+            <Link
+              to="/project-management/reports"
+              className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+            >
+              <ArrowLeft size={20} />
+            </Link>
+            <div>
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300">
                 Senior Data Intelligence
@@ -177,9 +184,10 @@ export default function TaskExecutionReportPage() {
           >
             <Printer size={16} />
             Print Report
-          </button>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {error ? (
         <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-400 text-sm flex items-center justify-between">
@@ -573,140 +581,6 @@ export default function TaskExecutionReportPage() {
             )}
           </div>
         </div>
-      </div>
-
-      {/* Main Execution Data Table */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-          <div>
-            <h3 className="font-bold text-slate-900 dark:text-white text-base">
-              Task Execution Log ({filteredTasks.length})
-            </h3>
-            <p className="text-xs text-slate-500">
-              Detailed tracking of operational tasks, SLA schedule, and milestone completion.
-            </p>
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="p-12 text-center text-slate-400 text-sm">
-            Loading task execution intelligence...
-          </div>
-        ) : filteredTasks.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 text-sm">
-            No task execution records match the selected filter criteria.
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-semibold">
-                  <th className="py-3 px-4">Task Name</th>
-                  <th className="py-3 px-4">Project</th>
-                  <th className="py-3 px-4">Assignee</th>
-                  <th className="py-3 px-4">Priority</th>
-                  <th className="py-3 px-4">Progress</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Due Date</th>
-                  <th className="py-3 px-4">SLA Schedule</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {filteredTasks.map((task) => {
-                  const priorityColor =
-                    task.priority === "URGENT"
-                      ? "bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300"
-                      : task.priority === "HIGH"
-                      ? "bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
-                      : task.priority === "LOW"
-                      ? "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
-                      : "bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300";
-
-                  const statusColor =
-                    task.status === "COMPLETED"
-                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
-                      : task.status === "IN_PROGRESS"
-                      ? "bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300"
-                      : task.status === "BLOCKED"
-                      ? "bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300"
-                      : task.status === "REVIEW"
-                      ? "bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300"
-                      : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400";
-
-                  const dueStatusBadge =
-                    task.due_status === "COMPLETED" ? (
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                        Completed
-                      </span>
-                    ) : task.due_status === "OVERDUE" ? (
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-800 flex items-center gap-1 w-fit">
-                        <AlertTriangle size={11} /> {task.due_label}
-                      </span>
-                    ) : task.due_status === "DUE_TODAY" ? (
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                        Due Today
-                      </span>
-                    ) : (
-                      <span className="text-slate-400">{task.due_label || "—"}</span>
-                    );
-
-                  return (
-                    <tr
-                      key={task.id}
-                      className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors"
-                    >
-                      <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white">
-                        {task.task_name}
-                      </td>
-                      <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
-                        <span className="font-medium">{task.project_name}</span>
-                        {task.project_code ? (
-                          <span className="text-[10px] text-slate-400 block">
-                            #{task.project_code}
-                          </span>
-                        ) : null}
-                      </td>
-                      <td className="py-3 px-4 text-slate-700 dark:text-slate-300 font-medium">
-                        {task.assigned_to_name}
-                      </td>
-                      <td className="py-3 px-4">
-                        <span
-                          className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${priorityColor}`}
-                        >
-                          {task.priority || "MEDIUM"}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 min-w-[120px]">
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                            <div
-                              className="bg-brand-500 h-full"
-                              style={{ width: `${task.completion_percent || 0}%` }}
-                            />
-                          </div>
-                          <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300">
-                            {task.completion_percent || 0}%
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <span
-                          className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${statusColor}`}
-                        >
-                          {task.status}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-slate-500 dark:text-slate-400">
-                        {task.end_date ? String(task.end_date).split("T")[0] : "—"}
-                      </td>
-                      <td className="py-3 px-4">{dueStatusBadge}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
     </div>
   );

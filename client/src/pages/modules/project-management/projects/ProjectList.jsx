@@ -113,7 +113,9 @@ export default function ProjectList() {
               <thead>
                 <tr>
                   <SortableHeader label="Project"          sortKey="project_name"       currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                  <SortableHeader label="Client & Manager" sortKey="client_name"         currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                  <SortableHeader label="Status"           sortKey="project_status"     currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                  <SortableHeader label="Client"           sortKey="client_name"        currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                  <SortableHeader label="Manager"          sortKey="manager_name"       currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <SortableHeader label="Progress"         sortKey="completion_percent"  currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-center" />
                   <SortableHeader label="Budget"           sortKey="budget"              currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-right" />
                   <th>Budget Health</th>
@@ -124,10 +126,10 @@ export default function ProjectList() {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan="8" className="text-center py-8 text-slate-400">Loading...</td></tr>
+                  <tr><td colSpan="10" className="text-center py-8 text-slate-400">Loading...</td></tr>
                 ) : sortedItems.length > 0 ? sortedItems.map((item) => (
                   <tr key={item.id}>
-                    {/* Project column — code badge + name + status badge inline */}
+                    {/* Project column */}
                     <td className="py-3">
                       <div className="flex items-center gap-2.5">
                         {/* Code chip */}
@@ -139,28 +141,35 @@ export default function ProjectList() {
                             {(item.project_code || "").split("-")[1] || "00"}
                           </span>
                         </div>
-                        {/* Name + badges on one line */}
                         <div className="min-w-0">
                           <div className="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate max-w-[180px]">
                             {item.project_name}
                           </div>
-                          <div className="flex items-center gap-1 mt-0.5">
-                            <StatusBadge status={item.project_status} />
-                            {item.project_priority === "HIGH" && (
-                              <span className="bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase">HIGH</span>
-                            )}
-                          </div>
+                          {item.project_priority === "HIGH" && (
+                            <div className="mt-0.5">
+                              <span className="bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase">HIGH PRIORITY</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </td>
 
-                    {/* Client & Manager */}
+                    {/* Status column */}
+                    <td className="py-3">
+                      <StatusBadge status={item.project_status} />
+                    </td>
+
+                    {/* Client */}
                     <td className="py-3">
                       <div className="text-sm font-semibold text-slate-800 dark:text-slate-100 whitespace-nowrap">
                         {item.client_name || "Internal"}
                       </div>
-                      <div className="text-[10px] text-slate-400 whitespace-nowrap">
-                        Managed by {item.manager_name || "N/A"}
+                    </td>
+
+                    {/* Manager */}
+                    <td className="py-3">
+                      <div className="text-sm text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                        {item.manager_name || "N/A"}
                       </div>
                     </td>
 
@@ -228,7 +237,7 @@ export default function ProjectList() {
                     </td>
                   </tr>
                 )) : (
-                  <tr><td colSpan="8" className="text-center py-8 text-slate-400">No projects found.</td></tr>
+                  <tr><td colSpan="10" className="text-center py-8 text-slate-400">No projects found.</td></tr>
                 )}
               </tbody>
             </table>

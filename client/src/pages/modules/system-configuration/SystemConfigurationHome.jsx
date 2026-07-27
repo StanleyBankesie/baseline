@@ -17,8 +17,7 @@ import LicenseManagement from "../../admin/LicenseManagement.jsx";
 import PaymentPackages from "../../admin/PaymentPackages.jsx";
 import GeneralSettingsPage from "./GeneralSettingsPage.jsx";
 
-function SystemConfigurationLanding() {
-  const sections = [
+export const systemConfigurationSections = [
     {
       title: "System Configuration",
       badge: "Core",
@@ -93,12 +92,13 @@ function SystemConfigurationLanding() {
     },
   ];
 
+function SystemConfigurationLanding() {
   return (
     <ModuleDashboard
       title="System Configuration"
       description="Super-admin restricted system configuration and setup."
       stats={[]}
-      sections={sections}
+      sections={systemConfigurationSections}
       quickActions={[]}
     />
   );
@@ -106,19 +106,21 @@ function SystemConfigurationLanding() {
 
 export default function SystemConfigurationHome() {
   return (
-    <Routes>
-      <Route path="/" element={<SystemConfigurationLanding />} />
-      <Route path="/companies" element={<CompanyList />} />
-      <Route path="/companies/new" element={<CompanyForm />} />
-      <Route path="/companies/:id" element={<CompanyForm />} />
-      <Route path="/branches" element={<BranchList />} />
-      <Route path="/branches/new" element={<BranchForm />} />
-      <Route path="/branches/:id" element={<BranchForm />} />
-      <Route path="/admin-permissions" element={<AdminPermissionsPage />} />
-      <Route path="/backups" element={<BackupPage />} />
-      <Route path="/licenses" element={<LicenseManagement />} />
-      <Route path="/payment-packages" element={<PaymentPackages />} />
-      <Route path="/general-settings" element={<GeneralSettingsPage />} />
-    </Routes>
+    <ModuleLayout sections={systemConfigurationSections} moduleKey="system-configuration">
+      <Routes>
+        <Route path="/" element={<SystemConfigurationLanding />} />
+        <Route path="/companies" element={<CompanyList />} />
+        <Route path="/companies/new" element={<CompanyForm />} />
+        <Route path="/companies/:id" element={<CompanyForm />} />
+        <Route path="/branches" element={<BranchList />} />
+        <Route path="/branches/new" element={<BranchForm />} />
+        <Route path="/branches/:id" element={<BranchForm />} />
+        <Route path="/admin-permissions" element={<AdminPermissionsPage />} />
+        <Route path="/backups" element={<BackupPage />} />
+        <Route path="/licenses" element={<LicenseManagement />} />
+        <Route path="/payment-packages" element={<PaymentPackages />} />
+        <Route path="/general-settings" element={<GeneralSettingsPage />} />
+      </Routes>
+    </ModuleLayout>
   );
 }

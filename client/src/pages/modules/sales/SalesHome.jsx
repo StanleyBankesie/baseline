@@ -7,6 +7,7 @@ import React from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import { usePermission } from "../../../auth/PermissionContext";
 import ModuleDashboard from "../../../components/ModuleDashboard";
+import ModuleLayout from "../../../components/ModuleLayout.jsx";
 import { api } from "../../../api/client.js";
 
 // Import list pages
@@ -70,6 +71,99 @@ const ActionButton = ({ label, path, type, featureKey, action }) => {
     </Link>
   );
 };
+
+export const salesFeatures = [
+  {
+    module_key: "sales",
+    label: "Quotations",
+    path: "/sales/quotations",
+    type: "feature",
+  },
+  {
+    module_key: "sales",
+    label: "Sales Orders",
+    path: "/sales/sales-orders",
+    type: "feature",
+  },
+  {
+    module_key: "sales",
+    label: "Invoices",
+    path: "/sales/invoices",
+    type: "feature",
+  },
+  {
+    module_key: "sales",
+    label: "Delivery Notes",
+    path: "/sales/delivery",
+    type: "feature",
+  },
+  {
+    module_key: "sales",
+    label: "Price Setup",
+    path: "/sales/price-setup",
+    type: "feature",
+  },
+  {
+    module_key: "sales",
+    label: "Promotional Campaigns",
+    path: "/sales/discount-schemes",
+    type: "feature",
+  },
+  {
+    module_key: "sales",
+    label: "Sales Setup",
+    path: "/sales/setup",
+    type: "feature",
+  },
+  {
+    module_key: "sales",
+    label: "Customer Setup",
+    path: "/sales/customers",
+    type: "feature",
+  },
+  {
+    module_key: "sales",
+    label: "Sales Register",
+    path: "/sales/reports/sales-register",
+    type: "dashboard",
+  },
+  {
+    module_key: "sales",
+    label: "Delivery Register",
+    path: "/sales/reports/delivery-register",
+    type: "dashboard",
+  },
+  {
+    module_key: "sales",
+    label: "Sales Return Report",
+    path: "/sales/reports/sales-return",
+    type: "dashboard",
+  },
+  {
+    module_key: "sales",
+    label: "Debtors Balance",
+    path: "/sales/reports/debtors-balance",
+    type: "dashboard",
+  },
+  {
+    module_key: "sales",
+    label: "Sales Profitability",
+    path: "/sales/reports/sales-profitability",
+    type: "dashboard",
+  },
+  {
+    module_key: "sales",
+    label: "Sales Tracking",
+    path: "/sales/reports/sales-tracking",
+    type: "dashboard",
+  },
+  {
+    module_key: "sales",
+    label: "Sales Returns",
+    path: "/sales/returns",
+    type: "feature",
+  },
+];
 
 /**
  * SalesModuleHome component
@@ -244,10 +338,24 @@ const SalesModuleHome = () => {
     };
   }, []);
 
-  const sections = [
-    {
-      title: "Sales Transactions",
-      badge: "Operations",
+  return (
+    <ModuleDashboard
+      title="Sales Module"
+      description="Customer orders, quotations, invoicing, and sales analytics"
+      stats={stats}
+      headerActions={[
+        { label: "Dashboard", path: "/sales/dashboard", icon: "📊" },
+      ]}
+      sections={salesModuleSections}
+      features={salesFeatures}
+    />
+  );
+};
+
+export const salesModuleSections = [
+  {
+    title: "Sales Transactions",
+    badge: "Operations",
       items: [
         {
           title: "Quotations",
@@ -585,20 +693,6 @@ const SalesModuleHome = () => {
     },
   ];
 
-  return (
-    <ModuleDashboard
-      title="Sales Module"
-      description="Customer orders, quotations, invoicing, and sales analytics"
-      stats={stats}
-      headerActions={[
-        { label: "Dashboard", path: "/sales/dashboard", icon: "📊" },
-      ]}
-      sections={sections}
-      features={salesFeatures}
-    />
-  );
-};
-
 /**
  * SalesHome component
  * Root router for the Sales module. Maps URL paths to specific sales components.
@@ -607,81 +701,54 @@ const SalesModuleHome = () => {
  */
 export default function SalesHome() {
   return (
-    <Routes>
-      <Route path="/" element={<SalesModuleHome />} />
-      <Route
-        path="/dashboard"
-        element={
-          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
-            {React.createElement(
-              React.lazy(() => import("./SalesDashboardPage.jsx")),
-            )}
-          </React.Suspense>
-        }
-      />
-      <Route path="/quotations" element={<QuotationList />} />
-      <Route path="/quotations/new" element={<QuotationForm />} />
-      <Route path="/quotations/:id" element={<QuotationForm />} />
-      <Route path="/sales-orders" element={<SalesOrderList />} />
-      <Route path="/sales-orders/new" element={<SalesOrderForm />} />
-      <Route path="/sales-orders/:id" element={<SalesOrderForm />} />
-      <Route path="/invoices" element={<InvoiceList />} />
-      <Route path="/invoices/new" element={<InvoiceForm />} />
-      <Route path="/invoices/:id" element={<InvoiceForm />} />
-      <Route path="delivery" element={<DeliveryList />} />
-      <Route path="delivery/new" element={<DeliveryForm />} />
-      <Route path="delivery/:id" element={<DeliveryForm />} />
-      <Route path="/price-setup" element={<PriceSetup />} />
-      <Route path="/discount-schemes" element={<CampaignHub />} />
-      <Route path="/discount-schemes/discount" element={<DiscountSchemeList />} />
-      <Route path="/discount-schemes/discount/new" element={<CampaignForm />} />
-      <Route path="/discount-schemes/discount/:id" element={<CampaignForm />} />
-      <Route path="/discount-schemes/purchase-reward" element={<PurchaseRewardCampaignList />} />
-      <Route path="/discount-schemes/purchase-reward/new" element={<PurchaseRewardCampaignForm />} />
-      <Route path="/discount-schemes/purchase-reward/:id" element={<PurchaseRewardCampaignForm />} />
-      <Route path="/setup" element={<SalesSetupPage />} />
-      <Route path="/customer-credit" element={<CustomerCreditList />} />
-      <Route path="/customer-credit/:id" element={<CustomerCreditForm />} />
-      <Route path="/customers" element={<CustomerList />} />
-      <Route path="/customers/new" element={<CustomerForm />} />
-      <Route path="/customers/:id" element={<CustomerForm />} />
-      <Route path="/prospect-customers" element={<PotentialCustomerList />} />
-      <Route
-        path="/prospect-customers/new"
-        element={<PotentialCustomerForm />}
-      />
-      <Route
-        path="/prospect-customers/:id"
-        element={<PotentialCustomerForm />}
-      />
-      <Route path="/prospect-conversion" element={<ProspectConversion />} />
-      <Route path="/bulk-upload" element={<BulkCustomerUpload />} />
-      {/* Additional sales report routes */}
-      <Route
-        path="/reports"
-        element={
-          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
-            {React.createElement(
-              React.lazy(() => import("./reports/SalesReports.jsx")),
-            )}
-          </React.Suspense>
-        }
-      />
-      <Route
-        path="/reports/prospect-customer-list"
-        element={
-          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
-            {React.createElement(
-              React.lazy(
-                () => import("./reports/ProspectiveCustomerListReportPage.jsx"),
-              ),
-            )}
-          </React.Suspense>
-        }
-      />
-      <Route
-        path="/reports/customer-list"
-        element={
+    <ModuleLayout sections={salesModuleSections} moduleKey="sales">
+      <Routes>
+        <Route path="/" element={<SalesModuleHome />} />
+        <Route
+          path="/dashboard"
+          element={
+            <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+              {React.createElement(
+                React.lazy(() => import("./SalesDashboardPage.jsx")),
+              )}
+            </React.Suspense>
+          }
+        />
+        <Route path="/quotations" element={<QuotationList />} />
+        <Route path="/quotations/new" element={<QuotationForm />} />
+        <Route path="/quotations/:id" element={<QuotationForm />} />
+        <Route path="/sales-orders" element={<SalesOrderList />} />
+        <Route path="/sales-orders/new" element={<SalesOrderForm />} />
+        <Route path="/sales-orders/:id" element={<SalesOrderForm />} />
+        <Route path="/invoices" element={<InvoiceList />} />
+        <Route path="/invoices/new" element={<InvoiceForm />} />
+        <Route path="/invoices/:id" element={<InvoiceForm />} />
+        <Route path="/delivery" element={<DeliveryList />} />
+        <Route path="/delivery/new" element={<DeliveryForm />} />
+        <Route path="/delivery/:id" element={<DeliveryForm />} />
+        <Route path="/price-setup" element={<PriceSetup />} />
+        <Route path="/discount-schemes" element={<CampaignHub />} />
+        <Route path="/discount-schemes/list" element={<DiscountSchemeList />} />
+        <Route path="/discount-schemes/new" element={<CampaignForm />} />
+        <Route path="/discount-schemes/edit/:id" element={<CampaignForm />} />
+        <Route path="/discount-schemes/purchase-rewards" element={<PurchaseRewardCampaignList />} />
+        <Route path="/discount-schemes/purchase-rewards/new" element={<PurchaseRewardCampaignForm />} />
+        <Route path="/discount-schemes/purchase-rewards/edit/:id" element={<PurchaseRewardCampaignForm />} />
+        <Route path="/customer-credit" element={<CustomerCreditList />} />
+        <Route path="/customer-credit/new" element={<CustomerCreditForm />} />
+        <Route path="/customer-credit/:id" element={<CustomerCreditForm />} />
+        <Route path="/customers" element={<CustomerList />} />
+        <Route path="/customers/new" element={<CustomerForm />} />
+        <Route path="/customers/:id" element={<CustomerForm />} />
+        <Route path="/prospect-customers" element={<PotentialCustomerList />} />
+        <Route path="/prospect-customers/new" element={<PotentialCustomerForm />} />
+        <Route path="/prospect-customers/:id" element={<PotentialCustomerForm />} />
+        <Route path="/prospect-conversion" element={<ProspectConversion />} />
+        <Route path="/bulk-upload" element={<BulkCustomerUpload />} />
+        <Route path="/setup" element={<SalesSetupPage />} />
+        <Route
+          path="/reports/prospect-customer-list"
+          element={
           <React.Suspense fallback={<div className="p-4">Loading...</div>}>
             {React.createElement(
               React.lazy(() => import("./reports/CustomerListReportPage.jsx")),
@@ -867,99 +934,7 @@ export default function SalesHome() {
       <Route path="/returns" element={<SalesReturnList />} />
       <Route path="/returns/new" element={<SalesReturnForm />} />
       <Route path="/returns/:id" element={<SalesReturnForm />} />
-    </Routes>
+      </Routes>
+    </ModuleLayout>
   );
 }
-
-export const salesFeatures = [
-  {
-    module_key: "sales",
-    label: "Quotations",
-    path: "/sales/quotations",
-    type: "feature",
-  },
-  {
-    module_key: "sales",
-    label: "Sales Orders",
-    path: "/sales/sales-orders",
-    type: "feature",
-  },
-  {
-    module_key: "sales",
-    label: "Invoices",
-    path: "/sales/invoices",
-    type: "feature",
-  },
-  {
-    module_key: "sales",
-    label: "Delivery Notes",
-    path: "/sales/delivery",
-    type: "feature",
-  },
-  {
-    module_key: "sales",
-    label: "Price Setup",
-    path: "/sales/price-setup",
-    type: "feature",
-  },
-  {
-    module_key: "sales",
-    label: "Promotional Campaigns",
-    path: "/sales/discount-schemes",
-    type: "feature",
-  },
-  {
-    module_key: "sales",
-    label: "Sales Setup",
-    path: "/sales/setup",
-    type: "feature",
-  },
-  {
-    module_key: "sales",
-    label: "Customer Setup",
-    path: "/sales/customers",
-    type: "feature",
-  },
-  {
-    module_key: "sales",
-    label: "Sales Register",
-    path: "/sales/reports/sales-register",
-    type: "dashboard",
-  },
-  {
-    module_key: "sales",
-    label: "Delivery Register",
-    path: "/sales/reports/delivery-register",
-    type: "dashboard",
-  },
-  {
-    module_key: "sales",
-    label: "Sales Return Report",
-    path: "/sales/reports/sales-return",
-    type: "dashboard",
-  },
-  {
-    module_key: "sales",
-    label: "Debtors Balance",
-    path: "/sales/reports/debtors-balance",
-    type: "dashboard",
-  },
-  {
-    module_key: "sales",
-    label: "Sales Profitability",
-    path: "/sales/reports/sales-profitability",
-    type: "dashboard",
-  },
-  {
-    module_key: "sales",
-    label: "Sales Tracking",
-    path: "/sales/reports/sales-tracking",
-    type: "dashboard",
-  },
-  {
-    module_key: "sales",
-    label: "Sales Returns",
-    path: "/sales/returns",
-    type: "feature",
-  },
-];

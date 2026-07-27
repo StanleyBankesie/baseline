@@ -138,7 +138,7 @@ export default function PMPurchaseRequisitionList() {
                           <button className="px-2 py-1 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded hover:bg-amber-100"
                             onClick={() => handleSubmit(r.id)}>Submit</button>
                         )}
-                        {["DRAFT","REJECTED","PENDING_APPROVAL"].includes(r.status) && (
+                        {hasExceptional("PM.PR.CANCEL") && ["DRAFT","REJECTED","PENDING_APPROVAL"].includes(r.status) && (
                           <button className="px-2 py-1 text-xs font-medium text-white bg-red-700 rounded hover:bg-red-800"
                             onClick={() => handleDelete(r.id)}>Cancel</button>
                         )}

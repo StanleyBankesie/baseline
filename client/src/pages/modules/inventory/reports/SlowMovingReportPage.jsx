@@ -18,6 +18,12 @@ import jsPDF from "jspdf";
  * @returns {JSX.Element} The rendered component
  */
 export default function SlowMovingReportPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [items, setItems] = useState([]);
@@ -39,7 +45,7 @@ export default function SlowMovingReportPage() {
 
   useEffect(() => {
     run();
-  }, [from, to]);
+  }, [from, to, pollingCounter]);
 
 
   const { sorted: sorted_items, sortKey, sortDir, toggle } = useSort(items, "date", "desc");

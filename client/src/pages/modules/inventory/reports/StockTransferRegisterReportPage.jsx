@@ -18,6 +18,12 @@ import jsPDF from "jspdf";
  * @returns {JSX.Element} The rendered component
  */
 export default function StockTransferRegisterReportPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [items, setItems] = useState([]);
@@ -40,7 +46,7 @@ export default function StockTransferRegisterReportPage() {
 
   useEffect(() => {
     loadFilters();
-  }, []);
+  }, [pollingCounter]);
 
 
   async function run() {
@@ -59,7 +65,7 @@ export default function StockTransferRegisterReportPage() {
 
   useEffect(() => {
     run();
-  }, [from, to, warehouseId, itemId]);
+  }, [from, to, warehouseId, itemId, pollingCounter]);
 
 
   const { sorted: sorted_items, sortKey, sortDir, toggle } = useSort(items, "date", "desc");

@@ -18,6 +18,12 @@ import { Link } from 'react-router-dom';
  * @returns {JSX.Element} The rendered component
  */
 export default function HRReports() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, []);
+
   const [reportType, setReportType] = useState('employees');
   const [fromDate, setFromDate] = useState(new Date(new Date().setDate(1)).toISOString().slice(0, 10));
   const [toDate, setToDate] = useState(new Date().toISOString().slice(0, 10));
@@ -37,7 +43,7 @@ export default function HRReports() {
   useEffect(() => {
     loadDepartments();
     loadReport();
-  }, [reportType]);
+  }, [reportType, pollingCounter]);
 
   const loadDepartments = async () => {
     try {

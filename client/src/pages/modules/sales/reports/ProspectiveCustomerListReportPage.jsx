@@ -16,6 +16,12 @@ import * as XLSX from "xlsx";
  * @returns {JSX.Element} The rendered component
  */
 export default function ProspectiveCustomerListReportPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [customer, setCustomer] = useState("");
@@ -38,7 +44,7 @@ export default function ProspectiveCustomerListReportPage() {
 
   useEffect(() => {
     run();
-  }, [customer]);
+  }, [customer, pollingCounter]);
 
   function exportExcel() {
     if (!items.length) return;

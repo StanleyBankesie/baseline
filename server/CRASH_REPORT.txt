@@ -13437,3 +13437,560 @@ Error: Authentication required
     at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
     at Function.handle (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:175:3)
 --------------------------------------------------------------------------------
+
+[2026-07-27T00:39:04.444Z] HTTP_400
+Summary: At least one line item is required
+Request: POST /api/projects/purchase-requisitions (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/projects/purchase-requisitions
+ip: ::1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"requisition_date":"2026-07-27","project_id":1,"department":"Finance","requested_by":null,"purpose":"tre","priority":"LOW","required_date":null,"status":"DRAFT","remarks":"kkjj","timeline":"2 days","items":[]}
+query: {}
+Technical details:
+Error: At least one line item is required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/routes/projects.routes.js:1182:36
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-07-27T00:39:27.728Z] HTTP_500
+Summary: Unknown column 'timeline' in 'field list'
+Request: POST /api/projects/purchase-requisitions (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: POST
+url: /api/projects/purchase-requisitions
+ip: ::1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"requisition_date":"2026-07-27","project_id":1,"department":"Finance","requested_by":null,"purpose":"tre","priority":"LOW","required_date":null,"status":"DRAFT","remarks":"kkjj","timeline":"2 days","items":[{"item_id":9,"description":"Cleaning Service","qty":5,"uom":"PCS","estimated_unit_cost":0.06}]}
+query: {}
+Technical details:
+Error: Unknown column 'timeline' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/projects.routes.js:1185:22
+--------------------------------------------------------------------------------
+
+[2026-07-27T00:43:54.330Z] HTTP_500
+Summary: Unknown column 'timeline' in 'field list'
+Request: POST /api/projects/purchase-requisitions (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: POST
+url: /api/projects/purchase-requisitions
+ip: ::1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"requisition_date":"2026-07-27","project_id":1,"department":"Finance","requested_by":null,"purpose":"tre","priority":"LOW","required_date":null,"status":"DRAFT","remarks":"kkjj","timeline":"2 days","items":[{"item_id":9,"description":"Cleaning Service","qty":5,"uom":"PCS","estimated_unit_cost":0}]}
+query: {}
+Technical details:
+Error: Unknown column 'timeline' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/projects.routes.js:1185:22
+--------------------------------------------------------------------------------
+
+[2026-07-27T02:46:59.961Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/fast-moving?from=2026-07-01&to=2026-07-27 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/fast-moving?from=2026-07-01&to=2026-07-27
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-07-01","to":"2026-07-27"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1795:20
+--------------------------------------------------------------------------------
+
+[2026-07-27T02:46:59.991Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/fast-moving?from=2026-06-01&to=2026-06-30 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/fast-moving?from=2026-06-01&to=2026-06-30
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-06-01","to":"2026-06-30"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1795:20
+--------------------------------------------------------------------------------
+
+[2026-07-27T02:47:00.020Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/slow-moving?from=2026-07-01&to=2026-07-27 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/slow-moving?from=2026-07-01&to=2026-07-27
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-07-01","to":"2026-07-27"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1837:20
+--------------------------------------------------------------------------------
+
+[2026-07-27T02:47:00.320Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/slow-moving?from=2026-06-01&to=2026-06-30 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/slow-moving?from=2026-06-01&to=2026-06-30
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 7
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-06-01","to":"2026-06-30"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1837:20
+--------------------------------------------------------------------------------
+
+[2026-07-27T03:54:12.079Z] HTTP_500
+Summary: Database query timeout after 15000ms
+Request: GET /api/workflows/approvals/pending (status 500)
+Context:
+status: 500
+code: DB_QUERY_TIMEOUT
+method: GET
+url: /api/workflows/approvals/pending
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Database query timeout after 15000ms
+    at Timeout.<anonymous> (file:///C:/Users/stanl/baseline/server/db/pool.js:310:28)
+    at listOnTimeout (node:internal/timers:594:17)
+    at process.processTimers (node:internal/timers:529:7)
+--------------------------------------------------------------------------------
+
+[2026-07-27T03:54:15.991Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/fast-moving?from=2026-07-01&to=2026-07-27 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/fast-moving?from=2026-07-01&to=2026-07-27
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-07-01","to":"2026-07-27"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1795:20
+--------------------------------------------------------------------------------
+
+[2026-07-27T03:54:16.568Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/fast-moving?from=2026-06-01&to=2026-06-30 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/fast-moving?from=2026-06-01&to=2026-06-30
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-06-01","to":"2026-06-30"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1795:20
+--------------------------------------------------------------------------------
+
+[2026-07-27T03:54:16.746Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/slow-moving?from=2026-07-01&to=2026-07-27 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/slow-moving?from=2026-07-01&to=2026-07-27
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-07-01","to":"2026-07-27"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1837:20
+--------------------------------------------------------------------------------
+
+[2026-07-27T03:54:16.763Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/slow-moving?from=2026-06-01&to=2026-06-30 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/slow-moving?from=2026-06-01&to=2026-06-30
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-06-01","to":"2026-06-30"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1837:20
+--------------------------------------------------------------------------------
+
+[2026-07-27T18:20:44.363Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/human-resources/dashboard-stats (status 404)
+Context:
+requestId: ms3jyo5a-o19blcg8
+durationMs: 12
+method: GET
+url: /api/human-resources/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-27T18:27:57.630Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/project-management/dashboard-stats (status 404)
+Context:
+requestId: ms3k7ygq-u07kvgle
+durationMs: 4
+method: GET
+url: /api/project-management/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-27T18:28:23.666Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/fast-moving?from=2026-07-01&to=2026-07-27 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/fast-moving?from=2026-07-01&to=2026-07-27
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-07-01","to":"2026-07-27"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1795:20
+--------------------------------------------------------------------------------
+
+[2026-07-27T18:28:24.159Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/fast-moving?from=2026-06-01&to=2026-06-30 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/fast-moving?from=2026-06-01&to=2026-06-30
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-06-01","to":"2026-06-30"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1795:20
+--------------------------------------------------------------------------------
+
+[2026-07-27T18:28:25.828Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/slow-moving?from=2026-07-01&to=2026-07-27 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/slow-moving?from=2026-07-01&to=2026-07-27
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-07-01","to":"2026-07-27"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1837:20
+--------------------------------------------------------------------------------
+
+[2026-07-27T18:28:26.449Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/slow-moving?from=2026-06-01&to=2026-06-30 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/slow-moving?from=2026-06-01&to=2026-06-30
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-06-01","to":"2026-06-30"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1837:20
+--------------------------------------------------------------------------------
+
+[2026-07-27T18:44:36.555Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/project-management/dashboard-stats (status 404)
+Context:
+requestId: ms3ktd8l-t6v7pkoh
+durationMs: 6
+method: GET
+url: /api/project-management/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-27T18:44:42.046Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/human-resources/dashboard-stats (status 404)
+Context:
+requestId: ms3kthh7-rawjrogc
+durationMs: 3
+method: GET
+url: /api/human-resources/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-27T18:45:25.138Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/project-management/dashboard-stats (status 404)
+Context:
+requestId: ms3kueq7-lpbd2owr
+durationMs: 2
+method: GET
+url: /api/project-management/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-27T18:45:30.024Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/maintenance/dashboard-stats (status 404)
+Context:
+requestId: ms3kuihy-ee17z5hc
+durationMs: 2
+method: GET
+url: /api/maintenance/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-27T18:45:46.921Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/human-resources/dashboard-stats (status 404)
+Context:
+requestId: ms3kuvja-npss40us
+durationMs: 2
+method: GET
+url: /api/human-resources/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------

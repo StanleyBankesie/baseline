@@ -15,6 +15,12 @@ import * as XLSX from "xlsx";
  * @returns {JSX.Element} The rendered component
  */
 export default function ExecSlowMovingItemsPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [items, setItems] = useState([]);
@@ -29,8 +35,8 @@ export default function ExecSlowMovingItemsPage() {
     finally { setLoading(false); }
   }
 
-  useEffect(() => { run(); }, []); // eslint-disable-line
-  useEffect(() => { if (from || to) run(); }, [from, to]); // eslint-disable-line
+  useEffect(() => { run(); }, [pollingCounter]); // eslint-disable-line
+  useEffect(() => { if (from || to) run(); }, [from, to, pollingCounter]); // eslint-disable-line
 
   return (
     <div className="space-y-6 p-4">

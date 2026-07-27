@@ -18,6 +18,12 @@ const fmt = (n) => Number(n || 0).toLocaleString(undefined, { minimumFractionDig
  * @returns {JSX.Element} The rendered component
  */
 export default function BalanceSheetReportPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [to, setTo] = useState("");
   const [assets, setAssets] = useState({ items: [], total: 0 });
   const [liabilities, setLiabilities] = useState({ items: [], total: 0 });
@@ -54,7 +60,7 @@ export default function BalanceSheetReportPage() {
   useEffect(() => {
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [to]);
+  }, [to, pollingCounter]);
 
   // Flatten tree for export
   function flattenTree(nodes, section, rows = []) {

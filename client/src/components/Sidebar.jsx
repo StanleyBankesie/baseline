@@ -408,8 +408,8 @@ export default function Sidebar() {
         })
       : [];
 
-    // Don't render item if no children are visible and it's not a parent module
-    if (hasChildren && visibleChildren.length === 0 && level > 0) {
+    // Don't render item if no children are visible
+    if (hasChildren && visibleChildren.length === 0) {
       return null;
     }
 

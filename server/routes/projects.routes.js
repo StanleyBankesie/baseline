@@ -1298,6 +1298,15 @@ router.delete(
       const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
       const id = toNumber(req.params.id);
       if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid ID");
+
+      const uRows = await query(
+        `SELECT 1 FROM adm_exceptional_permissions WHERE user_id = :uid AND effect = 'ALLOW' AND is_active = 1 AND permission_code = 'PM.PR.CANCEL' LIMIT 1`,
+        { uid: req.user?.sub }
+      );
+      if (!uRows || uRows.length === 0) {
+        throw httpError(403, "FORBIDDEN", "You do not have exceptional permission to cancel purchase requisitions");
+      }
+
       await query(
         `UPDATE pm_purchase_requisitions SET status = 'CANCELLED', is_active = 'N', deleted_at = NOW()
          WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,

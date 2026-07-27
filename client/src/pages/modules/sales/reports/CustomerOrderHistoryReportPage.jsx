@@ -15,6 +15,12 @@ import { api } from "api/client";
  * @returns {JSX.Element} The rendered component
  */
 export default function CustomerOrderHistoryReportPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, []);
+
   const [customerId, setCustomerId] = useState("");
   const [customers, setCustomers] = useState([]);
   const [fromDate, setFromDate] = useState("");
@@ -39,7 +45,7 @@ export default function CustomerOrderHistoryReportPage() {
       }
     }
     loadCustomers();
-  }, []);
+  }, [pollingCounter]);
 
   async function run() {
     try {
@@ -62,7 +68,7 @@ export default function CustomerOrderHistoryReportPage() {
 
   useEffect(() => {
     run();
-  }, [customerId, fromDate, toDate]);
+  }, [customerId, fromDate, toDate, pollingCounter]);
 
   const { sorted: sorted_items, sortKey, sortDir, toggle } = useSort(items, "txn_date", "desc");
 
@@ -77,9 +83,7 @@ export default function CustomerOrderHistoryReportPage() {
             <p className="text-sm mt-1">Full customer transaction history</p>
           </div>
           <div className="flex gap-2">
-            <Link to="/sales" className="btn btn-secondary">
-              Return to Menu
-            </Link>
+            <div className="flex items-center gap-3"><div className="flex items-center gap-2" title="Live Auto-Refresh Active"><span className="relative flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span></span><span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Live</span></div><Link to="/sales" className="btn btn-secondary">Return to Menu</Link></div>
           </div>
         </div>
         <div className="card-body">

@@ -27,6 +27,12 @@ import {
 } from "lucide-react";
 
 export default function DebtorsLedgerReportPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, []);
+
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [items, setItems] = useState([]);
@@ -103,7 +109,7 @@ export default function DebtorsLedgerReportPage() {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [accountQuery, filteredAccounts, selectedAccountLabel]);
+  }, [accountQuery, filteredAccounts, selectedAccountLabel, pollingCounter]);
 
   async function loadAccounts() {
     try {
@@ -118,7 +124,7 @@ export default function DebtorsLedgerReportPage() {
 
   useEffect(() => {
     loadAccounts();
-  }, []);
+  }, [pollingCounter]);
 
   const totals = useMemo(() => {
     const debit = items.reduce((sum, r) => sum + Number(r.debit || 0), 0);
@@ -153,12 +159,12 @@ export default function DebtorsLedgerReportPage() {
     setFrom(jan1.toISOString().slice(0, 10));
     setTo(today.toISOString().slice(0, 10));
     run();
-  }, []);
+  }, [pollingCounter]);
 
   useEffect(() => {
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, to, accountId]);
+  }, [from, to, accountId, pollingCounter]);
 
   const handleExportExcel = () => {
     const rows = Array.isArray(items) ? items : [];

@@ -6,6 +6,7 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import ModuleDashboard from "../../../components/ModuleDashboard";
+import ModuleLayout from "../../../components/ModuleLayout.jsx";
 import api from "../../../api/client.js";
 import { useAuth } from "../../../auth/AuthContext.jsx";
 
@@ -134,228 +135,69 @@ function PurchaseHomeIndex() {
     },
   ];
 
-  const sections = [
-    {
-      title: "Quick Purchase",
-      items: [
-        {
-          title: "Direct Purchase",
-          description: "Create quick single-step purchases",
-          path: "/purchase/direct-purchase",
-          icon: "⚡",
-        },
-      ],
-    },
-    {
-      title: "Procurement",
-      items: [
-        {
-          title: "Purchase Requisition",
-          description: "Request items or services to be purchased",
-          path: "/purchase/general-requisitions",
-          icon: "📋",
-        },
-        {
-          title: "Request for Quotation",
-          description: "Create and manage RFQs",
-          path: "/purchase/rfqs",
-          icon: "📝",
-        },
-        {
-          title: "Supplier Quotations",
-          description: "Capture and compare supplier quotations",
-          path: "/purchase/supplier-quotations",
-          icon: "📨",
-        },
-        {
-          title: "Quotation Analysis",
-          description: "Analyze quotation options and decisions",
-          path: "/purchase/quotation-analysis",
-          icon: "📊",
-        },
-      ],
-    },
-    {
-      title: "Purchase Orders",
-      items: [
-        {
-          title: "Local Purchase Orders",
-          description: "Manage local POs",
-          path: "/purchase/purchase-orders-local",
-          icon: "📦",
-        },
-        {
-          title: "Import Purchase Orders",
-          description: "Manage import POs",
-          path: "/purchase/purchase-orders-import",
-          icon: "🚢",
-        },
-      ],
-    },
-    {
-      title: "Logistics",
-      items: [
-        {
-          title: "Shipping Advice",
-          description: "Manage shipping advice documents",
-          path: "/purchase/shipping-advice",
-          icon: "🚚",
-        },
-        {
-          title: "Port Clearances",
-          description: "Track port clearance records",
-          path: "/purchase/port-clearances",
-          icon: "🛃",
-        },
-      ],
-    },
-    {
-      title: "Billing",
-      items: [
-        {
-          title: "Local Purchase Bills",
-          description: "Create and manage local purchase bills",
-          path: "/purchase/purchase-bills-local",
-          icon: "🧾",
-        },
-        {
-          title: "Import Purchase Bills",
-          description: "Create and manage import purchase bills",
-          path: "/purchase/purchase-bills-import",
-          icon: "🧾",
-        },
-      ],
-    },
-    {
-      title: "Master Data",
-      items: [
-        {
-          title: "Suppliers",
-          description: "Manage suppliers and contacts",
-          path: "/purchase/suppliers",
-          icon: "🏭",
-        },
-        {
-          title: "Setup",
-          description: "Configure accounts and purchase rules",
-          path: "/purchase/setup",
-          icon: "⚙️",
-        },
-      ],
-    },
-  ];
-
   return (
     <ModuleDashboard
       title="🛒 Purchase"
       description="Purchase management and procurement workflows"
       stats={stats}
       headerActions={[]}
-      sections={sections}
-      features={purchaseFeatures}
+      sections={[]}
+      features={[]}
     />
   );
 }
+export const purchaseSections = [
+  {
+    title: "Procurement",
+    features: [
+      { name: "Direct Purchase", path: "/purchase/direct-purchase", description: "Create quick single-step purchases", icon: "⚡" },
+      { name: "Purchase Requisition", path: "/purchase/general-requisitions", description: "Request items or services to be purchased", icon: "📋" },
+      { name: "Request for Quotation", path: "/purchase/rfqs", description: "Create and manage RFQs", icon: "📝" },
+      { name: "Supplier Quotations", path: "/purchase/supplier-quotations", description: "Capture and compare supplier quotations", icon: "📨" },
+      { name: "Quotation Analysis", path: "/purchase/quotation-analysis", description: "Analyze quotation options and decisions", icon: "📊" },
+    ],
+  },
+  {
+    title: "Purchase Orders",
+    features: [
+      { name: "Local Purchase Orders", path: "/purchase/purchase-orders-local", description: "Manage local POs", icon: "📦" },
+      { name: "Import Purchase Orders", path: "/purchase/purchase-orders-import", description: "Manage import POs", icon: "🚢" },
+    ],
+  },
+  {
+    title: "Logistics",
+    features: [
+      { name: "Shipping Advice", path: "/purchase/shipping-advice", description: "Manage shipping advice documents", icon: "🚚" },
+      { name: "Port Clearances", path: "/purchase/port-clearances", description: "Track port clearance records", icon: "🛃" },
+    ],
+  },
+  {
+    title: "Billing",
+    features: [
+      { name: "Local Purchase Bills", path: "/purchase/purchase-bills-local", description: "Create and manage local purchase bills", icon: "🧾" },
+      { name: "Import Purchase Bills", path: "/purchase/purchase-bills-import", description: "Create and manage import purchase bills", icon: "🧾" },
+    ],
+  },
+  {
+    title: "Returns",
+    features: [
+      { name: "Purchase Returns", path: "/purchase/purchase-returns", description: "Manage returned items", icon: "↩" },
+    ],
+  },
+  {
+    title: "Master Data",
+    features: [
+      { name: "Suppliers", path: "/purchase/suppliers", description: "Manage suppliers and contacts", icon: "🏭" },
+      { name: "Setup", path: "/purchase/setup", description: "Configure accounts and purchase rules", icon: "⚙️" },
+    ],
+  },
+];
 
 export default function PurchaseHome() {
   return (
-    <Routes>
+    <ModuleLayout sections={purchaseSections} moduleKey="purchase">
+      <Routes>
       <Route index element={<PurchaseHomeIndex />} />
-      <Route path="general-requisitions" element={<GeneralRequisitionList />} />
-      <Route
-        path="general-requisitions/new"
-        element={<GeneralRequisitionForm />}
-      />
-      <Route
-        path="general-requisitions/:id"
-        element={<GeneralRequisitionForm />}
-      />
-      <Route
-        path="general-requisitions/:id/edit"
-        element={<GeneralRequisitionForm />}
-      />
-      <Route path="rfqs" element={<RequestForQuotationList />} />
-      <Route path="rfqs/new" element={<RequestForQuotationForm />} />
-      <Route path="rfqs/:id" element={<RequestForQuotationForm />} />
-      <Route path="rfqs/:id/edit" element={<RequestForQuotationForm />} />
-      <Route path="supplier-quotations" element={<SupplierQuotationsList />} />
-      <Route
-        path="supplier-quotations/new"
-        element={<SupplierQuotationForm />}
-      />
-      <Route
-        path="supplier-quotations/:id"
-        element={<SupplierQuotationForm />}
-      />
-      <Route
-        path="supplier-quotations/:id/edit"
-        element={<SupplierQuotationForm />}
-      />
-      <Route path="quotation-analysis" element={<QuotationAnalysis />} />
-      <Route
-        path="purchase-orders-local"
-        element={<PurchaseOrdersLocalList />}
-      />
-      <Route
-        path="purchase-orders-local/new"
-        element={<PurchaseOrdersLocalForm />}
-      />
-      <Route
-        path="purchase-orders-local/:id"
-        element={<PurchaseOrdersLocalForm />}
-      />
-      <Route
-        path="purchase-orders-local/:id/edit"
-        element={<PurchaseOrdersLocalForm />}
-      />
-      <Route
-        path="purchase-orders-import"
-        element={<PurchaseOrdersImportList />}
-      />
-      <Route
-        path="purchase-orders-import/new"
-        element={<PurchaseOrdersImportForm />}
-      />
-      <Route
-        path="purchase-orders-import/:id"
-        element={<PurchaseOrdersImportForm />}
-      />
-      <Route
-        path="purchase-orders-import/:id/edit"
-        element={<PurchaseOrdersImportForm />}
-      />
-
-      <Route path="shipping-advice" element={<ShippingAdviceList />} />
-      <Route path="shipping-advice/new" element={<ShippingAdviceForm />} />
-      <Route path="shipping-advice/:id" element={<ShippingAdviceForm />} />
-
-      <Route path="port-clearances" element={<PortClearancesList />} />
-      <Route path="port-clearances/new" element={<PortClearancesForm />} />
-      <Route path="port-clearances/:id" element={<PortClearancesForm />} />
-
-      <Route path="purchase-bills-local" element={<PurchaseBillsList />} />
-      <Route path="purchase-bills-local/new" element={<PurchaseBillsForm />} />
-      <Route path="purchase-bills-local/:id" element={<PurchaseBillsForm />} />
-
-      <Route path="purchase-bills-import" element={<PurchaseBillsList />} />
-      <Route path="purchase-bills-import/new" element={<PurchaseBillsForm />} />
-      <Route path="purchase-bills-import/:id" element={<PurchaseBillsForm />} />
-      <Route path="direct-purchase" element={<DirectPurchaseList />} />
-      <Route path="direct-purchase/new" element={<DirectPurchase />} />
-      <Route path="direct-purchase/:id" element={<DirectPurchase />} />
-      <Route path="direct-purchase/:id/edit" element={<DirectPurchase />} />
-      <Route
-        path="direct-purchases"
-        element={<Navigate to="/purchase/direct-purchase" replace />}
-      />
-      <Route path="service-bills" element={<ServiceBillsList />} />
-      <Route path="service-bills/new" element={<ServiceBillForm />} />
-      <Route path="service-bills/:id" element={<ServiceBillForm />} />
-      <Route path="service-bills/:id/edit" element={<ServiceBillForm />} />
-      <Route
-        path="service-confirmation"
-        element={<ServiceConfirmationsList />}
-      />
       <Route
         path="service-confirmation/new"
         element={<ServiceConfirmationForm />}
@@ -514,12 +356,175 @@ export default function PurchaseHome() {
         element={
           <PurchaseFeaturePage
             title="Supplier Analytics"
-            description="Supplier analytics dashboard"
+            description="Supplier performance analytics and metrics"
           />
         }
       />
-      <Route path="*" element={<Navigate to="/purchase" replace />} />
-    </Routes>
+        <Route
+          path="service-confirmation/new"
+          element={<ServiceConfirmationForm />}
+        />
+        <Route
+          path="service-confirmation/:id"
+          element={<ServiceConfirmationForm />}
+        />
+        <Route path="suppliers" element={<SuppliersList />} />
+        <Route path="setup" element={<PurchaseSetupPage />} />
+        <Route path="suppliers/new" element={<SupplierForm />} />
+        <Route path="suppliers/:id" element={<SupplierForm />} />
+        <Route
+          path="suppliers/mass-upload"
+          element={
+            <PurchaseFeaturePage
+              title="Mass Suppliers Upload"
+              description="Import suppliers in bulk from file"
+            />
+          }
+        />
+        <Route
+          path="reports/import-order-tracking"
+          element={<ImportOrderTrackingReportPage />}
+        />
+        <Route
+          path="reports/local-order-tracking"
+          element={<LocalOrderTrackingReportPage />}
+        />
+        <Route
+          path="reports/purchase-tracking"
+          element={<PurchaseTrackingReportPage />}
+        />
+        <Route
+          path="reports/supplier-quotation-analysis"
+          element={<SupplierQuotationAnalysisReportPage />}
+        />
+        <Route
+          path="reports/pending-grn-to-bill-local"
+          element={<PendingGrnToBillLocalReportPage />}
+        />
+        <Route
+          path="reports/pending-grn-to-bill-import"
+          element={<PendingGrnToBillImportReportPage />}
+        />
+        <Route
+          path="reports/import-order-list"
+          element={<ImportOrderListReportPage />}
+        />
+        <Route
+          path="reports/pending-shipments"
+          element={<PendingShipmentDetailsReportPage />}
+        />
+        <Route
+          path="reports/purchase-register"
+          element={<PurchaseRegisterReportPage />}
+        />
+        <Route
+          path="reports/department-analysis"
+          element={React.createElement(
+            React.lazy(
+              () => import("./reports/DepartmentPurchaseAnalysisReportPage.jsx"),
+            ),
+          )}
+        />
+        <Route
+          path="reports/import-cost-breakdown"
+          element={React.createElement(
+            React.lazy(
+              () => import("./reports/ImportCostBreakdownReportPage.jsx"),
+            ),
+          )}
+        />
+        <Route
+          path="reports/lead-time-analysis"
+          element={React.createElement(
+            React.lazy(() => import("./reports/LeadTimeAnalysisReportPage.jsx")),
+          )}
+        />
+        <Route
+          path="reports/cancelled-pos"
+          element={React.createElement(
+            React.lazy(
+              () => import("./reports/CancelledPurchaseOrdersReportPage.jsx"),
+            ),
+          )}
+        />
+        <Route
+          path="reports/purchase-returns-analysis"
+          element={React.createElement(
+            React.lazy(
+              () => import("./reports/PurchaseReturnsAnalysisReportPage.jsx"),
+            ),
+          )}
+        />
+        <Route
+          path="reports/item-purchase-history"
+          element={React.createElement(
+            React.lazy(
+              () => import("./reports/ItemPurchaseHistoryReportPage.jsx"),
+            ),
+          )}
+        />
+        <Route
+          path="reports/price-variance"
+          element={React.createElement(
+            React.lazy(() => import("./reports/PriceVarianceReportPage.jsx")),
+          )}
+        />
+        <Route
+          path="reports/supplier-performance"
+          element={React.createElement(
+            React.lazy(
+              () => import("./reports/SupplierPerformanceReportPage.jsx"),
+            ),
+          )}
+        />
+        <Route
+          path="reports/supplier-outstanding-payables"
+          element={React.createElement(
+            React.lazy(
+              () => import("./reports/SupplierOutstandingPayablesReportPage.jsx"),
+            ),
+          )}
+        />
+        <Route
+          path="reports/purchase-aging"
+          element={React.createElement(
+            React.lazy(() => import("./reports/PurchaseAgingReportPage.jsx")),
+          )}
+        />
+        <Route
+          path="dashboard"
+          element={
+            <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+              {React.createElement(
+                React.lazy(() => import("./PurchaseDashboardPage.jsx")),
+              )}
+            </React.Suspense>
+          }
+        />
+        <Route path="purchase-returns" element={<PurchaseReturnList />} />
+        <Route path="purchase-returns/new" element={<PurchaseReturnForm />} />
+        <Route path="purchase-returns/:id" element={<PurchaseReturnForm />} />
+        <Route
+          path="procurement-overview"
+          element={
+            <PurchaseFeaturePage
+              title="Procurement Overview"
+              description="Procurement overview dashboard"
+            />
+          }
+        />
+        <Route
+          path="supplier-analytics"
+          element={
+            <PurchaseFeaturePage
+              title="Supplier Analytics"
+              description="Supplier analytics dashboard"
+            />
+          }
+        />
+        <Route path="*" element={<Navigate to="/purchase" replace />} />
+      </Routes>
+    </ModuleLayout>
   );
 }
 

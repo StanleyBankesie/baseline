@@ -25,6 +25,12 @@ import {
 } from "lucide-react";
 
 export default function VoucherRegisterReportPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [type, setType] = useState("");
@@ -53,12 +59,12 @@ export default function VoucherRegisterReportPage() {
     setTo(today.toISOString().slice(0, 10));
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [pollingCounter]);
 
   useEffect(() => {
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, to, type]);
+  }, [from, to, type, pollingCounter]);
 
   const { sorted: sortedItems, sortKey, sortDir, toggle } = useSort(items, "voucher_date", "desc");
 

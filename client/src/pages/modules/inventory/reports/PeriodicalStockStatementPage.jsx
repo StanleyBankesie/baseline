@@ -8,6 +8,12 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 
 export default function PeriodicalStockStatementPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [warehouseId, setWarehouseId] = useState("");
@@ -126,12 +132,12 @@ export default function PeriodicalStockStatementPage() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [pollingCounter]);
 
   useEffect(() => {
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, to, warehouseId, itemGroupId, q]);
+  }, [from, to, warehouseId, itemGroupId, q, pollingCounter]);
 
   const { sorted: sorted_items, sortKey, sortDir, toggle } = useSort(items, "item_name", "asc");
 

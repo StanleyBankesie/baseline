@@ -1,7 +1,98 @@
 import React, { useState, useMemo } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, NavLink } from "react-router-dom";
+import { ArrowLeft, ChevronDown } from "lucide-react";
 import { usePermission } from "../auth/PermissionContext.jsx";
 import { MODULES_REGISTRY } from "../data/modulesRegistry.js";
+import { ModuleTopNavBar } from "./ModuleLayout.jsx";
+
+// ─── Module Top Navigation Dropdown Component ───────────────────
+function ModuleNavDropdown({ section, location, navigate }) {
+  const [open, setOpen] = useState(false);
+  const ref = React.useRef(null);
+
+  const visibleItems = useMemo(() => {
+    const rawItems = section.items || section.features || [];
+    return rawItems.filter((item) => item && !item.hidden && (item.path || item.title || item.name || item.label));
+  }, [section]);
+
+  React.useEffect(() => {
+    if (!open) return;
+    function handler(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  if (visibleItems.length === 0) return null;
+
+  const sectionTitle = section.title || section.name || section.category || "Section";
+  const isSectionActive = visibleItems.some((i) => location.pathname === i.path);
+
+  return (
+    <div ref={ref} className="relative flex-shrink-0">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+          isSectionActive
+            ? "bg-brand-900 text-white"
+            : "text-slate-600 dark:text-slate-300 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:text-brand-700 dark:hover:text-brand-300"
+        }`}
+      >
+        <span>{sectionTitle}</span>
+        <ChevronDown size={14} className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div
+          className="absolute left-0 top-full mt-1.5 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-erp-lg overflow-hidden"
+          style={{ minWidth: 240, maxWidth: 360 }}
+        >
+          <div className="p-1.5 grid grid-cols-1 gap-1 max-h-80 overflow-y-auto">
+            {visibleItems.map((item, idx) => {
+              const itemTitle = item.title || item.name || item.label;
+              const itemPath = item.path;
+              const itemIcon = item.icon;
+              const itemDesc = item.description || item.desc;
+              const isActive = location.pathname === itemPath;
+
+              return (
+                <button
+                  key={itemPath || itemTitle || idx}
+                  onClick={() => {
+                    if (itemPath) navigate(itemPath);
+                    setOpen(false);
+                  }}
+                  className={`flex items-start gap-2.5 w-full px-3 py-2 rounded-lg text-sm font-medium text-left transition-colors ${
+                    isActive
+                      ? "bg-brand-900 text-white"
+                      : "text-slate-700 dark:text-slate-300 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:text-brand-700 dark:hover:text-brand-300"
+                  }`}
+                >
+                  {typeof itemIcon === "string" ? (
+                    <span className="text-base flex-shrink-0 mt-0.5">{itemIcon}</span>
+                  ) : itemIcon && typeof itemIcon === "function" ? (
+                    <itemIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  ) : (
+                    <span className="text-base flex-shrink-0 mt-0.5">📄</span>
+                  )}
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="truncate leading-snug">{itemTitle}</span>
+                    {itemDesc && (
+                      <span className={`text-[11px] font-normal truncate leading-tight ${isActive ? "text-white/80" : "text-slate-400 dark:text-slate-500"}`}>
+                        {itemDesc}
+                      </span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const ModuleDashboard = ({
   title,
@@ -16,7 +107,7 @@ const ModuleDashboard = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { canAccessPath, canAccessFeatureKey, canViewDashboardElement } =
+  const { canAccessPath, canAccessFeatureKey, canViewDashboardElement, isSuper } =
     usePermission();
 
   const isDashboardPath = (path) => {
@@ -90,7 +181,7 @@ const ModuleDashboard = ({
   }, [stats.length]);
 
   function isFeatureEnabled(path) {
-    if (showAll) return true;
+    if (showAll || isSuper) return true;
     return canAccessPath(path);
   }
 
@@ -100,38 +191,26 @@ const ModuleDashboard = ({
     const path = String(item.path || "");
     if (!path) return false;
 
+    if (showAll || isSuper) return true;
+
     const parts = path.split("/").filter(Boolean);
     const mk = String(item.module_key || parts[0] || "");
     const fk = String(item.feature_key || parts[1] || "");
 
-    if (showAll) return true;
     if (mk && isDashboardPath(path)) {
       return (
         canViewDashboardElement(mk, "dashboard", "dashboard") !== false &&
         canViewDashboardElement(mk, "dashboard", "dashboards") !== false
       );
     }
+
     if (mk && fk) {
-      // Check if this feature key is a known/registered feature in the registry.
-      // If it is, we use canAccessFeatureKey as the definitive gate — no fallback.
-      // Unknown paths (e.g. sub-pages like /sales/reports/sales-register) fall
-      // through to canAccessPath for looser path-based access.
-      const moduleInfo = MODULES_REGISTRY[mk];
-      const isKnownFeature = moduleInfo && (
-        (moduleInfo.features || []).some(f => String(f.key) === fk) ||
-        (moduleInfo.dashboards || []).some(d => String(d.key) === fk)
-      );
-      if (isKnownFeature) {
-        // Explicit feature: respect the RBAC gate with no fallback.
-        return canAccessFeatureKey(mk, fk);
-      }
-      // Unknown feature key — try the primary key first, then path fallback.
       if (canAccessFeatureKey(mk, fk)) return true;
-      if (!item.feature_key && parts.length > 2) {
+      if (item.feature_key && canAccessFeatureKey(mk, item.feature_key)) return true;
+      if (parts.length > 2) {
         const fk2 = String(parts[2] || "");
         if (fk2 && canAccessFeatureKey(mk, fk2)) return true;
       }
-      return canAccessPath(path);
     }
     return canAccessPath(path);
   };
@@ -338,9 +417,14 @@ const ModuleDashboard = ({
   }, [location.pathname, location.search, location.hash, navigate]);
 
   return (
-    <div className="p-6 space-y-8 animate-fade-in fullbleed-sm">
-      {/* Header */}
-      <div className="mb-8 flex items-start justify-between gap-4">
+    <div className="space-y-6 animate-fade-in fullbleed-sm -mx-6 px-6">
+      <div className="-mx-6 px-6 sticky top-0 z-40 bg-slate-50 dark:bg-slate-950 pb-2 pt-2 -mt-2">
+        <ModuleTopNavBar sections={allSections} headerActions={resolvedHeaderActions} moduleKey={moduleKey} />
+      </div>
+
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="mb-8 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-brand-900 dark:text-white tracking-tight mb-2">
             {title}
@@ -690,6 +774,7 @@ const ModuleDashboard = ({
             </div>
           );
         })}
+      </div>
       </div>
       {overlayType === "reports" && overlayItems.length > 0 ? (
         <div className="fixed inset-0 z-40 pointer-events-none">

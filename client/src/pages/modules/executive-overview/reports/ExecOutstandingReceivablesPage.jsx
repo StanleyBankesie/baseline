@@ -14,6 +14,12 @@ import jsPDF from "jspdf";
 const fmt = (n) => Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export default function ExecOutstandingReceivablesPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [items, setItems] = useState([]);
@@ -46,7 +52,7 @@ export default function ExecOutstandingReceivablesPage() {
 
   useEffect(() => {
     if (from || to) run();
-  }, [from, to]);
+  }, [from, to, pollingCounter]);
 
   const filteredItems = items.filter((r) => {
     if (!searchTerm) return true;

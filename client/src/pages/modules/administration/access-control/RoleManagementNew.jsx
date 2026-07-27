@@ -49,6 +49,13 @@ export default function RoleManagementNew() {
     is_active: true,
   });
 
+  const isModuleAllowed = (moduleKey) => {
+    if (!allowedModules || allowedModules.size === 0) return true;
+    if (allowedModules.has("*")) return true;
+    if (moduleKey === "administration") return true; // Always allow administration
+    return allowedModules.has(moduleKey);
+  };
+
   // Permission states
   const [selectedModules, setSelectedModules] = useState(new Set());
   const [selectedFeatures, setSelectedFeatures] = useState(new Set());
@@ -519,6 +526,7 @@ export default function RoleManagementNew() {
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {getAllModuleKeys()
+                    .filter(isModuleAllowed)
                     .map((moduleKey) => {
                     const moduleInfo = MODULES_REGISTRY[moduleKey];
                     return (
@@ -549,6 +557,7 @@ export default function RoleManagementNew() {
               {/* Features Section */}
               <div className="space-y-6">
                 {getAllModuleKeys()
+                  .filter(isModuleAllowed)
                   .map((moduleKey) => {
                   const moduleInfo = MODULES_REGISTRY[moduleKey];
                   const isModuleSelected = selectedModules.has(moduleKey);

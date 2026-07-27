@@ -19,6 +19,12 @@ import SortableHeader from "@/components/SortableHeader.jsx";
  * @returns {JSX.Element} The rendered component
  */
 export default function TrialBalanceReportPage() {
+  const [pollingCounter, setPollingCounter] = React.useState(0);
+  React.useEffect(() => {
+    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
+    return () => clearInterval(__pollId);
+  }, [pollingCounter]);
+
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [groupId, setGroupId] = useState("");
@@ -82,7 +88,7 @@ export default function TrialBalanceReportPage() {
   useEffect(() => {
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, to, groupId, accountId]);
+  }, [from, to, groupId, accountId, pollingCounter]);
 
   // Transform data for new column format
   const transformedItems = items.map((r) => {

@@ -4,6 +4,7 @@ import api from "../../../api/client.js";
 import { useAuth } from "../../../auth/AuthContext.jsx";
 import { usePermission } from "../../../auth/PermissionContext.jsx";
 import ModuleDashboard from "../../../components/ModuleDashboard.jsx";
+import ModuleLayout from "../../../components/ModuleLayout.jsx";
 import TransportDashboard from "./dashboard/TransportDashboard.jsx";
 import TransportRequests from "./requests/TransportRequests.jsx";
 import TransportRequestForm from "./requests/TransportRequestForm.jsx";
@@ -68,6 +69,312 @@ const ActionButton = ({ label, path, type, featureKey, action }) => {
   );
 };
 
+export const transportSections = [
+  {
+    title: "Operations",
+    items: [
+      { 
+        title: "Transport Requests", 
+        path: "/transport/requests", 
+        feature_key: "requests", 
+        description: "Manage internal and external transport requests",
+        icon: "📋",
+        actions: [
+          <ActionButton key="view" label="View" path="/transport/requests" type="outline" featureKey="transport:requests" action="view" />,
+          <ActionButton key="new" label="New" path="/transport/requests/new" type="primary" featureKey="transport:requests" action="create" />
+        ]
+      },
+      { 
+        title: "Vehicles Management", 
+        path: "/transport/vehicles", 
+        feature_key: "vehicles", 
+        description: "Register and manage fleet vehicles",
+        icon: "🚛",
+        actions: [
+          <ActionButton key="view" label="View" path="/transport/vehicles" type="outline" featureKey="transport:vehicles" action="view" />,
+          <ActionButton key="new" label="New" path="/transport/vehicles/new" type="primary" featureKey="transport:vehicles" action="create" />
+        ]
+      },
+      { 
+        title: "Vehicle Compliance", 
+        path: "/transport/compliance", 
+        feature_key: "compliance", 
+        description: "Track vehicle roadworthy, insurance, and compliance",
+        icon: "🛡️",
+        actions: [
+          <ActionButton key="view" label="View" path="/transport/compliance" type="outline" featureKey="transport:compliance" action="view" />,
+          <ActionButton key="new" label="New" path="/transport/compliance/new" type="primary" featureKey="transport:compliance" action="create" />
+        ]
+      },
+      { 
+        title: "Vehicle Servicing", 
+        path: "/transport/servicing", 
+        feature_key: "servicing", 
+        description: "Manage vehicle maintenance schedules and servicing",
+        icon: "🔧",
+        actions: [
+          <ActionButton key="view" label="View" path="/transport/servicing" type="outline" featureKey="transport:servicing" action="view" />,
+          <ActionButton key="new" label="New" path="/transport/servicing/new" type="primary" featureKey="transport:servicing" action="create" />
+        ]
+      },
+      { 
+        title: "Drivers Management", 
+        path: "/transport/drivers", 
+        feature_key: "drivers", 
+        description: "Manage driver profiles, licenses, and assignments",
+        icon: "👨‍✈️",
+        actions: [
+          <ActionButton key="view" label="View" path="/transport/drivers" type="outline" featureKey="transport:drivers" action="view" />,
+          <ActionButton key="new" label="New" path="/transport/drivers/new" type="primary" featureKey="transport:drivers" action="create" />
+        ]
+      },
+      { 
+        title: "Trip Management", 
+        path: "/transport/trips", 
+        feature_key: "trips", 
+        description: "Create, dispatch, and track vehicle trips",
+        icon: "📍",
+        actions: [
+          <ActionButton key="view" label="View Trips" path="/transport/trips" type="outline" featureKey="transport:trips" action="view" />,
+          <ActionButton key="manage" label="Management" path="/transport/trip-management" type="primary" featureKey="transport:trips" action="create" />
+        ]
+      },
+      { 
+        title: "Trip Returns", 
+        path: "/transport/trip-returns", 
+        feature_key: "trips", 
+        description: "Confirm returning trips and log vehicle metrics",
+        icon: "🔙",
+        actions: [
+          <ActionButton key="view" label="Manage Returns" path="/transport/trip-returns" type="primary" featureKey="transport:trips" action="view" />
+        ]
+      },
+
+      { 
+        title: "GPS Tracking", 
+        path: "/transport/tracking", 
+        feature_key: "tracking", 
+        description: "Monitor live vehicle locations via GPS",
+        icon: "📍",
+        actions: [
+          <ActionButton key="view" label="View Map" path="/transport/tracking" type="primary" featureKey="transport:trips" action="view" />
+        ]
+      },
+      { 
+        title: "Driver's Logbook", 
+        path: "/transport/logbooks", 
+        feature_key: "logbooks", 
+        description: "Maintain daily vehicle logbook entries",
+        icon: "📖",
+        actions: [
+          <ActionButton key="view" label="View" path="/transport/logbooks" type="outline" featureKey="transport:logbooks" action="view" />,
+          <ActionButton key="new" label="New" path="/transport/logbooks/new" type="primary" featureKey="transport:logbooks" action="create" />
+        ]
+      },
+      { 
+        title: "Inspections", 
+        path: "/transport/inspections", 
+        feature_key: "inspections", 
+        description: "Conduct vehicle safety and pre-trip inspections",
+        icon: "🔍",
+        actions: [
+          <ActionButton key="view" label="View" path="/transport/inspections" type="outline" featureKey="transport:inspections" action="view" />,
+          <ActionButton key="new" label="New" path="/transport/inspections/new" type="primary" featureKey="transport:inspections" action="create" />
+        ]
+      },
+      { 
+        title: "Routes Management", 
+        path: "/transport/routes", 
+        feature_key: "routes", 
+        description: "Define standard transport routes and distances",
+        icon: "🗺️",
+        actions: [
+          <ActionButton key="view" label="View" path="/transport/routes" type="outline" featureKey="transport:routes" action="view" />,
+          <ActionButton key="new" label="New" path="/transport/routes/new" type="primary" featureKey="transport:routes" action="create" />
+        ]
+      },
+    ],
+  },
+  {
+    title: "Fuel & Expenses",
+    items: [
+      { 
+        title: "Fuel Logs", 
+        path: "/transport/fuel", 
+        feature_key: "fuel", 
+        description: "Track vehicle refueling and fuel consumption",
+        icon: "⛽",
+        actions: [
+          <ActionButton key="view" label="View" path="/transport/fuel" type="outline" featureKey="transport:fuel" action="view" />,
+          <ActionButton key="new" label="New" path="/transport/fuel/new" type="primary" featureKey="transport:fuel" action="create" />
+        ]
+      },
+      { 
+        title: "Fuel Bills", 
+        path: "/transport/fuel-bills", 
+        feature_key: "fuel-bills", 
+        description: "Manage fuel supplier bills and invoices",
+        icon: "🧾",
+        actions: [
+          <ActionButton key="view" label="View" path="/transport/fuel-bills" type="outline" featureKey="transport:fuel-bills" action="view" />,
+          <ActionButton key="new" label="New" path="/transport/fuel-bills/new" type="primary" featureKey="transport:fuel-bills" action="create" />
+        ]
+      },
+      { 
+        title: "Transportation Bills", 
+        path: "/transport/transportation-bills", 
+        feature_key: "bills", 
+        description: "Manage transportation bills and payments",
+        icon: "📑",
+        actions: [
+          <ActionButton key="view" label="View" path="/transport/transportation-bills" type="outline" featureKey="transport:bills" action="view" />,
+          <ActionButton key="new" label="New" path="/transport/transportation-bills/new" type="primary" featureKey="transport:bills" action="create" />
+        ]
+      },
+      { 
+        title: "Billing", 
+        path: "/transport/billing", 
+        feature_key: "billing", 
+        description: "Manage transport invoices and billing",
+        icon: "🧾",
+        actions: [
+          <ActionButton key="view" label="View" path="/transport/billing" type="outline" featureKey="transport:billing" action="view" />
+        ]
+      },
+      { 
+        title: "Transportation Income", 
+        path: "/transport/income", 
+        feature_key: "income", 
+        description: "Manage income records",
+        icon: "💵",
+        actions: [
+          <ActionButton key="view" label="View" path="/transport/income" type="outline" featureKey="transport:income" action="view" />
+        ]
+      },
+      { 
+        title: "Transportation Expenses", 
+        path: "/transport/expenses", 
+        feature_key: "expenses", 
+        description: "Manage expense records",
+        icon: "💸",
+        actions: [
+          <ActionButton key="view" label="View" path="/transport/expenses" type="outline" featureKey="transport:expenses" action="view" />
+        ]
+      },
+    ],
+  },
+  {
+    title: "Reports & Analytics",
+    items: [
+      { 
+        title: "Transport Reports", 
+        path: "/transport/reports", 
+        feature_key: "reports", 
+        description: "Comprehensive transport analytics and reports hub",
+        icon: "📊",
+        actions: [
+          <ActionButton key="view" label="Reports Hub" path="/transport/reports" type="primary" featureKey="transport:reports" action="view" />
+        ]
+      },
+      { 
+        title: "Trip Execution Report", 
+        path: "/transport/reports/trip-execution", 
+        feature_key: "reports", 
+        description: "Detailed report of trip executions and metrics",
+        icon: "📈",
+        actions: [
+          <ActionButton key="view" label="View Report" path="/transport/reports/trip-execution" type="primary" featureKey="transport:reports" action="view" />
+        ]
+      },
+      { 
+        title: "Trip History Report", 
+        path: "/transport/reports/trip-history", 
+        feature_key: "reports", 
+        description: "Historical trip logs and driver performance",
+        icon: "📜",
+        actions: [
+          <ActionButton key="view" label="View Report" path="/transport/reports/trip-history" type="primary" featureKey="transport:reports" action="view" />
+        ]
+      },
+      { 
+        title: "Transport Revenue Report", 
+        path: "/transport/reports/revenue", 
+        feature_key: "reports", 
+        description: "Analyze transport billings and income",
+        icon: "💰",
+        actions: [
+          <ActionButton key="view" label="View Report" path="/transport/reports/revenue" type="primary" featureKey="transport:reports" action="view" />
+        ]
+      },
+      { 
+        title: "Trip Profitability Report", 
+        path: "/transport/reports/profitability", 
+        feature_key: "reports", 
+        description: "Revenue vs cost breakdown per trip",
+        icon: "💵",
+        actions: [
+          <ActionButton key="view" label="View Report" path="/transport/reports/profitability" type="primary" featureKey="transport:reports" action="view" />
+        ]
+      },
+      { 
+        title: "Fuel Consumption Report", 
+        path: "/transport/reports/fuel", 
+        feature_key: "reports", 
+        description: "Fuel usage and efficiency per vehicle",
+        icon: "⛽",
+        actions: [
+          <ActionButton key="view" label="View Report" path="/transport/reports/fuel" type="primary" featureKey="transport:reports" action="view" />
+        ]
+      },
+      { 
+        title: "Vehicle Utilization Report", 
+        path: "/transport/reports/utilization", 
+        feature_key: "reports", 
+        description: "Fleet operational hours and downtime analysis",
+        icon: "⏱️",
+        actions: [
+          <ActionButton key="view" label="View Report" path="/transport/reports/utilization" type="primary" featureKey="transport:reports" action="view" />
+        ]
+      },
+      { 
+        title: "Driver Performance Report", 
+        path: "/transport/reports/driver-performance", 
+        feature_key: "reports", 
+        description: "Trips completed, delays, and safety rating",
+        icon: "⭐",
+        actions: [
+          <ActionButton key="view" label="View Report" path="/transport/reports/driver-performance" type="primary" featureKey="transport:reports" action="view" />
+        ]
+      },
+      { 
+        title: "Trip Delays & Issues", 
+        path: "/transport/reports/delays", 
+        feature_key: "reports", 
+        description: "Analysis of delays and issues during trips",
+        icon: "⚠️",
+        actions: [
+          <ActionButton key="view" label="View Report" path="/transport/reports/delays" type="primary" featureKey="transport:reports" action="view" />
+        ]
+      },
+    ],
+  },
+  {
+    title: "Configuration",
+    items: [
+      { 
+        title: "Settings", 
+        path: "/transport/settings", 
+        feature_key: "settings", 
+        description: "Configure pricing, types, and module behaviors",
+        icon: "⚙️",
+        actions: [
+          <ActionButton key="view" label="Manage" path="/transport/settings" type="primary" featureKey="transport:settings" action="view" />
+        ]
+      },
+    ],
+  }
+];
+
 function TransportLanding() {
   const [stats, setStats] = useState(null);
   const [now, setNow] = useState(new Date());
@@ -129,290 +436,12 @@ function TransportLanding() {
     },
   ];
 
-  const sections = [
-    {
-      title: "Operations",
-      items: [
-        { 
-          title: "Transport Requests", 
-          path: "/transport/requests", 
-          feature_key: "requests", 
-          description: "Manage internal and external transport requests",
-          icon: "📋",
-          actions: [
-            <ActionButton key="view" label="View" path="/transport/requests" type="outline" featureKey="transport:requests" action="view" />,
-            <ActionButton key="new" label="New" path="/transport/requests/new" type="primary" featureKey="transport:requests" action="create" />
-          ]
-        },
-        { 
-          title: "Trips & Dispatch", 
-          path: "/transport/trips", 
-          feature_key: "trips", 
-          description: "Dispatch vehicles and track live trips",
-          icon: "🗺️",
-          actions: [
-            <ActionButton key="view" label="View" path="/transport/trips" type="outline" featureKey="transport:trips" action="view" />,
-            <ActionButton key="new" label="New" path="/transport/trips/new" type="primary" featureKey="transport:trips" action="create" />
-          ]
-        },
-        { 
-          title: "Live Trip Management", 
-          path: "/transport/trip-management", 
-          feature_key: "trips", 
-          description: "Monitor scheduled and active trips on a dashboard",
-          icon: "🚀",
-          actions: [
-            <ActionButton key="view" label="Live Dashboard" path="/transport/trip-management" type="primary" featureKey="transport:trips" action="view" />
-          ]
-        },
-        { 
-          title: "Trip & Dispatch Returns", 
-          path: "/transport/trip-returns", 
-          feature_key: "trips", 
-          description: "Confirm returning trips and log vehicle metrics",
-          icon: "🔙",
-          actions: [
-            <ActionButton key="view" label="Manage Returns" path="/transport/trip-returns" type="primary" featureKey="transport:trips" action="view" />
-          ]
-        },
-
-        { 
-          title: "GPS Tracking", 
-          path: "/transport/tracking", 
-          feature_key: "tracking", 
-          description: "Monitor live vehicle locations via GPS",
-          icon: "📍",
-          actions: [
-            <ActionButton key="view" label="View Map" path="/transport/tracking" type="primary" featureKey="transport:trips" action="view" />
-          ]
-        },
-        { 
-          title: "Driver's Logbook", 
-          path: "/transport/logbooks", 
-          feature_key: "drivers", 
-          description: "Track vehicle trips, mileages, fuel usage, and driver activities",
-          icon: "📓",
-          actions: [
-            <ActionButton key="view" label="View" path="/transport/logbooks" type="outline" featureKey="transport:drivers" action="view" />,
-            <ActionButton key="new" label="New" path="/transport/logbooks/new" type="primary" featureKey="transport:drivers" action="create" />
-          ]
-        },
-        { 
-          title: "Routes", 
-          path: "/transport/routes", 
-          feature_key: "routes", 
-          description: "Manage standard transport routes and distances",
-          icon: "🛣️",
-          actions: [
-            <ActionButton key="view" label="View" path="/transport/routes" type="outline" featureKey="transport:routes" action="view" />,
-            <ActionButton key="new" label="New" path="/transport/routes/new" type="primary" featureKey="transport:routes" action="create" />
-          ]
-        },
-      ],
-    },
-    {
-      title: "Fleet Management",
-      items: [
-        { 
-          title: "Vehicle Compliance", 
-          path: "/transport/compliance", 
-          feature_key: "vehicles", 
-          description: "Manage vehicle insurance, roadworthy, and licenses",
-          icon: "🛡️",
-          actions: [
-            <ActionButton key="view" label="View" path="/transport/compliance" type="outline" featureKey="transport:vehicles" action="view" />,
-            <ActionButton key="new" label="New" path="/transport/compliance/new" type="primary" featureKey="transport:vehicles" action="create" />
-          ]
-        },
-        { 
-          title: "Vehicle Servicing", 
-          path: "/transport/servicing", 
-          feature_key: "vehicles", 
-          description: "Manage vehicle servicing, maintenance, and history",
-          icon: "🔧",
-          actions: [
-            <ActionButton key="view" label="View" path="/transport/servicing" type="outline" featureKey="transport:vehicles" action="view" />,
-            <ActionButton key="new" label="New" path="/transport/servicing/new" type="primary" featureKey="transport:vehicles" action="create" />
-          ]
-        },
-        { 
-          title: "Inspections", 
-          path: "/transport/inspections", 
-          feature_key: "inspections", 
-          description: "Record pre-trip and post-trip vehicle inspections",
-          icon: "📋",
-          actions: [
-            <ActionButton key="view" label="View" path="/transport/inspections" type="outline" featureKey="transport:inspections" action="view" />,
-            <ActionButton key="new" label="New" path="/transport/inspections/new" type="primary" featureKey="transport:inspections" action="create" />
-          ]
-        },
-      ],
-    },
-    {
-      title: "Costing & Billing",
-      items: [
-        { 
-          title: "Refuelling", 
-          path: "/transport/fuel", 
-          feature_key: "fuel", 
-          description: "Log all information of fuel purchased and refuelling events",
-          icon: "⛽",
-          actions: [
-            <ActionButton key="view" label="View" path="/transport/fuel" type="outline" featureKey="transport:fuel" action="view" />,
-            <ActionButton key="new" label="New" path="/transport/fuel/new" type="primary" featureKey="transport:fuel" action="create" />
-          ]
-        },
-        { 
-          title: "Transportation Bills", 
-          path: "/transport/transportation-bills", 
-          feature_key: "bills", 
-          description: "Manage transportation bills and service supplier invoices",
-          icon: "📑",
-          actions: [
-            <ActionButton key="view" label="View" path="/transport/transportation-bills" type="outline" featureKey="transport:bills" action="view" />,
-            <ActionButton key="new" label="New" path="/transport/transportation-bills/new" type="primary" featureKey="transport:bills" action="create" />
-          ]
-        },
-        { 
-          title: "Billing", 
-          path: "/transport/billing", 
-          feature_key: "billing", 
-          description: "Manage transport invoices and billing",
-          icon: "🧾",
-          actions: [
-            <ActionButton key="view" label="View" path="/transport/billing" type="outline" featureKey="transport:billing" action="view" />
-          ]
-        },
-        { 
-          title: "Transportation Income", 
-          path: "/transport/income", 
-          feature_key: "income", 
-          description: "Manage income records",
-          icon: "💵",
-          actions: [
-            <ActionButton key="view" label="View" path="/transport/income" type="outline" featureKey="transport:income" action="view" />
-          ]
-        },
-        { 
-          title: "Transportation Expenses", 
-          path: "/transport/expenses", 
-          feature_key: "expenses", 
-          description: "Manage expense records",
-          icon: "💸",
-          actions: [
-            <ActionButton key="view" label="View" path="/transport/expenses" type="outline" featureKey="transport:expenses" action="view" />
-          ]
-        },
-        { 
-          title: "Expense Logs", 
-          path: "/transport/expense-logs", 
-          feature_key: "expense_log", 
-          description: "Log general fleet expenses",
-          icon: "🧾",
-          actions: [
-            <ActionButton key="view" label="View" path="/transport/expense-logs" type="outline" featureKey="transport:expense_log" action="view" />
-          ]
-        },
-      ],
-    },
-    {
-      title: "Reports & Analytics",
-      items: [
-        { 
-          title: "Trip History & Tracking", 
-          path: "/transport/reports/trip-history", 
-          feature_key: "reports", 
-          description: "Detailed history logs and tracking of fleet trips",
-          icon: "📜",
-          actions: [
-            <ActionButton key="view" label="View Report" path="/transport/reports/trip-history" type="primary" featureKey="transport:reports" action="view" />
-          ]
-        },
-        { 
-          title: "Transport Revenue", 
-          path: "/transport/reports/revenue", 
-          feature_key: "reports", 
-          description: "Revenue generated from transport operations",
-          icon: "💰",
-          actions: [
-            <ActionButton key="view" label="View Report" path="/transport/reports/revenue" type="primary" featureKey="transport:reports" action="view" />
-          ]
-        },
-        { 
-          title: "Trip Profitability", 
-          path: "/transport/reports/profitability", 
-          feature_key: "reports", 
-          description: "Profitability analysis for individual trips",
-          icon: "📈",
-          actions: [
-            <ActionButton key="view" label="View Report" path="/transport/reports/profitability" type="primary" featureKey="transport:reports" action="view" />
-          ]
-        },
-        { 
-          title: "Fuel Consumption", 
-          path: "/transport/reports/fuel", 
-          feature_key: "reports", 
-          description: "Fuel usage and efficiency across the fleet",
-          icon: "⛽",
-          actions: [
-            <ActionButton key="view" label="View Report" path="/transport/reports/fuel" type="primary" featureKey="transport:reports" action="view" />
-          ]
-        },
-        { 
-          title: "Vehicle Utilization", 
-          path: "/transport/reports/utilization", 
-          feature_key: "reports", 
-          description: "Usage rates and downtime of vehicles",
-          icon: "🚛",
-          actions: [
-            <ActionButton key="view" label="View Report" path="/transport/reports/utilization" type="primary" featureKey="transport:reports" action="view" />
-          ]
-        },
-        { 
-          title: "Driver Performance", 
-          path: "/transport/reports/driver-performance", 
-          feature_key: "reports", 
-          description: "Performance metrics for transport drivers",
-          icon: "🧑‍✈️",
-          actions: [
-            <ActionButton key="view" label="View Report" path="/transport/reports/driver-performance" type="primary" featureKey="transport:reports" action="view" />
-          ]
-        },
-        { 
-          title: "Trip Delays & Issues", 
-          path: "/transport/reports/delays", 
-          feature_key: "reports", 
-          description: "Analysis of delays and issues during trips",
-          icon: "⚠️",
-          actions: [
-            <ActionButton key="view" label="View Report" path="/transport/reports/delays" type="primary" featureKey="transport:reports" action="view" />
-          ]
-        },
-      ],
-    },
-    {
-      title: "Configuration",
-      items: [
-        { 
-          title: "Settings", 
-          path: "/transport/settings", 
-          feature_key: "settings", 
-          description: "Configure pricing, types, and module behaviors",
-          icon: "⚙️",
-          actions: [
-            <ActionButton key="view" label="Manage" path="/transport/settings" type="primary" featureKey="transport:settings" action="view" />
-          ]
-        },
-      ],
-    }
-  ];
-
   return (
     <ModuleDashboard
       moduleKey="transport"
       title="Transport Management"
       stats={dashboardStats}
-      sections={sections}
+      sections={transportSections}
       now={now}
     />
   );
@@ -420,8 +449,9 @@ function TransportLanding() {
 
 export default function TransportLayout() {
   return (
-    <Routes>
-      <Route path="/" element={<TransportLanding />} />
+    <ModuleLayout sections={transportSections} moduleKey="transport">
+      <Routes>
+        <Route path="/" element={<TransportLanding />} />
       <Route path="dashboard" element={<TransportDashboard />} />
       <Route path="requests" element={<TransportRequests />} />
       <Route path="requests/new" element={<TransportRequestForm />} />
@@ -483,6 +513,7 @@ export default function TransportLayout() {
       <Route path="income" element={<TransportIncomeList />} />
       <Route path="expenses" element={<TransportExpenseList />} />
       <Route path="expense-logs" element={<ExpenseLogList />} />
-    </Routes>
+      </Routes>
+    </ModuleLayout>
   );
 }
