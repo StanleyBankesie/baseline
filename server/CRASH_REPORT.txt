@@ -14134,3 +14134,155 @@ status: 404
 Technical details:
 (no stack)
 --------------------------------------------------------------------------------
+
+[2026-07-27T22:01:43.803Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/project-management/dashboard-stats (status 404)
+Context:
+requestId: ms3ruv70-6qk7aau4
+durationMs: 14
+method: GET
+url: /api/project-management/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-27T22:01:51.893Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/maintenance/dashboard-stats (status 404)
+Context:
+requestId: ms3rv1fl-1f51m98f
+durationMs: 20
+method: GET
+url: /api/maintenance/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-27T22:01:54.860Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/human-resources/dashboard-stats (status 404)
+Context:
+requestId: ms3rv3q2-s1x2xfup
+durationMs: 18
+method: GET
+url: /api/human-resources/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-27T22:01:58.603Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/human-resources/dashboard-stats (status 404)
+Context:
+requestId: ms3rv6mf-w35qpu8h
+durationMs: 4
+method: GET
+url: /api/human-resources/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-27T22:01:59.576Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/maintenance/dashboard-stats (status 404)
+Context:
+requestId: ms3rv7d3-pa4hb1rc
+durationMs: 16
+method: GET
+url: /api/maintenance/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-27T22:02:00.324Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/project-management/dashboard-stats (status 404)
+Context:
+requestId: ms3rv7xs-q3t7c21u
+durationMs: 20
+method: GET
+url: /api/project-management/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-27T22:02:08.439Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/project-management/dashboard-stats (status 404)
+Context:
+requestId: ms3rve7d-ocrw7i9e
+durationMs: 14
+method: GET
+url: /api/project-management/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-27T22:02:22.143Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/project-management/dashboard-stats (status 404)
+Context:
+requestId: ms3rvorw-7ti9kvyp
+durationMs: 19
+method: GET
+url: /api/project-management/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------

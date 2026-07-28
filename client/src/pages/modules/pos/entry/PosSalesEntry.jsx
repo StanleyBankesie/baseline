@@ -10,6 +10,7 @@ import { saveLocalSale } from "../../../../offline/posStore.js";
 import { uuid } from "../../../../offline/uuid.js";
 import { toast } from "react-toastify";
 import QRCode from "qrcode";
+import Swal from "sweetalert2";
 import {
   getPosDatum,
   cachePosDatum,
@@ -662,6 +663,7 @@ export default function PosSalesEntry() {
     };
   }, []);
   const [headerDiscount, setHeaderDiscount] = useState("");
+  const [globalDiscountInfo, setGlobalDiscountInfo] = useState({ type: null, value: 0, amount: 0 });
 
   useEffect(() => {
     let mounted = true;
@@ -894,15 +896,27 @@ export default function PosSalesEntry() {
       return sum + qty * price;
     }, 0);
   }, [cart]);
+  const lineDiscountsTotal = useMemo(() => {
+    return cart.reduce((sum, i) => sum + Number(i.discount || 0), 0);
+  }, [cart]);
+  const globalDiscountAmount = useMemo(() => {
+    if (!globalDiscountInfo || !globalDiscountInfo.value) return 0;
+    const base = Math.max(0, gross - lineDiscountsTotal);
+    if (globalDiscountInfo.type === "percent") {
+      return (base * Number(globalDiscountInfo.value)) / 100;
+    }
+    return Math.min(base, Number(globalDiscountInfo.amount || globalDiscountInfo.value || 0));
+  }, [globalDiscountInfo, gross, lineDiscountsTotal]);
   const subtotal = useMemo(() => {
-    return cart.reduce((sum, i) => {
+    const rawSub = cart.reduce((sum, i) => {
       const qty = Number(i.quantity || 0);
       const price = Number(i.price || 0);
       const disc = Number(i.discount || 0);
       const lineTotal = Math.max(0, qty * price - disc);
       return sum + lineTotal;
     }, 0);
-  }, [cart]);
+    return Math.max(0, rawSub - globalDiscountAmount);
+  }, [cart, globalDiscountAmount]);
   const discountTotal = useMemo(() => {
     const diff = gross - subtotal;
     if (!Number.isFinite(diff) || diff < 0) return 0;
@@ -952,6 +966,101 @@ export default function PosSalesEntry() {
     }
     setTimeout(run, 0);
   }
+
+  const handleGlobalDiscountClick = async () => {
+    if (!canEditDiscount() || generalSettings.allowDiscounts === false) return;
+    if (cart.length === 0) {
+      Swal.fire(
+        "Empty Cart",
+        "Please add items to the cart before applying a discount.",
+        "warning",
+      );
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: "Select Discount Type",
+      showDenyButton: true,
+      showCancelButton: true,
+      confirmButtonText: "Amount",
+      denyButtonText: "Percentage",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#296d8f",
+      denyButtonColor: "#2E8B1F",
+      cancelButtonColor: "#6b7280",
+    });
+
+    if (result.isConfirmed) {
+      // Amount
+      const { value: amount } = await Swal.fire({
+        title: "Enter Discount Amount",
+        input: "number",
+        inputAttributes: { min: 0, step: 0.01 },
+        showCancelButton: true,
+        confirmButtonColor: "#296d8f",
+        cancelButtonColor: "#6b7280",
+        inputValidator: (value) => {
+          if (!value || isNaN(value) || Number(value) < 0) {
+            return "Please enter a valid positive amount";
+          }
+        },
+      });
+
+      if (amount) {
+        const amt = Number(amount);
+        const rawSub = cart.reduce((sum, item) => sum + Math.max(0, Number(item.price || 0) * Number(item.quantity || 0) - Number(item.discount || 0)), 0);
+        if (amt > rawSub) {
+          Swal.fire("Error", "Discount cannot exceed subtotal", "error");
+          return;
+        }
+        setGlobalDiscountInfo({ type: "amount", value: amt, amount: amt });
+        setHeaderDiscount(amt.toFixed(2));
+      }
+    } else if (result.isDenied) {
+      // Percentage
+      const { value: percent } = await Swal.fire({
+        title: "Enter Discount Percentage",
+        input: "number",
+        inputAttributes: { min: 0, max: 100, step: 0.1 },
+        showCancelButton: true,
+        confirmButtonColor: "#296d8f",
+        cancelButtonColor: "#6b7280",
+        inputValidator: (value) => {
+          if (
+            !value ||
+            isNaN(value) ||
+            Number(value) < 0 ||
+            Number(value) > 100
+          ) {
+            return "Please enter a valid percentage between 0 and 100";
+          }
+        },
+      });
+
+      if (percent) {
+        const pct = Number(percent);
+        const rawSub = cart.reduce((sum, item) => sum + Math.max(0, Number(item.price || 0) * Number(item.quantity || 0) - Number(item.discount || 0)), 0);
+        const calcAmt = (pct / 100) * rawSub;
+        if (calcAmt > rawSub) {
+          Swal.fire("Error", "Discount cannot exceed subtotal", "error");
+          return;
+        }
+        setGlobalDiscountInfo({ type: "percent", value: pct, amount: calcAmt });
+        setHeaderDiscount(`${pct}%`);
+      }
+    }
+  };
+
+  const applyGlobalDiscount = (totalDiscountAmt) => {
+    const rawSub = cart.reduce((sum, item) => sum + Math.max(0, Number(item.price || 0) * Number(item.quantity || 0) - Number(item.discount || 0)), 0);
+    if (rawSub === 0) return;
+    if (totalDiscountAmt > rawSub) {
+      Swal.fire("Error", "Discount cannot exceed subtotal", "error");
+      return;
+    }
+    setGlobalDiscountInfo({ type: "amount", value: Number(totalDiscountAmt), amount: Number(totalDiscountAmt) });
+    setHeaderDiscount(Number(totalDiscountAmt).toFixed(2));
+  };
 
   function getDefaultPaymentModeId() {
     const activeModes = Array.isArray(paymentModes) ? paymentModes : [];
@@ -1078,7 +1187,7 @@ export default function PosSalesEntry() {
           code: prod.code,
           price: unitPrice,
           quantity: qty,
-          discount: canEditDiscount() ? Number(headerDiscount || 0) : 0,
+          discount: 0,
         },
       ];
     });
@@ -1155,7 +1264,7 @@ export default function PosSalesEntry() {
             code: prod.code,
             price: unitPrice,
             quantity: qty,
-            discount: canEditDiscount() ? Number(headerDiscount || 0) : 0,
+            discount: 0,
           });
           lastVfdItemRef.current = {
             id: prod.id,
@@ -1371,24 +1480,60 @@ export default function PosSalesEntry() {
   }
 
   function clearCart() {
-    if (!cart.length) return;
+    if (!cart.length && !headerDiscount) return;
     setCart([]);
     setSelectedItems([]);
     lastVfdItemRef.current = null;
+    setHeaderDiscount("");
+    setGlobalDiscountInfo({ type: null, value: 0, amount: 0 });
   }
 
-  async function handleHold() {
-    if (!cart.length || saving) return;
-    setSaving(true);
-    try {
-      const saleCart = cart;
-      const lines = saleCart.map((it) => ({
+  const getEffectiveSaleLines = (sourceCart) => {
+    if (!globalDiscountAmount || globalDiscountAmount <= 0 || !sourceCart.length) {
+      return sourceCart.map((it) => ({
         item_id: it.id,
         name: it.name,
         quantity: Number(it.quantity || 0),
         price: Number(it.price || 0),
         discount: Number(it.discount || 0),
       }));
+    }
+    const baseTotal = sourceCart.reduce((sum, it) => sum + Math.max(0, Number(it.quantity || 0) * Number(it.price || 0) - Number(it.discount || 0)), 0);
+    if (baseTotal <= 0) {
+      return sourceCart.map((it) => ({
+        item_id: it.id,
+        name: it.name,
+        quantity: Number(it.quantity || 0),
+        price: Number(it.price || 0),
+        discount: Number(it.discount || 0),
+      }));
+    }
+    let remainingGlobal = globalDiscountAmount;
+    return sourceCart.map((it, idx) => {
+      const lineBase = Math.max(0, Number(it.quantity || 0) * Number(it.price || 0) - Number(it.discount || 0));
+      let addDisc = 0;
+      if (idx === sourceCart.length - 1) {
+        addDisc = Number(remainingGlobal.toFixed(2));
+      } else {
+        addDisc = Number(((lineBase / baseTotal) * globalDiscountAmount).toFixed(2));
+        remainingGlobal -= addDisc;
+      }
+      return {
+        item_id: it.id,
+        name: it.name,
+        quantity: Number(it.quantity || 0),
+        price: Number(it.price || 0),
+        discount: Number((Number(it.discount || 0) + addDisc).toFixed(2)),
+      };
+    });
+  };
+
+  async function handleHold() {
+    if (!cart.length || saving) return;
+    setSaving(true);
+    try {
+      const saleCart = cart;
+      const lines = getEffectiveSaleLines(saleCart);
       const payload = {
         payment_method: "CASH",
         payment_mode_id: selectedPaymentModeId || "",
@@ -1504,8 +1649,9 @@ export default function PosSalesEntry() {
           if (sale.paid_amount) {
             setAmountPaid(String(sale.paid_amount));
           }
-          if (sale.discount_amount) {
+          if (sale.discount_amount && Number(sale.discount_amount) > 0) {
             setHeaderDiscount(String(sale.discount_amount));
+            setGlobalDiscountInfo({ type: "amount", value: Number(sale.discount_amount), amount: Number(sale.discount_amount) });
           }
           api.put(`/pos/holds/${resumeId}/cancel`).catch(() => {});
           toast.success("On-hold sale loaded — review and complete");
@@ -1596,13 +1742,7 @@ export default function PosSalesEntry() {
         return;
       }
 
-      const lines = saleCart.map((it) => ({
-        item_id: it.id,
-        name: it.name,
-        quantity: Number(it.quantity || 0),
-        price: Number(it.price || 0),
-        discount: Number(it.discount || 0),
-      }));
+      const lines = getEffectiveSaleLines(saleCart);
       // Purchase reward: add free items from active campaigns
       let consumedReward = [];
       if (Array.isArray(purchaseRewardCampaigns) && purchaseRewardCampaigns.length) {
@@ -1855,6 +1995,8 @@ export default function PosSalesEntry() {
     setSearchParams({});
     setShowSplitPaymentModal(false);
     setCart([]);
+    setHeaderDiscount("");
+    setGlobalDiscountInfo({ type: null, value: 0, amount: 0 });
     setSelectedItems([]);
     setReceiptNo("");
     setAmountPaid("");
@@ -1987,7 +2129,8 @@ export default function PosSalesEntry() {
             "",
         )
       : "";
-    const itemsArr = cart.map((it) => ({
+    const effectiveCart = getEffectiveSaleLines(cart);
+    const itemsArr = effectiveCart.map((it) => ({
       name: it.name || "",
       qty: Number(it.quantity || 0),
       price: Number(it.price || 0),
@@ -2375,23 +2518,12 @@ export default function PosSalesEntry() {
                   <label className="label">Discount</label>
                   <input
                     name="discount"
-                    type="number"
-                    className={`input w-full ${!canEditDiscount() || generalSettings.allowDiscounts === false ? "disabled-light-blue" : ""}`}
-                    min={0}
-                    step="0.01"
+                    type="text"
+                    readOnly
+                    className={`input w-full cursor-pointer ${!canEditDiscount() || generalSettings.allowDiscounts === false ? "disabled-light-blue" : ""}`}
                     value={headerDiscount}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      setHeaderDiscount(v);
-                      if (
-                        selectedItems.length === 1 &&
-                        canEditDiscount() &&
-                        generalSettings.allowDiscounts !== false
-                      ) {
-                        updateCartField(selectedItems[0].id, "discount", v);
-                      }
-                    }}
-                    disabled={!canEditDiscount()}
+                    onClick={handleGlobalDiscountClick}
+                    disabled={!canEditDiscount() || generalSettings.allowDiscounts === false}
                     placeholder="0.00"
                   />
                 </div>
@@ -2538,12 +2670,12 @@ export default function PosSalesEntry() {
               {/* Selected items list hidden per requirement */}
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <div>Discount</div>
-                  <div>{`GH₵ ${discountTotal.toFixed(2)}`}</div>
-                </div>
-                <div className="flex justify-between">
                   <div>Subtotal</div>
                   <div>{`GH₵ ${subtotal.toFixed(2)}`}</div>
+                </div>
+                <div className="flex justify-between">
+                  <div>{`Discount${globalDiscountInfo.type === "percent" && globalDiscountInfo.value ? ` (${globalDiscountInfo.value}%)` : ""}`}</div>
+                  <div>{`GH₵ ${discountTotal.toFixed(2)}`}</div>
                 </div>
                 {taxActive ? (
                   <div className="flex justify-between">

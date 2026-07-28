@@ -549,19 +549,30 @@ export const deleteTimesheet = async (req, res, next) => {
 // ===== DASHBOARD =====
 export const getPMDashboardStats = async (req, res, next) => {
   try {
-    const { companyId, branchId = null } = req.scope || {};
+    const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
     await ensureProjectTables(companyId, branchId);
 
-    const [projects] = await query(`SELECT COUNT(*) as count FROM pm_projects WHERE company_id = :companyId AND branch_id = :branchId`, { companyId, branchId });
-    const [activeTasks] = await query(`SELECT COUNT(*) as count FROM pm_tasks WHERE company_id = :companyId AND branch_id = :branchId AND status IN ('PENDING', 'IN_PROGRESS')`, { companyId, branchId });
-    const [budgetRows] = await query(`SELECT SUM(budget) as total FROM pm_projects WHERE company_id = :companyId AND branch_id = :branchId`, { companyId, branchId });
-    const [hoursRows] = await query(`SELECT SUM(hours) as total FROM pm_timesheets WHERE company_id = :companyId AND branch_id = :branchId`, { companyId, branchId });
+    const branchFilter = `AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr) OR (:branchIdStr != '' AND :branchIdStr != 'all' AND branch_id = :branchIdStr))`;
+    const params = { companyId, branchIdStr: String(branchId || ''), branchIdsStr: String(branchIdsStr || '') };
+
+    const [projects] = await query(`SELECT COUNT(*) as count FROM pm_projects WHERE company_id = :companyId ${branchFilter}`, params);
+    const [activeProjects] = await query(`SELECT COUNT(*) as count FROM pm_projects WHERE company_id = :companyId ${branchFilter} AND project_status IN ('IN_PROGRESS', 'ACTIVE', 'EXECUTION', 'PLANNING')`, params);
+    const [activeTasks] = await query(`SELECT COUNT(*) as count FROM pm_tasks WHERE company_id = :companyId ${branchFilter} AND status IN ('PENDING', 'IN_PROGRESS')`, params);
+    const [overdueTasks] = await query(`SELECT COUNT(*) as count FROM pm_tasks WHERE company_id = :companyId ${branchFilter} AND status IN ('PENDING', 'IN_PROGRESS') AND end_date < CURDATE()`, params);
+    const [budgetRows] = await query(`SELECT SUM(budget) as total FROM pm_projects WHERE company_id = :companyId ${branchFilter}`, params);
+    const [expenseRows] = await query(`SELECT SUM(amount) as total FROM pm_expenses WHERE company_id = :companyId ${branchFilter}`, params);
+    const [hoursRows] = await query(`SELECT SUM(hours) as total, COUNT(DISTINCT log_date) as days FROM pm_timesheets WHERE company_id = :companyId ${branchFilter}`, params);
 
     res.json({
       totalProjects: projects.count,
+      activeProjects: activeProjects.count,
       activeTasks: activeTasks.count,
+      openTasks: activeTasks.count,
+      overdueTasks: overdueTasks.count,
       totalBudget: budgetRows.total || 0,
-      totalLoggedHours: hoursRows.total || 0
+      totalExpenses: expenseRows.total || 0,
+      totalLoggedHours: hoursRows.total || 0,
+      totalDays: hoursRows.days || 0
     });
   } catch (err) {
     next(err);
@@ -604,18 +615,19 @@ export const listTaskDependencies = async (req, res, next) => {
 
 export const createTaskDependency = async (req, res, next) => {
   try {
-    const { companyId, branchId = null } = req.scope || {};
+    const { companyId, branchId = 1 } = req.scope || {};
     await ensureTaskDependenciesTable(companyId, branchId);
-    const b = req.body;
-    if (!b.task_id || !b.predecessor_id) throw httpError(400, "VALIDATION_ERROR", "task_id and predecessor_id required");
-    await query(`INSERT INTO pm_task_dependencies (company_id, branch_id, task_id, predecessor_id, dependency_type, lag_days)
-      VALUES (:companyId, :branchId, :taskId, :predecessorId, :depType, :lagDays)
-      ON DUPLICATE KEY UPDATE dependency_type = VALUES(dependency_type), lag_days = VALUES(lag_days)`, {
-      companyId, branchId, taskId: b.task_id, predecessorId: b.predecessor_id,
-      depType: b.dependency_type || 'FS', lagDays: b.lag_days || 0
-    });
-    res.status(201).json({ ok: true });
-  } catch (err) { next(err); }
+    const { taskId, predecessorId, dependencyType = 'FS', lagDays = 0 } = req.body;
+    if (!taskId || !predecessorId) return res.status(400).json({ message: 'taskId and predecessorId required' });
+    if (toNumber(taskId) === toNumber(predecessorId)) return res.status(400).json({ message: 'A task cannot depend on itself' });
+    const resIdx = await query(`INSERT INTO pm_task_dependencies (company_id, branch_id, task_id, predecessor_id, dependency_type, lag_days)
+      VALUES (:companyId, :branchId, :taskId, :predecessorId, :dependencyType, :lagDays)`,
+      { companyId, branchId, taskId: toNumber(taskId), predecessorId: toNumber(predecessorId), dependencyType, lagDays: toNumber(lagDays) });
+    res.status(201).json({ id: resIdx.insertId, message: 'Dependency created' });
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY') return res.status(409).json({ message: 'This dependency already exists' });
+    next(err);
+  }
 };
 
 export const deleteTaskDependency = async (req, res, next) => {
@@ -839,21 +851,24 @@ export const updateIncomeVoucherId = async (req, res, next) => {
 // ===== ENHANCED DASHBOARD STATS =====
 export const getPMDashboardDetail = async (req, res, next) => {
   try {
-    const { companyId, branchId = null } = req.scope || {};
+    const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
     await ensureProjectTables(companyId, branchId);
+    const branchFilter = `AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr) OR (:branchIdStr != '' AND :branchIdStr != 'all' AND branch_id = :branchIdStr))`;
+    const params = { companyId, branchIdStr: String(branchId || ''), branchIdsStr: String(branchIdsStr || '') };
+
     const [projectStats] = await query(`SELECT
-      COUNT(*) AS total, SUM(CASE WHEN project_status = 'IN_PROGRESS' THEN 1 ELSE 0 END) AS active,
+      COUNT(*) AS total, SUM(CASE WHEN project_status IN ('IN_PROGRESS', 'ACTIVE', 'EXECUTION') THEN 1 ELSE 0 END) AS active,
       SUM(CASE WHEN project_status = 'PLANNING' THEN 1 ELSE 0 END) AS planning,
       SUM(CASE WHEN project_status = 'COMPLETED' THEN 1 ELSE 0 END) AS completed,
       SUM(budget) AS total_budget
-      FROM pm_projects WHERE company_id = :companyId AND branch_id = :branchId`, { companyId, branchId });
+      FROM pm_projects WHERE company_id = :companyId ${branchFilter}`, params);
     const [taskStats] = await query(`SELECT COUNT(*) AS total,
       SUM(CASE WHEN status IN ('PENDING','IN_PROGRESS') THEN 1 ELSE 0 END) AS open,
       SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) AS completed,
       SUM(CASE WHEN status = 'BLOCKED' THEN 1 ELSE 0 END) AS blocked
-      FROM pm_tasks WHERE company_id = :companyId AND branch_id = :branchId`, { companyId, branchId });
-    const [hoursRow] = await query(`SELECT COALESCE(SUM(hours),0) AS total FROM pm_timesheets WHERE company_id = :companyId AND branch_id = :branchId`, { companyId, branchId });
-    const [expenseRow] = await query(`SELECT COALESCE(SUM(amount),0) AS total FROM pm_expenses WHERE company_id = :companyId AND branch_id = :branchId`, { companyId, branchId });
+      FROM pm_tasks WHERE company_id = :companyId ${branchFilter}`, params);
+    const [hoursRow] = await query(`SELECT COALESCE(SUM(hours),0) AS total FROM pm_timesheets WHERE company_id = :companyId ${branchFilter}`, params);
+    const [expenseRow] = await query(`SELECT COALESCE(SUM(amount),0) AS total FROM pm_expenses WHERE company_id = :companyId ${branchFilter}`, params);
     res.json({
       projects: projectStats,
       tasks: taskStats,
@@ -866,8 +881,11 @@ export const getPMDashboardDetail = async (req, res, next) => {
 // ===== BUDGET VS ACTUAL =====
 export const getBudgetVsActual = async (req, res, next) => {
   try {
-    const { companyId, branchId = null } = req.scope || {};
+    const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
     await ensureProjectTables(companyId, branchId);
+    const branchFilter = `AND (:branchIdsStr = '' OR FIND_IN_SET(p.branch_id, :branchIdsStr) OR (:branchIdStr != '' AND :branchIdStr != 'all' AND p.branch_id = :branchIdStr))`;
+    const params = { companyId, branchIdStr: String(branchId || ''), branchIdsStr: String(branchIdsStr || '') };
+
     const rows = await query(`SELECT
       p.id, p.project_name, p.project_code, p.project_status, p.budget, p.completion_percent,
       COALESCE(e.total_expense,0) AS total_expense,
@@ -880,8 +898,8 @@ export const getBudgetVsActual = async (req, res, next) => {
       FROM pm_projects p
       LEFT JOIN (SELECT project_id, SUM(amount) AS total_expense FROM pm_expenses GROUP BY project_id) e ON p.id = e.project_id
       LEFT JOIN (SELECT project_id, SUM(hours * 50) AS total_labor FROM pm_timesheets GROUP BY project_id) t ON p.id = t.project_id
-      WHERE p.company_id = :companyId AND p.branch_id = :branchId
-      ORDER BY spend_pct DESC`, { companyId, branchId });
+      WHERE p.company_id = :companyId ${branchFilter}
+      ORDER BY spend_pct DESC`, params);
     res.json({ items: rows });
   } catch (err) { next(err); }
 };

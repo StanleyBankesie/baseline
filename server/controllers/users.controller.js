@@ -65,7 +65,7 @@ export const getUsers = async (req, res, next) => {
       params.scopeCompanyId = scopeCompanyId;
     }
     if (branchIdsStr) {
-      clauses.push("(:branchIdsStr = '' OR FIND_IN_SET(u.branch_id, :branchIdsStr))");
+      clauses.push("(:branchIdsStr = '' OR u.branch_id IS NULL OR FIND_IN_SET(u.branch_id, :branchIdsStr) > 0)");
       params.branchIdsStr = branchIdsStr;
     }
     const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";

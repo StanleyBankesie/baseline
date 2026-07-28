@@ -46,7 +46,12 @@ export default function UserPermissionsNew() {
     setError("");
     try {
       const res = await api.get("/admin/users");
-      const items = res?.data?.data?.items || [];
+      const d = res?.data;
+      let items = [];
+      if (Array.isArray(d)) items = d;
+      else if (Array.isArray(d?.items)) items = d.items;
+      else if (Array.isArray(d?.data?.items)) items = d.data.items;
+      else if (Array.isArray(d?.data)) items = d.data;
       setUsers(items);
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to load users");

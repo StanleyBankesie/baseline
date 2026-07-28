@@ -332,14 +332,21 @@ export default function DashboardPermissions() {
           },
         ],
       });
-      const msg = `${String(module_key || "").toUpperCase()}: ${String(
-        type === "dashboard" ? "Dashboard" : type === "card" ? "Card" : "Ticker",
-      )} ${String(key || "")} ${allow ? "enabled" : "disabled"}`;
-      toast.success(msg);
+      toast.success(
+        `${allow ? "✅" : "🚫"} ${String(type === "dashboard" ? key : type === "card" ? key : key)
+          .replace(/-/g, " ")
+          .replace(/\b\w/g, (c) => c.toUpperCase())} ${
+          type === "dashboard" ? "dashboard" : type === "card" ? "card" : "ticker"
+        } ${allow ? "enabled" : "disabled"}`,
+        { autoClose: 2000 }
+      );
+      // Fire refresh in background without awaiting — avoids UI disruption
       if (Number(selectedUserId) === Number(user?.id)) {
-        await refreshPermissions();
+        refreshPermissions();
       }
     } catch (err) {
+      // Revert optimistic update on failure
+      setView(module_key, dashboard_key, card_key, ticker_key, !allow);
       toast.error(err.response?.data?.message || "Failed to save");
     }
   };
@@ -443,9 +450,10 @@ export default function DashboardPermissions() {
                                     user_id: Number(selectedUserId),
                                     permissions: permsList
                                   });
-                                  toast.success(`Updated ${String(m.key || "").toUpperCase()} permissions`);
+                                  const label = m.name || String(m.key || "").replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+                                  toast.success(`${val ? "✅" : "🚫"} ${label} — all permissions ${val ? "enabled" : "disabled"}`, { autoClose: 2000 });
                                   if (Number(selectedUserId) === Number(user?.id)) {
-                                    await refreshPermissions();
+                                    refreshPermissions();
                                   }
                                 } catch {
                                   toast.error("Failed to save permissions");

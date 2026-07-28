@@ -25,6 +25,7 @@ import RoleManagement from "./access-control/RoleManagementNew.jsx";
 import UserOverrides from "./access-control/UserOverrides.jsx";
 import ExceptionalPermissionsList from "./access-control/ExceptionalPermissionsList.jsx";
 import UserPermissions from "./access-control/UserPermissionsNew.jsx";
+import DashboardPermissions from "../../../pages/admin/DashboardPermissions.jsx";
 import NotificationSettings from "./notifications/NotificationSettings.jsx";
 
 export const administrationSections = [
@@ -91,6 +92,13 @@ export const administrationSections = [
         description: "Review special permission overrides",
         path: "/administration/access/user-overrides",
         icon: "⭐",
+        actions: [],
+      },
+      {
+        title: "Dashboard Permissions",
+        description: "Configure role and user access to dashboard analytics",
+        path: "/administration/access/dashboard-permissions",
+        icon: "📊",
         actions: [],
       },
     ],
@@ -281,6 +289,7 @@ export default function AdministrationHome() {
         path="/access/user-permissions/:id"
         element={<UserPermissions />}
       />
+      <Route path="/access/dashboard-permissions" element={<DashboardPermissions />} />
       <Route path="/access/user-overrides" element={<UserOverrides />} />
       <Route
         path="/exceptional-permissions"
@@ -308,6 +317,12 @@ export const administrationFeatures = [
     module_key: "administration",
     label: "Exceptional Permissions",
     path: "/administration/access/user-overrides",
+    type: "feature",
+  },
+  {
+    module_key: "administration",
+    label: "Dashboard Permissions",
+    path: "/administration/access/dashboard-permissions",
     type: "feature",
   },
   {

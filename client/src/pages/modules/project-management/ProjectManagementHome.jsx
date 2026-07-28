@@ -218,8 +218,8 @@ function ProjectManagementLanding() {
     let mounted = true;
     async function load() {
       try {
-        const resp = await api.get("/project-management/dashboard-stats");
-        const d = resp?.data?.data;
+        const resp = await api.get("/projects/dashboard/stats");
+        const d = resp?.data?.data || resp?.data;
         if (d && mounted) {
           setStats((prev) => [
             {
@@ -230,14 +230,14 @@ function ProjectManagementLanding() {
             },
             {
               ...prev[1],
-              value: String(d.openTasks ?? "—"),
+              value: String(d.openTasks ?? d.activeTasks ?? "—"),
               change: `${d.overdueTasks ?? 0} overdue`,
               changeType: d.overdueTasks > 0 ? "warning" : "positive",
             },
             {
               ...prev[2],
               value: `GHS ${Number(d.totalBudget || 0).toLocaleString()}`,
-              change: `${d.totalExpenses ?? 0} spent`,
+              change: `GHS ${Number(d.totalExpenses ?? 0).toLocaleString()} spent`,
               changeType: "positive",
             },
             {
@@ -248,7 +248,9 @@ function ProjectManagementLanding() {
             },
           ]);
         }
-      } catch {}
+      } catch (err) {
+        console.error("Failed loading project management stats:", err);
+      }
     }
     load();
     return () => {

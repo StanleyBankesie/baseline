@@ -1926,14 +1926,12 @@ router.put("/departments/:id", requireAuth, requireCompanyScope, updateDepartmen
 router.get(
   "/users",
   requireAuth,
-  requirePermission("ADMIN.USERS.VIEW"),
   getUsers,
 );
 
 router.get(
   "/users/:id",
   requireAuth,
-  requirePermission("ADMIN.USERS.VIEW"),
   getUserById,
 );
 

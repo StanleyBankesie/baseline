@@ -305,7 +305,7 @@ export default function RoleManagementNew() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Role Management</h1>
+          <h1 className="text-2xl font-bold">Role Setup</h1>
           <p className="text-sm text-slate-600">
             Create roles and assign module and feature permissions
           </p>
