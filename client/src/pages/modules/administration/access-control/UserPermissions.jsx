@@ -78,12 +78,23 @@ export default function UserPermissions() {
         setRolePermissions(byModule);
         const allFeatures = featsRes?.data?.features || [];
         const roleFeats = roleFeatsRes?.data?.features || [];
-        const roleFeatSet = new Set(roleFeats.map(String));
-        const filtered = allFeatures.filter(
-          (f) =>
-            mods.includes(f.module_key) &&
-            roleFeatSet.has(String(f.feature_key)),
-        );
+        const registryLabelMap = new Map();
+        Object.entries(MODULES_REGISTRY).forEach(([mKey, mod]) => {
+          (mod.features || []).forEach((f) => {
+            registryLabelMap.set(`${mKey}:${f.key}`, f.label);
+          });
+        });
+
+        const filtered = allFeatures
+          .filter(
+            (f) =>
+              mods.includes(f.module_key) &&
+              roleFeatSet.has(String(f.feature_key)),
+          )
+          .map((feature) => {
+            const updatedLabel = registryLabelMap.get(feature.feature_key) || feature.label;
+            return { ...feature, label: updatedLabel };
+          });
         setFeatures(filtered);
         setAvailableModules(
           Array.from(new Set(filtered.map((f) => f.module_key))),

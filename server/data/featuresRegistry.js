@@ -10,21 +10,20 @@ export const FEATURES_REGISTRY = {
   // Administration Module: Contains features for user, role, company, and system configuration
   administration: {
     features: [
+      { feature_key: "administration:roles", type: "feature", label: "Role Setup", path: "/administration/access/roles" },
+      { feature_key: "administration:user-permissions", type: "feature", label: "User Permissions", path: "/administration/access/user-permissions" },
+      { feature_key: "administration:user-overrides", type: "feature", label: "Exceptional Permissions", path: "/administration/access/user-overrides" },
+      { feature_key: "administration:dashboard-permissions", type: "feature", label: "Dashboard Permissions", path: "/administration/access/dashboard-permissions" },
       { feature_key: "administration:users", type: "feature", label: "User Management", path: "/administration/users" },
-      { feature_key: "administration:user-permissions", type: "feature", label: "User Permissions", path: "/administration/user-permissions" },
-      { feature_key: "administration:user-overrides", type: "feature", label: "Exceptional Permissions", path: "/administration/user-overrides" },
-      { feature_key: "administration:roles", type: "feature", label: "Role Setup", path: "/administration/roles" },
-      { feature_key: "administration:companies", type: "feature", label: "Company Setup", path: "/administration/companies" },
-      { feature_key: "administration:branches", type: "feature", label: "Branch Setup", path: "/administration/branches" },
-      { feature_key: "administration:workflows", type: "feature", label: "Workflows", path: "/administration/workflows" },
-      { feature_key: "administration:templates", type: "feature", label: "Document Templates", path: "/administration/templates" },
-      { feature_key: "administration:reports", type: "feature", label: "System Reports", path: "/administration/reports" },
-      { feature_key: "administration:settings", type: "feature", label: "System Settings", path: "/administration/settings" },
-      { feature_key: "administration:backups", type: "feature", label: "System Backups", path: "/administration/backups" },
+      { feature_key: "administration:settings", type: "feature", label: "Settings", path: "/administration/settings" },
+      { feature_key: "administration:diagnostics", type: "feature", label: "Diagnostics", path: "/administration/diagnostics" },
+      { feature_key: "administration:workflows", type: "feature", label: "Workflow Configuration", path: "/administration/workflows" },
+      { feature_key: "administration:workflow-approvals", type: "feature", label: "Workflow Approvals", path: "/administration/workflows/approvals" },
+      { feature_key: "administration:document-review", type: "feature", label: "Document Review", path: "/administration/workflows/approvals" },
     ],
     dashboards: [
-      { feature_key: "administration:system-overview", type: "dashboard", label: "System Overview Dashboard", path: "/administration/system-overview" },
-      { feature_key: "administration:user-activity", type: "dashboard", label: "User Activity Dashboard", path: "/administration/user-activity" },
+      { feature_key: "administration:system-log-book", type: "dashboard", label: "System Log Book Report", path: "/administration/reports/system-log-book" },
+      { feature_key: "administration:user-login-activity", type: "dashboard", label: "User Login Activity Report", path: "/administration/reports/user-login-activity" },
     ],
   },
 

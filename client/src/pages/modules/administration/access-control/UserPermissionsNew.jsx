@@ -149,13 +149,26 @@ export default function UserPermissionsNew() {
           roleFeatSet.has(String(f.feature_key)),
         );
 
-        // Features only (dashboards excluded from user permissions page)
-        const featuresOnly = filteredFeatures.filter((feature) => {
-          const [moduleKey, itemKey] = feature.feature_key.split(":");
-          const moduleInfo = MODULES_REGISTRY[moduleKey];
-          if (!moduleInfo) return true;
-          return !moduleInfo.dashboards.some((d) => d.key === itemKey);
+        // Build registry label map so labels always reflect modulesRegistry.js
+        const registryLabelMap = new Map();
+        Object.entries(MODULES_REGISTRY).forEach(([mKey, mod]) => {
+          (mod.features || []).forEach((f) => {
+            registryLabelMap.set(`${mKey}:${f.key}`, f.label);
+          });
         });
+
+        // Features only (dashboards excluded from user permissions page)
+        const featuresOnly = filteredFeatures
+          .filter((feature) => {
+            const [moduleKey, itemKey] = feature.feature_key.split(":");
+            const moduleInfo = MODULES_REGISTRY[moduleKey];
+            if (!moduleInfo) return true;
+            return !moduleInfo.dashboards?.some((d) => d.key === itemKey);
+          })
+          .map((feature) => {
+            const updatedLabel = registryLabelMap.get(feature.feature_key) || feature.label;
+            return { ...feature, label: updatedLabel };
+          });
 
         // Store role defaults + pages from context for later save (keyed by feature_key)
         const ctxMap = new Map();
@@ -333,8 +346,8 @@ export default function UserPermissionsNew() {
         permissions: payload,
       });
       try {
-        // Non-blocking RBAC refresh (do not delay navigation)
-        refreshPermissions?.();
+        // Await refresh so page-level permission cache is cleared before we reload context
+        await refreshPermissions?.();
         window.dispatchEvent?.(new Event("rbac:changed"));
       } catch {}
 

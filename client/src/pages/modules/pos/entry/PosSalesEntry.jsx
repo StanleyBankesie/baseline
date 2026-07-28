@@ -987,7 +987,7 @@ export default function PosSalesEntry() {
       cancelButtonText: "Cancel",
       confirmButtonColor: "#296d8f",
       denyButtonColor: "#2E8B1F",
-      cancelButtonColor: "#6b7280",
+      cancelButtonColor: "#dc2626",
     });
 
     if (result.isConfirmed) {

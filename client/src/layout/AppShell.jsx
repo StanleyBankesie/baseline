@@ -1227,7 +1227,12 @@ export default function AppShell() {
           ensurePagePerms(base);
         } catch {}
       }
-      const allow = { view: true, create: true, edit: true, delete: true };
+      const allow = {
+        view: pageAllow.view !== null ? pageAllow.view : (fk ? canPerformAction(fk, "view") : true),
+        create: pageAllow.create !== null ? pageAllow.create : (fk ? canPerformAction(fk, "create") : true),
+        edit: pageAllow.edit !== null ? pageAllow.edit : (fk ? canPerformAction(fk, "edit") : true),
+        delete: pageAllow.delete !== null ? pageAllow.delete : (fk ? canPerformAction(fk, "delete") : true),
+      };
       const nodes = Array.from(
         document.querySelectorAll(
           'button, a, [role="button"], input[type="button"], input[type="submit"]',

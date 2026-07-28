@@ -685,22 +685,31 @@ export const saveUserFeaturePermissions = async (req, res, next) => {
       await query("DELETE FROM adm_user_permissions WHERE user_id = ?", [userId]);
     }
 
-    for (const p of resolved) {
-      const pageId = toNumber(p.page_id);
-      if (!pageId) continue;
-      await query(
-        `INSERT INTO adm_user_permissions (user_id, page_id, can_view, can_create, can_edit, can_delete)
-         VALUES (:userId, :pageId, :canView, :canCreate, :canEdit, :canDelete)
-         ON DUPLICATE KEY UPDATE
-           can_view = :canView, can_create = :canCreate, can_edit = :canEdit, can_delete = :canDelete`,
-        {
-          userId, pageId,
-          canView: p.can_view ? 1 : 0,
-          canCreate: p.can_create ? 1 : 0,
-          canEdit: p.can_edit ? 1 : 0,
-          canDelete: p.can_delete ? 1 : 0,
-        },
-      );
+    // Bulk upsert all resolved rows in a single query for speed
+    if (resolved.length > 0) {
+      const rowsToInsert = resolved.filter((p) => toNumber(p.page_id));
+      if (rowsToInsert.length > 0) {
+        // Build: INSERT INTO ... VALUES (?,?,?,?,?,?),... ON DUPLICATE KEY UPDATE ...
+        const valuePlaceholders = rowsToInsert.map(() => "(?,?,?,?,?,?)").join(",");
+        const flatValues = rowsToInsert.flatMap((p) => [
+          userId,
+          toNumber(p.page_id),
+          p.can_view ? 1 : 0,
+          p.can_create ? 1 : 0,
+          p.can_edit ? 1 : 0,
+          p.can_delete ? 1 : 0,
+        ]);
+        await query(
+          `INSERT INTO adm_user_permissions (user_id, page_id, can_view, can_create, can_edit, can_delete)
+           VALUES ${valuePlaceholders}
+           ON DUPLICATE KEY UPDATE
+             can_view = VALUES(can_view),
+             can_create = VALUES(can_create),
+             can_edit = VALUES(can_edit),
+             can_delete = VALUES(can_delete)`,
+          flatValues,
+        );
+      }
     }
 
     res.json({

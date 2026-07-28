@@ -212,9 +212,11 @@ export const PermissionProvider = ({ children }) => {
           BACKGROUND_GET_CONFIG,
         )
         .catch(() => ({ data: { items: [] } }));
-      const overrideItems = Array.isArray(userOverridesRes?.data?.items)
-        ? userOverridesRes.data.items
-        : [];
+      const overrideItems = Array.isArray(userOverridesRes?.data?.data?.items)
+        ? userOverridesRes.data.data.items
+        : Array.isArray(userOverridesRes?.data?.items)
+          ? userOverridesRes.data.items
+          : [];
       const overrideByFk = new Map(
         overrideItems.map((it) => [
           String(it.feature_key || "").trim(),
@@ -786,8 +788,10 @@ export const PermissionProvider = ({ children }) => {
                 : action === "delete"
                   ? "can_delete"
                   : `can_${action}`;
-        if (typeof perms?.[k] === "boolean" && perms[k] === true) {
-          return true;
+        // Return the definitive page-level value (true OR false)
+        // — do NOT fall through, otherwise role defaults override user-specific denials
+        if (typeof perms?.[k] === "boolean") {
+          return perms[k];
         }
       }
     } catch {}
@@ -964,6 +968,8 @@ export const PermissionProvider = ({ children }) => {
       setLoading(false);
       return;
     }
+    // Clear page-level permission cache so changes take effect immediately
+    setPagePermsByPath(new Map());
     await loadPermissions();
     await loadDashboardPermissions();
   };
