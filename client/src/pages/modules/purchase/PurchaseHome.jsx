@@ -62,6 +62,53 @@ function PurchaseFeaturePage({ title, description }) {
   );
 }
 
+export const purchaseSections = [
+  {
+    title: "Procurement",
+    features: [
+      { name: "Direct Purchase", path: "/purchase/direct-purchase", description: "Create quick single-step purchases", icon: "⚡" },
+      { name: "Purchase Requisition", path: "/purchase/general-requisitions", description: "Request items or services to be purchased", icon: "📋" },
+      { name: "Request for Quotation", path: "/purchase/rfqs", description: "Create and manage RFQs", icon: "📝" },
+      { name: "Supplier Quotations", path: "/purchase/supplier-quotations", description: "Capture and compare supplier quotations", icon: "📨" },
+      { name: "Quotation Analysis", path: "/purchase/quotation-analysis", description: "Analyze quotation options and decisions", icon: "📊" },
+    ],
+  },
+  {
+    title: "Purchase Orders",
+    features: [
+      { name: "Local Purchase Orders", path: "/purchase/purchase-orders-local", description: "Manage local POs", icon: "📦" },
+      { name: "Import Purchase Orders", path: "/purchase/purchase-orders-import", description: "Manage import POs", icon: "🚢" },
+    ],
+  },
+  {
+    title: "Logistics",
+    features: [
+      { name: "Shipping Advice", path: "/purchase/shipping-advice", description: "Manage shipping advice documents", icon: "🚚" },
+      { name: "Port Clearances", path: "/purchase/port-clearances", description: "Track port clearance records", icon: "🛃" },
+    ],
+  },
+  {
+    title: "Billing",
+    features: [
+      { name: "Local Purchase Bills", path: "/purchase/purchase-bills-local", description: "Create and manage local purchase bills", icon: "🧾" },
+      { name: "Import Purchase Bills", path: "/purchase/purchase-bills-import", description: "Create and manage import purchase bills", icon: "🧾" },
+    ],
+  },
+  {
+    title: "Returns",
+    features: [
+      { name: "Purchase Returns", path: "/purchase/purchase-returns", description: "Manage returned items", icon: "↩" },
+    ],
+  },
+  {
+    title: "Master Data",
+    features: [
+      { name: "Suppliers", path: "/purchase/suppliers", description: "Manage suppliers and contacts", icon: "🏭" },
+      { name: "Setup", path: "/purchase/setup", description: "Configure accounts and purchase rules", icon: "⚙️" },
+    ],
+  },
+];
+
 function PurchaseHomeIndex() {
   const { token } = useAuth();
   const [overview, setOverview] = useState(null);
@@ -140,58 +187,15 @@ function PurchaseHomeIndex() {
       title="🛒 Purchase"
       description="Purchase management and procurement workflows"
       stats={stats}
-      headerActions={[]}
-      sections={[]}
-      features={[]}
+      moduleKey="purchase"
+      headerActions={[
+        { label: "Dashboard", path: "/purchase/dashboard", icon: "📊" },
+      ]}
+      sections={purchaseSections}
     />
   );
 }
-export const purchaseSections = [
-  {
-    title: "Procurement",
-    features: [
-      { name: "Direct Purchase", path: "/purchase/direct-purchase", description: "Create quick single-step purchases", icon: "⚡" },
-      { name: "Purchase Requisition", path: "/purchase/general-requisitions", description: "Request items or services to be purchased", icon: "📋" },
-      { name: "Request for Quotation", path: "/purchase/rfqs", description: "Create and manage RFQs", icon: "📝" },
-      { name: "Supplier Quotations", path: "/purchase/supplier-quotations", description: "Capture and compare supplier quotations", icon: "📨" },
-      { name: "Quotation Analysis", path: "/purchase/quotation-analysis", description: "Analyze quotation options and decisions", icon: "📊" },
-    ],
-  },
-  {
-    title: "Purchase Orders",
-    features: [
-      { name: "Local Purchase Orders", path: "/purchase/purchase-orders-local", description: "Manage local POs", icon: "📦" },
-      { name: "Import Purchase Orders", path: "/purchase/purchase-orders-import", description: "Manage import POs", icon: "🚢" },
-    ],
-  },
-  {
-    title: "Logistics",
-    features: [
-      { name: "Shipping Advice", path: "/purchase/shipping-advice", description: "Manage shipping advice documents", icon: "🚚" },
-      { name: "Port Clearances", path: "/purchase/port-clearances", description: "Track port clearance records", icon: "🛃" },
-    ],
-  },
-  {
-    title: "Billing",
-    features: [
-      { name: "Local Purchase Bills", path: "/purchase/purchase-bills-local", description: "Create and manage local purchase bills", icon: "🧾" },
-      { name: "Import Purchase Bills", path: "/purchase/purchase-bills-import", description: "Create and manage import purchase bills", icon: "🧾" },
-    ],
-  },
-  {
-    title: "Returns",
-    features: [
-      { name: "Purchase Returns", path: "/purchase/purchase-returns", description: "Manage returned items", icon: "↩" },
-    ],
-  },
-  {
-    title: "Master Data",
-    features: [
-      { name: "Suppliers", path: "/purchase/suppliers", description: "Manage suppliers and contacts", icon: "🏭" },
-      { name: "Setup", path: "/purchase/setup", description: "Configure accounts and purchase rules", icon: "⚙️" },
-    ],
-  },
-];
+
 
 export default function PurchaseHome() {
   return (

@@ -14286,3 +14286,683 @@ status: 404
 Technical details:
 (no stack)
 --------------------------------------------------------------------------------
+
+[2026-07-28T01:07:45.800Z] HTTP_401
+Summary: Authentication required
+Request: GET /api/inventory/dashboard-stats (status 401)
+Context:
+status: 401
+code: UNAUTHORIZED
+method: GET
+url: /api/inventory/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Authentication required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:143:17)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+    at Function.handle (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:175:3)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:07:45.827Z] HTTP_401
+Summary: Authentication required
+Request: GET /api/purchase/analytics/overview (status 401)
+Context:
+status: 401
+code: UNAUTHORIZED
+method: GET
+url: /api/purchase/analytics/overview
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Authentication required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:143:17)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+    at Function.handle (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:175:3)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:07:49.327Z] HTTP_401
+Summary: Authentication required
+Request: GET /api/admin/users/7/roles (status 401)
+Context:
+status: 401
+code: UNAUTHORIZED
+method: GET
+url: /api/admin/users/7/roles
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Authentication required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:143:17)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at param (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:365:14)
+    at param (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:376:14)
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:421:3)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:07:49.377Z] HTTP_401
+Summary: Authentication required
+Request: GET /api/licenses/company/1 (status 401)
+Context:
+status: 401
+code: UNAUTHORIZED
+method: GET
+url: /api/licenses/company/1
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Authentication required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:143:17)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:328:13)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+    at Function.handle (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:175:3)
+    at router (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:47:12)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:07:49.397Z] HTTP_401
+Summary: Refresh token is missing
+Request: POST /api/auth/refresh (status 401)
+Context:
+status: 401
+code: INVALID_REFRESH_TOKEN
+method: POST
+url: /api/auth/refresh
+ip: ::1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Refresh token is missing
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at refreshAccessToken (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:495:13)
+    at file:///C:/Users/stanl/baseline/server/routes/auth.routes.js:20:50
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:07:49.462Z] HTTP_401
+Summary: Authentication required
+Request: GET /api/push/public-key (status 401)
+Context:
+status: 401
+code: UNAUTHORIZED
+method: GET
+url: /api/push/public-key
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Authentication required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:143:17)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+    at Function.handle (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:175:3)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:07:49.524Z] HTTP_401
+Summary: Authentication required
+Request: GET /api/auth/user-branches (status 401)
+Context:
+status: 401
+code: UNAUTHORIZED
+method: GET
+url: /api/auth/user-branches
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Authentication required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:143:17)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+    at Function.handle (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:175:3)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:07:49.542Z] HTTP_401
+Summary: Refresh token is missing
+Request: POST /api/auth/refresh (status 401)
+Context:
+status: 401
+code: INVALID_REFRESH_TOKEN
+method: POST
+url: /api/auth/refresh
+ip: ::1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Refresh token is missing
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at refreshAccessToken (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:495:13)
+    at file:///C:/Users/stanl/baseline/server/routes/auth.routes.js:20:50
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:07:49.980Z] HTTP_401
+Summary: Authentication required
+Request: GET /api/admin/companies (status 401)
+Context:
+status: 401
+code: UNAUTHORIZED
+method: GET
+url: /api/admin/companies
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Authentication required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:143:17)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+    at Function.handle (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:175:3)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:07:50.180Z] HTTP_401
+Summary: Refresh token is missing
+Request: POST /api/auth/refresh (status 401)
+Context:
+status: 401
+code: INVALID_REFRESH_TOKEN
+method: POST
+url: /api/auth/refresh
+ip: ::1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Refresh token is missing
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at refreshAccessToken (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:495:13)
+    at file:///C:/Users/stanl/baseline/server/routes/auth.routes.js:20:50
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:07:50.319Z] HTTP_401
+Summary: Authentication required
+Request: GET /api/inventory/alerts/low-stock (status 401)
+Context:
+status: 401
+code: UNAUTHORIZED
+method: GET
+url: /api/inventory/alerts/low-stock
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Authentication required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:143:17)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+    at Function.handle (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:175:3)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:07:50.353Z] HTTP_401
+Summary: Refresh token is missing
+Request: POST /api/auth/refresh (status 401)
+Context:
+status: 401
+code: INVALID_REFRESH_TOKEN
+method: POST
+url: /api/auth/refresh
+ip: ::1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Refresh token is missing
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at refreshAccessToken (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:495:13)
+    at file:///C:/Users/stanl/baseline/server/routes/auth.routes.js:20:50
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:07:50.394Z] HTTP_401
+Summary: Authentication required
+Request: GET /api/workflows/notifications (status 401)
+Context:
+status: 401
+code: UNAUTHORIZED
+method: GET
+url: /api/workflows/notifications
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Authentication required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:143:17)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+    at Function.handle (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:175:3)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:07:50.509Z] HTTP_401
+Summary: Refresh token is missing
+Request: POST /api/auth/refresh (status 401)
+Context:
+status: 401
+code: INVALID_REFRESH_TOKEN
+method: POST
+url: /api/auth/refresh
+ip: ::1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Refresh token is missing
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at refreshAccessToken (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:495:13)
+    at file:///C:/Users/stanl/baseline/server/routes/auth.routes.js:20:50
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:09:52.609Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/inventory/dashboard/metrics?top=10 (status 404)
+Context:
+requestId: ms3yktok-jteq4ldi
+durationMs: 29
+method: GET
+url: /api/inventory/dashboard/metrics?top=10
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:10:12.872Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/human-resources/dashboard-stats (status 404)
+Context:
+requestId: ms3yl9bs-j971iz15
+durationMs: 16
+method: GET
+url: /api/human-resources/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:10:16.015Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/maintenance/dashboard-stats (status 404)
+Context:
+requestId: ms3ylbqm-bvu0bxnf
+durationMs: 33
+method: GET
+url: /api/maintenance/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:12:59.717Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/human-resources/dashboard-stats (status 404)
+Context:
+requestId: ms3you2n-gznpxztr
+durationMs: 6
+method: GET
+url: /api/human-resources/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:13:03.482Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/maintenance/dashboard-stats (status 404)
+Context:
+requestId: ms3yowz3-i786wikc
+durationMs: 11
+method: GET
+url: /api/maintenance/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:13:55.800Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/fast-moving?from=2026-07-01&to=2026-07-28 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/fast-moving?from=2026-07-01&to=2026-07-28
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-07-01","to":"2026-07-28"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1795:20
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:13:55.840Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/fast-moving?from=2026-06-01&to=2026-06-30 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/fast-moving?from=2026-06-01&to=2026-06-30
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-06-01","to":"2026-06-30"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1795:20
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:13:55.913Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/slow-moving?from=2026-07-01&to=2026-07-28 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/slow-moving?from=2026-07-01&to=2026-07-28
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-07-01","to":"2026-07-28"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1837:20
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:13:55.980Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/service-management/dashboard-stats (status 404)
+Context:
+requestId: ms3yq1h2-oqr3sgyq
+durationMs: 22
+method: GET
+url: /api/service-management/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:13:55.996Z] HTTP_500
+Summary: Unknown column 'd.cost_price' in 'field list'
+Request: GET /api/inventory/reports/slow-moving?from=2026-06-01&to=2026-06-30 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/inventory/reports/slow-moving?from=2026-06-01&to=2026-06-30
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-06-01","to":"2026-06-30"}
+Technical details:
+Error: Unknown column 'd.cost_price' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/baseline/server/db/pool.js:585:42)
+    at file:///C:/Users/stanl/baseline/server/db/pool.js:448:13
+    at withQueryTimeout (file:///C:/Users/stanl/baseline/server/db/pool.js:325:24)
+    at withPoolOperation (file:///C:/Users/stanl/baseline/server/db/pool.js:447:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/baseline/server/db/pool.js:683:20)
+    at async file:///C:/Users/stanl/baseline/server/routes/inventory.routes.js:1837:20
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:13:58.141Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/maintenance/dashboard-stats (status 404)
+Context:
+requestId: ms3yq35j-s55683gy
+durationMs: 6
+method: GET
+url: /api/maintenance/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-07-28T01:13:58.820Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/human-resources/dashboard-stats (status 404)
+Context:
+requestId: ms3yq3o8-dr8h4lch
+durationMs: 12
+method: GET
+url: /api/human-resources/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------

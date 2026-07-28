@@ -112,20 +112,16 @@ export function ModuleTopNavBar({ sections = [], headerActions = [], moduleKey }
 
   const resolvedHeaderActions = React.useMemo(() => {
     const actions = Array.isArray(headerActions) ? [...headerActions] : [];
-    const hasDashboards = moduleInfo && moduleInfo.dashboards && moduleInfo.dashboards.length > 0;
-    const dbPath = `/${mk}/dashboard`;
-    const dbsPath = `/${mk}/dashboards`;
-
-    if (
-      mk &&
-      hasDashboards &&
-      !actions.some((a) => String(a.path || "") === dbPath || String(a.path || "") === dbsPath)
-    ) {
-      const targetPath = canAccessPath(dbPath) ? dbPath : dbsPath;
-      actions.push({ label: "Dashboard", path: targetPath, icon: "📊" });
-    }
-    return actions;
-  }, [headerActions, mk, moduleInfo, canAccessPath]);
+    // Remove Dashboard button from top navigation bar
+    return actions.filter((a) => {
+      const p = String(a?.path || "").toLowerCase();
+      const l = String(a?.label || a?.title || "").toLowerCase();
+      if (l === "dashboard" || p.endsWith("/dashboard") || p.endsWith("/dashboards")) {
+        return false;
+      }
+      return true;
+    });
+  }, [headerActions]);
 
   if (!sections.length && !resolvedHeaderActions.length) return null;
 
