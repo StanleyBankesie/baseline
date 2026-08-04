@@ -250,7 +250,6 @@ api.interceptors.request.use(
     if (accessToken) {
       config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${accessToken}`;
-      config.headers["X-Access-Token"] = accessToken; // Nginx proxy bypass
     } else if (config.headers?.Authorization) {
       delete config.headers.Authorization;
       delete config.headers["X-Access-Token"];
