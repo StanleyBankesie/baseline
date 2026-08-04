@@ -1168,7 +1168,7 @@ if (_spaFrontendPath && serveFrontendFlag) {
 }
 
 /* ---------------- ERRORS ---------------- */
-// app.use(notFound); // Handled by SPA catch-all now, or use for API 404s if desired
+app.use(notFound); // Handled by SPA catch-all now, or use for API 404s if desired
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 4002;
