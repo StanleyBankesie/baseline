@@ -467,8 +467,8 @@ const ModuleDashboard = ({
   }, [location.pathname, location.search, location.hash, navigate]);
 
   return (
-    <div className="space-y-6 animate-fade-in fullbleed-sm -mx-6 px-6">
-      <div className="-mx-6 px-6 sticky top-0 z-40 bg-slate-50 dark:bg-slate-950 pb-2 pt-2 -mt-2">
+    <div className="space-y-6 animate-fade-in px-3 sm:px-4 md:-mx-6 md:px-6">
+      <div className="-mx-3 px-3 sm:-mx-4 sm:px-4 md:-mx-6 md:px-6 sticky top-0 z-40 bg-slate-50 dark:bg-slate-950 pb-2 pt-2 -mt-2">
         <ModuleTopNavBar sections={allSections} headerActions={resolvedHeaderActions} moduleKey={moduleKey} />
       </div>
 

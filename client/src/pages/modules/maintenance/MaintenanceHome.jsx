@@ -162,7 +162,7 @@ function MaintenanceLanding() {
     let mounted = true;
     async function load() {
       try {
-        const resp = await api.get("/maintenance/dashboard-stats");
+        const resp = await api.get("/maintenance/dashboard/stats");
         const d = resp?.data?.data;
         if (d && mounted) {
           setStats((prev) => {
