@@ -807,7 +807,10 @@ const ModuleDashboard = ({
 
                   <div className="relative z-10">
                     <div className="flex items-center justify-between gap-3 mb-4">
-                      <div className={`w-12 h-12 shrink-0 rounded-full bg-gradient-to-br ${iconStyle} text-white flex items-center justify-center text-2xl shadow-lg group-hover:scale-110 group-hover:rotate-2 transition-transform duration-300`}>
+                      <div 
+                        className={`shrink-0 bg-gradient-to-br ${iconStyle} text-white flex items-center justify-center text-2xl shadow-lg group-hover:scale-110 group-hover:rotate-2 transition-transform duration-300`}
+                        style={{ width: '52px', height: '52px', minWidth: '52px', minHeight: '52px', maxWidth: '52px', maxHeight: '52px', borderRadius: '50%' }}
+                      >
                         {sectionIcon}
                       </div>
                       <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-600/60 shadow-2xs">
