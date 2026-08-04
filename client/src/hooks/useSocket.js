@@ -76,6 +76,8 @@ export function useSocket() {
         backendOrigin = "https://kindserver.omnisuite-erp.com";
       } else if (hostname === "kaf.omnisuite-erp.com" || hostname === "kafserver.omnisuite-erp.com") {
         backendOrigin = "https://kafserver.omnisuite-erp.com";
+      } else if (hostname === "demo.omnisuite-erp.com" || hostname === "demoserver.omnisuite-erp.com") {
+        backendOrigin = "https://demoserver.omnisuite-erp.com";
       }
     }
 
