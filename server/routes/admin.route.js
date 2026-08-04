@@ -2820,7 +2820,7 @@ router.get(
 
       res.json({
         data: {
-          api_key: apiKey ? "********" : "",
+          api_key: apiKey,
         },
       });
     } catch (err) {
