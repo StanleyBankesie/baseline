@@ -253,6 +253,7 @@ export function verifyAccessToken(token) {
 export function signAccessToken(payload) {
   const tokenPayload = { ...payload };
   delete tokenPayload.profile_picture_url;
+  delete tokenPayload.permissions; // PREVENT NGINX 400 BAD REQUEST HEADER TOO LARGE
   return jwt.sign(
     {
       ...tokenPayload,
