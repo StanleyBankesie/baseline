@@ -31288,3 +31288,77 @@ Error: Unknown column 'p.created_at' in 'field list'
     at async query (file:///C:/Users/stanl/OneDrive/Documents/Stanness%20Technologies/kaf/server/db/pool.js:683:20)
     at async listPayslips (file:///C:/Users/stanl/OneDrive/Documents/Stanness%20Technologies/kaf/server/controllers/hr.controller.js:3189:22)
 --------------------------------------------------------------------------------
+
+[2026-08-04T10:42:25.682Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 49540
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-04T12:07:35.036Z] HTTP_500
+Summary: AggregateError
+Request: GET /api/subscription-plans (status 500)
+Context:
+status: 500
+code: ECONNREFUSED
+method: GET
+url: /api/subscription-plans
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.19041.6456
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1139:18)
+    at afterConnectMultiple (node:net:1712:7)
+--------------------------------------------------------------------------------
+
+[2026-08-04T12:07:35.473Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 49768
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-04T12:09:14.774Z] HTTP_500
+Summary: AggregateError
+Request: GET /api/subscription-plans/ (status 500)
+Context:
+status: 500
+code: ECONNREFUSED
+method: GET
+url: /api/subscription-plans/
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.19041.6456
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1139:18)
+    at afterConnectMultiple (node:net:1712:7)
+--------------------------------------------------------------------------------
+
+[2026-08-04T12:09:15.171Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 49834
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
