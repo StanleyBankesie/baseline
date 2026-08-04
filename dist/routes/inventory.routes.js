@@ -1798,7 +1798,7 @@ router.get(
            i.item_code, 
            i.item_name, 
            SUM(d.qty_issued) AS issued_qty, 
-           SUM(d.qty_issued * d.cost_price) AS turnover 
+           SUM(d.qty_issued * i.cost_price) AS turnover 
          FROM inv_issue_to_requirement r 
          JOIN inv_issue_to_requirement_details d ON d.issue_id = r.id 
          JOIN inv_items i ON i.id = d.item_id 
@@ -1840,7 +1840,7 @@ router.get(
            i.item_code, 
            i.item_name, 
            SUM(d.qty_issued) AS issued_qty, 
-           SUM(d.qty_issued * d.cost_price) AS turnover 
+           SUM(d.qty_issued * i.cost_price) AS turnover 
          FROM inv_issue_to_requirement r 
          JOIN inv_issue_to_requirement_details d ON d.issue_id = r.id 
          JOIN inv_items i ON i.id = d.item_id 
@@ -2078,6 +2078,10 @@ router.post(
           : [];
       const warehouseId =
         Number(body.warehouseId || 0) > 0 ? Number(body.warehouseId) : null;
+
+      if (!warehouseId) {
+        throw httpError(400, "VALIDATION_ERROR", "Warehouse ID is required for bulk stock upload");
+      }
 
       if (!rows.length) {
         throw httpError(400, "VALIDATION_ERROR", "No rows provided");
@@ -10391,9 +10395,13 @@ router.get(
         { companyId },
       ).catch(() => [{ count: 0 }]);
       const [stock] = await query(
-        "SELECT COUNT(DISTINCT item_id) as items_count, COALESCE(SUM(qty), 0) as total_qty FROM inv_stock_balances WHERE company_id = :companyId AND branch_id = :branchId",
-        { companyId, branchId },
+        "SELECT COUNT(DISTINCT item_id) as items_count, COALESCE(SUM(qty), 0) as total_qty FROM inv_stock_balances WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))",
+        { companyId, branchIdsStr },
       ).catch(() => [{ items_count: 0, total_qty: 0 }]);
+      const [locations] = await query(
+        "SELECT COUNT(DISTINCT branch_id) as locations_count FROM inv_stock_balances WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))",
+        { companyId, branchIdsStr },
+      ).catch(() => [{ locations_count: 0 }]);
       const [reqs] = await query(
         "SELECT COUNT(*) as count FROM inv_material_requisitions WHERE company_id = :companyId AND branch_id = :branchId AND status IN ('PENDING','SUBMITTED','PENDING_APPROVAL')",
         { companyId, branchId },
@@ -10415,13 +10423,19 @@ router.get(
       res.json({
         success: true,
         data: {
-          itemsCount: items.count,
-          stockItemsCount: stock.items_count,
-          stockTotalQty: stock.total_qty,
+          // canonical names expected by InventoryHome.jsx
+          totalItems: items.count,
+          activeItems: stock.items_count,
+          totalStockQty: stock.total_qty,
+          locationsCount: locations.locations_count,
           pendingRequisitions: reqs.count,
           pendingTransfers: transfers.count,
           lowStockItems: lowStock.count,
           recentAdjustments: adjustments.count,
+          // legacy aliases kept for any other consumers
+          itemsCount: items.count,
+          stockItemsCount: stock.items_count,
+          stockTotalQty: stock.total_qty,
         },
       });
     } catch (err) {

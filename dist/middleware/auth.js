@@ -43,9 +43,10 @@ export async function requireAuth(req, res, next) {
     const cookies = parseCookieHeader(req.headers.cookie || "");
     const sessionId = cookies.omnisuite_session;
     const authHeader = String(req.headers.authorization || "");
+    const customHeader = String(req.headers["x-access-token"] || "");
     const bearerToken = authHeader.startsWith("Bearer ")
       ? authHeader.slice(7).trim()
-      : "";
+      : customHeader.trim();
 
     const debugAuth = String(process.env.DEBUG_AUTH || "").trim() === "1";
     if (debugAuth) {
@@ -167,8 +168,11 @@ export function requireCompanyScope(req, res, next) {
 
   req.scope = req.scope || {};
 
-  // Admin (ID 1) can access any requested company
-  if (Number(req.user.id) === 1) {
+  const rawId = process.env.LICENSE_SUPER_ADMIN_ID;
+  const superAdminId = rawId ? parseInt(String(rawId).trim(), 10) : 1;
+
+  // Admin (ID 1 or Super Admin ID) can access any requested company
+  if (Number(req.user.id) === superAdminId) {
     const companyId = Number(
       req.headers["x-company-id"] || req.query.companyId || req.user?.company_id || 1,
     );
@@ -209,8 +213,11 @@ export async function requireBranchScope(req, res, next) {
     const branchId = Number(rawBranchId || req.user?.branchIds?.[0] || 1);
     req.scope.branchId = branchId;
 
+    const rawId = process.env.LICENSE_SUPER_ADMIN_ID;
+    const superAdminId = rawId ? parseInt(String(rawId).trim(), 10) : 1;
+
     // Admin bypass: allow 'all' branches or fetch superbranch hierarchy dynamically
-    if (Number(req.user.id) === 1) {
+    if (Number(req.user.id) === superAdminId) {
       if (rawBranchId === "all") {
         req.scope.branchId = "all";
         req.scope.branchIdsStr = "";

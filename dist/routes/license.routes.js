@@ -28,14 +28,14 @@ router.get("/super-admin", requireAuth, (req, res) => {
 // Paystack payment routes (PUBLICly accessible for expired license renewal on login)
 router.post("/paystack/initialize", initializePaystackPayment);
 router.get("/paystack/verify", verifyPaystackPayment);
-router.get("/global-status", getGlobalLicenseStatus);
+router.get("/system-state", getGlobalLicenseStatus);
 
 // All other license endpoints require authentication
 router.use(requireAuth);
 
 router.get("/company/:companyId", getLicense);
 
-// Ensure only super admin can manage licenses
+// Ensure only super admin (or users with specific permission) can manage licenses
 router.use(requirePermission("admin.licenses.manage"));
 
 router.get("/companies", getCompaniesForLicense);

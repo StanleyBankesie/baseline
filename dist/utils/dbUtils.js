@@ -3385,3 +3385,149 @@ export async function ensurePMPurchaseRequisitionTables() {
     `).catch(() => null);
   }
 }
+
+export async function ensurePMQuotationTables() {
+  const t = "prj_quotations";
+  if (!(await hasTable(t))) {
+    await query(`
+      CREATE TABLE IF NOT EXISTS ${t} (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        company_id BIGINT UNSIGNED NOT NULL,
+        branch_id BIGINT UNSIGNED NOT NULL,
+        quotation_no VARCHAR(50) NOT NULL,
+        quotation_date DATE NOT NULL,
+        project_id BIGINT UNSIGNED NULL,
+        project_name VARCHAR(255) NULL,
+        customer_id BIGINT UNSIGNED NULL,
+        customer_name VARCHAR(255) NULL,
+        customer_address VARCHAR(255) NULL,
+        customer_city VARCHAR(100) NULL,
+        customer_state VARCHAR(100) NULL,
+        customer_country VARCHAR(100) NULL,
+        valid_days INT NULL,
+        valid_until DATE NULL,
+        total_amount DECIMAL(18,2) DEFAULT 0,
+        net_amount DECIMAL(18,2) DEFAULT 0,
+        tax_amount DECIMAL(18,2) DEFAULT 0,
+        status VARCHAR(30) DEFAULT 'DRAFT',
+        price_type ENUM('WHOLESALE','RETAIL') DEFAULT 'RETAIL',
+        payment_type ENUM('CASH','CHEQUE','CREDIT') DEFAULT 'CASH',
+        currency_id BIGINT UNSIGNED DEFAULT 4,
+        exchange_rate DECIMAL(18,6) DEFAULT 1,
+        remarks TEXT NULL,
+        terms_and_conditions TEXT NULL,
+        created_by BIGINT UNSIGNED NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY uq_prj_quotation_scope_no (company_id, branch_id, quotation_no),
+        KEY idx_prj_quotation_scope (company_id, branch_id),
+        KEY idx_prj_quotation_project (project_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `).catch(() => null);
+  }
+
+  const ensureCol = async (col, ddl) => {
+    if (!(await hasColumn(t, col))) {
+      await query(`ALTER TABLE ${t} ADD COLUMN ${ddl}`).catch(() => null);
+    }
+  };
+  await ensureCol("project_id", "BIGINT UNSIGNED NULL");
+  await ensureCol("project_name", "VARCHAR(255) NULL");
+
+  const ti = "prj_quotation_details";
+  if (!(await hasTable(ti))) {
+    await query(`
+      CREATE TABLE IF NOT EXISTS ${ti} (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        quotation_id BIGINT UNSIGNED NOT NULL,
+        item_id BIGINT UNSIGNED NOT NULL,
+        qty DECIMAL(18,4) NOT NULL DEFAULT 0,
+        unit_price DECIMAL(18,4) NOT NULL DEFAULT 0,
+        discount_percent DECIMAL(5,2) NOT NULL DEFAULT 0,
+        total_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
+        net_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
+        tax_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
+        tax_type BIGINT UNSIGNED NULL,
+        uom VARCHAR(20) NULL,
+        PRIMARY KEY (id),
+        KEY idx_prj_qd_q (quotation_id),
+        KEY idx_prj_qd_item (item_id),
+        CONSTRAINT fk_prj_qd_q FOREIGN KEY (quotation_id) REFERENCES ${t}(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `).catch(() => null);
+  }
+}
+
+export async function ensurePMInvoiceTables() {
+  const t = "prj_invoices";
+  if (!(await hasTable(t))) {
+    await query(`
+      CREATE TABLE IF NOT EXISTS ${t} (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        company_id BIGINT UNSIGNED NOT NULL,
+        branch_id BIGINT UNSIGNED NOT NULL,
+        invoice_no VARCHAR(50) NOT NULL,
+        invoice_date DATE NOT NULL,
+        due_date DATE NULL,
+        project_id BIGINT UNSIGNED NULL,
+        project_name VARCHAR(255) NULL,
+        customer_id BIGINT UNSIGNED NULL,
+        customer_name VARCHAR(255) NULL,
+        customer_address VARCHAR(255) NULL,
+        customer_city VARCHAR(100) NULL,
+        customer_state VARCHAR(100) NULL,
+        customer_country VARCHAR(100) NULL,
+        total_amount DECIMAL(18,2) DEFAULT 0,
+        net_amount DECIMAL(18,2) DEFAULT 0,
+        tax_amount DECIMAL(18,2) DEFAULT 0,
+        amount_paid DECIMAL(18,2) DEFAULT 0,
+        balance DECIMAL(18,2) DEFAULT 0,
+        status VARCHAR(30) DEFAULT 'DRAFT',
+        payment_status ENUM('UNPAID','PARTIAL','PAID') DEFAULT 'UNPAID',
+        currency_id BIGINT UNSIGNED DEFAULT 4,
+        exchange_rate DECIMAL(18,6) DEFAULT 1,
+        remarks TEXT NULL,
+        terms_and_conditions TEXT NULL,
+        created_by BIGINT UNSIGNED NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY uq_prj_inv_scope_no (company_id, branch_id, invoice_no),
+        KEY idx_prj_inv_scope (company_id, branch_id),
+        KEY idx_prj_inv_project (project_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `).catch(() => null);
+  }
+  
+  const ensureCol = async (col, ddl) => {
+    if (!(await hasColumn(t, col))) {
+      await query(`ALTER TABLE ${t} ADD COLUMN ${ddl}`).catch(() => null);
+    }
+  };
+  await ensureCol("project_id", "BIGINT UNSIGNED NULL");
+  await ensureCol("project_name", "VARCHAR(255) NULL");
+
+  const ti = "prj_invoice_details";
+  if (!(await hasTable(ti))) {
+    await query(`
+      CREATE TABLE IF NOT EXISTS ${ti} (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        invoice_id BIGINT UNSIGNED NOT NULL,
+        item_id BIGINT UNSIGNED NOT NULL,
+        qty DECIMAL(18,4) NOT NULL DEFAULT 0,
+        unit_price DECIMAL(18,4) NOT NULL DEFAULT 0,
+        discount_percent DECIMAL(5,2) NOT NULL DEFAULT 0,
+        total_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
+        net_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
+        tax_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
+        tax_type BIGINT UNSIGNED NULL,
+        uom VARCHAR(20) NULL,
+        PRIMARY KEY (id),
+        KEY idx_prj_id_i (invoice_id),
+        KEY idx_prj_id_item (item_id),
+        CONSTRAINT fk_prj_id_i FOREIGN KEY (invoice_id) REFERENCES ${t}(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `).catch(() => null);
+  }
+}

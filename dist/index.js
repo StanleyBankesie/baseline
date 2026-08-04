@@ -61,6 +61,8 @@ import {
   ensureUserBranchMapping,
   ensurePagesTable,
   verifiedTables,
+  ensurePMQuotationTables,
+  ensurePMInvoiceTables,
 } from "./utils/dbUtils.js";
 import { seedDefaultTemplates } from "./services/seed-defaults.js";
 import { ensureIndexes } from "./utils/ensureIndexes.js";
@@ -112,6 +114,14 @@ try {
     });
   }
 } catch {}
+
+const serveFrontendFlag = (() => {
+  const v1 = String(process.env.SERVE_FRONTEND || "").toLowerCase();
+  const v2 = String(process.env.ENABLE_SPA || "").toLowerCase();
+  if (v1 === "0" || v1 === "false" || v2 === "0" || v2 === "false")
+    return false;
+  return true; // Default to true if a frontend build is present
+})();
 
 const app = express();
 app.set("trust proxy", 1);
@@ -201,7 +211,10 @@ app.use(
 );
 
 app.use((req, res, next) => {
-  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  res.setHeader(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=()",
+  );
   next();
 });
 app.use(morgan("dev"));
@@ -254,11 +267,13 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  const isProd = String(process.env.NODE_ENV || "").toLowerCase() === "production";
+  const isProd =
+    String(process.env.NODE_ENV || "").toLowerCase() === "production";
   const connectSrc = process.env.CSP_CONNECT_SRC || "'self' wss: ws:";
-  const scriptSrc = isProd && String(process.env.CSP_ALLOW_EVAL || "").trim() !== "1"
-    ? "'self'"
-    : "'self' 'unsafe-eval'";
+  const scriptSrc =
+    isProd && String(process.env.CSP_ALLOW_EVAL || "").trim() !== "1"
+      ? "'self'"
+      : "'self' 'unsafe-eval'";
   res.setHeader(
     "Content-Security-Policy",
     `default-src 'self'; script-src ${scriptSrc}; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' data: https://cdn.jsdelivr.net; connect-src ${connectSrc};`,
@@ -351,10 +366,10 @@ const allowedOrigins = (() => {
         .map((s) => s.trim())
         .filter(Boolean)
     : [];
-  
+
   // Always allow the production frontend domain by default
-  if (!origins.includes("https://demo.omnisuite-erp.com")) {
-    origins.push("https://demo.omnisuite-erp.com");
+  if (!origins.includes("https://kaf.omnisuite-erp.com")) {
+    origins.push("https://kaf.omnisuite-erp.com");
   }
   return origins;
 })();
@@ -374,6 +389,7 @@ const corsOptions = {
     "x-branch-id",
     "x-user-id",
     "x-skip-offline-queue",
+    "x-access-token",
   ],
   optionsSuccessStatus: 204,
 };
@@ -482,31 +498,56 @@ app.get("/api/ping", (_req, res) => res.json({ ok: true }));
 
     // Migration for adm_license_renewals table fields (tax, subtotal, discount, tax_rate, payment_method)
     try {
-      const renewTableCheck = await query("SHOW TABLES LIKE 'adm_license_renewals'");
+      const renewTableCheck = await query(
+        "SHOW TABLES LIKE 'adm_license_renewals'",
+      );
       if (renewTableCheck && renewTableCheck.length > 0) {
-        const taxCols = await query("SHOW COLUMNS FROM `adm_license_renewals` LIKE 'tax'");
+        const taxCols = await query(
+          "SHOW COLUMNS FROM `adm_license_renewals` LIKE 'tax'",
+        );
         if (!taxCols || taxCols.length === 0) {
-          await query("ALTER TABLE `adm_license_renewals` ADD COLUMN `tax` DECIMAL(18,2) NOT NULL DEFAULT 0.00");
+          await query(
+            "ALTER TABLE `adm_license_renewals` ADD COLUMN `tax` DECIMAL(18,2) NOT NULL DEFAULT 0.00",
+          );
         }
-        const subtotalCols = await query("SHOW COLUMNS FROM `adm_license_renewals` LIKE 'subtotal'");
+        const subtotalCols = await query(
+          "SHOW COLUMNS FROM `adm_license_renewals` LIKE 'subtotal'",
+        );
         if (!subtotalCols || subtotalCols.length === 0) {
-          await query("ALTER TABLE `adm_license_renewals` ADD COLUMN `subtotal` DECIMAL(18,2) NOT NULL DEFAULT 0.00");
+          await query(
+            "ALTER TABLE `adm_license_renewals` ADD COLUMN `subtotal` DECIMAL(18,2) NOT NULL DEFAULT 0.00",
+          );
         }
-        const discountCols = await query("SHOW COLUMNS FROM `adm_license_renewals` LIKE 'discount'");
+        const discountCols = await query(
+          "SHOW COLUMNS FROM `adm_license_renewals` LIKE 'discount'",
+        );
         if (!discountCols || discountCols.length === 0) {
-          await query("ALTER TABLE `adm_license_renewals` ADD COLUMN `discount` DECIMAL(18,2) NOT NULL DEFAULT 0.00");
+          await query(
+            "ALTER TABLE `adm_license_renewals` ADD COLUMN `discount` DECIMAL(18,2) NOT NULL DEFAULT 0.00",
+          );
         }
-        const taxRateCols = await query("SHOW COLUMNS FROM `adm_license_renewals` LIKE 'tax_rate'");
+        const taxRateCols = await query(
+          "SHOW COLUMNS FROM `adm_license_renewals` LIKE 'tax_rate'",
+        );
         if (!taxRateCols || taxRateCols.length === 0) {
-          await query("ALTER TABLE `adm_license_renewals` ADD COLUMN `tax_rate` DECIMAL(18,2) NOT NULL DEFAULT 0.00");
+          await query(
+            "ALTER TABLE `adm_license_renewals` ADD COLUMN `tax_rate` DECIMAL(18,2) NOT NULL DEFAULT 0.00",
+          );
         }
-        const payMethodCols = await query("SHOW COLUMNS FROM `adm_license_renewals` LIKE 'payment_method'");
+        const payMethodCols = await query(
+          "SHOW COLUMNS FROM `adm_license_renewals` LIKE 'payment_method'",
+        );
         if (!payMethodCols || payMethodCols.length === 0) {
-          await query("ALTER TABLE `adm_license_renewals` ADD COLUMN `payment_method` VARCHAR(100) NULL DEFAULT NULL");
+          await query(
+            "ALTER TABLE `adm_license_renewals` ADD COLUMN `payment_method` VARCHAR(100) NULL DEFAULT NULL",
+          );
         }
       }
     } catch (migErr) {
-      console.warn("[Migration] adm_license_renewals migration warning:", migErr.message);
+      console.warn(
+        "[Migration] adm_license_renewals migration warning:",
+        migErr.message,
+      );
     }
 
     // Check if created_by exists in fin_vouchers
@@ -883,20 +924,29 @@ const _activeFrontendPaths = [];
 for (const candidate of _frontendCandidates) {
   if (fs.existsSync(candidate)) {
     _activeFrontendPaths.push(candidate);
-    app.use(express.static(candidate, _staticOpts));
-    const assetsSubdir = path.join(candidate, "assets");
-    if (fs.existsSync(assetsSubdir)) {
-      app.use("/assets", express.static(assetsSubdir, _staticOpts));
+    if (serveFrontendFlag) {
+      app.use(express.static(candidate, _staticOpts));
+      const assetsSubdir = path.join(candidate, "assets");
+      if (fs.existsSync(assetsSubdir)) {
+        app.use("/assets", express.static(assetsSubdir, _staticOpts));
+      }
     }
-    if (!_earlyFrontendPath && fs.existsSync(path.join(candidate, "index.html"))) {
+    if (
+      !_earlyFrontendPath &&
+      fs.existsSync(path.join(candidate, "index.html"))
+    ) {
       _earlyFrontendPath = candidate;
     }
   }
 }
 
 if (_earlyFrontendPath) {
-  console.log(`[STATIC] Serving primary frontend index.html from ${_earlyFrontendPath}`);
-  console.log(`[STATIC] Active asset directories: ${_activeFrontendPaths.join(", ")}`);
+  console.log(
+    `[STATIC] Serving primary frontend index.html from ${_earlyFrontendPath}`,
+  );
+  console.log(
+    `[STATIC] Active asset directories: ${_activeFrontendPaths.join(", ")}`,
+  );
 } else {
   console.warn(
     `[STATIC] Frontend build not found. Checked: ${_frontendCandidates.join(", ")}`,
@@ -920,7 +970,9 @@ app.use(
 app.get("/api/debug-crash-log", requireAuthMiddleware, (req, res) => {
   // SECURITY: Only allow admin users (ID 1) to access crash reports
   if (Number(req.user?.id) !== 1) {
-    return res.status(403).json({ error: "FORBIDDEN", message: "Admin access required" });
+    return res
+      .status(403)
+      .json({ error: "FORBIDDEN", message: "Admin access required" });
   }
   try {
     const p1 = path.join(process.cwd(), "crash_report.txt");
@@ -933,53 +985,102 @@ app.get("/api/debug-crash-log", requireAuthMiddleware, (req, res) => {
     res.setHeader("Content-Type", "text/plain");
     res.send(content);
   } catch (err) {
-    res.status(500).json({ error: "INTERNAL_ERROR", message: "Error reading crash report" });
+    res
+      .status(500)
+      .json({ error: "INTERNAL_ERROR", message: "Error reading crash report" });
   }
 });
 
 app.use("/api/", healthRoutes);
+app.use("/", healthRoutes);
+
 app.use("/api", requireLicense);
-app.use("/api/licenses", licenseRoutes);
-app.use("/api/payment-packages", paymentPackageRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/administration", adminRoutes);
-app.use(["/api/backups", "/backups"], backupRoutes);
-app.use("/api/workflows", workflowRoutes);
-app.use("/api/upload", uploadRoutes);
-app.use("/api/sales", salesRoutes);
-app.use("/api/purchase/bills", purchaseBillsRoutes);
-app.use("/api/purchase", purchaseRoutes);
-app.use("/api/inventory", inventoryRoutes);
-app.use("/api/finance", financeRoutes);
-app.use("/api/hr", hrRoutes);
-app.use("/api/maintenance", maintenanceRoutes);
-app.use("/api/projects", projectsRoutes);
-app.use("/api/production", productionRoutes);
-app.use("/api/pos", posRoutes);
-app.use("/api/bi", biRoutes);
-app.use("/api/service-management", serviceMgmtRoutes);
-app.use("/api/services", srvInvoicesRoutes);
-app.use("/api/transport", transportRoutes);
+app.use("/", requireLicense);
+
+const apiPaths = [
+  { path: "/licenses", router: licenseRoutes },
+  { path: "/subscription-plans", router: paymentPackageRoutes },
+  { path: "/admin", router: adminRoutes },
+  { path: "/administration", router: adminRoutes },
+  { path: "/backups", router: backupRoutes },
+  { path: "/workflows", router: workflowRoutes },
+  { path: "/upload", router: uploadRoutes },
+  { path: "/sales", router: salesRoutes },
+  { path: "/purchase/bills", router: purchaseBillsRoutes },
+  { path: "/purchase", router: purchaseRoutes },
+  { path: "/inventory", router: inventoryRoutes },
+  { path: "/finance", router: financeRoutes },
+  { path: "/hr", router: hrRoutes },
+  { path: "/maintenance", router: maintenanceRoutes },
+  { path: "/projects", router: projectsRoutes },
+  { path: "/production", router: productionRoutes },
+  { path: "/pos", router: posRoutes },
+  { path: "/bi", router: biRoutes },
+  { path: "/service-management", router: serviceMgmtRoutes },
+  { path: "/services", router: srvInvoicesRoutes },
+  { path: "/transport", router: transportRoutes },
+  { path: "/push", router: pushRoutes },
+  { path: "/templates", router: templatesRoutes },
+  { path: "/documents", router: documentsRoutes },
+  { path: "/social-feed", router: socialFeedRoutes },
+  { path: "/access", router: accessRoutes },
+  { path: "/chat", router: chatRoutes },
+  { path: "/email-test", router: emailTestRoutes },
+  { path: "/visitors", router: visitorsRoutes },
+];
+
+  // Debug Endpoint to view production crash reports directly from the browser
+  app.get("/api/debug-status", async (req, res) => {
+    try {
+      const fs = await import("fs");
+      const path = await import("path");
+      let crashReport = "No crash report found.";
+      const crashPath = path.join(process.cwd(), "CRASH_REPORT.txt");
+      if (fs.existsSync(crashPath)) {
+        crashReport = fs.readFileSync(crashPath, "utf8");
+      }
+      
+      const dbHealth = await (await import("./db/pool.js")).getDbHealth({ probe: true });
+      const dbConfig = await (await import("./db/pool.js")).getDbConfig();
+      
+      res.json({
+        ok: true,
+        dbHealth,
+        dbConfig,
+        crashReport,
+        nodeEnv: process.env.NODE_ENV,
+        cwd: process.cwd()
+      });
+    } catch (err) {
+      res.status(500).json({ error: err.message, stack: err.stack });
+    }
+  });
+
+
+
+apiPaths.forEach(({ path, router }) => {
+  app.use(`/api${path}`, router);
+  app.use(path, router);
+});
+
 app.use("/api", authRoutes);
-app.use("/api/push", pushRoutes);
-app.use("/api/templates", templatesRoutes);
-app.use("/api/documents", documentsRoutes);
-app.use("/api/social-feed", socialFeedRoutes);
-app.use("/api/access", accessRoutes);
-app.use("/api/chat", chatRoutes);
-app.use("/api/email-test", emailTestRoutes);
-app.use("/api/visitors", visitorsRoutes);
+app.use("/", authRoutes);
+
+// Intercept Socket.io requests explicitly because Passenger intercepts the http.Server hook
+app.use("/socket.io", (req, res, next) => {
+  if (ioInstance && ioInstance.engine) {
+    req.url = req.originalUrl; // Express strips the mount path, but engine.io needs it!
+    ioInstance.engine.handleRequest(req, res);
+  } else {
+    // If socket.io is disabled, return 400 to tell the frontend client to stop polling
+    res.status(400).json({ error: "Socket.io disabled by server" });
+  }
+});
 
 /* ---------------- STATIC FILES & SPA FALLBACK ---------------- */
 // Use the frontend path already discovered by the early static block above.
 // Also allow SERVE_FRONTEND / ENABLE_SPA to force-enable SPA fallback even if
 // the path was overridden by STATIC_DIR / PUBLIC_DIR env vars.
-const serveFrontendFlag = (() => {
-  const v1 = String(process.env.SERVE_FRONTEND || "").toLowerCase();
-  const v2 = String(process.env.ENABLE_SPA || "").toLowerCase();
-  if (v1 === "0" || v1 === "false" || v2 === "0" || v2 === "false") return false;
-  return true; // Default to true if a frontend build is present
-})();
 
 // Resolve override directory from env, if any
 const _overrideDir =
@@ -1005,19 +1106,30 @@ if (_spaFrontendPath && serveFrontendFlag) {
   }
 
   app.get("*", (req, res, next) => {
-    if (req.url.startsWith("/api") || req.url.startsWith("/uploads") || req.url.startsWith("/socket.io")) {
+    if (
+      req.url.startsWith("/api") ||
+      req.url.startsWith("/uploads") ||
+      req.url.startsWith("/socket.io")
+    ) {
       return next();
     }
 
     // Check if the requested path is a static asset file (.js, .css, .png, etc.)
-    if (/\.(js|css|png|jpg|jpeg|gif|ico|json|svg|woff|woff2|ttf|map)$/i.test(req.path)) {
+    if (
+      /\.(js|css|png|jpg|jpeg|gif|ico|json|svg|woff|woff2|ttf|map)$/i.test(
+        req.path,
+      )
+    ) {
       // Try to find the file in any of our active static candidate directories
       const relativePath = req.path.replace(/^\//, "");
       for (const candidate of _activeFrontendPaths) {
         const fullFilePath = path.join(candidate, relativePath);
         if (fs.existsSync(fullFilePath) && fs.statSync(fullFilePath).isFile()) {
           if (fullFilePath.endsWith(".js") || fullFilePath.endsWith(".mjs")) {
-            res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+            res.setHeader(
+              "Content-Type",
+              "application/javascript; charset=utf-8",
+            );
           } else if (fullFilePath.endsWith(".css")) {
             res.setHeader("Content-Type", "text/css; charset=utf-8");
           }
@@ -1030,7 +1142,10 @@ if (_spaFrontendPath && serveFrontendFlag) {
     if (frontendPath) {
       const indexPath = path.join(frontendPath, "index.html");
       if (fs.existsSync(indexPath)) {
-        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0");
+        res.setHeader(
+          "Cache-Control",
+          "no-cache, no-store, must-revalidate, max-age=0",
+        );
         res.setHeader("Pragma", "no-cache");
         res.setHeader("Expires", "0");
         return res.sendFile(indexPath);
@@ -1068,8 +1183,11 @@ server.on("clientError", (err, socket) => {
     remoteAddress: socket?.remoteAddress || null,
     remotePort: socket?.remotePort || null,
   });
+  // Do not write raw HTTP/1.1 strings to the socket, as this breaks HTTP/2 streams
   try {
-    socket.end("HTTP/1.1 400 Bad Request\r\n\r\n");
+    if (socket.writable) {
+      socket.destroy();
+    }
   } catch {}
 });
 
@@ -1115,7 +1233,6 @@ if (process.env.NODE_ENV !== "test" && !socketsDisabled) {
 export { ioInstance as io };
 
 if (process.env.NODE_ENV !== "test") {
-
   server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     initCronJobs();
@@ -1154,6 +1271,8 @@ if (process.env.NODE_ENV !== "test") {
               () => ensureExceptionalPermissionsTable(),
             ],
             ["system logs", () => ensureSystemLogsTable()],
+            ["pm quotations", () => ensurePMQuotationTables()],
+            ["pm invoices", () => ensurePMInvoiceTables()],
           ];
           for (const [name, fn] of steps) {
             try {
@@ -1182,6 +1301,12 @@ if (process.env.NODE_ENV !== "test") {
         } catch {}
         try {
           await ensureSystemLogsTable();
+        } catch {}
+        try {
+          await ensurePMQuotationTables();
+        } catch {}
+        try {
+          await ensurePMInvoiceTables();
         } catch {}
         try {
           await seedDefaultTemplates();
@@ -1443,7 +1568,7 @@ process.on("uncaughtException", (err) => {
   console.error(`[Process] Uncaught Exception: ${err?.message || err}`);
   console.error(err?.stack || "(no stack)");
   logToCrashReport("UncaughtException", err);
-  
+
   // If the server hasn't successfully bound to a port yet (e.g., module import failure),
   // we MUST exit. Otherwise Phusion Passenger will hang for 90 seconds.
   if (err?.code === "MODULE_NOT_FOUND" || !server.listening) {
