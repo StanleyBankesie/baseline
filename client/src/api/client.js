@@ -57,9 +57,10 @@ let API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 if (
   typeof window !== "undefined" &&
-  (window.location.hostname === "kaf.omnisuite-erp.com" || window.location.hostname === "kafserver.omnisuite-erp.com")
+  (window.location.hostname === "demo.omnisuite-erp.com" ||
+    window.location.hostname === "demoserver.omnisuite-erp.com")
 ) {
-  API_BASE = "https://kafserver.omnisuite-erp.com/api";
+  API_BASE = "https://demoserver.omnisuite-erp.com/api";
 } else if (!API_BASE) {
   // Default to same-origin so Vite dev proxy handles local API traffic.
   API_BASE = "/api";
@@ -226,7 +227,7 @@ api.interceptors.request.use(
         delete config.headers["Content-Type"];
         delete config.headers["content-type"];
       }
-      
+
       if (
         typeof config.__background === "undefined" &&
         _postLoginGraceUntil > Date.now() &&
@@ -630,7 +631,12 @@ function delay(ms) {
 
 function shouldRetryGet(error, attempt) {
   if (attempt >= Math.max(GET_RETRY_LIMIT, 3)) return false; // Ensure we retry at least 3 times
-  if (error?.response?.status === 500 || error?.response?.status === 502 || error?.response?.status === 403) return true; // Retry on server/WAF errors
+  if (
+    error?.response?.status === 500 ||
+    error?.response?.status === 502 ||
+    error?.response?.status === 403
+  )
+    return true; // Retry on server/WAF errors
   if (error?.response) return false;
   const msg = String(error?.message || "").toLowerCase();
   if (error?.code === "ECONNABORTED" || msg.includes("timeout of"))
