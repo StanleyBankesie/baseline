@@ -281,7 +281,7 @@ export default function MaintenanceRosterList() {
             <button onClick={loadData} className="btn-secondary p-2" title="Refresh">
               <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
             </button>
-            <Link to="/maintenance" className="btn-secondary">Back to Menu</Link>
+            <Link to="/maintenance?section=Operations %26 Schedules" className="btn-secondary">Back</Link>
             <Link to="/maintenance/rosters/new" className="btn-primary">+ New Roster</Link>
           </div>
         </div>

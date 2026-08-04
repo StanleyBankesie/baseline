@@ -35,9 +35,9 @@ export default function InterviewForm() {
     async function loadData() {
       try {
         const [reqRes, candRes, userRes] = await Promise.all([
-          api.get("/hr/requisitions"),
-          api.get("/hr/candidates"),
-          api.get("/admin/users"),
+          api.get("/hr/requisitions").catch(() => ({ data: { items: [] } })),
+          api.get("/hr/candidates").catch(() => ({ data: { items: [] } })),
+          api.get("/admin/users").catch(() => ({ data: { items: [] } })),
         ]);
         setRequisitions(reqRes?.data?.items || []);
         setCandidates(candRes?.data?.items || []);

@@ -168,7 +168,7 @@ export default function BankReconciliationTransactionReportPage() {
         </div>
         <div className="flex gap-2">
           <Link
-            to="/finance"
+            to="/finance?section=Banking"
             className="font-sans btn btn-sm btn-outline text-white border-white hover:bg-white/20"
           >
             Back to Finance

@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import { api } from "api/client";
 import { useAuth } from "@/auth/AuthContext.jsx";
 
@@ -25,8 +25,11 @@ function generateBranchCode(name) {
 export default function BranchForm() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
   const isEdit = Boolean(id);
+  const isSystemConfig = location.pathname.startsWith("/system-configuration");
+  const backPath = isSystemConfig ? "/system-configuration/branches" : "/administration/branches";
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -125,7 +128,7 @@ export default function BranchForm() {
       } else {
         await api.post("/admin/branches", payload);
       }
-      navigate("/administration/branches");
+      navigate(backPath);
     } catch (err) {
       setError(err?.response?.data?.message || "Error saving branch");
     } finally {
@@ -148,7 +151,7 @@ export default function BranchForm() {
     <div className="space-y-6 [&::-webkit-scrollbar]:hidden">
       <div>
         <Link
-          to="/administration/branches"
+          to={backPath}
           className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300 mb-2 inline-block"
         >
           ← Back to Branches
@@ -346,7 +349,7 @@ export default function BranchForm() {
               >
                 {loading ? "Saving..." : isEdit ? "Update Branch" : "Create Branch"}
               </button>
-              <Link to="/administration/branches" className="btn btn-secondary">
+              <Link to={backPath} className="btn btn-secondary">
                 Cancel
               </Link>
             </div>

@@ -59,7 +59,7 @@ export default function AttendanceDashboard() {
       <div className="p-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Link to="/human-resources" className="btn-secondary text-sm">
+            <Link to="/human-resources?section=Time%20%26%20Attendance" className="btn-secondary text-sm">
               Back to Menu
             </Link>
             <h2 className="text-lg font-semibold">Attendance</h2>

@@ -54,7 +54,7 @@ export default function EquipmentList() {
           <div className="flex justify-between items-center">
             <div className="font-semibold">Equipment Setup</div>
             <div className="flex gap-2">
-              <Link to="/maintenance" className="btn btn-secondary">Return to Menu</Link>
+              <Link to="/maintenance?section=Master Data" className="btn btn-secondary">Back</Link>
               <Link to="/maintenance/equipment/new" className="btn-success">+ New Equipment</Link>
             </div>
           </div>

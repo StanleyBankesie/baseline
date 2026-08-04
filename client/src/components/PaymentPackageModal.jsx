@@ -23,7 +23,7 @@ export default function PaymentPackageModal({
   useEffect(() => {
     async function fetchPackages() {
       try {
-        const res = await api.get("/payment-packages");
+        const res = await api.get("/subscription-plans");
         if (res.data && Array.isArray(res.data)) {
           const activePackages = res.data.filter(p => p.status === 'ACTIVE');
           setPlans(activePackages);

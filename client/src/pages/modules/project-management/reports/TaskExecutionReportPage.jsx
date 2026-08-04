@@ -138,29 +138,24 @@ export default function TaskExecutionReportPage({ isEmbedded = false }) {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
           <div className="flex items-center gap-4">
             <Link
-              to="/project-management/reports"
+              to="/project-management?section=Reports%20%26%20Analytics"
               className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             >
               <ArrowLeft size={20} />
             </Link>
             <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300">
-                Senior Data Intelligence
-              </span>
               <span className="text-xs text-slate-400">Project Management</span>
+              <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
+                Task Management & Execution Analytics
+              </h1>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Throughput velocity, SLA risk monitoring, assignee workload, and operational performance metrics.
+              </p>
             </div>
-            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
-              Task Management & Execution Analytics
-            </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              Throughput velocity, SLA risk monitoring, assignee workload, and operational performance metrics.
-            </p>
           </div>
-        </div>
 
-        {/* Action Controls */}
-        <div className="flex items-center gap-2 print:hidden">
+          {/* Action Controls */}
+          <div className="flex items-center gap-2 print:hidden">
           <button
             onClick={loadReport}
             disabled={loading}

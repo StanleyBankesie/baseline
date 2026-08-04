@@ -122,7 +122,7 @@ export default function PosReports() {
     <div className="space-y-6">
       <div>
         <Link
-          to="/pos"
+          to="/pos?section=Reports"
           className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
         >
           ← Back to POS

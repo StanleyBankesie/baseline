@@ -207,7 +207,7 @@ export default function SalaryProcessing() {
       <div className="p-4 space-y-5">
         {/* ── header ─────────────────────────────────────────────────────── */}
         <div className="flex items-center gap-3">
-          <Link to="/human-resources" className="btn-secondary text-sm">
+          <Link to="/human-resources?section=Payroll%20%26%20Benefits" className="btn-secondary text-sm">
             ← Back
           </Link>
           <div>

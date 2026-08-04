@@ -175,7 +175,7 @@ export default function PosReconciliation() {
           <p className="text-sm text-slate-600">Manage offline sales that haven't synced to the server</p>
         </div>
         <div className="flex gap-2">
-          <Link to="/pos" className="btn btn-secondary">Back to POS</Link>
+          <Link to="/pos?section=Reports" className="btn btn-secondary">Back to POS</Link>
         </div>
       </div>
 

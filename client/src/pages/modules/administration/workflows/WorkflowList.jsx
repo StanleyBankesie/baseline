@@ -47,7 +47,7 @@ const WorkflowList = () => {
           Workflow Definitions
         </h1>
         <div className="flex gap-2">
-          <Link to="/administration" className="btn btn-secondary">
+          <Link to="/administration?section=Audit%20%26%20Logs" className="btn btn-secondary">
             Return to Menu
           </Link>
           <button

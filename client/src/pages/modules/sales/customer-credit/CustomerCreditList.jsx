@@ -24,7 +24,7 @@ export default function CustomerCreditList() {
     <div className="space-y-4">
       <div className="card"><div className="card-header bg-brand text-white rounded-t-lg flex justify-between items-center">
         <div><h1 className="text-2xl font-bold dark:text-brand-300">Customer Credit Limits</h1><p className="text-sm mt-1">Credit limit setup (placeholder)</p></div>
-        <Link to="/sales" className="btn btn-secondary">Return to Menu</Link>
+        <Link to="/sales" className="btn btn-secondary">Back</Link>
       </div></div>
 
       <div className="card"><div className="card-body overflow-x-auto">

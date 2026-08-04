@@ -103,7 +103,7 @@ export default function TimesheetList() {
               <p className="text-sm mt-1 opacity-80">Work hours logged against projects and tasks</p>
             </div>
             <div className="flex gap-2">
-              <Link to="/project-management" className="btn btn-secondary">Return to Menu</Link>
+              <Link to="/project-management?section=Reports%20%26%20Analytics" className="btn btn-secondary">Back</Link>
               <button onClick={openCreate} className="btn-success flex items-center gap-2"><Plus size={16} />Log Hours</button>
             </div>
           </div>

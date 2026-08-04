@@ -50,7 +50,7 @@ export default function SalaryConfigList() {
               Configure base salaries and payroll calculation structures
             </p>
           </div>
-          <Link to="/human-resources" className="btn-secondary shrink-0">
+          <Link to="/human-resources?section=Payroll%20%26%20Benefits" className="btn-secondary shrink-0">
             ← Back to Menu
           </Link>
         </div>

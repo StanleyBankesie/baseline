@@ -782,7 +782,7 @@ export default function QuotationList() {
               </p>
             </div>
             <div className="flex gap-2">
-              <Link to="/sales" className="btn btn-secondary">
+              <Link to="/sales?section=Sales%20Transactions" className="btn btn-secondary">
                 Return to Menu
               </Link>
               <Link to="/sales/quotations/new" className="btn-success">

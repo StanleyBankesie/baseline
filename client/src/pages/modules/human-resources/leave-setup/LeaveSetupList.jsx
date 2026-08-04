@@ -40,7 +40,7 @@ export default function LeaveSetupList() {
     <div className="space-y-4 p-4">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
-          <Link to="/human-resources" className="btn-secondary text-sm">
+          <Link to="/human-resources?section=Settings%20%26%20Setup" className="btn-secondary text-sm">
             Back
           </Link>
           <h2 className="text-lg font-semibold">Leave Setup</h2>
@@ -62,7 +62,6 @@ export default function LeaveSetupList() {
                 <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Type Name</th>
                 <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Days Per Year</th>
                 <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Paid</th>
-                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Carry Forward</th>
                 <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Created By</th>
                 <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Created Date</th>
                 <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-right">Actions</th>
@@ -72,12 +71,9 @@ export default function LeaveSetupList() {
               {items.map((r) => (
                 <tr key={r.id} className="border-t hover:bg-slate-50 dark:hover:bg-slate-700/50">
                   <td className="px-4 py-2 font-medium">{r.type_name}</td>
-                  <td className="px-4 py-2">{r.days_per_year}</td>
+                  <td className="px-4 py-2">{r.max_days}</td>
                   <td className="px-4 py-2">
                     {r.is_paid ? <span className="text-green-600">Yes</span> : <span className="text-red-600">No</span>}
-                  </td>
-                  <td className="px-4 py-2">
-                    {r.carry_forward ? <span className="text-green-600">Yes</span> : <span className="text-slate-400">No</span>}
                   </td>
                   <td className="px-4 py-2">{r.created_by_name || "-"}</td>
                   <td className="px-4 py-2">{r.created_at ? new Date(r.created_at).toLocaleDateString() : "-"}</td>
@@ -88,7 +84,7 @@ export default function LeaveSetupList() {
               ))}
               {items.length === 0 && !loading && (
                 <tr>
-                  <td colSpan={7} className="text-center py-10 text-slate-500">No leave types configured</td>
+                  <td colSpan={6} className="text-center py-10 text-slate-500">No leave types configured</td>
                 </tr>
               )}
             </tbody>

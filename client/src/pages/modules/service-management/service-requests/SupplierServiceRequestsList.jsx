@@ -450,7 +450,7 @@ export default function SupplierServiceRequestsList() {
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <Link to="/service-management" className="text-sm text-brand hover:text-brand-600">
+          <Link to="/service-management?section=Reports%20%26%20Parameters" className="text-sm text-brand hover:text-brand-600">
             ← Back to Service Management
           </Link>
           <h1 className="text-2xl font-bold mt-2">Purchase Supplier Service Requests</h1>

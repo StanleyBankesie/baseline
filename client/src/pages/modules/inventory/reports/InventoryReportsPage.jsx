@@ -148,7 +148,7 @@ export default function InventoryReportsPage() {
                 Complete analytics suite for warehouse stock balances, valuation, item velocity, and operations
               </p>
             </div>
-            <Link to="/inventory" className="btn btn-secondary text-xs">
+            <Link to="/inventory?section=Reports%20%26%20Valuation" className="btn btn-secondary text-xs">
               Return to Inventory Menu
             </Link>
           </div>

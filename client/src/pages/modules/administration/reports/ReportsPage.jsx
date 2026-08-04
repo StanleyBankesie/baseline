@@ -31,7 +31,7 @@ export default function ReportsPage() {
     <div className="space-y-6">
       <div>
         <Link
-          to="/administration"
+          to="/administration?section=Audit%20%26%20Logs"
           className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300 mb-2 inline-block"
         >
           ← Back to Administration

@@ -47,6 +47,7 @@ import ProductionSetup from "./setup/ProductionSetup";
 
 export const productionSections = [
   {
+    icon: "🏗️",
     title: "Manufacturing Masters",
     features: [
       {
@@ -158,6 +159,7 @@ export const productionSections = [
     ],
   },
   {
+    icon: "💡",
     title: "Intelligence & Analytics",
     features: [
       {
@@ -254,6 +256,7 @@ function ProductionHomeIndex() {
 
   return (
     <ModuleDashboard
+      useSectionNavigation={true}
       title="Production Management"
       description="Modern industrial suite for end-to-end manufacturing control, from design and planning to shop floor execution."
       stats={stats}

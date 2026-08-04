@@ -83,6 +83,14 @@ export default function StockUploadPage() {
   }, []);
 
   const downloadTemplate = () => {
+    if (!branchId) {
+      toast.error("Please select a Branch first");
+      return;
+    }
+    if (!warehouseId) {
+      toast.error("Please select a Warehouse first");
+      return;
+    }
     try {
       const header = ["ITEM_CODE", "ITEM_NAME", "GROUP_NAME", "NEW_QTY"];
       const data = items.map((it) => ({
@@ -102,10 +110,28 @@ export default function StockUploadPage() {
   };
 
   const handleChooseFile = () => {
+    if (!branchId) {
+      toast.error("Please select a Branch first");
+      return;
+    }
+    if (!warehouseId) {
+      toast.error("Please select a Warehouse first");
+      return;
+    }
     fileRef.current?.click();
   };
 
   const handleFile = async (e) => {
+    if (!branchId) {
+      toast.error("Please select a Branch first");
+      e.target.value = "";
+      return;
+    }
+    if (!warehouseId) {
+      toast.error("Please select a Warehouse first");
+      e.target.value = "";
+      return;
+    }
     const file = e.target.files?.[0];
     if (!file) return;
     setLoading(true);
@@ -156,7 +182,7 @@ export default function StockUploadPage() {
           You do not have permission to access the Stock Upload page.
           Please contact your system administrator.
         </p>
-        <Link to="/inventory" className="btn btn-secondary mt-4 inline-block">← Back to Inventory</Link>
+        <Link to="/inventory?section=Stock%20Operations" className="btn btn-secondary mt-4 inline-block">← Back to Inventory</Link>
       </div>
     );
   }
@@ -166,7 +192,7 @@ export default function StockUploadPage() {
       <div className="flex items-center justify-between">
         <div>
           <Link
-            to="/inventory"
+            to="/inventory?section=Stock%20Operations"
             className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
           >
             ← Back to Inventory

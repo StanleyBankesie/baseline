@@ -134,9 +134,9 @@ export const PermissionProvider = ({ children }) => {
   /**
    * Load user permissions from backend
    */
-  const loadPermissions = async () => {
+  const loadPermissions = async (background = false) => {
     try {
-      setLoading(true);
+      if (!background) setLoading(true);
       setError(null);
 
       if (!initialized || !token) {
@@ -769,32 +769,7 @@ export const PermissionProvider = ({ children }) => {
     const fk = String(featureKey || "").trim();
     if (!fk) return false;
     if (isSuper) return true;
-    try {
-      const path =
-        (typeof window !== "undefined" &&
-          window.location &&
-          window.location.pathname) ||
-        "/";
-      const base = basePathFrom ? basePathFrom(path) : path;
-      if (base && pagePermsByPath && pagePermsByPath.has(base)) {
-        const perms = pagePermsByPath.get(base);
-        const k =
-          action === "view"
-            ? "can_view"
-            : action === "create"
-              ? "can_create"
-              : action === "edit"
-                ? "can_edit"
-                : action === "delete"
-                  ? "can_delete"
-                  : `can_${action}`;
-        // Return the definitive page-level value (true OR false)
-        // — do NOT fall through, otherwise role defaults override user-specific denials
-        if (typeof perms?.[k] === "boolean") {
-          return perms[k];
-        }
-      }
-    } catch {}
+
     const sess = sessionOverrides.get(fk);
     if (sess) {
       const k =
@@ -970,7 +945,7 @@ export const PermissionProvider = ({ children }) => {
     }
     // Clear page-level permission cache so changes take effect immediately
     setPagePermsByPath(new Map());
-    await loadPermissions();
+    await loadPermissions(true);
     await loadDashboardPermissions();
   };
 
@@ -1230,6 +1205,28 @@ export const PermissionProvider = ({ children }) => {
         .replace(/[^a-z0-9-]/g, "");
       if (!dashboardViewLoaded) return false;
       const comp = `${mk}|${t}|${normKey}`;
+
+      if (mk === "home" && t === "card") {
+        let hasHomeCardConfig = false;
+        for (const k of dashboardViewMap.keys()) {
+          if (k.startsWith("home|card|")) {
+            hasHomeCardConfig = true;
+            break;
+          }
+        }
+        if (hasHomeCardConfig) {
+          return dashboardViewMap.get(comp) === true;
+        } else {
+          const defaultCards = [
+            "sales-total-revenue",
+            "sales-pending-orders",
+            "sales-active-customers",
+            "purchase-total-value"
+          ];
+          return defaultCards.includes(normKey);
+        }
+      }
+
       // If this item has an explicit permission entry, respect it
       if (dashboardViewMap.has(comp)) {
         return dashboardViewMap.get(comp) === true;

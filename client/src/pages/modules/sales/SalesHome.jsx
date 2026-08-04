@@ -340,6 +340,7 @@ const SalesModuleHome = () => {
 
   return (
     <ModuleDashboard
+      useSectionNavigation={true}
       title="Sales Module"
       description="Customer orders, quotations, invoicing, and sales analytics"
       stats={stats}
@@ -354,6 +355,7 @@ const SalesModuleHome = () => {
 
 export const salesModuleSections = [
   {
+    icon: "💳",
     title: "Sales Transactions",
     badge: "Operations",
       items: [
@@ -428,6 +430,31 @@ export const salesModuleSections = [
               path="/sales/invoices/new"
               type="primary"
               featureKey="sales:invoices"
+              action="create"
+            />,
+          ],
+        },
+        {
+          title: "Sales Returns",
+          path: "/sales/returns",
+          feature_key: "returns",
+          description: "Manage returned products and credit notes",
+          icon: "🔙",
+          actions: [
+            <ActionButton
+              key="view"
+              label="View"
+              path="/sales/returns"
+              type="outline"
+              featureKey="sales:returns"
+              action="view"
+            />,
+            <ActionButton
+              key="new"
+              label="New"
+              path="/sales/returns/new"
+              type="primary"
+              featureKey="sales:returns"
               action="create"
             />,
           ],

@@ -2056,7 +2056,7 @@ export const getVoucherById = async (req, res, next) => {
            ON c.id = v.currency_id
           AND c.company_id = v.company_id
         WHERE v.company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
           AND v.id = :id
         LIMIT 1`,
       { companyId, branchId, branchIdsStr, id },
@@ -2592,7 +2592,7 @@ export const createVoucher = async (req, res, next) => {
                     ELSE 'UNPAID'
                   END
             WHERE company_id = :companyId
-              AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+              AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
               AND id = :billId`,
           {
             companyId,
@@ -2618,7 +2618,7 @@ export const createVoucher = async (req, res, next) => {
                     ELSE COALESCE(payment, 'UNPAID')
                   END
             WHERE company_id = :companyId
-              AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+              AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
               AND id = :billId`,
           {
             companyId,
@@ -2647,7 +2647,7 @@ export const createVoucher = async (req, res, next) => {
                     ELSE COALESCE(payment_status, 'UNPAID')
                   END
             WHERE company_id = :companyId
-              AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+              AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
               AND id = :billId`,
           {
             companyId,
@@ -2677,7 +2677,7 @@ export const createVoucher = async (req, res, next) => {
                     ELSE 'UNPAID'
                   END
             WHERE company_id = :companyId
-              AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+              AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
               AND id = :invoiceId`,
           {
             companyId,
@@ -2737,7 +2737,7 @@ export const updateVoucher = async (req, res, next) => {
               status = COALESCE(:status, status),
               cost_center_id = COALESCE(:costCenterId, cost_center_id)
         WHERE company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
           AND id = :id`,
       {
         companyId,
@@ -2960,7 +2960,7 @@ export const reverseVoucher = async (req, res, next) => {
       `UPDATE fin_vouchers
           SET status = 'REVERSED'
         WHERE company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
           AND id = :id`,
       { companyId, branchId, branchIdsStr, id },
     );
@@ -3007,7 +3007,7 @@ export const voucherRegisterReport = async (req, res, next) => {
            ON vt.id = v.voucher_type_id
           AND vt.company_id = v.company_id
         WHERE v.company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
           AND (:from IS NULL OR v.voucher_date >= :from)
           AND (:to IS NULL OR v.voucher_date <= :to)
           AND (:typeFilter IS NULL OR vt.code = :typeFilter)
@@ -3052,7 +3052,7 @@ export const paymentDueReport = async (req, res, next) => {
          FROM pur_bills pb
          LEFT JOIN pur_suppliers s ON s.id = pb.supplier_id
         WHERE pb.company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
           AND (:from IS NULL OR pb.due_date >= :from)
           AND (:to IS NULL OR pb.due_date <= :to)
           AND (pb.total_amount - COALESCE(pb.amount_paid, 0)) > 0
@@ -3069,7 +3069,7 @@ export const paymentDueReport = async (req, res, next) => {
          FROM maint_bills mb
          LEFT JOIN pur_suppliers s ON s.id = mb.supplier_id
         WHERE mb.company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
           AND (:from IS NULL OR mb.due_date >= :from)
           AND (:to IS NULL OR mb.due_date <= :to)
           AND (mb.total_amount - ${maintPaidExpr}) > 0
@@ -3085,7 +3085,7 @@ export const paymentDueReport = async (req, res, next) => {
               COALESCE(sb.payment_status, 'UNPAID') AS status
          FROM pur_service_bills sb
         WHERE sb.company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
           AND (:from IS NULL OR sb.due_date >= :from)
           AND (:to IS NULL OR sb.due_date <= :to)
           AND (sb.total_amount - COALESCE(sb.amount_paid, 0)) > 0
@@ -3236,7 +3236,7 @@ export const journalsReport = async (req, res, next) => {
          JOIN fin_voucher_lines vl ON vl.voucher_id = v.id
          JOIN fin_accounts a ON a.id = vl.account_id
         WHERE v.company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
           AND (:from IS NULL OR v.voucher_date >= :from)
           AND (:to IS NULL OR v.voucher_date <= :to)
           AND v.status = 'POSTED'
@@ -4119,7 +4119,7 @@ export const balanceSheetReport = async (req, res, next) => {
        LEFT JOIN fin_voucher_lines vl ON vl.account_id = a.id
        LEFT JOIN fin_vouchers v ON v.id = vl.voucher_id 
           AND v.company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
           AND v.voucher_date <= :asOfDate
           AND v.status = 'POSTED'
        WHERE a.company_id = :companyId
@@ -4243,7 +4243,7 @@ export const profitAndLossReport = async (req, res, next) => {
        LEFT JOIN fin_voucher_lines vl ON vl.account_id = a.id
        LEFT JOIN fin_vouchers v ON v.id = vl.voucher_id 
           AND v.company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
           AND (:from IS NULL OR v.voucher_date >= :from)
           AND (:to IS NULL OR v.voucher_date <= :to)
           AND v.status = 'POSTED'
@@ -4345,7 +4345,7 @@ export const ratioAnalysisReport = async (req, res, next) => {
        LEFT JOIN fin_voucher_lines vl ON vl.account_id = a.id
        LEFT JOIN fin_vouchers v ON v.id = vl.voucher_id 
           AND v.company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
           AND v.voucher_date <= :asOf
           AND v.status = 'POSTED'
        WHERE a.company_id = :companyId
@@ -4364,7 +4364,7 @@ export const ratioAnalysisReport = async (req, res, next) => {
        LEFT JOIN fin_voucher_lines vl ON vl.account_id = a.id
        LEFT JOIN fin_vouchers v ON v.id = vl.voucher_id 
           AND v.company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
           AND v.voucher_date <= :asOf
           AND v.status = 'POSTED'
        WHERE a.company_id = :companyId
@@ -4549,7 +4549,7 @@ export const supplierOutstandingReport = async (req, res, next) => {
        FROM pur_bills b
        LEFT JOIN pur_suppliers s ON s.id = b.supplier_id
        WHERE b.company_id = :companyId
-         AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+         AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
          AND b.bill_date <= :asOf
          AND b.status IN ('POSTED', 'APPROVED', 'PARTIAL')
          AND (b.net_amount - COALESCE(b.amount_paid, 0)) > 0.005
@@ -4714,7 +4714,7 @@ export const creditorsLedgerReport = async (req, res, next) => {
          JOIN fin_accounts a ON a.id = vl.account_id
          JOIN fin_account_groups ag ON ag.id = a.group_id
         WHERE v.company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
           AND (:from IS NULL OR v.voucher_date >= :from)
           AND (:to IS NULL OR v.voucher_date <= :to)
           AND (:accountId IS NULL OR vl.account_id = :accountId)
@@ -4743,7 +4743,7 @@ export const debtorsLedgerReport = async (req, res, next) => {
          JOIN fin_accounts a ON a.id = vl.account_id
          JOIN fin_account_groups ag ON ag.id = a.group_id
         WHERE v.company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
           AND (:from IS NULL OR v.voucher_date >= :from)
           AND (:to IS NULL OR v.voucher_date <= :to)
           AND (:accountId IS NULL OR vl.account_id = :accountId)
@@ -4986,7 +4986,7 @@ export const listBankAccounts = async (req, res, next) => {
       `SELECT id, company_id, branch_id, name, bank_name, account_number, gl_account_id, currency_id, is_active
          FROM fin_bank_accounts
         WHERE company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
         ORDER BY name ASC`,
       { companyId, branchId: branchId || null, branchIdsStr },
     );
@@ -5225,7 +5225,7 @@ export const updateBankReconciliation = async (req, res, next) => {
               status = COALESCE(:status, status)
         WHERE id = :id
           AND company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))`,
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)`,
       {
         id,
         companyId,
@@ -5458,7 +5458,7 @@ export const confirmBankReconciliation = async (req, res, next) => {
       `SELECT id, status FROM fin_bank_reconciliations
         WHERE id = :id
           AND company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
         LIMIT 1`,
       { id, companyId, branchId: branchId || null, branchIdsStr: branchIdsStr || '' },
     );
@@ -5492,7 +5492,7 @@ export const getSupplierBillsByAccount = async (req, res, next) => {
       `SELECT id, code
          FROM fin_accounts
         WHERE company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
           AND id = :accountId
         LIMIT 1`,
       {
@@ -5583,7 +5583,7 @@ export const getSupplierBillsByAccount = async (req, res, next) => {
          ) pbd
            ON pbd.bill_id = pb.id
         WHERE pb.company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
           AND pb.supplier_id IN (${supplierIdListSql})
           AND COALESCE(pb.payment_status, 'UNPAID') IN ('UNPAID', 'PARTIAL PAYMENT')
           AND GREATEST(
@@ -5653,7 +5653,7 @@ export const listCostCenters = async (req, res, next) => {
       `SELECT id, company_id, branch_id, code, name, description, default_currency_id, is_active, created_at, updated_at
          FROM fin_cost_centers
         WHERE company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
         ORDER BY code ASC`,
       { companyId, branchId: branchId || null, branchIdsStr: branchIdsStr || '' },
     );
@@ -5920,7 +5920,7 @@ export const getDashboardMetrics = async (req, res, next) => {
         `SELECT COALESCE(SUM(vl.debit),0) AS dr, COALESCE(SUM(vl.credit),0) AS cr
          FROM fin_voucher_lines vl
          JOIN fin_vouchers v ON v.id = vl.voucher_id AND v.company_id = :companyId
-           AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+           AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
            AND v.status = 'POSTED'
            AND v.voucher_date BETWEEN :from AND :to
          JOIN fin_accounts a ON a.id = vl.account_id AND a.company_id = :companyId
@@ -5951,7 +5951,7 @@ export const getDashboardMetrics = async (req, res, next) => {
               vl.account_id, a.group_id, SUM(vl.debit) AS dr, SUM(vl.credit) AS cr
        FROM fin_voucher_lines vl
        JOIN fin_vouchers v ON v.id = vl.voucher_id AND v.company_id = :companyId
-         AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+         AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
          AND v.status = 'POSTED'
          AND v.voucher_date BETWEEN :from AND :to
        JOIN fin_accounts a ON a.id = vl.account_id AND a.company_id = :companyId
@@ -6009,7 +6009,7 @@ export const getDashboardMetrics = async (req, res, next) => {
         `SELECT a.name, SUM(vl.debit - vl.credit) AS value
          FROM fin_voucher_lines vl
          JOIN fin_vouchers v ON v.id = vl.voucher_id AND v.company_id = :companyId
-           AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+           AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
            AND v.status = 'POSTED'
            AND v.voucher_date BETWEEN :from AND :to
          JOIN fin_accounts a ON a.id = vl.account_id AND a.company_id = :companyId
@@ -6029,7 +6029,7 @@ export const getDashboardMetrics = async (req, res, next) => {
         `SELECT a.name, SUM(vl.credit - vl.debit) AS value
          FROM fin_voucher_lines vl
          JOIN fin_vouchers v ON v.id = vl.voucher_id AND v.company_id = :companyId
-           AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)))
+           AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR branch_id IS NULL)
            AND v.status = 'POSTED'
            AND v.voucher_date BETWEEN :from AND :to
          JOIN fin_accounts a ON a.id = vl.account_id AND a.company_id = :companyId

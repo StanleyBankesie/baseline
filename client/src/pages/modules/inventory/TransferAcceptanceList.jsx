@@ -88,7 +88,7 @@ export default function TransferAcceptanceList() {
               </h1>
               <p className="text-sm mt-1">Receive transferred stock</p>
             </div>
-            <Link to="/inventory" className="btn btn-secondary">
+            <Link to="/inventory?section=Stock%20Operations" className="btn btn-secondary">
               Return to Menu
             </Link>
           </div>

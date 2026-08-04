@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { api } from "../../api/client.js";
 import { toast } from "react-toastify";
 import { useAuth } from "../../auth/AuthContext.jsx";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { MODULES_REGISTRY } from "../../data/modulesRegistry.js";
 
 import { ArrowLeft } from "lucide-react";
@@ -10,6 +10,9 @@ import { ArrowLeft } from "lucide-react";
 export default function AdminPermissionsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isSystemConfig = location.pathname.startsWith("/system-configuration");
+  const moduleHome = isSystemConfig ? "/system-configuration" : "/administration";
   
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState([]);
@@ -129,7 +132,7 @@ export default function AdminPermissionsPage() {
           </p>
         </div>
         <button
-          onClick={() => navigate("/administration")}
+          onClick={() => navigate(moduleHome)}
           className="btn-secondary flex items-center gap-2"
         >
           <ArrowLeft size={16} />

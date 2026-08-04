@@ -132,7 +132,7 @@ export default function ServiceReportsPage() {
                 Analytics suite for service executions, technician utilization, SLA compliance, and billing
               </p>
             </div>
-            <Link to="/service-management" className="btn btn-secondary text-xs">
+            <Link to="/service-management?section=Reports%20%26%20Parameters" className="btn btn-secondary text-xs">
               Return to Service Menu
             </Link>
           </div>

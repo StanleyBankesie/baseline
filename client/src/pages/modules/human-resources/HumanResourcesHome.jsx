@@ -10,6 +10,7 @@ import { api } from "../../../api/client.js";
 import EmployeeList from "./employees/EmployeeList.jsx";
 import EmployeeForm from "./employees/EmployeeForm.jsx";
 import HRSetup from "./HRSetup.jsx";
+import OrganogramPage from "./organogram/OrganogramPage.jsx";
 import LeaveSetupList from "./leave-setup/LeaveSetupList.jsx";
 import LeaveSetupForm from "./leave-setup/LeaveSetupForm.jsx";
 import ShiftList from "./shifts/ShiftList.jsx";
@@ -62,6 +63,7 @@ import PolicyForm from "./compliance/PolicyForm.jsx";
 import PolicyViewer from "./compliance/PolicyViewer.jsx";
 import ExitRequest from "./exit/ExitRequest.jsx";
 import ClearanceTracking from "./exit/ClearanceTracking.jsx";
+import TimesheetReport from "./attendance/TimesheetReport.jsx";
 import AttendanceDashboard from "./attendance/AttendanceDashboard.jsx";
 import BulkAttendance from "./attendance/BulkAttendance.jsx";
 import TimesheetView from "./attendance/TimesheetView.jsx";
@@ -73,6 +75,7 @@ import ModuleLayout from "../../../components/ModuleLayout.jsx";
 
 export const humanResourcesSections = [
   {
+    icon: "👔",
     title: "Employee Management",
     features: [
       {
@@ -93,34 +96,40 @@ export const humanResourcesSections = [
     title: "Organization & Structures",
     features: [
       {
-        name: "Departments",
-        path: "/human-resources/departments",
-        description: "Manage organization departments",
-        icon: "🏢",
-      },
-      {
-        name: "Designations",
-        path: "/human-resources/designations",
-        description: "Manage job titles and positions",
-        icon: "🏷",
-      },
-      {
-        name: "Job Roles Setup",
-        path: "/human-resources/job-roles",
-        description: "Define job roles and responsibilities",
-        icon: "📋",
-      },
-      {
-        name: "Branches",
-        path: "/human-resources/branches",
-        description: "Manage branch locations",
-        icon: "📍",
-      },
-      {
         name: "Organogram",
         path: "/human-resources/organogram",
-        description: "Interactive visual organization chart",
+        description: "Interactive visual chart of company positions and reporting structure",
         icon: "📊",
+      },
+      {
+        name: "Employee Information",
+        path: "/human-resources/reports?type=employees",
+        description: "View comprehensive employee information reports",
+        icon: "👥",
+      },
+      {
+        name: "SSF (SSNIT) Contributions",
+        path: "/human-resources/reports?type=ssf",
+        description: "View SSF and SSNIT contribution breakdown reports",
+        icon: "🛡️",
+      },
+      {
+        name: "Income Tax (PAYE)",
+        path: "/human-resources/reports?type=paye",
+        description: "View statutory Income Tax and PAYE deduction reports",
+        icon: "🧾",
+      },
+      {
+        name: "Employee Loans",
+        path: "/human-resources/reports?type=loans",
+        description: "View employee loan statements and repayment reports",
+        icon: "💳",
+      },
+      {
+        name: "Employee Allowances",
+        path: "/human-resources/reports?type=allowances",
+        description: "View recurring and statutory employee allowance reports",
+        icon: "🎁",
       },
     ],
   },
@@ -134,16 +143,28 @@ export const humanResourcesSections = [
         icon: "⏰",
       },
       {
-        name: "Bulk Attendance",
-        path: "/human-resources/bulk-attendance",
-        description: "Enter attendance for multiple staff at once",
-        icon: "📅",
-      },
-      {
         name: "Timesheet Entry",
         path: "/human-resources/timesheet",
         description: "Track project and task work hours",
         icon: "⏱",
+      },
+      {
+        name: "Timesheet Report",
+        path: "/human-resources/timesheet-report",
+        description: "View and filter comprehensive timesheet logs and hours",
+        icon: "📊",
+      },
+      {
+        name: "Work Schedule Management",
+        path: "/human-resources/work-schedules",
+        description: "Define employee work schedules",
+        icon: "📆",
+      },
+      {
+        name: "Roster Management",
+        path: "/human-resources/roster",
+        description: "Manage shift rosters",
+        icon: "📅",
       },
     ],
   },
@@ -215,26 +236,56 @@ export const humanResourcesSections = [
         description: "Track and manage staff loans",
         icon: "🏦",
       },
+      {
+        name: "Payslips",
+        path: "/human-resources/payslips",
+        description: "View and generate employee payslips",
+        icon: "🧾",
+      },
+      {
+        name: "Salary Posting",
+        path: "/human-resources/payroll/salary-posting",
+        description: "Post finalized salary to finance",
+        icon: "💸",
+      },
     ],
   },
   {
     title: "Settings & Setup",
     features: [
       {
+        name: "HR Master Setup",
+        path: "/human-resources/setup",
+        description: "Configure departments, shifts, categories, and HR parameters",
+        icon: "🛠️",
+      },
+      {
+        name: "Branches Setup",
+        path: "/human-resources/setup?tab=locations",
+        description: "Manage company branch locations",
+        icon: "📍",
+      },
+      {
+        name: "Job Roles Setup",
+        path: "/human-resources/setup?tab=positions",
+        description: "Define job roles and position hierarchy",
+        icon: "📋",
+      },
+      {
         name: "Payroll Elements",
-        path: "/human-resources/payroll/elements",
+        path: "/human-resources/allowances",
         description: "Manage custom earnings and deduction types",
         icon: "⚙️",
       },
       {
         name: "Leave Parameters",
-        path: "/human-resources/leave/types",
+        path: "/human-resources/leave-setup",
         description: "Configure leave types and entitlements",
         icon: "🏖️",
       },
       {
         name: "Attendance Policies",
-        path: "/human-resources/attendance-policies",
+        path: "/human-resources/work-schedules",
         description: "Configure work shifts, grace periods, and rules",
         icon: "🕒",
       },
@@ -256,8 +307,14 @@ export const humanResourcesSections = [
         icon: "📈",
       },
       {
-        name: "Appraisal Submissions",
-        path: "/human-resources/appraisal/submit",
+        name: "Appraisal Form",
+        path: "/human-resources/performance/appraisal",
+        description: "Fill performance appraisal forms",
+        icon: "📝",
+      },
+      {
+        name: "Submit Appraisals",
+        path: "/human-resources/performance/submit",
         description: "Submit or review employee performance appraisals",
         icon: "⭐",
       },
@@ -268,10 +325,16 @@ export const humanResourcesSections = [
         icon: "🎯",
       },
       {
-        name: "Training & Development",
-        path: "/human-resources/training/programs",
+        name: "Training Programs",
+        path: "/human-resources/training",
         description: "Manage company training programs",
         icon: "🎓",
+      },
+      {
+        name: "Training History",
+        path: "/human-resources/training/history",
+        description: "View employee training records",
+        icon: "📜",
       },
       {
         name: "Company Policies",
@@ -329,38 +392,38 @@ function HRDashboard() {
     let mounted = true;
     async function load() {
       try {
-        const resp = await api.get("/human-resources/dashboard-stats");
-        const d = resp?.data?.data;
+        const resp = await api.get("/hr/dashboard-stats");
+        const d = resp?.data?.data || resp?.data;
         if (d && mounted) {
           setStats((prev) => {
             const next = [...prev];
             next[0] = {
               ...next[0],
-              value: String(d.totalEmployees ?? "—"),
+              value: String(d.activeEmployees ?? d.totalEmployees ?? "—"),
               change: `${d.activeEmployees ?? 0} active`,
               changeType: "positive",
             };
             next[1] = {
               ...next[1],
-              value: String(d.onLeaveCount ?? "—"),
-              change: `${d.leaveTypesCount ?? 0} active types`,
+              value: String(d.onLeaveToday ?? d.onLeaveCount ?? "—"),
+              change: `${d.presentToday ?? 0} present today`,
               changeType: "neutral",
             };
             next[2] = {
               ...next[2],
-              value: `GHS ${Number(d.latestPayrollTotal || 0).toLocaleString()}`,
-              change: d.latestPayrollPeriod || "Current month",
+              value: String(d.payrollStatus || "Current month"),
+              change: d.latestPayrollPeriod || "Status",
               changeType: "neutral",
             };
             next[3] = {
               ...next[3],
-              value: String(d.pendingLeaveCount ?? "—"),
+              value: String(d.pendingLeaveRequests ?? d.pendingLeaveCount ?? "0"),
               change:
-                d.pendingLeaveCount > 0
+                (d.pendingLeaveRequests || d.pendingLeaveCount) > 0
                   ? "Requires review"
                   : "All clear",
               changeType:
-                d.pendingLeaveCount > 0
+                (d.pendingLeaveRequests || d.pendingLeaveCount) > 0
                   ? "warning"
                   : "positive",
             };
@@ -377,6 +440,7 @@ function HRDashboard() {
 
   return (
     <ModuleDashboard
+      useSectionNavigation={true}
       title="Human Resources"
       description="Employee management and payroll processing"
       stats={stats}
@@ -432,11 +496,23 @@ export default function HumanResourcesHome() {
       <Route path="payroll/salary-posting" element={<SalaryPostingPage />} />
       <Route path="leave" element={<LeaveManagementDashboard />} />
       <Route path="leave/request" element={<LeaveApplication />} />
+      <Route path="leave/apply" element={<LeaveApplication />} />
       <Route path="leave/scheduling" element={<LeaveScheduling />} />
+      <Route path="leave-scheduling" element={<LeaveScheduling />} />
       <Route path="leave/roster" element={<LeaveRoster />} />
+      <Route path="leave-roster" element={<LeaveRoster />} />
       <Route path="leave/records" element={<LeaveRecords />} />
       <Route path="leave/calendar" element={<LeaveCalendar />} />
       <Route path="leave/balances" element={<LeaveBalances />} />
+      <Route path="leave-balances" element={<LeaveBalances />} />
+
+      {/* Organization & Structures routes */}
+      <Route path="departments" element={<HRSetup />} />
+      <Route path="designations" element={<HRSetup />} />
+      <Route path="job-roles" element={<HRSetup />} />
+      <Route path="branches" element={<HRSetup />} />
+      <Route path="organogram" element={<OrganogramPage />} />
+
       <Route path="performance/kpis" element={<KPISetup />} />
       <Route path="performance/appraisal" element={<AppraisalForm />} />
       <Route path="performance/appraisal/:id" element={<AppraisalForm />} />
@@ -450,6 +526,7 @@ export default function HumanResourcesHome() {
       <Route path="exit/request" element={<ExitRequest />} />
       <Route path="exit/clearance" element={<ClearanceTracking />} />
       <Route path="leave-setup" element={<LeaveSetupList />} />
+      <Route path="leave/types" element={<LeaveSetupList />} />
 
       <Route path="leave-setup/new" element={<LeaveSetupForm />} />
       <Route path="leave-setup/:id" element={<LeaveSetupForm />} />
@@ -457,13 +534,18 @@ export default function HumanResourcesHome() {
       <Route path="shifts/new" element={<ShiftForm />} />
       <Route path="shifts/:id" element={<ShiftForm />} />
       <Route path="work-schedules" element={<WorkScheduleManagement />} />
+      <Route path="attendance-policies" element={<WorkScheduleManagement />} />
       <Route path="roster" element={<RosterManagement />} />
-      {/* merged routes above */}
+      <Route path="payroll/elements" element={<AllowanceList />} />
+      {/* Time & Attendance extra routes */}
       <Route path="attendance" element={<AttendanceDashboard />} />
       <Route path="attendance/new" element={<AttendanceForm />} />
       <Route path="attendance/list" element={<AttendanceList />} />
       <Route path="attendance/bulk" element={<BulkAttendance />} />
+      <Route path="bulk-attendance" element={<BulkAttendance />} />
       <Route path="attendance/timesheet" element={<TimesheetView />} />
+      <Route path="timesheet" element={<TimesheetView />} />
+      <Route path="timesheet-report" element={<TimesheetReport />} />
       <Route path="attendance/:id" element={<AttendanceForm />} />
       <Route path="salary-config" element={<SalaryConfigList />} />
       <Route

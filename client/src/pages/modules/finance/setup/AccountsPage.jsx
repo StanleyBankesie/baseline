@@ -41,6 +41,7 @@ export default function AccountsPage() {
   const [groupId, setGroupId] = useState("");
   const [name, setName] = useState("");
   const [currencyId, setCurrencyId] = useState("");
+  const [baseCurrencyId, setBaseCurrencyId] = useState("");
   const [exchangeRate, setExchangeRate] = useState("1");
   const [isPostable, setIsPostable] = useState(true);
   const [editId, setEditId] = useState("");
@@ -68,7 +69,13 @@ export default function AccountsPage() {
       ]);
       setItems(accRes.data?.items || []);
       setGroups(grpRes.data?.items || []);
-      setCurrencies(curRes.data?.items || []);
+      const c = curRes.data?.items || [];
+      setCurrencies(c);
+      const base = c.find(cur => Number(cur.is_base) === 1 || cur.is_base === true);
+      if (base) {
+        setBaseCurrencyId(base.id);
+        setCurrencyId(base.id);
+      }
     } catch (e) {
       toast.error(e?.response?.data?.message || "Failed to load accounts");
     } finally {
@@ -116,7 +123,7 @@ export default function AccountsPage() {
       toast.success("Account created successfully");
       setGroupId("");
       setName("");
-      setCurrencyId("");
+      setCurrencyId(baseCurrencyId);
       setShowCreateModal(false);
       load();
     } catch (e2) {
@@ -230,7 +237,7 @@ export default function AccountsPage() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <Link
-                to="/finance"
+                to="/finance?section=Banking"
                 className="inline-flex items-center gap-1.5 text-xs text-white/80 hover:text-white transition-colors mb-2"
               >
                 <ArrowLeft size={14} /> Back to Accounting Setup

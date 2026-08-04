@@ -274,7 +274,7 @@ export default function CustomerServiceRequestsList() {
           <div className="flex justify-between items-center">
             <div className="font-semibold">Customer Service Requests</div>
             <div className="flex gap-2">
-              <Link to="/service-management" className="btn btn-secondary">
+              <Link to="/service-management?section=Reports%20%26%20Parameters" className="btn btn-secondary">
                 Return to Menu
               </Link>
               <Link

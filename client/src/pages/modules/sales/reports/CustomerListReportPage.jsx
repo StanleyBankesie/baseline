@@ -83,7 +83,7 @@ export default function CustomerListReportPage() {
             <p className="text-xs opacity-90">Export all active customers to Excel</p>
           </div>
           <div className="flex gap-2">
-            <Link to="/sales" className="btn btn-sm bg-white/10 hover:bg-white/20 text-white border-white/20">
+            <Link to="/sales?section=Analytics%20%26%20Reports" className="btn btn-sm bg-white/10 hover:bg-white/20 text-white border-white/20">
               Back
             </Link>
             <button

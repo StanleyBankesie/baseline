@@ -43,11 +43,11 @@ export default function OfferForm() {
     async function loadData() {
       try {
         const [reqRes, candRes, posRes, allowRes, taxRes] = await Promise.all([
-          api.get("/hr/requisitions"),
-          api.get("/hr/candidates"),
-          api.get("/hr/positions"),
-          api.get("/hr/allowances"),
-          api.get("/hr/tax-configs"),
+          api.get("/hr/requisitions").catch(() => ({ data: { items: [] } })),
+          api.get("/hr/candidates").catch(() => ({ data: { items: [] } })),
+          api.get("/hr/positions").catch(() => ({ data: { items: [] } })),
+          api.get("/hr/allowances").catch(() => ({ data: { items: [] } })),
+          api.get("/hr/tax-configs").catch(() => ({ data: { items: [] } })),
         ]);
         setRequisitions(reqRes?.data?.items || []);
         setCandidates(candRes?.data?.items || []);

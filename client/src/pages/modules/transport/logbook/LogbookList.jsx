@@ -76,21 +76,21 @@ export default function LogbookList({ isTab = false }) {
       header: "Route",
       accessor: (l) => `${l.origin} ${l.destination}`,
       render: (l) => (
-        <span className="text-xs">
+        <div className="text-xs whitespace-normal min-w-[150px]">
           <strong>From:</strong> {l.origin || "-"} <br/>
           <strong>To:</strong> {l.destination || "-"}
-        </span>
+        </div>
       )
     },
     {
       header: "Dates",
       accessor: "departure_time",
       render: (l) => (
-        <span className="text-xs">
+        <div className="text-xs whitespace-normal min-w-[200px]">
           <strong>Dep:</strong> {l.departure_time ? new Date(l.departure_time).toLocaleString() : "-"} <br/>
           <strong>Exp Ret:</strong> {l.expected_return_time ? new Date(l.expected_return_time).toLocaleString() : "-"} <br/>
           <strong>Act Ret:</strong> {l.actual_return_time ? new Date(l.actual_return_time).toLocaleString() : "-"}
-        </span>
+        </div>
       )
     },
     {

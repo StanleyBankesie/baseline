@@ -69,7 +69,7 @@ export default function ServiceBillsList() {
           <p className="text-sm mt-1">Prepare and manage service bills</p>
         </div>
         <div className="flex gap-2">
-          <Link to="/service-management" className="btn btn-secondary">
+          <Link to="/service-management?section=Reports%20%26%20Parameters" className="btn btn-secondary">
             Return to Menu
           </Link>
           <Link to="/service-management/service-bills/new" className="btn-success">

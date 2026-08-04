@@ -238,7 +238,7 @@ export default function MaterialRequisitionForm() {
               </h1>
               <p className="text-sm mt-1">Request materials for your project</p>
             </div>
-            <Link to="/project-management/material-requisitions" className="btn-success">Back to List</Link>
+            <Link to="/project-management/material-requisitions" className="btn-success">Back</Link>
           </div>
         </div>
         <div className="card-body">

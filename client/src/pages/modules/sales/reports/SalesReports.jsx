@@ -133,7 +133,7 @@ export default function SalesReports() {
                 Comprehensive reporting suite for revenue, customer activity, order fulfillment, and AR aging
               </p>
             </div>
-            <Link to="/sales" className="btn btn-secondary text-xs">
+            <Link to="/sales?section=Analytics%20%26%20Reports" className="btn btn-secondary text-xs">
               Return to Sales Menu
             </Link>
           </div>

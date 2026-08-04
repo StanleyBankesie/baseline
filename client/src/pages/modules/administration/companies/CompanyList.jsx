@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { api } from "api/client";
 import { useAuth } from "@/auth/AuthContext.jsx";
 import DataTable from "@/components/common/DataTable.jsx";
@@ -19,6 +19,10 @@ import ViewToggle from "@/components/ViewToggle";
 export default function CompanyList() {
   const [viewMode, setViewMode] = useViewMode();
   const { user } = useAuth();
+  const location = useLocation();
+  const isSystemConfig = location.pathname.startsWith("/system-configuration");
+  const moduleHome = isSystemConfig ? "/system-configuration" : "/administration";
+  const basePath = isSystemConfig ? "/system-configuration/companies" : "/administration/companies";
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -73,7 +77,7 @@ export default function CompanyList() {
       sortable: false,
       render: (c) => (
         <Link
-          to={`/administration/companies/${c.id}`}
+          to={`${basePath}/${c.id}`}
           className="text-brand hover:text-brand-600 text-sm font-medium"
         >
           Edit
@@ -92,10 +96,10 @@ export default function CompanyList() {
           <p className="text-sm mt-1">Manage companies</p>
         </div>
         <div className="flex gap-2">
-          <Link to="/administration" className="btn btn-secondary">
+          <Link to={moduleHome} className="btn btn-secondary">
             Return to Menu
           </Link>
-          <Link to="/administration/companies/new" className="btn-success">
+          <Link to={`${basePath}/new`} className="btn-success">
             + New Company
           </Link>
         </div>

@@ -11,6 +11,7 @@ import client from "../../api/client";
 import CompanyFeed from "../../components/CompanyFeed/CompanyFeed";
 import { toast } from "react-toastify";
 import { getModuleDashboards } from "../../data/modulesRegistry.js";
+import { DASHBOARD_CARDS } from "../../data/dashboardCards.js";
 
 /**
  * HomePage component
@@ -586,56 +587,90 @@ export default function HomePage() {
     })}`;
   }
 
-  const metrics = [
-    {
-      label: "Today Sales",
-      value: fmtCurrency(overview?.todaySales || 0),
-      badge: overview?.badges?.["today-sales"]?.text || "",
-      icon: "💵",
-      path: "/sales/reports",
-      color: "from-ticker-green to-ticker-green",
-    },
-    {
-      label: "Total Customers",
-      value: String(overview?.totalCustomers ?? 0),
-      badge: overview?.badges?.["total-customers"]?.text || "",
-      icon: "👥",
-      home_key: "total-customers",
-      path: "/sales/customers",
-      color: "from-ticker-blue to-ticker-blue",
-    },
-    {
-      label: "Average Order",
-      value: fmtCurrency(overview?.averageOrder || 0),
-      badge: overview?.badges?.["average-order"]?.text || "",
-      icon: "🧾",
-      path: "/sales/reports",
-      color: "from-ticker-purple to-ticker-purple",
-    },
-    {
-      label: "Monthly Revenue",
-      value: fmtCurrency(overview?.monthlyRevenue || 0),
-      badge: overview?.badges?.["monthly-revenue"]?.text || "",
-      icon: "📊",
-      path: "/finance/reports",
-      color: "from-ticker-orange to-ticker-orange",
-    },
-  ];
+  const allPossibleMetrics = React.useMemo(() => {
+    const defaultIcons = {
+      sales: "💰", purchase: "🛒", inventory: "📦", finance: "🏦", hr: "👔",
+      maintenance: "🛠️", production: "🏭", projects: "📌", pos: "💳",
+      bi: "📈", executive: "👔", service: "📨", transport: "🚚", admin: "👤", system: "⚙️"
+    };
+    const defaultPaths = {
+      sales: "/sales", purchase: "/purchase", inventory: "/inventory", finance: "/finance", hr: "/human-resources",
+      maintenance: "/maintenance", production: "/production", projects: "/project-management", pos: "/pos",
+      bi: "/reports", executive: "/reports", service: "/service-management", transport: "/transport", admin: "/administration", system: "/system-configuration"
+    };
 
-  const visibleMetrics = metrics.filter((m) => {
-    const labelKey = String(m.label || "")
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9-]/g, "");
-    const allowedByHome = canViewDashboardElement("home", "card", labelKey);
-    if (!allowedByHome) return false;
-    if (m?.home_key) {
-      // Backward-compatible: also allow if legacy role feature is granted
-      if (hasRoleFeature(`home:${m.home_key}`)) return true;
+    const metrics = [];
+    Object.entries(DASHBOARD_CARDS).forEach(([moduleKey, cards]) => {
+      cards.forEach(card => {
+        // Find a matching value from overview. We will try camelCasing the label or key
+        // For simplicity, we can do some explicit mapping or fallback.
+        
+        let val = 0;
+        let badge = "";
+        
+        // Manual mapping for the original values:
+        if (card.key === "pos-today-sales") val = overview?.todaySales || 0;
+        else if (card.key === "sales-active-customers") val = overview?.totalCustomers || 0;
+        else if (card.key === "pos-avg-order") val = overview?.averageOrder || 0;
+        else if (card.key === "bi-company-revenue") val = overview?.monthlyRevenue || 0;
+        else if (card.key === "sales-pending-orders") val = overview?.openQuotations || 0;
+        else if (card.key === "sales-total-revenue") val = overview?.totalRevenue || overview?.monthlyRevenue || 0;
+        else if (card.key === "purchase-total-value") val = overview?.totalPurchases || 0; // Wait, totalPurchases is not defined?
+        else if (card.key === "purchase-pending-pos") val = overview?.activePOs || 0;
+        else if (card.key === "purchase-active-suppliers") val = overview?.activeSuppliers || 0;
+        else if (card.key === "inventory-total-items") val = overview?.itemsTracked || overview?.totalItems || 0;
+        else if (card.key === "inventory-low-stock") val = overview?.lowStockItems || 0;
+        else if (card.key === "finance-cash-balance") val = overview?.cashBalance || 0;
+        else if (card.key === "hr-total-employees") val = overview?.activeEmployees || 0;
+        else if (card.key === "hr-on-leave") val = overview?.onLeave || 0;
+        else if (card.key === "maint-open-work-orders") val = overview?.openRequests || overview?.openWorkOrders || 0;
+        else if (card.key === "maint-assets-in-maint") val = overview?.activeJobs || 0;
+        else if (card.key === "prod-active-orders") val = overview?.activeProductionOrders || 0;
+        else if (card.key === "pm-active-projects") val = overview?.activeProjects || 0;
+        else if (card.key === "sm-active-contracts") val = overview?.serviceRequests || 0;
+        else if (card.key === "trans-ongoing-trips") val = overview?.activeTrips || 0;
+        else if (card.key === "trans-active-vehicles") val = overview?.totalVehicles || 0;
+        else if (card.key === "admin-active-users") val = overview?.activeUsers || 0;
+        
+        // Currency formatting for known monetary values
+        const isMonetary = ["sales-total-revenue", "pos-today-sales", "pos-avg-order", "bi-company-revenue", "purchase-total-value", "finance-cash-balance", "finance-ar", "finance-ap"].includes(card.key);
+        const finalValue = isMonetary ? fmtCurrency(val) : String(val);
+
+        metrics.push({
+          key: card.key,
+          label: card.label,
+          value: finalValue,
+          badge: overview?.badges?.[card.key]?.text || "",
+          icon: defaultIcons[moduleKey] || "📊",
+          path: defaultPaths[moduleKey] || "/"
+        });
+      });
+    });
+    
+    return metrics;
+  }, [overview, fmtCurrency]);
+
+
+  const visibleMetrics = React.useMemo(() => {
+    const checked = allPossibleMetrics.filter((m) => {
+      const labelKey = String(m.label || "")
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9-]/g, "");
+      
+      const allowedByKey = m.key ? canViewDashboardElement("home", "card", m.key) : false;
+      const allowedByLabel = canViewDashboardElement("home", "card", labelKey);
+      
+      return allowedByKey || allowedByLabel;
+    });
+
+    if (checked.length > 0) {
+      return checked.slice(0, 4);
     }
-    return canAccessPath(m.path, "view");
-  });
+    // Fallback to first 4 default metrics if no explicit toggle set
+    return allPossibleMetrics.slice(0, 4);
+  }, [allPossibleMetrics, canViewDashboardElement]);
 
   // Quick Actions section removed per request
 

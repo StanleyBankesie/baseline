@@ -5,7 +5,7 @@
 
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import ModuleDashboard from "../../../components/ModuleDashboard";
+import ModuleDashboard from "../../../components/ModuleDashboard.jsx";
 import ModuleLayout from "../../../components/ModuleLayout.jsx";
 import { api } from "../../../api/client.js";
 
@@ -238,13 +238,13 @@ function ServiceManagementLanding() {
     };
   }, []);
 
-
   return (
     <ModuleDashboard
       title="Service Management"
       description="End-to-end service request, confirmation, and billing"
       stats={stats}
       moduleKey="service-management"
+      useSectionNavigation={true}
       headerActions={[
         {
           label: "Dashboard",
@@ -260,224 +260,249 @@ function ServiceManagementLanding() {
 
 /**
  *  component
- * 
+ *
  * @returns {JSX.Element} The rendered component
  */
 export default function ServiceManagementHome() {
   return (
-    <ModuleLayout sections={serviceManagementSections} moduleKey="service-management">
+    <ModuleLayout
+      sections={serviceManagementSections}
+      moduleKey="service-management"
+    >
       <Routes>
         <Route path="/" element={<ServiceManagementLanding />} />
-      <Route
-        path="dashboard"
-        element={
-          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
-            {React.createElement(
-              React.lazy(() => import("./ServiceDashboardPage.jsx")),
-            )}
-          </React.Suspense>
-        }
-      />
-      <Route path="customer-service-requests" element={<CustomerServiceRequestsList />} />
-      <Route path="customer-service-requests/new" element={<CustomerServiceRequestForm />} />
-      <Route path="customer-service-requests/:id" element={<CustomerServiceRequestForm />} />
-      <Route path="supplier-service-requests" element={<SupplierServiceRequestsList />} />
-      <Route path="supplier-service-requests/new" element={<SupplierServiceRequestForm />} />
-      <Route path="supplier-service-requests/:id" element={<SupplierServiceRequestForm />} />
-      <Route path="service-orders" element={<ServiceOrdersList />} />
-      <Route path="service-orders/new" element={<ServiceOrderForm />} />
-      <Route path="service-orders/:id" element={<ServiceOrderForm />} />
-      <Route path="service-executions" element={<ServiceExecutionsList />} />
-      <Route path="service-executions/:id" element={<ServiceExecutionView />} />
-      <Route path="service-execution" element={<ServiceExecutionForm />} />
-      <Route
-        path="service-confirmation"
-        element={<ServiceConfirmationsList />}
-      />
-      <Route
-        path="service-confirmation/new"
-        element={<ServiceConfirmationForm />}
-      />
-      <Route
-        path="service-confirmation/:id"
-        element={<ServiceConfirmationForm />}
-      />
-      <Route path="service-invoices" element={<ServiceInvoiceList />} />
-      <Route path="service-invoices/new" element={<ServiceInvoiceForm />} />
-      <Route path="service-invoices/:id" element={<ServiceInvoiceForm />} />
-      <Route path="service-bills" element={<ServiceBillsList />} />
-      <Route path="service-bills/new" element={<ServiceBillForm />} />
-      <Route path="service-bills/:id" element={<ServiceBillForm />} />
-      <Route path="setup" element={<ServiceParametersPage />} />
-      <Route
-        path="visitors-log"
-        element={
-          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
-            {React.createElement(
-              React.lazy(() => import("./visitors-log/VisitorsLogList.jsx")),
-            )}
-          </React.Suspense>
-        }
-      />
-      <Route
-        path="visitors-log/new"
-        element={
-          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
-            {React.createElement(
-              React.lazy(() => import("./visitors-log/VisitorLogForm.jsx")),
-            )}
-          </React.Suspense>
-        }
-      />
-      <Route
-        path="visitors-log/:id/edit"
-        element={
-          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
-            {React.createElement(
-              React.lazy(() => import("./visitors-log/VisitorLogForm.jsx")),
-            )}
-          </React.Suspense>
-        }
-      />
-      <Route path="reports" element={<ServiceReportsPage />} />
-      <Route
-        path="reports/service-request-summary"
-        element={
-          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
-            {React.createElement(
-              React.lazy(
-                () => import("./reports/ServiceRequestSummaryReport.jsx"),
-              ),
-            )}
-          </React.Suspense>
-        }
-      />
-      <Route
-        path="reports/service-order-status"
-        element={
-          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
-            {React.createElement(
-              React.lazy(
-                () => import("./reports/ServiceOrderStatusReport.jsx"),
-              ),
-            )}
-          </React.Suspense>
-        }
-      />
-      <Route
-        path="reports/execution-performance"
-        element={
-          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
-            {React.createElement(
-              React.lazy(
-                () => import("./reports/ServiceExecutionPerformanceReport.jsx"),
-              ),
-            )}
-          </React.Suspense>
-        }
-      />
-      <Route
-        path="reports/sla-compliance"
-        element={
-          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
-            {React.createElement(
-              React.lazy(() => import("./reports/SLAComplianceReport.jsx")),
-            )}
-          </React.Suspense>
-        }
-      />
-      <Route
-        path="reports/service-revenue"
-        element={
-          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
-            {React.createElement(
-              React.lazy(() => import("./reports/ServiceRevenueReport.jsx")),
-            )}
-          </React.Suspense>
-        }
-      />
-      <Route
-        path="reports/outstanding-bills"
-        element={
-          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
-            {React.createElement(
-              React.lazy(
-                () => import("./reports/OutstandingServiceBillsReport.jsx"),
-              ),
-            )}
-          </React.Suspense>
-        }
-      />
-      <Route
-        path="reports/service-confirmation"
-        element={
-          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
-            {React.createElement(
-              React.lazy(
-                () => import("./reports/ServiceConfirmationReport.jsx"),
-              ),
-            )}
-          </React.Suspense>
-        }
-      />
-      <Route
-        path="reports/technician-utilization"
-        element={
-          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
-            {React.createElement(
-              React.lazy(
-                () => import("./reports/TechnicianUtilizationReport.jsx"),
-              ),
-            )}
-          </React.Suspense>
-        }
-      />
-      <Route
-        path="reports/service-cost-analysis"
-        element={
-          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
-            {React.createElement(
-              React.lazy(
-                () => import("./reports/ServiceCostAnalysisReport.jsx"),
-              ),
-            )}
-          </React.Suspense>
-        }
-      />
-      <Route
-        path="reports/repeat-requests"
-        element={
-          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
-            {React.createElement(
-              React.lazy(
-                () => import("./reports/RepeatServiceRequestReport.jsx"),
-              ),
-            )}
-          </React.Suspense>
-        }
-      />
-      <Route
-        path="reports/service-type-performance"
-        element={
-          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
-            {React.createElement(
-              React.lazy(
-                () => import("./reports/ServiceTypePerformanceReport.jsx"),
-              ),
-            )}
-          </React.Suspense>
-        }
-      />
-      <Route
-        path="reports/visitors-log"
-        element={
-          <React.Suspense fallback={<div className="p-4">Loading...</div>}>
-            {React.createElement(
-              React.lazy(() => import("./reports/VisitorsLogReport.jsx")),
-            )}
-          </React.Suspense>
-        }
-      />
+        <Route
+          path="dashboard"
+          element={
+            <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+              {React.createElement(
+                React.lazy(() => import("./ServiceDashboardPage.jsx")),
+              )}
+            </React.Suspense>
+          }
+        />
+        <Route
+          path="customer-service-requests"
+          element={<CustomerServiceRequestsList />}
+        />
+        <Route
+          path="customer-service-requests/new"
+          element={<CustomerServiceRequestForm />}
+        />
+        <Route
+          path="customer-service-requests/:id"
+          element={<CustomerServiceRequestForm />}
+        />
+        <Route
+          path="supplier-service-requests"
+          element={<SupplierServiceRequestsList />}
+        />
+        <Route
+          path="supplier-service-requests/new"
+          element={<SupplierServiceRequestForm />}
+        />
+        <Route
+          path="supplier-service-requests/:id"
+          element={<SupplierServiceRequestForm />}
+        />
+        <Route path="service-orders" element={<ServiceOrdersList />} />
+        <Route path="service-orders/new" element={<ServiceOrderForm />} />
+        <Route path="service-orders/:id" element={<ServiceOrderForm />} />
+        <Route path="service-executions" element={<ServiceExecutionsList />} />
+        <Route
+          path="service-executions/:id"
+          element={<ServiceExecutionView />}
+        />
+        <Route path="service-execution" element={<ServiceExecutionForm />} />
+        <Route
+          path="service-confirmation"
+          element={<ServiceConfirmationsList />}
+        />
+        <Route
+          path="service-confirmation/new"
+          element={<ServiceConfirmationForm />}
+        />
+        <Route
+          path="service-confirmation/:id"
+          element={<ServiceConfirmationForm />}
+        />
+        <Route path="service-invoices" element={<ServiceInvoiceList />} />
+        <Route path="service-invoices/new" element={<ServiceInvoiceForm />} />
+        <Route path="service-invoices/:id" element={<ServiceInvoiceForm />} />
+        <Route path="service-bills" element={<ServiceBillsList />} />
+        <Route path="service-bills/new" element={<ServiceBillForm />} />
+        <Route path="service-bills/:id" element={<ServiceBillForm />} />
+        <Route path="setup" element={<ServiceParametersPage />} />
+        <Route
+          path="visitors-log"
+          element={
+            <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+              {React.createElement(
+                React.lazy(() => import("./visitors-log/VisitorsLogList.jsx")),
+              )}
+            </React.Suspense>
+          }
+        />
+        <Route
+          path="visitors-log/new"
+          element={
+            <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+              {React.createElement(
+                React.lazy(() => import("./visitors-log/VisitorLogForm.jsx")),
+              )}
+            </React.Suspense>
+          }
+        />
+        <Route
+          path="visitors-log/:id/edit"
+          element={
+            <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+              {React.createElement(
+                React.lazy(() => import("./visitors-log/VisitorLogForm.jsx")),
+              )}
+            </React.Suspense>
+          }
+        />
+        <Route path="reports" element={<ServiceReportsPage />} />
+        <Route
+          path="reports/service-request-summary"
+          element={
+            <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+              {React.createElement(
+                React.lazy(
+                  () => import("./reports/ServiceRequestSummaryReport.jsx"),
+                ),
+              )}
+            </React.Suspense>
+          }
+        />
+        <Route
+          path="reports/service-order-status"
+          element={
+            <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+              {React.createElement(
+                React.lazy(
+                  () => import("./reports/ServiceOrderStatusReport.jsx"),
+                ),
+              )}
+            </React.Suspense>
+          }
+        />
+        <Route
+          path="reports/execution-performance"
+          element={
+            <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+              {React.createElement(
+                React.lazy(
+                  () =>
+                    import("./reports/ServiceExecutionPerformanceReport.jsx"),
+                ),
+              )}
+            </React.Suspense>
+          }
+        />
+        <Route
+          path="reports/sla-compliance"
+          element={
+            <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+              {React.createElement(
+                React.lazy(() => import("./reports/SLAComplianceReport.jsx")),
+              )}
+            </React.Suspense>
+          }
+        />
+        <Route
+          path="reports/service-revenue"
+          element={
+            <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+              {React.createElement(
+                React.lazy(() => import("./reports/ServiceRevenueReport.jsx")),
+              )}
+            </React.Suspense>
+          }
+        />
+        <Route
+          path="reports/outstanding-bills"
+          element={
+            <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+              {React.createElement(
+                React.lazy(
+                  () => import("./reports/OutstandingServiceBillsReport.jsx"),
+                ),
+              )}
+            </React.Suspense>
+          }
+        />
+        <Route
+          path="reports/service-confirmation"
+          element={
+            <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+              {React.createElement(
+                React.lazy(
+                  () => import("./reports/ServiceConfirmationReport.jsx"),
+                ),
+              )}
+            </React.Suspense>
+          }
+        />
+        <Route
+          path="reports/technician-utilization"
+          element={
+            <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+              {React.createElement(
+                React.lazy(
+                  () => import("./reports/TechnicianUtilizationReport.jsx"),
+                ),
+              )}
+            </React.Suspense>
+          }
+        />
+        <Route
+          path="reports/service-cost-analysis"
+          element={
+            <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+              {React.createElement(
+                React.lazy(
+                  () => import("./reports/ServiceCostAnalysisReport.jsx"),
+                ),
+              )}
+            </React.Suspense>
+          }
+        />
+        <Route
+          path="reports/repeat-requests"
+          element={
+            <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+              {React.createElement(
+                React.lazy(
+                  () => import("./reports/RepeatServiceRequestReport.jsx"),
+                ),
+              )}
+            </React.Suspense>
+          }
+        />
+        <Route
+          path="reports/service-type-performance"
+          element={
+            <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+              {React.createElement(
+                React.lazy(
+                  () => import("./reports/ServiceTypePerformanceReport.jsx"),
+                ),
+              )}
+            </React.Suspense>
+          }
+        />
+        <Route
+          path="reports/visitors-log"
+          element={
+            <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+              {React.createElement(
+                React.lazy(() => import("./reports/VisitorsLogReport.jsx")),
+              )}
+            </React.Suspense>
+          }
+        />
       </Routes>
     </ModuleLayout>
   );

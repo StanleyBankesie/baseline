@@ -10,6 +10,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { usePermission } from "../../../../auth/PermissionContext.jsx";
 import { filterByPrefix } from "@/utils/searchUtils.js";
 import { toast } from "react-toastify";
+import { ArrowLeft, Save, Plus, Trash2, Search, FileText, CheckCircle, AlertCircle, Clock } from "lucide-react";
 
 function StatusBadge({ status }) {
   const s = String(status || "").toLowerCase();
@@ -64,7 +65,7 @@ export default function TransportationBillForm() {
     service_date: "",
     supplier_id: "",
     relatedExecId: "",
-    currency_id: 4,
+    currency_id: "",
     exchange_rate: 1,
     payment_terms: 30,
     payment_status: "UNPAID",
@@ -107,6 +108,10 @@ export default function TransportationBillForm() {
   const selectedCurrencyCode = useMemo(() => {
     return finCurrencies.find((c) => String(c.id) === String(bill.currency_id))?.code || "";
   }, [finCurrencies, bill.currency_id]);
+
+  const selectedCurrencySymbol = useMemo(() => {
+    return finCurrencies.find((c) => String(c.id) === String(bill.currency_id))?.symbol || selectedCurrencyCode || "";
+  }, [finCurrencies, bill.currency_id, selectedCurrencyCode]);
 
   const methods = [
     { key: "cash", label: "Cash", icon: "💵" },
@@ -320,7 +325,7 @@ export default function TransportationBillForm() {
       try {
         const [supRes, svcOrdersRes, curRes, itemsRes, uomsRes, taxesRes, ccRes] = await Promise.all([
           api.get("/purchase/suppliers", { params: { contractor: "Y" } }).catch(() => ({ data: { items: [] } })),
-          api.get("/purchase/service-orders").catch(() => ({ data: { items: [] } })),
+          api.get("/transport/expense-logs").catch(() => ({ data: { items: [] } })),
           api.get("/finance/currencies").catch(() => ({ data: { items: [] } })),
           api.get("/inventory/items").catch(() => ({ data: { items: [] } })),
           api.get("/inventory/uoms").catch(() => ({ data: { items: [] } })),
@@ -330,15 +335,19 @@ export default function TransportationBillForm() {
         if (!mounted) return;
 
         setSuppliers(Array.isArray(supRes.data?.items) ? supRes.data.items : []);
-        const allOrders = Array.isArray(svcOrdersRes.data?.items) ? svcOrdersRes.data.items : [];
-        const validStatuses = ["DONE"];
-        setConfirmedServices(allOrders.filter((o) => validStatuses.includes(String(o.status || "").toUpperCase())));
+        const svcItems = svcOrdersRes.data?.data?.items || svcOrdersRes.data?.items || [];
+        const allOrders = Array.isArray(svcItems) ? svcItems : [];
+        setConfirmedServices(allOrders);
         setUoms(Array.isArray(uomsRes.data?.items) ? uomsRes.data.items : []);
 
         const currs = Array.isArray(curRes.data?.items) ? curRes.data.items : [];
         setFinCurrencies(currs);
-        const base = currs.find((c) => Number(c.is_base) === 1) || currs.find((c) => /ghs/i.test(String(c.code || "")));
+        const base = currs.find((c) => Number(c.is_base) === 1 || c.is_base === true);
         setBaseFinCurrencyId(base ? Number(base.id) : null);
+
+        if ((!id || id === "new") && base) {
+          setBill(p => ({ ...p, currency_id: Number(base.id) }));
+        }
 
         const items = Array.isArray(itemsRes.data?.items) ? itemsRes.data.items : [];
         const svc = items.filter((it) => String(it.service_item || "").toUpperCase() === "Y");
@@ -371,6 +380,8 @@ export default function TransportationBillForm() {
     return () => { mounted = false; };
   }, []);
 
+  const isInitialLoadRef = React.useRef(true);
+
   useEffect(() => {
     if (!bill.currency_id || finCurrencies.length === 0) return;
     const selected = finCurrencies.find((c) => String(c.id) === String(bill.currency_id));
@@ -382,10 +393,15 @@ export default function TransportationBillForm() {
       return;
     }
 
+    if (id && id !== "new" && isInitialLoadRef.current) {
+      // Skip auto-fetching exchange rate on initial load of an existing bill
+      return;
+    }
+
     getExchangeRate(selected.code, base.code).then((rate) => {
       if (rate && bill.exchange_rate !== rate) setBill((p) => ({ ...p, exchange_rate: rate }));
     });
-  }, [bill.currency_id, finCurrencies]);
+  }, [bill.currency_id, finCurrencies, id]);
 
   useEffect(() => {
     let mounted = true;
@@ -394,8 +410,8 @@ export default function TransportationBillForm() {
       try {
         setLoading(true);
         const res = await api.get(`/transport/transportation-bills/${id}`);
-        const item = res.data?.item || {};
-        const details = Array.isArray(res.data?.details) ? res.data.details : [];
+        const item = res.data?.data?.item || res.data?.item || res.data?.data || {};
+        const details = Array.isArray(res.data?.data?.details) ? res.data.data.details : Array.isArray(res.data?.details) ? res.data.details : [];
         if (!mounted) return;
 
         setBill({
@@ -439,6 +455,7 @@ export default function TransportationBillForm() {
         if (mounted) setError("Failed to load service bill");
       } finally {
         if (mounted) setLoading(false);
+        isInitialLoadRef.current = false;
       }
     }
     loadExisting();
@@ -481,7 +498,7 @@ export default function TransportationBillForm() {
     setError("");
 
     try {
-      const status = "COMPLETED";
+      const status = "POSTED";
       const payload = {
         bill_no: bill.bill_no || null,
         bill_date: toYmd(bill.bill_date),
@@ -499,19 +516,18 @@ export default function TransportationBillForm() {
         other_charges: Number(bill.other_charges) || 0,
         notes: bill.notes || null,
         cost_center_id: bill.cost_center_id ? Number(bill.cost_center_id) : null,
-        details: lines
+        items: lines
           .filter((l) => l.item_id || l.desc)
           .map((l) => ({
             item_id: l.item_id ? Number(l.item_id) : null,
             description: l.desc || l.item_name || "",
             uom_id: l.uom_id ? Number(l.uom_id) : null,
-            qty: Number(l.qty) || 0,
-            rate: Number(l.rate) || 0,
-            amount: Number(l.qty || 0) * Number(l.rate || 0),
+            quantity: Number(l.qty) || 0,
+            unit_price: Number(l.rate) || 0,
+            total_amount: Number(l.line_total) || 0,
             discount_percent: Number(l.discount_percent) || 0,
             tax_code_id: l.tax_code_id ? Number(l.tax_code_id) : null,
             tax_amount: Number(l.tax_amount) || 0,
-            line_total: Number(l.line_total) || 0,
           })),
         subtotal: Number(totals.subtotal || 0),
         discount_amount: Number(totals.discountAmount || 0),
@@ -539,22 +555,23 @@ export default function TransportationBillForm() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link to="/transport/transportation-bills" className="btn-secondary">
-            ← Back
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-7xl mx-auto">
+      {/* Header section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center gap-4">
+          <Link to="/transport/transportation-bills" className="inline-flex items-center justify-center p-2.5 text-slate-500 hover:text-slate-900 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-all shadow-sm dark:bg-slate-800 dark:border-slate-600 dark:text-slate-300 dark:hover:text-white">
+            <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-              {id && id !== "new" ? "Edit" : "New"} Fuel Bill
+            <h1 className="text-3xl font-extrabold text-brand">
+              {id && id !== "new" ? "Edit" : "New"} Transport Bill
             </h1>
-            <p className="text-sm mt-1">Prepare and issue bill for services provided</p>
+            <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium">Prepare and issue bill for services provided</p>
           </div>
         </div>
-        <div className="text-right">
-          <div className="text-xs text-slate-600">Bill No</div>
-          <div className="text-lg font-semibold">{bill.bill_no}</div>
+        <div className="mt-4 md:mt-0 text-right bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+          <div className="text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 mb-1">Bill No</div>
+          <div className="text-xl font-bold text-slate-900 dark:text-slate-100">{bill.bill_no}</div>
         </div>
       </div>
 
@@ -564,17 +581,14 @@ export default function TransportationBillForm() {
       {loading && <div className="p-4 bg-white rounded shadow text-center">Loading...</div>}
       {error && <div className="p-4 text-red-600 bg-white rounded shadow">{error}</div>}
 
-      <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg">
-          <div className="flex justify-between items-center">
-            <div className="font-semibold">Bill Details</div>
-            <div className="flex items-center gap-2">
-              <StatusBadge status={bill.status} />
-              <PaymentBadge payment={bill.payment_status} />
-            </div>
+      <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-2 font-bold text-lg text-slate-800 dark:text-slate-200">
+            <FileText className="w-5 h-5 text-brand-500" />
+            Bill Details
           </div>
         </div>
-        <div className="card-body grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="form-group">
             <label className="label required">Bill Date</label>
             <input type="date" className={`input ${disabledClass}`} value={bill.bill_date} onChange={(e) => update("bill_date", e.target.value)} readOnly={readOnly} 
@@ -658,16 +672,55 @@ export default function TransportationBillForm() {
             <select
               className={`input ${disabledClass}`}
               value={bill.relatedExecId || ""}
-              onChange={(e) => update("relatedExecId", e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                update("relatedExecId", val);
+                if (val) {
+                  const log = confirmedServices.find(so => String(so.id) === String(val));
+                  if (log) {
+                    if (log.items && log.items.length > 0) {
+                      const firstItem = log.items[0];
+                      setNewItem(prev => ({
+                        ...prev,
+                        item_id: String(firstItem.item_id || ""),
+                        qty: Number(firstItem.quantity || 1),
+                        rate: Number(firstItem.unit_price || 0),
+                        tax_code_id: log.tax_code_id ? String(log.tax_code_id) : "",
+                        desc: log.expense_type || "",
+                      }));
+                      const matchedItem = serviceItems.find(i => String(i.id) === String(firstItem.item_id));
+                      if (matchedItem) setItemQuery(matchedItem.item_name);
+                      else if (firstItem.item_name) setItemQuery(firstItem.item_name);
+                      else setItemQuery(log.expense_type || "");
+                    } else {
+                      const matchedItem = serviceItems.find(i => (i.item_name || "").toLowerCase() === (log.expense_type || "").toLowerCase());
+                      setNewItem(prev => ({
+                        ...prev,
+                        item_id: matchedItem ? String(matchedItem.id) : "",
+                        qty: 1,
+                        rate: Number(log.amount || 0),
+                        tax_code_id: log.tax_code_id ? String(log.tax_code_id) : "",
+                        desc: log.expense_type || "",
+                      }));
+                      if (matchedItem) {
+                        setItemQuery(matchedItem.item_name);
+                      } else {
+                        setItemQuery(log.expense_type || "");
+                      }
+                    }
+                  }
+                }
+              }}
               disabled={readOnly}
             >
               <option value="">-- Select Expense Log --</option>
               {(() => {
-                const selectedSup = suppliers.find(s => String(s.id) === String(bill.supplier_id));
-                const supCode = selectedSup?.supplier_code || selectedSup?.code || null;
                 return confirmedServices
-                  .filter(so => supCode && String(so.contractor_code) === String(supCode) && String(so.status || "").toUpperCase() === "DONE")
-                  .map((so) => (<option key={so.id} value={String(so.id)}>{so.order_no} - {so.customer_name || so.service_type || ""}</option>));
+                  .filter(so =>
+                    String(so.supplier_id) === String(bill.supplier_id) &&
+                    (!so.bill_id || String(so.id) === String(bill.relatedExecId))
+                  )
+                  .map((so) => (<option key={so.id} value={String(so.id)}>{so.log_number || `Expense #${so.id}`} - {so.expense_type} ({Number(so.amount).toFixed(2)})</option>));
               })()}
             </select>
           </div>
@@ -711,15 +764,20 @@ export default function TransportationBillForm() {
         </div>
       </div>
 
-      <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg">
-          <div className="font-semibold">Service Lines</div>
+      <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden mt-6">
+        <div className="p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
+          <div className="flex items-center gap-2 font-bold text-lg text-slate-800 dark:text-slate-200">
+            <FileText className="w-5 h-5 text-brand-500" />
+            Service Lines
+          </div>
         </div>
-        <div className="card-body">
+        <div className="p-0 md:p-6">
           {!readOnly && (
-            <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg mb-6">
-              <h4 className="text-sm font-semibold mb-3 text-brand">Add Service</h4>
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-3">
+            <div className="p-5 md:p-6 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl mb-6 shadow-sm mx-4 md:mx-0 mt-4 md:mt-0">
+              <h4 className="text-sm font-bold mb-4 text-brand-600 dark:text-brand-400 flex items-center">
+                <Plus className="w-4 h-4 mr-1.5" /> Add Service
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-5 mb-3">
                 <div className="md:col-span-4">
                   <label className="text-xs uppercase font-semibold text-slate-500 mb-1 block">Service Item *</label>
                   <div className="relative">
@@ -831,24 +889,23 @@ export default function TransportationBillForm() {
               </div>
             </div>
           )}
-          <div className="overflow-x-auto">
-            <table className="table">
-              <thead className="bg-[#f8f9fa]">
-                <tr>
-                  <th>#</th>
-                  <th className="min-w-[300px]">Item</th>
-
-                  <th className="text-right">Qty</th>
-                  <th className="text-right">Rate</th>
-                  <th className="text-right">Disc%</th>
-                  <th className="text-right">Tax</th>
-                  <th className="text-right">Total</th>
-                  {!readOnly && <th></th>}
+          <div className="overflow-x-auto w-full border-y md:border border-slate-200 dark:border-slate-700 md:rounded-xl bg-white dark:bg-slate-900 shadow-sm">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-100/80 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-xs uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">
+                  <th className="px-4 py-4 text-center w-12">#</th>
+                  <th className="px-4 py-4 min-w-[250px]">Item</th>
+                  <th className="px-4 py-4 text-right w-24">Qty</th>
+                  <th className="px-4 py-4 text-right w-32">Rate</th>
+                  <th className="px-4 py-4 text-right w-24">Disc%</th>
+                  <th className="px-4 py-4 text-right w-24">Tax</th>
+                  <th className="px-4 py-4 text-right w-32">Total</th>
+                  {!readOnly && <th className="px-4 py-4 w-16 text-center">Act</th>}
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
                 {lines.length === 0 ? (
-                  <tr><td colSpan="8" className="text-center py-10 text-slate-400 bg-slate-50 italic">No service items added yet.</td></tr>
+                  <tr><td colSpan="8" className="text-center py-16 text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-slate-900/50 italic">No service items added yet.</td></tr>
                 ) : (
                   lines.map((row, i) => {
                     const qty = Number(row.qty || 0);
@@ -861,34 +918,35 @@ export default function TransportationBillForm() {
                     const total = Number(row.line_total || 0) || net + tax;
                     return (
                       <tr key={row.id || i} className="hover:bg-slate-50">
-                        <td>{i + 1}</td>
-                        <td>
+                        <td className="px-4 py-3 text-center text-slate-500 font-medium">{i + 1}</td>
+                        <td className="px-4 py-3">
                           {!readOnly ? (
-                            <select className="input text-xs w-full" value={row.item_id || ""} onChange={(e) => handleLineChange(row.id, "item_id", e.target.value)}>
+                            <select className="input w-full dark:bg-slate-800 dark:border-slate-700" value={row.item_id || ""} onChange={(e) => handleLineChange(row.id, "item_id", e.target.value)}>
                               <option value="">Select item</option>
                               {serviceItems.map((it) => (<option key={it.id} value={String(it.id)}>{it.item_name}</option>))}
                             </select>
                           ) : (
-                            <span className="font-medium text-[#0E3646]">{row.item_name || row.desc || "Unknown"}</span>
+                            <span className="font-semibold text-slate-900 dark:text-slate-100">{row.item_name || row.desc || "Unknown"}</span>
                           )}
                         </td>
-
-                        <td className="text-right">
+                        <td className="px-4 py-3 text-right">
                           {!readOnly ? (
-                            <input type="number" className="input text-right text-xs w-20" value={row.qty} onChange={(e) => handleLineChange(row.id, "qty", e.target.value)} />
-                          ) : row.qty}
+                            <input type="number" className="input text-right w-full dark:bg-slate-800 dark:border-slate-700" value={row.qty} onChange={(e) => handleLineChange(row.id, "qty", e.target.value)} />
+                          ) : <span className="font-medium text-slate-700 dark:text-slate-300">{row.qty}</span>}
                         </td>
-                        <td className="text-right font-mono">
+                        <td className="px-4 py-3 text-right font-mono">
                           {!readOnly ? (
-                            <input type="number" className="input text-right text-xs w-24" value={row.rate} onChange={(e) => handleLineChange(row.id, "rate", e.target.value)} />
+                            <input type="number" className="input text-right w-full dark:bg-slate-800 dark:border-slate-700" value={row.rate} onChange={(e) => handleLineChange(row.id, "rate", e.target.value)} />
                           ) : Number(row.rate).toFixed(2)}
                         </td>
-                        <td className="text-right text-red-500">{row.discount_percent}%</td>
-                        <td className="text-right text-slate-500">{tax.toFixed(2)}</td>
-                        <td className="text-right font-bold text-[#0E3646]">{total.toFixed(2)}</td>
+                        <td className="px-4 py-3 text-right font-medium text-red-500 dark:text-red-400">{row.discount_percent}%</td>
+                        <td className="px-4 py-3 text-right text-slate-500 dark:text-slate-400 font-mono">{tax.toFixed(2)}</td>
+                        <td className="px-4 py-3 text-right font-bold text-slate-900 dark:text-slate-100 font-mono">{selectedCurrencySymbol}{total.toFixed(2)}</td>
                         {!readOnly && (
-                          <td className="text-center">
-                            <button type="button" className="text-red-500 hover:text-red-800 transition-colors text-xs" onClick={() => removeRow(i)}>Remove</button>
+                          <td className="px-4 py-3 text-center">
+                            <button type="button" className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors" onClick={() => removeRow(i)} title="Remove Item">
+                              <Trash2 className="w-4 h-4 mx-auto" />
+                            </button>
                           </td>
                         )}
                       </tr>
@@ -898,66 +956,79 @@ export default function TransportationBillForm() {
               </tbody>
             </table>
           </div>
-          <div className="mt-6 flex justify-end">
-            <div className="w-72 space-y-2 text-sm">
-              <div className="flex justify-between items-center py-1">
-                <span className="text-slate-600">Sub Total:</span>
-                <span className="font-semibold">{totals.subtotal.toFixed(2)}</span>
+          <div className="mt-8 flex flex-col items-end md:mx-6 mb-6">
+            <div className="w-full md:w-80 space-y-3 bg-slate-50 dark:bg-slate-800/30 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-600 dark:text-slate-400 font-medium">Sub Total:</span>
+                <span className="font-semibold text-slate-900 dark:text-slate-100 font-mono">{selectedCurrencySymbol}{totals.subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between items-center py-1 text-red-600">
-                <span className="text-slate-600">Discount Amount:</span>
-                <span>-{totals.discountAmount.toFixed(2)}</span>
-              </div>
+              {totals.discountAmount > 0 && (
+                <div className="flex justify-between items-center text-sm text-red-600 dark:text-red-400">
+                  <span className="font-medium">Discount Amount:</span>
+                  <span className="font-mono">-{selectedCurrencySymbol}{totals.discountAmount.toFixed(2)}</span>
+                </div>
+              )}
               {totals.components.length > 0 && (
               <>
-              <div className="flex justify-between items-center py-2 border-b border-slate-200">
-                <span className="font-medium">Tax</span>
-                <span className="font-bold">{totals.taxAmount.toFixed(2)}</span>
+              <div className="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-700 text-sm">
+                <span className="font-medium text-slate-700 dark:text-slate-300">Total Tax</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 font-mono">{selectedCurrencySymbol}{totals.taxAmount.toFixed(2)}</span>
               </div>
               {totals.components.map((c) => (
-                <div key={c.name} className="flex justify-between items-center py-1 text-xs text-slate-500 pl-4">
+                <div key={c.name} className="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400 pl-2">
                   <span>{c.name} ({c.rate}%):</span>
-                  <span>{Number(c.amount || 0).toFixed(2)}</span>
+                  <span className="font-mono">{selectedCurrencySymbol}{Number(c.amount || 0).toFixed(2)}</span>
                 </div>
               ))}
               </>
               )}
-              <div className="flex justify-between items-center py-1">
-                <span className="text-slate-600">Other Charges:</span>
+              <div className="flex justify-between items-center text-sm pt-2 border-t border-slate-200 dark:border-slate-700">
+                <span className="text-slate-600 dark:text-slate-400 font-medium">Other Charges:</span>
                 {!readOnly ? (
-                  <input className={`input w-28 text-right text-xs ${disabledClass}`} type="number" value={bill.other_charges} onChange={(e) => update("other_charges", e.target.value)} readOnly={readOnly} />
-                ) : totals.other.toFixed(2)}
+                  <div className="relative w-28">
+                    <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                      <span className="text-slate-500 text-xs">{selectedCurrencySymbol}</span>
+                    </div>
+                    <input className={`w-full pl-6 pr-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg text-right text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all ${disabledClass}`} type="number" value={bill.other_charges} onChange={(e) => update("other_charges", e.target.value)} readOnly={readOnly} />
+                  </div>
+                ) : <span className="font-mono">{selectedCurrencySymbol}{totals.other.toFixed(2)}</span>}
               </div>
-              <div className="flex justify-between items-center pt-3 mt-1 border-t-2 border-slate-900 dark:border-slate-100 text-lg font-bold text-[#0E3646]">
-                <span>Total Amount:</span>
-                <span>{totals.total.toFixed(2)}</span>
+              <div className="flex justify-between items-center pt-4 mt-2 border-t-2 border-slate-900 dark:border-slate-600 text-xl font-bold">
+                <span className="text-slate-900 dark:text-slate-100">Total Amount:</span>
+                <span className="text-brand font-mono">{selectedCurrencySymbol}{totals.total.toFixed(2)}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-
-
-      <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg">
-          <div className="font-semibold">Notes</div>
+      <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden mb-8 mt-6">
+        <div className="p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
+          <div className="flex items-center gap-2 font-bold text-lg text-slate-800 dark:text-slate-200">
+            <FileText className="w-5 h-5 text-brand-500" />
+            Additional Notes
+          </div>
         </div>
-        <div className="card-body">
-          <textarea className={`input ${disabledClass}`} rows={3} value={bill.notes} onChange={(e) => update("notes", e.target.value)} placeholder="Additional notes..." readOnly={readOnly} />
+        <div className="p-6">
+          <textarea className={`w-full p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition-all resize-none text-slate-700 dark:text-slate-300 ${disabledClass}`} rows={3} value={bill.notes} onChange={(e) => update("notes", e.target.value)} placeholder="Type any additional notes or terms here..." readOnly={readOnly} />
         </div>
       </div>
 
-      <div className="flex justify-end gap-2">
-        <button type="button" className="btn-secondary" onClick={() => navigate("/transport/transportation-bills")} disabled={saving}>
+      <div className="flex items-center justify-end gap-3 pt-2 pb-10">
+        <button type="button" className="px-6 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-all shadow-sm dark:bg-slate-800 dark:border-slate-600 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700" onClick={() => navigate("/transport/transportation-bills")} disabled={saving}>
           Cancel
         </button>
         {!readOnly && (
-          <>
-            <button type="button" className="btn-primary" onClick={() => saveBill()} disabled={saving}>
-              {saving ? "Saving..." : "Save Bill"}
-            </button>
-          </>
+          <button type="button" className="inline-flex items-center justify-center px-6 py-2.5 text-sm font-semibold text-white bg-brand rounded-xl hover:bg-brand-600 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:opacity-70 disabled:transform-none" onClick={() => saveBill()} disabled={saving}>
+            {saving ? (
+              <span className="flex items-center">
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                Saving...
+              </span>
+            ) : (
+              <span className="flex items-center"><Save className="w-4 h-4 mr-2" /> Save Bill</span>
+            )}
+          </button>
         )}
       </div>
     </div>

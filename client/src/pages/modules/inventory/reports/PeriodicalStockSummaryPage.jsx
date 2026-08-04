@@ -4,6 +4,7 @@
  */
 
 import React, { useEffect, useState } from "react";
+import { Download, Printer } from "lucide-react";
 import useSort from "@/hooks/useSort.js";
 import SortableHeader from "@/components/SortableHeader.jsx";
 import { toast } from "react-toastify";
@@ -140,12 +141,48 @@ export default function PeriodicalStockSummaryPage() {
 
   const { sorted: sorted_items, sortKey, sortDir, toggle } = useSort(items, "date", "desc");
 
+
+  function exportExcel() {
+    const rows = Array.isArray(items) ? items : (typeof sortedItems !== 'undefined' && Array.isArray(sortedItems) ? sortedItems : (typeof sorted_items !== 'undefined' && Array.isArray(sorted_items) ? sorted_items : []));
+    if (!rows || !rows.length) return;
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Report");
+    XLSX.writeFile(wb, "inventory-report.xlsx");
+  }
+
+  function exportPDF() {
+    const rows = Array.isArray(items) ? items : (typeof sortedItems !== 'undefined' && Array.isArray(sortedItems) ? sortedItems : (typeof sorted_items !== 'undefined' && Array.isArray(sorted_items) ? sorted_items : []));
+    if (!rows || !rows.length) return;
+    const doc = new jsPDF("p", "mm", "a4");
+    doc.setFontSize(16);
+    doc.text("Inventory Report", 14, 15);
+    doc.setFontSize(10);
+    doc.text(`Generated on ${new Date().toLocaleDateString()}`, 14, 22);
+    
+    // Fallback simple PDF generation
+    const headers = Object.keys(rows[0] || {}).slice(0, 8);
+    const data = rows.map(r => headers.map(h => String(r[h] || "")));
+    
+    try {
+      doc.autoTable({
+        startY: 30,
+        head: [headers],
+        body: data,
+        styles: { fontSize: 8 }
+      });
+    } catch (e) {
+      doc.text("Data table (see Excel for full details)", 14, 30);
+    }
+    doc.save("inventory-report.pdf");
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <Link
-            to="/inventory"
+            to="/inventory?section=Reports%20%26%20Valuation"
             className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
           >
             ← Back to Inventory
@@ -157,6 +194,16 @@ export default function PeriodicalStockSummaryPage() {
             Opening, receipts, issues, closing per period
           </p>
         </div>
+        <div className="flex gap-2">
+          <button onClick={exportExcel} className="btn btn-outline btn-sm border-brand text-brand hover:bg-brand hover:text-white flex items-center gap-1.5 text-xs">
+            <Download size={14} /> Excel
+          </button>
+          <button onClick={exportPDF} className="btn btn-outline btn-sm border-brand text-brand hover:bg-brand hover:text-white flex items-center gap-1.5 text-xs">
+            <Download size={14} /> PDF
+          </button>
+          
+        </div>
+
       </div>
 
       <div className="card">
@@ -326,84 +373,8 @@ export default function PeriodicalStockSummaryPage() {
               ) : null}
             </div>
             <div className="flex items-end gap-3 sm:ml-auto flex-wrap">
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => {
-                  const rows = Array.isArray(items) ? items : [];
-                  if (!rows.length) return;
-                  const ws = XLSX.utils.json_to_sheet(rows);
-                  const wb = XLSX.utils.book_new();
-                  XLSX.utils.book_append_sheet(
-                    wb,
-                    ws,
-                    "PeriodicalStockSummary",
-                  );
-                  XLSX.writeFile(wb, "periodical-stock-summary.xlsx");
-                }}
-                disabled={!items.length}
-              >
-                Export Excel
-              </button>
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={() => {
-                  const rows = Array.isArray(items) ? items : [];
-                  if (!rows.length) return;
-                  const doc = new jsPDF("p", "mm", "a4");
-                  let y = 15;
-                  doc.setFontSize(14);
-                  doc.text("Periodical Stock Summary", 10, y);
-                  y += 8;
-                  doc.setFontSize(10);
-                  doc.text("Item", 10, y);
-                  doc.text("Opening", 95, y);
-                  doc.text("Receipts", 130, y);
-                  doc.text("Issues", 160, y);
-                  doc.text("Closing", 190, y, { align: "right" });
-                  y += 4;
-                  doc.line(10, y, 200, y);
-                  y += 5;
-                  rows.forEach((r) => {
-                    if (y > 270) {
-                      doc.addPage();
-                      y = 15;
-                    }
-                    doc.text(
-                      String(r.item_name || r.item_code || "-").slice(0, 60),
-                      10,
-                      y,
-                    );
-                    doc.text(
-                      String(Number(r.opening_qty || 0).toLocaleString()),
-                      95,
-                      y,
-                    );
-                    doc.text(
-                      String(Number(r.receipts_qty || 0).toLocaleString()),
-                      130,
-                      y,
-                    );
-                    doc.text(
-                      String(Number(r.issues_qty || 0).toLocaleString()),
-                      160,
-                      y,
-                    );
-                    doc.text(
-                      String(Number(r.closing_qty || 0).toLocaleString()),
-                      190,
-                      y,
-                      { align: "right" },
-                    );
-                    y += 5;
-                  });
-                  doc.save("periodical-stock-summary.pdf");
-                }}
-                disabled={!items.length}
-              >
-                Export PDF
-              </button>
+              
+              
             </div>
           </div>
 

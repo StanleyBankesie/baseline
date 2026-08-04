@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Loader2, User, Trash2, Plus, X, Pencil, Building2, Warehouse } from "lucide-react";
+import { Loader2, User, Trash2, Plus, X, Pencil, Building2, Warehouse, Wrench } from "lucide-react";
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import PhoneInput from "../../../../components/PhoneInput.jsx";
@@ -128,8 +128,18 @@ export default function Setup() {
     sales_account_id: "", currency_id: ""
   });
   const [clientSaving, setClientSaving] = useState(false);
+
+  // ── Equipments ────────────────────────────────────
+  const [equipments, setEquipments] = useState([]);
+  const [eqModal, setEqModal] = useState(false);
+  const [editingEq, setEditingEq] = useState(null);
+  const [eqForm, setEqForm] = useState({ name: "", description: "", status: "ACTIVE", maint_equipment_id: "" });
+  const [eqSaving, setEqSaving] = useState(false);
+  const [maintAssets, setMaintAssets] = useState([]);
+
   const [accounts, setAccounts] = useState([]);
   const [currencies, setCurrencies] = useState([]);
+  const baseCurrencyId = currencies.find((c) => Number(c.is_base) === 1 || c.is_base === true)?.id || "";
   const [supExpenseAccountSearch, setSupExpenseAccountSearch] = useState("");
   const supExpenseAccountResults = useMemo(() => {
     if (!supExpenseAccountSearch) return [];
@@ -190,6 +200,20 @@ export default function Setup() {
     } catch { toast.error("Failed to load clients"); }
   }, []);
 
+  const loadEquipments = useCallback(async () => {
+    try {
+      const res = await api.get("/projects/equipments");
+      setEquipments(res.data || []);
+    } catch { toast.error("Failed to load equipments"); }
+  }, []);
+
+  const loadMaintAssets = useCallback(async () => {
+    try {
+      const res = await api.get("/maintenance/assets").catch(() => ({ data: { items: [] }}));
+      setMaintAssets(res.data?.items || res.data || []);
+    } catch { }
+  }, []);
+
   const loadAccountsAndCurrencies = useCallback(async () => {
     try {
       const [accRes, curRes] = await Promise.all([
@@ -203,8 +227,8 @@ export default function Setup() {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([loadManagers(), loadDepartments(), loadWarehouses(), loadSuppliers(), loadClients(), loadAccountsAndCurrencies()]).finally(() => setLoading(false));
-  }, [loadManagers, loadDepartments, loadWarehouses, loadSuppliers, loadClients, loadAccountsAndCurrencies]);
+    Promise.all([loadManagers(), loadDepartments(), loadWarehouses(), loadSuppliers(), loadClients(), loadEquipments(), loadMaintAssets(), loadAccountsAndCurrencies()]).finally(() => setLoading(false));
+  }, [loadManagers, loadDepartments, loadWarehouses, loadSuppliers, loadClients, loadEquipments, loadMaintAssets, loadAccountsAndCurrencies]);
 
   /* ── Project Managers ── */
   const handleAddManager = async () => {
@@ -298,7 +322,7 @@ export default function Setup() {
       city: "", state: "", country: "Ghana", payment_terms: "", 
       tax_id: "", business_reg_no: "", supplier_type: "LOCAL", 
       service_contractor: true, industry: "Services", is_active: 1,
-      expense_account_id: "", currency_id: ""
+      expense_account_id: "", currency_id: baseCurrencyId
     }); 
     setSupModal(true); 
   };
@@ -359,7 +383,7 @@ export default function Setup() {
       customer_name: "", customer_code: nextCode, contact_person: "", email: "", phone: "", address: "", 
       city: "", state: "", country: "Ghana", payment_terms: "", 
       customer_type: "LOCAL", service_customer: true, is_active: 1,
-      sales_account_id: "", currency_id: ""
+      sales_account_id: "", currency_id: baseCurrencyId
     }); 
     setClientModal(true); 
   };
@@ -412,13 +436,14 @@ export default function Setup() {
     { id: "warehouses",  label: "Temp. Storage / Warehouses" },
     { id: "suppliers",   label: "Suppliers" },
     { id: "clients",     label: "Clients" },
+    { id: "equipments",  label: "Equipments" },
   ];
 
   return (
     <div className="p-4 space-y-6">
       {/* Page Header */}
       <div className="flex items-center gap-3">
-        <Link to="/project-management" className="btn-secondary text-sm">Back to Menu</Link>
+        <Link to="/project-management?section=Reports%20%26%20Analytics" className="btn-secondary text-sm">Back</Link>
         <div>
           <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Project Setup</h2>
           <p className="text-xs text-slate-500">Configure managers, departments, and storage</p>
@@ -886,6 +911,91 @@ export default function Setup() {
               <button className="btn-outline" onClick={() => setClientModal(false)}>Cancel</button>
               <button className="btn-primary flex items-center gap-2" disabled={clientSaving} onClick={saveClient}>
                 {clientSaving ? <Loader2 size={14} className="animate-spin" /> : null} Save
+              </button>
+            </div>
+          </ModalForm>
+        </>
+      )}
+
+      {/* ── Equipments Tab ── */}
+      {activeTab === "equipments" && (
+        <>
+          <CrudSection
+            title="Project Equipments"
+            icon={<Wrench size={18} className="text-slate-600" />}
+            emptyMsg="No equipments found. Add one to get started."
+            columns={["Name", "Linked Maintenance Asset", "Status"]}
+            rows={equipments}
+            loading={loading}
+            onAdd={() => { setEditingEq(null); setEqForm({ name: "", description: "", status: "ACTIVE", maint_equipment_id: "" }); setEqModal(true); }}
+            onEdit={(e) => { setEditingEq(e); setEqForm({ name: e.name || "", description: e.description || "", status: e.status || "ACTIVE", maint_equipment_id: e.maint_equipment_id || "" }); setEqModal(true); }}
+            onDelete={async (id) => {
+              if (!confirm("Delete this equipment?")) return;
+              try {
+                await api.delete(`/projects/equipments/${id}`);
+                toast.success("Equipment deleted");
+                loadEquipments();
+              } catch (e) { toast.error(e?.response?.data?.message || "Failed to delete equipment"); }
+            }}
+            renderRow={e => (
+              <>
+                <td className="px-4 py-3 font-medium text-sm">{e.name}</td>
+                <td className="px-4 py-3 text-sm text-slate-500">{e.maint_equipment_name || "—"}</td>
+                <td className="px-4 py-3">
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${e.status === "ACTIVE" ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
+                    {e.status}
+                  </span>
+                </td>
+              </>
+            )}
+          />
+
+          <ModalForm open={eqModal} onClose={() => setEqModal(false)} title={editingEq ? "Edit Equipment" : "New Equipment"}>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Equipment Name *</label>
+                <input type="text" className="input w-full" placeholder="e.g. Excavator Model X" value={eqForm.name} onChange={e => setEqForm(p => ({ ...p, name: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Description</label>
+                <textarea className="input w-full" placeholder="Specs, details..." value={eqForm.description} onChange={e => setEqForm(p => ({ ...p, description: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Link to Maintenance Asset (Optional)</label>
+                <select className="input w-full" value={eqForm.maint_equipment_id} onChange={e => setEqForm(p => ({ ...p, maint_equipment_id: e.target.value }))}>
+                  <option value="">-- None --</option>
+                  {maintAssets.map(a => <option key={a.id} value={a.id}>{a.asset_name} ({a.asset_code})</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Status</label>
+                <select className="input w-full" value={eqForm.status} onChange={e => setEqForm(p => ({ ...p, status: e.target.value }))}>
+                  <option value="ACTIVE">ACTIVE</option>
+                  <option value="INACTIVE">INACTIVE</option>
+                  <option value="MAINTENANCE">MAINTENANCE</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <button className="btn-outline" onClick={() => setEqModal(false)}>Cancel</button>
+              <button className="btn-primary flex items-center gap-2" disabled={eqSaving} onClick={async () => {
+                if (!eqForm.name.trim()) { toast.error("Equipment name is required"); return; }
+                setEqSaving(true);
+                try {
+                  const payload = { ...eqForm, maint_equipment_id: eqForm.maint_equipment_id || null };
+                  if (editingEq) {
+                    await api.put(`/projects/equipments/${editingEq.id}`, payload);
+                    toast.success("Equipment updated");
+                  } else {
+                    await api.post("/projects/equipments", payload);
+                    toast.success("Equipment created");
+                  }
+                  setEqModal(false);
+                  loadEquipments();
+                } catch (e) { toast.error(e?.response?.data?.message || "Failed to save equipment"); }
+                finally { setEqSaving(false); }
+              }}>
+                {eqSaving ? <Loader2 size={14} className="animate-spin" /> : null} Save
               </button>
             </div>
           </ModalForm>

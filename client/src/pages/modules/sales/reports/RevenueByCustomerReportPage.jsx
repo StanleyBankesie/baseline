@@ -33,7 +33,7 @@ export default function RevenueByCustomerReportPage() {
       setLoading(true);
       setError("");
       const res = await api.get("/sales/reports/revenue-by-customer", {
-        params: { from: from || null, to: to || null, customer: customer || null },
+        params: { from: null, to: null, customer: null },
       });
       setItems(Array.isArray(res?.data?.items) ? res.data.items : []);
     } catch (e) {
@@ -135,7 +135,7 @@ export default function RevenueByCustomerReportPage() {
             <p className="text-sm mt-1">Identify top customers</p>
           </div>
           <div className="flex gap-2">
-            <div className="flex items-center gap-3"><div className="flex items-center gap-2" title="Live Auto-Refresh Active"><span className="relative flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span></span><span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Live</span></div><Link to="/sales" className="btn btn-secondary">Return to Menu</Link></div>
+            <div className="flex items-center gap-3"><div className="flex items-center gap-2" title="Live Auto-Refresh Active"><span className="relative flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span></span><span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Live</span></div><Link to="/sales?section=Analytics%20%26%20Reports" className="btn btn-secondary">Back</Link></div>
             <button
               className="btn-success"
               onClick={exportCSV}

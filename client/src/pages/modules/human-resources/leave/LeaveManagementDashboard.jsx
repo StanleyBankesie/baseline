@@ -69,7 +69,7 @@ export default function LeaveManagementDashboard() {
             Strict Priority Hierarchy: APPLICATION {">"} SCHEDULE {">"} ROSTER
           </p>
         </div>
-        <Link to="/human-resources" className="btn-secondary shrink-0">
+        <Link to="/human-resources?section=Leave%20Management" className="btn-secondary shrink-0">
           ← Back
         </Link>
       </div>

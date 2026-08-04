@@ -1788,30 +1788,34 @@ export default function ReceiptVoucherForm() {
               exchangeRate: Number(rvVoucherExchangeRate || 1) || 1,
             }
           : {}),
-        ...(isPAYV &&
-        paymentType === "AGAINST_BILL" &&
-        selectedBillId &&
-        Number(totals.grand || 0) > 0
-          ? {
-              apply_to_purchase_bills: [
-                {
-                  bill_id: Number(selectedBillId),
-                  amount: Number(totals.grand || 0),
-                },
-              ],
-            }
+        ...(isRV && rvForm.receiptType === "AGAINST_INVOICE" && selectedInvoiceRefs.length > 0
+          ? (() => {
+              const allocations = [];
+              let remaining = Number(totals.grand || 0);
+              const selectedInvoices = customerInvoices.filter(i => selectedInvoiceRefs.includes(String(i.invoice_no)));
+              for (const inv of selectedInvoices) {
+                if (!inv || remaining <= 0) continue;
+                const balance = Number(inv.balance_amount || inv.net_amount || 0);
+                const alloc = Math.min(balance, remaining);
+                remaining -= alloc;
+                allocations.push({ invoice_id: inv.id, amount: alloc });
+              }
+              return {
+                apply_to_sales_invoices: allocations.map(a => ({ invoice_id: Number(a.invoice_id), amount: Number(a.amount) }))
+              };
+            })()
           : {}),
-        // Include payment details for Direct Payment - backend will generate posting lines
-        ...(isPAYV && paymentType === "DIRECT"
+        // Include payment details for Direct Receipt
+        ...(isRV && rvForm.receiptType === "DIRECT"
           ? {
               paymentDetails: {
                 accountId: firstPvPaymentItem.accountId || null,
-                paymentAccountId: pvForm.paymentAccountId || null,
+                paymentAccountId: rvForm.depositAccountId || null,
                 totalAmount: Number(totals.grand || 0),
-                baseAmount: Number(pvAmountInBase || 0),
+                baseAmount: Number(rvAmountInBase || 0),
                 baseCurrencyCode: baseCurrency?.code || "USD",
-                currencyCode: effectivePaymentCurrencyCode || "USD",
-                description: firstPvPaymentItem.description || "Direct Payment",
+                currencyCode: rvVoucherCurrencyId ? "GHS" : "GHS", // Will be processed on backend
+                description: firstPvPaymentItem.description || "Direct Receipt",
               },
             }
           : {}),
@@ -4690,17 +4694,17 @@ export default function ReceiptVoucherForm() {
                 </div>
               ) : null}
 
-              <div>
+              <div className="w-full mt-6">
                 <label className="label">Notes / Remarks</label>
                 <textarea
-                  className="input h-24"
+                  className="input h-24 w-full"
                   value={rvForm.notes}
                   onChange={(e) => updateRvForm({ notes: e.target.value })}
                   placeholder="Additional notes or comments"
                 />
               </div>
 
-              <div className="flex flex-col md:flex-row gap-2">
+              <div className="flex flex-col md:flex-row justify-end gap-2 mt-4">
                 <Link to="/finance/receipt-voucher" className="btn-success">
                   Cancel
                 </Link>

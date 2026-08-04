@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "../../api/client.js";
 import { MODULES_REGISTRY } from "../../data/modulesRegistry.js";
+import { DASHBOARD_CARDS } from "../../data/dashboardCards.js";
 import { useAuth } from "../../auth/AuthContext.jsx";
 import { usePermission } from "../../auth/PermissionContext.jsx";
 
@@ -39,6 +40,7 @@ export default function DashboardPermissions() {
   const [perms, setPerms] = useState([]);
   const [userToggles, setUserToggles] = useState({});
   const [togglesInitialized, setTogglesInitialized] = useState(false);
+  const [licensedModules, setLicensedModules] = useState(null);
 
   useEffect(() => {
     setUserToggles({});
@@ -56,11 +58,46 @@ export default function DashboardPermissions() {
     setTogglesInitialized(true);
   }, [perms, togglesInitialized]);
 
+  useEffect(() => {
+    async function fetchLicense() {
+      if (!selectedUserId || users.length === 0) {
+        setLicensedModules(null);
+        return;
+      }
+      const selectedUser = users.find((u) => String(u.id) === String(selectedUserId));
+      if (!selectedUser || !selectedUser.company_id) {
+        setLicensedModules(null);
+        return;
+      }
+      try {
+        const res = await api.get(`/licenses/company/${selectedUser.company_id}`);
+        setLicensedModules(res.data?.modules || []);
+      } catch (err) {
+        setLicensedModules([]);
+      }
+    }
+    fetchLicense();
+  }, [selectedUserId, users]);
+
   const modules = useMemo(() => {
     const base = Object.entries(MODULES_REGISTRY).map(([key, val]) => {
       const fromRegistry = Array.isArray(val.dashboards) ? val.dashboards : [];
       const existing = new Set(fromRegistry.map((d) => String(d.key || "")));
-      const extras = [{ key: "dashboard", name: "Dashboard" }];
+      const modulesWithDashboard = new Set([
+        "sales",
+        "purchase",
+        "inventory",
+        "finance",
+        "human-resources",
+        "maintenance",
+        "pos",
+        "project-management",
+        "service-management",
+        "business-intelligence",
+        "executive-overview",
+        "transport"
+      ]);
+      const extras = modulesWithDashboard.has(key) ? [{ key: "dashboard", name: "Dashboard" }] : [];
       if (key === "business-intelligence") {
         extras.unshift({ key: "dashboards", name: "Dashboards" });
       }
@@ -111,18 +148,13 @@ export default function DashboardPermissions() {
 
   const KNOWN_CARDS = useMemo(
     () => ({
-      home: [
-        { key: "today-sales", label: "Today Sales" },
-        { key: "total-customers", label: "Total Customers" },
-        { key: "average-order", label: "Average Order" },
-        { key: "monthly-revenue", label: "Monthly Revenue" },
-      ],
+      home: Object.values(DASHBOARD_CARDS).flat().map(c => ({ ...c, moduleGroup: Object.keys(DASHBOARD_CARDS).find(k => DASHBOARD_CARDS[k].some(x => x.key === c.key)) })),
       administration: [
         { key: "total-users", label: "Total Users" },
         { key: "roles-pages", label: "Roles & Pages" },
         { key: "active-sessions", label: "Active Sessions (24h)" },
         { key: "pending-workflows", label: "Pending Workflows" },
-      ],
+],
       sales: [
         { key: "sales-this-month", label: "Total Sales This Month" },
         { key: "open-quotations", label: "Open Quotations" },
@@ -130,67 +162,67 @@ export default function DashboardPermissions() {
         { key: "overdue-invoices", label: "Overdue Invoices" },
         { key: "total-revenue", label: "Total Revenue" },
         { key: "sales-growth", label: "Sales Growth %" },
-      ],
+],
       purchase: [
         { key: "total-purchases", label: "Total Purchases" },
         { key: "active-purchase-orders", label: "Active Purchase Orders" },
         { key: "active-suppliers", label: "Active Suppliers" },
         { key: "pending-approvals", label: "Pending Approvals" },
         { key: "outstanding-payables", label: "Outstanding Payables" },
-      ],
+],
       inventory: [
         { key: "items-tracked", label: "Items Tracked" },
         { key: "stock-quantity", label: "Stock Quantity" },
         { key: "pending-requisitions", label: "Pending Requisitions" },
         { key: "low-stock-items", label: "Low Stock Items" },
-      ],
+],
       finance: [
         { key: "cash-balance", label: "Cash on Hand" },
         { key: "bank-balance", label: "Bank Balance" },
         { key: "pending-vouchers", label: "Pending Vouchers" },
         { key: "net-income", label: "Net Income (MTD)" },
-      ],
+],
       "human-resources": [
         { key: "active-employees", label: "Active Employees" },
         { key: "today-attendance", label: "Present Today" },
         { key: "on-leave", label: "On Leave Today" },
         { key: "payroll-status", label: "Payroll Status" },
-      ],
+],
       maintenance: [
         { key: "open-requests", label: "New Requests" },
         { key: "active-jobs", label: "Jobs In Progress" },
         { key: "overdue-pms", label: "Overdue PMs" },
-      ],
+],
       production: [
         { key: "active-production-orders", label: "Active Production Orders" },
         { key: "open-job-cards", label: "Open Job Cards" },
         { key: "pending-requisitions", label: "Pending Requisitions" },
         { key: "bom-master-records", label: "BOM Master Records" },
-      ],
+],
       "project-management": [
         { key: "active-projects", label: "Total Projects" },
         { key: "active-tasks", label: "Active Tasks" },
         { key: "total-budget", label: "Total Budget" },
         { key: "logged-hours", label: "Logged Hours" },
-      ],
+],
       pos: [
         { key: "today-sales", label: "Today Sales" },
         { key: "total-customers", label: "Total Customers" },
         { key: "average-order", label: "Average Order" },
         { key: "monthly-revenue", label: "Monthly Revenue" },
-      ],
+],
       "business-intelligence": [
         { key: "active-dashboards", label: "Active Dashboards" },
         { key: "sales-30d", label: "Sales (30d)" },
         { key: "purchase-30d", label: "Purchases (30d)" },
         { key: "overview", label: "Items / Employees" },
-      ],
+],
       "service-management": [
         { key: "service-requests", label: "Customer Service Requests" },
         { key: "open-orders", label: "Open Orders" },
         { key: "executions", label: "Executions" },
         { key: "confirmed-services", label: "Confirmed Services" },
-      ],
+],
       "executive-overview": [
         { key: "outstanding-receivables", label: "Outstanding Receivables" },
         { key: "outstanding-payables", label: "Outstanding Payables" },
@@ -200,12 +232,14 @@ export default function DashboardPermissions() {
         { key: "supplier-outstanding", label: "Supplier Outstanding" },
         { key: "fast-moving-items", label: "Fast Moving Items" },
         { key: "slow-moving-items", label: "Slow Moving Items" },
-      ],
+],
       transport: [
         { key: "active-trips", label: "Active Trips" },
         { key: "total-vehicles", label: "Total Vehicles" },
         { key: "total-drivers", label: "Total Drivers" },
         { key: "total-fuel-cost", label: "Total Fuel Cost" },
+],
+      system: [
       ],
     }),
     [],
@@ -340,10 +374,6 @@ export default function DashboardPermissions() {
         } ${allow ? "enabled" : "disabled"}`,
         { autoClose: 2000 }
       );
-      // Fire refresh in background without awaiting — avoids UI disruption
-      if (Number(selectedUserId) === Number(user?.id)) {
-        refreshPermissions();
-      }
     } catch (err) {
       // Revert optimistic update on failure
       setView(module_key, dashboard_key, card_key, ticker_key, !allow);
@@ -388,7 +418,14 @@ export default function DashboardPermissions() {
           {selectedUserId && (
             <div className="space-y-6">
               {modules.map((m) => {
-                const cards = KNOWN_CARDS[m.key] || [];
+                let cards = KNOWN_CARDS[m.key] || [];
+                if (m.key === "home") {
+                  if (licensedModules) {
+                    cards = cards.filter(c => licensedModules.includes(`card:${c.key}`));
+                  } else {
+                    cards = [];
+                  }
+                }
                 const hasDashboards = m.dashboards.length > 0;
                 const hasCards = cards.length > 0;
                 if (!hasDashboards && !hasCards && m.key !== "home")
@@ -400,7 +437,7 @@ export default function DashboardPermissions() {
                       <div className="font-semibold">
                         {m.icon} {m.name}
                       </div>
-                      {(hasDashboards || hasCards) && (
+                      {(hasDashboards || hasCards) && m.key !== "home" && (
                         <label className="flex items-center gap-2 text-sm">
                           <input
                             type="checkbox"
@@ -431,6 +468,18 @@ export default function DashboardPermissions() {
                                   can_view: val ? 1 : 0
                                 });
                               });
+                              
+                              if (hasDashboards && m.key !== "home") {
+                                const k1 = permKey(m.key, "dashboard", null, null);
+                                const k2 = permKey(m.key, "dashboards", null, null);
+                                updates[k1] = val;
+                                updates[k2] = val;
+                                setView(m.key, "dashboard", null, null, val);
+                                setView(m.key, "dashboards", null, null, val);
+                                permsList.push({ module_key: m.key, dashboard_key: "dashboard", card_key: null, ticker_key: null, can_view: val ? 1 : 0 });
+                                permsList.push({ module_key: m.key, dashboard_key: "dashboards", card_key: null, ticker_key: null, can_view: val ? 1 : 0 });
+                              }
+                              
                               cards.forEach((c) => {
                                 const k = permKey(m.key, null, c.key, null);
                                 updates[k] = val;
@@ -452,9 +501,6 @@ export default function DashboardPermissions() {
                                   });
                                   const label = m.name || String(m.key || "").replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
                                   toast.success(`${val ? "✅" : "🚫"} ${label} — all permissions ${val ? "enabled" : "disabled"}`, { autoClose: 2000 });
-                                  if (Number(selectedUserId) === Number(user?.id)) {
-                                    refreshPermissions();
-                                  }
                                 } catch {
                                   toast.error("Failed to save permissions");
                                 }
@@ -466,54 +512,98 @@ export default function DashboardPermissions() {
                       )}
                     </div>
                     <div className="p-4 space-y-4">
-                      {m.dashboards.map((d) => (
-                        <div key={d.key}>
-                          <label className="flex items-center gap-2 font-medium mb-2">
+                      {hasDashboards && m.key !== "home" && (
+                        <div className="mb-2">
+                          <label className="flex items-center gap-2 font-medium">
                             <input
                               type="checkbox"
                               className="checkbox checkbox-sm"
-                              checked={getView(m.key, d.key)}
-                              onChange={makeToggleHandler(m.key, d.key, null, null, (val) => {
-                                setView(m.key, d.key, null, null, val);
-                                persistPermission(m.key, "dashboard", d.key, val);
-                              })}
+                              checked={getView(m.key, "dashboard") || getView(m.key, "dashboards")}
+                              onChange={(e) => {
+                                const val = e.target.checked;
+                                const handler = makeToggleHandler(m.key, "dashboard", null, null, (newVal) => {
+                                  setView(m.key, "dashboard", null, null, newVal);
+                                  setView(m.key, "dashboards", null, null, newVal);
+                                  persistPermission(m.key, "dashboard", "dashboard", newVal);
+                                  persistPermission(m.key, "dashboard", "dashboards", newVal);
+                                });
+                                handler(e);
+                              }}
                             />
-                            <span>📊 {d.name || d.label}</span>
+                            <span>📊 Dashboard</span>
                           </label>
                         </div>
-                      ))}
+                      )}
                       {cards.length > 0 && (
-                        <div className={m.dashboards.length > 0 ? "ml-7 space-y-1" : ""}>
-                          {m.dashboards.length > 0 && (
-                            <h4 className="font-medium text-sm text-slate-700 mb-1">
-                              Dashboard Cards
-                            </h4>
+                        <div className="">
+                          
+                          
+                          {m.key === "home" ? (
+                            <div className="space-y-4">
+                              {Array.from(new Set(cards.map(c => c.moduleGroup))).map(modGroup => {
+                                const groupCards = cards.filter(c => c.moduleGroup === modGroup);
+                                if (groupCards.length === 0) return null;
+                                return (
+                                  <div key={modGroup} className="border-b border-slate-100 pb-3 last:border-0">
+                                    <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{modGroup}</h5>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                                      {groupCards.map(c => (
+                                        <label key={c.key} className="flex items-center gap-2">
+                                          <input
+                                            type="checkbox"
+                                            className="checkbox checkbox-sm"
+                                            checked={getView(m.key, null, c.key, null)}
+                                                                                        onChange={(e) => {
+                                              const val = e.target.checked;
+                                              if (val) {
+                                                let checkedCount = 0;
+                                                cards.forEach(hc => {
+                                                  if (getView("home", null, hc.key, null)) checkedCount++;
+                                                });
+                                                if (checkedCount >= 4) {
+                                                  e.preventDefault();
+                                                  toast.error("You can only select up to 4 cards for the Home dashboard.");
+                                                  return;
+                                                }
+                                              }
+                                              const handler = makeToggleHandler(m.key, null, c.key, null, (newVal) => {
+                                                setView(m.key, null, c.key, null, newVal);
+                                                persistPermission(m.key, "card", c.key, newVal);
+                                              });
+                                              handler(e);
+                                            }}
+                                          />
+                                          <span className="text-sm">{c.label}</span>
+                                        </label>
+                                      ))}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                              {cards.map((c) => (
+                                <label
+                                  key={c.key}
+                                  className="flex items-center gap-2"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    className="checkbox checkbox-sm"
+                                    checked={getView(m.key, null, c.key, null)}
+                                    onChange={makeToggleHandler(m.key, null, c.key, null, (val) => {
+                                      setView(m.key, null, c.key, null, val);
+                                      persistPermission(m.key, "card", c.key, val);
+                                    })}
+                                  />
+                                  <span className="text-sm">
+                                    {c.label}
+                                  </span>
+                                </label>
+                              ))}
+                            </div>
                           )}
-                          <div className={m.dashboards.length > 0 ? "space-y-1" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"}>
-                            {cards.map((c) => (
-                              <label
-                                key={c.key}
-                                className={
-                                  m.dashboards.length > 0
-                                    ? "flex items-center gap-2 pl-2 border-l-2 border-slate-200"
-                                    : "flex items-center gap-2"
-                                }
-                              >
-                                <input
-                                  type="checkbox"
-                                  className={m.dashboards.length > 0 ? "checkbox checkbox-xs" : "checkbox checkbox-sm"}
-                                  checked={getView(m.key, null, c.key, null)}
-                                  onChange={makeToggleHandler(m.key, null, c.key, null, (val) => {
-                                    setView(m.key, null, c.key, null, val);
-                                    persistPermission(m.key, "card", c.key, val);
-                                  })}
-                                />
-                                <span className={"text-sm" + (m.dashboards.length > 0 ? " text-slate-600" : "")}>
-                                  {c.label}
-                                </span>
-                              </label>
-                            ))}
-                          </div>
                         </div>
                       )}
                     </div>

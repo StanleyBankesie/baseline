@@ -1105,7 +1105,7 @@ export default function ItemsList() {
               </p>
             </div>
             <div className="flex gap-2 flex-wrap w-full md:w-auto justify-start md:justify-end">
-              <Link to="/inventory" className="btn-secondary">
+              <Link to="/inventory?section=Stock%20Operations" className="btn-secondary">
                 Return to Menu
               </Link>
               <input

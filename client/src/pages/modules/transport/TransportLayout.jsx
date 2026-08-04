@@ -85,17 +85,6 @@ export const transportSections = [
         ]
       },
       { 
-        title: "Vehicles Management", 
-        path: "/transport/vehicles", 
-        feature_key: "vehicles", 
-        description: "Register and manage fleet vehicles",
-        icon: "🚛",
-        actions: [
-          <ActionButton key="view" label="View" path="/transport/vehicles" type="outline" featureKey="transport:vehicles" action="view" />,
-          <ActionButton key="new" label="New" path="/transport/vehicles/new" type="primary" featureKey="transport:vehicles" action="create" />
-        ]
-      },
-      { 
         title: "Vehicle Compliance", 
         path: "/transport/compliance", 
         feature_key: "compliance", 
@@ -115,17 +104,6 @@ export const transportSections = [
         actions: [
           <ActionButton key="view" label="View" path="/transport/servicing" type="outline" featureKey="transport:servicing" action="view" />,
           <ActionButton key="new" label="New" path="/transport/servicing/new" type="primary" featureKey="transport:servicing" action="create" />
-        ]
-      },
-      { 
-        title: "Drivers Management", 
-        path: "/transport/drivers", 
-        feature_key: "drivers", 
-        description: "Manage driver profiles, licenses, and assignments",
-        icon: "👨‍✈️",
-        actions: [
-          <ActionButton key="view" label="View" path="/transport/drivers" type="outline" featureKey="transport:drivers" action="view" />,
-          <ActionButton key="new" label="New" path="/transport/drivers/new" type="primary" featureKey="transport:drivers" action="create" />
         ]
       },
       { 
@@ -209,17 +187,7 @@ export const transportSections = [
           <ActionButton key="new" label="New" path="/transport/fuel/new" type="primary" featureKey="transport:fuel" action="create" />
         ]
       },
-      { 
-        title: "Fuel Bills", 
-        path: "/transport/fuel-bills", 
-        feature_key: "fuel-bills", 
-        description: "Manage fuel supplier bills and invoices",
-        icon: "🧾",
-        actions: [
-          <ActionButton key="view" label="View" path="/transport/fuel-bills" type="outline" featureKey="transport:fuel-bills" action="view" />,
-          <ActionButton key="new" label="New" path="/transport/fuel-bills/new" type="primary" featureKey="transport:fuel-bills" action="create" />
-        ]
-      },
+
       { 
         title: "Transportation Bills", 
         path: "/transport/transportation-bills", 
@@ -261,8 +229,19 @@ export const transportSections = [
           <ActionButton key="view" label="View" path="/transport/expenses" type="outline" featureKey="transport:expenses" action="view" />
         ]
       },
+      { 
+        title: "Expense Logs", 
+        path: "/transport/expense-logs", 
+        feature_key: "expense_log", 
+        description: "Detailed logs of all transportation expenses",
+        icon: "📋",
+        actions: [
+          <ActionButton key="view" label="View" path="/transport/expense-logs" type="outline" featureKey="transport:expense_log" action="view" />
+        ]
+      },
     ],
   },
+  /*
   {
     title: "Reports & Analytics",
     items: [
@@ -358,6 +337,7 @@ export const transportSections = [
       },
     ],
   },
+  */
   {
     title: "Configuration",
     items: [
@@ -438,11 +418,15 @@ function TransportLanding() {
 
   return (
     <ModuleDashboard
+      useSectionNavigation={true}
       moduleKey="transport"
       title="Transport Management"
       stats={dashboardStats}
       sections={transportSections}
       now={now}
+      headerActions={[
+        { label: "Dashboard", path: "/transport/dashboard", icon: "📊" },
+      ]}
     />
   );
 }

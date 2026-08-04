@@ -53,7 +53,7 @@ export default function ServiceExecutionsList() {
           <h2 className="text-xl font-semibold">Service Executions</h2>
         </div>
         <div className="flex items-center gap-2">
-          <Link to="/service-management" className="btn-secondary">
+          <Link to="/service-management?section=Reports%20%26%20Parameters" className="btn-secondary">
             Back to Menu
           </Link>
           <Link to="/service-management/service-execution" className="btn-success">

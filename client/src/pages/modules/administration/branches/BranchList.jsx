@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { api } from "api/client";
 import "../../../../styles/BranchSetup.css";
 import { filterAndSort } from "@/utils/searchUtils.js";
@@ -271,6 +271,9 @@ function UserAssignmentTab({ branches, companies, onUpdate }) {
 export default function BranchList() {
   const [viewMode, setViewMode] = useViewMode();
   const { user } = useAuth();
+  const location = useLocation();
+  const isSystemConfig = location.pathname.startsWith("/system-configuration");
+  const moduleHome = isSystemConfig ? "/system-configuration" : "/administration";
   const [activeTab, setActiveTab] = useState("branches"); // Default to branches as requested by sync task
   const [branches, setBranches] = useState([]);
   const [companies, setCompanies] = useState([]); // Store companies for dropdown
@@ -458,7 +461,7 @@ export default function BranchList() {
           <h1>🏢 Branch Management System</h1>
         </div>
         <div className="header-actions">
-          <Link to="/administration" className="btn btn-secondary">
+          <Link to={moduleHome} className="btn btn-secondary">
             Return to Menu
           </Link>
           <button

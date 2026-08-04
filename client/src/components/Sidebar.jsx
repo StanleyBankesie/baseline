@@ -100,11 +100,7 @@ export default function Sidebar() {
           label: "Items Setup",
           path: "/inventory/items",
         },
-        {
-          key: "item-categories",
-          label: "Categories",
-          path: "/inventory/item-groups",
-        },
+
         {
           key: "stock-adjustments",
           label: "Stock Adjustments",

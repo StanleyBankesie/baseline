@@ -150,7 +150,7 @@ export default function VisitorsLogReport() {
               </p>
             </div>
             <div className="flex gap-2">
-              <Link to="/service-management" className="btn-success text-sm">
+              <Link to="/service-management?section=Reports%20%26%20Parameters" className="btn-success text-sm">
                 Back
               </Link>
               <button

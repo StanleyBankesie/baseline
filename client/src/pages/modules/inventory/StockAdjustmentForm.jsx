@@ -517,7 +517,7 @@ export default function StockAdjustmentForm() {
                   </div>
                   <div>
                     <label className="label">Warehouse</label>
-                    <select
+                    <select required
                       className="input"
                       value={formData.warehouseId}
                       onChange={(e) =>

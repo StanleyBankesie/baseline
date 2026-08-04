@@ -21,6 +21,9 @@ import {
   listSetupItems, createSetupItem, updateSetupItem, deleteSetupItem
 } from "../controllers/transport-setup.controller.js";
 import {
+  listInspections, getInspectionById, createInspection, updateInspection, deleteInspection
+} from "../controllers/transport-inspections.controller.js";
+import {
   listRoutes, getRoute, createRoute, updateRoute, toggleRouteStatus
 } from "../controllers/transport-routes.controller.js";
 import {
@@ -32,7 +35,7 @@ import {
   listDrivers, createDriver, getDriver, updateDriver, toggleDriverStatus,
   listRequests, createRequest, updateRequestStatus,
   listTrips, getTrip, createTrip, startTrip, returnTrip,
-  listFuelLogs, createFuelLog,
+  listFuelLogs, createFuelLog, getFuelLog, updateFuelLog, updateFuelLogStatus, deleteFuelLog,
   listFuelExpenses, createFuelExpense,
   listBilling,
   addTripLocation, getTripLocations, submitPOD,
@@ -98,6 +101,10 @@ router.put("/trips/:id/return", requireAuth, requireCompanyScope, requirePermiss
 // Fuel Logs
 router.get("/fuel", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.FUEL.VIEW"), listFuelLogs);
 router.post("/fuel", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.FUEL.CREATE"), createFuelLog);
+router.get("/fuel/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.FUEL.VIEW"), getFuelLog);
+router.put("/fuel/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.FUEL.CREATE"), updateFuelLog);
+router.put("/fuel/:id/status", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.FUEL.CREATE"), updateFuelLogStatus);
+router.delete("/fuel/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.FUEL.CREATE"), deleteFuelLog);
 
 // Billing
 router.get("/billing/next-no", requireAuth, requireCompanyScope, getNextBillingNo);
@@ -158,6 +165,13 @@ router.get("/setup", requireAuth, requireCompanyScope, listSetupItems);
 router.post("/setup", requireAuth, requireCompanyScope, createSetupItem);
 router.put("/setup/:id", requireAuth, requireCompanyScope, updateSetupItem);
 router.delete("/setup/:id", requireAuth, requireCompanyScope, deleteSetupItem);
+
+// Inspections
+router.get("/inspections", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.INSPECTIONS.VIEW"), listInspections);
+router.get("/inspections/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.INSPECTIONS.VIEW"), getInspectionById);
+router.post("/inspections", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.INSPECTIONS.CREATE"), createInspection);
+router.put("/inspections/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.INSPECTIONS.EDIT"), updateInspection);
+router.delete("/inspections/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.INSPECTIONS.DELETE"), deleteInspection);
 
 // Routes
 router.get("/routes", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.ROUTES.VIEW"), listRoutes);

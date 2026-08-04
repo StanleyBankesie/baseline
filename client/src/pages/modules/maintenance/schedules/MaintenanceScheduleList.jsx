@@ -65,7 +65,7 @@ export default function MaintenanceScheduleList() {
             <p className="text-sm text-slate-500">Track and manage maintenance schedules</p>
           </div>
           <div className="flex gap-2">
-            <Link to="/maintenance" className="btn-secondary">Back to Menu</Link>
+            <Link to="/maintenance?section=Operations %26 Schedules" className="btn-secondary">Back</Link>
             <Link to="/maintenance/schedules/new" className="btn-primary">+ New Schedule</Link>
           </div>
         </div>

@@ -71,7 +71,7 @@ export default function ExitRequest() {
   return (
     <div className="p-4">
       <div className="flex items-center gap-2 mb-4">
-        <Link to="/human-resources" className="btn-secondary text-sm">
+        <Link to="/human-resources?section=Employee%20Management" className="btn-secondary text-sm">
           Back to Menu
         </Link>
         <h2 className="text-lg font-semibold">Exit Request</h2>

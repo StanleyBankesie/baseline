@@ -5,16 +5,78 @@ import { usePermission } from "../auth/PermissionContext.jsx";
 import { MODULES_REGISTRY } from "../data/modulesRegistry.js";
 
 // ─── Module Top Navigation Dropdown Component ───────────────────
-export function ModuleNavDropdown({ section, location, navigate }) {
+export function ModuleNavDropdown({ section, location, navigate, moduleKey }) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef(null);
+  const { canPerformAction, canViewDashboardElement, canAccessPath } = usePermission();
 
   const visibleItems = React.useMemo(() => {
     const rawItems = section.items || section.features || [];
-    return rawItems.filter(
-      (item) => item && !item.hidden && (item.path || item.title || item.name || item.label)
-    );
-  }, [section]);
+    const mk = moduleKey || (location.pathname.split("/").filter(Boolean)[0] || "");
+    const moduleInfo = MODULES_REGISTRY[mk] || {};
+    const features = moduleInfo.features || [];
+    const dashboards = moduleInfo.dashboards || [];
+
+    return rawItems.filter((item) => {
+      if (!item || item.hidden || !(item.path || item.title || item.name || item.label)) return false;
+      const title = item.title || item.name || item.label;
+
+      // 1. Check if it's a known feature by exact label
+      const featureMatch = features.find(f => f.label === title || f.name === title);
+      if (featureMatch) {
+        if (!canPerformAction(`${mk}:${featureMatch.key}`, "view")) return false;
+        return true;
+      }
+      
+      // 2. Check if it's a known dashboard
+      const dashboardMatch = dashboards.find(d => d.label === title || d.name === title);
+      if (dashboardMatch) {
+        if (!canViewDashboardElement(mk, "dashboard", dashboardMatch.key)) return false;
+        return true;
+      }
+
+      // 3. Fuzzy match on title/label
+      const searchTitle = title.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const fuzzyFeature = features.find(f => {
+        const fLabel = (f.label || "").toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (fLabel.length > 4 && searchTitle.length > 4) {
+           return searchTitle.includes(fLabel) || fLabel.includes(searchTitle);
+        }
+        return false;
+      });
+      
+      if (fuzzyFeature) {
+        if (!canPerformAction(`${mk}:${fuzzyFeature.key}`, "view")) return false;
+        return true;
+      }
+
+      // 4. Try to derive feature key from path
+      if (item.path) {
+        const parts = item.path.split("/").filter(Boolean);
+        if (parts.length > 1 && parts[0] === mk) {
+           const pathKey = parts[parts.length - 1];
+           const pathFeatureMatch = features.find(f => f.key === pathKey);
+           if (pathFeatureMatch) {
+             if (!canPerformAction(`${mk}:${pathFeatureMatch.key}`, "view")) return false;
+             return true;
+           }
+        }
+        
+        // 5. Special fallback for reports (many reports don't match feature keys exactly)
+        if (item.path.includes('/reports')) {
+           const hasGenericReports = features.find(f => f.key === 'reports' || f.key === 'project-reports' || f.key === 'production-reports');
+           if (hasGenericReports) {
+              if (!canPerformAction(`${mk}:${hasGenericReports.key}`, "view")) return false;
+           }
+        }
+
+        // 6. Final fallback: use the system's canAccessPath (which defaults to true for unknown paths)
+        if (!canAccessPath(item.path, "view")) return false;
+      }
+      
+      return true;
+    });
+  }, [section, canPerformAction, canViewDashboardElement, canAccessPath, moduleKey, location]);
 
   React.useEffect(() => {
     if (!open) return;
@@ -163,6 +225,7 @@ export function ModuleTopNavBar({ sections = [], headerActions = [], moduleKey }
             section={section}
             location={location}
             navigate={navigate}
+            moduleKey={mk}
           />
         ))}
       </div>

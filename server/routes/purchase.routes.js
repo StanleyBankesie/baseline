@@ -10404,11 +10404,8 @@ router.get(
       const purchaseRows = await query(
         `
         SELECT COUNT(*) AS count,
-               COALESCE(SUM(total_amount), 0) AS total,
-          created_at,
-          u.username AS created_by_name
+               COALESCE(SUM(total_amount), 0) AS total
          FROM pur_orders
-        LEFT JOIN adm_users u ON u.id = created_by
          WHERE company_id = :companyId
           AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
           AND po_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
@@ -10420,11 +10417,8 @@ router.get(
 
       const activePoRows = await query(
         `
-        SELECT COUNT(*) AS count,
-          created_at,
-          u.username AS created_by_name
+        SELECT COUNT(*) AS count
          FROM pur_orders
-        LEFT JOIN adm_users u ON u.id = created_by
          WHERE company_id = :companyId
           AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
           AND status NOT IN ('RECEIVED', 'CANCELLED', 'CLOSED', 'REJECTED')
@@ -10435,11 +10429,8 @@ router.get(
 
       const supplierRows = await query(
         `
-        SELECT COUNT(*) AS count,
-          created_at,
-          u.username AS created_by_name
+        SELECT COUNT(*) AS count
          FROM pur_suppliers
-        LEFT JOIN adm_users u ON u.id = created_by
          WHERE company_id = :companyId
           AND is_active = 1
         `,
@@ -10449,11 +10440,8 @@ router.get(
 
       const pendingRows = await query(
         `
-        SELECT COUNT(*) AS count,
-          dw.created_at,
-          u.username AS created_by_name
+        SELECT COUNT(*) AS count
          FROM adm_document_workflows dw
-        LEFT JOIN adm_users u ON u.id = dw.created_by
          WHERE dw.company_id = :companyId
           AND dw.status = 'PENDING'
           AND dw.assigned_to_user_id = :userId
@@ -10472,11 +10460,8 @@ router.get(
         SELECT COALESCE(
                  SUM(GREATEST(COALESCE(net_amount, 0) - COALESCE(amount_paid, 0), 0)),
                  0
-               ) AS total,
-          created_at,
-          u.username AS created_by_name
+               ) AS total
          FROM pur_bills
-        LEFT JOIN adm_users u ON u.id = created_by
          WHERE company_id = :companyId
           AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
           AND status = 'POSTED'

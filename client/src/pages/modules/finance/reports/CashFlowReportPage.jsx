@@ -67,7 +67,7 @@ export default function CashFlowReportPage() {
       <div className="flex justify-between items-center bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
         <div>
           <Link
-            to="/finance"
+            to="/finance?section=Reports%20%26%20Analysis"
             className="font-sans text-xs font-bold text-brand uppercase tracking-wider hover:text-brand-600 transition-colors"
           >
             ← Back to Finance

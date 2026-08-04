@@ -46,7 +46,7 @@ export default function AllowanceList() {
             <p className="text-sm text-slate-500">Manage recurring employee allowances</p>
           </div>
           <div className="flex gap-2">
-            <Link to="/human-resources" className="btn-secondary">Back to Menu</Link>
+            <Link to="/human-resources?section=Payroll%20%26%20Benefits" className="btn-secondary">Back</Link>
             <Link to="/human-resources/allowances/new" className="btn-primary">+ New Allowance</Link>
           </div>
         </div>

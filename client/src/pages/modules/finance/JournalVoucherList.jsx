@@ -96,7 +96,7 @@ export default function JournalVoucherList() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Link to="/finance" className="font-sans btn btn-secondary">
+            <Link to="/finance?section=Banking" className="font-sans btn btn-secondary">
               Return to Menu
             </Link>
             <Link to="/finance/journal-voucher/create" className="btn-success">

@@ -62,7 +62,7 @@ export default function PurchaseBillsForm() {
     grn_id: "",
     bill_type: billType,
     due_date: "",
-    currency_id: 4,
+    currency_id: "",
     exchange_rate: 1,
     payment_terms: 30,
     project_id: "",
@@ -190,15 +190,13 @@ export default function PurchaseBillsForm() {
               ? curRes.data.items
               : [];
             setFinCurrencies(items);
-            const base = items.find(
-              (c) => Number(c.is_base) === 1 || c.is_base === true,
-            );
+            const base = items.find((c) => Number(c.is_base) === 1 || c.is_base === true);
             setBaseFinCurrencyId(base ? Number(base.id) : null);
 
             if (isNew && !formData.currency_id && base) {
               setFormData((prev) => ({
                 ...prev,
-                currency_id: base.id,
+                currency_id: Number(base.id),
                 exchange_rate: 1,
               }));
             }
@@ -777,7 +775,7 @@ export default function PurchaseBillsForm() {
           }
         }
       } else {
-        setFormData((prev) => ({ ...prev, currency_id: 4 }));
+        setFormData((prev) => ({ ...prev, currency_id: baseFinCurrencyId || "" }));
       }
     }
 
@@ -1144,7 +1142,7 @@ export default function PurchaseBillsForm() {
       po_id: "",
       grn_id: "",
       due_date: "",
-      currency_id: 4,
+      currency_id: baseFinCurrencyId || "",
       exchange_rate: 1,
       payment_terms: 30,
       discount_amount: 0,

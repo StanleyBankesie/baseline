@@ -35,8 +35,8 @@ export default function LeaveRequestForm() {
     async function load() {
       try {
         const [tRes, eRes] = await Promise.all([
-          api.get("/hr/leave/types"),
-          api.get("/hr/employees"),
+          api.get("/hr/leave/types").catch(() => ({ data: { items: [] } })),
+          api.get("/hr/employees").catch(() => ({ data: { items: [] } })),
         ]);
         if (mounted) {
           setTypes(tRes?.data?.items || []);

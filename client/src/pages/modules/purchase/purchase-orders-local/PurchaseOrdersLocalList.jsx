@@ -631,7 +631,7 @@ export default function PurchaseOrdersLocalList() {
         </div>
         <div className="flex gap-2 items-center">
           <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
-          <Link to="/purchase" className="btn btn-secondary">
+          <Link to="/purchase?section=Procurement" className="btn btn-secondary">
             Return to Menu
           </Link>
           <Link

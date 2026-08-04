@@ -33,8 +33,8 @@ export default function LeaveApplicationForm() {
     const load = async () => {
       try {
         const [t, e] = await Promise.all([
-          api.get("/hr/leave/types"),
-          api.get("/hr/employees?status=ACTIVE"),
+          api.get("/hr/leave/types").catch(() => ({ data: { items: [] } })),
+          api.get("/hr/employees?status=ACTIVE").catch(() => ({ data: { items: [] } })),
         ]);
         setTypes(t.data?.items || []);
         setEmployees(e.data?.items || []);

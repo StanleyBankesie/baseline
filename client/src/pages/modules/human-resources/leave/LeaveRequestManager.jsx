@@ -19,7 +19,7 @@ export default function LeaveRequestManager() {
   return (
     <div className="p-4 md:p-8 space-y-6">
       <div className="flex items-center gap-4">
-        <Link to="/human-resources" className="btn-secondary text-sm">
+        <Link to="/human-resources?section=Leave%20Management" className="btn-secondary text-sm">
           ← Back
         </Link>
         <div>

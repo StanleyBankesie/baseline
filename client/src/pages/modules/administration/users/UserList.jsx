@@ -162,7 +162,7 @@ export default function UserList() {
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage user accounts and details</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Link to="/administration" className="btn btn-secondary">
+          <Link to="/administration?section=Audit%20%26%20Logs" className="btn btn-secondary">
             Return to Menu
           </Link>
           <Link to="/administration/users/new" className="btn btn-success">

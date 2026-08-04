@@ -711,7 +711,7 @@ export default function CashCollectionDetails() {
       <div className="flex items-center justify-between">
         <div>
           <Link
-            to="/pos"
+            to="/pos?section=Reports"
             className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
           >
             ← Back to POS

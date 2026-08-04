@@ -21,6 +21,7 @@ import {
 export default function CostCentersPage() {
   const [items, setItems] = useState([]);
   const [currencies, setCurrencies] = useState([]);
+  const [baseCurrencyId, setBaseCurrencyId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
@@ -28,7 +29,7 @@ export default function CostCentersPage() {
     code: "",
     name: "",
     description: "",
-    default_currency_id: "",
+    default_currency_id: baseCurrencyId,
   });
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
@@ -44,9 +45,13 @@ export default function CostCentersPage() {
       ]);
       const rows = Array.isArray(ccResp.data?.items) ? ccResp.data.items : [];
       setItems(rows);
-      setCurrencies(
-        Array.isArray(curResp.data?.items) ? curResp.data.items : [],
-      );
+      const c = Array.isArray(curResp.data?.items) ? curResp.data.items : [];
+      setCurrencies(c);
+      const base = c.find(cur => Number(cur.is_base) === 1 || cur.is_base === true);
+      if (base) {
+        setBaseCurrencyId(base.id);
+        setForm(p => ({ ...p, default_currency_id: base.id }));
+      }
     } catch (e) {
       setError("Cost center API not available");
     } finally {
@@ -84,7 +89,7 @@ export default function CostCentersPage() {
       code: "",
       name: "",
       description: "",
-      default_currency_id: "",
+      default_currency_id: baseCurrencyId,
     });
     setSuccess("");
     setError("");
@@ -119,7 +124,7 @@ export default function CostCentersPage() {
         code: "",
         name: "",
         description: "",
-        default_currency_id: "",
+        default_currency_id: baseCurrencyId,
       });
       setShowCreateModal(false);
       await load();
@@ -138,7 +143,7 @@ export default function CostCentersPage() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <Link
-                to="/finance"
+                to="/finance?section=Banking"
                 className="inline-flex items-center gap-1.5 text-xs text-white/80 hover:text-white transition-colors mb-2"
               >
                 <ArrowLeft size={14} /> Back to Accounting Setup

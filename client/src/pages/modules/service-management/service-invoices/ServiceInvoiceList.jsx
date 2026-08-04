@@ -508,7 +508,7 @@ export default function InvoiceList() {
               </p>
             </div>
             <div className="flex gap-2">
-              <Link to="/service-management" className="btn btn-secondary">
+              <Link to="/service-management?section=Service%20Requests" className="btn btn-secondary">
                 <ArrowLeft className="w-4 h-4 mr-2" /> Back
               </Link>
               <Link to="/service-management/service-invoices/new" className="btn-success">

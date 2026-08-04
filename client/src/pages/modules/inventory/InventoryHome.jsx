@@ -110,20 +110,20 @@ export const inventorySections = [
       },
       {
         name: "Opening Balances",
-        path: "/inventory/opening-balances",
+        path: "/inventory/dashboard",
         description: "Set initial stock balances",
         icon: "🏁",
       },
       {
         name: "Warehouses / Locations",
-        path: "/inventory/locations",
+        path: "/inventory/warehouses",
         description: "Manage warehouses, bins, and storage locations",
         icon: "🏬",
       },
       {
         name: "Physical Inventory (Stock Take)",
-        path: "/inventory/stock-counts",
-        description: "Reconcile physical stock counts",
+        path: "/inventory/stock-take",
+        description: "Generate and manage physical stock counts",
         icon: "📋",
       },
       {
@@ -131,6 +131,48 @@ export const inventorySections = [
         path: "/inventory/stock-take",
         description: "Perform physical stock counts",
         icon: "📋",
+      },
+      {
+        name: "Stock Updation",
+        path: "/inventory/stock-updation",
+        description: "Fast-track stock increases",
+        icon: "📈",
+      },
+      {
+        name: "Stock Verification",
+        path: "/inventory/stock-verification",
+        description: "Verify physical stock levels",
+        icon: "✅",
+      },
+      {
+        name: "Stock Updation & Verification",
+        path: "/inventory/stock-ops",
+        description: "Manage stock adjustments and verifications",
+        icon: "⚖️",
+      },
+      {
+        name: "Return to Stores Advice",
+        path: "/inventory/return-to-stores",
+        description: "Process returned materials",
+        icon: "🔙",
+      },
+      {
+        name: "Issue to Requirement Area",
+        path: "/inventory/issue-to-requirement",
+        description: "Issue materials to specific areas",
+        icon: "📤",
+      },
+      {
+        name: "Transfer Acceptance",
+        path: "/inventory/transfer-acceptance",
+        description: "Accept incoming stock transfers",
+        icon: "📥",
+      },
+      {
+        name: "Stock Reorder",
+        path: "/inventory/stock-reorder",
+        description: "Generate stock reorder requests",
+        icon: "🛒",
       },
     ],
   },
@@ -151,7 +193,7 @@ export const inventorySections = [
       },
       {
         name: "Goods Issue",
-        path: "/inventory/goods-issue",
+        path: "/inventory/issue-to-requirement",
         description: "Issue goods for production or consumption",
         icon: "📤",
       },
@@ -166,23 +208,36 @@ export const inventorySections = [
         description: "Configure valuation methods and defaults",
         icon: "⚙️",
       },
-      {
-        name: "UOM Setup",
-        path: "/inventory/uom",
-        description: "Units of Measure and Conversions",
-        icon: "📏",
-      },
-      {
-        name: "Item Categories",
-        path: "/inventory/item-categories",
-        description: "Product categories and hierarchies",
-        icon: "🏷️",
-      },
+
       {
         name: "Item Attributes",
         path: "/inventory/item-attributes",
         description: "Custom item parameters and specs",
         icon: "🎨",
+      },
+      {
+        name: "Item Groups & Sub Groups",
+        path: "/inventory/item-groups",
+        description: "Categorize items into groups",
+        icon: "🗂️",
+      },
+      {
+        name: "Unit Conversion",
+        path: "/inventory/unit-conversions",
+        description: "Define unit conversion rates",
+        icon: "🔄",
+      },
+      {
+        name: "Warehouse Setup",
+        path: "/inventory/warehouses",
+        description: "Configure warehouse locations",
+        icon: "🏬",
+      },
+      {
+        name: "Item Batches",
+        path: "/inventory/batches",
+        description: "Manage inventory item batches",
+        icon: "📦",
       },
     ],
   },
@@ -190,28 +245,94 @@ export const inventorySections = [
     title: "Reports & Valuation",
     features: [
       {
-        name: "Inventory Reports",
-        path: "/inventory/reports",
-        description: "Comprehensive stock reports hub",
-        icon: "📊",
-      },
-      {
-        name: "Dashboard",
+        name: "Inventory Dashboard",
         path: "/inventory/dashboard",
         description: "Key inventory metrics and visual charts",
         icon: "📈",
       },
       {
-        name: "Stock Valuation",
-        path: "/inventory/reports/valuation",
-        description: "FIFO/Weighted Average inventory valuation",
+        name: "Health Monitor",
+        path: "/inventory/reports/health-monitor",
+        description: "Overall stock health and KPIs",
+        icon: "🏥",
+      },
+      {
+        name: "Stock Balances",
+        path: "/inventory/reports/stock-balances",
+        description: "Current stock quantity in all locations",
+        icon: "⚖️",
+      },
+      {
+        name: "Stock Value",
+        path: "/inventory/reports/stock-value",
+        description: "Valuation of current inventory",
         icon: "💰",
       },
       {
-        name: "Fast/Slow Moving Items",
-        path: "/inventory/reports/movement",
-        description: "Inventory velocity analysis",
+        name: "Stock Aging Analysis",
+        path: "/inventory/reports/stock-aging-analysis",
+        description: "Age of current stock holdings",
+        icon: "⏳",
+      },
+      {
+        name: "Fast Moving Items",
+        path: "/inventory/reports/fast-moving",
+        description: "High velocity inventory items",
         icon: "🚀",
+      },
+      {
+        name: "Slow Moving Items",
+        path: "/inventory/reports/slow-moving",
+        description: "Low velocity inventory items",
+        icon: "🐢",
+      },
+      {
+        name: "Non Moving Items",
+        path: "/inventory/reports/non-moving",
+        description: "Stagnant inventory items",
+        icon: "🛑",
+      },
+      {
+        name: "Periodical Stock Summary",
+        path: "/inventory/reports/periodical-stock-summary",
+        description: "Summary of stock movements over a period",
+        icon: "📅",
+      },
+      {
+        name: "Periodical Stock Statement",
+        path: "/inventory/reports/periodical-stock-statement",
+        description: "Detailed stock statement over a period",
+        icon: "📃",
+      },
+      {
+        name: "Issue Register",
+        path: "/inventory/reports/issue-register",
+        description: "Log of all issued materials",
+        icon: "📤",
+      },
+      {
+        name: "Stock Transfer Register",
+        path: "/inventory/reports/stock-transfer-register",
+        description: "Log of stock transfers between locations",
+        icon: "🔄",
+      },
+      {
+        name: "Stock Verification Report",
+        path: "/inventory/reports/stock-verification",
+        description: "Results of physical stock verifications",
+        icon: "📋",
+      },
+      {
+        name: "Stock Adjustment Report",
+        path: "/inventory/reports/stock-adjustments",
+        description: "Log of manual stock adjustments",
+        icon: "⚖️",
+      },
+      {
+        name: "Material Return Report",
+        path: "/inventory/reports/material-returns",
+        description: "Log of returned materials",
+        icon: "🔙",
       },
     ],
   },
@@ -301,6 +422,7 @@ function InventoryHomeIndex() {
 
   return (
     <ModuleDashboard
+      useSectionNavigation={true}
       title="Inventory Management"
       description="Stock management, warehouse operations, and inventory control"
       stats={stats}
@@ -717,12 +839,7 @@ export const inventoryFeatures = [
     path: "/inventory/items",
     type: "feature",
   },
-  {
-    module_key: "inventory",
-    label: "Item Groups & Sub Groups",
-    path: "/inventory/item-groups",
-    type: "feature",
-  },
+
   {
     module_key: "inventory",
     label: "Unit Conversion",

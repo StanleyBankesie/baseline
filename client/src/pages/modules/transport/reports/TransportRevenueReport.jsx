@@ -44,7 +44,7 @@ export default function TransportRevenueReport() {
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-5">
         <div className="flex items-center gap-4">
           <Link
-            to="/transport/reports"
+            to="/transport"
             className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
           >
             <ArrowLeft size={20} />

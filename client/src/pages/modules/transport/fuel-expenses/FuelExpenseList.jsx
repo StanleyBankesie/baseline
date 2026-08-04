@@ -98,7 +98,7 @@ export default function FuelExpenseList() {
             <p className="text-sm mt-1">Manage fuel and other vehicle expenses</p>
           </div>
           <div className="flex gap-2">
-            <Link to="/transport" className="btn btn-secondary">Return to Menu</Link>
+            <Link to="/transport" className="btn btn-secondary">Back</Link>
             <button className="btn-success btn" onClick={handleOpenCreate}>
               <PlusOutlined /> Create Request
             </button>

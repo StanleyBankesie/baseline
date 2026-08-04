@@ -101,7 +101,7 @@ export default function MaintenanceMaterialRequisitionList() {
               </p>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => (window.location.href = "/maintenance")} className="btn btn-secondary">Return to Menu</button>
+              <button onClick={() => (window.location.href = "/maintenance?section=Procurement %26 Materials")} className="btn btn-secondary">Back</button>
               <button onClick={() => (window.location.href = "/maintenance/material-requisitions/new")} className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700">+ New Requisition</button>
             </div>
           </div>

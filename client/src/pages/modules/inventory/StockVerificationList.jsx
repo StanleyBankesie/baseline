@@ -167,7 +167,7 @@ export default function StockVerificationList() {
               Manage and track warehouse stock verification activities
             </p>
           </div>
-          <Link to="/inventory" className="btn btn-secondary">
+          <Link to="/inventory?section=Stock%20Operations" className="btn btn-secondary">
             Return to Menu
           </Link>
         </div>

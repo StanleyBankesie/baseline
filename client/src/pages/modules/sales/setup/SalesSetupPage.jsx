@@ -136,7 +136,7 @@ export default function SalesSetupPage() {
     <Guard moduleKey="sales">
       <div className="p-4">
         <div className="flex items-center gap-2 mb-4">
-          <Link to="/sales" className="btn-secondary text-sm">
+          <Link to="/sales?section=Pricing%20%26%20Discounts" className="btn-secondary text-sm">
             Back to Menu
           </Link>
           <h2 className="text-lg font-semibold">Sales Setup & Parameters</h2>

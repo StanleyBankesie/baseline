@@ -36,6 +36,10 @@ import ProjectExpenseReport from "./reports/ProjectExpenseReport.jsx";
 import TaskExecutionReportPage from "./reports/TaskExecutionReportPage.jsx";
 import TaskManagementAndExecutionPage from "./reports/TaskManagementAndExecutionPage.jsx";
 import ProjectManagementDashboardPage from "./ProjectManagementDashboardPage.jsx";
+import ProjectQuotationList from "./quotations/ProjectQuotationList.jsx";
+import ProjectQuotationForm from "./quotations/ProjectQuotationForm.jsx";
+import ProjectInvoiceList from "./project-invoices/ProjectInvoiceList.jsx";
+import ProjectInvoiceForm from "./project-invoices/ProjectInvoiceForm.jsx";
 
 export const projectManagementSections = [
   {
@@ -60,6 +64,12 @@ export const projectManagementSections = [
         description: "Project categories, types, and WBS templates",
         icon: "⚙️",
       },
+      {
+        title: "Milestones",
+        path: "/project-management/milestones",
+        description: "Track key project events and deadlines",
+        icon: "🎯",
+      },
     ],
   },
   {
@@ -83,6 +93,12 @@ export const projectManagementSections = [
         path: "/project-management/timesheets",
         description: "Log labor hours against project tasks",
         icon: "⌛",
+      },
+      {
+        title: "Resource Management",
+        path: "/project-management/resources",
+        description: "Manage project team members and equipment",
+        icon: "👥",
       },
     ],
   },
@@ -110,7 +126,7 @@ export const projectManagementSections = [
       },
       {
         title: "Material Utilization",
-        path: "/project-management/material-utilization",
+        path: "/project-management/material-utilizations",
         description: "Track site material consumption against tasks",
         icon: "🔨",
       },
@@ -121,13 +137,25 @@ export const projectManagementSections = [
     badge: "Costing",
     items: [
       {
+        title: "Project Quotations",
+        path: "/project-management/quotations",
+        description: "Draft quotes for clients based on project estimates",
+        icon: "📝",
+      },
+      {
+        title: "Project Invoices",
+        path: "/project-management/project-invoices",
+        description: "Bill clients for completed project work",
+        icon: "🧾",
+      },
+      {
         title: "Project Direct Expenses",
         path: "/project-management/expenses",
         description: "Record site petty cash and out-of-pocket costs",
         icon: "💸",
       },
       {
-        title: "Project Billings & Income",
+        title: "Project Income",
         path: "/project-management/income",
         description: "Project milestone billings and income tracking",
         icon: "💵",
@@ -138,12 +166,7 @@ export const projectManagementSections = [
     title: "Reports & Analytics",
     badge: "BI",
     items: [
-      {
-        title: "Project Reports Hub",
-        path: "/project-management/reports",
-        description: "All project analytical and financial reports",
-        icon: "📊",
-      },
+
       {
         title: "Project Status Report",
         path: "/project-management/reports/project-status",
@@ -264,6 +287,7 @@ function ProjectManagementLanding() {
       description="Strategic project planning and operational execution"
       stats={stats}
       moduleKey="project-management"
+      useSectionNavigation={true}
       headerActions={[
         {
           label: "Dashboard",
@@ -279,85 +303,128 @@ function ProjectManagementLanding() {
 
 /**
  *  component
- * 
+ *
  * @returns {JSX.Element} The rendered component
  */
 export default function ProjectManagementHome() {
   return (
-    <ModuleLayout sections={projectManagementSections} moduleKey="project-management">
+    <ModuleLayout
+      sections={projectManagementSections}
+      moduleKey="project-management"
+    >
       <Routes>
         <Route path="/" element={<ProjectManagementLanding />} />
-      <Route path="dashboard" element={<ProjectManagementDashboardPage />} />
+        <Route path="dashboard" element={<ProjectManagementDashboardPage />} />
 
-      <Route path="/projects" element={<ProjectList />} />
-      <Route path="/projects/new" element={<ProjectForm />} />
-      <Route path="/projects/:id/edit" element={<ProjectForm />} />
-      <Route path="/projects/:id" element={<ProjectForm />} />
-      <Route
-        path="/projects/:id/dashboard"
-        element={<ProjectDetailDashboard />}
-      />
+        <Route path="/projects" element={<ProjectList />} />
+        <Route path="/projects/new" element={<ProjectForm />} />
+        <Route path="/projects/:id/edit" element={<ProjectForm />} />
+        <Route path="/projects/:id" element={<ProjectForm />} />
+        <Route
+          path="/projects/:id/dashboard"
+          element={<ProjectDetailDashboard />}
+        />
 
-      <Route path="/tasks" element={<TaskList />} />
-      <Route path="/tasks/execution" element={<TaskExecution />} />
-      <Route path="/tasks/new" element={<TaskForm />} />
-      <Route path="/tasks/:id" element={<TaskForm />} />
+        <Route path="/tasks" element={<TaskList />} />
+        <Route path="/tasks/execution" element={<TaskExecution />} />
+        <Route path="/tasks/new" element={<TaskForm />} />
+        <Route path="/tasks/:id" element={<TaskForm />} />
 
-      <Route path="/expenses" element={<ExpenseList />} />
-      <Route path="/income" element={<ProjectIncomeList />} />
+        <Route path="/expenses" element={<ExpenseList />} />
+        <Route path="/income" element={<ProjectIncomeList />} />
 
-      <Route path="/reports" element={<ProjectReports />} />
-      <Route path="/reports/task-execution" element={<TaskExecutionReportPage />} />
-      <Route path="/reports/project-status" element={<ProjectStatusReport />} />
-      <Route path="/reports/project-income" element={<ProjectIncomeReport />} />
-      <Route path="/reports/project-expense" element={<ProjectExpenseReport />} />
-      <Route path="/reports/task-management-and-execution" element={<TaskManagementAndExecutionPage />} />
+        <Route path="/reports" element={<ProjectReports />} />
+        <Route
+          path="/reports/task-execution"
+          element={<TaskExecutionReportPage />}
+        />
+        <Route
+          path="/reports/project-status"
+          element={<ProjectStatusReport />}
+        />
+        <Route
+          path="/reports/project-income"
+          element={<ProjectIncomeReport />}
+        />
+        <Route
+          path="/reports/project-expense"
+          element={<ProjectExpenseReport />}
+        />
+        <Route
+          path="/reports/task-management-and-execution"
+          element={<TaskManagementAndExecutionPage />}
+        />
 
-      <Route path="/setup" element={<PMSetup />} />
+        <Route path="/setup" element={<PMSetup />} />
 
-      <Route
-        path="/material-requisitions"
-        element={<PMMaterialRequisitionList />}
-      />
-      <Route
-        path="/material-requisitions/new"
-        element={<PMMaterialRequisitionForm />}
-      />
-      <Route
-        path="/material-requisitions/:id"
-        element={<PMMaterialRequisitionForm />}
-      />
+        <Route
+          path="/material-requisitions"
+          element={<PMMaterialRequisitionList />}
+        />
+        <Route
+          path="/material-requisitions/new"
+          element={<PMMaterialRequisitionForm />}
+        />
+        <Route
+          path="/material-requisitions/:id"
+          element={<PMMaterialRequisitionForm />}
+        />
 
-      <Route
-        path="/material-utilizations"
-        element={<PMMaterialUtilizationList />}
-      />
-      <Route
-        path="/material-utilizations/new"
-        element={<PMMaterialUtilizationForm />}
-      />
-      <Route
-        path="/material-utilizations/:id"
-        element={<PMMaterialUtilizationForm />}
-      />
+        <Route
+          path="/material-utilizations"
+          element={<PMMaterialUtilizationList />}
+        />
+        <Route
+          path="/material-utilizations/new"
+          element={<PMMaterialUtilizationForm />}
+        />
+        <Route
+          path="/material-utilizations/:id"
+          element={<PMMaterialUtilizationForm />}
+        />
 
-      <Route path="/material-receipts" element={<PMMaterialReceiptList />} />
-      <Route
-        path="/material-receipts/new"
-        element={<PMMaterialReceiptForm />}
-      />
-      <Route
-        path="/material-receipts/:id"
-        element={<PMMaterialReceiptForm />}
-      />
+        <Route path="/material-receipts" element={<PMMaterialReceiptList />} />
+        <Route
+          path="/material-receipts/new"
+          element={<PMMaterialReceiptForm />}
+        />
+        <Route
+          path="/material-receipts/:id"
+          element={<PMMaterialReceiptForm />}
+        />
 
-      <Route path="/project-orders" element={<ProjectOrderList />} />
-      <Route path="/project-orders/new" element={<ProjectOrderForm />} />
-      <Route path="/project-orders/:id" element={<ProjectOrderForm />} />
+        <Route path="/project-orders" element={<ProjectOrderList />} />
+        <Route path="/project-orders/new" element={<ProjectOrderForm />} />
+        <Route path="/project-orders/:id" element={<ProjectOrderForm />} />
 
-      <Route path="/purchase-requisitions" element={<PMPurchaseRequisitionList />} />
-      <Route path="/purchase-requisitions/new" element={<PMPurchaseRequisitionForm />} />
-      <Route path="/purchase-requisitions/:id" element={<PMPurchaseRequisitionForm />} />
+        <Route path="/quotations" element={<ProjectQuotationList />} />
+        <Route path="/quotations/new" element={<ProjectQuotationForm />} />
+        <Route path="/quotations/:id" element={<ProjectQuotationForm />} />
+
+        <Route path="/project-invoices" element={<ProjectInvoiceList />} />
+        <Route path="/project-invoices/new" element={<ProjectInvoiceForm />} />
+        <Route
+          path="/project-invoices/:id"
+          element={<ProjectInvoiceForm />}
+        />
+
+        <Route path="/milestones" element={<ProjectManagementDashboardPage />} />
+        <Route path="/resources" element={<ProjectManagementDashboardPage />} />
+        <Route path="/timesheets" element={<TimesheetList />} />
+        <Route path="/income" element={<ProjectIncomeList />} />
+
+        <Route
+          path="/purchase-requisitions"
+          element={<PMPurchaseRequisitionList />}
+        />
+        <Route
+          path="/purchase-requisitions/new"
+          element={<PMPurchaseRequisitionForm />}
+        />
+        <Route
+          path="/purchase-requisitions/:id"
+          element={<PMPurchaseRequisitionForm />}
+        />
       </Routes>
     </ModuleLayout>
   );
@@ -414,8 +481,44 @@ export const projectManagementFeatures = [
   },
   {
     module_key: "project-management",
+    label: "Timesheets",
+    path: "/project-management/timesheets",
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Project Income",
+    path: "/project-management/income",
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Milestones",
+    path: "/project-management/milestones",
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Resource Management",
+    path: "/project-management/resources",
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
     label: "Project Orders",
     path: "/project-management/project-orders",
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Project Quotations",
+    path: "/project-management/quotations",
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Project Invoices",
+    path: "/project-management/project-invoices",
     type: "feature",
   },
   {
@@ -424,12 +527,7 @@ export const projectManagementFeatures = [
     path: "/project-management/purchase-requisitions",
     type: "feature",
   },
-  {
-    module_key: "project-management",
-    label: "Project Reports",
-    path: "/project-management/reports",
-    type: "dashboard",
-  },
+
   {
     module_key: "project-management",
     label: "Project Status Report",
@@ -446,6 +544,18 @@ export const projectManagementFeatures = [
     module_key: "project-management",
     label: "Project Expense Report",
     path: "/project-management/reports/project-expense",
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Task Management Report",
+    path: "/project-management/reports/task-management",
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Task Execution Log",
+    path: "/project-management/reports/task-execution",
     type: "feature",
   },
 ];

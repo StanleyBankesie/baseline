@@ -40,7 +40,7 @@ export default function CandidatesList() {
     <div className="p-4">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Link to="/human-resources" className="btn-secondary text-sm">
+          <Link to="/human-resources?section=Recruitment%20%26%20Onboarding" className="btn-secondary text-sm">
             Back to Menu
           </Link>
           <h2 className="text-lg font-semibold">Candidates</h2>

@@ -75,7 +75,7 @@ export default function TripReturnList() {
             <h1 className="text-2xl font-bold dark:text-brand-300">Trip & Dispatch Returns</h1>
             <p className="text-sm mt-1">Confirm and complete active transport trips</p>
           </div>
-          <Link to="/transport" className="btn btn-secondary">Return to Menu</Link>
+          <Link to="/transport" className="btn btn-secondary">Back</Link>
         </div>
       </div>
       

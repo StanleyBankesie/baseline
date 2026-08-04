@@ -88,7 +88,7 @@ export default function BackupPage() {
           <p className="text-slate-500 text-sm">Configure automated backup integrations.</p>
         </div>
         <button 
-          onClick={() => navigate('/administration')} 
+          onClick={() => navigate("/administration?section=System%20Health%20%26%20Settings")} 
           className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-200 rounded shadow-sm transition"
         >
           Back to Menu

@@ -1497,7 +1497,7 @@ export default function SalesOrderForm() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Warehouse
                     </label>
-                    <select
+                    <select required
                       name="warehouse_id"
                       value={formData.warehouse_id}
                       onChange={handleInputChange}

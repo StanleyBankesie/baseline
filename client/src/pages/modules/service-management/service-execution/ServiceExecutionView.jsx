@@ -48,7 +48,7 @@ export default function ServiceExecutionView() {
           >
             Back to List
           </Link>
-          <Link to="/service-management" className="btn-secondary">
+          <Link to="/service-management?section=Reports%20%26%20Parameters" className="btn-secondary">
             Back to Menu
           </Link>
         </div>

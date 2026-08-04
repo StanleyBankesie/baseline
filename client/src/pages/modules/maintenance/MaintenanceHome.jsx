@@ -42,134 +42,82 @@ import MaterialReceiptList from "./material-receipt/MaterialReceiptList.jsx";
 import MaterialReceiptForm from "./material-receipt/MaterialReceiptForm.jsx";
 import MaintenanceDashboardPage from "./MaintenanceDashboardPage.jsx";
 
-const buildFeature = (title, path, description, icon) => ({
-  title,
-  path,
-  description,
-  icon,
-});
+import { Link } from "react-router-dom";
+import { usePermission } from "../../../auth/PermissionContext.jsx";
+
+const ActionButton = ({ label, path, type, featureKey, action }) => {
+  const { canPerformAction } = usePermission();
+  const hasPermission = featureKey ? canPerformAction(featureKey, action) : true;
+  if (!hasPermission) return null;
+
+  const baseClasses = type === "primary" ? "btn btn-primary btn-sm" : "btn btn-outline btn-sm";
+  return (
+    <Link to={path} className={baseClasses}>{label}</Link>
+  );
+};
+
+const buildFeature = (title, path, description, icon) => {
+  const isReport = path.includes('/reports');
+  const isSetup = path.includes('/setup');
+  const featureKey = `maintenance:${path.split('/').pop()}`;
+  return {
+    title,
+    path,
+    description,
+    icon,
+    actions: [
+      <ActionButton key="view" label="View" path={path} type="outline" featureKey={featureKey} action="view" />,
+      (!isReport && !isSetup) ? <ActionButton key="add" label="Add" path={`${path}/new`} type="primary" featureKey={featureKey} action="create" /> : null
+    ].filter(Boolean)
+  };
+};
 
 export const maintenanceSections = [
   {
-    title: "Master Data",
+    title: "Equipment & Assets",
+    icon: "🏗️",
     items: [
-      buildFeature(
-        "Equipment",
-        "/maintenance/equipment",
-        "Equipment setup",
-        "🧰",
-      ),
-      buildFeature(
-        "Maintenance Contracts",
-        "/maintenance/contracts",
-        "Contract management",
-        "📄",
-      ),
-      buildFeature(
-        "Maintenance Assets",
-        "/maintenance/assets",
-        "Manage assets and equipment details",
-        "🏗️",
-      ),
+      buildFeature("Maintenance Assets", "/maintenance/assets", "Manage assets and equipment details", "🏢"),
+      buildFeature("Equipment", "/maintenance/equipment", "Equipment setup", "🚜"),
+      buildFeature("Maintenance Contracts", "/maintenance/contracts", "Contract management", "📜"),
     ],
   },
   {
-    title: "Operations & Schedules",
+    title: "Maintenance Operations",
+    icon: "🛠️",
     items: [
-      buildFeature(
-        "PM Schedules",
-        "/maintenance/pm-schedules",
-        "Preventive maintenance schedules",
-        "📅",
-      ),
-      buildFeature(
-        "Maintenance Requests",
-        "/maintenance/maintenance-requests",
-        "Service/repair requests",
-        "📋",
-      ),
-      buildFeature(
-        "Maintenance Rosters",
-        "/maintenance/rosters",
-        "Technician rosters and shift schedules",
-        "🗓️",
-      ),
-      buildFeature(
-        "Job Orders",
-        "/maintenance/job-orders",
-        "Job orders and work tickets",
-        "📑",
-      ),
-      buildFeature(
-        "Job Execution",
-        "/maintenance/job-executions",
-        "Track active job execution",
-        "⚙️",
-      ),
-      buildFeature(
-        "Maintenance Schedules",
-        "/maintenance/schedules",
-        "Master calendar for maintenance",
-        "📆",
-      ),
+      buildFeature("Maintenance Requests", "/maintenance/maintenance-requests", "Service/repair requests", "📬"),
+      buildFeature("Job Orders", "/maintenance/job-orders", "Job orders and work tickets", "📋"),
+      buildFeature("Job Execution", "/maintenance/job-executions", "Track active job execution", "🔧"),
+      buildFeature("PM Schedules", "/maintenance/pm-schedules", "Preventive maintenance schedules", "📅"),
+      buildFeature("Maintenance Schedules", "/maintenance/schedules", "Master calendar for maintenance", "📆"),
     ],
   },
   {
-    title: "Procurement & Materials",
+    title: "Resource Management",
+    icon: "👥",
     items: [
-      buildFeature(
-        "Maintenance RFQ",
-        "/maintenance/rfqs",
-        "Request for quotation for maintenance items/services",
-        "📜",
-      ),
-      buildFeature(
-        "Supplier Quotations",
-        "/maintenance/supplier-quotations",
-        "Quotations received from suppliers",
-        "🏷️",
-      ),
-      buildFeature(
-        "Maintenance Bills",
-        "/maintenance/maintenance-bills",
-        "Vendor bills for maintenance services",
-        "💵",
-      ),
-      buildFeature(
-        "Material Requisition",
-        "/maintenance/material-requisition",
-        "Requisition spare parts from main inventory",
-        "📦",
-      ),
-      buildFeature(
-        "Material Receipt",
-        "/maintenance/material-receipt",
-        "Confirm arrival of spare parts at maintenance site",
-        "📥",
-      ),
+      buildFeature("Maintenance Rosters", "/maintenance/rosters", "Technician rosters and shift schedules", "📅"),
+      buildFeature("Material Requisition", "/maintenance/material-requisition", "Requisition spare parts from main inventory", "📝"),
+      buildFeature("Material Receipt", "/maintenance/material-receipt", "Confirm arrival of spare parts at maintenance site", "📥"),
     ],
   },
   {
-    title: "Reports & Setup",
+    title: "Procurement & Billing",
+    icon: "💳",
     items: [
-      buildFeature(
-        "Maintenance Reports",
-        "/maintenance/reports",
-        "Asset performance and cost reports",
-        "📊",
-      ),
-      buildFeature(
-        "Downtime Analysis",
-        "/maintenance/reports/downtime",
-        "Analyze MTBF, MTTR, and asset downtime",
-        "📈",
-      ),
-      buildFeature(
-        "Maintenance Setup",
-        "/maintenance/setup",
-        "Configure maintenance categories, work centers, and parameters",
-        "🛠️",
-      ),
+      buildFeature("Maintenance RFQ", "/maintenance/rfqs", "Request for quotation for maintenance items/services", "✉️"),
+      buildFeature("Supplier Quotations", "/maintenance/supplier-quotations", "Quotations received from suppliers", "🏷️"),
+      buildFeature("Maintenance Bills", "/maintenance/maintenance-bills", "Vendor bills for maintenance services", "🧾"),
+    ],
+  },
+  {
+    title: "Setup & Reports",
+    icon: "⚙️",
+    items: [
+      buildFeature("Maintenance Reports", "/maintenance/reports", "Asset performance and cost reports", "📊"),
+      buildFeature("Downtime Analysis", "/maintenance/reports/downtime", "Analyze MTBF, MTTR, and asset downtime", "📉"),
+      buildFeature("Maintenance Setup", "/maintenance/setup", "Configure maintenance categories, work centers, and parameters", "⚙️"),
     ],
   },
 ];
@@ -271,6 +219,7 @@ function MaintenanceLanding() {
       ]}
       sections={maintenanceSections}
       features={maintenanceFeatures}
+      useSectionNavigation={true}
     />
   );
 }
@@ -373,83 +322,97 @@ export const maintenanceFeatures = [
     label: "Maintenance Reports",
     path: "/maintenance/reports",
     type: "dashboard",
+    icon: "📊"
   },
   {
     module_key: "maintenance",
     label: "Maintenance Requests",
     path: "/maintenance/maintenance-requests",
     type: "feature",
+    icon: "📬"
   },
   {
     module_key: "maintenance",
     label: "Job Orders",
     path: "/maintenance/job-orders",
     type: "feature",
+    icon: "📋"
   },
   {
     module_key: "maintenance",
     label: "Job Executions",
     path: "/maintenance/job-executions",
     type: "feature",
+    icon: "🔧"
   },
   {
     module_key: "maintenance",
     label: "RFQs",
     path: "/maintenance/rfq",
     type: "feature",
+    icon: "✉️"
   },
   {
     module_key: "maintenance",
     label: "Supplier Quotations",
     path: "/maintenance/supplier-quotations",
     type: "feature",
+    icon: "🏷️"
   },
   {
     module_key: "maintenance",
     label: "Maintenance Bills",
     path: "/maintenance/bills",
     type: "feature",
+    icon: "🧾"
   },
   {
     module_key: "maintenance",
     label: "Maintenance Schedules",
     path: "/maintenance/schedules",
     type: "feature",
+    icon: "📆"
   },
   {
     module_key: "maintenance",
     label: "Maintenance Rosters",
     path: "/maintenance/rosters",
     type: "feature",
+    icon: "📅"
   },
   {
     module_key: "maintenance",
     label: "Equipment",
     path: "/maintenance/equipment",
     type: "feature",
+    icon: "🚜"
   },
   {
     module_key: "maintenance",
     label: "Maintenance Contracts",
     path: "/maintenance/contracts",
     type: "feature",
+    icon: "📜"
   },
   {
     module_key: "maintenance",
     label: "Material Requisitions",
     path: "/maintenance/material-requisitions",
     type: "feature",
+    icon: "📝"
   },
   {
     module_key: "maintenance",
     label: "Material Receipts",
     path: "/maintenance/material-receipts",
     type: "feature",
+    icon: "📥"
   },
   {
     module_key: "maintenance",
     label: "Setup",
     path: "/maintenance/setup",
     type: "feature",
+    icon: "⚙️"
   },
 ];

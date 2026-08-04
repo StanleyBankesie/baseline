@@ -59,7 +59,7 @@ export default function MaintenanceRFQList() {
             <p className="text-sm text-slate-500">Track and manage requests for quotations</p>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => (window.location.href = "/maintenance")} className="btn btn-secondary">Back to Menu</button>
+            <button onClick={() => (window.location.href = "/maintenance?section=Procurement %26 Materials")} className="btn btn-secondary">Back</button>
             <button onClick={() => (window.location.href = "/maintenance/rfq/new")} className="bg-brand text-white px-4 py-2 rounded-lg font-medium hover:bg-brand-700">+ New RFQ</button>
           </div>
         </div>

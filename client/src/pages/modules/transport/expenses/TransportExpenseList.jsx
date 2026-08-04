@@ -66,7 +66,7 @@ export default function TransportExpenseList() {
       setSuppliers(r.data?.items || r.data?.data?.items || []);
     }).catch(() => {});
     api.get("/finance/accounts").then(r => setAccounts(r.data?.items || r.data?.data?.items || [])).catch(() => {});
-    api.get("/finance/tax-codes", { params: { form: "PAYMENT_VOUCHER" } }).then(r => {
+    api.get("/finance/tax-codes", { params: { form: "TRANSPORT_EXPENSES" } }).then(r => {
       const allTaxes = r.data?.items || r.data?.data?.items || [];
       setTaxCodes(allTaxes.filter(t => Number(t.is_active || 0) === 1));
     }).catch(() => {});
@@ -494,7 +494,7 @@ export default function TransportExpenseList() {
                         const checked = Boolean(e.target.checked);
                         setForm({...form, is_tax_included: checked, tax_code_id: checked ? form.tax_code_id : ""});
                       }} />
-                    <span className="font-medium text-slate-700">Is Tax Included</span>
+                    <span className="font-medium text-slate-700">Tax Applicable</span>
                   </label>
                   {form.is_tax_included && (
                     <select className="input input-bordered w-full mt-2" value={form.tax_code_id || ""} onChange={e => setForm({...form, tax_code_id: e.target.value})}>

@@ -1604,7 +1604,7 @@ export default function PriceSetup() {
               </p>
             </div>
             <Link
-              to="/sales"
+              to="/sales?section=Pricing%20%26%20Discounts"
               className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors shrink-0"
             >
               ← Back to Menu

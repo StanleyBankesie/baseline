@@ -10,6 +10,35 @@ function toNumber(v, fallback = null) {
 
 async function ensureProjectTables(companyId, branchId) {
   if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
+  await query(`CREATE TABLE IF NOT EXISTS pm_equipments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    company_id INT NOT NULL, branch_id INT NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    description TEXT,
+    status VARCHAR(50) DEFAULT 'ACTIVE',
+    maint_equipment_id INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+
+  await query(`CREATE TABLE IF NOT EXISTS pm_resources (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    company_id INT NOT NULL, branch_id INT NOT NULL,
+    project_id INT NOT NULL,
+    task_id INT NULL,
+    resource_type VARCHAR(50) DEFAULT 'EQUIPMENT', 
+    pm_equipment_id INT NULL, 
+    hr_employee_id INT NULL,
+    resource_name VARCHAR(200) NOT NULL,
+    allocated_qty DECIMAL(10,2) DEFAULT 1,
+    status VARCHAR(50) DEFAULT 'ALLOCATED', 
+    accountable_user_id INT,
+    accountable_user_name VARCHAR(200),
+    start_date DATE,
+    end_date DATE,
+    remarks TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+
   await query(`CREATE TABLE IF NOT EXISTS pm_projects (
     id INT AUTO_INCREMENT PRIMARY KEY,
     company_id INT NOT NULL, branch_id INT NOT NULL,
@@ -2105,6 +2134,202 @@ export const getTaskExecutionAnalyticsReport = async (req, res, next) => {
         projectExecutionBreakdown
       }
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ============================================================================
+// Equipment Management (pm_equipments)
+// ============================================================================
+
+export const listPmEquipments = async (req, res, next) => {
+  try {
+    const { companyId, branchId } = req.scope || {};
+    await ensureProjectTables(companyId, branchId);
+    
+    const rows = await query(
+      `SELECT e.*, me.asset_name as maint_equipment_name
+       FROM pm_equipments e
+       LEFT JOIN maint_assets me ON e.maint_equipment_id = me.id
+       WHERE e.company_id = ? AND e.branch_id = ?
+       ORDER BY e.name ASC`,
+      [companyId, branchId]
+    );
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createPmEquipment = async (req, res, next) => {
+  try {
+    const { companyId, branchId } = req.scope || {};
+    await ensureProjectTables(companyId, branchId);
+    const { name, description, status, maint_equipment_id } = req.body;
+    
+    if (!name) return httpError(res, 400, "Equipment name is required");
+
+    const result = await query(
+      `INSERT INTO pm_equipments (company_id, branch_id, name, description, status, maint_equipment_id)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [companyId, branchId, name, description || null, status || 'ACTIVE', maint_equipment_id || null]
+    );
+    res.status(201).json({ id: result.insertId, message: "Equipment created successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updatePmEquipment = async (req, res, next) => {
+  try {
+    const { companyId, branchId } = req.scope || {};
+    const { id } = req.params;
+    const { name, description, status, maint_equipment_id } = req.body;
+
+    if (!name) return httpError(res, 400, "Equipment name is required");
+
+    await query(
+      `UPDATE pm_equipments 
+       SET name = ?, description = ?, status = ?, maint_equipment_id = ?
+       WHERE id = ? AND company_id = ? AND branch_id = ?`,
+      [name, description || null, status || 'ACTIVE', maint_equipment_id || null, id, companyId, branchId]
+    );
+    res.json({ success: true, message: "Equipment updated" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deletePmEquipment = async (req, res, next) => {
+  try {
+    const { companyId, branchId } = req.scope || {};
+    const { id } = req.params;
+
+    const used = await query(`SELECT id FROM pm_resources WHERE pm_equipment_id = ? LIMIT 1`, [id]);
+    if (used.length > 0) return httpError(res, 400, "Equipment is allocated in a project/task and cannot be deleted");
+
+    await query(`DELETE FROM pm_equipments WHERE id = ? AND company_id = ? AND branch_id = ?`, [id, companyId, branchId]);
+    res.json({ success: true, message: "Equipment deleted" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ============================================================================
+// Resource Management (pm_resources)
+// ============================================================================
+
+export const listPmResources = async (req, res, next) => {
+  try {
+    const { companyId, branchId } = req.scope || {};
+    const { project_id, task_id } = req.query;
+    await ensureProjectTables(companyId, branchId);
+
+    let sql = `
+      SELECT r.*, 
+             p.project_name, p.project_code,
+             t.task_title,
+             e.name as pm_equipment_name,
+             he.employee_name as hr_employee_name
+      FROM pm_resources r
+      LEFT JOIN pm_projects p ON r.project_id = p.id
+      LEFT JOIN pm_tasks t ON r.task_id = t.id
+      LEFT JOIN pm_equipments e ON r.pm_equipment_id = e.id
+      LEFT JOIN hr_employees he ON r.hr_employee_id = he.id
+      WHERE r.company_id = ? AND r.branch_id = ?
+    `;
+    const params = [companyId, branchId];
+    
+    if (project_id) {
+      sql += " AND r.project_id = ?";
+      params.push(project_id);
+    }
+    if (task_id) {
+      sql += " AND r.task_id = ?";
+      params.push(task_id);
+    }
+    
+    sql += " ORDER BY r.created_at DESC";
+
+    const rows = await query(sql, params);
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createPmResource = async (req, res, next) => {
+  try {
+    const { companyId, branchId } = req.scope || {};
+    await ensureProjectTables(companyId, branchId);
+    
+    const { 
+      project_id, task_id, resource_type, pm_equipment_id, hr_employee_id, 
+      resource_name, allocated_qty, status, accountable_user_id, accountable_user_name,
+      start_date, end_date, remarks 
+    } = req.body;
+
+    if (!project_id) return httpError(res, 400, "Project is required");
+    if (!resource_name) return httpError(res, 400, "Resource name is required");
+
+    const result = await query(
+      `INSERT INTO pm_resources (
+        company_id, branch_id, project_id, task_id, resource_type,
+        pm_equipment_id, hr_employee_id, resource_name, allocated_qty,
+        status, accountable_user_id, accountable_user_name, start_date, end_date, remarks
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        companyId, branchId, project_id, task_id || null, resource_type || 'EQUIPMENT',
+        pm_equipment_id || null, hr_employee_id || null, resource_name, 
+        allocated_qty || 1, status || 'ALLOCATED', accountable_user_id || null, accountable_user_name || null,
+        start_date || null, end_date || null, remarks || null
+      ]
+    );
+
+    res.status(201).json({ id: result.insertId, message: "Resource allocated successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updatePmResource = async (req, res, next) => {
+  try {
+    const { companyId, branchId } = req.scope || {};
+    const { id } = req.params;
+    
+    const { 
+      task_id, resource_type, pm_equipment_id, hr_employee_id, 
+      resource_name, allocated_qty, status, accountable_user_id, accountable_user_name,
+      start_date, end_date, remarks 
+    } = req.body;
+
+    await query(
+      `UPDATE pm_resources SET
+        task_id = ?, resource_type = ?, pm_equipment_id = ?, hr_employee_id = ?,
+        resource_name = ?, allocated_qty = ?, status = ?, accountable_user_id = ?, 
+        accountable_user_name = ?, start_date = ?, end_date = ?, remarks = ?
+       WHERE id = ? AND company_id = ? AND branch_id = ?`,
+      [
+        task_id || null, resource_type || 'EQUIPMENT', pm_equipment_id || null, hr_employee_id || null,
+        resource_name, allocated_qty || 1, status || 'ALLOCATED', accountable_user_id || null,
+        accountable_user_name || null, start_date || null, end_date || null, remarks || null,
+        id, companyId, branchId
+      ]
+    );
+
+    res.json({ success: true, message: "Resource updated successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deletePmResource = async (req, res, next) => {
+  try {
+    const { companyId, branchId } = req.scope || {};
+    const { id } = req.params;
+    await query(`DELETE FROM pm_resources WHERE id = ? AND company_id = ? AND branch_id = ?`, [id, companyId, branchId]);
+    res.json({ success: true, message: "Resource allocation deleted" });
   } catch (err) {
     next(err);
   }

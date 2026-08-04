@@ -15,7 +15,7 @@ export default function TransportDashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState("overview");
+
 
   const loadData = async () => {
     try {
@@ -75,22 +75,7 @@ export default function TransportDashboard() {
           </div>
         </div>
 
-        {/* Tab navigation */}
-        <div className="mt-5 border-t border-white/10 pt-4 flex gap-2">
-          {["overview", "reports"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                activeTab === tab
-                  ? "bg-white text-brand-900 shadow-sm"
-                  : "text-white/70 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              {tab === "overview" ? "Executive Dashboard" : "Reports & Intelligence"}
-            </button>
-          ))}
-        </div>
+
       </div>
 
       {error && (
@@ -99,9 +84,7 @@ export default function TransportDashboard() {
         </div>
       )}
 
-      {activeTab === "reports" ? (
-        <TransportReports isTab={true} />
-      ) : (
+      <div className="space-y-6">
         <div className="space-y-6">
           {/* KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -342,10 +325,10 @@ export default function TransportDashboard() {
                 <span className="text-slate-600 dark:text-slate-300 font-medium">Fuel Efficiency:</span>
                 <span className="font-bold text-brand-700 dark:text-brand-300">{analytics.fuelKmPerLiter || 0} km / Liter</span>
               </div>
-            </div>
           </div>
         </div>
-      )}
+      </div>
+    </div>
     </div>
   );
 }

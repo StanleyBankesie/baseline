@@ -64,6 +64,7 @@ function PurchaseFeaturePage({ title, description }) {
 
 export const purchaseSections = [
   {
+    icon: "🛒",
     title: "Procurement",
     features: [
       { name: "Direct Purchase", path: "/purchase/direct-purchase", description: "Create quick single-step purchases", icon: "⚡" },
@@ -101,10 +102,35 @@ export const purchaseSections = [
     ],
   },
   {
+    icon: "🗂️",
     title: "Master Data",
     features: [
       { name: "Suppliers", path: "/purchase/suppliers", description: "Manage suppliers and contacts", icon: "🏭" },
       { name: "Setup", path: "/purchase/setup", description: "Configure accounts and purchase rules", icon: "⚙️" },
+    ],
+  },
+  {
+    title: "Analytics & Reports",
+    features: [
+      { name: "Purchase Register", path: "/purchase/reports/purchase-register", description: "All purchases registered", icon: "📊" },
+      { name: "Purchase Tracking", path: "/purchase/reports/purchase-tracking", description: "Track all purchase status", icon: "🔎" },
+      { name: "Supplier Quotation Analysis", path: "/purchase/reports/supplier-quotation-analysis", description: "Analyze supplier quotations", icon: "📑" },
+      { name: "Supplier Performance", path: "/purchase/reports/supplier-performance", description: "Evaluate supplier performance", icon: "📈" },
+      { name: "Supplier Outstanding Payables", path: "/purchase/reports/supplier-outstanding-payables", description: "Track outstanding supplier balances", icon: "💰" },
+      { name: "Item Purchase History", path: "/purchase/reports/item-purchase-history", description: "History of item purchases", icon: "📋" },
+      { name: "Price Variance", path: "/purchase/reports/price-variance", description: "Analyze price variations", icon: "📉" },
+      { name: "Purchase Aging", path: "/purchase/reports/purchase-aging", description: "Aging analysis of purchases", icon: "📅" },
+      { name: "Lead Time Analysis", path: "/purchase/reports/lead-time-analysis", description: "Analyze delivery lead times", icon: "⏳" },
+      { name: "Cancelled POs", path: "/purchase/reports/cancelled-pos", description: "List of cancelled orders", icon: "🚫" },
+      { name: "Import Order Tracking", path: "/purchase/reports/import-order-tracking", description: "Track import orders", icon: "🚢" },
+      { name: "Local Order Tracking", path: "/purchase/reports/local-order-tracking", description: "Track local orders", icon: "🚚" },
+      { name: "Pending GRN to Bill (Local)", path: "/purchase/reports/pending-grn-to-bill-local", description: "Pending local GRN to bill", icon: "📝" },
+      { name: "Pending GRN to Bill (Import)", path: "/purchase/reports/pending-grn-to-bill-import", description: "Pending import GRN to bill", icon: "📝" },
+      { name: "Import Order List", path: "/purchase/reports/import-order-list", description: "List of import orders", icon: "📑" },
+      { name: "Pending Shipments", path: "/purchase/reports/pending-shipments", description: "Track pending shipments", icon: "📦" },
+      { name: "Department Analysis", path: "/purchase/reports/department-analysis", description: "Purchase analysis by department", icon: "📊" },
+      { name: "Import Cost Breakdown", path: "/purchase/reports/import-cost-breakdown", description: "Breakdown of import costs", icon: "💰" },
+      { name: "Purchase Returns Analysis", path: "/purchase/reports/purchase-returns-analysis", description: "Analyze purchase returns", icon: "↩️" }
     ],
   },
 ];
@@ -184,6 +210,7 @@ function PurchaseHomeIndex() {
 
   return (
     <ModuleDashboard
+      useSectionNavigation={true}
       title="🛒 Purchase"
       description="Purchase management and procurement workflows"
       stats={stats}

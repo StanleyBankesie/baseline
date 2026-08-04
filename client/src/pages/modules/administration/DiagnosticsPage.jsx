@@ -185,7 +185,7 @@ export default function DiagnosticsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Link to="/administration" className="btn" style={{ padding: "8px 16px", background: "#6b7280", color: "white", borderRadius: "6px", textDecoration: "none", fontSize: "14px" }}>
+          <Link to="/administration?section=Audit%20%26%20Logs" className="btn" style={{ padding: "8px 16px", background: "#6b7280", color: "white", borderRadius: "6px", textDecoration: "none", fontSize: "14px" }}>
             ← Return to Menu
           </Link>
           <button className="btn-primary" onClick={runDiagnostics} disabled={running}>

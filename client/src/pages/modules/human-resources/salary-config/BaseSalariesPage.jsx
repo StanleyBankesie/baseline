@@ -31,8 +31,8 @@ export default function BaseSalariesPage() {
     setLoading(true);
     try {
       const [empRes, salRes] = await Promise.all([
-        api.get("/hr/employees"),
-        api.get("/hr/salary/base-salaries"),
+        api.get("/hr/employees").catch(() => ({ data: { items: [] } })),
+        api.get("/hr/salary/base-salaries").catch(() => ({ data: { items: [] } })),
       ]);
       setEmployees((empRes.data.items || []).filter(e => e.status === 'ACTIVE'));
       setBaseSalaries(salRes.data.items || []);

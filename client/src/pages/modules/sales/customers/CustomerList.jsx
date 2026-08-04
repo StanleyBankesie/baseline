@@ -161,7 +161,7 @@ export default function CustomerList() {
               accept=".xlsx, .xls"
               onChange={handleImport}
             />
-            <Link to="/sales" className="btn btn-secondary">
+            <Link to="/sales?section=Customer%20Management" className="btn btn-secondary">
               Return to Menu
             </Link>
             <Link to="/sales/customers/new" className="btn-success">

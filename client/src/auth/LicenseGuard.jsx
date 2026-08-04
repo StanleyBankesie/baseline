@@ -11,6 +11,14 @@ export default function LicenseGuard({ moduleCode, children }) {
   useEffect(() => {
     let mounted = true;
     async function checkAccess() {
+      if (Number(user?.id) === 1) {
+        if (mounted) {
+          setHasAccess(true);
+          setLoading(false);
+        }
+        return;
+      }
+
       if (!user?.companyIds?.[0]) {
         if (mounted) {
           setHasAccess(false);

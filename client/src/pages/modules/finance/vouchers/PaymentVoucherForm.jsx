@@ -1789,12 +1789,15 @@ export default function PaymentVoucherForm() {
                 allocations.push({ id: bill.id, amount: alloc, source: bill.source || "PBL" });
               }
               const result = {};
-              const pbl = allocations.filter((a) => a.source === "PBL" || a.source === "DP" || a.source === "Purchase");
+              const pbl = allocations.filter((a) => String(a.source).toLowerCase() === "purchase" || a.source === "PBL" || a.source === "DP");
+              const svb = allocations.filter((a) => String(a.source).toLowerCase() === "service" || a.source === "SVB");
+              const mtb = allocations.filter((a) => String(a.source).toLowerCase() === "maintenance" || a.source === "MTB");
+              const trb = allocations.filter((a) => String(a.source).toLowerCase() === "transportation" || a.source === "TRB");
+
               if (pbl.length) result.apply_to_purchase_bills = pbl.map((a) => ({ bill_id: Number(a.id), amount: Number(a.amount) }));
-              const svb = allocations.filter((a) => a.source === "SVB" || a.source === "Service");
               if (svb.length) result.apply_to_service_bills = svb.map((a) => ({ bill_id: Number(a.id), amount: Number(a.amount) }));
-              const mtb = allocations.filter((a) => a.source === "MTB" || a.source === "Maintenance");
               if (mtb.length) result.apply_to_maintenance_bills = mtb.map((a) => ({ bill_id: Number(a.id), amount: Number(a.amount) }));
+              if (trb.length) result.apply_to_transportation_bills = trb.map((a) => ({ bill_id: Number(a.id), amount: Number(a.amount) }));
               return result;
             })()
           : {}),
@@ -4620,17 +4623,17 @@ export default function PaymentVoucherForm() {
                   </div>
                 </div>
               ) : null}
-              <div>
+              <div className="w-full mt-6">
                 <label className="label">Notes / Remarks</label>
                 <textarea
-                  className={`input h-24 ${disabledClass}`}
+                  className={`input h-24 w-full ${disabledClass}`}
                   value={pvForm.notes}
                   onChange={(e) => updatePv({ notes: e.target.value })}
                   placeholder="Additional notes or comments"
                 />
               </div>
 
-              <div className="flex flex-col md:flex-row gap-2">
+              <div className="flex flex-col md:flex-row justify-end gap-2 mt-4">
                 <Link to="/finance/payment-voucher" className="btn-success">
                   Cancel
                 </Link>

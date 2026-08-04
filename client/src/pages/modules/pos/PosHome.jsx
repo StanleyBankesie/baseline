@@ -99,6 +99,7 @@ function PosLanding() {
     <div className="space-y-6">
       <PosSyncStatus />
       <ModuleDashboard
+      useSectionNavigation={true}
         title="Point of Sale (POS)"
         description="Retail sales, register operations, and day management"
         stats={stats}
@@ -114,6 +115,7 @@ function PosLanding() {
 
 export const posSections = [
   {
+    icon: "💳",
     title: "Transactions",
     features: [
       {

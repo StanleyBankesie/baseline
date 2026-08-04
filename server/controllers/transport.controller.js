@@ -358,13 +358,14 @@ export const createFuelLog = async (req, res, next) => {
   try {
     const { companyId, branchIdStr } = req.scope;
     const branchId = toNumber(branchIdStr) || 1;
-    const { vehicle_id, log_date, odometer_reading, fuel_quantity, cost_per_unit, total_cost } = req.body;
+    const { vehicle_id, log_date, odometer_reading, fuel_quantity, cost_per_unit, total_cost, status, notes } = req.body;
     
     const result = await query(
-      `INSERT INTO trans_fuel_logs (company_id, branch_id, vehicle_id, log_date, odometer_reading, fuel_quantity, cost_per_unit, total_cost, created_by) 
-       VALUES (:companyId, :branchId, :vehicle_id, :log_date, :odometer_reading, :fuel_quantity, :cost_per_unit, :total_cost, :userId)`,
+      `INSERT INTO trans_fuel_logs (company_id, branch_id, vehicle_id, log_date, odometer_reading, fuel_quantity, cost_per_unit, total_cost, status, remarks, created_by) 
+       VALUES (:companyId, :branchId, :vehicle_id, :log_date, :odometer_reading, :fuel_quantity, :cost_per_unit, :total_cost, :status, :remarks, :userId)`,
       {
         companyId, branchId, vehicle_id, log_date, odometer_reading, fuel_quantity, cost_per_unit, total_cost,
+        status: status || 'PENDING', remarks: notes || null,
         userId: req.user?.id || null
       }
     );
@@ -374,6 +375,69 @@ export const createFuelLog = async (req, res, next) => {
       { odometer_reading, vehicle_id });
 
     res.status(201).json({ success: true, data: { id: result.insertId } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getFuelLog = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { companyId } = req.scope;
+    const [item] = await query("SELECT * FROM trans_fuel_logs WHERE id = :id AND company_id = :companyId", { id, companyId });
+    if (!item) return res.status(404).json({ message: "Fuel log not found" });
+    res.json({ success: true, data: { item } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateFuelLog = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { companyId } = req.scope;
+    const { vehicle_id, log_date, odometer_reading, fuel_quantity, cost_per_unit, total_cost, fuel_station, notes } = req.body;
+    
+    await query(
+      `UPDATE trans_fuel_logs 
+       SET vehicle_id = :vehicle_id, log_date = :log_date, odometer_reading = :odometer_reading, 
+           fuel_quantity = :fuel_quantity, cost_per_unit = :cost_per_unit, total_cost = :total_cost,
+           remarks = :notes, updated_by = :userId
+       WHERE id = :id AND company_id = :companyId`,
+      {
+        id, companyId, vehicle_id, log_date, odometer_reading, fuel_quantity, cost_per_unit, total_cost,
+        notes, userId: req.user?.id || null
+      }
+    );
+    
+    // Update vehicle odometer
+    await query("UPDATE trans_vehicles SET current_odometer = GREATEST(current_odometer, :odometer_reading) WHERE id = :vehicle_id", 
+      { odometer_reading, vehicle_id });
+
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateFuelLogStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { companyId } = req.scope;
+    const { status } = req.body;
+    await query("UPDATE trans_fuel_logs SET status = :status WHERE id = :id AND company_id = :companyId", { id, companyId, status });
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteFuelLog = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { companyId } = req.scope;
+    await query("DELETE FROM trans_fuel_logs WHERE id = :id AND company_id = :companyId", { id, companyId });
+    res.json({ success: true });
   } catch (err) {
     next(err);
   }
@@ -833,7 +897,7 @@ export const listFuelExpenses = async (req, res, next) => {
   try {
     const { companyId } = req.scope;
     const items = await query(
-      `SELECT f.*, v.vehicle_name, v.registration_number, c.customer_name as supplier_name_mapped
+      `SELECT f.*, v.vehicle_name, v.reg_number, c.customer_name as supplier_name_mapped
        FROM trans_fuel_expenses f
        LEFT JOIN trans_vehicles v ON f.vehicle_id = v.id
        LEFT JOIN sal_customers c ON f.supplier_id = c.id
@@ -1347,7 +1411,11 @@ export const listTransportationBills = async (req, res, next) => {
   try {
     const { companyId } = req.scope;
     const items = await query(
-      "SELECT * FROM trans_transportation_bills WHERE company_id = :companyId ORDER BY id DESC",
+      `SELECT tb.*, s.supplier_name
+       FROM trans_transportation_bills tb
+       LEFT JOIN pur_suppliers s ON s.id = tb.supplier_id
+       WHERE tb.company_id = :companyId
+       ORDER BY tb.id DESC`,
       { companyId }
     );
     res.json({ success: true, data: { items } });
@@ -1359,9 +1427,29 @@ export const listTransportationBills = async (req, res, next) => {
 export const getTransportationBill = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const items = await query("SELECT * FROM trans_transportation_bills WHERE id = :id", { id });
-    const details = await query("SELECT * FROM trans_transportation_bill_details WHERE bill_id = :id", { id });
-    res.json({ success: true, data: { ...items[0], items: details } });
+    const rows = await query(
+      `SELECT tb.*, s.supplier_name
+       FROM trans_transportation_bills tb
+       LEFT JOIN pur_suppliers s ON s.id = tb.supplier_id
+       WHERE tb.id = :id`,
+      { id }
+    );
+    const details = await query(
+      `SELECT tbd.*, ii.item_name, ii.item_code
+       FROM trans_transportation_bill_details tbd
+       LEFT JOIN inv_items ii ON ii.id = tbd.item_id
+       WHERE tbd.bill_id = :id`,
+      { id }
+    );
+    // Map bill_details columns to what the form expects
+    const mappedDetails = details.map(d => ({
+      ...d,
+      desc: d.description || d.item_name || "",
+      qty: Number(d.quantity) || 0,
+      rate: Number(d.unit_price) || 0,
+      line_total: Number(d.total_amount) || 0,
+    }));
+    res.json({ success: true, data: { item: rows[0] || {}, details: mappedDetails } });
   } catch (err) {
     next(err);
   }
@@ -1369,11 +1457,11 @@ export const getTransportationBill = async (req, res, next) => {
 
 export const createTransportationBill = async (req, res, next) => {
   try {
-    const { companyId } = req.scope;
-    const { bill_no, bill_date, supplier_id, total_amount, items } = req.body;
+    const { companyId, branchId } = req.scope;
+    const { bill_no, bill_date, due_date, supplier_id, total_amount, order_id, items, currency_id, exchange_rate, service_date, cost_center_id } = req.body;
     const result = await query(
-      "INSERT INTO trans_transportation_bills (company_id, bill_no, bill_date, supplier_id, total_amount) VALUES (:companyId, :bill_no, :bill_date, :supplier_id, :total_amount)",
-      { companyId, bill_no, bill_date: bill_date || new Date(), supplier_id: supplier_id || 0, total_amount: total_amount || 0 }
+      "INSERT INTO trans_transportation_bills (company_id, branch_id, bill_no, bill_date, due_date, supplier_id, total_amount, status, payment_status, currency_id, exchange_rate, service_date, order_id, cost_center_id) VALUES (:companyId, :branchId, :bill_no, :bill_date, :due_date, :supplier_id, :total_amount, 'POSTED', 'UNPAID', :currency_id, :exchange_rate, :service_date, :order_id, :cost_center_id)",
+      { companyId, branchId: branchId || null, bill_no, bill_date: bill_date || new Date(), due_date: due_date || bill_date || new Date(), supplier_id: supplier_id || 0, total_amount: total_amount || 0, currency_id: currency_id || null, exchange_rate: exchange_rate || 1, service_date: service_date || null, order_id: order_id || null, cost_center_id: cost_center_id || null }
     );
     const billId = result.insertId;
     if (items && items.length) {
@@ -1384,6 +1472,13 @@ export const createTransportationBill = async (req, res, next) => {
         );
       }
     }
+    // Mark the linked expense log as billed and sync status
+    if (order_id) {
+      await query(
+        `UPDATE trans_expense_logs SET bill_id = :billId, status = 'POSTED' WHERE id = :order_id AND company_id = :companyId`,
+        { billId, order_id, companyId }
+      ).catch(() => {});
+    }
     res.json({ success: true, data: { id: billId } });
   } catch (err) {
     next(err);
@@ -1393,10 +1488,11 @@ export const createTransportationBill = async (req, res, next) => {
 export const updateTransportationBill = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { bill_no, bill_date, supplier_id, total_amount, items } = req.body;
+    const { companyId } = req.scope;
+    const { bill_no, bill_date, due_date, supplier_id, total_amount, order_id, items, currency_id, exchange_rate, service_date, cost_center_id } = req.body;
     await query(
-      "UPDATE trans_transportation_bills SET bill_no = :bill_no, bill_date = :bill_date, supplier_id = :supplier_id, total_amount = :total_amount WHERE id = :id",
-      { bill_no, bill_date, supplier_id: supplier_id || 0, total_amount: total_amount || 0, id }
+      "UPDATE trans_transportation_bills SET bill_no = :bill_no, bill_date = :bill_date, due_date = :due_date, supplier_id = :supplier_id, total_amount = :total_amount, status = 'POSTED', currency_id = :currency_id, exchange_rate = :exchange_rate, service_date = :service_date, order_id = :order_id, cost_center_id = :cost_center_id WHERE id = :id",
+      { bill_no, bill_date, due_date: due_date || bill_date || null, supplier_id: supplier_id || 0, total_amount: total_amount || 0, currency_id: currency_id || null, exchange_rate: exchange_rate || 1, service_date: service_date || null, order_id: order_id || null, cost_center_id: cost_center_id || null, id }
     );
     await query("DELETE FROM trans_transportation_bill_details WHERE bill_id = :id", { id });
     if (items && items.length) {
@@ -1406,6 +1502,24 @@ export const updateTransportationBill = async (req, res, next) => {
           { id, item_id: item.item_id || 0, quantity: item.quantity || 0, unit_price: item.unit_price || 0, total_amount: item.total_amount || 0 }
         );
       }
+    }
+    // Clear old expense log link, then re-link the new one
+    await query(
+      "UPDATE trans_expense_logs SET bill_id = NULL WHERE bill_id = :id AND company_id = :companyId",
+      { id, companyId }
+    ).catch(() => {});
+    if (order_id) {
+      await query(
+        `UPDATE trans_expense_logs e
+         JOIN trans_transportation_bills tb ON tb.id = :id
+         SET e.bill_id = :id, e.status = CASE
+             WHEN tb.payment_status = 'FULLY PAID' THEN 'FULLY PAID'
+             WHEN tb.payment_status = 'PARTIAL PAYMENT' THEN 'PARTIAL PAYMENT'
+             ELSE tb.status
+         END
+         WHERE e.id = :order_id AND e.company_id = :companyId`,
+        { id, order_id, companyId }
+      ).catch(() => {});
     }
     res.json({ success: true });
   } catch (err) {
@@ -1452,7 +1566,7 @@ export const listExpenseLogs = async (req, res, next) => {
   try {
     const { companyId } = req.scope;
     const sql = `
-      SELECT e.*, 
+      SELECT e.*, e.bill_id,
         t.trip_number as trip_no,
         v.reg_number as vehicle_reg,
         s.supplier_name
@@ -1496,8 +1610,8 @@ export const createExpenseLog = async (req, res, next) => {
     const b = req.body;
     if (!b.amount && (!b.items || !b.items.length)) throw httpError(400, "VALIDATION_ERROR", "amount or items required");
     
-    const r = await query(`INSERT INTO trans_expense_logs (company_id, branch_id, trip_id, vehicle_id, supplier_id, expense_date, expense_type, amount, currency, description, recorded_by, status)
-      VALUES (:companyId, :branchId, :tripId, :vehicleId, :supplierId, :expenseDate, :expenseType, :amount, :currency, :description, :recordedBy, :status)`, {
+    const r = await query(`INSERT INTO trans_expense_logs (company_id, branch_id, trip_id, vehicle_id, supplier_id, expense_date, expense_type, amount, currency, description, recorded_by, status, is_tax_included, tax_code_id)
+      VALUES (:companyId, :branchId, :tripId, :vehicleId, :supplierId, :expenseDate, :expenseType, :amount, :currency, :description, :recordedBy, :status, :isTaxIncluded, :taxCodeId)`, {
       companyId, branchId,
       tripId: toNumber(b.trip_id) || null,
       vehicleId: toNumber(b.vehicle_id) || null,
@@ -1508,10 +1622,16 @@ export const createExpenseLog = async (req, res, next) => {
       currency: b.currency || 'GHS',
       description: b.description || null,
       recordedBy: req.user?.username || null,
-      status: b.status || 'PENDING'
+      status: b.status || 'PENDING',
+      isTaxIncluded: b.is_tax_included ? 1 : 0,
+      taxCodeId: toNumber(b.tax_code_id) || null
     });
     
     const logId = r.insertId;
+    
+    // Auto-generate log_number (e.g., EXL000001)
+    const logNumber = `EXL${String(logId).padStart(6, '0')}`;
+    await query(`UPDATE trans_expense_logs SET log_number = :logNumber WHERE id = :logId`, { logNumber, logId });
     
     if (b.items && Array.isArray(b.items)) {
       for (const item of b.items) {
@@ -1540,7 +1660,7 @@ export const updateExpenseLog = async (req, res, next) => {
     const b = req.body;
     await query(`UPDATE trans_expense_logs SET
       trip_id = :tripId, vehicle_id = :vehicleId, supplier_id = :supplierId, expense_date = :expenseDate, expense_type = :expenseType, amount = :amount, currency = :currency,
-      description = :description, status = :status
+      description = :description, status = :status, is_tax_included = :isTaxIncluded, tax_code_id = :taxCodeId
       WHERE id = :id AND company_id = :companyId`, {
       id, companyId,
       tripId: toNumber(b.trip_id) || null,
@@ -1551,7 +1671,9 @@ export const updateExpenseLog = async (req, res, next) => {
       amount: Number(b.amount || 0),
       currency: b.currency || 'GHS',
       description: b.description || null,
-      status: b.status || 'PENDING'
+      status: b.status || 'PENDING',
+      isTaxIncluded: b.is_tax_included ? 1 : 0,
+      taxCodeId: toNumber(b.tax_code_id) || null
     });
     
     if (b.items && Array.isArray(b.items)) {
@@ -1609,22 +1731,22 @@ export const getTransportFullAnalyticsReport = async (req, res, next) => {
 
     // 1. Fetch Vehicles
     const vehicleRows = await query(
-      "SELECT id, registration_number, make, model, status, capacity, fuel_type FROM trans_vehicles WHERE company_id = :companyId ORDER BY registration_number",
+      "SELECT id, reg_number, make, model, status, capacity, fuel_type FROM trans_vehicles WHERE company_id = :companyId ORDER BY reg_number",
       { companyId }
     ).catch(() => []);
 
     // 2. Fetch Drivers
     const driverRows = await query(
-      "SELECT id, driver_name, license_number, status, phone FROM trans_drivers WHERE company_id = :companyId ORDER BY driver_name",
+      "SELECT id, employee_name AS driver_name, license_number, status FROM trans_drivers WHERE company_id = :companyId ORDER BY employee_name",
       { companyId }
     ).catch(() => []);
 
     // 3. Query Trips
     let tripSql = `
       SELECT t.*, 
-             COALESCE(NULLIF(v.registration_number, ''), NULLIF(CONCAT(v.make, ' ', v.model), ' '), CONCAT('Vehicle #', t.vehicle_id)) AS vehicle_name,
-             v.registration_number AS reg_number,
-             COALESCE(NULLIF(d.driver_name, ''), 'Unassigned Driver') AS driver_name
+             COALESCE(NULLIF(v.reg_number, ''), NULLIF(CONCAT(v.make, ' ', v.model), ' '), CONCAT('Vehicle #', t.vehicle_id)) AS vehicle_name,
+             v.reg_number AS reg_number,
+             COALESCE(NULLIF(d.employee_name, ''), 'Unassigned Driver') AS driver_name
       FROM trans_trips t
       LEFT JOIN trans_vehicles v ON v.id = t.vehicle_id
       LEFT JOIN trans_drivers d ON d.id = t.driver_id
@@ -1640,13 +1762,30 @@ export const getTransportFullAnalyticsReport = async (req, res, next) => {
 
     // 4. Query Fuel Logs
     const fuelRows = await query(
-      "SELECT f.*, v.registration_number AS reg_number FROM trans_fuel_logs f LEFT JOIN trans_vehicles v ON v.id = f.vehicle_id WHERE f.company_id = :companyId ORDER BY f.log_date DESC",
+      "SELECT f.*, v.reg_number AS reg_number FROM trans_fuel_logs f LEFT JOIN trans_vehicles v ON v.id = f.vehicle_id WHERE f.company_id = :companyId ORDER BY f.log_date DESC",
       { companyId }
     ).catch(() => []);
 
     // 5. Query Expenses / Bills
     const expenseRows = await query(
       "SELECT * FROM trans_expense_logs WHERE company_id = :companyId AND (deleted_at IS NULL)",
+      { companyId }
+    ).catch(() => []);
+
+    // 6. Query Billing/Invoices for Revenue
+    const invoiceRows = await query(
+      "SELECT trip_id, net_amount as amount, status FROM trans_invoices WHERE company_id = :companyId",
+      { companyId }
+    ).catch(() => []);
+
+    const billingRows = await query(
+      "SELECT trip_id, amount, status FROM trans_billing WHERE company_id = :companyId AND (deleted_at IS NULL)",
+      { companyId }
+    ).catch(() => []);
+
+    // 7. Query Routes for Distance
+    const routeRows = await query(
+      "SELECT id, distance FROM trans_routes WHERE company_id = :companyId AND (deleted_at IS NULL)",
       { companyId }
     ).catch(() => []);
 
@@ -1679,9 +1818,20 @@ export const getTransportFullAnalyticsReport = async (req, res, next) => {
       else if (currentStatus === "DELAYED") delayedTrips++;
       else if (currentStatus === "CANCELLED") cancelledTrips++;
 
-      const dist = Number(t.total_distance_km || t.distance_km || 0);
-      const rev = Number(t.revenue || t.total_amount || 0);
-      const cost = Number(t.trip_cost || t.total_cost || 0);
+      const tripExpenses = expenseRows.filter(e => e.trip_id === t.id);
+      const calculatedCost = tripExpenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+
+      const tripInvoices = invoiceRows.filter(i => i.trip_id === t.id && i.status !== 'CANCELLED');
+      const tripBilling = billingRows.filter(b => b.trip_id === t.id && b.status !== 'CANCELLED');
+      const calculatedRev = tripInvoices.reduce((sum, i) => sum + Number(i.amount || 0), 0) + 
+                            tripBilling.reduce((sum, b) => sum + Number(b.amount || 0), 0);
+
+      const route = routeRows.find(r => r.id === t.route_id);
+      const calculatedDist = route ? Number(route.distance || 0) : Number((t.end_odometer || 0) - (t.start_odometer || 0));
+
+      const dist = calculatedDist > 0 ? calculatedDist : Number(t.total_distance_km || t.distance_km || 0);
+      const rev = calculatedRev > 0 ? calculatedRev : Number(t.revenue || t.total_amount || 0);
+      const cost = calculatedCost > 0 ? calculatedCost : Number(t.trip_cost || t.total_cost || 0);
 
       totalDistanceKm += dist;
       totalRevenue += rev;

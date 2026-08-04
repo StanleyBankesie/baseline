@@ -274,7 +274,7 @@ export default function OpeningBalancesPage() {
         <p className="text-sm text-slate-600 dark:text-slate-400">
           You do not have administrative permission to access Opening Balances setup for this branch.
         </p>
-        <Link to="/finance" className="btn btn-secondary text-xs px-4 py-2 inline-flex items-center gap-1.5">
+        <Link to="/finance?section=Banking" className="btn btn-secondary text-xs px-4 py-2 inline-flex items-center gap-1.5">
           <ArrowLeft size={14} /> Return to Finance
         </Link>
       </div>
@@ -289,7 +289,7 @@ export default function OpeningBalancesPage() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <Link
-                to="/finance"
+                to="/finance?section=Banking"
                 className="inline-flex items-center gap-1.5 text-xs text-white/80 hover:text-white transition-colors mb-2"
               >
                 <ArrowLeft size={14} /> Back to Accounting Setup

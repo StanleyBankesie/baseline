@@ -66,7 +66,7 @@ export default function ProjectList() {
               <p className="text-sm mt-1 opacity-80">Strategic execution and delivery management</p>
             </div>
             <div className="flex gap-2">
-              <Link to="/project-management" className="btn btn-secondary">Return to Menu</Link>
+              <Link to="/project-management?section=Reports%20%26%20Analytics" className="btn btn-secondary">Back</Link>
               <Link to="/project-management/projects/new" className="btn-success flex items-center gap-1.5"><Plus size={15} />New Project</Link>
             </div>
           </div>

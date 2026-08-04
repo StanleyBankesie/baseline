@@ -187,7 +187,7 @@ export default function UserPermissions() {
         <div className="flex gap-2">
           <button
             className="btn btn-secondary"
-            onClick={() => navigate("/administration")}
+            onClick={() => navigate("/administration?section=Audit%20%26%20Logs")}
           >
             Back to Menu
           </button>

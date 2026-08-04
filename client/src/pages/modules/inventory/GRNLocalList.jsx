@@ -480,7 +480,7 @@ export default function GRNLocalList() {
               <p className="text-sm mt-1">Receive local purchase deliveries</p>
             </div>
             <div className="flex gap-2">
-              <Link to="/inventory" className="btn btn-secondary">
+              <Link to="/inventory?section=Stock%20Operations" className="btn btn-secondary">
                 Return to Menu
               </Link>
               <Link to="/inventory/grn-local/new" className="btn-success">

@@ -6,6 +6,7 @@
 import React from "react";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { api } from "../api/client.js";
+import { MODULES_REGISTRY } from "../data/modulesRegistry.js";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -17,6 +18,8 @@ export default function DashboardPage() {
   });
   const [taskAnalytics, setTaskAnalytics] = React.useState(null);
   const [transportAnalytics, setTransportAnalytics] = React.useState(null);
+  const [moduleAnalytics, setModuleAnalytics] = React.useState({});
+  const [moduleConfig, setModuleConfig] = React.useState({});
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState("");
 
@@ -31,7 +34,8 @@ export default function DashboardPage() {
         const [biRes, taskRes, transRes] = await Promise.allSettled([
           api.get("/bi/dashboards"),
           api.get("/projects/reports/task-execution"),
-          api.get("/transport/reports/analytics")
+          api.get("/transport/reports/analytics"),
+          api.get("/bi/module-analytics")
         ]);
 
         if (mounted) {
@@ -62,6 +66,9 @@ export default function DashboardPage() {
 
           if (transRes.status === "fulfilled") {
             setTransportAnalytics(transRes.value?.data || null);
+          }
+          if (modRes.status === "fulfilled") {
+            setModuleAnalytics(modRes.value?.data?.data || {});
           }
         }
       } catch (e) {
@@ -137,230 +144,79 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Primary Module Metric Cards */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="card">
-          <div className="card-body">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                Sales (30 Days)
-              </h3>
-              <span className="badge-success">
-                {loading ? "Loading" : "Updated"}
-              </span>
-            </div>
-            <p className="text-2xl font-bold text-brand dark:text-brand-300">
-              {currency(summary.sales.total)}
-            </p>
-            <p className="text-xs text-slate-500 mt-1">
-              {summary.sales.documents} invoices
-            </p>
+      
+      {/* Dynamic Module Analytics Cards */}
+      {(user?.permissions?.dashboards?.length > 0 || user?.permissions?.cards?.length > 0) && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-lg font-bold text-slate-800 dark:text-white">Granted Analytics</h2>
+            <div className="h-px bg-slate-200 dark:bg-slate-700 flex-1 ml-4" />
           </div>
+          
+          {(() => {
+            // Group user's granted dashboards by module
+            const grantedDashboards = user.permissions.dashboards || [];
+            const grantedCards = user.permissions.cards || [];
+            const granted = [...grantedDashboards, ...grantedCards];
+            
+            // Build a flat dictionary of all known dashboards across modules
+            const allDashboardsByKey = {};
+            Object.keys(MODULES_REGISTRY).forEach(modKey => {
+              const mod = MODULES_REGISTRY[modKey];
+              if (mod.dashboards) {
+                mod.dashboards.forEach(d => {
+                  allDashboardsByKey[d.key] = { ...d, moduleName: mod.name };
+                });
+              }
+            });
+
+            // Group granted keys
+            const grouped = {};
+            granted.forEach(featKey => {
+               // featKey might be like "home:sales-total-revenue" or "sales:sales-total-revenue"
+               const rawKey = featKey.includes(':') ? featKey.split(':')[1] : featKey;
+               const conf = allDashboardsByKey[rawKey];
+               if (conf) {
+                 if (!grouped[conf.moduleName]) grouped[conf.moduleName] = [];
+                 grouped[conf.moduleName].push({ ...conf, featKey });
+               }
+            });
+
+            return Object.entries(grouped).map(([modName, cards]) => (
+              <div key={modName} className="mb-6">
+                <h3 className="text-sm font-semibold text-brand dark:text-brand-300 mb-3 uppercase tracking-wider">{modName}</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {cards.map(c => {
+                    const rawKey = c.key; // e.g., 'sales-total-revenue'
+                    const val = moduleAnalytics[rawKey];
+                    const isCurrency = rawKey.includes('revenue') || rawKey.includes('balance') || rawKey.includes('value') || rawKey.includes('income') || rawKey.includes('profit') || rawKey.includes('expenses') || rawKey.includes('ar') || rawKey.includes('ap');
+                    
+                    return (
+                      <div key={rawKey} className="group relative overflow-hidden p-5 rounded-2xl bg-white dark:bg-slate-800 shadow-sm hover:shadow-md border border-slate-100 dark:border-slate-700 transition-all duration-300 transform hover:-translate-y-1">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-brand-400 to-brand-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="flex justify-between items-start mb-4">
+                           <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{c.label}</span>
+                           <div className="p-1.5 bg-brand-50 dark:bg-brand-900/30 rounded-lg text-brand-600 dark:text-brand-400">
+                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                           </div>
+                        </div>
+                        <p className="text-2xl font-extrabold text-slate-900 dark:text-white truncate">
+                           {loading ? (
+                             <span className="animate-pulse bg-slate-200 dark:bg-slate-700 h-8 w-24 rounded block" />
+                           ) : (
+                             isCurrency ? currency(val) : (val !== undefined ? val : '0')
+                           )}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ));
+          })()}
         </div>
-
-        <div className="card">
-          <div className="card-body">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                Purchases (30 Days)
-              </h3>
-              <span className="badge-success">
-                {loading ? "Loading" : "Updated"}
-              </span>
-            </div>
-            <p className="text-2xl font-bold text-brand dark:text-brand-300">
-              {currency(summary.purchase.total)}
-            </p>
-            <p className="text-xs text-slate-500 mt-1">
-              {summary.purchase.documents} POs
-            </p>
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="card-body">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                Inventory
-              </h3>
-              <span className="badge-info">
-                {loading ? "Loading" : "Updated"}
-              </span>
-            </div>
-            <p className="text-2xl font-bold text-brand dark:text-brand-300">
-              {summary.inventory.items}
-            </p>
-            <p className="text-xs text-slate-500 mt-1">Items tracked</p>
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="card-body">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                Employees
-              </h3>
-              <span className="badge-info">
-                {loading ? "Loading" : "Updated"}
-              </span>
-            </div>
-            <p className="text-2xl font-bold text-brand dark:text-brand-300">
-              {summary.hr.employees}
-            </p>
-            <p className="text-xs text-slate-500 mt-1">Active</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Widget 1: Transport & Logistics Execution Analytics */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
-                Transport Module
-              </span>
-              <span className="text-xs text-slate-400">Fleet Operations</span>
-            </div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white mt-1">
-              Transport & Fleet Execution Analytics
-            </h2>
-          </div>
-          <a
-            href="/transport/dashboard"
-            className="px-3.5 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-xs font-semibold flex items-center gap-1.5 transition-colors w-fit"
-          >
-            Full Transport Dashboard →
-          </a>
-        </div>
-
-        {/* Transport Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Total Managed Trips
-            </span>
-            <p className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
-              {loading ? "..." : tAnalytics.totalTrips || 0}
-            </p>
-            <p className="text-[11px] text-slate-500 mt-1">
-              {tAnalytics.inTransitTrips || 0} currently in-transit
-            </p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40">
-            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
-              Trip Completion Rate
-            </span>
-            <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
-              {loading ? "..." : `${tAnalytics.completionRate || 0}%`}
-            </p>
-            <p className="text-[11px] text-slate-500 mt-1">
-              {tAnalytics.onTimeRate || 0}% on-time arrival
-            </p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40">
-            <span className="text-xs font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wider">
-              Fleet Readiness Rate
-            </span>
-            <p className="text-2xl font-extrabold text-blue-600 dark:text-blue-400 mt-1">
-              {loading ? "..." : `${tAnalytics.fleetUtilizationRate || 0}%`}
-            </p>
-            <p className="text-[11px] text-slate-500 mt-1">
-              {tAnalytics.availableVehicles || 0} ready in yard
-            </p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-purple-50/60 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-900/40">
-            <span className="text-xs font-semibold text-purple-700 dark:text-purple-400 uppercase tracking-wider">
-              Net Route Profit
-            </span>
-            <p className="text-2xl font-extrabold text-purple-600 dark:text-purple-400 mt-1">
-              {loading ? "..." : `GHS ${(tAnalytics.netProfitability || 0).toLocaleString()}`}
-            </p>
-            <p className="text-[11px] text-slate-500 mt-1">
-              GHS {(tAnalytics.totalRevenue || 0).toLocaleString()} revenue
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Widget 2: Task Management & Operational Execution Analytics */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300">
-                Project Management Module
-              </span>
-              <span className="text-xs text-slate-400">Execution Velocity</span>
-            </div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white mt-1">
-              Task Execution & Velocity Analytics
-            </h2>
-          </div>
-          <a
-            href="/project-management/reports/task-execution"
-            className="px-3.5 py-2 rounded-xl bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 text-xs font-semibold flex items-center gap-1.5 transition-colors w-fit"
-          >
-            Full Task Analytics Report →
-          </a>
-        </div>
-
-        {/* Task Metric Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Total Tasks Managed
-            </span>
-            <p className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
-              {loading ? "..." : analytics.totalTasks || 0}
-            </p>
-            <p className="text-[11px] text-slate-500 mt-1">
-              {analytics.completedTasks || 0} completed ({analytics.completionRate || 0}%)
-            </p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40">
-            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
-              Completion Rate
-            </span>
-            <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
-              {loading ? "..." : `${analytics.completionRate || 0}%`}
-            </p>
-            <div className="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full mt-2 overflow-hidden">
-              <div
-                className="bg-emerald-500 h-full"
-                style={{ width: `${Math.min(100, analytics.completionRate || 0)}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="p-4 rounded-xl bg-rose-50/60 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/40">
-            <span className="text-xs font-semibold text-rose-700 dark:text-rose-400 uppercase tracking-wider">
-              Overdue SLA Risk
-            </span>
-            <p className="text-2xl font-extrabold text-rose-600 dark:text-rose-400 mt-1">
-              {loading ? "..." : analytics.overdueTasks || 0}
-            </p>
-            <p className="text-[11px] text-rose-600/80 dark:text-rose-400/80 mt-1">
-              {analytics.overdueRate || 0}% breach rate
-            </p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40">
-            <span className="text-xs font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wider">
-              On-Time Performance
-            </span>
-            <p className="text-2xl font-extrabold text-blue-600 dark:text-blue-400 mt-1">
-              {loading ? "..." : `${analytics.onTimeRate || 0}%`}
-            </p>
-            <p className="text-[11px] text-slate-500 mt-1">Deliverables met on schedule</p>
-          </div>
-        </div>
-
-        {/* Visual Execution Progress Breakdown Bar */}
+      )}
+{/* Visual Execution Progress Breakdown Bar */}
         <div>
           <div className="flex justify-between items-center text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
             <span>Task Execution Status Breakdown</span>

@@ -607,7 +607,7 @@ export default function UserPermissionsNew() {
           ) : (
             <button
               className="btn btn-secondary"
-              onClick={() => navigate("/administration")}
+              onClick={() => navigate("/administration?section=Audit%20%26%20Logs")}
             >
               Back to Menu
             </button>

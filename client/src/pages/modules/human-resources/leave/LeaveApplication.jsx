@@ -20,9 +20,9 @@ export default function LeaveApplication({ isEmbedded }) {
   const loadData = async () => {
     try {
       const [eRes, tRes, rRes] = await Promise.all([
-        api.get("/hr/employees?status=ACTIVE"),
-        api.get("/hr/leave/types"),
-        api.get("/hr/leave/records?source=APPLICATION"),
+        api.get("/hr/employees?status=ACTIVE").catch(() => ({ data: { items: [] } })),
+        api.get("/hr/leave/types").catch(() => ({ data: { items: [] } })),
+        api.get("/hr/leave/records?source=APPLICATION").catch(() => ({ data: { items: [] } })),
       ]);
       setEmployees(eRes.data?.items || []);
       setTypes(tRes.data?.items || []);
@@ -93,7 +93,7 @@ export default function LeaveApplication({ isEmbedded }) {
     <div className={isEmbedded ? "space-y-6" : "p-4 md:p-8 space-y-8"}>
       {!isEmbedded && (
         <div className="flex items-center gap-4">
-          <Link to="/human-resources" className="btn-secondary text-sm">
+          <Link to="/human-resources?section=Leave%20Management" className="btn-secondary text-sm">
             ← Back
           </Link>
           <div>

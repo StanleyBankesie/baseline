@@ -46,7 +46,7 @@ export default function LoanList() {
             <p className="text-sm text-slate-500">Track and manage employee staff loans</p>
           </div>
           <div className="flex gap-2">
-            <Link to="/human-resources" className="btn-secondary">Back to Menu</Link>
+            <Link to="/human-resources?section=Payroll%20%26%20Benefits" className="btn-secondary">Back</Link>
             <Link to="/human-resources/loans/new" className="btn-primary">+ New Loan</Link>
           </div>
         </div>

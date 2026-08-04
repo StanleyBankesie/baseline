@@ -12,6 +12,7 @@ import {
   getPurchaseReport,
   getInventoryReport,
   getHomeOverview,
+  getModuleAnalytics,
 } from "../controllers/bi.controller.js";
 
 const router = express.Router();
@@ -30,6 +31,8 @@ async function sq(sql, params, fallback = []) {
 }
 
 // ===== LEGACY ROUTES =====
+router.get("/module-analytics", (req, res, next) => getModuleAnalytics(req, res, next));
+
 router.get("/dashboards", (req, res, next) => getDashboards(req, res, next));
 router.get("/home-overview", (req, res, next) => getHomeOverview(req, res, next));
 router.get("/sales-report", (req, res, next) => getSalesReport(req, res, next));

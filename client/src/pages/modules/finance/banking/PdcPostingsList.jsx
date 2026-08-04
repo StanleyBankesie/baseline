@@ -149,7 +149,7 @@ export default function PdcPostingsList() {
         </div>
         <div className="flex gap-3">
           <Link
-            to="/finance"
+            to="/finance?section=Banking"
             className="font-sans btn btn-sm bg-white/20 hover:bg-white/30 border-none text-white backdrop-blur-sm"
           >
             Return to Menu

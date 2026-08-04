@@ -466,7 +466,7 @@ export default function ProjectOrderForm() {
                     className="btn btn-secondary text-xs px-3 py-1">Print</button>
                 </>
               )}
-              <Link to="/project-management/project-orders" className="btn-success">Back to List</Link>
+              <Link to="/project-management/project-orders" className="btn-success">Back</Link>
             </div>
           </div>
         </div>

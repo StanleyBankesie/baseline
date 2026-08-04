@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import { api } from "../../api/client.js";
 import { toast } from "react-toastify";
 import { useAuth } from "../../auth/AuthContext.jsx";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function PaymentPackages() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isSystemConfig = location.pathname.startsWith("/system-configuration");
+  const moduleHome = isSystemConfig ? "/system-configuration" : "/administration";
   const [packages, setPackages] = useState([]);
   const [selectedPackageId, setSelectedPackageId] = useState("");
   const [superAdminId, setSuperAdminId] = useState(1);
@@ -57,7 +60,7 @@ export default function PaymentPackages() {
 
   const fetchPackages = async () => {
     try {
-      const res = await api.get("/payment-packages").catch(() => null);
+      const res = await api.get("/subscription-plans").catch(() => null);
       if (res && res.data && Array.isArray(res.data)) {
         setPackages(res.data);
       }
@@ -102,11 +105,11 @@ export default function PaymentPackages() {
     setLoading(true);
     try {
       if (selectedPackageId === "NEW") {
-        await api.post(`/payment-packages`, formData);
-        toast.success("Payment package created successfully");
+        await api.post(`/subscription-plans`, formData);
+        toast.success("Package created successfully.");
       } else {
-        await api.put(`/payment-packages/${selectedPackageId}`, formData);
-        toast.success("Payment package updated successfully");
+        await api.put(`/subscription-plans/${selectedPackageId}`, formData);
+        toast.success("Package updated successfully.");
       }
       setSelectedPackageId("");
       fetchPackages();
@@ -131,8 +134,8 @@ export default function PaymentPackages() {
 
     setLoading(true);
     try {
-      await api.delete(`/payment-packages/${selectedPackageId}`);
-      toast.success("Payment package deleted successfully");
+      await api.delete(`/subscription-plans/${selectedPackageId}`);
+      toast.success("Package deleted successfully.");
       setSelectedPackageId("");
       fetchPackages();
     } catch (err) {
@@ -162,7 +165,7 @@ export default function PaymentPackages() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Payment Packages</h1>
         <button 
-          onClick={() => navigate('/administration')} className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-200 rounded shadow-sm transition">Back to Menu
+          onClick={() => navigate(moduleHome)} className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-200 rounded shadow-sm transition">Back to Menu
         </button>
       </div>
 

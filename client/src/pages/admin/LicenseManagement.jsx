@@ -3,12 +3,16 @@ import { api } from "../../api/client.js";
 import { toast } from "react-toastify";
 import { usePermission } from "../../auth/PermissionContext.jsx";
 import { MODULES_REGISTRY } from "../../data/modulesRegistry.js";
+import { DASHBOARD_CARDS } from "../../data/dashboardCards.js";
 import { useAuth } from "../../auth/AuthContext.jsx";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function LicenseManagement() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isSystemConfig = location.pathname.startsWith("/system-configuration");
+  const moduleHome = isSystemConfig ? "/system-configuration" : "/administration";
   const [companies, setCompanies] = useState([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
   const [license, setLicense] = useState(null);
@@ -132,7 +136,7 @@ export default function LicenseManagement() {
 
   const fetchPackages = async () => {
     try {
-      const res = await api.get("/payment-packages").catch(() => null);
+      const res = await api.get("/subscription-plans").catch(() => null);
       if (res && res.data && Array.isArray(res.data)) {
         setPackages(res.data.filter(p => p.status === 'ACTIVE'));
       }
@@ -251,7 +255,7 @@ export default function LicenseManagement() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">License Management</h1>
         <button 
-          onClick={() => navigate('/administration')} className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-200 rounded shadow-sm transition">Back to Menu
+          onClick={() => navigate(moduleHome)} className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-200 rounded shadow-sm transition">Back to Menu
         </button>
       </div>
       
@@ -456,20 +460,46 @@ export default function LicenseManagement() {
                 </div>
               </div>
 
-              <div className="mt-6">
-                <h3 className="text-lg font-bold border-b pb-2 mb-4">Licensed Modules</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {moduleList.map(mod => (
-                    <label key={mod.code} className="flex items-center space-x-2 p-2 border rounded hover:bg-slate-50 dark:bg-slate-800/50 cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        checked={selectedModules.includes(mod.code)}
-                        onChange={() => toggleModule(mod.code)}
-                        className="rounded"
-                      />
-                      <span className="text-sm font-medium">{mod.name}</span>
-                    </label>
-                  ))}
+              <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-bold border-b pb-2 mb-4">Licensed Modules</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {moduleList.map(mod => (
+                      <label key={mod.code} className="flex items-center space-x-2 p-2 border rounded hover:bg-slate-50 dark:bg-slate-800/50 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedModules.includes(mod.code)}
+                          onChange={() => toggleModule(mod.code)}
+                          className="rounded"
+                        />
+                        <span className="text-sm font-medium">{mod.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-bold border-b pb-2 mb-4">Home Dashboard Cards</h3>
+                  <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                    {Object.entries(DASHBOARD_CARDS).map(([modKey, cards]) => (
+                      <div key={modKey} className="border-b pb-2 last:border-0 dark:border-slate-700">
+                        <h4 className="font-semibold text-sm text-slate-500 uppercase tracking-wider mb-2">{modKey}</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {cards.map(c => (
+                            <label key={c.key} className="flex items-center space-x-2">
+                              <input 
+                                type="checkbox"
+                                checked={selectedModules.includes(`card:${c.key}`)}
+                                onChange={() => toggleModule(`card:${c.key}`)}
+                                className="rounded text-blue-600"
+                              />
+                              <span className="text-xs">{c.label}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 

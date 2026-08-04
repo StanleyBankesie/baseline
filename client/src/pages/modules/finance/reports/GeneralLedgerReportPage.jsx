@@ -251,7 +251,7 @@ export default function GeneralLedgerReportPage() {
       <div className="flex items-center justify-between">
         <div>
           <Link
-            to="/finance"
+            to="/finance?section=Reports%20%26%20Analysis"
             className="font-sans text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
           >
             ← Back to Finance

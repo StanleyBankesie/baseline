@@ -30,6 +30,8 @@ const PAGE_IDS = {
   SALES_RETURN: 19,
   PURCHASE_RETURN: 20,
   DELIVERY_NOTE: 21,
+  TRANSPORT_EXPENSES: 22,
+  TRANSPORT_INCOME: 23,
 };
 
 const ALL_PAGES = [
@@ -96,7 +98,16 @@ const ALL_PAGES = [
     code: "PURCHASE_RETURN",
     label: "Purchase Return",
   },
-  { value: PAGE_IDS.DELIVERY_NOTE, code: "DELIVERY_NOTE", label: "Delivery Note" },
+  {
+    value: PAGE_IDS.TRANSPORT_EXPENSES,
+    code: "TRANSPORT_EXPENSES",
+    label: "Transport Expenses & Logs",
+  },
+  {
+    value: PAGE_IDS.TRANSPORT_INCOME,
+    code: "TRANSPORT_INCOME",
+    label: "Transportation Income",
+  },
 ];
 
 const SALES_PAGES = [
@@ -535,6 +546,8 @@ export default function TaxCodesPage() {
         delete n[id];
         return n;
       });
+      setShowEditModal(false);
+      setEditingTaxId(null);
       load();
     } catch (e2) {
       toast.error(e2?.response?.data?.message || "Failed to update tax code");
@@ -570,7 +583,7 @@ export default function TaxCodesPage() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <Link
-                to="/finance"
+                to="/finance?section=Banking"
                 className="inline-flex items-center gap-1.5 text-xs text-white/80 hover:text-white transition-colors mb-2"
               >
                 ← Back to Accounting Setup

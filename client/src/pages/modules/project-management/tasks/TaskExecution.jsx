@@ -374,7 +374,7 @@ export default function TaskExecution() {
               </p>
             </div>
             <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-              <Link to="/project-management" className="btn btn-secondary text-xs flex-1 sm:flex-initial text-center justify-center">
+              <Link to="/project-management?section=Reports%20%26%20Analytics" className="btn btn-secondary text-xs flex-1 sm:flex-initial text-center justify-center">
                 Return to Menu
               </Link>
               <Link to="/project-management/tasks" className="btn-success text-xs px-3 py-2 flex-1 sm:flex-initial text-center justify-center">

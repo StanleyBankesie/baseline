@@ -63,7 +63,7 @@ export default function MaintenanceContractList() {
           <div className="flex justify-between items-center">
             <div className="font-semibold">Maintenance Contracts</div>
             <div className="flex gap-2">
-              <Link to="/maintenance" className="btn btn-secondary">Return to Menu</Link>
+              <Link to="/maintenance?section=Master Data" className="btn btn-secondary">Back</Link>
               <Link to="/maintenance/contracts/new" className="btn-success">+ New Contract</Link>
             </div>
           </div>

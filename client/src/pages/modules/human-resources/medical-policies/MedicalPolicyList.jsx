@@ -46,7 +46,7 @@ export default function MedicalPolicyList() {
             <p className="text-sm text-slate-500">Manage employee medical insurance policies</p>
           </div>
           <div className="flex gap-2">
-            <Link to="/human-resources" className="btn-secondary">Back to Menu</Link>
+            <Link to="/human-resources?section=Settings%20%26%20Setup" className="btn-secondary">Back</Link>
             <Link to="/human-resources/medical-policies/new" className="btn-primary">+ New Policy</Link>
           </div>
         </div>

@@ -247,8 +247,8 @@ export default function TaxConfigList() {
     setLoading(true);
     try {
       const [taxRes, alwRes] = await Promise.all([
-        api.get("/hr/tax-configs"),
-        api.get("/hr/allowances"),
+        api.get("/hr/tax-configs").catch(() => ({ data: { items: [] } })),
+        api.get("/hr/allowances").catch(() => ({ data: { items: [] } })),
       ]);
       const items = taxRes.data.items || [];
       setAllowances(alwRes.data.items || []);
@@ -411,7 +411,7 @@ export default function TaxConfigList() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Link to="/human-resources" className="btn-secondary">
+            <Link to="/human-resources?section=Payroll%20%26%20Benefits" className="btn-secondary">
               Back to Menu
             </Link>
           </div>

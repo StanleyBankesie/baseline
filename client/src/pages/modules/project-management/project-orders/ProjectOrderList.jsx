@@ -177,7 +177,7 @@ export default function ProjectOrderList() {
               </p>
             </div>
             <div className="flex gap-2">
-              <Link to="/project-management" className="btn btn-secondary">
+              <Link to="/project-management?section=Reports%20%26%20Analytics" className="btn btn-secondary">
                 Return to Menu
               </Link>
               <Link

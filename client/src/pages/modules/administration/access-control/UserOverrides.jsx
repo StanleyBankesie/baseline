@@ -210,7 +210,7 @@ export default function UserOverrides() {
             Set exceptional overrides per user
           </p>
         </div>
-        <Link to="/administration" className="btn btn-secondary">
+        <Link to="/administration?section=Audit%20%26%20Logs" className="btn btn-secondary">
           Back to Menu
         </Link>
       </div>

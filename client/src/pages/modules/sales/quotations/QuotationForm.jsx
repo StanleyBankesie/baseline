@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, Link, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "api/client";
 import { useAuth } from "../../../../auth/AuthContext.jsx";
@@ -86,6 +86,9 @@ const COUNTRIES = [
 export default function QuotationForm() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const modeParam = searchParams.get("mode");
+  const readOnly = modeParam === "view";
   const isEditMode = !!id;
   const { user } = useAuth();
   const { getExchangeRate } = useExchangeRate();

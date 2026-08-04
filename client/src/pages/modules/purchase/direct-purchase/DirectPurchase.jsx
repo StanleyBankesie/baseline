@@ -207,7 +207,7 @@ export default function DirectPurchase() {
           setTaxes(mappedTaxes);
           setApprovedItemRequisitions(Array.isArray(reqs) ? reqs : []);
           const base =
-            (cur || []).find((c) => Number(c.is_base) === 1)?.id || null;
+            (cur || []).find((c) => Number(c.is_base) === 1 || c.is_base === true)?.id || null;
           setBaseCurrencyId(base);
           if (base) {
             setForm((prev) =>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Loader2, Trash2, X, Pencil, Building2 } from "lucide-react";
+import { Loader2, Trash2, X, Pencil, Building2, ToggleLeft, ToggleRight } from "lucide-react";
 import { api } from "../../../../api/client.js";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -26,7 +26,7 @@ function ModalForm({ open, onClose, title, children }) {
   );
 }
 
-function CrudSection({ title, icon, emptyMsg, columns, rows, loading, onAdd, onEdit, onDelete, renderRow }) {
+function CrudSection({ title, icon, emptyMsg, columns, rows, loading, onAdd, onEdit, onDelete, onToggleActive, renderRow }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -59,7 +59,12 @@ function CrudSection({ title, icon, emptyMsg, columns, rows, loading, onAdd, onE
                         <Pencil size={14} />
                       </button>
                     )}
-                    {onDelete && (
+                    {onToggleActive && (
+                      <button onClick={() => onToggleActive(row)} className={`p-1.5 rounded transition-colors ${row.is_active ? 'text-green-500 hover:text-green-700 hover:bg-green-50' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}>
+                        {row.is_active ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
+                      </button>
+                    )}
+                    {onDelete && !onToggleActive && (
                       <button onClick={() => onDelete(row.id)} className="p-1.5 text-rose-400 hover:text-rose-600 rounded hover:bg-rose-50 transition-colors">
                         <Trash2 size={14} />
                       </button>
@@ -271,6 +276,14 @@ export default function TransportSettings() {
       toast.success("Client deleted");
       loadClients();
     } catch (e) { toast.error(e?.response?.data?.message || "Failed to delete client"); }
+  };
+
+  const toggleClientActive = async (client) => {
+    try {
+      await api.put(`/sales/customers/${client.id}`, { ...client, is_active: client.is_active ? 0 : 1 });
+      toast.success(client.is_active ? "Client deactivated" : "Client activated");
+      loadClients();
+    } catch (e) { toast.error("Failed to update status"); }
   };
 
   const renderSuppliers = () => (

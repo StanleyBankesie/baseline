@@ -49,7 +49,7 @@ export default function PolicyViewer() {
   return (
     <div className="p-4">
       <div className="flex items-center gap-2 mb-4">
-        <Link to="/human-resources" className="btn-secondary text-sm">
+        <Link to="/human-resources?section=Settings%20%26%20Setup" className="btn-secondary text-sm">
           Back to Menu
         </Link>
         <h2 className="text-lg font-semibold">Policies</h2>

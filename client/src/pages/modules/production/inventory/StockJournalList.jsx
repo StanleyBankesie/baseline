@@ -50,7 +50,7 @@ export default function StockJournalList() {
     <div className="p-6 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <Link to="/production" className="btn btn-secondary p-2">
+          <Link to="/production?section=Inventory%20%26%20Stock%20Updation" className="btn btn-secondary p-2">
             <ArrowLeft size={20} />
           </Link>
           <div>

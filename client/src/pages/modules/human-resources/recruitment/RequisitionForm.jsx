@@ -41,8 +41,8 @@ export default function RequisitionForm() {
     async function loadDeps() {
       try {
         const [d, p] = await Promise.all([
-          api.get("/hr/departments"),
-          api.get("/hr/positions"),
+          api.get("/hr/departments").catch(() => ({ data: { items: [] } })),
+          api.get("/hr/positions").catch(() => ({ data: { items: [] } })),
         ]);
         if (mounted) {
           setDepts(d?.data?.items || []);

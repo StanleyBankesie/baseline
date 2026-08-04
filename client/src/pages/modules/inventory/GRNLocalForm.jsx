@@ -923,7 +923,7 @@ export default function GRNLocalForm() {
                     </div>
                     <div>
                       <label className="label">Warehouse</label>
-                      <select
+                      <select required
                         className="input w-80"
                         value={formData.warehouse_id}
                         onChange={(e) =>

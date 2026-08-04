@@ -96,7 +96,7 @@ export default function ProjectExpenseReport() {
     <div className="p-6 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link to="/project-management" className="btn btn-secondary p-2"><ArrowLeft size={20} /></Link>
+          <Link to="/project-management?section=Reports%20%26%20Analytics" className="btn btn-secondary p-2"><ArrowLeft size={20} /></Link>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Project Expense Report</h1>
             <p className="text-slate-500 dark:text-slate-400 text-sm">View all payment vouchers linked to a project</p>

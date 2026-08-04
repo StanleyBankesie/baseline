@@ -79,7 +79,7 @@ export default function DirectPurchaseList() {
       <div className="flex items-center justify-between">
         <div>
           <Link
-            to="/purchase"
+            to="/purchase?section=Procurement"
             className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
           >
             ← Back to Purchase

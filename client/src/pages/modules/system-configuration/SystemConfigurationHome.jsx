@@ -54,7 +54,8 @@ export const systemConfigurationSections = [
       ],
     },
     {
-      title: "Access & Security",
+      icon: "🛡️",
+    title: "Access & Security",
       items: [
         {
           title: "Admin Permissions",
@@ -96,6 +97,7 @@ export const systemConfigurationSections = [
 function SystemConfigurationLanding() {
   return (
     <ModuleDashboard
+      useSectionNavigation={true}
       title="System Configuration"
       description="Super-admin restricted system configuration and setup."
       stats={[]}

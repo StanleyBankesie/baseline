@@ -82,7 +82,7 @@ export default function LoginPage() {
   useEffect(() => {
     async function checkGlobalLicense() {
       try {
-        const res = await api.get("/licenses/global-status");
+        const res = await api.get("/licenses/system-state");
         if (
           res.data?.status === "EXPIRED" ||
           res.data?.status === "INACTIVE" ||
@@ -120,7 +120,7 @@ export default function LoginPage() {
     let mounted = true;
     async function loadLoginBackground() {
       try {
-        const resp = await api.get("/admin/settings/login-background/meta");
+        const resp = await api.get("/admin/settings/login-bg-info");
         const meta = resp.data;
         if (!mounted || !meta?.hasBackground) return;
         const version = meta.updatedAt || Date.now();

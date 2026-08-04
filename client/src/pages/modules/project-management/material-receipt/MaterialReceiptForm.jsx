@@ -216,7 +216,7 @@ export default function MaterialReceiptForm() {
               </h1>
               <p className="text-sm mt-1">Receive materials issued from Inventory</p>
             </div>
-            <Link to="/project-management/material-receipts" className="btn-success">Back to List</Link>
+            <Link to="/project-management/material-receipts" className="btn-success">Back</Link>
           </div>
         </div>
         <div className="card-body">

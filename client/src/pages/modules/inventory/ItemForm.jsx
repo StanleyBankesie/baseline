@@ -108,7 +108,12 @@ export default function ItemForm({ isModal = false, modalItemId, onClose, onSave
           }));
         }
         setTaxes(Array.isArray(d.taxes) ? d.taxes : []);
-        setCurrencies(Array.isArray(d.currencies) ? d.currencies : []);
+        const curList = Array.isArray(d.currencies) ? d.currencies : [];
+        setCurrencies(curList);
+        const baseCur = curList.find((c) => Number(c.is_base) === 1 || c.is_base === true);
+        if (isNew && baseCur) {
+          setFormData((prev) => ({ ...prev, currency_id: baseCur.id }));
+        }
         setUoms(loadedUoms);
         setCategories(loadedCategories);
         setItemTypes(loadedItemTypes);
@@ -201,11 +206,12 @@ export default function ItemForm({ isModal = false, modalItemId, onClose, onSave
         setTaxes(
           Array.isArray(taxesRes.data?.items) ? taxesRes.data.items : [],
         );
-        setCurrencies(
-          Array.isArray(currenciesRes.data?.items)
-            ? currenciesRes.data.items
-            : [],
-        );
+        const curList = Array.isArray(currenciesRes.data?.items) ? currenciesRes.data.items : [];
+        setCurrencies(curList);
+        const baseCur = curList.find((c) => Number(c.is_base) === 1 || c.is_base === true);
+        if (isNew && baseCur) {
+          setFormData((prev) => ({ ...prev, currency_id: baseCur.id }));
+        }
         setUoms(Array.isArray(uomsRes.data?.items) ? uomsRes.data.items : []);
         setItemTypes(
           Array.isArray(itemTypesRes.data?.items)

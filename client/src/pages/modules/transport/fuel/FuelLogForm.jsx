@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../../../api/client.js";
 import { usePermission } from "@/auth/PermissionContext.jsx";
@@ -8,8 +8,12 @@ export default function FuelLogForm() {
   const { hasExceptional } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const mode = searchParams.get("mode");
+  const isView = mode === "view";
   const [loading, setLoading] = useState(false);
   const [vehicles, setVehicles] = useState([]);
+  const [fuelStations, setFuelStations] = useState([]);
   const [formData, setFormData] = useState({
     vehicle_id: "",
     log_date: "",
@@ -26,8 +30,33 @@ export default function FuelLogForm() {
     api.get("/transport/vehicles").then(res => {
       if (!cancelled) setVehicles(res.data?.data?.items || []);
     }).catch(() => toast.error("Failed to load vehicles"));
+    
+    api.get("/transport/setup?type=FUEL_STATION").then(res => {
+      if (!cancelled) setFuelStations(res.data?.data?.items || []);
+    }).catch(() => console.error("Failed to load fuel stations"));
+
+    if (id && id !== "new") {
+      setLoading(true);
+      api.get(`/transport/fuel/${id}`).then(res => {
+        if (!cancelled && res.data?.data?.item) {
+          const item = res.data.data.item;
+          setFormData({
+            vehicle_id: item.vehicle_id || "",
+            log_date: item.log_date ? item.log_date.split("T")[0] : "",
+            odometer_reading: item.odometer_reading || "",
+            fuel_quantity: item.fuel_quantity || "",
+            cost_per_unit: item.cost_per_unit || "",
+            total_cost: item.total_cost || "",
+            fuel_station: item.remarks || "", // using remarks as fuel station for now
+            notes: item.remarks || "",
+          });
+        }
+      }).catch(() => toast.error("Failed to load fuel log"))
+      .finally(() => { if (!cancelled) setLoading(false); });
+    }
+
     return () => { cancelled = true; };
-  }, []);
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,8 +79,13 @@ export default function FuelLogForm() {
     }
     setLoading(true);
     try {
-      await api.post("/transport/fuel", formData);
-      toast.success("Fuel log added successfully");
+      if (id && id !== "new") {
+        await api.put(`/transport/fuel/${id}`, formData);
+        toast.success("Fuel log updated successfully");
+      } else {
+        await api.post("/transport/fuel", formData);
+        toast.success("Fuel log added successfully");
+      }
       navigate("/transport/fuel");
     } catch (err) {
       toast.error(err.response?.data?.message || "Operation failed");
@@ -85,10 +119,11 @@ export default function FuelLogForm() {
               </label>
               <select
                 name="vehicle_id"
-                className="select select-bordered w-full"
+                className="input input-bordered w-full"
                 value={formData.vehicle_id}
                 onChange={handleChange}
                 required
+                disabled={isView}
               >
                 <option value="" disabled>Select a vehicle</option>
                 {vehicles.map(v => (
@@ -108,14 +143,13 @@ export default function FuelLogForm() {
                 value={formData.log_date}
                 onChange={handleChange}
                 required
-              
-                disabled={!!id && !hasExceptional("DOCUMENT.EDIT_DATE")}
+                disabled={isView || (!!id && !hasExceptional("DOCUMENT.EDIT_DATE"))}
               />
             </div>
 
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Odometer Reading *</span>
+                <span className="label-text">Odometer Reading</span>
               </label>
               <input
                 type="number"
@@ -123,7 +157,7 @@ export default function FuelLogForm() {
                 className="input input-bordered w-full"
                 value={formData.odometer_reading}
                 onChange={handleChange}
-                required
+                disabled={isView}
               />
             </div>
 
@@ -139,6 +173,7 @@ export default function FuelLogForm() {
                 value={formData.fuel_quantity}
                 onChange={handleChange}
                 required
+                disabled={isView}
               />
             </div>
 
@@ -154,6 +189,7 @@ export default function FuelLogForm() {
                 value={formData.cost_per_unit}
                 onChange={handleChange}
                 required
+                disabled={isView}
               />
             </div>
 
@@ -174,13 +210,18 @@ export default function FuelLogForm() {
               <label className="label">
                 <span className="label-text">Fuel Station</span>
               </label>
-              <input
-                type="text"
+              <select
                 name="fuel_station"
                 className="input input-bordered w-full"
                 value={formData.fuel_station}
                 onChange={handleChange}
-              />
+                disabled={isView}
+              >
+                <option value="">Select a fuel station</option>
+                {fuelStations.map(s => (
+                  <option key={s.id} value={s.setup_value}>{s.setup_value}</option>
+                ))}
+              </select>
             </div>
 
             <div className="form-control">
@@ -193,21 +234,24 @@ export default function FuelLogForm() {
                 rows={2}
                 value={formData.notes}
                 onChange={handleChange}
+                disabled={isView}
               />
             </div>
           </div>
 
           <div className="mt-8 flex justify-end gap-3 border-t pt-4">
             <Link to="/transport/fuel" className="btn btn-secondary">
-              Cancel
+              {isView ? "Back" : "Cancel"}
             </Link>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={loading}
-            >
-              {loading ? "Saving..." : "Save Fuel Log"}
-            </button>
+            {!isView && (
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={loading}
+              >
+                {loading ? "Saving..." : "Save Fuel Log"}
+              </button>
+            )}
           </div>
         </form>
       </div>

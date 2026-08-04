@@ -26,6 +26,7 @@ export default function PotentialCustomerForm() {
   const isEdit = Boolean(id);
   const isViewOnly =
     Boolean(isEdit) && searchParams.get("mode") === "view";
+  const returnUrl = searchParams.get("returnUrl");
   const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(false);
@@ -145,16 +146,20 @@ export default function PotentialCustomerForm() {
       dispatch(
         setRefresh({ key: "prospect_customers", id: createdId || null }),
       );
-      navigate("/sales/prospect-customers", {
-        state: {
-          afterSave: {
-            entity: "prospect_customers",
-            id: createdId || null,
-            ts: Date.now(),
+      if (returnUrl) {
+        navigate(returnUrl, { replace: true });
+      } else {
+        navigate("/sales/prospect-customers", {
+          state: {
+            afterSave: {
+              entity: "prospect_customers",
+              id: createdId || null,
+              ts: Date.now(),
+            },
           },
-        },
-        replace: true,
-      });
+          replace: true,
+        });
+      }
     } catch (err) {
       setError(
         err?.response?.data?.message || "Error saving prospective customer",
@@ -178,9 +183,19 @@ export default function PotentialCustomerForm() {
             </h1>
           </div>
           <div className="flex gap-2">
-            <Link to="/sales/quotations/new" className="btn btn-secondary">
-              Back to Quotation
-            </Link>
+            {returnUrl ? (
+              <button
+                type="button"
+                onClick={() => navigate(returnUrl)}
+                className="btn btn-secondary"
+              >
+                Back to Origin
+              </button>
+            ) : (
+              <Link to="/sales/quotations/new" className="btn btn-secondary">
+                Back to Quotation
+              </Link>
+            )}
             <Link to="/sales/prospect-customers" className="btn-success">
               Back
             </Link>

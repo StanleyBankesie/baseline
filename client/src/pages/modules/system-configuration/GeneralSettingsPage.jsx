@@ -104,11 +104,13 @@ export default function GeneralSettingsPage() {
 
   async function loadLoginBackgroundMeta() {
     try {
-      const res = await api.get("/admin/settings/login-background/meta");
-      const hasBackground = !!res?.data?.hasBackground;
-      const version = res?.data?.updatedAt || Date.now();
-      setLoginBackgroundVersion(String(version || ""));
-      setLoginBackgroundUrl(hasBackground ? `/api/admin/settings/login-background?v=${encodeURIComponent(String(version))}` : "");
+      const res = await api.get("/admin/settings/login-bg-info");
+      if (res.data) {
+        const hasBackground = !!res?.data?.hasBackground;
+        const version = res?.data?.updatedAt || Date.now();
+        setLoginBackgroundVersion(String(version || ""));
+        setLoginBackgroundUrl(hasBackground ? `/api/admin/settings/login-background?v=${encodeURIComponent(String(version))}` : "");
+      }
     } catch {
       setLoginBackgroundUrl("");
       setLoginBackgroundVersion("");
@@ -198,6 +200,16 @@ export default function GeneralSettingsPage() {
       setEnvSaving(true);
       await api.post("/admin/settings/env", envVars);
       toast.success("Environment configurations saved successfully.");
+      
+      // Reload the variables to get the "********" masked values from the backend
+      const res = await api.get("/admin/settings/env");
+      setEnvVars(prev => ({
+        ...prev,
+        ARKESEL_API_KEY: res.data.ARKESEL_API_KEY || "",
+        ARKESEL_SENDER_ID: res.data.ARKESEL_SENDER_ID || "",
+        GREEN_API_TOKEN_INSTANCE: res.data.GREEN_API_TOKEN_INSTANCE || "",
+        SMTP_PASS: res.data.SMTP_PASS || ""
+      }));
     } catch (e) {
       toast.error(e?.response?.data?.message || e?.message || "Failed to save environment variables");
     } finally {
@@ -210,6 +222,10 @@ export default function GeneralSettingsPage() {
       setGoogleMapsSaving(true);
       await api.post("/admin/settings/google-maps", { api_key: googleMapsApiKey });
       toast.success("Google Maps settings saved");
+      const res = await api.get("/admin/settings/google-maps");
+      if (res?.data?.data?.api_key) {
+        setGoogleMapsApiKey(res.data.data.api_key);
+      }
     } catch (e) {
       toast.error(e?.response?.data?.message || e?.message || "Failed to save settings");
     } finally { setGoogleMapsSaving(false); }
@@ -233,7 +249,7 @@ export default function GeneralSettingsPage() {
               <h1 className="text-2xl font-bold dark:text-brand-300">General Settings</h1>
               <p className="text-sm mt-1">Configure global application variables</p>
             </div>
-            <Link to="/system-configuration" className="btn btn-secondary">Return to Menu</Link>
+            <Link to="/system-configuration?section=System%20Configuration" className="btn btn-secondary">Back</Link>
           </div>
         </div>
       </div>

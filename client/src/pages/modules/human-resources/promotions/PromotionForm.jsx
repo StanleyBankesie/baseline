@@ -43,10 +43,10 @@ export default function PromotionForm() {
     async function loadData() {
       try {
         const [empRes, posRes, deptRes, locRes] = await Promise.all([
-          api.get("/hr/employees"),
-          api.get("/hr/positions"),
-          api.get("/admin/departments"),
-          api.get("/hr/setup/locations"),
+          api.get("/hr/employees").catch(() => ({ data: { items: [] } })),
+          api.get("/hr/positions").catch(() => ({ data: { items: [] } })),
+          api.get("/admin/departments").catch(() => ({ data: { items: [] } })),
+          api.get("/hr/setup/locations").catch(() => ({ data: { items: [] } })),
         ]);
         setEmployees(empRes?.data?.items || []);
         setPositions(posRes?.data?.items || []);
