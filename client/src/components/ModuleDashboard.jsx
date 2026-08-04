@@ -761,7 +761,7 @@ const ModuleDashboard = ({
         
         {/* Section Navigation Mode: View all sections as cards */}
         {!searchTerm && useSectionNavigation && activeSection === null && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredSections.map((section, sectionIndex) => {
               const sectionTitle = section.title || section.category;
               const sectionIcon = getSectionIcon(section, sectionIndex);
@@ -870,7 +870,7 @@ const ModuleDashboard = ({
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {sectionItems
                   .filter((item) => canShowItem(item))
                   .map((item, itemIndex) => {
@@ -885,8 +885,14 @@ const ModuleDashboard = ({
                         className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700/50 hover:border-brand-300/80 dark:hover:border-brand-600/80 hover:-translate-y-1.5 hover:shadow-[0_15px_35px_rgba(14,54,70,0.06)] dark:hover:shadow-[0_15px_35px_rgba(0,0,0,0.25)] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group relative overflow-hidden"
                         onClick={() => handleNavigate(item.path)}
                       >
-                        <div className="flex items-start gap-4">
-                          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-50 to-brand-100/50 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 group-hover:rotate-1 group-hover:from-brand-100 group-hover:to-brand-200/50 dark:group-hover:from-slate-600 dark:group-hover:to-slate-700 transition-all duration-300">
+                        {/* Subtle hover background tint for item cards */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-brand-50/60 to-transparent dark:from-slate-700/50 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                        <div className="flex items-start gap-4 relative z-10">
+                          <div 
+                            className="shrink-0 rounded-full bg-gradient-to-br from-brand-50 to-brand-100/50 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 group-hover:rotate-1 group-hover:from-brand-100 group-hover:to-brand-200/50 dark:group-hover:from-slate-600 dark:group-hover:to-slate-700 transition-all duration-300"
+                            style={{ width: '44px', height: '44px', minWidth: '44px', minHeight: '44px', maxWidth: '44px', maxHeight: '44px', borderRadius: '50%' }}
+                          >
                             {item.icon || "📄"}
                           </div>
                           <div className="flex-1 min-w-0">

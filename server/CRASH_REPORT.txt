@@ -31362,3 +31362,22 @@ Technical details:
 Error: read ECONNRESET
     at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
 --------------------------------------------------------------------------------
+
+[2026-08-04T16:26:00.468Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/maintenance/dashboard-stats (status 404)
+Context:
+requestId: msevdxtw-rufkd9kn
+durationMs: 15
+method: GET
+url: /api/maintenance/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Mobile Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
