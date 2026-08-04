@@ -371,6 +371,9 @@ const allowedOrigins = (() => {
   if (!origins.includes("https://kaf.omnisuite-erp.com")) {
     origins.push("https://kaf.omnisuite-erp.com");
   }
+  if (!origins.includes("https://demo.omnisuite-erp.com")) {
+    origins.push("https://demo.omnisuite-erp.com");
+  }
   return origins;
 })();
 
