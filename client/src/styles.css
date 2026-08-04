@@ -634,12 +634,10 @@
     }
 
     /* -- Grid: force single column -- */
-    .grid.grid-cols-2,
     .grid.grid-cols-3,
     .grid.grid-cols-4,
     .grid.grid-cols-5,
     .grid.grid-cols-6,
-    div.grid.grid-cols-2,
     div.grid.grid-cols-3,
     div.grid.grid-cols-4,
     div.grid.grid-cols-5,

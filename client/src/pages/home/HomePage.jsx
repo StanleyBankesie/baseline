@@ -1287,13 +1287,13 @@ export default function HomePage() {
                   .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
                   .join(" ");
                 const colors = [
-                  "from-emerald-500 to-emerald-600",
-                  "from-blue-500 to-blue-600",
-                  "from-purple-500 to-purple-600",
-                  "from-orange-500 to-orange-600",
-                  "from-pink-500 to-pink-600",
-                  "from-teal-500 to-teal-600",
-                  "from-rose-500 to-rose-600",
+                  "bg-emerald-500",
+                  "bg-blue-500",
+                  "bg-purple-500",
+                  "bg-orange-500",
+                  "bg-pink-500",
+                  "bg-teal-500",
+                  "bg-rose-500",
                 ];
                 const idx =
                   Math.abs(
@@ -1310,13 +1310,13 @@ export default function HomePage() {
                   >
                     <button
                       type="button"
-                      className={`rounded-lg px-4 py-3 text-left text-white shadow-erp-sm hover:shadow-erp-md transition bg-gradient-to-r ${colors[idx]} h-20 w-full flex flex-col justify-center`}
+                      className={`rounded-xl px-4 py-3 text-left text-white hover:opacity-90 transition ${colors[idx]} h-20 w-full flex flex-col justify-center`}
                       title={`Show ${label} reports and dashboards`}
                       onClick={() =>
                         setActiveModule((curr) => (curr === mk ? null : mk))
                       }
                     >
-                      <div className="text-sm font-semibold truncate">
+                      <div className="text-sm font-semibold truncate tracking-tight">
                         {label}
                       </div>
                       <div className="text-xs text-white/90 mt-0.5 truncate">

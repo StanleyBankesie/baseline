@@ -31381,3 +31381,41 @@ status: 404
 Technical details:
 (no stack)
 --------------------------------------------------------------------------------
+
+[2026-08-04T17:17:35.925Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/maintenance/dashboard-stats (status 404)
+Context:
+requestId: msex8aaw-k91n3ziv
+durationMs: 12
+method: GET
+url: /api/maintenance/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Mobile Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-04T17:29:44.790Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/maintenance/dashboard-stats (status 404)
+Context:
+requestId: msexnwpd-9jj6b578
+durationMs: 5
+method: GET
+url: /api/maintenance/dashboard-stats
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Mobile Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------

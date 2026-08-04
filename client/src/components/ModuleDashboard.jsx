@@ -761,7 +761,7 @@ const ModuleDashboard = ({
         
         {/* Section Navigation Mode: View all sections as cards */}
         {!searchTerm && useSectionNavigation && activeSection === null && (
-          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredSections.map((section, sectionIndex) => {
               const sectionTitle = section.title || section.category;
               const sectionIcon = getSectionIcon(section, sectionIndex);
@@ -813,7 +813,7 @@ const ModuleDashboard = ({
                       >
                         {sectionIcon}
                       </div>
-                      <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-600/60 shadow-2xs">
+                      <span className="flex-none w-max inline-block text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-600/60 shadow-2xs">
                         {itemCount} {itemCount === 1 ? 'Page' : 'Pages'}
                       </span>
                     </div>
