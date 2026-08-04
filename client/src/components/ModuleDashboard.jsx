@@ -803,7 +803,7 @@ const ModuleDashboard = ({
                   }}
                 >
                   {/* Subtle top background tint */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${cardGradient} opacity-60 pointer-events-none`} />
+                  <div className={`absolute inset-0 bg-gradient-to-br ${cardGradient} opacity-0 group-hover:opacity-60 transition-opacity duration-500 pointer-events-none`} />
 
                   <div className="relative z-10">
                     <div className="flex items-center justify-between gap-3 mb-4">
