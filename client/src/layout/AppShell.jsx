@@ -1892,7 +1892,7 @@ export default function AppShell() {
             type="button"
             aria-label="Close menu"
             onClick={() => setSidebarOpen(false)}
-            className="fixed inset-0 z-40 bg-black/40 md:hidden transition-opacity duration-300 animate-in fade-in"
+            className="fixed inset-0 z-50 bg-black/40 md:hidden transition-opacity duration-300 animate-in fade-in"
           />
         )}
 
@@ -1900,7 +1900,7 @@ export default function AppShell() {
           onTouchStart={handleSidebarTouchStart}
           onTouchEnd={handleSidebarTouchEnd}
           className={
-            "md:sticky md:top-[45px] md:h-[calc(100vh-45px)] border-b md:border-b-0 md:border-r border-slate-800 dark:border-slate-800 p-5 bg-brand-950 dark:bg-slate-950 shadow-lg overflow-y-auto no-scrollbar z-40 transition-all duration-300 ease-in-out " +
+            "md:sticky md:top-[45px] md:h-[calc(100vh-45px)] border-b md:border-b-0 md:border-r border-slate-800 dark:border-slate-800 p-5 bg-brand-950 dark:bg-slate-950 shadow-lg overflow-y-auto no-scrollbar z-[60] transition-all duration-300 ease-in-out " +
             (sidebarOpen
               ? "fixed inset-y-0 left-0 w-[280px] top-[45px] translate-x-0 md:static md:translate-x-0"
               : "fixed inset-y-0 left-0 w-[280px] top-[45px] -translate-x-full md:static md:translate-x-0 md:hidden")

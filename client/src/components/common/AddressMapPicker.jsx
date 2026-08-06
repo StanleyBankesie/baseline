@@ -14,7 +14,7 @@ const defaultCenter = {
   lng: -0.1870, // Default to Accra
 };
 
-const libraries = ['places'];
+const libraries = ['places', 'geometry'];
 
 
 export default function AddressMapPicker(props) {

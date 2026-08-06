@@ -9,7 +9,7 @@ const containerStyle = {
   height: '100%',
 };
 
-const libraries = ['places'];
+const libraries = ['places', 'geometry'];
 
 export default function LiveTrackingMap(props) {
   const [apiKey, setApiKey] = useState(null);
