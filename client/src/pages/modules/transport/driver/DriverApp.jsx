@@ -39,8 +39,8 @@ export default function DriverApp() {
     };
   }, []);
 
-  const handleStartTrip = async (tripId) => {
-    const success = startTracking(tripId);
+  const handleStartTrip = async (tripId, vehicleId) => {
+    const success = startTracking(tripId, vehicleId);
     if (success) {
       message.success("Trip Started! GPS tracking active.");
       // Ideally update backend status to IN_TRANSIT here
@@ -104,7 +104,7 @@ export default function DriverApp() {
                   type="primary" 
                   block 
                   icon={<EnvironmentOutlined />}
-                  onClick={() => handleStartTrip(trip.id)}
+                  onClick={() => handleStartTrip(trip.id, trip.vehicle_id)}
                   disabled={trip.status === 'IN_TRANSIT'}
                 >
                   Start GPS

@@ -43,9 +43,9 @@ export default function SettingsPage() {
   const [cloudSaving, setCloudSaving] = useState(false);
   const [emailTestTo, setEmailTestTo] = useState("");
   const [emailTesting, setEmailTesting] = useState(false);
-  const [loginBackgroundUrl, setLoginBackgroundUrl] = useState("");
-  const [loginBackgroundVersion, setLoginBackgroundVersion] = useState("");
-  const [loginBackgroundSaving, setLoginBackgroundSaving] = useState(false);
+  const [loginHeroImageUrl, setloginHeroImageUrl] = useState("");
+  const [loginHeroImageVersion, setloginHeroImageVersion] = useState("");
+  const [loginHeroImageSaving, setloginHeroImageSaving] = useState(false);
   const [inactivityTimeout, setInactivityTimeout] = useState(() => {
     try {
       if (typeof localStorage !== "undefined") {
@@ -107,27 +107,27 @@ export default function SettingsPage() {
     finally { setEmailTesting(false); }
   }
 
-  async function loadLoginBackgroundMeta() {
+  async function loadloginHeroImageMeta() {
     try {
-      const res = await api.get("/admin/settings/login-bg-info");
+      const res = await api.get("/admin/settings/login-hero-bg-info");
       if (res.data) {
         const hasBackground = !!res?.data?.hasBackground;
         const version = res?.data?.updatedAt || Date.now();
-        setLoginBackgroundVersion(String(version || ""));
-        setLoginBackgroundUrl(hasBackground ? `/api/admin/settings/login-background?v=${encodeURIComponent(String(version))}` : "");
+        setloginHeroImageVersion(String(version || ""));
+        setloginHeroImageUrl(hasBackground ? `/api/admin/settings/login-hero-background?v=${encodeURIComponent(String(version))}` : "");
       }
     } catch {
-      setLoginBackgroundUrl("");
-      setLoginBackgroundVersion("");
+      setloginHeroImageUrl("");
+      setloginHeroImageVersion("");
     }
   }
 
-  useEffect(() => { loadLoginBackgroundMeta(); }, []);
+  useEffect(() => { loadloginHeroImageMeta(); }, []);
 
-  async function uploadLoginBackground(file) {
+  async function uploadloginHeroImage(file) {
     if (!file) return;
     try {
-      setLoginBackgroundSaving(true);
+      setloginHeroImageSaving(true);
       let uploadFile = file;
       if (file.size > 300 * 1024) {
         const compressed = await new Promise((resolve) => {
@@ -153,24 +153,24 @@ export default function SettingsPage() {
       }
       const fd = new FormData();
       fd.append("background", uploadFile);
-      await api.post("/admin/settings/login-background", fd, { headers: { "Content-Type": "multipart/form-data" } });
-      toast.success("Login background updated");
-      await loadLoginBackgroundMeta();
+      await api.post("/admin/settings/login-hero-background", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      toast.success("Login hero image updated");
+      await loadloginHeroImageMeta();
     } catch (e) {
-      toast.error(e?.response?.data?.message || e?.message || "Failed to update login background");
-    } finally { setLoginBackgroundSaving(false); }
+      toast.error(e?.response?.data?.message || e?.message || "Failed to update Login hero image");
+    } finally { setloginHeroImageSaving(false); }
   }
 
-  async function clearLoginBackground() {
+  async function clearloginHeroImage() {
     try {
-      setLoginBackgroundSaving(true);
-      await api.delete("/admin/settings/login-background");
-      setLoginBackgroundUrl("");
-      setLoginBackgroundVersion("");
-      toast.success("Login background reset");
+      setloginHeroImageSaving(true);
+      await api.delete("/admin/settings/login-hero-background");
+      setloginHeroImageUrl("");
+      setloginHeroImageVersion("");
+      toast.success("Login hero image reset");
     } catch (e) {
-      toast.error(e?.response?.data?.message || e?.message || "Failed to reset login background");
-    } finally { setLoginBackgroundSaving(false); }
+      toast.error(e?.response?.data?.message || e?.message || "Failed to reset Login hero image");
+    } finally { setloginHeroImageSaving(false); }
   }
 
   async function requestPushPermission() {
@@ -253,21 +253,21 @@ export default function SettingsPage() {
             <div className="card-body space-y-3">
               <div className="flex justify-between items-start gap-4">
                 <div>
-                  <div className="text-lg font-semibold">Login Background</div>
+                  <div className="text-lg font-semibold">Login Hero Image</div>
                   <div className="text-sm text-slate-500">Change the image shown behind the login form.</div>
                 </div>
-                {loginBackgroundUrl ? (
-                  <div className="w-40 h-24 rounded border border-slate-200 bg-cover bg-center" style={{ backgroundImage: `url(${loginBackgroundUrl})` }} />
+                {loginHeroImageUrl ? (
+                  <div className="w-40 h-24 rounded border border-slate-200 bg-cover bg-center" style={{ backgroundImage: `url(${loginHeroImageUrl})` }} />
                 ) : (
                   <div className="w-40 h-24 rounded border border-dashed border-slate-300 flex items-center justify-center text-xs text-slate-500">Default image</div>
                 )}
               </div>
               <div className="flex flex-wrap gap-2">
                 <label className="btn-primary cursor-pointer">
-                  {loginBackgroundSaving ? "Saving..." : "Upload Background"}
-                  <input type="file" accept="image/*" className="hidden" disabled={loginBackgroundSaving} onChange={e => { const file = e.target.files?.[0] || null; e.target.value = ""; uploadLoginBackground(file); }} />
+                  {loginHeroImageSaving ? "Saving..." : "Upload Background"}
+                  <input type="file" accept="image/*" className="hidden" disabled={loginHeroImageSaving} onChange={e => { const file = e.target.files?.[0] || null; e.target.value = ""; uploadloginHeroImage(file); }} />
                 </label>
-                <button type="button" className="btn-outline" disabled={loginBackgroundSaving || !loginBackgroundUrl} onClick={clearLoginBackground}>Reset to Default</button>
+                <button type="button" className="btn-outline" disabled={loginHeroImageSaving || !loginHeroImageUrl} onClick={clearloginHeroImage}>Reset to Default</button>
               </div>
             </div>
           </div>

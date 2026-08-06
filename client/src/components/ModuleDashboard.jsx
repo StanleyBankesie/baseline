@@ -526,7 +526,7 @@ const ModuleDashboard = ({
           <div className="relative">
             <input
               type="text"
-              placeholder="Search entry, transaction, or report page..."
+              placeholder="Search entry, transaction or report page"
               className="input w-full pl-10"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}

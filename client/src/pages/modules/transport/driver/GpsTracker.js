@@ -56,8 +56,8 @@ export const startTracking = (tripId, vId) => {
     },
     {
       enableHighAccuracy: true,
-      maximumAge: 5000,
-      timeout: 5000
+      maximumAge: 10000,
+      timeout: 30000
     }
   );
   return true;

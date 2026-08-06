@@ -1733,6 +1733,26 @@ router.get("/settings/login-bg-info", async (req, res, next) => {
   }
 });
 
+// Get login hero background metadata
+router.get("/settings/login-hero-bg-info", async (req, res, next) => {
+  try {
+    await ensureLoginBrandingTable();
+    const rows = await query(
+      `SELECT hero_image IS NOT NULL AS has_background, updated_at
+         FROM adm_login_branding
+        WHERE id = 1
+        LIMIT 1`,
+    );
+    const row = rows[0] || {};
+    res.json({
+      hasBackground: Number(row.has_background || 0) === 1,
+      updatedAt: row.updated_at || null,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get("/settings/login-background", async (req, res, next) => {
   try {
     await ensureLoginBrandingTable();
@@ -1748,6 +1768,28 @@ router.get("/settings/login-background", async (req, res, next) => {
       ? row.background_image
       : Buffer.from(row.background_image);
     res.setHeader("Content-Type", row.background_mime || "image/jpeg");
+    res.setHeader("Cache-Control", "public, max-age=300");
+    return res.end(body);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/settings/login-hero-background", async (req, res, next) => {
+  try {
+    await ensureLoginBrandingTable();
+    const rows = await query(
+      `SELECT hero_image, hero_mime
+         FROM adm_login_branding
+        WHERE id = 1
+        LIMIT 1`,
+    );
+    const row = rows[0] || null;
+    if (!row?.hero_image) return res.status(404).end();
+    const body = Buffer.isBuffer(row.hero_image)
+      ? row.hero_image
+      : Buffer.from(row.hero_image);
+    res.setHeader("Content-Type", row.hero_mime || "image/jpeg");
     res.setHeader("Cache-Control", "public, max-age=300");
     return res.end(body);
   } catch (err) {
@@ -1785,6 +1827,36 @@ router.post(
   },
 );
 
+router.post(
+  "/settings/login-hero-background",
+  requireAuth,
+  requirePageAccess("/administration/settings", "edit"),
+  loginBackgroundUpload.single("background"),
+  async (req, res, next) => {
+    try {
+      if (!req.file?.buffer) {
+        throw httpError(400, "VALIDATION_ERROR", "Hero image is required");
+      }
+      await ensureLoginBrandingTable();
+      try { await query("SET SESSION max_allowed_packet = 16777216"); } catch {}
+      await query(
+        `INSERT INTO adm_login_branding (id, hero_image, hero_mime)
+         VALUES (1, :image, :mime)
+         ON DUPLICATE KEY UPDATE
+           hero_image = VALUES(hero_image),
+           hero_mime = VALUES(hero_mime)`,
+        {
+          image: req.file.buffer,
+          mime: req.file.mimetype || "image/jpeg",
+        },
+      );
+      res.json({ success: true, updatedAt: new Date().toISOString() });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
 router.delete(
   "/settings/login-background",
   requireAuth,
@@ -1792,7 +1864,22 @@ router.delete(
   async (req, res, next) => {
     try {
       await ensureLoginBrandingTable();
-      await query(`DELETE FROM adm_login_branding WHERE id = 1`);
+      await query(`UPDATE adm_login_branding SET background_image = NULL, background_mime = NULL WHERE id = 1`);
+      res.json({ success: true });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.delete(
+  "/settings/login-hero-background",
+  requireAuth,
+  requirePageAccess("/administration/settings", "delete"),
+  async (req, res, next) => {
+    try {
+      await ensureLoginBrandingTable();
+      await query(`UPDATE adm_login_branding SET hero_image = NULL, hero_mime = NULL WHERE id = 1`);
       res.json({ success: true });
     } catch (err) {
       next(err);

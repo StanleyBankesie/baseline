@@ -32304,3 +32304,291 @@ Error: Invalid id
     at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:241:14)
     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
 --------------------------------------------------------------------------------
+
+[2026-08-06T17:24:58.212Z] HTTP_401
+Summary: Authentication required
+Request: GET /api/access/dashboard-permissions/version (status 401)
+Context:
+status: 401
+code: UNAUTHORIZED
+method: GET
+url: /api/access/dashboard-permissions/version
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Mobile Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Authentication required
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:144:17)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+    at Function.handle (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:175:3)
+--------------------------------------------------------------------------------
+
+[2026-08-06T17:24:58.834Z] HTTP_401
+Summary: Refresh token is missing
+Request: POST /api/auth/refresh (status 401)
+Context:
+status: 401
+code: INVALID_REFRESH_TOKEN
+method: POST
+url: /api/auth/refresh
+ip: ::1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Mobile Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Refresh token is missing
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at refreshAccessToken (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:498:13)
+    at file:///C:/Users/stanl/baseline/server/routes/auth.routes.js:20:50
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
+--------------------------------------------------------------------------------
+
+[2026-08-06T18:05:38.471Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/admin/settings/login-background-meta (status 404)
+Context:
+requestId: mshttrtj-5q18mabw
+durationMs: 15
+method: GET
+url: /api/admin/settings/login-background-meta
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T18:05:51.111Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/admin/settings/login-background-meta (status 404)
+Context:
+requestId: mshtu1kn-2lrxzjcw
+durationMs: 16
+method: GET
+url: /api/admin/settings/login-background-meta
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T18:10:52.764Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/admin/settings/login-background-meta (status 404)
+Context:
+requestId: mshu0ibz-e9sq0vih
+durationMs: 13
+method: GET
+url: /api/admin/settings/login-background-meta
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Mobile Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T18:10:57.480Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/admin/settings/login-background-meta (status 404)
+Context:
+requestId: mshu0lyt-0f0xggpp
+durationMs: 19
+method: GET
+url: /api/admin/settings/login-background-meta
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Mobile Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T18:11:01.549Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/admin/settings/login-background-meta (status 404)
+Context:
+requestId: mshu0p1j-fyatx0ff
+durationMs: 102
+method: GET
+url: /api/admin/settings/login-background-meta
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Mobile Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T18:11:08.444Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/admin/settings/login-background-meta (status 404)
+Context:
+requestId: mshu0ufh-6bdukrst
+durationMs: 15
+method: GET
+url: /api/admin/settings/login-background-meta
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Mobile Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T18:13:17.512Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/admin/settings/login-background-meta (status 404)
+Context:
+requestId: mshu3m0z-de1kctb1
+durationMs: 5
+method: GET
+url: /api/admin/settings/login-background-meta
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T18:23:47.411Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/admin/settings/login-background-meta (status 404)
+Context:
+requestId: mshuh41a-n02nod0h
+durationMs: 37
+method: GET
+url: /api/admin/settings/login-background-meta
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Mobile Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T18:24:44.230Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/admin/settings/login-background-meta (status 404)
+Context:
+requestId: mshuibwe-hadllofd
+durationMs: 8
+method: GET
+url: /api/admin/settings/login-background-meta
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Mobile Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T18:26:10.245Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/admin/settings/login-background-meta (status 404)
+Context:
+requestId: mshuk69t-gydhdio6
+durationMs: 3
+method: GET
+url: /api/admin/settings/login-background-meta
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Mobile Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T18:29:11.553Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/admin/settings/login-background-meta (status 404)
+Context:
+requestId: mshuo264-7zxyai0p
+durationMs: 5
+method: GET
+url: /api/admin/settings/login-background-meta
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Mobile Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T18:30:16.236Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/admin/settings/login-background-meta (status 404)
+Context:
+requestId: mshupg2h-66sqpn1h
+durationMs: 19
+method: GET
+url: /api/admin/settings/login-background-meta
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Mobile Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------

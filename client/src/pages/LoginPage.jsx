@@ -12,9 +12,15 @@ import * as authStorage from "../auth/authStorage.js";
 import api from "../api/client.js";
 import logoClear from "../assets/resources/OMNISUITE_LOGO_CLEAR.png";
 import backgroundImage from "../assets/resources/BACKGROUND.jpg";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Calendar as CalendarIcon, Clock, Video, Users } from "lucide-react";
 import Swal from "sweetalert2";
 import PaymentPackageModal from "../components/PaymentPackageModal.jsx";
+
+const CAROUSEL_MESSAGES = [
+  "Empowering Your Business Operations",
+  "Seamless Enterprise Resource Planning",
+  "Streamline Your Workflow Today",
+];
 
 /**
  * LoginPage component
@@ -33,10 +39,26 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loginBackgroundUrl, setLoginBackgroundUrl] = useState(backgroundImage);
+  const [loginHeroImageUrl, setLoginHeroImageUrl] = useState(backgroundImage);
   const [rememberMe, setRememberMe] = useState(() =>
     authStorage.readRememberMePreference(),
   );
   const handledStartupRedirect = useRef(false);
+  
+  // Date and carousel state for right panel
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [carouselIndex, setCarouselIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentDate(new Date()), 60000);
+    const carouselTimer = setInterval(() => {
+      setCarouselIndex((prev) => (prev + 1) % CAROUSEL_MESSAGES.length);
+    }, 4000);
+    return () => {
+      clearInterval(timer);
+      clearInterval(carouselTimer);
+    };
+  }, []);
 
   // ── Remembered credential suggestion state ──────────────────
   const [savedProfiles, setSavedProfiles] = useState([]);
@@ -132,6 +154,27 @@ export default function LoginPage() {
       } catch {}
     }
     loadLoginBackground().catch(() => {});
+
+    async function loadLoginHeroBackground() {
+      try {
+        let resp;
+        try { resp = await api.get("/admin/settings/login-hero-bg-info"); } catch (e) {
+          if (api.defaults && api.defaults.baseURL) {
+            resp = await fetch(api.defaults.baseURL + "/admin/settings/login-hero-bg-info").then(r => r.json());
+            resp = { data: resp };
+          }
+        }
+        const meta = resp.data;
+        if (!mounted || !meta?.hasBackground) return;
+        const version = meta.updatedAt || Date.now();
+        const base = api.defaults ? (api.defaults.baseURL || "") : "";
+        setLoginHeroImageUrl(
+          base + "/admin/settings/login-hero-background?v=" + encodeURIComponent(String(version))
+        );
+      } catch {}
+    }
+    loadLoginHeroBackground().catch(() => {});
+
     return () => {
       mounted = false;
     };
@@ -411,244 +454,238 @@ export default function LoginPage() {
   }
 
   return (
-    <div
-      className="min-h-screen grid place-items-center bg-gradient-to-br from-brand-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6"
-      style={{
-        backgroundImage: `url(${loginBackgroundUrl})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      <div className="w-full max-w-[400px]">
-        <div
-          className="card shadow-erp-lg p-8"
-          style={{ backgroundColor: "rgba(255,255,255,0.7)" }}
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4 sm:p-6 md:p-8">
+      <div className="w-full max-w-6xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[600px]">
+        
+        {/* Left Side: Form */}
+        <div 
+          className="w-full md:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-center relative bg-slate-900"
+          style={{
+            backgroundImage: `url(${loginBackgroundUrl})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
         >
-          <div className="flex items-center justify-center text-center mb-8">
-            <div className="w-full">
-              <div className="flex justify-center mt-3 mb-4">
-                <img src={logoClear} alt="OmniSuite" className="h-14 w-auto" />
+          {/* Overlay to ensure form text readability */}
+          <div className="absolute inset-0 bg-white/90"></div>
+          
+          {/* Logo at upper left corner */}
+          <div className="absolute top-6 left-6 md:top-8 md:left-8 z-20">
+            <div className="bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow-sm flex items-center gap-2 border border-slate-100">
+              <img src={logoClear} alt="OmniSuite" className="h-6 w-auto" />
+            </div>
+          </div>
+          
+          <div className="max-w-md w-full mx-auto relative z-10">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-2">Login</h1>
+              <p className="text-slate-600">Sign in to continue your enterprise journey.</p>
+            </div>
+            
+            {error ? (
+              <div className="mb-4 rounded-lg border border-status-error/30 bg-red-50 px-4 py-3 text-status-error text-sm">
+                {error}
               </div>
-              <div className="text-xl font-bold text-slate-600 dark:text-slate-400">
-                Enterprise Resource Planning
+            ) : null}
+
+            <form onSubmit={onSubmit} className="space-y-5" autoComplete="on" method="post">
+              <div className="relative w-full">
+                <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="username">Username</label>
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/80 focus:bg-white focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition-all"
+                  ref={usernameRef}
+                  autoComplete="username"
+                  required
+                  defaultValue=""
+                  onFocus={handleUsernameFocus}
+                  onClick={handleUsernameFocus}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setUsernameQuery(val);
+                    if (savedProfiles.length && !isAutoFillingRef.current) {
+                      if (val.trim().length >= 2) {
+                        setShowSuggestion(true);
+                      }
+                      const matched = savedProfiles.find(
+                        (p) => p.username.toLowerCase() === val.trim().toLowerCase(),
+                      );
+                      if (matched && matched.password && passwordRef.current) {
+                        setInputValue(passwordRef.current, matched.password);
+                      }
+                    }
+                  }}
+                />
+                
+                {/* Credential suggestion dropdown */}
+                {shouldShowSuggestion && (
+                  <div
+                    ref={suggestionRef}
+                    className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 max-h-56 overflow-y-auto overflow-x-hidden"
+                  >
+                    {filteredProfiles.map((profile) => (
+                      <button
+                        key={profile.username}
+                        type="button"
+                        onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); handleSelectSuggestion(profile); }}
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleSelectSuggestion(profile); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0 text-left"
+                      >
+                        {profile.profilePictureUrl ? (
+                          <img src={profile.profilePictureUrl} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
+                        ) : (
+                          <div
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
+                            style={{ background: profile.avatarColor || authStorage.getRememberedAvatarColor(profile.username) }}
+                          >
+                            {profile.username.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <div className="font-semibold text-sm text-slate-800 leading-tight truncate">{profile.username}</div>
+                          <div className="text-xs text-slate-400 leading-tight">••••••••</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="w-full">
+                <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="password">Password</label>
+                <div className="relative w-full">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/80 focus:bg-white focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition-all pr-12"
+                    ref={passwordRef}
+                    autoComplete="current-password"
+                    required
+                    defaultValue=""
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                    onClick={() => setShowPassword((v) => !v)}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              <label className="inline-flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="rounded border-slate-300 text-amber-500 focus:ring-amber-500 w-4 h-4"
+                  checked={rememberMe}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setRememberMe(checked);
+                    authStorage.saveRememberMePreference(checked);
+                  }}
+                />
+                Remember me
+              </label>
+
+              <button
+                type="submit"
+                className="w-full bg-amber-400 hover:bg-amber-500 text-amber-900 font-bold py-3 px-4 rounded-xl shadow-sm transition-colors mt-2"
+                disabled={loading}
+              >
+                {loading ? "Signing in…" : "Submit"}
+              </button>
+              
+              <div className="mt-4 text-center">
+                <Link to="/forgot-password" className="text-sm text-slate-500 hover:text-slate-800 font-medium transition-colors">
+                  Forgot password?
+                </Link>
+              </div>
+            </form>
+            
+            <div className="mt-8 pt-8 border-t border-amber-200/50 flex justify-between items-center text-xs text-slate-500">
+              <div>Powered by Stanness Technologies</div>
+              <div className="flex gap-4">
+                <a href="#" className="hover:text-slate-800 transition-colors">Terms</a>
+                <a href="#" className="hover:text-slate-800 transition-colors">Conditions</a>
               </div>
             </div>
           </div>
+        </div>
+        
+        {/* Right Side: Image and Glassmorphic Elements */}
+        <div 
+          className="hidden md:block w-full md:w-1/2 relative bg-slate-900 overflow-hidden"
+          style={{
+            backgroundImage: `url(${loginBackgroundUrl})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          {/* Overlay to ensure text readability */}
+          <div className="absolute inset-0 bg-black/20"></div>
 
-          {error ? (
-            <div className="mb-4 rounded-lg border border-status-error/30 bg-red-50 dark:bg-red-900/20 px-4 py-3 text-status-error text-sm">
-              {error}
+          {/* Glassmorphic Carousel */}
+          <div className="absolute top-12 left-1/2 -translate-x-1/2 w-4/5 max-w-md z-20">
+            <div className="backdrop-blur-md bg-white/20 border border-white/30 p-4 rounded-2xl shadow-xl flex items-center justify-between text-white">
+              <div className="flex-1 overflow-hidden relative h-6">
+                {CAROUSEL_MESSAGES.map((msg, idx) => (
+                  <div 
+                    key={idx}
+                    className="absolute inset-0 w-full flex items-center font-medium transition-all duration-500 ease-in-out"
+                    style={{
+                      transform: `translateY(${(idx - carouselIndex) * 100}%)`,
+                      opacity: idx === carouselIndex ? 1 : 0
+                    }}
+                  >
+                    {msg}
+                  </div>
+                ))}
+              </div>
+              <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse ml-4 shrink-0"></div>
             </div>
-          ) : null}
+          </div>
 
-          <form
-            onSubmit={onSubmit}
-            className="space-y-4"
-            autoComplete="on"
-            method="post"
-          >
-            {/* ── Username field with suggestion dropdown ── */}
-            <div className="relative w-full">
-              <label className="label" htmlFor="username">
-                Username
-              </label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                className="login-input"
-                ref={usernameRef}
-                autoComplete="username"
-                required
-                defaultValue=""
-                onFocus={handleUsernameFocus}
-                onClick={handleUsernameFocus}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setUsernameQuery(val);
-                  if (savedProfiles.length && !isAutoFillingRef.current) {
-                    if (val.trim().length >= 2) {
-                      setShowSuggestion(true);
-                    }
-                    const matched = savedProfiles.find(
-                      (p) => p.username.toLowerCase() === val.trim().toLowerCase(),
-                    );
-                    if (matched && matched.password && passwordRef.current) {
-                      setInputValue(passwordRef.current, matched.password);
-                    }
-                  }
-                }}
-              />
-
-              {/* Credential suggestion dropdown */}
-              {shouldShowSuggestion && (
-                <div
-                  ref={suggestionRef}
-                  style={{
-                    position: "absolute",
-                    top: "100%",
-                    left: 0,
-                    right: 0,
-                    zIndex: 50,
-                    marginTop: "2px",
-                    backgroundColor: "#fff",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
-                    overflowY: "auto",
-                    maxHeight: "220px",
-                  }}
-                >
-                  {filteredProfiles.map((profile) => (
-                    <button
-                      key={profile.username}
-                      type="button"
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleSelectSuggestion(profile);
-                      }}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleSelectSuggestion(profile);
-                      }}
-                      style={{
-                        width: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                        padding: "10px 14px",
-                        border: "none",
-                        backgroundColor: "transparent",
-                        cursor: "pointer",
-                        textAlign: "left",
-                        transition: "background-color 0.15s",
-                      }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.backgroundColor = "#f1f5f9")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.backgroundColor = "transparent")
-                      }
-                    >
-                      {profile.profilePictureUrl ? (
-                        <img
-                          src={profile.profilePictureUrl}
-                          alt=""
-                          style={{
-                            width: "32px",
-                            height: "32px",
-                            borderRadius: "50%",
-                            objectFit: "cover",
-                            flexShrink: 0,
-                          }}
-                        />
-                      ) : (
-                        <div
-                          style={{
-                            width: "32px",
-                            height: "32px",
-                            borderRadius: "50%",
-                            background:
-                              profile.avatarColor ||
-                              authStorage.getRememberedAvatarColor(
-                                profile.username,
-                              ),
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            color: "#fff",
-                            fontWeight: 700,
-                            fontSize: "14px",
-                            flexShrink: 0,
-                          }}
-                        >
-                          {profile.username.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                      <div style={{ minWidth: 0 }}>
-                        <div
-                          style={{
-                            fontWeight: 600,
-                            fontSize: "14px",
-                            color: "#1e293b",
-                            lineHeight: 1.3,
-                          }}
-                        >
-                          {profile.username}
-                        </div>
-                        <div
-                          style={{
-                            fontSize: "12px",
-                            color: "#94a3b8",
-                            lineHeight: 1.3,
-                          }}
-                        >
-                          {"•".repeat(8)}
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="w-full">
-              <label className="label" htmlFor="password">
-                Password
-              </label>
-              <div className="relative w-full">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  className="login-input pr-20"
-                  ref={passwordRef}
-                  autoComplete="current-password"
-                  required
-                  defaultValue=""
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-2 flex items-center text-slate-500"
-                  onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+          {/* Glassmorphic Calendar & Date */}
+          <div className="absolute bottom-12 left-12 right-12 flex flex-col gap-6 z-20">
+            {/* Calendar Strip */}
+            <div className="backdrop-blur-md bg-black/20 border border-white/20 p-4 rounded-3xl text-white">
+              <div className="flex justify-between items-center px-2">
+                {[...Array(7)].map((_, i) => {
+                  const d = new Date(currentDate);
+                  d.setDate(d.getDate() - 3 + i);
+                  const isToday = i === 3;
+                  return (
+                    <div key={i} className={`flex flex-col items-center p-2 rounded-xl transition-all ${isToday ? 'bg-white/20 scale-110' : 'opacity-70'}`}>
+                      <span className="text-xs mb-1">{d.toLocaleDateString("en-US", { weekday: "short" })}</span>
+                      <span className={`font-bold ${isToday ? 'text-lg' : 'text-sm'}`}>{d.getDate()}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-
-            <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  setRememberMe(checked);
-                  authStorage.saveRememberMePreference(checked);
-                }}
-              />
-              Remember me
-            </label>
-
-            <button
-              type="submit"
-              className="btn-primary w-full mt-6"
-              disabled={loading}
-            >
-              {loading ? "Signing in…" : "Sign in"}
-            </button>
-            <div className="mt-3 text-right">
-              <Link
-                to="/forgot-password"
-                className="text-sm text-brand-700 hover:underline"
-              >
-                Forgot password?
-              </Link>
+            
+            {/* Meeting Widget */}
+            <div className="backdrop-blur-md bg-white/90 border border-white p-4 rounded-2xl shadow-xl flex items-start gap-4 max-w-xs">
+              <div className="bg-amber-100 text-amber-600 p-2 rounded-xl">
+                <Video size={20} />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-slate-800 text-sm">Daily Meeting</h3>
+                <p className="text-slate-500 text-xs flex items-center gap-1 mt-1">
+                  <Clock size={12} /> 12:00pm - 01:00pm
+                </p>
+                <div className="flex -space-x-2 mt-3">
+                  <div className="w-6 h-6 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold">JD</div>
+                  <div className="w-6 h-6 rounded-full bg-green-500 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold">AS</div>
+                  <div className="w-6 h-6 rounded-full bg-purple-500 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold">+3</div>
+                </div>
+              </div>
             </div>
-          </form>
+          </div>
+          
         </div>
       </div>
       <PaymentPackageModal
