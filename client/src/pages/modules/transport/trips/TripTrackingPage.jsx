@@ -54,6 +54,23 @@ export default function TripTrackingPage() {
       });
     });
 
+    newSocket.on("TRIP_LOCATION_UPDATE", (data) => {
+      setVehicles(prev => {
+        const idx = prev.findIndex(v => String(v.trip_id) === String(data.tripId));
+        if (idx === -1) return prev;
+        const updated = [...prev];
+        updated[idx] = { 
+          ...updated[idx], 
+          current_lat: data.location.latitude,
+          current_lng: data.location.longitude,
+          speed: data.location.speed,
+          heading: data.location.heading,
+          last_update: data.location.recorded_at
+        };
+        return updated;
+      });
+    });
+
     setSocket(newSocket);
     return () => newSocket.disconnect();
   }, []);

@@ -75,10 +75,9 @@ export default function TripManagementPage() {
         },
         (err) => {
           console.error("Tracking error:", err);
-          // Only show toast if it's explicitly started by a user click right now, not on background resume
-          // toast.error("Error getting location: " + err.message);
+          toast.error("GPS Error: " + err.message);
         },
-        { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+        { enableHighAccuracy: true, maximumAge: 10000, timeout: 30000 }
       );
       trackingIntervals.current[tripId] = watchId;
     } else {
