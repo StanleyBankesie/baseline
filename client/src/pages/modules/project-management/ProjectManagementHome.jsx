@@ -49,24 +49,39 @@ export const projectManagementSections = [
       {
         title: "Projects",
         path: "/project-management/projects",
+        actions: [
+          { label: "View", path: "/project-management/projects", type: "outline" },
+          { label: "New", path: "/project-management/projects/new", type: "primary" }
+        ],
         description: "Manage end-to-end project lifecycles",
         icon: "📁",
       },
       {
         title: "Project Orders",
         path: "/project-management/project-orders",
+        actions: [
+          { label: "View", path: "/project-management/project-orders", type: "outline" },
+          { label: "New", path: "/project-management/project-orders/new", type: "primary" }
+        ],
         description: "Client project engagements and orders",
         icon: "📜",
       },
       {
         title: "Setup & WBS",
         path: "/project-management/setup",
+        actions: [
+          { label: "View", path: "/project-management/setup", type: "outline" }
+        ],
         description: "Project categories, types, and WBS templates",
         icon: "⚙️",
       },
       {
         title: "Milestones",
         path: "/project-management/milestones",
+        actions: [
+          { label: "View", path: "/project-management/milestones", type: "outline" },
+          { label: "New", path: "/project-management/milestones/new", type: "primary" }
+        ],
         description: "Track key project events and deadlines",
         icon: "🎯",
       },
@@ -79,24 +94,40 @@ export const projectManagementSections = [
       {
         title: "Task Assignments",
         path: "/project-management/tasks",
+        actions: [
+          { label: "View", path: "/project-management/tasks", type: "outline" },
+          { label: "New", path: "/project-management/tasks/new", type: "primary" }
+        ],
         description: "Assign work items and milestones",
         icon: "📋",
       },
       {
         title: "Task Execution Dashboard",
         path: "/project-management/tasks/execution",
+        actions: [
+          { label: "View", path: "/project-management/tasks/execution", type: "outline" },
+          { label: "New", path: "/project-management/tasks/execution/new", type: "primary" }
+        ],
         description: "Work log, progress updates, and task timer",
         icon: "⏱️",
       },
       {
         title: "Timesheets",
         path: "/project-management/timesheets",
+        actions: [
+          { label: "View", path: "/project-management/timesheets", type: "outline" },
+          { label: "New", path: "/project-management/timesheets/new", type: "primary" }
+        ],
         description: "Log labor hours against project tasks",
         icon: "⌛",
       },
       {
         title: "Resource Management",
         path: "/project-management/resources",
+        actions: [
+          { label: "View", path: "/project-management/resources", type: "outline" },
+          { label: "New", path: "/project-management/resources/new", type: "primary" }
+        ],
         description: "Manage project team members and equipment",
         icon: "👥",
       },
@@ -109,24 +140,40 @@ export const projectManagementSections = [
       {
         title: "Purchase Requisitions",
         path: "/project-management/purchase-requisitions",
+        actions: [
+          { label: "View", path: "/project-management/purchase-requisitions", type: "outline" },
+          { label: "New", path: "/project-management/purchase-requisitions/new", type: "primary" }
+        ],
         description: "Request external items for project work",
         icon: "🛒",
       },
       {
         title: "Material Requisitions",
         path: "/project-management/material-requisitions",
+        actions: [
+          { label: "View", path: "/project-management/material-requisitions", type: "outline" },
+          { label: "New", path: "/project-management/material-requisitions/new", type: "primary" }
+        ],
         description: "Request stock from main warehouse",
         icon: "📦",
       },
       {
         title: "Material Receipts",
         path: "/project-management/material-receipts",
+        actions: [
+          { label: "View", path: "/project-management/material-receipts", type: "outline" },
+          { label: "New", path: "/project-management/material-receipts/new", type: "primary" }
+        ],
         description: "Receive requested items on site",
         icon: "📥",
       },
       {
         title: "Material Utilization",
         path: "/project-management/material-utilizations",
+        actions: [
+          { label: "View", path: "/project-management/material-utilizations", type: "outline" },
+          { label: "New", path: "/project-management/material-utilizations/new", type: "primary" }
+        ],
         description: "Track site material consumption against tasks",
         icon: "🔨",
       },
@@ -139,24 +186,40 @@ export const projectManagementSections = [
       {
         title: "Project Quotations",
         path: "/project-management/quotations",
+        actions: [
+          { label: "View", path: "/project-management/quotations", type: "outline" },
+          { label: "New", path: "/project-management/quotations/new", type: "primary" }
+        ],
         description: "Draft quotes for clients based on project estimates",
         icon: "📝",
       },
       {
         title: "Project Invoices",
         path: "/project-management/project-invoices",
+        actions: [
+          { label: "View", path: "/project-management/project-invoices", type: "outline" },
+          { label: "New", path: "/project-management/project-invoices/new", type: "primary" }
+        ],
         description: "Bill clients for completed project work",
         icon: "🧾",
       },
       {
         title: "Project Direct Expenses",
         path: "/project-management/expenses",
+        actions: [
+          { label: "View", path: "/project-management/expenses", type: "outline" },
+          { label: "New", path: "/project-management/expenses/new", type: "primary" }
+        ],
         description: "Record site petty cash and out-of-pocket costs",
         icon: "💸",
       },
       {
         title: "Project Income",
         path: "/project-management/income",
+        actions: [
+          { label: "View", path: "/project-management/income", type: "outline" },
+          { label: "New", path: "/project-management/income/new", type: "primary" }
+        ],
         description: "Project milestone billings and income tracking",
         icon: "💵",
       },
@@ -170,30 +233,45 @@ export const projectManagementSections = [
       {
         title: "Project Status Report",
         path: "/project-management/reports/project-status",
+        actions: [
+          { label: "View", path: "/project-management/reports/project-status", type: "outline" }
+        ],
         description: "Schedule, budget vs actual variance analysis",
         icon: "📈",
       },
       {
         title: "Task Management Report",
         path: "/project-management/reports/task-management",
+        actions: [
+          { label: "View", path: "/project-management/reports/task-management", type: "outline" }
+        ],
         description: "Task completion metrics and assignee workloads",
         icon: "📉",
       },
       {
         title: "Task Execution Log",
         path: "/project-management/reports/task-execution",
+        actions: [
+          { label: "View", path: "/project-management/reports/task-execution", type: "outline" }
+        ],
         description: "Detailed timesheet and daily work log summary",
         icon: "📝",
       },
       {
         title: "Project Income Report",
         path: "/project-management/reports/project-income",
+        actions: [
+          { label: "View", path: "/project-management/reports/project-income", type: "outline" }
+        ],
         description: "Receipt vouchers linked to projects",
         icon: "💰",
       },
       {
         title: "Project Expense Report",
         path: "/project-management/reports/project-expense",
+        actions: [
+          { label: "View", path: "/project-management/reports/project-expense", type: "outline" }
+        ],
         description: "Payment vouchers linked to projects",
         icon: "💳",
       },
@@ -210,6 +288,10 @@ function ProjectManagementLanding() {
       change: "Loading…",
       changeType: "neutral",
       path: "/project-management/projects",
+        actions: [
+          { label: "View", path: "/project-management/projects", type: "outline" },
+          { label: "New", path: "/project-management/projects/new", type: "primary" }
+        ],
     },
     {
       rbac_key: "open-tasks",
@@ -218,6 +300,10 @@ function ProjectManagementLanding() {
       change: "Loading…",
       changeType: "neutral",
       path: "/project-management/tasks",
+        actions: [
+          { label: "View", path: "/project-management/tasks", type: "outline" },
+          { label: "New", path: "/project-management/tasks/new", type: "primary" }
+        ],
     },
     {
       rbac_key: "total-budget",
@@ -226,6 +312,9 @@ function ProjectManagementLanding() {
       change: "Loading…",
       changeType: "neutral",
       path: "/project-management/reports",
+        actions: [
+          { label: "View", path: "/project-management/reports", type: "outline" }
+        ],
     },
     {
       rbac_key: "total-hours",
@@ -234,6 +323,10 @@ function ProjectManagementLanding() {
       change: "Loading…",
       changeType: "neutral",
       path: "/project-management/timesheets",
+        actions: [
+          { label: "View", path: "/project-management/timesheets", type: "outline" },
+          { label: "New", path: "/project-management/timesheets/new", type: "primary" }
+        ],
     },
   ]);
 
@@ -292,6 +385,9 @@ function ProjectManagementLanding() {
         {
           label: "Dashboard",
           path: "/project-management/dashboard",
+        actions: [
+          { label: "View", path: "/project-management/dashboard", type: "outline" }
+        ],
           icon: "📊",
         },
       ]}
@@ -435,96 +531,159 @@ export const projectManagementFeatures = [
     module_key: "project-management",
     label: "Projects",
     path: "/project-management/projects",
+        actions: [
+          { label: "View", path: "/project-management/projects", type: "outline" },
+          { label: "New", path: "/project-management/projects/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "project-management",
     label: "Task Assignment",
     path: "/project-management/tasks",
+        actions: [
+          { label: "View", path: "/project-management/tasks", type: "outline" },
+          { label: "New", path: "/project-management/tasks/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "project-management",
     label: "Task Execution",
     path: "/project-management/tasks/execution",
+        actions: [
+          { label: "View", path: "/project-management/tasks/execution", type: "outline" },
+          { label: "New", path: "/project-management/tasks/execution/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "project-management",
     label: "Expenses",
     path: "/project-management/expenses",
+        actions: [
+          { label: "View", path: "/project-management/expenses", type: "outline" },
+          { label: "New", path: "/project-management/expenses/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "project-management",
     label: "Project Setup",
     path: "/project-management/setup",
+        actions: [
+          { label: "View", path: "/project-management/setup", type: "outline" }
+        ],
     type: "feature",
   },
   {
     module_key: "project-management",
     label: "Material Requisition",
     path: "/project-management/material-requisitions",
+        actions: [
+          { label: "View", path: "/project-management/material-requisitions", type: "outline" },
+          { label: "New", path: "/project-management/material-requisitions/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "project-management",
     label: "Material Utilization",
     path: "/project-management/material-utilizations",
+        actions: [
+          { label: "View", path: "/project-management/material-utilizations", type: "outline" },
+          { label: "New", path: "/project-management/material-utilizations/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "project-management",
     label: "Materials Receipt",
     path: "/project-management/material-receipts",
+        actions: [
+          { label: "View", path: "/project-management/material-receipts", type: "outline" },
+          { label: "New", path: "/project-management/material-receipts/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "project-management",
     label: "Timesheets",
     path: "/project-management/timesheets",
+        actions: [
+          { label: "View", path: "/project-management/timesheets", type: "outline" },
+          { label: "New", path: "/project-management/timesheets/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "project-management",
     label: "Project Income",
     path: "/project-management/income",
+        actions: [
+          { label: "View", path: "/project-management/income", type: "outline" },
+          { label: "New", path: "/project-management/income/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "project-management",
     label: "Milestones",
     path: "/project-management/milestones",
+        actions: [
+          { label: "View", path: "/project-management/milestones", type: "outline" },
+          { label: "New", path: "/project-management/milestones/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "project-management",
     label: "Resource Management",
     path: "/project-management/resources",
+        actions: [
+          { label: "View", path: "/project-management/resources", type: "outline" },
+          { label: "New", path: "/project-management/resources/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "project-management",
     label: "Project Orders",
     path: "/project-management/project-orders",
+        actions: [
+          { label: "View", path: "/project-management/project-orders", type: "outline" },
+          { label: "New", path: "/project-management/project-orders/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "project-management",
     label: "Project Quotations",
     path: "/project-management/quotations",
+        actions: [
+          { label: "View", path: "/project-management/quotations", type: "outline" },
+          { label: "New", path: "/project-management/quotations/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "project-management",
     label: "Project Invoices",
     path: "/project-management/project-invoices",
+        actions: [
+          { label: "View", path: "/project-management/project-invoices", type: "outline" },
+          { label: "New", path: "/project-management/project-invoices/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "project-management",
     label: "Purchase Requisition",
     path: "/project-management/purchase-requisitions",
+        actions: [
+          { label: "View", path: "/project-management/purchase-requisitions", type: "outline" },
+          { label: "New", path: "/project-management/purchase-requisitions/new", type: "primary" }
+        ],
     type: "feature",
   },
 
@@ -532,30 +691,45 @@ export const projectManagementFeatures = [
     module_key: "project-management",
     label: "Project Status Report",
     path: "/project-management/reports/project-status",
+        actions: [
+          { label: "View", path: "/project-management/reports/project-status", type: "outline" }
+        ],
     type: "dashboard",
   },
   {
     module_key: "project-management",
     label: "Project Income Report",
     path: "/project-management/reports/project-income",
+        actions: [
+          { label: "View", path: "/project-management/reports/project-income", type: "outline" }
+        ],
     type: "feature",
   },
   {
     module_key: "project-management",
     label: "Project Expense Report",
     path: "/project-management/reports/project-expense",
+        actions: [
+          { label: "View", path: "/project-management/reports/project-expense", type: "outline" }
+        ],
     type: "feature",
   },
   {
     module_key: "project-management",
     label: "Task Management Report",
     path: "/project-management/reports/task-management",
+        actions: [
+          { label: "View", path: "/project-management/reports/task-management", type: "outline" }
+        ],
     type: "feature",
   },
   {
     module_key: "project-management",
     label: "Task Execution Log",
     path: "/project-management/reports/task-execution",
+        actions: [
+          { label: "View", path: "/project-management/reports/task-execution", type: "outline" }
+        ],
     type: "feature",
   },
 ];

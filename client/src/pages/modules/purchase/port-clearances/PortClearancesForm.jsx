@@ -283,9 +283,9 @@ export default function PortClearancesForm() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Link to="/purchase/port-clearances" className="btn-secondary">
+          <button onClick={() => window.history.back()} className="btn-secondary">
             Cancel
-          </Link>
+          </button>
           <button
             onClick={handleSubmit}
             disabled={saving}

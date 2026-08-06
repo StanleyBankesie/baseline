@@ -84,9 +84,9 @@ export default function ChartOfAccountsReportPage() {
               Visual table of accounts grouped by parent groups. Export to Excel.
             </p>
           </div>
-          <Link to="/finance?section=Reports%20%26%20Analysis" className="font-sans btn-secondary text-sm">
+          <button onClick={() => window.history.back()} className="font-sans btn-secondary text-sm">
             Back to Finance
-          </Link>
+          </button>
         </div>
 
         <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 flex flex-wrap items-end gap-4">

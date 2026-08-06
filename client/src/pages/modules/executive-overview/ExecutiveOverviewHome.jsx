@@ -121,17 +121,52 @@ const buildDeltaBadge = (current, previous, suffix) => {
 };
 
 const MODULE_DEFINITIONS = [
-  { key: "finance", label: "Finance & Accounting", path: "/finance/dashboard", icon: DollarSign, color: "text-blue-500 bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800", desc: "General ledger, vouchers, financial statements & AR/AP" },
-  { key: "sales", label: "Sales & CRM", path: "/sales/dashboard", icon: TrendingUp, color: "text-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800", desc: "Quotations, sales orders, deliveries & customer billing" },
-  { key: "inventory", label: "Inventory Management", path: "/inventory/dashboard", icon: Package, color: "text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800", desc: "Stock balances, warehouse transfers, GRN & valuation" },
-  { key: "purchase", label: "Procurement & Purchase", path: "/purchase/dashboard", icon: ShoppingBag, color: "text-purple-500 bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-800", desc: "Purchase requisitions, RFQs, POs & vendor management" },
-  { key: "human-resources", label: "Human Resources & Payroll", path: "/human-resources/dashboard", icon: Users, color: "text-violet-500 bg-violet-50 dark:bg-violet-950/40 border-violet-200 dark:border-violet-800", desc: "Employee directory, attendance, leaves & monthly payroll" },
-  { key: "maintenance", label: "Asset Maintenance", path: "/maintenance/dashboard", icon: Wrench, color: "text-amber-500 bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800", desc: "Work orders, preventive maintenance & downtime log" },
-  { key: "production", label: "Production & Manufacturing", path: "/production/dashboard", icon: Boxes, color: "text-teal-500 bg-teal-50 dark:bg-teal-950/40 border-teal-200 dark:border-teal-800", desc: "Bill of materials, work centers & production orders" },
-  { key: "project-management", label: "Project Management", path: "/project-management/dashboard", icon: Layers, color: "text-rose-500 bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800", desc: "Projects WBS, task assignments, execution & tracking" },
-  { key: "service-management", label: "Service Management", path: "/service-management/dashboard", icon: ShieldCheck, color: "text-orange-500 bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-orange-800", desc: "Service tickets, SLA tracking, executions & service billing" },
-  { key: "business-intelligence", label: "Business Intelligence", path: "/business-intelligence", icon: Activity, color: "text-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-950/40 border-fuchsia-200 dark:border-fuchsia-800", desc: "Executive analytics, KPI charts & custom dashboards" },
-  { key: "administration", label: "System Administration", path: "/administration", icon: Building2, color: "text-slate-500 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700", desc: "User security roles, system configuration & logs" },
+  { key: "finance", label: "Finance & Accounting", path: "/finance/dashboard",
+        actions: [
+          { label: "View", path: "/finance/dashboard", type: "outline" }
+        ], icon: DollarSign, color: "text-blue-500 bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800", desc: "General ledger, vouchers, financial statements & AR/AP" },
+  { key: "sales", label: "Sales & CRM", path: "/sales/dashboard",
+        actions: [
+          { label: "View", path: "/sales/dashboard", type: "outline" }
+        ], icon: TrendingUp, color: "text-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800", desc: "Quotations, sales orders, deliveries & customer billing" },
+  { key: "inventory", label: "Inventory Management", path: "/inventory/dashboard",
+        actions: [
+          { label: "View", path: "/inventory/dashboard", type: "outline" }
+        ], icon: Package, color: "text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800", desc: "Stock balances, warehouse transfers, GRN & valuation" },
+  { key: "purchase", label: "Procurement & Purchase", path: "/purchase/dashboard",
+        actions: [
+          { label: "View", path: "/purchase/dashboard", type: "outline" }
+        ], icon: ShoppingBag, color: "text-purple-500 bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-800", desc: "Purchase requisitions, RFQs, POs & vendor management" },
+  { key: "human-resources", label: "Human Resources & Payroll", path: "/human-resources/dashboard",
+        actions: [
+          { label: "View", path: "/human-resources/dashboard", type: "outline" }
+        ], icon: Users, color: "text-violet-500 bg-violet-50 dark:bg-violet-950/40 border-violet-200 dark:border-violet-800", desc: "Employee directory, attendance, leaves & monthly payroll" },
+  { key: "maintenance", label: "Asset Maintenance", path: "/maintenance/dashboard",
+        actions: [
+          { label: "View", path: "/maintenance/dashboard", type: "outline" }
+        ], icon: Wrench, color: "text-amber-500 bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800", desc: "Work orders, preventive maintenance & downtime log" },
+  { key: "production", label: "Production & Manufacturing", path: "/production/dashboard",
+        actions: [
+          { label: "View", path: "/production/dashboard", type: "outline" }
+        ], icon: Boxes, color: "text-teal-500 bg-teal-50 dark:bg-teal-950/40 border-teal-200 dark:border-teal-800", desc: "Bill of materials, work centers & production orders" },
+  { key: "project-management", label: "Project Management", path: "/project-management/dashboard",
+        actions: [
+          { label: "View", path: "/project-management/dashboard", type: "outline" }
+        ], icon: Layers, color: "text-rose-500 bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800", desc: "Projects WBS, task assignments, execution & tracking" },
+  { key: "service-management", label: "Service Management", path: "/service-management/dashboard",
+        actions: [
+          { label: "View", path: "/service-management/dashboard", type: "outline" }
+        ], icon: ShieldCheck, color: "text-orange-500 bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-orange-800", desc: "Service tickets, SLA tracking, executions & service billing" },
+  { key: "business-intelligence", label: "Business Intelligence", path: "/business-intelligence",
+        actions: [
+          { label: "View", path: "/business-intelligence", type: "outline" },
+          { label: "New", path: "/business-intelligence/new", type: "primary" }
+        ], icon: Activity, color: "text-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-950/40 border-fuchsia-200 dark:border-fuchsia-800", desc: "Executive analytics, KPI charts & custom dashboards" },
+  { key: "administration", label: "System Administration", path: "/administration",
+        actions: [
+          { label: "View", path: "/administration", type: "outline" },
+          { label: "New", path: "/administration/new", type: "primary" }
+        ], icon: Building2, color: "text-slate-500 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700", desc: "User security roles, system configuration & logs" },
 ];
 
 export default function ExecutiveOverviewHome() {
@@ -261,12 +296,20 @@ export default function ExecutiveOverviewHome() {
       label: "Outstanding Receivables",
       kpiKey: "outstandingReceivables",
       path: "/executive-overview/outstanding-receivables",
+        actions: [
+          { label: "View", path: "/executive-overview/outstanding-receivables", type: "outline" },
+          { label: "New", path: "/executive-overview/outstanding-receivables/new", type: "primary" }
+        ],
       desc: "Customer invoices due",
     },
     {
       label: "Outstanding Payables",
       kpiKey: "outstandingPayables",
       path: "/executive-overview/outstanding-payables",
+        actions: [
+          { label: "View", path: "/executive-overview/outstanding-payables", type: "outline" },
+          { label: "New", path: "/executive-overview/outstanding-payables/new", type: "primary" }
+        ],
       desc: "Supplier payments owed",
     },
     {
@@ -274,6 +317,10 @@ export default function ExecutiveOverviewHome() {
       kpiKey: "todaySales",
       badgeKey: "todaySales",
       path: "/executive-overview/sales-today",
+        actions: [
+          { label: "View", path: "/executive-overview/sales-today", type: "outline" },
+          { label: "New", path: "/executive-overview/sales-today/new", type: "primary" }
+        ],
       desc: "Revenue generated today",
     },
     {
@@ -281,6 +328,10 @@ export default function ExecutiveOverviewHome() {
       kpiKey: "monthSales",
       badgeKey: "monthSales",
       path: "/executive-overview/sales-this-month",
+        actions: [
+          { label: "View", path: "/executive-overview/sales-this-month", type: "outline" },
+          { label: "New", path: "/executive-overview/sales-this-month/new", type: "primary" }
+        ],
       desc: "Month-to-date revenue",
     },
     {
@@ -288,12 +339,20 @@ export default function ExecutiveOverviewHome() {
       kpiKey: "weekSales",
       badgeKey: "weekSales",
       path: "/executive-overview/sales-this-week",
+        actions: [
+          { label: "View", path: "/executive-overview/sales-this-week", type: "outline" },
+          { label: "New", path: "/executive-overview/sales-this-week/new", type: "primary" }
+        ],
       desc: "Week-to-date revenue",
     },
     {
       label: "Supplier Outstanding",
       kpiKey: "supplierOutstanding",
       path: "/executive-overview/supplier-outstanding",
+        actions: [
+          { label: "View", path: "/executive-overview/supplier-outstanding", type: "outline" },
+          { label: "New", path: "/executive-overview/supplier-outstanding/new", type: "primary" }
+        ],
       desc: "Total owed to suppliers",
     },
     {
@@ -302,6 +361,10 @@ export default function ExecutiveOverviewHome() {
       badgeKey: "fastMovingCount",
       format: "count",
       path: "/executive-overview/fast-moving-items",
+        actions: [
+          { label: "View", path: "/executive-overview/fast-moving-items", type: "outline" },
+          { label: "New", path: "/executive-overview/fast-moving-items/new", type: "primary" }
+        ],
       desc: "High turnover stock items",
     },
     {
@@ -310,6 +373,10 @@ export default function ExecutiveOverviewHome() {
       badgeKey: "slowMovingCount",
       format: "count",
       path: "/executive-overview/slow-moving-items",
+        actions: [
+          { label: "View", path: "/executive-overview/slow-moving-items", type: "outline" },
+          { label: "New", path: "/executive-overview/slow-moving-items/new", type: "primary" }
+        ],
       desc: "Low turnover stock items",
     },
   ];

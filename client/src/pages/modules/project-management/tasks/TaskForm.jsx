@@ -294,12 +294,10 @@ export default function TaskForm() {
                   📎 Attachments / Docs
                 </button>
               )}
-              <Link
-                to="/project-management/tasks"
-                className="btn btn-secondary text-xs"
+              <button onClick={() => window.history.back()} className="btn btn-secondary text-xs"
               >
                 Cancel
-              </Link>
+              </button>
               <button
                 type="button"
                 onClick={handleSubmit}

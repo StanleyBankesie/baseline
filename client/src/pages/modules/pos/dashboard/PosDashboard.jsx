@@ -708,12 +708,10 @@ export default function PosDashboard() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <Link
-            to="/pos?section=Reports"
-            className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
+          <button onClick={() => window.history.back()} className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
           >
             ← Back to POS
-          </Link>
+          </button>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-2">
             POS Dashboard
           </h1>

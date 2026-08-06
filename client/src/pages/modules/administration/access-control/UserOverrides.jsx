@@ -210,9 +210,9 @@ export default function UserOverrides() {
             Set exceptional overrides per user
           </p>
         </div>
-        <Link to="/administration?section=Audit%20%26%20Logs" className="btn btn-secondary">
+        <button onClick={() => window.history.back()} className="btn btn-secondary">
           Back to Menu
-        </Link>
+        </button>
       </div>
       {error && <div className="alert alert-error">{error}</div>}
       <div className="card">

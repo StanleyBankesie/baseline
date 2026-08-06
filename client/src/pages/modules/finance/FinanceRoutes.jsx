@@ -238,7 +238,7 @@ export default function FinanceRoutes() {
           element={<GraphicalChartOfAccountsPage />}
         />
 
-        <Route path="*" element={<Navigate to="/finance?section=Banking" replace />} />
+        <Route path="*" element={<Navigate to="/finance?section=Voucher%20Management" replace />} />
       </Routes>
     </ModuleLayout>
   );

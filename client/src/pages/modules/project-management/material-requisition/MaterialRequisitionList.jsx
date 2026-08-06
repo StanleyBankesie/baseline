@@ -74,7 +74,7 @@ export default function MaterialRequisitionList() {
               <p className="text-sm mt-1">Project material requests with approval workflow</p>
             </div>
             <div className="flex gap-2">
-              <Link to="/project-management?section=Reports%20%26%20Analytics" className="btn btn-secondary">Back</Link>
+              <button onClick={() => window.history.back()} className="btn btn-secondary">Back</button>
               <Link to="/project-management/material-requisitions/new" className="btn-success flex items-center gap-2"><Plus size={16} />New Requisition</Link>
             </div>
           </div>

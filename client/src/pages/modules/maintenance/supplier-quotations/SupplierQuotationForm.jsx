@@ -665,9 +665,9 @@ export default function SupplierQuotationForm() {
                 : "Record a new supplier quotation"}
             </p>
           </div>
-          <Link to="/maintenance/supplier-quotations" className="px-3 py-1.5 rounded bg-white text-brand hover:bg-slate-100 text-sm font-semibold">
+          <button onClick={() => window.history.back()} className="px-3 py-1.5 rounded bg-white text-brand hover:bg-slate-100 text-sm font-semibold">
             ← Back to List
-          </Link>
+          </button>
         </div>
 
       <form onSubmit={handleSubmit}>
@@ -1247,9 +1247,9 @@ export default function SupplierQuotationForm() {
         </div>
 
         <div className="flex gap-4 justify-end p-6 border-t mt-4">
-          <Link to="/maintenance/supplier-quotations" className="btn-secondary">
+          <button onClick={() => window.history.back()} className="btn-secondary">
             Cancel
-          </Link>
+          </button>
           <button type="submit" className="btn-primary" disabled={saving}>
             {saving ? "Saving..." : isEdit ? "Update Quotation" : "Create Quotation"}
           </button>

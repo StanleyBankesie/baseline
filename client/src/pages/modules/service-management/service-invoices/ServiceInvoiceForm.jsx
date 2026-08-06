@@ -1498,9 +1498,9 @@ export default function InvoiceForm() {
                 <Download className="w-4 h-4 inline mr-1" />
                 Download PDF
               </button>
-              <Link to="/service-management/service-invoices" className="btn-success">
+              <button onClick={() => window.history.back()} className="btn-success">
                 Back
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -2463,9 +2463,9 @@ export default function InvoiceForm() {
             </div>
 
             <div className="flex justify-end gap-3">
-              <Link to="/service-management/service-invoices" className="btn-success">
+              <button onClick={() => window.history.back()} className="btn-success">
                 Cancel
-              </Link>
+              </button>
               <label className="flex items-center gap-2 mr-4">
                 <input
                   type="checkbox"

@@ -582,12 +582,10 @@ export default function TaxCodesPage() {
         <div className="card-header bg-brand text-white rounded-t-lg p-5">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <Link
-                to="/finance?section=Banking"
-                className="inline-flex items-center gap-1.5 text-xs text-white/80 hover:text-white transition-colors mb-2"
+              <button onClick={() => window.history.back()} className="inline-flex items-center gap-1.5 text-xs text-white/80 hover:text-white transition-colors mb-2"
               >
                 ← Back to Accounting Setup
-              </Link>
+              </button>
               <h1 className="text-2xl font-bold flex items-center gap-2">
                 Tax Codes & Deductions Setup
               </h1>

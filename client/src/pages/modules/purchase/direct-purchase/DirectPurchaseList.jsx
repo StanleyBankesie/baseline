@@ -78,12 +78,10 @@ export default function DirectPurchaseList() {
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <Link
-            to="/purchase?section=Procurement"
-            className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
+          <button onClick={() => window.history.back()} className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
           >
             ← Back to Purchase
-          </Link>
+          </button>
           <h1 className="text-2xl font-bold mt-2">Direct Purchases</h1>
           <p className="text-sm text-slate-600">
             Single-step purchases created from the Direct Purchase form

@@ -40,9 +40,9 @@ export default function ShiftList() {
     <div className="space-y-4 p-4">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
-          <Link to="/human-resources?section=Settings%20%26%20Setup" className="btn-secondary text-sm">
+          <button onClick={() => window.history.back()} className="btn-secondary text-sm">
             Back
-          </Link>
+          </button>
           <h2 className="text-lg font-semibold">Shift Management</h2>
         </div>
         <Link to="/human-resources/shifts/new" className="btn-primary">

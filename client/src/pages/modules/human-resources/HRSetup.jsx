@@ -210,9 +210,9 @@ export default function HRSetup() {
     <Guard moduleKey="human-resources">
       <div className="p-4">
         <div className="flex items-center gap-2 mb-4">
-          <Link to="/human-resources?section=Organization%20%26%20Structures" className="btn-secondary text-sm">
+          <button onClick={() => window.history.back()} className="btn-secondary text-sm">
             Back to Menu
-          </Link>
+          </button>
           <h2 className="text-lg font-semibold">HR Setup & Parameters</h2>
         </div>
 

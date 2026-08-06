@@ -196,12 +196,10 @@ export default function ServiceConfirmationForm() {
                 Confirm service receipts
               </p>
             </div>
-            <Link
-              to="/purchase/service-confirmation"
-              className="btn-success"
+            <button onClick={() => window.history.back()} className="btn-success"
             >
               Back to List
-            </Link>
+            </button>
           </div>
         </div>
 
@@ -405,12 +403,10 @@ export default function ServiceConfirmationForm() {
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-              <Link
-                to="/purchase/service-confirmation"
-                className="btn-success"
+              <button onClick={() => window.history.back()} className="btn-success"
               >
                 Cancel
-              </Link>
+              </button>
               <button type="submit" className="btn-success" disabled={saving}>
                 {saving ? "Saving..." : "Save"}
               </button>

@@ -233,7 +233,7 @@ export default function SettingsPage() {
               <h1 className="text-2xl font-bold dark:text-brand-300">Administration Settings</h1>
               <p className="text-sm mt-1">Notifications, branding, and document setup</p>
             </div>
-            <Link to="/administration?section=Audit%20%26%20Logs" className="btn btn-secondary">Back</Link>
+            <button onClick={() => window.history.back()} className="btn btn-secondary">Back</button>
           </div>
         </div>
       </div>

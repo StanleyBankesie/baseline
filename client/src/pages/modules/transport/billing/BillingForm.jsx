@@ -1478,9 +1478,9 @@ export default function BillingForm() {
                 <Download className="w-4 h-4 inline mr-1" />
                 Download PDF
               </button>
-              <Link to="/transport/billing" className="btn-success">
+              <button onClick={() => window.history.back()} className="btn-success">
                 Back
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -2329,9 +2329,9 @@ export default function BillingForm() {
             </div>
 
             <div className="flex justify-end gap-3">
-              <Link to="/transport/billing" className="btn-success">
+              <button onClick={() => window.history.back()} className="btn-success">
                 Cancel
-              </Link>
+              </button>
               {!readOnly && (
                 <button
                   className="btn-success"

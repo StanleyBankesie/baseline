@@ -156,9 +156,9 @@ export default function MaintenanceJobOrderForm() {
         </div>
         
         <div className="flex items-center gap-3">
-          <Link to="/maintenance/job-orders" className="btn-secondary">
+          <button onClick={() => window.history.back()} className="btn-secondary">
             Cancel
-          </Link>
+          </button>
           <button 
             type="button" 
             onClick={handleSubmit} 

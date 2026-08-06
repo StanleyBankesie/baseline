@@ -226,7 +226,7 @@ export default function TaskList() {
               <p className="text-sm opacity-90">WBS task allocation, scope management & assignment tracking</p>
             </div>
             <div className="flex gap-2">
-              <Link to="/project-management?section=Reports%20%26%20Analytics" className="btn btn-secondary text-xs">Back</Link>
+              <button onClick={() => window.history.back()} className="btn btn-secondary text-xs">Back</button>
               <Link to="/project-management/tasks/new" className="btn-success text-xs">+ Add Task</Link>
             </div>
           </div>

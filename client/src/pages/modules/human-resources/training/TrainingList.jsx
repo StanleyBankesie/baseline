@@ -36,9 +36,9 @@ export default function TrainingList() {
     <div className="p-4">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Link to="/human-resources?section=Training%20%26%20Development" className="btn-secondary text-sm">
+          <button onClick={() => window.history.back()} className="btn-secondary text-sm">
             Back to Menu
-          </Link>
+          </button>
           <h2 className="text-lg font-semibold">Training Programs</h2>
         </div>
         <Link to="/human-resources/training/new" className="btn-primary text-sm">

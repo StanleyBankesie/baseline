@@ -225,9 +225,9 @@ export default function PurchaseRewardCampaignForm() {
             <p>Buy X items, get the same or another item free as a reward</p>
           </div>
           <div className="ds-header-actions">
-            <Link to="/sales/discount-schemes/purchase-reward" className="ds-btn ds-btn-secondary">
+            <button onClick={() => window.history.back()} className="ds-btn ds-btn-secondary">
               Back to Campaigns
-            </Link>
+            </button>
           </div>
         </div>
       </header>
@@ -322,9 +322,9 @@ export default function PurchaseRewardCampaignForm() {
             <button type="submit" className="ds-btn ds-btn-success" disabled={saving}>
               {saving ? "Saving..." : "💾 Save Campaign"}
             </button>
-            <Link to="/sales/discount-schemes/purchase-reward" className="ds-btn ds-btn-secondary">
+            <button onClick={() => window.history.back()} className="ds-btn ds-btn-secondary">
               ✖ Cancel
-            </Link>
+            </button>
           </div>
         </form>
       </div>

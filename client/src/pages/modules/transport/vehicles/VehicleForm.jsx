@@ -50,12 +50,10 @@ export default function VehicleForm() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
-            <Link
-              to="/transport/vehicles"
-              className="btn btn-ghost btn-sm px-2 text-slate-500"
+            <button onClick={() => window.history.back()} className="btn btn-ghost btn-sm px-2 text-slate-500"
             >
               ← Back
-            </Link>
+            </button>
             New Vehicle
           </h1>
         </div>
@@ -179,9 +177,9 @@ export default function VehicleForm() {
           </div>
 
           <div className="mt-8 flex justify-end gap-3 border-t pt-4">
-            <Link to="/transport/vehicles" className="btn btn-ghost">
+            <button onClick={() => window.history.back()} className="btn btn-ghost">
               Cancel
-            </Link>
+            </button>
             <button
               type="submit"
               className="btn btn-primary"

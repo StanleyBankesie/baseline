@@ -277,12 +277,10 @@ export default function GeneralRequisitionForm() {
                 : "Request items or services for purchase"}
             </p>
           </div>
-          <Link
-            to="/purchase/general-requisitions"
-            className="px-3 py-1.5 rounded bg-white text-brand hover:bg-slate-100 text-sm font-semibold"
+          <button onClick={() => window.history.back()} className="px-3 py-1.5 rounded bg-white text-brand hover:bg-slate-100 text-sm font-semibold"
           >
             ← Back to List
-          </Link>
+          </button>
         </div>
 
         <div className="px-6 py-5 space-y-5">

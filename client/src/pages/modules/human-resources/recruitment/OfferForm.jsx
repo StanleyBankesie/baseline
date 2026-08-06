@@ -153,7 +153,7 @@ export default function OfferForm() {
     <div className="p-4 space-y-4">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">{isEdit ? "Edit Offer" : "New Job Offer"}</h1>
-        <Link to="/human-resources/offers" className="btn-secondary">Back</Link>
+        <button onClick={() => window.history.back()} className="btn-secondary">Back</button>
       </div>
 
       <form onSubmit={submit} className="space-y-6">

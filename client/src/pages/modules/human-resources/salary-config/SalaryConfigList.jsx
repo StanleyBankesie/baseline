@@ -50,9 +50,9 @@ export default function SalaryConfigList() {
               Configure base salaries and payroll calculation structures
             </p>
           </div>
-          <Link to="/human-resources?section=Payroll%20%26%20Benefits" className="btn-secondary shrink-0">
+          <button onClick={() => window.history.back()} className="btn-secondary shrink-0">
             ← Back to Menu
-          </Link>
+          </button>
         </div>
 
         {/* Navigation cards */}

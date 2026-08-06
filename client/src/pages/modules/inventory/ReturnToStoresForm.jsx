@@ -394,9 +394,9 @@ export default function ReturnToStoresForm() {
                 Record materials being returned to stores
               </p>
             </div>
-            <Link to="/inventory/return-to-stores" className="btn-success">
+            <button onClick={() => window.history.back()} className="btn-success">
               Back to List
-            </Link>
+            </button>
           </div>
         </div>
 

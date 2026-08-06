@@ -43,9 +43,9 @@ export default function InterviewsList() {
     <div className="p-4">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Link to="/human-resources?section=Recruitment%20%26%20Onboarding" className="btn-secondary text-sm">
+          <button onClick={() => window.history.back()} className="btn-secondary text-sm">
             Back to Menu
-          </Link>
+          </button>
           <h2 className="text-lg font-semibold">Interviews</h2>
         </div>
         <Link to="/human-resources/interviews/new" className="btn-primary text-sm">

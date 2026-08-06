@@ -31419,3 +31419,888 @@ status: 404
 Technical details:
 (no stack)
 --------------------------------------------------------------------------------
+
+[2026-08-06T11:34:30.886Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshfus4e-pj80s494
+durationMs: 7
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:34:30.915Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshfus51-f4jam0w8
+durationMs: 14
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:34:55.000Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshfvaq2-qjyjkxf4
+durationMs: 14
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:34:55.051Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshfvars-rwli25wr
+durationMs: 3
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:35:46.453Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshfwefl-se0hn5p3
+durationMs: 4
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:35:46.477Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshfwega-rr4i0ekv
+durationMs: 3
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:36:45.294Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshfxnu3-3zrpswh8
+durationMs: 3
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:36:45.374Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshfxnwc-3l2vegsq
+durationMs: 2
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:37:29.251Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshfylq4-iqcfvuaf
+durationMs: 39
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:37:29.268Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshfylrl-1bssqfs6
+durationMs: 3
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:38:07.741Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshfzfer-0l40ftkr
+durationMs: 58
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:38:07.756Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshfzfgp-406rokgh
+durationMs: 3
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:45:17.431Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshg8n03-fwaurksf
+durationMs: 4
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:45:17.486Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshg8n1l-m4y4keay
+durationMs: 4
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:46:48.275Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshgal3j-1p802d49
+durationMs: 4
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:46:48.313Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshgal4j-kohatw34
+durationMs: 6
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:53:16.083Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshgiwbx-gxfy5ayq
+durationMs: 6
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:53:16.122Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshgiwcp-fvqkoox4
+durationMs: 17
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:53:22.690Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshgj1fa-ma8cqwv2
+durationMs: 12
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:53:22.730Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshgj1gn-5w8azdsc
+durationMs: 3
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:53:42.658Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshgjgu1-07q6gu8l
+durationMs: 9
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:53:42.704Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshgjgvg-95ccondh
+durationMs: 4
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:54:13.585Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshgk4p9-fkcuov0l
+durationMs: 4
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:54:13.602Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshgk4pr-wmh8vy3z
+durationMs: 3
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:58:23.159Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshgph9r-6w7mymbg
+durationMs: 8
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T11:58:23.181Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshgphah-dkrwfo1q
+durationMs: 4
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T12:07:07.966Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshh0q7l-ype8ksaz
+durationMs: 12
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T12:07:08.017Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshh0q91-e8mllz9s
+durationMs: 12
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T12:10:47.758Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshh5ft7-a39m499e
+durationMs: 3
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T12:10:47.787Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshh5fty-g3z06n80
+durationMs: 5
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T12:11:16.648Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshh623l-dh09y3lw
+durationMs: 6
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T12:11:16.667Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshh6248-lt5sij7e
+durationMs: 3
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T12:14:56.603Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshharth-rkfhwjyk
+durationMs: 6
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T12:14:56.625Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshharu5-egwilbi1
+durationMs: 4
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T12:15:28.628Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshhbgj3-yrn051st
+durationMs: 4
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T12:15:28.651Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshhbgjn-iw23ssvd
+durationMs: 8
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T12:21:44.966Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshhjivv-nfaw6sxd
+durationMs: 43
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T12:21:45.026Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshhjiyo-61vfg5r1
+durationMs: 2
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T12:30:18.995Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/services/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/services/invoices/next-no
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/routes/srv_invoices.route.js:4122:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/baseline/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:241:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-06T12:43:45.183Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/admin/companies/current (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/admin/companies/current
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at getCompanyById (file:///C:/Users/stanl/baseline/server/controllers/companies.controller.js:257:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/baseline/server/middleware/requirePermission.js:69:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (file:///C:/Users/stanl/baseline/server/middleware/auth.js:88:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-06T12:44:12.716Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshiceud-wv0vhcd3
+durationMs: 6
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T12:44:12.777Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshicev1-i2hiyqiv
+durationMs: 44
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T12:52:57.793Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/live (status 404)
+Context:
+requestId: mshinnzv-vmn8s22g
+durationMs: 6
+method: GET
+url: /api/api/tracking/live
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T12:52:57.822Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/api/tracking/dashboard (status 404)
+Context:
+requestId: mshino0p-d4x5bi4d
+durationMs: 5
+method: GET
+url: /api/api/tracking/dashboard
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-06T13:04:49.744Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/services/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/services/invoices/next-no
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/baseline/server/routes/srv_invoices.route.js:4122:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/baseline/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\baseline\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/baseline/server/middleware/auth.js:241:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------

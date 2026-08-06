@@ -1476,12 +1476,10 @@ export default function PurchaseOrdersLocalForm() {
             </button>
           </div>
           <div className="flex gap-3">
-            <Link
-              to="/purchase/purchase-orders-local"
-              className=" font-medium flex items-center gap-2 btn-success"
+            <button onClick={() => window.history.back()} className=" font-medium flex items-center gap-2 btn-success"
             >
               Back
-            </Link>
+            </button>
           </div>
         </div>
 

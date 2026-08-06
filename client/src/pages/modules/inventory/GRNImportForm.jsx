@@ -1020,9 +1020,9 @@ export default function GRNImportForm() {
                 Goods receipt note for import purchases
               </p>
             </div>
-            <Link to="/inventory/grn-import" className="btn-success">
+            <button onClick={() => window.history.back()} className="btn-success">
               Back to List
-            </Link>
+            </button>
           </div>
         </div>
 
@@ -1742,9 +1742,9 @@ export default function GRNImportForm() {
             </fieldset>
 
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-              <Link to="/inventory/grn-import" className="btn-secondary">
+              <button onClick={() => window.history.back()} className="btn-secondary">
                 Cancel
-              </Link>
+              </button>
               {!isView ? (
                 <button type="submit" className="btn-primary" disabled={saving}>
                   {saving ? "Saving..." : "Save GRN"}

@@ -3107,9 +3107,9 @@ export default function ReceiptVoucherForm() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Link to="/finance/receipt-voucher" className="btn-success">
+                <button onClick={() => window.history.back()} className="btn-success">
                   Back
-                </Link>
+                </button>
                 {voucherStatus === "APPROVED" ? (
                   <span className="px-2 py-1 rounded bg-green-500 text-white text-sm font-medium">
                     Approved
@@ -3670,9 +3670,9 @@ export default function ReceiptVoucherForm() {
               </div>
 
               <div className="flex justify-end gap-3">
-                <Link to="/finance/receipt-voucher" className="btn-success">
+                <button onClick={() => window.history.back()} className="btn-success">
                   Cancel
-                </Link>
+                </button>
                 <button
                   type="submit"
                   className="btn-success"
@@ -3704,9 +3704,9 @@ export default function ReceiptVoucherForm() {
                 <p className="text-sm mt-1">Record incoming payments</p>
               </div>
               <div className="flex gap-2">
-                <Link to="/finance/receipt-voucher" className="btn-success">
+                <button onClick={() => window.history.back()} className="btn-success">
                   Back
-                </Link>
+                </button>
                 {voucherStatus === "APPROVED" ? (
                   <span className="px-2 py-1 rounded bg-green-500 text-white text-sm font-medium">
                     Approved
@@ -4705,9 +4705,9 @@ export default function ReceiptVoucherForm() {
               </div>
 
               <div className="flex flex-col md:flex-row justify-end gap-2 mt-4">
-                <Link to="/finance/receipt-voucher" className="btn-success">
+                <button onClick={() => window.history.back()} className="btn-success">
                   Cancel
-                </Link>
+                </button>
                 <button
                   type="submit"
                   className="btn-success"

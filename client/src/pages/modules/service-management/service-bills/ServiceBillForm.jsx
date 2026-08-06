@@ -545,9 +545,9 @@ export default function ServiceBillForm() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link to="/service-management/service-bills" className="btn-secondary">
+          <button onClick={() => window.history.back()} className="btn-secondary">
             ← Back
-          </Link>
+          </button>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               {id && id !== "new" ? "Edit" : "New"} Service Bill

@@ -49,7 +49,7 @@ export default function ExecSalesTodayPage() {
     <div className="space-y-6 p-4">
       <div className="flex justify-between items-center bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
         <div>
-          <Link to="/executive-overview" className="text-xs font-bold text-brand uppercase tracking-wider">← Back to Executive Overview</Link>
+          <button onClick={() => window.history.back()} className="text-xs font-bold text-brand uppercase tracking-wider">← Back to Executive Overview</button>
           <h1 className="text-3xl font-extrabold text-slate-900 dark:text-slate-100 mt-2">📅 Today's Sales</h1>
           <p className="text-slate-500 text-sm mt-1">{new Date().toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
         </div>

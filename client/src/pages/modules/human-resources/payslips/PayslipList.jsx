@@ -267,9 +267,9 @@ export default function PayslipList() {
               </p>
             </div>
             <div className="flex gap-2">
-              <Link to="/human-resources?section=Payroll%20%26%20Benefits" className="btn btn-secondary">
+              <button onClick={() => window.history.back()} className="btn btn-secondary">
                 Back to Menu
-              </Link>
+              </button>
               <button
                 onClick={sendBulkEmails}
                 disabled={sendingBulk || !items.length}

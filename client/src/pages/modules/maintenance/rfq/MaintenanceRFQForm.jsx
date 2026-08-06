@@ -125,9 +125,9 @@ export default function MaintenanceRFQForm() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Link to="/maintenance/rfq" className="btn-secondary">
+        <button onClick={() => window.history.back()} className="btn-secondary">
           ← Back
-        </Link>
+        </button>
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
             {isEdit ? "Edit" : "New"} Request for Quotation
@@ -332,9 +332,9 @@ export default function MaintenanceRFQForm() {
           </div>
         </div>
         <div className="flex justify-end gap-2">
-          <Link to="/maintenance/rfq" className="btn-secondary">
+          <button onClick={() => window.history.back()} className="btn-secondary">
             Cancel
-          </Link>
+          </button>
           <button type="submit" className="btn-primary" disabled={saving}>
             {saving ? "Saving..." : "Save RFQ"}
           </button>

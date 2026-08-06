@@ -103,12 +103,10 @@ export default function TimesheetReport() {
           </button>
         </div>
       </div>
-          <Link
-            to="/human-resources?section=Time%20%26%20Attendance"
-            className="btn-secondary"
+          <button onClick={() => window.history.back()} className="btn-secondary"
           >
             Back
-          </Link>
+          </button>
         </div>
 
         {/* Filter Section */}

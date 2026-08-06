@@ -448,12 +448,10 @@ export default function StockUpdationForm({
             </div>
             <div className="flex gap-2">
               {!isModal && (
-                <Link
-                  to="/inventory/stock-updation"
-                  className="btn-success bg-green-600 text-white hover:bg-green-700 px-6 py-2 rounded shadow-sm font-medium"
+                <button onClick={() => window.history.back()} className="btn-success bg-green-600 text-white hover:bg-green-700 px-6 py-2 rounded shadow-sm font-medium"
                 >
                   ← Back to List
-                </Link>
+                </button>
               )}
               {isModal && (
                 <button

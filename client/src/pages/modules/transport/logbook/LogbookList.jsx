@@ -60,7 +60,6 @@ export default function LogbookList({ isTab = false }) {
       accessor: "created_at",
       render: (l) => l.created_at ? new Date(l.created_at).toLocaleDateString() : "-"
     },
-    { header: "Created By", accessor: (l) => l.created_by_name || "-" },
     { header: "Driver", accessor: "driver_name" },
     { 
       header: "Vehicle", 
@@ -126,6 +125,7 @@ export default function LogbookList({ isTab = false }) {
         );
       }
     },
+    { header: "Created By", accessor: (l) => l.created_by_name || "-" },
     {
       header: "Actions",
       filterable: false,
@@ -167,9 +167,9 @@ export default function LogbookList({ isTab = false }) {
               </p>
             </div>
             <div className="flex gap-2">
-              <Link to="/transport" className="btn btn-secondary">
+              <button onClick={() => window.history.back()} className="btn btn-secondary">
                 ← Back
-              </Link>
+              </button>
               <button className="btn-success" onClick={handleAdd}>
                 <PlusOutlined /> Add Trip Record
               </button>

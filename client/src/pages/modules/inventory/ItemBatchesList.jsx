@@ -69,9 +69,9 @@ export default function ItemBatchesList() {
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <Link to="/inventory?section=Stock%20Operations" className="text-sm text-brand hover:text-brand-600">
+          <button onClick={() => window.history.back()} className="text-sm text-brand hover:text-brand-600">
             ← Back to Inventory
-          </Link>
+          </button>
           <h1 className="text-2xl font-bold mt-2">Item Batches</h1>
           <p className="text-sm text-slate-600">
             Track item batches, costs, quantities and expiry dates. Soon-to-expire: {soonToExpire}

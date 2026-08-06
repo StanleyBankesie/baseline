@@ -70,9 +70,9 @@ export default function LeaveApplicationForm() {
   return (
     <div className="p-4 space-y-6">
       <div className="flex items-center gap-2">
-        <Link to="/human-resources/leave/applications" className="btn-secondary text-sm">
+        <button onClick={() => window.history.back()} className="btn-secondary text-sm">
           ← Back
-        </Link>
+        </button>
         <h1 className="text-xl font-semibold">New Leave Application</h1>
       </div>
 

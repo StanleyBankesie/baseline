@@ -443,7 +443,7 @@ export default function Setup() {
     <div className="p-4 space-y-6">
       {/* Page Header */}
       <div className="flex items-center gap-3">
-        <Link to="/project-management?section=Reports%20%26%20Analytics" className="btn-secondary text-sm">Back</Link>
+        <button onClick={() => window.history.back()} className="btn-secondary text-sm">Back</button>
         <div>
           <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Project Setup</h2>
           <p className="text-xs text-slate-500">Configure managers, departments, and storage</p>

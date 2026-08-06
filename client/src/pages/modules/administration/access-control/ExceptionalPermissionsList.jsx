@@ -70,9 +70,9 @@ export default function ExceptionalPermissionsList() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Link to="/administration" className="btn btn-secondary">
+          <button onClick={() => window.history.back()} className="btn btn-secondary">
             Back to Menu
-          </Link>
+          </button>
           <Link
             to="/administration/access/user-overrides"
             className="btn-success"

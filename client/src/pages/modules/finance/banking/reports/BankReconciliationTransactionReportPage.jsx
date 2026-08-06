@@ -167,12 +167,10 @@ export default function BankReconciliationTransactionReportPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Link
-            to="/finance?section=Banking"
-            className="font-sans btn btn-sm btn-outline text-white border-white hover:bg-white/20"
+          <button onClick={() => window.history.back()} className="font-sans btn btn-sm btn-outline text-white border-white hover:bg-white/20"
           >
             Back to Finance
-          </Link>
+          </button>
           <button
             onClick={handlePrint}
             className="btn btn-sm bg-white/20 hover:bg-white/30 border-none text-white backdrop-blur-sm"

@@ -298,9 +298,9 @@ export default function JobExecutionForm() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Link to="/maintenance/job-executions" className="btn-secondary">
+          <button onClick={() => window.history.back()} className="btn-secondary">
             ← Back
-          </Link>
+          </button>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               {isEdit ? "Edit" : "New"} Job Execution

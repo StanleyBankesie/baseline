@@ -135,9 +135,9 @@ export default function BankReconciliationForm() {
     return (
       <div className="p-4">
         <div className="alert alert-error">Reconciliation not found</div>
-        <Link to="/finance/bank-reconciliation" className="btn mt-4">
+        <button onClick={() => window.history.back()} className="btn mt-4">
           Back to List
-        </Link>
+        </button>
       </div>
     );
   }
@@ -157,12 +157,10 @@ export default function BankReconciliationForm() {
           {isViewMode && (
             <span className="badge badge-warning badge-lg font-semibold">View Only</span>
           )}
-          <Link
-            to="/finance/bank-reconciliation"
-            className="btn btn-sm btn-outline text-white border-white hover:bg-white/20"
+          <button onClick={() => window.history.back()} className="btn btn-sm btn-outline text-white border-white hover:bg-white/20"
           >
             Back to List
-          </Link>
+          </button>
           <button
             onClick={load}
             className="btn btn-sm btn-outline text-white border-white hover:bg-white/20"

@@ -136,9 +136,9 @@ export default function VisitorsLogList() {
               <p className="text-sm mt-1">Track and manage visitor records</p>
             </div>
             <div className="flex gap-2">
-              <Link to="/service-management?section=Reports%20%26%20Parameters" className="btn-success text-sm">
+              <button onClick={() => window.history.back()} className="btn-success text-sm">
                 Back
-              </Link>
+              </button>
               <Link to="new" className="btn-success text-sm">
                 + New Visitor
               </Link>

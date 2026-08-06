@@ -102,7 +102,7 @@ export default function WorkSchedule() {
     <div className="p-4 space-y-4">
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
-        <Link to="/human-resources?section=Time%20%26%20Attendance" className="btn-secondary text-sm">Back</Link>
+        <button onClick={() => window.history.back()} className="btn-secondary text-sm">Back</button>
         <h1 className="text-2xl font-bold">Work Schedule Management</h1>
       </div>
 

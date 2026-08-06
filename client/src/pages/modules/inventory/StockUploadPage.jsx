@@ -182,7 +182,7 @@ export default function StockUploadPage() {
           You do not have permission to access the Stock Upload page.
           Please contact your system administrator.
         </p>
-        <Link to="/inventory?section=Stock%20Operations" className="btn btn-secondary mt-4 inline-block">← Back to Inventory</Link>
+        <button onClick={() => window.history.back()} className="btn btn-secondary mt-4 inline-block">← Back to Inventory</button>
       </div>
     );
   }
@@ -191,12 +191,10 @@ export default function StockUploadPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <Link
-            to="/inventory?section=Stock%20Operations"
-            className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
+          <button onClick={() => window.history.back()} className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
           >
             ← Back to Inventory
-          </Link>
+          </button>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-2">
             Stock Upload
           </h1>

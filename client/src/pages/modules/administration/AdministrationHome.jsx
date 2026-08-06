@@ -39,22 +39,31 @@ export const administrationSections = [
         title: "Settings",
         description: "Push notifications and document templates",
         path: "/administration/settings",
+        actions: [
+          { label: "View", path: "/administration/settings", type: "outline" }
+        ],
         icon: "⚙️",
-        actions: [],
+        actions: [
+          { label: "View", path: "/administration/settings",
+        actions: [
+          { label: "View", path: "/administration/settings", type: "outline" }
+        ], type: "outline" }
+        ],
       },
       {
         title: "Diagnostics",
         description: "Health checks, database, and system diagnostics",
         path: "/administration/diagnostics",
+        actions: [
+          { label: "View", path: "/administration/diagnostics", type: "outline" }
+        ],
         icon: "🩺",
-        actions: [],
-      },
-      {
-        title: "Document Templates",
-        description: "Manage print headers, logos, and layouts",
-        path: "/administration/settings/templates",
-        icon: "📄",
-        actions: [],
+        actions: [
+          { label: "View", path: "/administration/diagnostics",
+        actions: [
+          { label: "View", path: "/administration/diagnostics", type: "outline" }
+        ], type: "outline" }
+        ],
       },
     ],
   },
@@ -67,11 +76,19 @@ export const administrationSections = [
         title: "User Accounts",
         description: "Add, edit, or deactivate system users",
         path: "/administration/users",
+        actions: [
+          { label: "View", path: "/administration/users", type: "outline" },
+          { label: "New", path: "/administration/users/new", type: "primary" }
+        ],
         icon: "👤",
         actions: [
           {
             label: "Add User",
             path: "/administration/users/new",
+        actions: [
+          { label: "View", path: "/administration/users/new", type: "outline" },
+          { label: "New", path: "/administration/users/new/new", type: "primary" }
+        ],
             type: "primary",
           },
         ],
@@ -80,29 +97,75 @@ export const administrationSections = [
         title: "Role Setup",
         description: "Manage system roles and feature permissions",
         path: "/administration/access/roles",
+        actions: [
+          { label: "View", path: "/administration/access/roles", type: "outline" },
+          { label: "New", path: "/administration/access/roles/new", type: "primary" }
+        ],
         icon: "🛡️",
-        actions: [],
+        actions: [
+          { label: "View", path: "/administration/users",
+        actions: [
+          { label: "View", path: "/administration/users", type: "outline" },
+          { label: "New", path: "/administration/users/new", type: "primary" }
+        ], type: "outline" },
+          { label: "New", path: "/administration/users/new",
+        actions: [
+          { label: "View", path: "/administration/users/new", type: "outline" },
+          { label: "New", path: "/administration/users/new/new", type: "primary" }
+        ], type: "primary" }
+        ],
       },
       {
         title: "User Permissions Matrix",
         description: "Configure direct feature permissions per user",
         path: "/administration/access/user-permissions",
+        actions: [
+          { label: "View", path: "/administration/access/user-permissions", type: "outline" }
+        ],
         icon: "🔐",
-        actions: [],
+        actions: [
+          { label: "View", path: "/administration/access/user-permissions",
+        actions: [
+          { label: "View", path: "/administration/access/user-permissions", type: "outline" }
+        ], type: "outline" }
+        ],
       },
       {
         title: "Exceptional Permissions",
         description: "Review special permission overrides",
         path: "/administration/access/user-overrides",
+        actions: [
+          { label: "View", path: "/administration/access/user-overrides", type: "outline" },
+          { label: "New", path: "/administration/access/user-overrides/new", type: "primary" }
+        ],
         icon: "⭐",
-        actions: [],
+        actions: [
+          { label: "View", path: "/administration/access/user-overrides",
+        actions: [
+          { label: "View", path: "/administration/access/user-overrides", type: "outline" },
+          { label: "New", path: "/administration/access/user-overrides/new", type: "primary" }
+        ], type: "outline" },
+          { label: "New", path: "/administration/access/user-overrides/new",
+        actions: [
+          { label: "View", path: "/administration/access/user-overrides/new", type: "outline" },
+          { label: "New", path: "/administration/access/user-overrides/new/new", type: "primary" }
+        ], type: "primary" }
+        ],
       },
       {
         title: "Dashboard Permissions",
         description: "Configure role and user access to dashboard analytics",
         path: "/administration/access/dashboard-permissions",
+        actions: [
+          { label: "View", path: "/administration/access/dashboard-permissions", type: "outline" }
+        ],
         icon: "📊",
-        actions: [],
+        actions: [
+          { label: "View", path: "/administration/access/dashboard-permissions",
+        actions: [
+          { label: "View", path: "/administration/access/dashboard-permissions", type: "outline" }
+        ], type: "outline" }
+        ],
       },
     ],
   },
@@ -115,25 +178,63 @@ export const administrationSections = [
         title: "My Approvals",
         description: "View and process pending approval requests",
         path: "/administration/workflows/approvals",
+        actions: [
+          { label: "View", path: "/administration/workflows/approvals", type: "outline" },
+          { label: "New", path: "/administration/workflows/approvals/new", type: "primary" }
+        ],
         icon: "✅",
-        actions: [],
+        actions: [
+          { label: "View", path: "/administration/workflows/approvals",
+        actions: [
+          { label: "View", path: "/administration/workflows/approvals", type: "outline" },
+          { label: "New", path: "/administration/workflows/approvals/new", type: "primary" }
+        ], type: "outline" },
+          { label: "New", path: "/administration/workflows/approvals/new",
+        actions: [
+          { label: "View", path: "/administration/workflows/approvals/new", type: "outline" },
+          { label: "New", path: "/administration/workflows/approvals/new/new", type: "primary" }
+        ], type: "primary" }
+        ],
       },
       {
         title: "Approved Documents",
         description: "History of fully approved workflows",
         path: "/administration/workflows/approved",
+        actions: [
+          { label: "View", path: "/administration/workflows/approved", type: "outline" },
+          { label: "New", path: "/administration/workflows/approved/new", type: "primary" }
+        ],
         icon: "📁",
-        actions: [],
+        actions: [
+          { label: "View", path: "/administration/workflows/approved",
+        actions: [
+          { label: "View", path: "/administration/workflows/approved", type: "outline" },
+          { label: "New", path: "/administration/workflows/approved/new", type: "primary" }
+        ], type: "outline" },
+          { label: "New", path: "/administration/workflows/approved/new",
+        actions: [
+          { label: "View", path: "/administration/workflows/approved/new", type: "outline" },
+          { label: "New", path: "/administration/workflows/approved/new/new", type: "primary" }
+        ], type: "primary" }
+        ],
       },
       {
         title: "Workflow Configurations",
         description: "Define multi-stage approval rules and triggers",
         path: "/administration/workflows",
+        actions: [
+          { label: "View", path: "/administration/workflows", type: "outline" },
+          { label: "New", path: "/administration/workflows/new", type: "primary" }
+        ],
         icon: "🔀",
         actions: [
           {
             label: "Create Workflow",
             path: "/administration/workflows/new",
+        actions: [
+          { label: "View", path: "/administration/workflows/new", type: "outline" },
+          { label: "New", path: "/administration/workflows/new/new", type: "primary" }
+        ],
             type: "primary",
           },
         ],
@@ -149,15 +250,37 @@ export const administrationSections = [
         title: "System Log Book",
         description: "Complete audit trail of system events",
         path: "/administration/reports/system-log-book",
+        actions: [
+          { label: "View", path: "/administration/reports/system-log-book", type: "outline" }
+        ],
         icon: "📖",
-        actions: [],
+        actions: [
+          { label: "View", path: "/administration/workflows",
+        actions: [
+          { label: "View", path: "/administration/workflows", type: "outline" },
+          { label: "New", path: "/administration/workflows/new", type: "primary" }
+        ], type: "outline" },
+          { label: "New", path: "/administration/workflows/new",
+        actions: [
+          { label: "View", path: "/administration/workflows/new", type: "outline" },
+          { label: "New", path: "/administration/workflows/new/new", type: "primary" }
+        ], type: "primary" }
+        ],
       },
       {
         title: "User Login Activity",
         description: "Track user login sessions and IP addresses",
         path: "/administration/reports/user-login-activity",
+        actions: [
+          { label: "View", path: "/administration/reports/user-login-activity", type: "outline" }
+        ],
         icon: "📊",
-        actions: [],
+        actions: [
+          { label: "View", path: "/administration/reports/user-login-activity",
+        actions: [
+          { label: "View", path: "/administration/reports/user-login-activity", type: "outline" }
+        ], type: "outline" }
+        ],
       },
     ],
   },
@@ -173,6 +296,10 @@ function AdministrationLanding() {
       change: "Loading…",
       changeType: "neutral",
       path: "/administration/users",
+        actions: [
+          { label: "View", path: "/administration/users", type: "outline" },
+          { label: "New", path: "/administration/users/new", type: "primary" }
+        ],
     },
     {
       rbac_key: "active-roles",
@@ -181,6 +308,10 @@ function AdministrationLanding() {
       change: "Loading…",
       changeType: "neutral",
       path: "/administration/access/roles",
+        actions: [
+          { label: "View", path: "/administration/access/roles", type: "outline" },
+          { label: "New", path: "/administration/access/roles/new", type: "primary" }
+        ],
     },
     {
       rbac_key: "pending-approvals",
@@ -189,6 +320,10 @@ function AdministrationLanding() {
       change: "Loading…",
       changeType: "neutral",
       path: "/administration/workflows/approvals",
+        actions: [
+          { label: "View", path: "/administration/workflows/approvals", type: "outline" },
+          { label: "New", path: "/administration/workflows/approvals/new", type: "primary" }
+        ],
     },
   ]);
 
@@ -196,11 +331,17 @@ function AdministrationLanding() {
     {
       label: "Settings",
       path: "/administration/settings",
+        actions: [
+          { label: "View", path: "/administration/settings", type: "outline" }
+        ],
       icon: "⚙️",
     },
     {
       label: "Diagnostics",
       path: "/administration/diagnostics",
+        actions: [
+          { label: "View", path: "/administration/diagnostics", type: "outline" }
+        ],
       icon: "🩺",
     },
   ];
@@ -250,7 +391,10 @@ function AdministrationLanding() {
       title="Administration"
       description="System configuration and user management"
       headerActions={[
-        { label: "Dashboard", path: "/administration/dashboard", icon: "📊" }
+        { label: "Dashboard", path: "/administration/dashboard",
+        actions: [
+          { label: "View", path: "/administration/dashboard", type: "outline" }
+        ], icon: "📊" }
       ]}
       stats={stats}
       quickActions={quickActions}
@@ -315,72 +459,114 @@ export const administrationFeatures = [
     module_key: "administration",
     label: "Role Setup",
     path: "/administration/access/roles",
+        actions: [
+          { label: "View", path: "/administration/access/roles", type: "outline" },
+          { label: "New", path: "/administration/access/roles/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "administration",
     label: "User Permissions",
     path: "/administration/access/user-permissions",
+        actions: [
+          { label: "View", path: "/administration/access/user-permissions", type: "outline" }
+        ],
     type: "feature",
   },
   {
     module_key: "administration",
     label: "Exceptional Permissions",
     path: "/administration/access/user-overrides",
+        actions: [
+          { label: "View", path: "/administration/access/user-overrides", type: "outline" },
+          { label: "New", path: "/administration/access/user-overrides/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "administration",
     label: "Dashboard Permissions",
     path: "/administration/access/dashboard-permissions",
+        actions: [
+          { label: "View", path: "/administration/access/dashboard-permissions", type: "outline" }
+        ],
     type: "feature",
   },
   {
     module_key: "administration",
     label: "User Management",
     path: "/administration/users",
+        actions: [
+          { label: "View", path: "/administration/users", type: "outline" },
+          { label: "New", path: "/administration/users/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "administration",
     label: "Settings",
     path: "/administration/settings",
+        actions: [
+          { label: "View", path: "/administration/settings", type: "outline" }
+        ],
     type: "feature",
   },
   {
     module_key: "administration",
     label: "Diagnostics",
     path: "/administration/diagnostics",
+        actions: [
+          { label: "View", path: "/administration/diagnostics", type: "outline" }
+        ],
     type: "feature",
   },
   {
     module_key: "administration",
     label: "Workflow Configuration",
     path: "/administration/workflows",
+        actions: [
+          { label: "View", path: "/administration/workflows", type: "outline" },
+          { label: "New", path: "/administration/workflows/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "administration",
     label: "Workflow Approvals",
     path: "/administration/workflows/approvals",
+        actions: [
+          { label: "View", path: "/administration/workflows/approvals", type: "outline" },
+          { label: "New", path: "/administration/workflows/approvals/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "administration",
     label: "Document Review",
     path: "/administration/workflows/approvals",
+        actions: [
+          { label: "View", path: "/administration/workflows/approvals", type: "outline" },
+          { label: "New", path: "/administration/workflows/approvals/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "administration",
     label: "System Log Book Report",
     path: "/administration/reports/system-log-book",
+        actions: [
+          { label: "View", path: "/administration/reports/system-log-book", type: "outline" }
+        ],
     type: "dashboard",
   },
   {
     module_key: "administration",
     label: "User Login Activity Report",
     path: "/administration/reports/user-login-activity",
+        actions: [
+          { label: "View", path: "/administration/reports/user-login-activity", type: "outline" }
+        ],
     type: "dashboard",
   },
 ];

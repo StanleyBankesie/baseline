@@ -1218,12 +1218,10 @@ export default function ProjectInvoiceForm() {
                 <Download className="w-4 h-4 inline mr-1" />
                 Download PDF
               </button>
-              <Link
-                to="/project-management?section=Reports%20%26%20Analytics"
-                className="btn-success"
+              <button onClick={() => window.history.back()} className="btn-success"
               >
                 Back
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -2124,12 +2122,10 @@ export default function ProjectInvoiceForm() {
             </div>
 
             <div className="flex justify-end gap-3">
-              <Link
-                to="/project-management?section=Reports%20%26%20Analytics"
-                className="btn-success"
+              <button onClick={() => window.history.back()} className="btn-success"
               >
                 Cancel
-              </Link>
+              </button>
               <label className="flex items-center gap-2 mr-4">
                 <input
                   type="checkbox"

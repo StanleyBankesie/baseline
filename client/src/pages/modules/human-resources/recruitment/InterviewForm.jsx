@@ -84,9 +84,9 @@ export default function InterviewForm() {
   return (
     <div className="p-4">
       <div className="flex items-center gap-2 mb-4">
-        <Link to="/human-resources/interviews" className="btn-secondary text-sm">
+        <button onClick={() => window.history.back()} className="btn-secondary text-sm">
           Back
-        </Link>
+        </button>
         <h2 className="text-lg font-semibold">{isEdit ? "Edit Interview" : "Schedule Interview"}</h2>
       </div>
 

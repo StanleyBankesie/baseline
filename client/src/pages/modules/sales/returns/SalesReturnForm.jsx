@@ -552,9 +552,9 @@ export default function SalesReturnForm() {
                 Record returned goods and auto-create a Credit Note
               </p>
             </div>
-            <Link to="/sales/returns" className="btn-success">
+            <button onClick={() => window.history.back()} className="btn-success">
               Back to List
-            </Link>
+            </button>
           </div>
         </div>
         <div className="card-body p-6">
@@ -1027,9 +1027,9 @@ export default function SalesReturnForm() {
             </div>
 
             <div className="flex justify-end gap-3">
-              <Link to="/sales/returns" className="btn btn-secondary">
+              <button onClick={() => window.history.back()} className="btn btn-secondary">
                 {readOnly ? "Back to List" : "Cancel"}
-              </Link>
+              </button>
               {!readOnly && (
                 <button
                   type="submit"

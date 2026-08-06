@@ -682,12 +682,10 @@ export default function DirectPurchase() {
               Complete a full purchase in one step
             </p>
           </div>
-          <Link
-            to="/purchase/direct-purchase"
-            className="px-3 py-1.5 rounded bg-white text-brand hover:bg-slate-100"
+          <button onClick={() => window.history.back()} className="px-3 py-1.5 rounded bg-white text-brand hover:bg-slate-100"
           >
             ← Back to List
-          </Link>
+          </button>
         </div>
         <div className="px-6 py-5 space-y-4">
           {error ? <div className="alert alert-error">{error}</div> : null}

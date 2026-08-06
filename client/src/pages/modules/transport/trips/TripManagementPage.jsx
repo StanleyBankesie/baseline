@@ -411,16 +411,6 @@ export default function TripManagementPage() {
                         >
                           <EnvironmentOutlined /> Live Map
                         </Link>
-                        {trip.destination_lat && trip.destination_lng && (
-                          <a 
-                            href={`https://www.google.com/maps/dir/?api=1&destination=${trip.destination_lat},${trip.destination_lng}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all flex justify-center items-center gap-2 text-xs shadow-md shadow-blue-900/20 text-center"
-                          >
-                            <CompassOutlined /> Navigate
-                          </a>
-                        )}
                       </>
                     )}
                     {trip.status?.toUpperCase() !== 'SCHEDULED' && (

@@ -119,9 +119,9 @@ export default function AttendanceList() {
 
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
-          <Link to="/human-resources?section=Time%20%26%20Attendance" className="btn-secondary text-sm">
+          <button onClick={() => window.history.back()} className="btn-secondary text-sm">
             Back
-          </Link>
+          </button>
           <h2 className="text-lg font-semibold">Attendance Records</h2>
         </div>
         <div className="flex gap-2">

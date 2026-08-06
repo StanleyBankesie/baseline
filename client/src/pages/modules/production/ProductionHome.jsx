@@ -53,6 +53,10 @@ export const productionSections = [
       {
         name: "Bill of Materials (BOM)",
         path: "/production/boms",
+        actions: [
+          { label: "View", path: "/production/boms", type: "outline" },
+          { label: "New", path: "/production/boms/new", type: "primary" }
+        ],
         description:
           "Define multi-level product recipes, assembly structures, and scrap factors",
         icon: "📜",
@@ -60,6 +64,10 @@ export const productionSections = [
       {
         name: "Routing & Operations",
         path: "/production/routings",
+        actions: [
+          { label: "View", path: "/production/routings", type: "outline" },
+          { label: "New", path: "/production/routings/new", type: "primary" }
+        ],
         description:
           "Operational sequence definitions, standard times, and resource requirements",
         icon: "🗺️",
@@ -67,6 +75,9 @@ export const productionSections = [
       {
         name: "Work Centers & Machines",
         path: "/production/setup/machines",
+        actions: [
+          { label: "View", path: "/production/setup/machines", type: "outline" }
+        ],
         description:
           "Register factory assets, production lines, and monitor equipment status",
         icon: "⚙️",
@@ -74,6 +85,9 @@ export const productionSections = [
       {
         name: "Manufacturing Setup",
         path: "/production/setup",
+        actions: [
+          { label: "View", path: "/production/setup", type: "outline" }
+        ],
         description:
           "Global manufacturing parameters, processes, and shift configurations",
         icon: "🛠️",
@@ -86,6 +100,10 @@ export const productionSections = [
       {
         name: "Master Daily Plan",
         path: "/production/planning/daily-plans",
+        actions: [
+          { label: "View", path: "/production/planning/daily-plans", type: "outline" },
+          { label: "New", path: "/production/planning/daily-plans/new", type: "primary" }
+        ],
         description:
           "Daily factory scheduling, target outputs, and line assignments",
         icon: "📅",
@@ -93,6 +111,10 @@ export const productionSections = [
       {
         name: "Production Orders",
         path: "/production/work-orders",
+        actions: [
+          { label: "View", path: "/production/work-orders", type: "outline" },
+          { label: "New", path: "/production/work-orders/new", type: "primary" }
+        ],
         description:
           "Authorizing manufacturing runs, batch tracking, and status monitoring",
         icon: "🏭",
@@ -105,6 +127,10 @@ export const productionSections = [
       {
         name: "Job Cards & Dispatch",
         path: "/production/execution/job-cards",
+        actions: [
+          { label: "View", path: "/production/execution/job-cards", type: "outline" },
+          { label: "New", path: "/production/execution/job-cards/new", type: "primary" }
+        ],
         description:
           "Operator job cards, real-time activity logging, and step progress",
         icon: "📑",
@@ -112,6 +138,10 @@ export const productionSections = [
       {
         name: "Material Requisitions",
         path: "/production/execution/material-requisition",
+        actions: [
+          { label: "View", path: "/production/execution/material-requisition", type: "outline" },
+          { label: "New", path: "/production/execution/material-requisition/new", type: "primary" }
+        ],
         description:
           "Request raw materials from main warehouse to shop floor",
         icon: "📦",
@@ -119,6 +149,10 @@ export const productionSections = [
       {
         name: "Material Receipts",
         path: "/production/execution/material-receipt",
+        actions: [
+          { label: "View", path: "/production/execution/material-receipt", type: "outline" },
+          { label: "New", path: "/production/execution/material-receipt/new", type: "primary" }
+        ],
         description:
           "Confirm raw material arrival at work center or production line",
         icon: "📥",
@@ -126,6 +160,10 @@ export const productionSections = [
       {
         name: "Goods Receipt (FG Transfer)",
         path: "/production/execution/transfer",
+        actions: [
+          { label: "View", path: "/production/execution/transfer", type: "outline" },
+          { label: "New", path: "/production/execution/transfer/new", type: "primary" }
+        ],
         description:
           "Transfer completed finished goods back to inventory stock",
         icon: "🚚",
@@ -133,6 +171,10 @@ export const productionSections = [
       {
         name: "Quality Inspections",
         path: "/production/execution/quality",
+        actions: [
+          { label: "View", path: "/production/execution/quality", type: "outline" },
+          { label: "New", path: "/production/execution/quality/new", type: "primary" }
+        ],
         description:
           "Perform in-line and final QC checks against tolerance standards",
         icon: "🔬",
@@ -145,6 +187,10 @@ export const productionSections = [
       {
         name: "Stock Journal Entries",
         path: "/production/inventory/stock-journals",
+        actions: [
+          { label: "View", path: "/production/inventory/stock-journals", type: "outline" },
+          { label: "New", path: "/production/inventory/stock-journals/new", type: "primary" }
+        ],
         description:
           "Log raw material consumption and finished goods production movements",
         icon: "📔",
@@ -152,6 +198,10 @@ export const productionSections = [
       {
         name: "Inventory Reconciliation",
         path: "/production/inventory/updation",
+        actions: [
+          { label: "View", path: "/production/inventory/updation", type: "outline" },
+          { label: "New", path: "/production/inventory/updation/new", type: "primary" }
+        ],
         description:
           "Verify and update production floor physical stock levels",
         icon: "🧮",
@@ -165,18 +215,27 @@ export const productionSections = [
       {
         name: "Production Dashboard",
         path: "/production/reports",
+        actions: [
+          { label: "View", path: "/production/reports", type: "outline" }
+        ],
         description: "Comprehensive manufacturing report repository and KPIs",
         icon: "📊",
       },
       {
         name: "Efficiency Analysis",
         path: "/production/reports/efficiency",
+        actions: [
+          { label: "View", path: "/production/reports/efficiency", type: "outline" }
+        ],
         description: "Monitor planned vs actual performance and throughput",
         icon: "📈",
       },
       {
         name: "Variance Reports",
         path: "/production/reports/variance",
+        actions: [
+          { label: "View", path: "/production/reports/variance", type: "outline" }
+        ],
         description:
           "Track differences between estimated and actual material usage",
         icon: "📉",
@@ -193,6 +252,10 @@ function ProductionHomeIndex() {
       change: "Execution",
       icon: "📋",
       path: "/production/work-orders",
+        actions: [
+          { label: "View", path: "/production/work-orders", type: "outline" },
+          { label: "New", path: "/production/work-orders/new", type: "primary" }
+        ],
       color: "from-blue-600 to-blue-700",
     },
     {
@@ -201,6 +264,10 @@ function ProductionHomeIndex() {
       change: "Shop Floor",
       icon: "📑",
       path: "/production/execution/job-cards",
+        actions: [
+          { label: "View", path: "/production/execution/job-cards", type: "outline" },
+          { label: "New", path: "/production/execution/job-cards/new", type: "primary" }
+        ],
       color: "from-amber-600 to-amber-700",
     },
     {
@@ -209,6 +276,10 @@ function ProductionHomeIndex() {
       change: "Warehouse",
       icon: "📦",
       path: "/production/execution/material-requisition",
+        actions: [
+          { label: "View", path: "/production/execution/material-requisition", type: "outline" },
+          { label: "New", path: "/production/execution/material-requisition/new", type: "primary" }
+        ],
       color: "from-purple-600 to-purple-700",
     },
     {
@@ -217,6 +288,10 @@ function ProductionHomeIndex() {
       change: "Engineering",
       icon: "📜",
       path: "/production/boms",
+        actions: [
+          { label: "View", path: "/production/boms", type: "outline" },
+          { label: "New", path: "/production/boms/new", type: "primary" }
+        ],
       color: "from-emerald-600 to-emerald-700",
     },
   ]);
@@ -389,6 +464,10 @@ export const productionFeatures = [
     module_key: "production",
     label: "Work Orders",
     path: "/production/work-orders",
+        actions: [
+          { label: "View", path: "/production/work-orders", type: "outline" },
+          { label: "New", path: "/production/work-orders/new", type: "primary" }
+        ],
     type: "feature",
     icon: "📋",
   },
@@ -396,6 +475,10 @@ export const productionFeatures = [
     module_key: "production",
     label: "Bill of Materials",
     path: "/production/boms",
+        actions: [
+          { label: "View", path: "/production/boms", type: "outline" },
+          { label: "New", path: "/production/boms/new", type: "primary" }
+        ],
     type: "feature",
     icon: "📜",
   },

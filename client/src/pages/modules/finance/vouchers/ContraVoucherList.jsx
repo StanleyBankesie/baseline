@@ -1277,7 +1277,7 @@ export default function ContraVoucherList() {
             <p className="text-sm mt-1">List, review, and manage vouchers</p>
           </div>
           <div className="flex gap-2">
-            <Link to="/finance?section=Banking" className="font-sans btn btn-secondary">
+            <Link to="/finance?section=Voucher%20Management" className="font-sans btn btn-secondary">
               Return to Menu
             </Link>
             <button

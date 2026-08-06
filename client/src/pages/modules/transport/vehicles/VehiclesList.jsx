@@ -48,9 +48,9 @@ export default function VehiclesList({ isTab = false }) {
               </p>
             </div>
             <div className="flex gap-2">
-              <Link to="/transport/settings" className="btn btn-secondary">
+              <button onClick={() => window.history.back()} className="btn btn-secondary">
                 ← Back
-              </Link>
+              </button>
               <button className="btn-success" onClick={handleAdd}>
                 <PlusOutlined /> New Vehicle
               </button>

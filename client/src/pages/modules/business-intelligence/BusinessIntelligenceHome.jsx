@@ -50,35 +50,111 @@ const NAV_GROUPS = [
     label: "Executive Dashboard",
     single: true,
     path: "/business-intelligence/executive-dashboard",
+        actions: [
+          { label: "View", path: "/business-intelligence/executive-dashboard", type: "outline" }
+        ],
     icon: LayoutDashboard,
   },
   {
     label: "Domain Analytics",
     items: [
-      { label: "Financial Analytics",     path: "/business-intelligence/financial",       icon: TrendingUp, moduleKey: "finance" },
-      { label: "Inventory Analytics",     path: "/business-intelligence/inventory",       icon: Package, moduleKey: "inventory" },
-      { label: "Purchase Analytics",      path: "/business-intelligence/purchase",        icon: ShoppingCart, moduleKey: "purchase" },
-      { label: "HR Analytics",            path: "/business-intelligence/hr",              icon: Users, moduleKey: "hr" },
-      { label: "Maintenance Analytics",   path: "/business-intelligence/maintenance",     icon: Wrench, moduleKey: "maintenance" },
-      { label: "Production Analytics",    path: "/business-intelligence/production",      icon: Factory, moduleKey: "production" },
-      { label: "Project Analytics",       path: "/business-intelligence/projects",        icon: FolderKanban, moduleKey: "pm" },
-      { label: "Transport Analytics",     path: "/business-intelligence/transport",       icon: Truck, moduleKey: "transport" },
-      { label: "Service Analytics",       path: "/business-intelligence/service",         icon: HeadphonesIcon, moduleKey: "service" },
-      { label: "POS Analytics",           path: "/business-intelligence/pos",             icon: Zap, moduleKey: "pos" },
-      { label: "Administration Analytics",path: "/business-intelligence/administration",  icon: Shield, moduleKey: "admin" },
-      { label: "Cross Module Analytics",  path: "/business-intelligence/cross-module",    icon: Layers },
+      { label: "Financial Analytics",     path: "/business-intelligence/financial",
+        actions: [
+          { label: "View", path: "/business-intelligence/financial", type: "outline" },
+          { label: "New", path: "/business-intelligence/financial/new", type: "primary" }
+        ],       icon: TrendingUp, moduleKey: "finance" },
+      { label: "Inventory Analytics",     path: "/business-intelligence/inventory",
+        actions: [
+          { label: "View", path: "/business-intelligence/inventory", type: "outline" },
+          { label: "New", path: "/business-intelligence/inventory/new", type: "primary" }
+        ],       icon: Package, moduleKey: "inventory" },
+      { label: "Purchase Analytics",      path: "/business-intelligence/purchase",
+        actions: [
+          { label: "View", path: "/business-intelligence/purchase", type: "outline" },
+          { label: "New", path: "/business-intelligence/purchase/new", type: "primary" }
+        ],        icon: ShoppingCart, moduleKey: "purchase" },
+      { label: "HR Analytics",            path: "/business-intelligence/hr",
+        actions: [
+          { label: "View", path: "/business-intelligence/hr", type: "outline" },
+          { label: "New", path: "/business-intelligence/hr/new", type: "primary" }
+        ],              icon: Users, moduleKey: "hr" },
+      { label: "Maintenance Analytics",   path: "/business-intelligence/maintenance",
+        actions: [
+          { label: "View", path: "/business-intelligence/maintenance", type: "outline" },
+          { label: "New", path: "/business-intelligence/maintenance/new", type: "primary" }
+        ],     icon: Wrench, moduleKey: "maintenance" },
+      { label: "Production Analytics",    path: "/business-intelligence/production",
+        actions: [
+          { label: "View", path: "/business-intelligence/production", type: "outline" },
+          { label: "New", path: "/business-intelligence/production/new", type: "primary" }
+        ],      icon: Factory, moduleKey: "production" },
+      { label: "Project Analytics",       path: "/business-intelligence/projects",
+        actions: [
+          { label: "View", path: "/business-intelligence/projects", type: "outline" },
+          { label: "New", path: "/business-intelligence/projects/new", type: "primary" }
+        ],        icon: FolderKanban, moduleKey: "pm" },
+      { label: "Transport Analytics",     path: "/business-intelligence/transport",
+        actions: [
+          { label: "View", path: "/business-intelligence/transport", type: "outline" },
+          { label: "New", path: "/business-intelligence/transport/new", type: "primary" }
+        ],       icon: Truck, moduleKey: "transport" },
+      { label: "Service Analytics",       path: "/business-intelligence/service",
+        actions: [
+          { label: "View", path: "/business-intelligence/service", type: "outline" },
+          { label: "New", path: "/business-intelligence/service/new", type: "primary" }
+        ],         icon: HeadphonesIcon, moduleKey: "service" },
+      { label: "POS Analytics",           path: "/business-intelligence/pos",
+        actions: [
+          { label: "View", path: "/business-intelligence/pos", type: "outline" },
+          { label: "New", path: "/business-intelligence/pos/new", type: "primary" }
+        ],             icon: Zap, moduleKey: "pos" },
+      { label: "Administration Analytics",path: "/business-intelligence/administration",
+        actions: [
+          { label: "View", path: "/business-intelligence/administration", type: "outline" },
+          { label: "New", path: "/business-intelligence/administration/new", type: "primary" }
+        ],  icon: Shield, moduleKey: "admin" },
+      { label: "Cross Module Analytics",  path: "/business-intelligence/cross-module",
+        actions: [
+          { label: "View", path: "/business-intelligence/cross-module", type: "outline" },
+          { label: "New", path: "/business-intelligence/cross-module/new", type: "primary" }
+        ],    icon: Layers },
     ],
   },
   {
     label: "BI Tools",
     items: [
-      { label: "KPI Center",     path: "/business-intelligence/kpi-center",    icon: Target },
-      { label: "Dashboards",     path: "/business-intelligence/dashboards",    icon: PieChart },
-      { label: "Report Center",  path: "/business-intelligence/report-center", icon: FileText },
-      { label: "Data Explorer",  path: "/business-intelligence/data-explorer", icon: Database },
-      { label: "AI Insights",    path: "/business-intelligence/ai-insights",   icon: Brain },
-      { label: "Alerts Center",  path: "/business-intelligence/alerts",        icon: Bell },
-      { label: "Settings",       path: "/business-intelligence/settings",      icon: Settings },
+      { label: "KPI Center",     path: "/business-intelligence/kpi-center",
+        actions: [
+          { label: "View", path: "/business-intelligence/kpi-center", type: "outline" },
+          { label: "New", path: "/business-intelligence/kpi-center/new", type: "primary" }
+        ],    icon: Target },
+      { label: "Dashboards",     path: "/business-intelligence/dashboards",
+        actions: [
+          { label: "View", path: "/business-intelligence/dashboards", type: "outline" }
+        ],    icon: PieChart },
+      { label: "Report Center",  path: "/business-intelligence/report-center",
+        actions: [
+          { label: "View", path: "/business-intelligence/report-center", type: "outline" }
+        ], icon: FileText },
+      { label: "Data Explorer",  path: "/business-intelligence/data-explorer",
+        actions: [
+          { label: "View", path: "/business-intelligence/data-explorer", type: "outline" },
+          { label: "New", path: "/business-intelligence/data-explorer/new", type: "primary" }
+        ], icon: Database },
+      { label: "AI Insights",    path: "/business-intelligence/ai-insights",
+        actions: [
+          { label: "View", path: "/business-intelligence/ai-insights", type: "outline" },
+          { label: "New", path: "/business-intelligence/ai-insights/new", type: "primary" }
+        ],   icon: Brain },
+      { label: "Alerts Center",  path: "/business-intelligence/alerts",
+        actions: [
+          { label: "View", path: "/business-intelligence/alerts", type: "outline" },
+          { label: "New", path: "/business-intelligence/alerts/new", type: "primary" }
+        ],        icon: Bell },
+      { label: "Settings",       path: "/business-intelligence/settings",
+        actions: [
+          { label: "View", path: "/business-intelligence/settings", type: "outline" }
+        ],      icon: Settings },
     ],
   },
 ];

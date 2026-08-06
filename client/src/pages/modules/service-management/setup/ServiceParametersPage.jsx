@@ -361,9 +361,9 @@ export default function ServiceParametersPage() {
   return (
     <div className="p-4">
       <div className="flex items-center gap-2 mb-4">
-        <Link to="/service-management?section=Reports%20%26%20Parameters" className="btn-secondary text-sm">
+        <button onClick={() => window.history.back()} className="btn-secondary text-sm">
           Back to Menu
-        </Link>
+        </button>
         <h2 className="text-lg font-semibold">Service Setup & Parameters</h2>
       </div>
 

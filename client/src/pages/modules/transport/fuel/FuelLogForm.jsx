@@ -99,12 +99,10 @@ export default function FuelLogForm() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
-            <Link
-              to="/transport/fuel"
-              className="btn btn-ghost btn-sm px-2 text-slate-500"
+            <button onClick={() => window.history.back()} className="btn btn-ghost btn-sm px-2 text-slate-500"
             >
               ← Back
-            </Link>
+            </button>
             Add Fuel Log
           </h1>
         </div>
@@ -240,9 +238,9 @@ export default function FuelLogForm() {
           </div>
 
           <div className="mt-8 flex justify-end gap-3 border-t pt-4">
-            <Link to="/transport/fuel" className="btn btn-secondary">
+            <button onClick={() => window.history.back()} className="btn btn-secondary">
               {isView ? "Back" : "Cancel"}
-            </Link>
+            </button>
             {!isView && (
               <button
                 type="submit"

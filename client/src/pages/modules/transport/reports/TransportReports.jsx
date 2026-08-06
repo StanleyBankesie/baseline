@@ -70,12 +70,10 @@ export default function TransportReports({ isTab = false }) {
         <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
           <div>
             <div className="flex items-center gap-2">
-              <Link
-                to="/transport"
-                className="text-xs font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+              <button onClick={() => window.history.back()} className="text-xs font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
               >
                 ← Return to Transport Hub
-              </Link>
+              </button>
             </div>
             <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
               Transport Analytics & Intelligence Reports

@@ -120,9 +120,9 @@ export default function RequisitionForm() {
     <div className="p-4">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Link to="/human-resources/requisitions" className="btn-secondary text-sm">
+          <button onClick={() => window.history.back()} className="btn-secondary text-sm">
             Back
-          </Link>
+          </button>
           <h2 className="text-lg font-semibold">
             {id ? "Edit Requisition" : "New Requisition"}
           </h2>

@@ -53,9 +53,9 @@ export default function ServiceExecutionsList() {
           <h2 className="text-xl font-semibold">Service Executions</h2>
         </div>
         <div className="flex items-center gap-2">
-          <Link to="/service-management?section=Reports%20%26%20Parameters" className="btn-secondary">
+          <button onClick={() => window.history.back()} className="btn-secondary">
             Back to Menu
-          </Link>
+          </button>
           <Link to="/service-management/service-execution" className="btn-success">
             New Execution
           </Link>

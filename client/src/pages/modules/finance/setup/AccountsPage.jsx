@@ -237,7 +237,7 @@ export default function AccountsPage() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <Link
-                to="/finance?section=Banking"
+                to="/finance?section=Accounting%20Setup"
                 className="inline-flex items-center gap-1.5 text-xs text-white/80 hover:text-white transition-colors mb-2"
               >
                 <ArrowLeft size={14} /> Back to Accounting Setup

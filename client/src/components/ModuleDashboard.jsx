@@ -104,8 +104,8 @@ function ModuleNavDropdown({ section, location, navigate }) {
                 >
                   {typeof itemIcon === "string" ? (
                     <span className="text-base flex-shrink-0 mt-0.5">{itemIcon}</span>
-                  ) : itemIcon && typeof itemIcon === "function" ? (
-                    <itemIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  ) : itemIcon ? (
+                    React.createElement(itemIcon, { className: "w-4 h-4 flex-shrink-0 mt-0.5" })
                   ) : (
                     <span className="text-base flex-shrink-0 mt-0.5">📄</span>
                   )}
@@ -512,7 +512,7 @@ const ModuleDashboard = ({
               className="btn btn-primary"
               title={a.title || a.label}
             >
-              {a.icon ? <span className="mr-2">{a.icon}</span> : null}
+              {a.icon ? <span className="mr-2">{typeof a.icon === "string" ? a.icon : React.createElement(a.icon, { className: "w-4 h-4 inline" })}</span> : null}
               {a.label || "Open"}
             </button>
           ))}
@@ -526,7 +526,7 @@ const ModuleDashboard = ({
           <div className="relative">
             <input
               type="text"
-              placeholder="Search feature name, code, or path..."
+              placeholder="Search entry, transaction, or report page..."
               className="input w-full pl-10"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -893,7 +893,13 @@ const ModuleDashboard = ({
                             className="shrink-0 rounded-full bg-gradient-to-br from-brand-50 to-brand-100/50 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 group-hover:rotate-1 group-hover:from-brand-100 group-hover:to-brand-200/50 dark:group-hover:from-slate-600 dark:group-hover:to-slate-700 transition-all duration-300"
                             style={{ width: '44px', height: '44px', minWidth: '44px', minHeight: '44px', maxWidth: '44px', maxHeight: '44px', borderRadius: '50%' }}
                           >
-                            {item.icon || "📄"}
+                            {typeof item.icon === "string" ? (
+                              item.icon
+                            ) : item.icon ? (
+                              React.createElement(item.icon, { className: "w-5 h-5 text-slate-700 dark:text-slate-300" })
+                            ) : (
+                              "📄"
+                            )}
                           </div>
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-slate-800 dark:text-slate-100 group-hover:text-brand-700 dark:group-hover:text-brand-400 transition-colors mb-1">

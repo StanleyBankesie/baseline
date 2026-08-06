@@ -159,12 +159,10 @@ export default function VisitorLogForm() {
                 : "Record a new visitor entry"}
             </p>
           </div>
-          <Link
-            to="/service-management/visitors-log"
-            className="btn-success text-sm"
+          <button onClick={() => window.history.back()} className="btn-success text-sm"
           >
             Back to List
-          </Link>
+          </button>
         </div>
       </div>
       <div className="card-body">
@@ -312,12 +310,10 @@ export default function VisitorLogForm() {
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t">
-            <Link
-              to="/service-management/visitors-log"
-              className="btn btn-secondary"
+            <button onClick={() => window.history.back()} className="btn btn-secondary"
             >
               Cancel
-            </Link>
+            </button>
             <button
               type="submit"
               className="btn-success"

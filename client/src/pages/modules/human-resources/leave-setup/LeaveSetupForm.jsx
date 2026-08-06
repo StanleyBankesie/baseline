@@ -73,9 +73,9 @@ export default function LeaveSetupForm() {
             </h1>
             <p className="text-sm mt-1">Leave configuration</p>
           </div>
-          <Link to="/human-resources/leave-setup" className="btn-secondary">
+          <button onClick={() => window.history.back()} className="btn-secondary">
             Back
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -127,9 +127,9 @@ export default function LeaveSetupForm() {
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t">
-              <Link to="/human-resources/leave-setup" className="btn-secondary">
+              <button onClick={() => window.history.back()} className="btn-secondary">
                 Cancel
-              </Link>
+              </button>
               <button className="btn-primary" type="submit" disabled={loading}>
                 {loading ? "Saving..." : "Save Leave Type"}
               </button>

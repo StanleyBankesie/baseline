@@ -273,9 +273,9 @@ export default function MaintenanceRosterForm() {
     <div className="space-y-5">
       {/* ── Page header ── */}
       <div className="flex items-center gap-3">
-        <Link to="/maintenance/rosters" className="btn-secondary">
+        <button onClick={() => window.history.back()} className="btn-secondary">
           ← Back
-        </Link>
+        </button>
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
             {isEdit ? (isView ? "View" : "Edit") : "New"} Maintenance Roster
@@ -584,9 +584,9 @@ export default function MaintenanceRosterForm() {
         {/* ── Footer actions ── */}
         {!isView && (
           <div className="flex justify-end gap-2 pt-1">
-            <Link to="/maintenance/rosters" className="btn-secondary">
+            <button onClick={() => window.history.back()} className="btn-secondary">
               Cancel
-            </Link>
+            </button>
             <button type="submit" className="btn-primary" disabled={saving}>
               <Save size={15} className="mr-1.5" />
               {saving ? "Saving…" : isEdit ? "Update Roster" : "Create Roster"}

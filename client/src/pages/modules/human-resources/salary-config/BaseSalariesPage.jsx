@@ -161,12 +161,10 @@ export default function BaseSalariesPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Link
-              to="/human-resources/salary-config"
-              className="btn-secondary"
+            <button onClick={() => window.history.back()} className="btn-secondary"
             >
               ← Back
-            </Link>
+            </button>
             <button
               onClick={handleDownloadTemplate}
               className="btn-secondary"

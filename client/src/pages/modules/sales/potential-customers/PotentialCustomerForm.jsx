@@ -192,13 +192,13 @@ export default function PotentialCustomerForm() {
                 Back to Origin
               </button>
             ) : (
-              <Link to="/sales/quotations/new" className="btn btn-secondary">
+              <button onClick={() => window.history.back()} className="btn btn-secondary">
                 Back to Quotation
-              </Link>
+              </button>
             )}
-            <Link to="/sales/prospect-customers" className="btn-success">
+            <button onClick={() => window.history.back()} className="btn-success">
               Back
-            </Link>
+            </button>
           </div>
         </div>
       </div>
@@ -393,12 +393,10 @@ export default function PotentialCustomerForm() {
                 </fieldset>
                 {!isViewOnly && (
                 <div className="flex justify-end gap-3 pt-4">
-                  <Link
-                    to="/sales/prospect-customers"
-                    className="btn btn-secondary"
+                  <button onClick={() => window.history.back()} className="btn btn-secondary"
                   >
                     Cancel
-                  </Link>
+                  </button>
                   <button className="btn-success" disabled={loading}>
                     {loading ? "Saving..." : "Save Potential Customer"}
                   </button>

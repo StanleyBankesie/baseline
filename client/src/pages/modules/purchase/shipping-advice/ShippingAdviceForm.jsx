@@ -401,9 +401,9 @@ export default function ShippingAdviceForm() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Link to="/purchase/shipping-advice" className="btn btn-outline">
+          <button onClick={() => window.history.back()} className="btn btn-outline">
             Cancel
-          </Link>
+          </button>
           <button
             onClick={handleSubmit}
             className="btn btn-primary"

@@ -244,7 +244,7 @@ export default function ExpenseLogList() {
           <p className="text-gray-500">Log general fleet expenses such as spare parts, fuel, and maintenance.</p>
         </div>
         <div className="flex gap-2">
-          <Link to="/transport" className="btn btn-outline">Back to Transport</Link>
+          <button onClick={() => window.history.back()} className="btn btn-outline">Back to Transport</button>
           <button onClick={openCreate} className="btn btn-primary">
             <Plus className="w-4 h-4 mr-2" />
             Record Expense

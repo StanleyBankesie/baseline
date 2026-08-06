@@ -267,7 +267,7 @@ export default function PMPurchaseRequisitionForm() {
                 <button type="button" onClick={handlePdf}
                   className="btn btn-secondary text-xs px-3 py-1">PDF</button>
               )}
-              <Link to="/project-management/purchase-requisitions" className="btn-success">Back</Link>
+              <button onClick={() => window.history.back()} className="btn-success">Back</button>
             </div>
           </div>
         </div>

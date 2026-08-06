@@ -66,12 +66,10 @@ export default function TransportDashboard() {
               <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
               Refresh
             </button>
-            <Link
-              to="/transport"
-              className="btn-secondary text-xs px-3 py-2 gap-1.5 bg-white/10 border-white/20 text-white hover:bg-white/20"
+            <button onClick={() => window.history.back()} className="btn-secondary text-xs px-3 py-2 gap-1.5 bg-white/10 border-white/20 text-white hover:bg-white/20"
             >
               ← Back to Menu
-            </Link>
+            </button>
           </div>
         </div>
 

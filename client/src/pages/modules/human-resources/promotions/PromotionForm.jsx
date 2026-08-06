@@ -126,9 +126,9 @@ export default function PromotionForm() {
         <h1 className="text-2xl font-bold">
           {isEdit ? "Edit Promotion" : "New Assignment/Promotion"}
         </h1>
-        <Link to="/human-resources/promotions" className="btn-secondary">
+        <button onClick={() => window.history.back()} className="btn-secondary">
           Back
-        </Link>
+        </button>
       </div>
 
       <form onSubmit={submit} className="space-y-6">
@@ -293,9 +293,9 @@ export default function PromotionForm() {
         </div>
 
         <div className="flex justify-end gap-3 pt-4">
-          <Link to="/human-resources/promotions" className="btn-secondary">
+          <button onClick={() => window.history.back()} className="btn-secondary">
             Cancel
-          </Link>
+          </button>
           <button className="btn-primary px-12" disabled={loading}>
             {loading ? "Saving..." : "Process Assignment"}
           </button>

@@ -130,12 +130,10 @@ export default function BulkAttendance() {
         <div className="flex flex-col gap-4 mb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Link
-                to="/human-resources/attendance"
-                className="btn-secondary text-sm whitespace-nowrap"
+              <button onClick={() => window.history.back()} className="btn-secondary text-sm whitespace-nowrap"
               >
                 Back to Dashboard
-              </Link>
+              </button>
               <h2 className="text-lg font-semibold whitespace-nowrap">Mark Bulk Attendance</h2>
             </div>
             <button

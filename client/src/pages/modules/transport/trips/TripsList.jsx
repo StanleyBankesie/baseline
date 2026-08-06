@@ -34,7 +34,7 @@ export default function TripsList() {
     fetchData();
   }, []);
 
-  const handleAdd = () => {
+  const handleNewTrip = () => {
     navigate("/transport/trips/new");
   };
 
@@ -103,7 +103,7 @@ export default function TripsList() {
             <Link to="/transport" className="btn btn-secondary">
               Return to Menu
             </Link>
-            <button className="btn-success" onClick={handleAdd}>
+            <button className="btn-success" onClick={() => navigate("/transport/trips/new")}>
               <PlusOutlined /> Dispatch Trip
             </button>
           </div>

@@ -150,9 +150,9 @@ export default function VisitorsLogReport() {
               </p>
             </div>
             <div className="flex gap-2">
-              <Link to="/service-management?section=Reports%20%26%20Parameters" className="btn-success text-sm">
+              <button onClick={() => window.history.back()} className="btn-success text-sm">
                 Back
-              </Link>
+              </button>
               <button
                 type="button"
                 className="btn-success text-sm"

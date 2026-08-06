@@ -131,6 +131,10 @@ function MaintenanceLanding() {
       change: "Loading…",
       changeType: "neutral",
       path: "/maintenance/maintenance-requests",
+        actions: [
+          { label: "View", path: "/maintenance/maintenance-requests", type: "outline" },
+          { label: "New", path: "/maintenance/maintenance-requests/new", type: "primary" }
+        ],
     },
     {
       rbac_key: "active-orders",
@@ -139,6 +143,10 @@ function MaintenanceLanding() {
       change: "Loading…",
       changeType: "neutral",
       path: "/maintenance/job-orders",
+        actions: [
+          { label: "View", path: "/maintenance/job-orders", type: "outline" },
+          { label: "New", path: "/maintenance/job-orders/new", type: "primary" }
+        ],
     },
     {
       rbac_key: "overdue-pm",
@@ -147,6 +155,10 @@ function MaintenanceLanding() {
       change: "Loading…",
       changeType: "neutral",
       path: "/maintenance/pm-schedules",
+        actions: [
+          { label: "View", path: "/maintenance/pm-schedules", type: "outline" },
+          { label: "New", path: "/maintenance/pm-schedules/new", type: "primary" }
+        ],
     },
     {
       rbac_key: "total-assets",
@@ -155,6 +167,10 @@ function MaintenanceLanding() {
       change: "Loading…",
       changeType: "neutral",
       path: "/maintenance/assets",
+        actions: [
+          { label: "View", path: "/maintenance/assets", type: "outline" },
+          { label: "New", path: "/maintenance/assets/new", type: "primary" }
+        ],
     },
   ]);
 
@@ -214,6 +230,9 @@ function MaintenanceLanding() {
         {
           label: "Dashboard",
           path: "/maintenance/dashboard",
+        actions: [
+          { label: "View", path: "/maintenance/dashboard", type: "outline" }
+        ],
           icon: "📊",
         },
       ]}
@@ -321,6 +340,9 @@ export const maintenanceFeatures = [
     module_key: "maintenance",
     label: "Maintenance Reports",
     path: "/maintenance/reports",
+        actions: [
+          { label: "View", path: "/maintenance/reports", type: "outline" }
+        ],
     type: "dashboard",
     icon: "📊"
   },
@@ -328,6 +350,10 @@ export const maintenanceFeatures = [
     module_key: "maintenance",
     label: "Maintenance Requests",
     path: "/maintenance/maintenance-requests",
+        actions: [
+          { label: "View", path: "/maintenance/maintenance-requests", type: "outline" },
+          { label: "New", path: "/maintenance/maintenance-requests/new", type: "primary" }
+        ],
     type: "feature",
     icon: "📬"
   },
@@ -335,6 +361,10 @@ export const maintenanceFeatures = [
     module_key: "maintenance",
     label: "Job Orders",
     path: "/maintenance/job-orders",
+        actions: [
+          { label: "View", path: "/maintenance/job-orders", type: "outline" },
+          { label: "New", path: "/maintenance/job-orders/new", type: "primary" }
+        ],
     type: "feature",
     icon: "📋"
   },
@@ -342,6 +372,10 @@ export const maintenanceFeatures = [
     module_key: "maintenance",
     label: "Job Executions",
     path: "/maintenance/job-executions",
+        actions: [
+          { label: "View", path: "/maintenance/job-executions", type: "outline" },
+          { label: "New", path: "/maintenance/job-executions/new", type: "primary" }
+        ],
     type: "feature",
     icon: "🔧"
   },
@@ -349,6 +383,10 @@ export const maintenanceFeatures = [
     module_key: "maintenance",
     label: "RFQs",
     path: "/maintenance/rfq",
+        actions: [
+          { label: "View", path: "/maintenance/rfq", type: "outline" },
+          { label: "New", path: "/maintenance/rfq/new", type: "primary" }
+        ],
     type: "feature",
     icon: "✉️"
   },
@@ -356,6 +394,10 @@ export const maintenanceFeatures = [
     module_key: "maintenance",
     label: "Supplier Quotations",
     path: "/maintenance/supplier-quotations",
+        actions: [
+          { label: "View", path: "/maintenance/supplier-quotations", type: "outline" },
+          { label: "New", path: "/maintenance/supplier-quotations/new", type: "primary" }
+        ],
     type: "feature",
     icon: "🏷️"
   },
@@ -363,6 +405,10 @@ export const maintenanceFeatures = [
     module_key: "maintenance",
     label: "Maintenance Bills",
     path: "/maintenance/bills",
+        actions: [
+          { label: "View", path: "/maintenance/bills", type: "outline" },
+          { label: "New", path: "/maintenance/bills/new", type: "primary" }
+        ],
     type: "feature",
     icon: "🧾"
   },
@@ -370,6 +416,10 @@ export const maintenanceFeatures = [
     module_key: "maintenance",
     label: "Maintenance Schedules",
     path: "/maintenance/schedules",
+        actions: [
+          { label: "View", path: "/maintenance/schedules", type: "outline" },
+          { label: "New", path: "/maintenance/schedules/new", type: "primary" }
+        ],
     type: "feature",
     icon: "📆"
   },
@@ -377,6 +427,10 @@ export const maintenanceFeatures = [
     module_key: "maintenance",
     label: "Maintenance Rosters",
     path: "/maintenance/rosters",
+        actions: [
+          { label: "View", path: "/maintenance/rosters", type: "outline" },
+          { label: "New", path: "/maintenance/rosters/new", type: "primary" }
+        ],
     type: "feature",
     icon: "📅"
   },
@@ -384,6 +438,10 @@ export const maintenanceFeatures = [
     module_key: "maintenance",
     label: "Equipment",
     path: "/maintenance/equipment",
+        actions: [
+          { label: "View", path: "/maintenance/equipment", type: "outline" },
+          { label: "New", path: "/maintenance/equipment/new", type: "primary" }
+        ],
     type: "feature",
     icon: "🚜"
   },
@@ -391,6 +449,10 @@ export const maintenanceFeatures = [
     module_key: "maintenance",
     label: "Maintenance Contracts",
     path: "/maintenance/contracts",
+        actions: [
+          { label: "View", path: "/maintenance/contracts", type: "outline" },
+          { label: "New", path: "/maintenance/contracts/new", type: "primary" }
+        ],
     type: "feature",
     icon: "📜"
   },
@@ -398,6 +460,10 @@ export const maintenanceFeatures = [
     module_key: "maintenance",
     label: "Material Requisitions",
     path: "/maintenance/material-requisitions",
+        actions: [
+          { label: "View", path: "/maintenance/material-requisitions", type: "outline" },
+          { label: "New", path: "/maintenance/material-requisitions/new", type: "primary" }
+        ],
     type: "feature",
     icon: "📝"
   },
@@ -405,6 +471,10 @@ export const maintenanceFeatures = [
     module_key: "maintenance",
     label: "Material Receipts",
     path: "/maintenance/material-receipts",
+        actions: [
+          { label: "View", path: "/maintenance/material-receipts", type: "outline" },
+          { label: "New", path: "/maintenance/material-receipts/new", type: "primary" }
+        ],
     type: "feature",
     icon: "📥"
   },
@@ -412,6 +482,9 @@ export const maintenanceFeatures = [
     module_key: "maintenance",
     label: "Setup",
     path: "/maintenance/setup",
+        actions: [
+          { label: "View", path: "/maintenance/setup", type: "outline" }
+        ],
     type: "feature",
     icon: "⚙️"
   },

@@ -51,9 +51,9 @@ export default function LeaveApplicationsList() {
     <div className="p-4 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Link to="/human-resources/leave" className="btn-secondary text-sm">
+          <button onClick={() => window.history.back()} className="btn-secondary text-sm">
             ← Back
-          </Link>
+          </button>
           <h1 className="text-xl font-semibold">My Leave Applications</h1>
         </div>
         <div className="flex items-center gap-2">

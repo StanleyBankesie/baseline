@@ -60,12 +60,10 @@ export default function RatioAnalysisReportPage() {
       {/* Modern Header */}
       <div className="flex justify-between items-center bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
         <div>
-          <Link
-            to="/finance?section=Reports%20%26%20Analysis"
-            className="font-sans text-xs font-bold text-brand uppercase tracking-wider hover:text-brand-600 transition-colors"
+          <button onClick={() => window.history.back()} className="font-sans text-xs font-bold text-brand uppercase tracking-wider hover:text-brand-600 transition-colors"
           >
             ← Back to Finance
-          </Link>
+          </button>
           <h1 className="text-3xl font-extrabold text-slate-900 dark:text-slate-100 mt-2 tracking-tight">
             Ratio Analysis
           </h1>

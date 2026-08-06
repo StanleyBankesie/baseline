@@ -81,96 +81,159 @@ export const inventorySections = [
       {
         name: "Material Requisition",
         path: "/inventory/material-requisitions",
+        actions: [
+          { label: "View", path: "/inventory/material-requisitions", type: "outline" },
+          { label: "New", path: "/inventory/material-requisitions/new", type: "primary" }
+        ],
         description: "Request materials from warehouse",
         icon: "📝",
       },
       {
         name: "Stock Upload",
         path: "/inventory/stock-upload",
+        actions: [
+          { label: "View", path: "/inventory/stock-upload", type: "outline" },
+          { label: "New", path: "/inventory/stock-upload/new", type: "primary" }
+        ],
         description: "Bulk update stock via Excel",
         icon: "⬆️",
       },
       {
         name: "Items / Master Data",
         path: "/inventory/items",
+        actions: [
+          { label: "View", path: "/inventory/items", type: "outline" },
+          { label: "New", path: "/inventory/items/new", type: "primary" }
+        ],
         description: "Manage items catalog and SKUs",
         icon: "📦",
       },
       {
         name: "Stock Transfers",
         path: "/inventory/stock-transfers",
+        actions: [
+          { label: "View", path: "/inventory/stock-transfers", type: "outline" },
+          { label: "New", path: "/inventory/stock-transfers/new", type: "primary" }
+        ],
         description: "Transfer stock between warehouses/branches",
         icon: "🔄",
       },
       {
         name: "Stock Adjustments",
         path: "/inventory/stock-adjustments",
+        actions: [
+          { label: "View", path: "/inventory/stock-adjustments", type: "outline" },
+          { label: "New", path: "/inventory/stock-adjustments/new", type: "primary" }
+        ],
         description: "Adjust stock levels manually",
         icon: "⚖️",
       },
       {
         name: "Opening Balances",
         path: "/inventory/dashboard",
+        actions: [
+          { label: "View", path: "/inventory/dashboard", type: "outline" }
+        ],
         description: "Set initial stock balances",
         icon: "🏁",
       },
       {
         name: "Warehouses / Locations",
         path: "/inventory/warehouses",
+        actions: [
+          { label: "View", path: "/inventory/warehouses", type: "outline" },
+          { label: "New", path: "/inventory/warehouses/new", type: "primary" }
+        ],
         description: "Manage warehouses, bins, and storage locations",
         icon: "🏬",
       },
       {
         name: "Physical Inventory (Stock Take)",
         path: "/inventory/stock-take",
+        actions: [
+          { label: "View", path: "/inventory/stock-take", type: "outline" },
+          { label: "New", path: "/inventory/stock-take/new", type: "primary" }
+        ],
         description: "Generate and manage physical stock counts",
         icon: "📋",
       },
       {
         name: "Daily Stock Take",
         path: "/inventory/stock-take",
+        actions: [
+          { label: "View", path: "/inventory/stock-take", type: "outline" },
+          { label: "New", path: "/inventory/stock-take/new", type: "primary" }
+        ],
         description: "Perform physical stock counts",
         icon: "📋",
       },
       {
         name: "Stock Updation",
         path: "/inventory/stock-updation",
+        actions: [
+          { label: "View", path: "/inventory/stock-updation", type: "outline" },
+          { label: "New", path: "/inventory/stock-updation/new", type: "primary" }
+        ],
         description: "Fast-track stock increases",
         icon: "📈",
       },
       {
         name: "Stock Verification",
         path: "/inventory/stock-verification",
+        actions: [
+          { label: "View", path: "/inventory/stock-verification", type: "outline" },
+          { label: "New", path: "/inventory/stock-verification/new", type: "primary" }
+        ],
         description: "Verify physical stock levels",
         icon: "✅",
       },
       {
         name: "Stock Updation & Verification",
         path: "/inventory/stock-ops",
+        actions: [
+          { label: "View", path: "/inventory/stock-ops", type: "outline" },
+          { label: "New", path: "/inventory/stock-ops/new", type: "primary" }
+        ],
         description: "Manage stock adjustments and verifications",
         icon: "⚖️",
       },
       {
         name: "Return to Stores Advice",
         path: "/inventory/return-to-stores",
+        actions: [
+          { label: "View", path: "/inventory/return-to-stores", type: "outline" },
+          { label: "New", path: "/inventory/return-to-stores/new", type: "primary" }
+        ],
         description: "Process returned materials",
         icon: "🔙",
       },
       {
         name: "Issue to Requirement Area",
         path: "/inventory/issue-to-requirement",
+        actions: [
+          { label: "View", path: "/inventory/issue-to-requirement", type: "outline" },
+          { label: "New", path: "/inventory/issue-to-requirement/new", type: "primary" }
+        ],
         description: "Issue materials to specific areas",
         icon: "📤",
       },
       {
         name: "Transfer Acceptance",
         path: "/inventory/transfer-acceptance",
+        actions: [
+          { label: "View", path: "/inventory/transfer-acceptance", type: "outline" },
+          { label: "New", path: "/inventory/transfer-acceptance/new", type: "primary" }
+        ],
         description: "Accept incoming stock transfers",
         icon: "📥",
       },
       {
         name: "Stock Reorder",
         path: "/inventory/stock-reorder",
+        actions: [
+          { label: "View", path: "/inventory/stock-reorder", type: "outline" },
+          { label: "New", path: "/inventory/stock-reorder/new", type: "primary" }
+        ],
         description: "Generate stock reorder requests",
         icon: "🛒",
       },
@@ -182,18 +245,30 @@ export const inventorySections = [
       {
         name: "Material Receipt (GRN) - Local",
         path: "/inventory/grn-local",
+        actions: [
+          { label: "View", path: "/inventory/grn-local", type: "outline" },
+          { label: "New", path: "/inventory/grn-local/new", type: "primary" }
+        ],
         description: "Receive local purchases",
         icon: "📦",
       },
       {
         name: "Material Receipt (GRN) - Import",
         path: "/inventory/grn-import",
+        actions: [
+          { label: "View", path: "/inventory/grn-import", type: "outline" },
+          { label: "New", path: "/inventory/grn-import/new", type: "primary" }
+        ],
         description: "Receive import purchases",
         icon: "🚢",
       },
       {
         name: "Goods Issue",
         path: "/inventory/issue-to-requirement",
+        actions: [
+          { label: "View", path: "/inventory/issue-to-requirement", type: "outline" },
+          { label: "New", path: "/inventory/issue-to-requirement/new", type: "primary" }
+        ],
         description: "Issue goods for production or consumption",
         icon: "📤",
       },
@@ -205,6 +280,9 @@ export const inventorySections = [
       {
         name: "Inventory Setup",
         path: "/inventory/setup",
+        actions: [
+          { label: "View", path: "/inventory/setup", type: "outline" }
+        ],
         description: "Configure valuation methods and defaults",
         icon: "⚙️",
       },
@@ -212,30 +290,50 @@ export const inventorySections = [
       {
         name: "Item Attributes",
         path: "/inventory/item-attributes",
+        actions: [
+          { label: "View", path: "/inventory/item-attributes", type: "outline" },
+          { label: "New", path: "/inventory/item-attributes/new", type: "primary" }
+        ],
         description: "Custom item parameters and specs",
         icon: "🎨",
       },
       {
         name: "Item Groups & Sub Groups",
         path: "/inventory/item-groups",
+        actions: [
+          { label: "View", path: "/inventory/item-groups", type: "outline" },
+          { label: "New", path: "/inventory/item-groups/new", type: "primary" }
+        ],
         description: "Categorize items into groups",
         icon: "🗂️",
       },
       {
         name: "Unit Conversion",
         path: "/inventory/unit-conversions",
+        actions: [
+          { label: "View", path: "/inventory/unit-conversions", type: "outline" },
+          { label: "New", path: "/inventory/unit-conversions/new", type: "primary" }
+        ],
         description: "Define unit conversion rates",
         icon: "🔄",
       },
       {
         name: "Warehouse Setup",
         path: "/inventory/warehouses",
+        actions: [
+          { label: "View", path: "/inventory/warehouses", type: "outline" },
+          { label: "New", path: "/inventory/warehouses/new", type: "primary" }
+        ],
         description: "Configure warehouse locations",
         icon: "🏬",
       },
       {
         name: "Item Batches",
         path: "/inventory/batches",
+        actions: [
+          { label: "View", path: "/inventory/batches", type: "outline" },
+          { label: "New", path: "/inventory/batches/new", type: "primary" }
+        ],
         description: "Manage inventory item batches",
         icon: "📦",
       },
@@ -247,90 +345,135 @@ export const inventorySections = [
       {
         name: "Inventory Dashboard",
         path: "/inventory/dashboard",
+        actions: [
+          { label: "View", path: "/inventory/dashboard", type: "outline" }
+        ],
         description: "Key inventory metrics and visual charts",
         icon: "📈",
       },
       {
         name: "Health Monitor",
         path: "/inventory/reports/health-monitor",
+        actions: [
+          { label: "View", path: "/inventory/reports/health-monitor", type: "outline" }
+        ],
         description: "Overall stock health and KPIs",
         icon: "🏥",
       },
       {
         name: "Stock Balances",
         path: "/inventory/reports/stock-balances",
+        actions: [
+          { label: "View", path: "/inventory/reports/stock-balances", type: "outline" }
+        ],
         description: "Current stock quantity in all locations",
         icon: "⚖️",
       },
       {
         name: "Stock Value",
         path: "/inventory/reports/stock-value",
+        actions: [
+          { label: "View", path: "/inventory/reports/stock-value", type: "outline" }
+        ],
         description: "Valuation of current inventory",
         icon: "💰",
       },
       {
         name: "Stock Aging Analysis",
         path: "/inventory/reports/stock-aging-analysis",
+        actions: [
+          { label: "View", path: "/inventory/reports/stock-aging-analysis", type: "outline" }
+        ],
         description: "Age of current stock holdings",
         icon: "⏳",
       },
       {
         name: "Fast Moving Items",
         path: "/inventory/reports/fast-moving",
+        actions: [
+          { label: "View", path: "/inventory/reports/fast-moving", type: "outline" }
+        ],
         description: "High velocity inventory items",
         icon: "🚀",
       },
       {
         name: "Slow Moving Items",
         path: "/inventory/reports/slow-moving",
+        actions: [
+          { label: "View", path: "/inventory/reports/slow-moving", type: "outline" }
+        ],
         description: "Low velocity inventory items",
         icon: "🐢",
       },
       {
         name: "Non Moving Items",
         path: "/inventory/reports/non-moving",
+        actions: [
+          { label: "View", path: "/inventory/reports/non-moving", type: "outline" }
+        ],
         description: "Stagnant inventory items",
         icon: "🛑",
       },
       {
         name: "Periodical Stock Summary",
         path: "/inventory/reports/periodical-stock-summary",
+        actions: [
+          { label: "View", path: "/inventory/reports/periodical-stock-summary", type: "outline" }
+        ],
         description: "Summary of stock movements over a period",
         icon: "📅",
       },
       {
         name: "Periodical Stock Statement",
         path: "/inventory/reports/periodical-stock-statement",
+        actions: [
+          { label: "View", path: "/inventory/reports/periodical-stock-statement", type: "outline" }
+        ],
         description: "Detailed stock statement over a period",
         icon: "📃",
       },
       {
         name: "Issue Register",
         path: "/inventory/reports/issue-register",
+        actions: [
+          { label: "View", path: "/inventory/reports/issue-register", type: "outline" }
+        ],
         description: "Log of all issued materials",
         icon: "📤",
       },
       {
         name: "Stock Transfer Register",
         path: "/inventory/reports/stock-transfer-register",
+        actions: [
+          { label: "View", path: "/inventory/reports/stock-transfer-register", type: "outline" }
+        ],
         description: "Log of stock transfers between locations",
         icon: "🔄",
       },
       {
         name: "Stock Verification Report",
         path: "/inventory/reports/stock-verification",
+        actions: [
+          { label: "View", path: "/inventory/reports/stock-verification", type: "outline" }
+        ],
         description: "Results of physical stock verifications",
         icon: "📋",
       },
       {
         name: "Stock Adjustment Report",
         path: "/inventory/reports/stock-adjustments",
+        actions: [
+          { label: "View", path: "/inventory/reports/stock-adjustments", type: "outline" }
+        ],
         description: "Log of manual stock adjustments",
         icon: "⚖️",
       },
       {
         name: "Material Return Report",
         path: "/inventory/reports/material-returns",
+        actions: [
+          { label: "View", path: "/inventory/reports/material-returns", type: "outline" }
+        ],
         description: "Log of returned materials",
         icon: "🔙",
       },
@@ -347,6 +490,10 @@ function InventoryHomeIndex() {
       change: "Loading…",
       changeType: "neutral",
       path: "/inventory/items",
+        actions: [
+          { label: "View", path: "/inventory/items", type: "outline" },
+          { label: "New", path: "/inventory/items/new", type: "primary" }
+        ],
     },
     {
       rbac_key: "stock-quantity",
@@ -355,6 +502,9 @@ function InventoryHomeIndex() {
       change: "Loading…",
       changeType: "neutral",
       path: "/inventory/reports/stock-balances",
+        actions: [
+          { label: "View", path: "/inventory/reports/stock-balances", type: "outline" }
+        ],
     },
     {
       rbac_key: "pending-requisitions",
@@ -363,6 +513,10 @@ function InventoryHomeIndex() {
       change: "Loading…",
       changeType: "neutral",
       path: "/inventory/material-requisitions",
+        actions: [
+          { label: "View", path: "/inventory/material-requisitions", type: "outline" },
+          { label: "New", path: "/inventory/material-requisitions/new", type: "primary" }
+        ],
     },
     {
       rbac_key: "low-stock-items",
@@ -371,6 +525,10 @@ function InventoryHomeIndex() {
       change: "Loading…",
       changeType: "neutral",
       path: "/inventory/alerts/low-stock",
+        actions: [
+          { label: "View", path: "/inventory/alerts/low-stock", type: "outline" },
+          { label: "New", path: "/inventory/alerts/low-stock/new", type: "primary" }
+        ],
     },
   ]);
 
@@ -427,7 +585,10 @@ function InventoryHomeIndex() {
       description="Stock management, warehouse operations, and inventory control"
       stats={stats}
       headerActions={[
-        { label: "Dashboard", path: "/inventory/dashboard", icon: "📊" },
+        { label: "Dashboard", path: "/inventory/dashboard",
+        actions: [
+          { label: "View", path: "/inventory/dashboard", type: "outline" }
+        ], icon: "📊" },
       ]}
       sections={inventorySections}
       features={inventoryFeatures}
@@ -753,90 +914,150 @@ export const inventoryFeatures = [
     module_key: "inventory",
     label: "Material Requisition",
     path: "/inventory/material-requisitions",
+        actions: [
+          { label: "View", path: "/inventory/material-requisitions", type: "outline" },
+          { label: "New", path: "/inventory/material-requisitions/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "inventory",
     label: "Stock Upload",
     path: "/inventory/stock-upload",
+        actions: [
+          { label: "View", path: "/inventory/stock-upload", type: "outline" },
+          { label: "New", path: "/inventory/stock-upload/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "inventory",
     label: "Stock Updation",
     path: "/inventory/stock-updation",
+        actions: [
+          { label: "View", path: "/inventory/stock-updation", type: "outline" },
+          { label: "New", path: "/inventory/stock-updation/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "inventory",
     label: "Stock Verification",
     path: "/inventory/stock-verification",
+        actions: [
+          { label: "View", path: "/inventory/stock-verification", type: "outline" },
+          { label: "New", path: "/inventory/stock-verification/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "inventory",
     label: "Stock Updation & Verification",
     path: "/inventory/stock-ops",
+        actions: [
+          { label: "View", path: "/inventory/stock-ops", type: "outline" },
+          { label: "New", path: "/inventory/stock-ops/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "inventory",
     label: "Return to Stores Advice",
     path: "/inventory/return-to-stores",
+        actions: [
+          { label: "View", path: "/inventory/return-to-stores", type: "outline" },
+          { label: "New", path: "/inventory/return-to-stores/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "inventory",
     label: "Stock Adjustment",
     path: "/inventory/stock-adjustments",
+        actions: [
+          { label: "View", path: "/inventory/stock-adjustments", type: "outline" },
+          { label: "New", path: "/inventory/stock-adjustments/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "inventory",
     label: "Issue to Requirement Area",
     path: "/inventory/issue-to-requirement",
+        actions: [
+          { label: "View", path: "/inventory/issue-to-requirement", type: "outline" },
+          { label: "New", path: "/inventory/issue-to-requirement/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "inventory",
     label: "Warehouse Stock Transfer",
     path: "/inventory/stock-transfers",
+        actions: [
+          { label: "View", path: "/inventory/stock-transfers", type: "outline" },
+          { label: "New", path: "/inventory/stock-transfers/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "inventory",
     label: "Transfer Acceptance",
     path: "/inventory/transfer-acceptance",
+        actions: [
+          { label: "View", path: "/inventory/transfer-acceptance", type: "outline" },
+          { label: "New", path: "/inventory/transfer-acceptance/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "inventory",
     label: "Stock Reorder",
     path: "/inventory/stock-reorder",
+        actions: [
+          { label: "View", path: "/inventory/stock-reorder", type: "outline" },
+          { label: "New", path: "/inventory/stock-reorder/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "inventory",
     label: "Daily Stock Take",
     path: "/inventory/stock-take",
+        actions: [
+          { label: "View", path: "/inventory/stock-take", type: "outline" },
+          { label: "New", path: "/inventory/stock-take/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "inventory",
     label: "Material Receipt (GRN) - Local",
     path: "/inventory/grn-local",
+        actions: [
+          { label: "View", path: "/inventory/grn-local", type: "outline" },
+          { label: "New", path: "/inventory/grn-local/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "inventory",
     label: "Material Receipt (GRN) - Import",
     path: "/inventory/grn-import",
+        actions: [
+          { label: "View", path: "/inventory/grn-import", type: "outline" },
+          { label: "New", path: "/inventory/grn-import/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "inventory",
     label: "Items Setup",
     path: "/inventory/items",
+        actions: [
+          { label: "View", path: "/inventory/items", type: "outline" },
+          { label: "New", path: "/inventory/items/new", type: "primary" }
+        ],
     type: "feature",
   },
 
@@ -844,78 +1065,120 @@ export const inventoryFeatures = [
     module_key: "inventory",
     label: "Unit Conversion",
     path: "/inventory/unit-conversions",
+        actions: [
+          { label: "View", path: "/inventory/unit-conversions", type: "outline" },
+          { label: "New", path: "/inventory/unit-conversions/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "inventory",
     label: "Warehouse Setup",
     path: "/inventory/warehouses",
+        actions: [
+          { label: "View", path: "/inventory/warehouses", type: "outline" },
+          { label: "New", path: "/inventory/warehouses/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "inventory",
     label: "Item Batches",
     path: "/inventory/batches",
+        actions: [
+          { label: "View", path: "/inventory/batches", type: "outline" },
+          { label: "New", path: "/inventory/batches/new", type: "primary" }
+        ],
     type: "feature",
   },
   {
     module_key: "inventory",
     label: "Health Monitor",
     path: "/inventory/reports/health-monitor",
+        actions: [
+          { label: "View", path: "/inventory/reports/health-monitor", type: "outline" }
+        ],
     type: "dashboard",
   },
   {
     module_key: "inventory",
     label: "Stock Summary",
     path: "/inventory/reports/periodical-stock-summary",
+        actions: [
+          { label: "View", path: "/inventory/reports/periodical-stock-summary", type: "outline" }
+        ],
     type: "dashboard",
   },
   {
     module_key: "inventory",
     label: "Stock Statement",
     path: "/inventory/reports/periodical-stock-statement",
+        actions: [
+          { label: "View", path: "/inventory/reports/periodical-stock-statement", type: "outline" }
+        ],
     type: "dashboard",
   },
   {
     module_key: "inventory",
     label: "Issue Register",
     path: "/inventory/reports/issue-register",
+        actions: [
+          { label: "View", path: "/inventory/reports/issue-register", type: "outline" }
+        ],
     type: "dashboard",
   },
   {
     module_key: "inventory",
     label: "Stock Transfer Register",
     path: "/inventory/reports/stock-transfer-register",
+        actions: [
+          { label: "View", path: "/inventory/reports/stock-transfer-register", type: "outline" }
+        ],
     type: "dashboard",
   },
   {
     module_key: "inventory",
     label: "Stock Verification",
     path: "/inventory/reports/stock-verification",
+        actions: [
+          { label: "View", path: "/inventory/reports/stock-verification", type: "outline" }
+        ],
     type: "dashboard",
   },
   {
     module_key: "inventory",
     label: "Stock Aging Analysis",
     path: "/inventory/reports/stock-aging-analysis",
+        actions: [
+          { label: "View", path: "/inventory/reports/stock-aging-analysis", type: "outline" }
+        ],
     type: "dashboard",
   },
   {
     module_key: "inventory",
     label: "Slow Moving Items",
     path: "/inventory/reports/slow-moving",
+        actions: [
+          { label: "View", path: "/inventory/reports/slow-moving", type: "outline" }
+        ],
     type: "dashboard",
   },
   {
     module_key: "inventory",
     label: "Fast Moving Items",
     path: "/inventory/reports/fast-moving",
+        actions: [
+          { label: "View", path: "/inventory/reports/fast-moving", type: "outline" }
+        ],
     type: "dashboard",
   },
   {
     module_key: "inventory",
     label: "Non Moving Items",
     path: "/inventory/reports/non-moving",
+        actions: [
+          { label: "View", path: "/inventory/reports/non-moving", type: "outline" }
+        ],
     type: "dashboard",
   },
 ];

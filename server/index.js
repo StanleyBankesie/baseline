@@ -30,6 +30,7 @@ import biRoutes from "./routes/bi.routes.js";
 import serviceMgmtRoutes from "./routes/service-management.routes.js";
 import srvInvoicesRoutes from "./routes/srv_invoices.route.js";
 import transportRoutes from "./routes/transport.route.js";
+import trackingRoutes from "./routes/tracking.route.js";
 import uploadRoutes from "./routes/upload.routes.js";
 import workflowRoutes from "./routes/workflow.routes.js";
 import healthRoutes from "./routes/health.route.js";
@@ -993,6 +994,12 @@ app.get("/api/debug-crash-log", requireAuthMiddleware, (req, res) => {
       .json({ error: "INTERNAL_ERROR", message: "Error reading crash report" });
   }
 });
+
+app.use("/api/service-management", serviceMgmtRoutes);
+app.use("/api/srv-invoices", srvInvoicesRoutes);
+app.use("/api/transport", transportRoutes);
+app.use("/api/tracking", trackingRoutes);
+app.use("/api/upload", uploadRoutes);
 
 app.use("/api/", healthRoutes);
 app.use("/", healthRoutes);

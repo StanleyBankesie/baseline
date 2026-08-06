@@ -125,7 +125,7 @@ export default function MedicalPolicyForm() {
     <div className="space-y-4 p-4">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">{isEdit ? 'Edit Medical Policy' : 'New Medical Policy'}</h1>
-        <Link to="/human-resources/medical-policies" className="btn-secondary">Back</Link>
+        <button onClick={() => window.history.back()} className="btn-secondary">Back</button>
       </div>
 
       <form onSubmit={submit} className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm space-y-6">
@@ -229,7 +229,7 @@ export default function MedicalPolicyForm() {
         </div>
 
         <div className="flex justify-end gap-3 pt-4">
-          <Link to="/human-resources/medical-policies" className="btn-secondary">Cancel</Link>
+          <button onClick={() => window.history.back()} className="btn-secondary">Cancel</button>
           <button className="btn-primary" disabled={loading || uploadingFile}>
             {loading || uploadingFile ? 'Saving...' : 'Save Policy'}
           </button>

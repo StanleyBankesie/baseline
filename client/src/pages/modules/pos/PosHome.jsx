@@ -71,6 +71,9 @@ function PosLanding() {
       value: fmt(overview?.todaySales || 0),
       label: "Today Sales",
       path: "/pos/reports",
+        actions: [
+          { label: "View", path: "/pos/reports", type: "outline" }
+        ],
     },
     {
       rbac_key: "total-customers",
@@ -78,6 +81,10 @@ function PosLanding() {
       value: String(overview?.totalCustomers ?? 0),
       label: "Total Customers",
       path: "/sales/customers",
+        actions: [
+          { label: "View", path: "/sales/customers", type: "outline" },
+          { label: "New", path: "/sales/customers/new", type: "primary" }
+        ],
     },
     {
       rbac_key: "average-order",
@@ -85,6 +92,9 @@ function PosLanding() {
       value: fmt(overview?.averageOrder || 0),
       label: "Average Order",
       path: "/pos/reports",
+        actions: [
+          { label: "View", path: "/pos/reports", type: "outline" }
+        ],
     },
     {
       rbac_key: "monthly-revenue",
@@ -92,6 +102,9 @@ function PosLanding() {
       value: fmt(overview?.monthlyRevenue || 0),
       label: "Monthly Revenue",
       path: "/finance/reports",
+        actions: [
+          { label: "View", path: "/finance/reports", type: "outline" }
+        ],
     },
   ];
 
@@ -104,7 +117,10 @@ function PosLanding() {
         description="Retail sales, register operations, and day management"
         stats={stats}
         headerActions={[
-          { label: "Dashboard", path: "/pos/dashboard", icon: "📊" },
+          { label: "Dashboard", path: "/pos/dashboard",
+        actions: [
+          { label: "View", path: "/pos/dashboard", type: "outline" }
+        ], icon: "📊" },
         ]}
         sections={posSections}
         features={posFeatures}
@@ -121,48 +137,80 @@ export const posSections = [
       {
         name: "Sales Entry",
         path: "/pos/sales-entry",
+        actions: [
+          { label: "View", path: "/pos/sales-entry", type: "outline" },
+          { label: "New", path: "/pos/sales-entry/new", type: "primary" }
+        ],
         description: "Quick sales entry",
         icon: "🛒",
       },
       {
         name: "Start/End Business Day",
         path: "/pos/day-management",
+        actions: [
+          { label: "View", path: "/pos/day-management", type: "outline" },
+          { label: "New", path: "/pos/day-management/new", type: "primary" }
+        ],
         description: "Open/close POS business day and reconciliation",
         icon: "📅",
       },
       {
         name: "Cash Collection",
         path: "/pos/cash-collection",
+        actions: [
+          { label: "View", path: "/pos/cash-collection", type: "outline" },
+          { label: "New", path: "/pos/cash-collection/new", type: "primary" }
+        ],
         description: "View and record cash collected per session",
         icon: "💵",
       },
       {
         name: "POS Invoices",
         path: "/pos/invoices",
+        actions: [
+          { label: "View", path: "/pos/invoices", type: "outline" },
+          { label: "New", path: "/pos/invoices/new", type: "primary" }
+        ],
         description: "View and reprint invoices",
         icon: "📜",
       },
       {
         name: "Post to Finance",
         path: "/pos/post-to-finance",
+        actions: [
+          { label: "View", path: "/pos/post-to-finance", type: "outline" },
+          { label: "New", path: "/pos/post-to-finance/new", type: "primary" }
+        ],
         description: "Post aggregated POS sales to G/L",
         icon: "📤",
       },
       {
         name: "POS Returns",
         path: "/pos/returns",
+        actions: [
+          { label: "View", path: "/pos/returns", type: "outline" },
+          { label: "New", path: "/pos/returns/new", type: "primary" }
+        ],
         description: "Process sales returns and refunds",
         icon: "↩️",
       },
       {
         name: "POS Register",
         path: "/pos/register",
+        actions: [
+          { label: "View", path: "/pos/register", type: "outline" },
+          { label: "New", path: "/pos/register/new", type: "primary" }
+        ],
         description: "Transactions listing and details",
         icon: "📒",
       },
       {
         name: "On-Hold Sales",
         path: "/pos/holds",
+        actions: [
+          { label: "View", path: "/pos/holds", type: "outline" },
+          { label: "New", path: "/pos/holds/new", type: "primary" }
+        ],
         description: "Complete held (draft) sales",
         icon: "⏸️",
       },
@@ -174,6 +222,9 @@ export const posSections = [
       {
         name: "POS Setup",
         path: "/pos/setup",
+        actions: [
+          { label: "View", path: "/pos/setup", type: "outline" }
+        ],
         description: "Configure terminals, shifts, payments, and settings",
         icon: "⚙️",
       },
@@ -185,24 +236,38 @@ export const posSections = [
       {
         name: "POS Reports",
         path: "/pos/reports",
+        actions: [
+          { label: "View", path: "/pos/reports", type: "outline" }
+        ],
         description: "Daily sales and performance reports",
         icon: "📊",
       },
       {
         name: "Dashboard",
         path: "/pos/dashboard",
+        actions: [
+          { label: "View", path: "/pos/dashboard", type: "outline" }
+        ],
         description: "Charts and analytics for POS",
         icon: "📈",
       },
       {
         name: "Customer Accounts",
         path: "/pos/customer-history",
+        actions: [
+          { label: "View", path: "/pos/customer-history", type: "outline" },
+          { label: "New", path: "/pos/customer-history/new", type: "primary" }
+        ],
         description: "View customer transactions and balances",
         icon: "📋",
       },
       {
         name: "Sync Reconciliation",
         path: "/pos/reconciliation",
+        actions: [
+          { label: "View", path: "/pos/reconciliation", type: "outline" },
+          { label: "New", path: "/pos/reconciliation/new", type: "primary" }
+        ],
         description: "Manage offline sales that haven't synced",
         icon: "🔄",
       },
@@ -283,17 +348,66 @@ export default function PosHome() {
 }
 
 export const posFeatures = [
-  { module_key: "pos", label: "Sales Entry", path: "/pos/sales-entry", type: "feature" },
-  { module_key: "pos", label: "Start/End Business Day", path: "/pos/day-management", type: "feature" },
-  { module_key: "pos", label: "Cash Collection", path: "/pos/cash-collection", type: "feature" },
-  { module_key: "pos", label: "POS Invoices", path: "/pos/invoices", type: "feature" },
-  { module_key: "pos", label: "Post to Finance", path: "/pos/post-to-finance", type: "feature" },
-  { module_key: "pos", label: "POS Returns", path: "/pos/returns", type: "feature" },
-  { module_key: "pos", label: "POS Register", path: "/pos/register", type: "feature" },
-  { module_key: "pos", label: "On-Hold Sales", path: "/pos/holds", type: "feature" },
-  { module_key: "pos", label: "POS Setup", path: "/pos/setup", type: "feature" },
-  { module_key: "pos", label: "Sync Reconciliation", path: "/pos/reconciliation", type: "feature" },
-  { module_key: "pos", label: "POS Reports", path: "/pos/reports", type: "dashboard" },
-  { module_key: "pos", label: "Dashboard", path: "/pos/dashboard", type: "dashboard" },
-  { module_key: "pos", label: "Customer Accounts", path: "/pos/customer-history", type: "dashboard" },
+  { module_key: "pos", label: "Sales Entry", path: "/pos/sales-entry",
+        actions: [
+          { label: "View", path: "/pos/sales-entry", type: "outline" },
+          { label: "New", path: "/pos/sales-entry/new", type: "primary" }
+        ], type: "feature" },
+  { module_key: "pos", label: "Start/End Business Day", path: "/pos/day-management",
+        actions: [
+          { label: "View", path: "/pos/day-management", type: "outline" },
+          { label: "New", path: "/pos/day-management/new", type: "primary" }
+        ], type: "feature" },
+  { module_key: "pos", label: "Cash Collection", path: "/pos/cash-collection",
+        actions: [
+          { label: "View", path: "/pos/cash-collection", type: "outline" },
+          { label: "New", path: "/pos/cash-collection/new", type: "primary" }
+        ], type: "feature" },
+  { module_key: "pos", label: "POS Invoices", path: "/pos/invoices",
+        actions: [
+          { label: "View", path: "/pos/invoices", type: "outline" },
+          { label: "New", path: "/pos/invoices/new", type: "primary" }
+        ], type: "feature" },
+  { module_key: "pos", label: "Post to Finance", path: "/pos/post-to-finance",
+        actions: [
+          { label: "View", path: "/pos/post-to-finance", type: "outline" },
+          { label: "New", path: "/pos/post-to-finance/new", type: "primary" }
+        ], type: "feature" },
+  { module_key: "pos", label: "POS Returns", path: "/pos/returns",
+        actions: [
+          { label: "View", path: "/pos/returns", type: "outline" },
+          { label: "New", path: "/pos/returns/new", type: "primary" }
+        ], type: "feature" },
+  { module_key: "pos", label: "POS Register", path: "/pos/register",
+        actions: [
+          { label: "View", path: "/pos/register", type: "outline" },
+          { label: "New", path: "/pos/register/new", type: "primary" }
+        ], type: "feature" },
+  { module_key: "pos", label: "On-Hold Sales", path: "/pos/holds",
+        actions: [
+          { label: "View", path: "/pos/holds", type: "outline" },
+          { label: "New", path: "/pos/holds/new", type: "primary" }
+        ], type: "feature" },
+  { module_key: "pos", label: "POS Setup", path: "/pos/setup",
+        actions: [
+          { label: "View", path: "/pos/setup", type: "outline" }
+        ], type: "feature" },
+  { module_key: "pos", label: "Sync Reconciliation", path: "/pos/reconciliation",
+        actions: [
+          { label: "View", path: "/pos/reconciliation", type: "outline" },
+          { label: "New", path: "/pos/reconciliation/new", type: "primary" }
+        ], type: "feature" },
+  { module_key: "pos", label: "POS Reports", path: "/pos/reports",
+        actions: [
+          { label: "View", path: "/pos/reports", type: "outline" }
+        ], type: "dashboard" },
+  { module_key: "pos", label: "Dashboard", path: "/pos/dashboard",
+        actions: [
+          { label: "View", path: "/pos/dashboard", type: "outline" }
+        ], type: "dashboard" },
+  { module_key: "pos", label: "Customer Accounts", path: "/pos/customer-history",
+        actions: [
+          { label: "View", path: "/pos/customer-history", type: "outline" },
+          { label: "New", path: "/pos/customer-history/new", type: "primary" }
+        ], type: "dashboard" },
 ];

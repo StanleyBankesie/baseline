@@ -263,12 +263,10 @@ export default function UserForm() {
   return (
     <div className="space-y-6">
       <div>
-        <Link
-          to="/administration/users"
-          className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300 mb-2 inline-block"
+        <button onClick={() => window.history.back()} className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300 mb-2 inline-block"
         >
           ← Back to Users
-        </Link>
+        </button>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
           {isEdit ? "Edit User" : "New User"}
         </h1>
@@ -718,9 +716,9 @@ export default function UserForm() {
             )}
 
             <div className="flex justify-end gap-3 mt-6">
-              <Link to="/administration/users" className="btn-success">
+              <button onClick={() => window.history.back()} className="btn-success">
                 Cancel
-              </Link>
+              </button>
               <button className="btn-success" type="submit" disabled={loading}>
                 {loading ? "Saving..." : isEdit ? "Update User" : "Create User"}
               </button>

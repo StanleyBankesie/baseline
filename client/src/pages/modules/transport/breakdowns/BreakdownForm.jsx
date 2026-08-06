@@ -66,12 +66,10 @@ export default function BreakdownForm() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
-            <Link
-              to="/transport/breakdowns"
-              className="btn btn-ghost btn-sm px-2 text-slate-500"
+            <button onClick={() => window.history.back()} className="btn btn-ghost btn-sm px-2 text-slate-500"
             >
               ← Back
-            </Link>
+            </button>
             New Breakdown Record
           </h1>
         </div>
@@ -227,9 +225,9 @@ export default function BreakdownForm() {
           </div>
 
           <div className="mt-8 flex justify-end gap-3">
-            <Link to="/transport/breakdowns" className="btn btn-ghost">
+            <button onClick={() => window.history.back()} className="btn btn-ghost">
               Cancel
-            </Link>
+            </button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
               {loading ? "Saving..." : "Save Breakdown Log"}
             </button>

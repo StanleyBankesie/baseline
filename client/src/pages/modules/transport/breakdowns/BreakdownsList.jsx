@@ -37,9 +37,9 @@ export default function BreakdownsList() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
-          <Link to="/transport" className="btn btn-ghost btn-sm px-2 text-slate-500">
+          <button onClick={() => window.history.back()} className="btn btn-ghost btn-sm px-2 text-slate-500">
             ← Back
-          </Link>
+          </button>
           <WarningOutlined className="text-primary" />
           Breakdown Logbook
         </h1>

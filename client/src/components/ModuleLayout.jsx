@@ -213,7 +213,7 @@ export function ModuleTopNavBar({ sections = [], headerActions = [], moduleKey }
                 : "text-slate-600 dark:text-slate-300 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:text-brand-700 dark:hover:text-brand-300"
             }`}
           >
-            {a.icon && <span className="text-sm">{a.icon}</span>}
+            {a.icon && <span className="text-sm">{typeof a.icon === "string" ? a.icon : React.createElement(a.icon, { className: "w-4 h-4 inline" })}</span>}
             <span>{a.label || a.title || "Dashboard"}</span>
           </button>
         ))}

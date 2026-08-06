@@ -625,9 +625,9 @@ export default function EmployeeForm() {
                   />
                 </label>
               </div>
-              <Link to="/human-resources/employees" className="btn-secondary">
+              <button onClick={() => window.history.back()} className="btn-secondary">
                 Back to List
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -1065,9 +1065,9 @@ export default function EmployeeForm() {
             </div>
 
             <div className="flex justify-end gap-3 border-t pt-4 mt-8">
-              <Link to="/human-resources/employees" className="btn-secondary">
+              <button onClick={() => window.history.back()} className="btn-secondary">
                 Cancel
-              </Link>
+              </button>
               <button className="btn-primary" type="submit" disabled={loading}>
                 {loading ? "Saving..." : "Save Employee record"}
               </button>

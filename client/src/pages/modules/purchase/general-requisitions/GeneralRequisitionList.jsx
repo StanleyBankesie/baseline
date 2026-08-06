@@ -456,9 +456,9 @@ export default function GeneralRequisitionList() {
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <Link to="/purchase?section=Procurement" className="text-sm text-brand hover:text-brand-600">
+          <button onClick={() => window.history.back()} className="text-sm text-brand hover:text-brand-600">
             ← Back to Purchase
-          </Link>
+          </button>
           <h1 className="text-2xl font-bold mt-2">Purchase Requisitions</h1>
           <p className="text-sm text-slate-600">Request items for purchase or services to be rendered</p>
         </div>

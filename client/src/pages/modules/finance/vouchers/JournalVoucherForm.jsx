@@ -3003,9 +3003,9 @@ export default function JournalVoucherForm() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Link to=".." className="btn-success">
+                <button onClick={() => window.history.back()} className="btn-success">
                   Back
-                </Link>
+                </button>
                 {voucherStatus === "APPROVED" ? (
                   <span className="px-2 py-1 rounded bg-green-500 text-white text-sm font-medium">
                     Approved
@@ -3551,9 +3551,9 @@ export default function JournalVoucherForm() {
               </div>
 
               <div className="flex justify-end gap-3">
-                <Link to=".." className="btn-success">
+                <button onClick={() => window.history.back()} className="btn-success">
                   Cancel
-                </Link>
+                </button>
                 <button
                   type="submit"
                   className="btn-success"

@@ -46,7 +46,7 @@ export default function PolicyList() {
             <p className="text-sm text-slate-500">Manage company-wide HR policies and compliance</p>
           </div>
           <div className="flex gap-2">
-            <Link to="/human-resources?section=Settings%20%26%20Setup" className="btn-secondary">Back</Link>
+            <button onClick={() => window.history.back()} className="btn-secondary">Back</button>
             <Link to="/human-resources/policies/new" className="btn-primary">+ New Policy</Link>
           </div>
         </div>

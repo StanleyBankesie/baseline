@@ -471,12 +471,10 @@ requisitionType: "ITEM",
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <Link
-            to="/service-management/service-requests"
-            className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
+          <button onClick={() => window.history.back()} className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
           >
             ← Back to Request List
-          </Link>
+          </button>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-2">
             Service Request
           </h1>

@@ -82,33 +82,33 @@ export const financeSections = [
   {
     title: "Accounting Setup",
     items: [
-      { title: "Chart of Account Groups", path: "/finance/account-groups", description: "Setup account group hierarchy", icon: "🗂" , actions: [
-          <ActionButton key="view" label="View" path="/finance/account-groups" type="outline" featureKey="finance:account-groups" action="view" />,
-          <ActionButton key="add" label="Add" path="/finance/account-groups/create" type="primary" featureKey="finance:account-groups" action="create" />
+      { title: "Chart of Account Groups", path: "/finance/setup/account-groups", description: "Setup account group hierarchy", icon: "🗂" , actions: [
+          <ActionButton key="view" label="View" path="/finance/setup/account-groups" type="outline" featureKey="finance:account-groups" action="view" />,
+          <ActionButton key="add" label="Add" path="/finance/setup/account-groups/create" type="primary" featureKey="finance:account-groups" action="create" />
         ], },
-      { title: "Accounts Creation", path: "/finance/accounts", description: "Create and manage accounts", icon: "🏦" , actions: [
-          <ActionButton key="view" label="View" path="/finance/accounts" type="outline" featureKey="finance:accounts" action="view" />,
-          <ActionButton key="add" label="Add" path="/finance/accounts/create" type="primary" featureKey="finance:accounts" action="create" />
+      { title: "Accounts Creation", path: "/finance/setup/accounts", description: "Create and manage accounts", icon: "🏦" , actions: [
+          <ActionButton key="view" label="View" path="/finance/setup/accounts" type="outline" featureKey="finance:accounts" action="view" />,
+          <ActionButton key="add" label="Add" path="/finance/setup/accounts/create" type="primary" featureKey="finance:accounts" action="create" />
         ], },
-      { title: "Cost Centers", path: "/finance/cost-centers", description: "Define and manage cost centers", icon: "🏷️" , actions: [
-          <ActionButton key="view" label="View" path="/finance/cost-centers" type="outline" featureKey="finance:cost-centers" action="view" />,
-          <ActionButton key="add" label="Add" path="/finance/cost-centers/create" type="primary" featureKey="finance:cost-centers" action="create" />
+      { title: "Cost Centers", path: "/finance/setup/cost-centers", description: "Define and manage cost centers", icon: "🏷️" , actions: [
+          <ActionButton key="view" label="View" path="/finance/setup/cost-centers" type="outline" featureKey="finance:cost-centers" action="view" />,
+          <ActionButton key="add" label="Add" path="/finance/setup/cost-centers/create" type="primary" featureKey="finance:cost-centers" action="create" />
         ], },
-      { title: "Tax Codes & Deductions", path: "/finance/tax-codes", description: "Configure tax and deduction codes", icon: "🧮" , actions: [
-          <ActionButton key="view" label="View" path="/finance/tax-codes" type="outline" featureKey="finance:tax-codes" action="view" />,
-          <ActionButton key="add" label="Add" path="/finance/tax-codes/create" type="primary" featureKey="finance:tax-codes" action="create" />
+      { title: "Tax Codes & Deductions", path: "/finance/setup/tax-codes", description: "Configure tax and deduction codes", icon: "🧮" , actions: [
+          <ActionButton key="view" label="View" path="/finance/setup/tax-codes" type="outline" featureKey="finance:tax-codes" action="view" />,
+          <ActionButton key="add" label="Add" path="/finance/setup/tax-codes/create" type="primary" featureKey="finance:tax-codes" action="create" />
         ], },
-      { title: "Currencies", path: "/finance/currencies", description: "Manage currencies and base currency", icon: "💱" , actions: [
-          <ActionButton key="view" label="View" path="/finance/currencies" type="outline" featureKey="finance:currencies" action="view" />,
-          <ActionButton key="add" label="Add" path="/finance/currencies/create" type="primary" featureKey="finance:currencies" action="create" />
+      { title: "Currencies", path: "/finance/setup/currencies", description: "Manage currencies and base currency", icon: "💱" , actions: [
+          <ActionButton key="view" label="View" path="/finance/setup/currencies" type="outline" featureKey="finance:currencies" action="view" />,
+          <ActionButton key="add" label="Add" path="/finance/setup/currencies/create" type="primary" featureKey="finance:currencies" action="create" />
         ], },
-      { title: "Fiscal Years", path: "/finance/fiscal-years", description: "Open/close fiscal periods", icon: "📅" , actions: [
-          <ActionButton key="view" label="View" path="/finance/fiscal-years" type="outline" featureKey="finance:fiscal-years" action="view" />,
-          <ActionButton key="add" label="Add" path="/finance/fiscal-years/create" type="primary" featureKey="finance:fiscal-years" action="create" />
+      { title: "Fiscal Years", path: "/finance/setup/fiscal-years", description: "Open/close fiscal periods", icon: "📅" , actions: [
+          <ActionButton key="view" label="View" path="/finance/setup/fiscal-years" type="outline" featureKey="finance:fiscal-years" action="view" />,
+          <ActionButton key="add" label="Add" path="/finance/setup/fiscal-years/create" type="primary" featureKey="finance:fiscal-years" action="create" />
         ], },
-      { title: "Opening Balances", path: "/finance/opening-balances", description: "Set beginning balances for all accounts", icon: "🧮" , actions: [
-          <ActionButton key="view" label="View" path="/finance/opening-balances" type="outline" featureKey="finance:opening-balances" action="view" />,
-          <ActionButton key="add" label="Add" path="/finance/opening-balances/create" type="primary" featureKey="finance:opening-balances" action="create" />
+      { title: "Opening Balances", path: "/finance/setup/opening-balances", description: "Set beginning balances for all accounts", icon: "🧮" , actions: [
+          <ActionButton key="view" label="View" path="/finance/setup/opening-balances" type="outline" featureKey="finance:opening-balances" action="view" />,
+          <ActionButton key="add" label="Add" path="/finance/setup/opening-balances/create" type="primary" featureKey="finance:opening-balances" action="create" />
         ], },
     ],
   },

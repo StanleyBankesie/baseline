@@ -249,7 +249,7 @@ export default function GeneralSettingsPage() {
               <h1 className="text-2xl font-bold dark:text-brand-300">General Settings</h1>
               <p className="text-sm mt-1">Configure global application variables</p>
             </div>
-            <Link to="/system-configuration?section=System%20Configuration" className="btn btn-secondary">Back</Link>
+            <button onClick={() => window.history.back()} className="btn btn-secondary">Back</button>
           </div>
         </div>
       </div>

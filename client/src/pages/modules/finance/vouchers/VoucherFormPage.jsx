@@ -2970,9 +2970,9 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Link to=".." className="btn-success">
+                <button onClick={() => window.history.back()} className="btn-success">
                   Back
-                </Link>
+                </button>
                 {voucherStatus === "APPROVED" ? (
                   <span className="px-2 py-1 rounded bg-green-500 text-white text-sm font-medium">
                     Approved
@@ -3451,9 +3451,9 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
               </div>
 
               <div className="flex justify-end gap-3">
-                <Link to=".." className="btn-success">
+                <button onClick={() => window.history.back()} className="btn-success">
                   Cancel
-                </Link>
+                </button>
                 <button
                   type="submit"
                   className="btn-success"
@@ -3616,9 +3616,9 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
                 <p className="text-sm mt-1">Record incoming payments</p>
               </div>
               <div className="flex gap-2">
-                <Link to=".." className="btn-success">
+                <button onClick={() => window.history.back()} className="btn-success">
                   Back
-                </Link>
+                </button>
                 {voucherStatus === "APPROVED" ? (
                   <span className="px-2 py-1 rounded bg-green-500 text-white text-sm font-medium">
                     Approved
@@ -4532,9 +4532,9 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
               </div>
 
               <div className="flex flex-col md:flex-row gap-2">
-                <Link to=".." className="btn-success">
+                <button onClick={() => window.history.back()} className="btn-success">
                   Cancel
-                </Link>
+                </button>
                 <button
                   type="submit"
                   className="btn-success"
@@ -4699,9 +4699,9 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
                 <p className="text-sm mt-1">Record outgoing payments</p>
               </div>
               <div className="flex gap-2">
-                <Link to="/finance/payment-voucher" className="btn-success">
+                <button onClick={() => window.history.back()} className="btn-success">
                   Back
-                </Link>
+                </button>
                 {voucherStatus === "APPROVED" ? (
                   <span className="px-2 py-1 rounded bg-green-500 text-white text-sm font-medium">
                     Approved
@@ -5641,9 +5641,9 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
               </div>
 
               <div className="flex flex-col md:flex-row gap-2">
-                <Link to="/finance/payment-voucher" className="btn-success">
+                <button onClick={() => window.history.back()} className="btn-success">
                   Cancel
-                </Link>
+                </button>
                 <button
                   type="submit"
                   className="btn-success"
@@ -5808,9 +5808,9 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
                 <p className="text-sm mt-1">Transfer funds between accounts</p>
               </div>
               <div className="flex gap-2">
-                <Link to=".." className="btn-success">
+                <button onClick={() => window.history.back()} className="btn-success">
                   Back
-                </Link>
+                </button>
                </div>
             </div>
           </div>
@@ -6116,9 +6116,9 @@ export default function VoucherFormPage({ voucherTypeCode, title }) {
               </div>
 
               <div className="flex flex-col md:flex-row gap-2">
-                <Link to=".." className="btn-success">
+                <button onClick={() => window.history.back()} className="btn-success">
                   Cancel
-                </Link>
+                </button>
                 <button
                   type="submit"
                   className="btn-success"

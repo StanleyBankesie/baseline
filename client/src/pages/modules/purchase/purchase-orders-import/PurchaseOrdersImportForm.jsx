@@ -1355,12 +1355,10 @@ export default function PurchaseOrdersImportForm() {
             </button>
           </div>
           <div className="flex gap-3">
-            <Link
-              to="/purchase/purchase-orders-import"
-              className="btn-success font-medium flex items-center gap-2"
+            <button onClick={() => window.history.back()} className="btn-success font-medium flex items-center gap-2"
             >
               Back
-            </Link>
+            </button>
           </div>
         </div>
 

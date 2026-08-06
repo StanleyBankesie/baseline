@@ -1585,12 +1585,10 @@ export default function ProjectQuotationForm() {
             )}
           </div>
           <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200 print:hidden">
-            <Link
-              to="/project-management?section=Reports%20%26%20Analytics"
-              className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            <button onClick={() => window.history.back()} className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Cancel
-            </Link>
+            </button>
             <button
               type="submit"
               className="flex items-center gap-2 px-6 py-2 text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"

@@ -8,17 +8,17 @@ import { toast } from "react-toastify";
 import { api } from "api/client";
 import { Link } from "react-router-dom";
 import { useExchangeRate } from "../../../../hooks/useExchangeRate";
-import { 
-  DollarSign, 
-  ArrowLeft, 
-  Plus, 
-  RefreshCw, 
-  Save, 
-  Globe, 
-  TrendingUp, 
-  CheckCircle2, 
+import {
+  DollarSign,
+  ArrowLeft,
+  Plus,
+  RefreshCw,
+  Save,
+  Globe,
+  TrendingUp,
+  CheckCircle2,
   XCircle,
-  HelpCircle
+  HelpCircle,
 } from "lucide-react";
 
 export default function CurrenciesPage() {
@@ -93,9 +93,7 @@ export default function CurrenciesPage() {
       toast.success("Base currency updated");
       load();
     } catch (e) {
-      toast.error(
-        e?.response?.data?.message || "Failed to set base currency",
-      );
+      toast.error(e?.response?.data?.message || "Failed to set base currency");
     }
   }
 
@@ -164,16 +162,17 @@ export default function CurrenciesPage() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <Link
-                to="/finance?section=Banking"
+                to="/finance?section=Accounting%20Setup"
                 className="inline-flex items-center gap-1.5 text-xs text-white/80 hover:text-white transition-colors mb-2"
               >
                 <ArrowLeft size={14} /> Back to Accounting Setup
               </Link>
               <h1 className="text-2xl font-bold flex items-center gap-2">
-                <DollarSign className="w-6 h-6" /> Currencies Setup
+                Currencies Setup
               </h1>
               <p className="text-sm mt-0.5 opacity-90">
-                Manage operational currencies, base reporting currency & exchange rate feeds
+                Manage operational currencies, base reporting currency &
+                exchange rate feeds
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -218,7 +217,9 @@ export default function CurrenciesPage() {
             <form onSubmit={create} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1 block">ISO Code *</label>
+                  <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1 block">
+                    ISO Code *
+                  </label>
                   <input
                     className="input w-full text-sm font-mono uppercase"
                     placeholder="e.g. USD"
@@ -229,7 +230,9 @@ export default function CurrenciesPage() {
                 </div>
 
                 <div>
-                  <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1 block">Symbol</label>
+                  <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1 block">
+                    Symbol
+                  </label>
                   <input
                     className="input w-full text-sm font-mono"
                     placeholder="e.g. $"
@@ -240,7 +243,9 @@ export default function CurrenciesPage() {
               </div>
 
               <div>
-                <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1 block">Currency Name *</label>
+                <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1 block">
+                  Currency Name *
+                </label>
                 <input
                   className="input w-full text-sm"
                   placeholder="e.g. US Dollar"
@@ -280,7 +285,10 @@ export default function CurrenciesPage() {
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn-success text-xs px-4 py-2 flex items-center gap-1">
+                <button
+                  type="submit"
+                  className="btn-success text-xs px-4 py-2 flex items-center gap-1"
+                >
                   <Plus size={14} /> Create Currency
                 </button>
               </div>
@@ -313,7 +321,10 @@ export default function CurrenciesPage() {
                 </tr>
               ) : items.length > 0 ? (
                 items.map((r) => (
-                  <tr key={r.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                  <tr
+                    key={r.id}
+                    className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+                  >
                     <td className="py-3 px-4 font-mono font-bold text-brand dark:text-brand-300">
                       {r.code}
                     </td>
@@ -397,10 +408,12 @@ export default function CurrenciesPage() {
       <div className="card shadow-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
         <div className="p-5 border-b border-slate-200 dark:border-slate-800">
           <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-brand" /> Historical Currency Exchange Rates
+            <TrendingUp className="w-5 h-5 text-brand" /> Historical Currency
+            Exchange Rates
           </h2>
           <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1">
-            Historical records only. Live rates are fetched directly from the exchange API for all transactions.
+            Historical records only. Live rates are fetched directly from the
+            exchange API for all transactions.
           </p>
         </div>
         <div className="p-5">
@@ -611,7 +624,9 @@ function RatesSection({ items }) {
                     {Number(r.rate || 0).toFixed(4)}
                   </td>
                   <td className="py-2.5 px-3 font-mono text-slate-500">
-                    {r.rate_date ? new Date(r.rate_date).toLocaleDateString() : "—"}
+                    {r.rate_date
+                      ? new Date(r.rate_date).toLocaleDateString()
+                      : "—"}
                   </td>
                 </tr>
               ))

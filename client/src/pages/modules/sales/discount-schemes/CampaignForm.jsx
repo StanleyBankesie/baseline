@@ -172,9 +172,9 @@ export default function CampaignForm() {
             <p>{isEdit ? "Update campaign details" : "Create a new promotional campaign"}</p>
           </div>
           <div className="ds-header-actions">
-            <Link to="/sales/discount-schemes/discount" className="ds-btn ds-btn-secondary">
+            <button onClick={() => window.history.back()} className="ds-btn ds-btn-secondary">
               Back to Campaigns
-            </Link>
+            </button>
           </div>
         </div>
       </header>
@@ -363,9 +363,9 @@ export default function CampaignForm() {
             <button type="submit" className="ds-btn ds-btn-success" disabled={saving}>
               {saving ? "Saving..." : "💾 Save Campaign"}
             </button>
-            <Link to="/sales/discount-schemes/discount" className="ds-btn ds-btn-secondary">
+            <button onClick={() => window.history.back()} className="ds-btn ds-btn-secondary">
               ✖ Cancel
-            </Link>
+            </button>
           </div>
         </form>
       </div>

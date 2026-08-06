@@ -259,7 +259,7 @@ export default function MaintenanceBillForm() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link to="/maintenance/bills" className="btn-secondary">← Back</Link>
+          <button onClick={() => window.history.back()} className="btn-secondary">← Back</button>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{isEdit ? "Edit" : "New"} Maintenance Bill</h1>
             <p className="text-sm mt-1">Raise a payment bill for completed maintenance work</p>
@@ -478,7 +478,7 @@ export default function MaintenanceBillForm() {
           </div>
         </div>
         <div className="flex justify-end gap-2">
-          <Link to="/maintenance/bills" className="btn-secondary">Cancel</Link>
+          <button onClick={() => window.history.back()} className="btn-secondary">Cancel</button>
           <button type="submit" className="btn-primary" disabled={saving}>{saving ? "Saving..." : "Save Bill"}</button>
         </div>
       </form>
