@@ -80,10 +80,10 @@ export default function TripTrackingPage() {
 
       {!isSingleTripMode && <FleetSummaryCards stats={stats} isLoading={isLoading} />}
 
-      <div className="flex-1 flex gap-4 overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row gap-4 overflow-hidden">
         {/* Left Panel: List (Hidden in Single Trip Mode) */}
         {!isSingleTripMode && (
-          <div className="w-80 flex-shrink-0">
+          <div className="w-full lg:w-80 h-1/3 lg:h-full flex-shrink-0">
             <FleetListPanel 
               vehicles={vehicles} 
               selectedVehicleId={selectedVehicleId}
@@ -103,7 +103,7 @@ export default function TripTrackingPage() {
 
         {/* Right Panel: Details (Slide In) */}
         {selectedVehicleId && (
-          <div className="w-80 flex-shrink-0 transition-all duration-300">
+          <div className="w-full lg:w-80 h-1/2 lg:h-full flex-shrink-0 transition-all duration-300">
             <TripDetailsPanel 
               vehicle={selectedVehicle} 
               onClose={() => !isSingleTripMode && setSelectedVehicleId(null)} // Prevent closing in single mode if desired, or just allow it
