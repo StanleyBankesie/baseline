@@ -295,7 +295,7 @@ function ServiceManagementLanding() {
         {
           label: "Dashboard",
           path: "/service-management/dashboard",
-          icon: FileText,
+          icon: "📊",
         },
       ]}
       sections={serviceManagementSections}
@@ -378,7 +378,7 @@ export default function ServiceManagementHome() {
         <Route path="service-bills" element={<ServiceBillsList />} />
         <Route path="service-bills/new" element={<ServiceBillForm />} />
         <Route path="service-bills/:id" element={<ServiceBillForm />} />
-        <Route path="setup" element={<ServiceParametersPage />} />
+        <Route path="setup/parameters" element={<ServiceParametersPage />} />
         <Route
           path="visitors-log"
           element={
@@ -448,7 +448,7 @@ export default function ServiceManagementHome() {
           }
         />
         <Route
-          path="reports/sla-compliance"
+          path="reports/sla"
           element={
             <React.Suspense fallback={<div className="p-4">Loading...</div>}>
               {React.createElement(

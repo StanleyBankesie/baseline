@@ -474,7 +474,7 @@ const ModuleDashboard = ({
 
       <div className="space-y-8">
         {/* Header */}
-        <div className="mb-8 flex items-start justify-between gap-4">
+        <div className="mb-8 hidden lg:flex items-start justify-between gap-4">
         <div>
           {(!useSectionNavigation || searchTerm || activeSection === null) && (
             <h1 className="text-3xl font-bold text-brand-900 dark:text-white tracking-tight mb-2">
@@ -888,7 +888,7 @@ const ModuleDashboard = ({
                         {/* Subtle hover background tint for item cards */}
                         <div className="absolute inset-0 bg-gradient-to-br from-brand-50/60 to-transparent dark:from-slate-700/50 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-                        <div className="flex items-start gap-4 relative z-10">
+                        <div className="flex flex-col lg:flex-row items-center lg:items-start text-center lg:text-left gap-4 relative z-10">
                           <div 
                             className="shrink-0 rounded-full bg-gradient-to-br from-brand-50 to-brand-100/50 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 group-hover:rotate-1 group-hover:from-brand-100 group-hover:to-brand-200/50 dark:group-hover:from-slate-600 dark:group-hover:to-slate-700 transition-all duration-300"
                             style={{ width: '44px', height: '44px', minWidth: '44px', minHeight: '44px', maxWidth: '44px', maxHeight: '44px', borderRadius: '50%' }}
@@ -911,7 +911,7 @@ const ModuleDashboard = ({
                               </p>
                             )}
                             {itemActions.length > 0 && (
-                              <div className="mt-4 flex flex-wrap gap-2">
+                              <div className="mt-4 flex flex-wrap gap-2 justify-center lg:justify-start">
                                 {itemActions.map((action, actionIndex) => {
                                   const actionType = String(
                                     action.type || "outline",

@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { api } from "../../../../api/client";
+import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import { Plus, Edit2, Trash2, Loader2, X, Building2, Pencil } from "lucide-react";
 import PhoneInput from "../../../../components/PhoneInput.jsx";
