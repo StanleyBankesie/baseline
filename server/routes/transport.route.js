@@ -132,8 +132,8 @@ router.delete("/fuel-bills/:id", requireAuth, requireCompanyScope, requirePermis
 
 
 // GPS & POD
-router.post("/trips/:id/location", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.TRIPS.EDIT"), addTripLocation);
-router.get("/trips/:id/locations", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.TRIPS.VIEW"), getTripLocations);
+router.post("/trips/:id/location", requireAuth, requireCompanyScope, addTripLocation);
+router.get("/trips/:id/locations", requireAuth, requireCompanyScope, getTripLocations);
 router.post("/trips/:id/pod", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.TRIPS.EDIT"), submitPOD);
 
 // Breakdowns

@@ -61,8 +61,8 @@ export default function TripTrackingPage() {
         const updated = [...prev];
         updated[idx] = { 
           ...updated[idx], 
-          current_lat: data.location.latitude,
-          current_lng: data.location.longitude,
+          latitude: data.location.latitude,
+          longitude: data.location.longitude,
           speed: data.location.speed,
           heading: data.location.heading,
           last_update: data.location.recorded_at
