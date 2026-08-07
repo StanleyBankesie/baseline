@@ -1463,13 +1463,13 @@ async function postGrnAccrualTx(
 async function nextSequentialNo(table, column, prefix, connObj = null) {
   const executor = connObj || { query };
   let sql = `
-    SELECT ${column} AS no,
-          created_at,
+    SELECT ${table}.${column} AS no,
+          ${table}.created_at,
           u.username AS created_by_name
          FROM ${table}
-        LEFT JOIN adm_users u ON u.id = created_by
-         WHERE ${column} REGEXP '^${prefix}-[0-9]{6}$'
-    ORDER BY CAST(SUBSTRING(${column}, ${prefix.length + 2}) AS UNSIGNED) DESC
+        LEFT JOIN adm_users u ON u.id = ${table}.created_by
+         WHERE ${table}.${column} REGEXP '^${prefix}-[0-9]{6}$'
+    ORDER BY CAST(SUBSTRING(${table}.${column}, ${prefix.length + 2}) AS UNSIGNED) DESC
     LIMIT 1
   `;
   if (connObj) sql += " FOR UPDATE";

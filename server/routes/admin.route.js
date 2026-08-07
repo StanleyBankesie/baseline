@@ -1710,6 +1710,20 @@ async function ensureLoginBrandingTable() {
       updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
+  
+  // Ensure missing hero columns exist
+  try {
+    const cols = await query(`SHOW COLUMNS FROM adm_login_branding`);
+    const colNames = cols.map(c => c.Field);
+    if (!colNames.includes('hero_image')) {
+      await query(`ALTER TABLE adm_login_branding ADD COLUMN hero_image LONGBLOB NULL AFTER background_mime`);
+    }
+    if (!colNames.includes('hero_mime')) {
+      await query(`ALTER TABLE adm_login_branding ADD COLUMN hero_mime VARCHAR(100) NULL AFTER hero_image`);
+    }
+  } catch (err) {
+    console.error("Failed to alter adm_login_branding:", err);
+  }
   _brandingTableEnsured = true;
 }
 
