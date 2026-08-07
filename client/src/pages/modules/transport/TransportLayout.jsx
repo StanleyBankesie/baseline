@@ -76,10 +76,7 @@ export const transportSections = [
       { 
         title: "Transport Requests", 
         path: "/transport/requests",
-        actions: [
-          { label: "View", path: "/transport/requests", type: "outline" },
-          { label: "New", path: "/transport/requests/new", type: "primary" }
-        ], 
+         
         feature_key: "requests", 
         description: "Manage internal and external transport requests",
         icon: "📋",
@@ -91,10 +88,7 @@ export const transportSections = [
       { 
         title: "Vehicle Compliance", 
         path: "/transport/compliance",
-        actions: [
-          { label: "View", path: "/transport/compliance", type: "outline" },
-          { label: "New", path: "/transport/compliance/new", type: "primary" }
-        ], 
+         
         feature_key: "compliance", 
         description: "Track vehicle roadworthy, insurance, and compliance",
         icon: "🛡️",
@@ -106,10 +100,7 @@ export const transportSections = [
       { 
         title: "Vehicle Servicing", 
         path: "/transport/servicing",
-        actions: [
-          { label: "View", path: "/transport/servicing", type: "outline" },
-          { label: "New", path: "/transport/servicing/new", type: "primary" }
-        ], 
+         
         feature_key: "servicing", 
         description: "Manage vehicle maintenance schedules and servicing",
         icon: "🔧",
@@ -121,10 +112,7 @@ export const transportSections = [
       { 
         title: "Trip Management", 
         path: "/transport/trips",
-        actions: [
-          { label: "View", path: "/transport/trips", type: "outline" },
-          { label: "New", path: "/transport/trips/new", type: "primary" }
-        ], 
+         
         feature_key: "trips", 
         description: "Create, dispatch, and track vehicle trips",
         icon: "📍",
@@ -136,10 +124,7 @@ export const transportSections = [
       { 
         title: "Live Trip Management", 
         path: "/transport/trip-management",
-        actions: [
-          { label: "View", path: "/transport/trip-management", type: "outline" },
-          { label: "New", path: "/transport/trip-management/new", type: "primary" }
-        ], 
+         
         feature_key: "trips", 
         description: "Monitor, dispatch, and manage active trips in real time",
         icon: "🚗",
@@ -150,10 +135,7 @@ export const transportSections = [
       { 
         title: "Trip Returns", 
         path: "/transport/trip-returns",
-        actions: [
-          { label: "View", path: "/transport/trip-returns", type: "outline" },
-          { label: "New", path: "/transport/trip-returns/new", type: "primary" }
-        ], 
+         
         feature_key: "trips", 
         description: "Confirm returning trips and log vehicle metrics",
         icon: "🔙",
@@ -165,10 +147,7 @@ export const transportSections = [
       { 
         title: "GPS Tracking", 
         path: "/transport/tracking",
-        actions: [
-          { label: "View", path: "/transport/tracking", type: "outline" },
-          { label: "New", path: "/transport/tracking/new", type: "primary" }
-        ], 
+         
         feature_key: "tracking", 
         description: "Monitor live vehicle locations via GPS",
         icon: "📍",
@@ -179,9 +158,7 @@ export const transportSections = [
       { 
         title: "Driver's Logbook", 
         path: "/transport/logbooks",
-        actions: [
-          { label: "View", path: "/transport/logbooks", type: "outline" }
-        ], 
+         
         feature_key: "logbooks", 
         description: "Maintain daily vehicle logbook entries",
         icon: "📖",
@@ -193,10 +170,7 @@ export const transportSections = [
       { 
         title: "Inspections", 
         path: "/transport/inspections",
-        actions: [
-          { label: "View", path: "/transport/inspections", type: "outline" },
-          { label: "New", path: "/transport/inspections/new", type: "primary" }
-        ], 
+         
         feature_key: "inspections", 
         description: "Conduct vehicle safety and pre-trip inspections",
         icon: "🔍",
@@ -208,10 +182,7 @@ export const transportSections = [
       { 
         title: "Routes Management", 
         path: "/transport/routes",
-        actions: [
-          { label: "View", path: "/transport/routes", type: "outline" },
-          { label: "New", path: "/transport/routes/new", type: "primary" }
-        ], 
+         
         feature_key: "routes", 
         description: "Define standard transport routes and distances",
         icon: "🗺️",
@@ -223,10 +194,7 @@ export const transportSections = [
       { 
         title: "Fuel Logs", 
         path: "/transport/fuel",
-        actions: [
-          { label: "View", path: "/transport/fuel", type: "outline" },
-          { label: "New", path: "/transport/fuel/new", type: "primary" }
-        ], 
+         
         feature_key: "fuel", 
         description: "Track vehicle refueling and fuel consumption",
         icon: "⛽",
@@ -245,10 +213,7 @@ export const transportSections = [
       { 
         title: "Transportation Bills", 
         path: "/transport/transportation-bills",
-        actions: [
-          { label: "View", path: "/transport/transportation-bills", type: "outline" },
-          { label: "New", path: "/transport/transportation-bills/new", type: "primary" }
-        ], 
+         
         feature_key: "bills", 
         description: "Manage transportation bills and payments",
         icon: "📑",
@@ -260,10 +225,7 @@ export const transportSections = [
       { 
         title: "Billing", 
         path: "/transport/billing",
-        actions: [
-          { label: "View", path: "/transport/billing", type: "outline" },
-          { label: "New", path: "/transport/billing/new", type: "primary" }
-        ], 
+         
         feature_key: "billing", 
         description: "Manage transport invoices and billing",
         icon: "🧾",
@@ -274,10 +236,7 @@ export const transportSections = [
       { 
         title: "Transportation Income", 
         path: "/transport/income",
-        actions: [
-          { label: "View", path: "/transport/income", type: "outline" },
-          { label: "New", path: "/transport/income/new", type: "primary" }
-        ], 
+         
         feature_key: "income", 
         description: "Manage income records",
         icon: "💵",
@@ -288,10 +247,7 @@ export const transportSections = [
       { 
         title: "Transportation Expenses", 
         path: "/transport/expenses",
-        actions: [
-          { label: "View", path: "/transport/expenses", type: "outline" },
-          { label: "New", path: "/transport/expenses/new", type: "primary" }
-        ], 
+         
         feature_key: "expenses", 
         description: "Manage expense records",
         icon: "💸",
@@ -302,9 +258,7 @@ export const transportSections = [
       { 
         title: "Expense Logs", 
         path: "/transport/expense-logs",
-        actions: [
-          { label: "View", path: "/transport/expense-logs", type: "outline" }
-        ], 
+         
         feature_key: "expense_log", 
         description: "Detailed logs of all transportation expenses",
         icon: "📋",
@@ -320,9 +274,7 @@ export const transportSections = [
       { 
         title: "Transport Reports", 
         path: "/transport/reports",
-        actions: [
-          { label: "View", path: "/transport/reports", type: "outline" }
-        ], 
+         
         feature_key: "reports", 
         description: "Comprehensive transport analytics and reports hub",
         icon: "📊",
@@ -333,9 +285,7 @@ export const transportSections = [
       { 
         title: "Trip Execution Report", 
         path: "/transport/reports/trip-execution",
-        actions: [
-          { label: "View", path: "/transport/reports/trip-execution", type: "outline" }
-        ], 
+         
         feature_key: "reports", 
         description: "Detailed report of trip executions and metrics",
         icon: "📈",
@@ -346,9 +296,7 @@ export const transportSections = [
       { 
         title: "Trip History Report", 
         path: "/transport/reports/trip-history",
-        actions: [
-          { label: "View", path: "/transport/reports/trip-history", type: "outline" }
-        ], 
+         
         feature_key: "reports", 
         description: "Historical trip logs and driver performance",
         icon: "📜",
@@ -359,9 +307,7 @@ export const transportSections = [
       { 
         title: "Transport Revenue Report", 
         path: "/transport/reports/revenue",
-        actions: [
-          { label: "View", path: "/transport/reports/revenue", type: "outline" }
-        ], 
+         
         feature_key: "reports", 
         description: "Analyze transport billings and income",
         icon: "💰",
@@ -372,9 +318,7 @@ export const transportSections = [
       { 
         title: "Trip Profitability Report", 
         path: "/transport/reports/profitability",
-        actions: [
-          { label: "View", path: "/transport/reports/profitability", type: "outline" }
-        ], 
+         
         feature_key: "reports", 
         description: "Revenue vs cost breakdown per trip",
         icon: "💵",
@@ -385,9 +329,7 @@ export const transportSections = [
       { 
         title: "Fuel Consumption Report", 
         path: "/transport/reports/fuel",
-        actions: [
-          { label: "View", path: "/transport/reports/fuel", type: "outline" }
-        ], 
+         
         feature_key: "reports", 
         description: "Fuel usage and efficiency per vehicle",
         icon: "⛽",
@@ -398,9 +340,7 @@ export const transportSections = [
       { 
         title: "Vehicle Utilization Report", 
         path: "/transport/reports/utilization",
-        actions: [
-          { label: "View", path: "/transport/reports/utilization", type: "outline" }
-        ], 
+         
         feature_key: "reports", 
         description: "Fleet operational hours and downtime analysis",
         icon: "⏱️",
@@ -411,9 +351,7 @@ export const transportSections = [
       { 
         title: "Driver Performance Report", 
         path: "/transport/reports/driver-performance",
-        actions: [
-          { label: "View", path: "/transport/reports/driver-performance", type: "outline" }
-        ], 
+         
         feature_key: "reports", 
         description: "Trips completed, delays, and safety rating",
         icon: "⭐",
@@ -424,9 +362,7 @@ export const transportSections = [
       { 
         title: "Trip Delays & Issues", 
         path: "/transport/reports/delays",
-        actions: [
-          { label: "View", path: "/transport/reports/delays", type: "outline" }
-        ], 
+         
         feature_key: "reports", 
         description: "Analysis of delays and issues during trips",
         icon: "⚠️",
@@ -442,9 +378,7 @@ export const transportSections = [
       { 
         title: "Settings", 
         path: "/transport/settings",
-        actions: [
-          { label: "View", path: "/transport/settings", type: "outline" }
-        ], 
+         
         feature_key: "settings", 
         description: "Configure pricing, types, and module behaviors",
         icon: "⚙️",
@@ -543,9 +477,7 @@ function TransportLanding() {
       now={now}
       headerActions={[
         { label: "Dashboard", path: "/transport/dashboard",
-        actions: [
-          { label: "View", path: "/transport/dashboard", type: "outline" }
-        ], icon: "📊" },
+         icon: "📊" },
       ]}
     />
   );

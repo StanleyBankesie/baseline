@@ -41,6 +41,8 @@ export default function GeneralSettingsPage() {
     TEMPLATE_MAINTENANCE_JOB: "",
     TEMPLATE_PAYMENT_VOUCHER: "",
   });
+  const [announcements, setAnnouncements] = useState("");
+  const [announcementsSaving, setAnnouncementsSaving] = useState(false);
   const [envLoading, setEnvLoading] = useState(false);
   const [envSaving, setEnvSaving] = useState(false);
   
@@ -97,6 +99,15 @@ export default function GeneralSettingsPage() {
           setGoogleMapsApiKey(res.data.data.api_key);
         }
       } catch {} finally { if (mounted) setGoogleMapsLoading(false); }
+    })();
+
+    (async () => {
+      try {
+        const res = await api.get("/admin/settings/announcements");
+        if (mounted && res?.data?.announcements !== undefined) {
+          setAnnouncements(res.data.announcements);
+        }
+      } catch {}
     })();
 
     return () => { mounted = false; };
@@ -195,6 +206,18 @@ export default function GeneralSettingsPage() {
     finally { setEmailTesting(false); }
   }
 
+  async function saveAnnouncements() {
+    try {
+      setAnnouncementsSaving(true);
+      await api.post("/admin/settings/announcements", { announcements });
+      toast.success("Announcements saved successfully.");
+    } catch (e) {
+      toast.error("Failed to save announcements");
+    } finally {
+      setAnnouncementsSaving(false);
+    }
+  }
+
   async function saveEnvVars() {
     try {
       setEnvSaving(true);
@@ -255,7 +278,41 @@ export default function GeneralSettingsPage() {
       </div>
 
       <div className="space-y-4">
-        {/* SMS and WhatsApp Configuration Section */}
+        
+          {/* Upcoming Announcements Section */}
+          <div className="card border-l-4 border-l-brand">
+            <div className="card-body space-y-3">
+              <div className="flex justify-between items-start gap-4">
+                <div>
+                  <div className="text-lg font-semibold text-gray-800">Upcoming Announcements</div>
+                  <div className="text-sm text-gray-500">
+                    Enter announcements to be displayed on the login page widget.
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-3">
+                <textarea
+                  className="input w-full min-h-[100px]"
+                  placeholder="Enter upcoming announcements here..."
+                  value={announcements}
+                  onChange={(e) => setAnnouncements(e.target.value)}
+                ></textarea>
+                
+                <div className="flex justify-end pt-3">
+                  <button
+                    className="btn btn-primary"
+                    onClick={saveAnnouncements}
+                    disabled={announcementsSaving}
+                  >
+                    {announcementsSaving ? "Saving..." : "Save Announcements"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* SMS and WhatsApp Configuration Section */}
         <div className="card border-l-4 border-l-brand">
           <div className="card-body space-y-3">
             <div className="flex justify-between items-start gap-4">
@@ -358,6 +415,27 @@ export default function GeneralSettingsPage() {
         </div>
 
 
+
+        <div className="card">
+          <div className="card-body space-y-3">
+            <div className="flex justify-between items-start gap-4">
+              <div>
+                <div className="text-lg font-semibold">Login Background Image</div>
+                <div className="text-sm text-slate-500">Set the background image for the login and password reset forms.</div>
+              </div>
+              {loginBackgroundUrl && (
+                <img src={loginBackgroundUrl} alt="Login Background" className="h-20 w-auto rounded border border-slate-200" />
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <label className="btn-primary cursor-pointer">
+                {loginBackgroundSaving ? "Saving..." : "Upload Background"}
+                <input type="file" accept="image/*" className="hidden" disabled={loginBackgroundSaving} onChange={e => { const file = e.target.files?.[0] || null; e.target.value = ""; uploadLoginBackground(file); }} />
+              </label>
+              <button type="button" className="btn-outline" disabled={loginBackgroundSaving || !loginBackgroundUrl} onClick={clearLoginBackground}>Reset to Default</button>
+            </div>
+          </div>
+        </div>
 
         <div className="card">
           <div className="card-body space-y-3">

@@ -38,11 +38,11 @@
 @layer components {
   /* ── ERP Button Styles ─────────────────────────────── */
   .btn-primary {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium text-white bg-brand-600 hover:bg-brand-700 active:bg-brand-800 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium text-white bg-brand-900 hover:bg-brand-800 active:bg-brand-950 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed;
     min-height: 38px;
   }
   .btn-primary:focus-visible {
-    @apply outline-none ring-2 ring-brand-500/40 ring-offset-2 ring-offset-white dark:ring-offset-slate-800;
+    @apply outline-none ring-2 ring-brand-900/40 ring-offset-2 ring-offset-white dark:ring-offset-slate-800;
   }
 
   .btn-secondary {
@@ -50,11 +50,11 @@
     min-height: 38px;
   }
   .btn-secondary:focus-visible {
-    @apply outline-none ring-2 ring-brand-500/30 ring-offset-2 ring-offset-white dark:ring-offset-slate-800;
+    @apply outline-none ring-2 ring-brand-900/30 ring-offset-2 ring-offset-white dark:ring-offset-slate-800;
   }
 
   .btn-outline {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium text-brand-600 dark:text-brand-400 border border-brand-600 dark:border-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium text-brand-900 dark:text-brand-400 border border-brand-900 dark:border-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
     min-height: 38px;
   }
   .btn-outline:focus-visible {

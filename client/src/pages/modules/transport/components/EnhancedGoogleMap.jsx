@@ -64,17 +64,23 @@ function EnhancedGoogleMapInner({ apiKey, vehicles, selectedVehicleId, onSelectV
     
     if (selectedVehicleId) {
       const v = vehicles.find(v => v.trip_id === selectedVehicleId);
-      if (v && v.latitude && v.longitude) {
-        mapRef.current.panTo({ lat: Number(v.latitude), lng: Number(v.longitude) });
-        mapRef.current.setZoom(16);
+      if (v) {
+        const lat = v.latitude ? Number(v.latitude) : (v.origin_lat ? Number(v.origin_lat) : null);
+        const lng = v.longitude ? Number(v.longitude) : (v.origin_lng ? Number(v.origin_lng) : null);
+        if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+          mapRef.current.panTo({ lat, lng });
+          mapRef.current.setZoom(16);
+        }
       }
     } else if (vehicles?.length > 0) {
       // Fit bounds to all vehicles
       const bounds = new window.google.maps.LatLngBounds();
       let hasValidCoords = false;
       vehicles.forEach(v => {
-        if (v.latitude && v.longitude) {
-          bounds.extend({ lat: Number(v.latitude), lng: Number(v.longitude) });
+        const lat = v.latitude ? Number(v.latitude) : (v.origin_lat ? Number(v.origin_lat) : null);
+        const lng = v.longitude ? Number(v.longitude) : (v.origin_lng ? Number(v.origin_lng) : null);
+        if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+          bounds.extend({ lat, lng });
           hasValidCoords = true;
         }
       });
@@ -154,13 +160,15 @@ function EnhancedGoogleMapInner({ apiKey, vehicles, selectedVehicleId, onSelectV
         {(clusterer) => (
           <>
             {vehicles.map((v) => {
-              if (!v.latitude || !v.longitude) return null;
+              const lat = v.latitude ? Number(v.latitude) : (v.origin_lat ? Number(v.origin_lat) : null);
+              const lng = v.longitude ? Number(v.longitude) : (v.origin_lng ? Number(v.origin_lng) : null);
+              if (!lat || !lng || isNaN(lat) || isNaN(lng)) return null;
               const isSelected = selectedVehicleId === v.trip_id;
 
               return (
                 <Marker
                   key={v.trip_id}
-                  position={{ lat: Number(v.latitude), lng: Number(v.longitude) }}
+                  position={{ lat, lng }}
                   icon={getMarkerIcon(v)}
                   onClick={() => onSelectVehicle(v)}
                   clusterer={clusterer}

@@ -118,15 +118,22 @@ export default function ResetPasswordPage() {
           {/* Overlay to ensure form text readability */}
           <div className="absolute inset-0 bg-white/90"></div>
           
-          {/* Logo at upper left corner */}
-          <div className="absolute top-6 left-6 md:top-8 md:left-8 z-20">
-            <div className="bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow-sm flex items-center gap-2 border border-slate-100">
-              <img src={logoClear} alt="OmniSuite" className="h-6 w-auto" />
-            </div>
-          </div>
-          
           <div className="max-w-md w-full mx-auto relative z-10">
-            
+            {/* Logo on top for all devices */}
+            <div className="flex justify-center mb-12">
+              <div className="bg-white/80 backdrop-blur px-5 py-2.5 rounded-full shadow-md flex items-center gap-3 border border-slate-100">
+                <img src="/OMNISUITE_ICON_CLEAR.png" alt="Omnisuite ERP" className="h-7 w-auto" />
+                <span className="font-bold text-slate-800 text-lg tracking-tight">Omnisuite ERP</span>
+              </div>
+            </div>
+            {/* Logo on top for all devices */}
+            <div className="flex justify-center mb-12">
+              <div className="bg-white/80 backdrop-blur px-5 py-2.5 rounded-full shadow-md flex items-center gap-3 border border-slate-100">
+                <img src="/OMNISUITE_ICON_CLEAR.png" alt="Omnisuite ERP" className="h-7 w-auto" />
+                <span className="font-bold text-slate-800 text-lg tracking-tight">Omnisuite ERP</span>
+              </div>
+            </div>
+
             <div className="text-center mb-8">
               <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-2">New Password</h1>
               <p className="text-slate-600">Enter the OTP sent to your email and your new password.</p>
@@ -200,9 +207,11 @@ export default function ResetPasswordPage() {
             </form>
             
             <div className="mt-8 pt-8 border-t border-amber-200/50 flex flex-col items-center gap-2 text-xs text-slate-500">
-              <div>Powered by Stanness Technologies</div>
+              <div>
+                Powered by <a href="https://www.stannesstechnologies.com" target="_blank" rel="noopener noreferrer" className="hover:text-slate-800 transition-colors font-medium">Stanness Technologies</a>
+              </div>
               <div className="flex gap-4">
-                <a href="#" className="hover:text-slate-800 transition-colors">Privacy Policy</a>
+                <Link to="/privacy-policy" className="hover:text-slate-800 transition-colors">Privacy Policy</Link>
               </div>
             </div>
           </div>

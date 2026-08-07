@@ -43,7 +43,28 @@ export default function DriverApp() {
     const success = startTracking(tripId, vehicleId);
     if (success) {
       message.success("Trip Started! GPS tracking active.");
-      // Ideally update backend status to IN_TRANSIT here
+      
+      try {
+        // Update backend status to IN_TRANSIT
+        await api.put(`/transport/trips/${tripId}/status`, { status: "IN_TRANSIT" });
+        fetchTrips();
+      } catch (err) {
+        console.error("Failed to update status", err);
+      }
+
+      // Automatically use Google Maps navigation to track vehicle position / direct the driver
+      const trip = trips.find(t => t.id === tripId);
+      if (trip && trip.destination_lat && trip.destination_lng) {
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${trip.destination_lat},${trip.destination_lng}&travelmode=driving`;
+        window.open(url, "_blank");
+      } else if (trip && trip.destination_name) {
+        // Fallback to name search if coordinates are missing
+        const encodedDest = encodeURIComponent(trip.destination_name);
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${encodedDest}&travelmode=driving`;
+        window.open(url, "_blank");
+      } else {
+        message.warning("No destination coordinates available for navigation.");
+      }
     }
   };
 

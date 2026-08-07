@@ -59,27 +59,123 @@ function ExecNavDropdown({ label, items, navigate }) {
       {open && (
         <div
           className="absolute left-0 top-full mt-1.5 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-erp-lg overflow-hidden"
-          style={{ minWidth: 220 }}
+          style={{ minWidth: 240, maxWidth: 360 }}
         >
-          <div className="p-1.5 grid grid-cols-1 gap-0.5 max-h-80 overflow-y-auto">
-            {items.map((item, idx) => (
-              <button
-                key={item.path || item.key || idx}
-                onClick={() => {
-                  if (item.path) navigate(item.path);
-                  setOpen(false);
-                }}
-                className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-sm font-medium text-left text-slate-700 dark:text-slate-300 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:text-brand-700 dark:hover:text-brand-300 transition-colors"
-              >
-                <span className="truncate">{item.label || item.title || item.name}</span>
-              </button>
-            ))}
+          <div className="p-1.5 grid grid-cols-1 gap-1 max-h-80 overflow-y-auto">
+            {items.map((item, idx) => {
+              const itemTitle = item.label || item.title || item.name;
+              const itemPath = item.path;
+              const itemIcon = item.icon;
+              const itemDesc = item.desc || item.description;
+
+              return (
+                <button
+                  key={itemPath || item.key || idx}
+                  onClick={() => {
+                    if (itemPath) navigate(itemPath);
+                    setOpen(false);
+                  }}
+                  className="flex items-start gap-2.5 w-full px-3 py-2 rounded-lg text-sm font-medium text-left transition-colors text-slate-700 dark:text-slate-300 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:text-brand-700 dark:hover:text-brand-300"
+                >
+                  {typeof itemIcon === "string" ? (
+                    <span className="text-base flex-shrink-0 mt-0.5">{itemIcon}</span>
+                  ) : itemIcon && typeof itemIcon === "function" ? (
+                    <itemIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  ) : (
+                    <span className="text-base flex-shrink-0 mt-0.5">📄</span>
+                  )}
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="truncate leading-snug">{itemTitle}</span>
+                    {itemDesc && (
+                      <span className="text-[11px] font-normal truncate leading-tight text-slate-400 dark:text-slate-500">
+                        {itemDesc}
+                      </span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
     </div>
   );
 }
+
+function ModuleLaunchCard({ m, navigate }) {
+  const [open, setOpen] = useState(false);
+  const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
+  const ref = React.useRef(null);
+  const IconComp = m.icon;
+
+  React.useEffect(() => {
+    if (!open) return;
+    function handler(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    const handleScroll = () => setOpen(false);
+    document.addEventListener("mousedown", handler);
+    document.addEventListener("scroll", handleScroll, true);
+    window.addEventListener("resize", handleScroll);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("scroll", handleScroll, true);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, [open]);
+
+  const toggleOpen = (e) => {
+    if (!open) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      setCoords({
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width
+      });
+    }
+    setOpen(!open);
+  };
+
+  return (
+    <div ref={ref} className="relative w-full">
+      <button
+        onClick={toggleOpen}
+        className="w-full text-left card p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-brand dark:hover:border-brand-500 shadow-sm hover:shadow-md transition-all group flex items-start gap-3"
+      >
+        <div className={`p-2 rounded-lg border ${m.color} shrink-0 mt-0.5`}>
+          <IconComp className="w-4 h-4" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 group-hover:text-brand transition-colors truncate">
+            {m.label}
+          </h3>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+            {m.desc}
+          </p>
+        </div>
+        <ChevronDown className={`w-4 h-4 text-slate-400 group-hover:text-brand transition-all shrink-0 mt-1 ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && m.actions && m.actions.length > 0 && (
+        <div 
+          className="fixed bg-white dark:bg-slate-800 rounded-lg shadow-erp-lg border border-slate-200 dark:border-slate-700 py-1 z-[9999] overflow-hidden"
+          style={{ top: coords.top, left: coords.left, width: Math.max(160, coords.width) }}
+        >
+          {m.actions.map((act, i) => (
+            <button
+              key={i}
+              onClick={() => { navigate(act.path); setOpen(false); }}
+              className="block w-full text-left px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:text-brand-700 dark:hover:text-brand-300 transition-colors"
+            >
+              {act.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 const fmt = (n) => Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -190,6 +286,7 @@ export default function ExecutiveOverviewHome() {
     badges: {},
   });
 
+  const [workflows, setWorkflows] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -248,6 +345,13 @@ export default function ExecutiveOverviewHome() {
         const prevFastData = prevFastRes.status === "fulfilled" ? prevFastRes.value.data?.items || [] : [];
         const slowData = slowRes.status === "fulfilled" ? slowRes.value.data?.items || [] : [];
         const prevSlowData = prevSlowRes.status === "fulfilled" ? prevSlowRes.value.data?.items || [] : [];
+
+        try {
+          const wfResponse = await api.get("/executive-overview/workflows");
+          setWorkflows(wfResponse?.data?.data || []);
+        } catch (e) {
+          console.error("Failed to load workflows", e);
+        }
 
         const outstandingReceivablesVal = sumOutstanding(recData);
         const outstandingPayablesVal = sumOutstanding(payData);
@@ -384,7 +488,7 @@ export default function ExecutiveOverviewHome() {
   return (
     <div className="space-y-6">
       {/* Upper Top Sticky Navigation Bar (Identical layout to BI Module) */}
-      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 shadow-sm px-4 py-2">
+      <div className="hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 shadow-sm px-4 py-2">
         <div className="flex items-center gap-1.5 overflow-x-auto">
           <NavLink
             to="/"
@@ -406,227 +510,280 @@ export default function ExecutiveOverviewHome() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
-      {/* Header Banner */}
-      <div className="card shadow-md">
-        <div className="card-header bg-brand text-white rounded-t-lg p-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-white/10 rounded-2xl border border-white/20">
-                <BarChart3 className="w-8 h-8 text-white" />
+      <div className="w-full px-4 sm:px-6 mb-6">
+        {/* Header Banner */}
+        <div className="card shadow-md">
+          <div className="card-header bg-brand text-white rounded-lg p-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-white/10 rounded-2xl border border-white/20">
+                  <BarChart3 className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-extrabold flex items-center gap-2">
+                    Executive Overview Dashboard
+                  </h1>
+                  <p className="text-sm mt-0.5 opacity-90">
+                    Real-time enterprise metrics, KPI reporting, and strategic operational insights
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-extrabold flex items-center gap-2">
-                  Executive Overview Dashboard
-                </h1>
-                <p className="text-sm mt-0.5 opacity-90">
-                  Real-time enterprise metrics, KPI reporting, and strategic operational insights
-                </p>
+              <div className="flex flex-col sm:items-end text-xs text-white/90">
+                <span className="font-semibold">
+                  {new Date().toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+                </span>
+                <span className="mt-1 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 font-bold text-[10px] uppercase">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> System Operational
+                </span>
               </div>
             </div>
-            <div className="flex flex-col sm:items-end text-xs text-white/90">
-              <span className="font-semibold">
-                {new Date().toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+          </div>
+        </div>
+      </div>
+      <div className="w-full px-4 sm:px-6 flex flex-col xl:flex-row gap-6 items-stretch">
+        {/* Main Content (Left Column) */}
+        <div className="flex-1 min-w-0 w-full">
+          {/* Signature Key Performance Indicators Section (Original 4-Card Vibrant UI) */}
+          <div className="space-y-4 h-full">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-amber-500" /> Key Performance Indicators
+              </h2>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">
+                Click to view detailed reports
               </span>
-              <span className="mt-1 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 font-bold text-[10px] uppercase">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> System Operational
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {KPI_CARDS.map((card, i) => {
+                const val = card.kpiKey ? kpis[card.kpiKey] : null;
+                const hasValue = val !== null && val !== undefined;
+                const badgeText = card.badgeKey ? kpis.badges?.[card.badgeKey] : "";
+                const cardType = i % 4;
+
+                const formattedVal = hasValue
+                  ? card.format === "count"
+                    ? Number(val || 0).toLocaleString()
+                    : `₵${fmt(val)}`
+                  : loading
+                  ? "Loading..."
+                  : "—";
+
+                if (cardType === 0) {
+                  // Card 1: Amber Gold
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => navigate(card.path)}
+                      className="group relative overflow-hidden rounded-[24px] p-5 shadow-[0_15px_30px_-5px_rgba(178,110,23,0.25)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(178,110,23,0.4)] active:scale-[0.98] transition-all duration-300 ease-out text-left focus:outline-none focus:ring-2 focus:ring-amber-500 bg-[#b26e17] text-white flex flex-col justify-between min-h-[140px]"
+                    >
+                      <div className="flex justify-between items-start min-h-[22px]">
+                        <p className="text-[10px] text-white/70 uppercase tracking-widest font-bold leading-none">{card.desc}</p>
+                        {badgeText ? (
+                          <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-white/15 backdrop-blur-md text-white/90 border border-white/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] leading-none flex items-center">
+                            {badgeText}
+                          </span>
+                        ) : null}
+                      </div>
+                      <div className="mt-4">
+                        <div 
+                          className="text-2xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)]"
+                          style={{ textShadow: "0 0 12px rgba(255, 255, 255, 0.45)" }}
+                        >
+                          {formattedVal}
+                        </div>
+                        <div className="mt-2 text-xs font-bold text-white/80 uppercase tracking-wider leading-none">
+                          {card.label}
+                        </div>
+                      </div>
+                      <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-white/5 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500 pointer-events-none" />
+                    </button>
+                  );
+                } else if (cardType === 1) {
+                  // Card 2: Steel Blue
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => navigate(card.path)}
+                      className="group relative overflow-hidden rounded-[24px] p-5 shadow-[0_15px_30px_-5px_rgba(36,82,109,0.25)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(36,82,109,0.4)] active:scale-[0.98] transition-all duration-300 ease-out text-left focus:outline-none focus:ring-2 focus:ring-blue-500 bg-[#24526d] text-white flex flex-col justify-between min-h-[140px]"
+                    >
+                      <div className="flex justify-between items-start min-h-[22px]">
+                        <p className="text-[10px] text-white/70 uppercase tracking-widest font-bold leading-none">{card.desc}</p>
+                        {badgeText ? (
+                          <span className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/20 backdrop-blur-md text-amber-200 border border-amber-400/20 shadow-sm leading-none flex items-center">
+                            {badgeText}
+                          </span>
+                        ) : null}
+                      </div>
+                      <div className="mt-4">
+                        <div className="text-2xl font-extrabold text-white tracking-tight">
+                          {formattedVal}
+                        </div>
+                        <div className="mt-2 text-xs font-bold text-white/80 uppercase tracking-wider leading-none flex items-center justify-between">
+                          <span>{card.label}</span>
+                          <svg className="w-8 h-4 text-white/30 ml-2 group-hover:text-white/50 transition-colors" viewBox="0 0 50 20" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M0 15 L10 12 L20 18 L30 8 L40 10 L50 2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </div>
+                      </div>
+                      <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-white/5 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500 pointer-events-none" />
+                    </button>
+                  );
+                } else if (cardType === 2) {
+                  // Card 3: Teal Green
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => navigate(card.path)}
+                      className="group relative overflow-hidden rounded-[24px] p-5 shadow-[0_15px_30px_-5px_rgba(24,117,92,0.25)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(24,117,92,0.4)] active:scale-[0.98] transition-all duration-300 ease-out text-left focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-[#18755c] text-white flex flex-col justify-between min-h-[140px]"
+                    >
+                      <div className="flex justify-between items-start min-h-[22px]">
+                        <p className="text-[10px] text-white/70 uppercase tracking-widest font-bold leading-none">{card.desc}</p>
+                        {badgeText ? (
+                          <span className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-white/90 border border-white/15 shadow-sm leading-none flex items-center">
+                            {badgeText}
+                          </span>
+                        ) : null}
+                      </div>
+                      <div className="mt-4">
+                        <div className="text-2xl font-extrabold text-white tracking-tight flex items-center gap-1.5">
+                          <span>{formattedVal}</span>
+                          <ArrowUpRight className="w-5 h-5 text-white/50 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                        </div>
+                        <div className="mt-2 text-xs font-bold text-white/80 uppercase tracking-wider leading-none">
+                          {card.label}
+                        </div>
+                      </div>
+                      <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-white/5 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500 pointer-events-none" />
+                    </button>
+                  );
+                } else {
+                  // Card 4: Carbon Black
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => navigate(card.path)}
+                      className="group relative overflow-hidden rounded-[24px] p-5 shadow-[0_15px_30px_-5px_rgba(0,0,0,0.25)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.5)] border border-white/5 hover:border-white/15 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-all duration-300 ease-out text-left focus:outline-none focus:ring-2 focus:ring-slate-500 bg-[#1d1f22] bg-[radial-gradient(#ffffff06_1px,transparent_1px)] [background-size:8px_8px] text-white flex flex-col justify-between min-h-[140px]"
+                    >
+                      <div className="flex justify-between items-start min-h-[22px]">
+                        <p className="text-[10px] text-white/70 uppercase tracking-widest font-bold leading-none">{card.desc}</p>
+                        {badgeText ? (
+                          <span className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-white border border-white/20 shadow-sm leading-none flex items-center">
+                            {badgeText}
+                          </span>
+                        ) : null}
+                      </div>
+                      <div className="mt-4">
+                        <div className="text-2xl font-extrabold text-white tracking-tight">
+                          {formattedVal}
+                        </div>
+                        <div className="mt-2 text-xs font-bold text-white/80 uppercase tracking-wider leading-none">
+                          {card.label}
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-white/30 absolute right-4 bottom-4 group-hover:translate-x-1 group-hover:text-white/70 transition-all" />
+                    </button>
+                  );
+                }
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Floating Enterprise ERP Modules Quick Launch (Right Column) */}
+        <div className="w-full xl:w-[340px] 2xl:w-[400px] shrink-0 xl:relative flex flex-col">
+          <div className="xl:absolute xl:inset-0 flex flex-col flex-1 w-full">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2 mb-4 shrink-0">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-emerald-500" /> Module Quick Launch
+              </h2>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">
+                {enabledModules.length} Modules
               </span>
+            </div>
+
+            <div className="flex-1 overflow-y-auto min-h-0 pb-4 pr-1 erp-scrollbar flex flex-col gap-3">
+              {enabledModules.map((m) => (
+                <ModuleLaunchCard key={m.key} m={m} navigate={navigate} />
+              ))}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Signature Key Performance Indicators Section (Original 4-Card Vibrant UI) */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-amber-500" /> Key Performance Indicators
-          </h2>
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">
-            Click to view detailed reports
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {KPI_CARDS.map((card, i) => {
-            const val = card.kpiKey ? kpis[card.kpiKey] : null;
-            const hasValue = val !== null && val !== undefined;
-            const badgeText = card.badgeKey ? kpis.badges?.[card.badgeKey] : "";
-            const cardType = i % 4;
-
-            const formattedVal = hasValue
-              ? card.format === "count"
-                ? Number(val || 0).toLocaleString()
-                : `₵${fmt(val)}`
-              : loading
-              ? "Loading..."
-              : "—";
-
-            if (cardType === 0) {
-              // Card 1: Amber Gold
-              return (
-                <button
-                  key={i}
-                  onClick={() => navigate(card.path)}
-                  className="group relative overflow-hidden rounded-[24px] p-5 shadow-[0_15px_30px_-5px_rgba(178,110,23,0.25)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(178,110,23,0.4)] active:scale-[0.98] transition-all duration-300 ease-out text-left focus:outline-none focus:ring-2 focus:ring-amber-500 bg-[#b26e17] text-white flex flex-col justify-between min-h-[140px]"
-                >
-                  <div className="flex justify-between items-start min-h-[22px]">
-                    <p className="text-[10px] text-white/70 uppercase tracking-widest font-bold leading-none">{card.desc}</p>
-                    {badgeText ? (
-                      <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-white/15 backdrop-blur-md text-white/90 border border-white/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] leading-none flex items-center">
-                        {badgeText}
-                      </span>
-                    ) : null}
-                  </div>
-                  <div className="mt-4">
-                    <div 
-                      className="text-2xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)]"
-                      style={{ textShadow: "0 0 12px rgba(255, 255, 255, 0.45)" }}
-                    >
-                      {formattedVal}
-                    </div>
-                    <div className="mt-2 text-xs font-bold text-white/80 uppercase tracking-wider leading-none">
-                      {card.label}
-                    </div>
-                  </div>
-                  <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-white/5 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500 pointer-events-none" />
-                </button>
-              );
-            } else if (cardType === 1) {
-              // Card 2: Steel Blue
-              return (
-                <button
-                  key={i}
-                  onClick={() => navigate(card.path)}
-                  className="group relative overflow-hidden rounded-[24px] p-5 shadow-[0_15px_30px_-5px_rgba(36,82,109,0.25)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(36,82,109,0.4)] active:scale-[0.98] transition-all duration-300 ease-out text-left focus:outline-none focus:ring-2 focus:ring-blue-500 bg-[#24526d] text-white flex flex-col justify-between min-h-[140px]"
-                >
-                  <div className="flex justify-between items-start min-h-[22px]">
-                    <p className="text-[10px] text-white/70 uppercase tracking-widest font-bold leading-none">{card.desc}</p>
-                    {badgeText ? (
-                      <span className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/20 backdrop-blur-md text-amber-200 border border-amber-400/20 shadow-sm leading-none flex items-center">
-                        {badgeText}
-                      </span>
-                    ) : null}
-                  </div>
-                  <div className="mt-4">
-                    <div className="text-2xl font-extrabold text-white tracking-tight">
-                      {formattedVal}
-                    </div>
-                    <div className="mt-2 text-xs font-bold text-white/80 uppercase tracking-wider leading-none flex items-center justify-between">
-                      <span>{card.label}</span>
-                      <svg className="w-8 h-4 text-white/30 ml-2 group-hover:text-white/50 transition-colors" viewBox="0 0 50 20" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M0 15 L10 12 L20 18 L30 8 L40 10 L50 2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-white/5 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500 pointer-events-none" />
-                </button>
-              );
-            } else if (cardType === 2) {
-              // Card 3: Teal Green
-              return (
-                <button
-                  key={i}
-                  onClick={() => navigate(card.path)}
-                  className="group relative overflow-hidden rounded-[24px] p-5 shadow-[0_15px_30px_-5px_rgba(24,117,92,0.25)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(24,117,92,0.4)] active:scale-[0.98] transition-all duration-300 ease-out text-left focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-[#18755c] text-white flex flex-col justify-between min-h-[140px]"
-                >
-                  <div className="flex justify-between items-start min-h-[22px]">
-                    <p className="text-[10px] text-white/70 uppercase tracking-widest font-bold leading-none">{card.desc}</p>
-                    {badgeText ? (
-                      <span className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-white/90 border border-white/15 shadow-sm leading-none flex items-center">
-                        {badgeText}
-                      </span>
-                    ) : null}
-                  </div>
-                  <div className="mt-4">
-                    <div className="text-2xl font-extrabold text-white tracking-tight flex items-center gap-1.5">
-                      <span>{formattedVal}</span>
-                      <ArrowUpRight className="w-5 h-5 text-white/50 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                    </div>
-                    <div className="mt-2 text-xs font-bold text-white/80 uppercase tracking-wider leading-none">
-                      {card.label}
-                    </div>
-                  </div>
-                  <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-white/5 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500 pointer-events-none" />
-                </button>
-              );
-            } else {
-              // Card 4: Carbon Black
-              return (
-                <button
-                  key={i}
-                  onClick={() => navigate(card.path)}
-                  className="group relative overflow-hidden rounded-[24px] p-5 shadow-[0_15px_30px_-5px_rgba(0,0,0,0.25)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.5)] border border-white/5 hover:border-white/15 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-all duration-300 ease-out text-left focus:outline-none focus:ring-2 focus:ring-slate-500 bg-[#1d1f22] bg-[radial-gradient(#ffffff06_1px,transparent_1px)] [background-size:8px_8px] text-white flex flex-col justify-between min-h-[140px]"
-                >
-                  <div className="flex justify-between items-start min-h-[22px]">
-                    <p className="text-[10px] text-white/70 uppercase tracking-widest font-bold leading-none">{card.desc}</p>
-                    {badgeText ? (
-                      <span className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-white border border-white/20 shadow-sm leading-none flex items-center">
-                        {badgeText}
-                      </span>
-                    ) : null}
-                  </div>
-                  <div className="mt-4">
-                    <div className="text-2xl font-extrabold text-white tracking-tight">
-                      {formattedVal}
-                    </div>
-                    <div className="mt-2 text-xs font-bold text-white/80 uppercase tracking-wider leading-none">
-                      {card.label}
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-white/30 absolute right-4 bottom-4 group-hover:translate-x-1 group-hover:text-white/70 transition-all" />
-                </button>
-              );
-            }
-          })}
+      {/* Bottom Full-Width Section */}
+      <div className="w-full px-4 sm:px-6 pb-8">
+        {/* Workflow Overview Section */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-indigo-500" /> Workflow Overview
+            </h2>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">
+              {workflows.length} Pending Actions
+            </span>
+          </div>
+          <div className="card overflow-hidden">
+            <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-120px)] erp-scrollbar">
+              <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+                <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold">Document No</th>
+                    <th className="px-4 py-3 font-semibold">Module</th>
+                    <th className="px-4 py-3 font-semibold">Type</th>
+                    <th className="px-4 py-3 font-semibold">Status</th>
+                    <th className="px-4 py-3 font-semibold">Date</th>
+                    <th className="px-4 py-3 font-semibold">Forwarded To</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {workflows.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" className="px-4 py-8 text-center text-slate-500">
+                        No pending workflows or drafts.
+                      </td>
+                    </tr>
+                  ) : (
+                    workflows.map((wf, idx) => (
+                      <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                        <td className="px-4 py-3 font-medium text-brand">{wf.doc_no || "-"}</td>
+                        <td className="px-4 py-3">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                            {wf.module}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">{wf.type}</td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${
+                            wf.status === 'DRAFT' ? 'bg-slate-100 text-slate-600' :
+                            wf.status === 'SUBMITTED' ? 'bg-blue-50 text-blue-600' :
+                            'bg-amber-50 text-amber-600'
+                          }`}>
+                            {wf.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">{wf.doc_date ? new Date(wf.doc_date).toLocaleDateString() : "-"}</td>
+                        <td className="px-4 py-3">
+                          {wf.assigned_to ? (
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-5 h-5 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-[10px] font-bold">
+                                {wf.assigned_to.substring(0, 1).toUpperCase()}
+                              </div>
+                              <span>{wf.assigned_to}</span>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 text-xs italic">Unassigned</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Enterprise ERP Modules Quick Launch */}
-      <div className="space-y-4 pt-2">
-        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-emerald-500" /> Enterprise Module Quick Launch
-          </h2>
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">
-            {enabledModules.length} Active Modules Enabled
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {enabledModules.map((m) => {
-            const IconComp = m.icon;
-            return (
-              <Link
-                key={m.key}
-                to={m.path}
-                className="card p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-brand dark:hover:border-brand-500 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between"
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className={`p-2.5 rounded-xl border ${m.color}`}>
-                      <IconComp className="w-5 h-5" />
-                    </div>
-                    <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-brand group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
-                  </div>
-                  <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 group-hover:text-brand transition-colors">
-                    {m.label}
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
-                    {m.desc}
-                  </p>
-                </div>
-
-                <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] font-semibold text-brand">
-                  <span>Open Dashboard</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-    </div>
     </div>
   );
 }

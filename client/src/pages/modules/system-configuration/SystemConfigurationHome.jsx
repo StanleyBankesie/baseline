@@ -27,10 +27,7 @@ export const systemConfigurationSections = [
           title: "Company Setup",
           description: "Manage company information and settings",
           path: "/system-configuration/companies",
-        actions: [
-          { label: "View", path: "/system-configuration/companies", type: "outline" },
-          { label: "New", path: "/system-configuration/companies/new", type: "primary" }
-        ],
+        
           icon: "🏢",
           hidden: false,
           actions: [
@@ -50,10 +47,7 @@ export const systemConfigurationSections = [
           title: "Branch Setup",
           description: "Configure and manage company branches",
           path: "/system-configuration/branches",
-        actions: [
-          { label: "View", path: "/system-configuration/branches", type: "outline" },
-          { label: "New", path: "/system-configuration/branches/new", type: "primary" }
-        ],
+        
           icon: "🏪",
           actions: [
             {
@@ -71,9 +65,7 @@ export const systemConfigurationSections = [
           title: "General Settings",
           description: "Global configurations and SMS/WhatsApp APIs",
           path: "/system-configuration/general-settings",
-        actions: [
-          { label: "View", path: "/system-configuration/general-settings", type: "outline" }
-        ],
+        
           icon: "⚙️",
           actions: [
           { label: "View", path: "/system-configuration/branches",
@@ -98,9 +90,7 @@ export const systemConfigurationSections = [
           title: "Admin Permissions",
           description: "Configure system-wide admin permissions",
           path: "/system-configuration/admin-permissions",
-        actions: [
-          { label: "View", path: "/system-configuration/admin-permissions", type: "outline" }
-        ],
+        
           icon: "🔒",
           actions: [
           { label: "View", path: "/system-configuration/admin-permissions",
@@ -113,10 +103,7 @@ export const systemConfigurationSections = [
           title: "Backup Settings",
           description: "Configure automated database backups",
           path: "/system-configuration/backups",
-        actions: [
-          { label: "View", path: "/system-configuration/backups", type: "outline" },
-          { label: "New", path: "/system-configuration/backups/new", type: "primary" }
-        ],
+        
           icon: "💾",
           actions: [
           { label: "View", path: "/system-configuration/backups",
@@ -140,10 +127,7 @@ export const systemConfigurationSections = [
           title: "License Management",
           description: "Manage system licensing",
           path: "/system-configuration/licenses",
-        actions: [
-          { label: "View", path: "/system-configuration/licenses", type: "outline" },
-          { label: "New", path: "/system-configuration/licenses/new", type: "primary" }
-        ],
+        
           icon: "🔑",
           actions: [
           { label: "View", path: "/system-configuration/licenses",
@@ -162,10 +146,7 @@ export const systemConfigurationSections = [
           title: "Payment Packages",
           description: "Manage subscription and payment packages",
           path: "/system-configuration/payment-packages",
-        actions: [
-          { label: "View", path: "/system-configuration/payment-packages", type: "outline" },
-          { label: "New", path: "/system-configuration/payment-packages/new", type: "primary" }
-        ],
+        
           icon: "💳",
           actions: [
           { label: "View", path: "/system-configuration/payment-packages",

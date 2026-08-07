@@ -1913,7 +1913,7 @@ export default function AppShell() {
               className={({ isActive }) =>
                 `flex items-center px-3 py-2.5 rounded-lg text-base font-medium transition-all duration-200 group ` +
                 (isActive
-                  ? "bg-brand-800 text-white shadow-lg border-l-4 border-primary-light"
+                  ? "bg-brand-800 text-white shadow-lg border-l-4 border-secondary"
                   : "text-brand-200 hover:bg-brand-800 hover:text-white border-l-4 border-transparent")
               }
             >
@@ -1940,7 +1940,7 @@ export default function AppShell() {
                   className={({ isActive }) =>
                     `flex items-center px-3 py-2.5 rounded-lg text-base font-medium transition-all duration-200 group ` +
                     (isActive
-                      ? "bg-brand-800 text-white shadow-lg border-l-4 border-primary-light"
+                      ? "bg-brand-800 text-white shadow-lg border-l-4 border-secondary"
                       : "text-brand-200 hover:bg-brand-800 hover:text-white border-l-4 border-transparent")
                   }
                 >
@@ -1957,7 +1957,7 @@ export default function AppShell() {
         </aside>
 
         <main className=" bg-slate-50 (#f8fafc)  dark:bg-slate-900 overflow-x-hidden min-w-0">
-          <div className="w-full max-w-full lg:max-w-[1200px] mx-auto p-2 md:p-2 lg:p-3">
+          <div className="w-full max-w-full 2xl:max-w-[1600px] mx-auto p-2 md:p-2 lg:p-3">
             {pushPromptVisible ? (
               <div className="mb-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 flex items-center justify-between">
                 <div className="text-sm">

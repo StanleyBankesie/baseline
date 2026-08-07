@@ -498,12 +498,14 @@ export const listBilling = async (req, res, next) => {
 export const addTripLocation = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { latitude, longitude, speed, heading, accuracy, recorded_at, is_initial, origin_name } = req.body;
+    const { latitude, longitude, speed, heading, accuracy, recorded_at, is_initial, origin_name, vehicle_id, driver_id, battery_level, is_offline_point } = req.body;
+
+    const userId = req.user?.id || req.user?.sub || null;
 
     await query(
-      `INSERT INTO trans_trip_locations (trip_id, latitude, longitude, speed, heading, accuracy, recorded_at)
-       VALUES (:id, :latitude, :longitude, :speed, :heading, :accuracy, :recorded_at)`,
-      { id, latitude, longitude, speed: speed || 0, heading: heading || 0, accuracy: accuracy || 0, recorded_at: recorded_at ? new Date(recorded_at) : new Date() }
+      `INSERT INTO trans_trip_locations (trip_id, vehicle_id, driver_id, latitude, longitude, speed, heading, accuracy, battery_level, is_offline_point, recorded_at)
+       VALUES (:id, :vehicle_id, :driver_id, :latitude, :longitude, :speed, :heading, :accuracy, :battery_level, :is_offline_point, :recorded_at)`,
+      { id, vehicle_id: vehicle_id || null, driver_id: driver_id || userId, latitude, longitude, speed: speed || 0, heading: heading || 0, accuracy: accuracy || 0, battery_level: battery_level || null, is_offline_point: is_offline_point || false, recorded_at: recorded_at ? new Date(recorded_at) : new Date() }
     );
 
     if (is_initial) {
@@ -513,7 +515,7 @@ export const addTripLocation = async (req, res, next) => {
         try {
           let mapsKey = process.env.GOOGLE_MAPS_API_KEY || process.env.VITE_GOOGLE_MAPS_API_KEY || "";
           if (!mapsKey) {
-            const [setting] = await query("SELECT setting_value FROM adm_system_settings WHERE setting_key = 'GOOGLE_MAPS_API_KEY'");
+            const [setting] = await query("SELECT setting_value FROM app_settings WHERE setting_key = 'GOOGLE_MAPS_API_KEY'");
             if (setting && setting.setting_value) mapsKey = setting.setting_value;
           }
           if (mapsKey) {

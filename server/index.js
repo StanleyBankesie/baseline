@@ -35,6 +35,7 @@ import uploadRoutes from "./routes/upload.routes.js";
 import workflowRoutes from "./routes/workflow.routes.js";
 import healthRoutes from "./routes/health.route.js";
 import authRoutes from "./routes/auth.routes.js";
+import executiveRoutes from "./routes/executive.routes.js";
 import { logDbError, query, testDbConnection } from "./db/pool.js";
 import { isMailerConfigured, verifyMailer, sendMail } from "./utils/mailer.js";
 import { closeRedis, getRedis } from "./utils/redis.js";
@@ -1000,6 +1001,7 @@ app.use("/api/srv-invoices", srvInvoicesRoutes);
 app.use("/api/transport", transportRoutes);
 app.use("/api/tracking", trackingRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/executive-overview", executiveRoutes);
 
 app.use("/api/", healthRoutes);
 app.use("/", healthRoutes);

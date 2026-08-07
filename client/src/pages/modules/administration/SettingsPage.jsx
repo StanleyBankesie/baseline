@@ -272,6 +272,13 @@ export default function SettingsPage() {
             </div>
           </div>
 
+          <div className="card">
+            <div className="card-body space-y-3">
+              <div className="text-lg font-semibold">Upcoming Events & Announcements</div>
+              <div className="text-sm text-slate-500">Configure multiple event topics to be displayed on the login page carousel.</div>
+              <AnnouncementsSection />
+            </div>
+          </div>
         </div>
       )}
 
@@ -567,4 +574,93 @@ function DepartmentsSection() {
   );
 }
 
+function AnnouncementsSection() {
+  const [topics, setTopics] = useState([""]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    async function load() {
+      setLoading(true);
+      try {
+        const res = await api.get("/admin/settings/announcements");
+        let loaded = res?.data?.announcements || [];
+        if (!Array.isArray(loaded)) {
+          loaded = loaded ? [String(loaded)] : [];
+        }
+        if (loaded.length === 0) loaded = [""];
+        setTopics(loaded);
+      } catch {
+        toast.error("Failed to load announcements");
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  const handleChange = (idx, val) => {
+    const newTopics = [...topics];
+    newTopics[idx] = val;
+    setTopics(newTopics);
+  };
+
+  const handleAdd = () => {
+    setTopics([...topics, ""]);
+  };
+
+  const handleRemove = (idx) => {
+    const newTopics = topics.filter((_, i) => i !== idx);
+    if (newTopics.length === 0) newTopics.push("");
+    setTopics(newTopics);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const validTopics = topics.filter(t => t.trim() !== "");
+      await api.post("/admin/settings/announcements", { announcements: validTopics });
+      toast.success("Announcements saved successfully");
+      if (validTopics.length === 0) setTopics([""]);
+      else setTopics(validTopics);
+    } catch {
+      toast.error("Failed to save announcements");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <div className="text-sm text-slate-500 py-2">Loading...</div>;
+
+  return (
+    <div className="space-y-4">
+      {topics.map((topic, idx) => (
+        <div key={idx} className="flex items-center gap-2">
+          <input
+            type="text"
+            placeholder="e.g. Annual Company Retreat - Nov 15th"
+            className="input flex-1"
+            value={topic}
+            onChange={(e) => handleChange(idx, e.target.value)}
+          />
+          <button
+            type="button"
+            onClick={() => handleRemove(idx)}
+            className="btn-outline px-3 text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200"
+            title="Remove topic"
+          >
+            ×
+          </button>
+        </div>
+      ))}
+      <div className="flex gap-2 pt-2">
+        <button type="button" onClick={handleAdd} className="btn-outline">
+          + Add Topic
+        </button>
+        <button type="button" onClick={handleSave} className="btn-primary" disabled={saving}>
+          {saving ? "Saving..." : "Save Topics"}
+        </button>
+      </div>
+    </div>
+  );
+}

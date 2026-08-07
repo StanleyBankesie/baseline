@@ -416,9 +416,7 @@ const SalesModuleHome = () => {
       stats={stats}
       headerActions={[
         { label: "Dashboard", path: "/sales/dashboard",
-        actions: [
-          { label: "View", path: "/sales/dashboard", type: "outline" }
-        ], icon: "📊" },
+         icon: "📊" },
       ]}
       sections={salesModuleSections}
       features={salesFeatures}
@@ -435,10 +433,7 @@ export const salesModuleSections = [
         {
           title: "Quotations",
           path: "/sales/quotations",
-        actions: [
-          { label: "View", path: "/sales/quotations", type: "outline" },
-          { label: "New", path: "/sales/quotations/new", type: "primary" }
-        ],
+        
           feature_key: "quotations",
           description: "Create and manage customer quotations",
           icon: "📋",
@@ -464,10 +459,7 @@ export const salesModuleSections = [
         {
           title: "Sales Orders",
           path: "/sales/sales-orders",
-        actions: [
-          { label: "View", path: "/sales/sales-orders", type: "outline" },
-          { label: "New", path: "/sales/sales-orders/new", type: "primary" }
-        ],
+        
           feature_key: "sales-orders",
           description: "Process customer orders and track fulfillment",
           icon: "🛒",
@@ -493,10 +485,7 @@ export const salesModuleSections = [
         {
           title: "Invoices",
           path: "/sales/invoices",
-        actions: [
-          { label: "View", path: "/sales/invoices", type: "outline" },
-          { label: "New", path: "/sales/invoices/new", type: "primary" }
-        ],
+        
           feature_key: "invoices",
           description: "Generate and manage sales invoices",
           icon: "🧾",
@@ -522,10 +511,7 @@ export const salesModuleSections = [
         {
           title: "Sales Returns",
           path: "/sales/returns",
-        actions: [
-          { label: "View", path: "/sales/returns", type: "outline" },
-          { label: "New", path: "/sales/returns/new", type: "primary" }
-        ],
+        
           feature_key: "returns",
           description: "Manage returned products and credit notes",
           icon: "🔙",
@@ -551,10 +537,7 @@ export const salesModuleSections = [
         {
           title: "Delivery Notes",
           path: "/sales/delivery",
-        actions: [
-          { label: "View", path: "/sales/delivery", type: "outline" },
-          { label: "New", path: "/sales/delivery/new", type: "primary" }
-        ],
+        
           feature_key: "delivery",
           description: "Track product deliveries to customers",
           icon: "🚚",
@@ -586,9 +569,7 @@ export const salesModuleSections = [
         {
           title: "Price Setup",
           path: "/sales/price-setup",
-        actions: [
-          { label: "View", path: "/sales/price-setup", type: "outline" }
-        ],
+        
           description: "Manage standard and customer pricing",
           icon: "💰",
           actions: [
@@ -607,10 +588,7 @@ export const salesModuleSections = [
         {
           title: "Promotional Campaigns",
           path: "/sales/discount-schemes",
-        actions: [
-          { label: "View", path: "/sales/discount-schemes", type: "outline" },
-          { label: "New", path: "/sales/discount-schemes/new", type: "primary" }
-        ],
+        
           description: "Discount campaigns, purchase reward schemes, and promotions",
           icon: "🏷️",
           actions: [
@@ -629,9 +607,7 @@ export const salesModuleSections = [
         {
           title: "Sales Setup",
           path: "/sales/setup",
-        actions: [
-          { label: "View", path: "/sales/setup", type: "outline" }
-        ],
+        
           description: "Configure sales return reasons and return workflows",
           icon: "⚙️",
           actions: [
@@ -649,10 +625,7 @@ export const salesModuleSections = [
         {
           title: "Customers",
           path: "/sales/customers",
-        actions: [
-          { label: "View", path: "/sales/customers", type: "outline" },
-          { label: "New", path: "/sales/customers/new", type: "primary" }
-        ],
+        
           feature_key: "customers",
           description: "Manage customer information and credit limits",
           icon: "👥",
@@ -678,10 +651,7 @@ export const salesModuleSections = [
         {
           title: "Prospective Customers",
           path: "/sales/prospect-customers",
-        actions: [
-          { label: "View", path: "/sales/prospect-customers", type: "outline" },
-          { label: "New", path: "/sales/prospect-customers/new", type: "primary" }
-        ],
+        
           feature_key: "prospect-customers",
           description: "Manage prospective customer (leads) information",
           icon: "🔮",
@@ -707,10 +677,7 @@ export const salesModuleSections = [
         {
           title: "Prospect Conversion",
           path: "/sales/prospect-conversion",
-        actions: [
-          { label: "View", path: "/sales/prospect-conversion", type: "outline" },
-          { label: "New", path: "/sales/prospect-conversion/new", type: "primary" }
-        ],
+        
           feature_key: "prospect-conversion",
           description:
             "Convert prospective customers into full customer accounts",
@@ -734,180 +701,140 @@ export const salesModuleSections = [
         {
           title: "Sales Register",
           path: "/sales/reports/sales-register",
-        actions: [
-          { label: "View", path: "/sales/reports/sales-register", type: "outline" }
-        ],
+        
           description: "Invoices within the selected period",
           icon: "🧾",
         },
         {
           title: "Delivery Register",
           path: "/sales/reports/delivery-register",
-        actions: [
-          { label: "View", path: "/sales/reports/delivery-register", type: "outline" }
-        ],
+        
           description: "Deliveries made to customers",
           icon: "🚚",
         },
         {
           title: "Sales Return Report",
           path: "/sales/reports/sales-return",
-        actions: [
-          { label: "View", path: "/sales/reports/sales-return", type: "outline" }
-        ],
+        
           description: "Items returned by customers",
           icon: "↩️",
         },
         {
           title: "Debtors Balance",
           path: "/sales/reports/debtors-balance",
-        actions: [
-          { label: "View", path: "/sales/reports/debtors-balance", type: "outline" }
-        ],
+        
           description: "Customer balances and outstanding",
           icon: "👤",
         },
         {
           title: "Sales Profitability",
           path: "/sales/reports/sales-profitability",
-        actions: [
-          { label: "View", path: "/sales/reports/sales-profitability", type: "outline" }
-        ],
+        
           description: "Margins and profitability by invoice",
           icon: "💹",
         },
         {
           title: "Sales Tracking",
           path: "/sales/reports/sales-tracking",
-        actions: [
-          { label: "View", path: "/sales/reports/sales-tracking", type: "outline" }
-        ],
+        
           description: "Track quotations → orders → deliveries → invoices",
           icon: "🔎",
         },
         {
           title: "Customer List",
           path: "/sales/reports/customer-list",
-        actions: [
-          { label: "View", path: "/sales/reports/customer-list", type: "outline" }
-        ],
+        
           description: "Export all active customers to Excel",
           icon: "👥",
         },
         {
           title: "Prospective Customer List",
           path: "/sales/reports/prospect-customer-list",
-        actions: [
-          { label: "View", path: "/sales/reports/prospect-customer-list", type: "outline" }
-        ],
+        
           description: "Export all prospective customers to Excel",
           icon: "🔮",
         },
         {
           title: "Quotation Summary",
           path: "/sales/reports/quotation-summary",
-        actions: [
-          { label: "View", path: "/sales/reports/quotation-summary", type: "outline" }
-        ],
+        
           description: "Track quotes",
           icon: "📋",
         },
         {
           title: "Quotation Conversion",
           path: "/sales/reports/quotation-conversion",
-        actions: [
-          { label: "View", path: "/sales/reports/quotation-conversion", type: "outline" }
-        ],
+        
           description: "Sales effectiveness",
           icon: "✅",
         },
         {
           title: "Sales Order Status",
           path: "/sales/reports/sales-order-status",
-        actions: [
-          { label: "View", path: "/sales/reports/sales-order-status", type: "outline" }
-        ],
+        
           description: "Monitor active orders",
           icon: "📦",
         },
         {
           title: "Invoice Summary",
           path: "/sales/reports/invoice-summary",
-        actions: [
-          { label: "View", path: "/sales/reports/invoice-summary", type: "outline" }
-        ],
+        
           description: "Revenue tracking",
           icon: "🧾",
         },
         {
           title: "A/R Aging",
           path: "/sales/reports/ar-aging",
-        actions: [
-          { label: "View", path: "/sales/reports/ar-aging", type: "outline" }
-        ],
+        
           description: "Overdue payments",
           icon: "⏱️",
         },
         {
           title: "Revenue by Customer",
           path: "/sales/reports/revenue-by-customer",
-        actions: [
-          { label: "View", path: "/sales/reports/revenue-by-customer", type: "outline" }
-        ],
+        
           description: "Top customers",
           icon: "👥",
         },
         {
           title: "Revenue by Product",
           path: "/sales/reports/revenue-by-product",
-        actions: [
-          { label: "View", path: "/sales/reports/revenue-by-product", type: "outline" }
-        ],
+        
           description: "Best sellers",
           icon: "📦",
         },
         {
           title: "Discount Utilization",
           path: "/sales/reports/discount-utilization",
-        actions: [
-          { label: "View", path: "/sales/reports/discount-utilization", type: "outline" }
-        ],
+        
           description: "Discount control",
           icon: "🏷️",
         },
         {
           title: "Price List",
           path: "/sales/reports/price-list",
-        actions: [
-          { label: "View", path: "/sales/reports/price-list", type: "outline" }
-        ],
+        
           description: "Monitor pricing",
           icon: "💰",
         },
         {
           title: "Monthly Sales Trend",
           path: "/sales/reports/monthly-sales-trend",
-        actions: [
-          { label: "View", path: "/sales/reports/monthly-sales-trend", type: "outline" }
-        ],
+        
           description: "Executive overview",
           icon: "📈",
         },
         {
           title: "Customer Order History",
           path: "/sales/reports/customer-order-history",
-        actions: [
-          { label: "View", path: "/sales/reports/customer-order-history", type: "outline" }
-        ],
+        
           description: "Per-customer timeline",
           icon: "🗂️",
         },
         {
           title: "Customer Accounts",
           path: "/sales/reports/customer-history",
-        actions: [
-          { label: "View", path: "/sales/reports/customer-history", type: "outline" }
-        ],
+        
           description:
             "Complete customer transaction history including returns",
           icon: "📋",
@@ -915,9 +842,7 @@ export const salesModuleSections = [
         {
           title: "Cancelled / Rejected Orders",
           path: "/sales/reports/cancelled-orders",
-        actions: [
-          { label: "View", path: "/sales/reports/cancelled-orders", type: "outline" }
-        ],
+        
           description: "Identify revenue loss",
           icon: "🛑",
         },

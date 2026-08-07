@@ -167,6 +167,26 @@ export const initializeSocket = (server) => {
       socket.leave(`post_${postId}`);
     });
 
+    // Tracking Events
+    socket.on("tracking:location_updated", (data) => {
+      ioInstance.emit("tracking:location_updated", data);
+    });
+    socket.on("tracking:trip_started", (data) => {
+      ioInstance.emit("tracking:trip_started", data);
+    });
+    socket.on("tracking:trip_paused", (data) => {
+      ioInstance.emit("tracking:trip_paused", data);
+    });
+    socket.on("tracking:trip_resumed", (data) => {
+      ioInstance.emit("tracking:trip_resumed", data);
+    });
+    socket.on("tracking:trip_completed", (data) => {
+      ioInstance.emit("tracking:trip_completed", data);
+    });
+    socket.on("tracking:emergency", (data) => {
+      ioInstance.emit("tracking:emergency", data);
+    });
+
     socket.on("error", (error) => {
       console.error(`⚠️ Socket error for User ${userId}:`, error);
     });

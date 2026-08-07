@@ -5,6 +5,7 @@ import api from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import { useAuth } from "@/auth/AuthContext.jsx";
 import { usePermission } from "@/auth/PermissionContext.jsx";
+import { useGpsTracking } from "@/context/GpsTrackingContext.jsx";
 
 export default function TripManagementPage() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export default function TripManagementPage() {
   const [endTripModal, setEndTripModal] = useState({ open: false, tripId: null, odometer: "" });
   const [reassignModal, setReassignModal] = useState({ open: false, tripId: null, driverId: "" });
   const [reassigning, setReassigning] = useState(false);
-  const trackingIntervals = React.useRef({});
+  const gps = useGpsTracking();
 
   // Exceptional permission check for reassigning trips
   const canReassignTrip = Boolean(
@@ -33,78 +34,17 @@ export default function TripManagementPage() {
     hasExceptional("TRANSPORT.REASSIGN")
   );
 
-  const startTracking = (tripId) => {
-    if (trackingIntervals.current[tripId]) return;
-    
-    // Remember tracking state for this device in case of page reload
-    localStorage.setItem('tracking_trip_' + tripId, 'true');
-
-    let isFirstPing = true;
-
-    if (navigator.geolocation) {
-      const watchId = navigator.geolocation.watchPosition(
-        async (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          let originName = null;
-          
-          if (isFirstPing && window.google) {
-            try {
-              const geocoder = new window.google.maps.Geocoder();
-              const res = await geocoder.geocode({ location: { lat, lng } });
-              if (res.results && res.results[0]) {
-                originName = res.results[0].formatted_address;
-              }
-            } catch (e) {
-              console.error("Geocoding failed", e);
-            }
-          }
-
-          api.post(`/transport/trips/${tripId}/location`, {
-            latitude: lat,
-            longitude: lng,
-            speed: pos.coords.speed,
-            heading: pos.coords.heading,
-            accuracy: pos.coords.accuracy,
-            recorded_at: new Date().toISOString(),
-            is_initial: isFirstPing,
-            origin_name: originName
-          }).catch((err) => { console.error("Failed to post GPS location:", err); });
-          
-          isFirstPing = false;
-        },
-        (err) => {
-          console.error("Tracking error:", err);
-          toast.error("GPS Error: " + err.message);
-        },
-        { enableHighAccuracy: true, maximumAge: 10000, timeout: 30000 }
-      );
-      trackingIntervals.current[tripId] = watchId;
-    } else {
-      toast.error("Geolocation is not supported by your browser.");
-    }
-  };
-
-  const stopTracking = (tripId) => {
-    localStorage.removeItem('tracking_trip_' + tripId);
-    if (trackingIntervals.current[tripId] && navigator.geolocation) {
-      navigator.geolocation.clearWatch(trackingIntervals.current[tripId]);
-      delete trackingIntervals.current[tripId];
-    }
-  };
-
-  // Resume tracking automatically for active trips started on this device
+  // Auto-start GPS for active trips via global context
   useEffect(() => {
+    if (!gps) return;
     trips.forEach(trip => {
       if (['STARTED', 'IN_TRANSIT'].includes(trip.status?.toUpperCase())) {
-        if (localStorage.getItem('tracking_trip_' + trip.id) === 'true') {
-          startTracking(trip.id);
+        if (!gps.isTracking(trip.id)) {
+          gps.startTracking(trip.id, trip.vehicle_id);
         }
-      } else {
-        stopTracking(trip.id);
       }
     });
-  }, [trips]);
+  }, [trips, gps]);
 
   const handleStartTrip = async () => {
     if (!startTripModal.odometer) {
@@ -115,7 +55,7 @@ export default function TripManagementPage() {
       const tripId = startTripModal.tripId;
       await api.put(`/transport/trips/${tripId}/start`, { start_odometer: startTripModal.odometer });
       toast.success("Trip started successfully");
-      startTracking(tripId);
+      if (gps) gps.startTracking(tripId, null);
       setStartTripModal({ open: false, tripId: null, odometer: "" });
       fetchData();
     } catch (err) {
@@ -128,7 +68,7 @@ export default function TripManagementPage() {
       const tripId = endTripModal.tripId;
       await api.put(`/transport/trips/${tripId}/return`, { end_time: new Date().toISOString(), end_odometer: endTripModal.odometer });
       toast.success("Trip ended successfully");
-      stopTracking(tripId);
+      if (gps) gps.stopTracking(tripId);
       setEndTripModal({ open: false, tripId: null, odometer: "" });
       fetchData();
     } catch (err) {
@@ -200,19 +140,8 @@ export default function TripManagementPage() {
     const interval = setInterval(fetchData, 30000);
     return () => {
       clearInterval(interval);
-      Object.keys(trackingIntervals.current).forEach(stopTracking);
     };
   }, [user?.id]);
-
-  useEffect(() => {
-    // Clear tracking if trip disappears from active trips
-    const activeTripIds = trips.map(t => String(t.id));
-    Object.keys(trackingIntervals.current).forEach(tripId => {
-      if (!activeTripIds.includes(String(tripId))) {
-        stopTracking(tripId);
-      }
-    });
-  }, [trips]);
 
   // Compute filtered trips based on status filter and search term
   const filteredTrips = trips.filter((t) => {

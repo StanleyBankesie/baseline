@@ -3385,4 +3385,64 @@ router.post("/settings/env", requireAuth, async (req, res, next) => {
   }
 });
 
+
+router.get("/settings/announcements", requireAuth, async (req, res, next) => {
+  try {
+    await query(`
+      CREATE TABLE IF NOT EXISTS app_settings (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        \`key\` VARCHAR(100) NOT NULL UNIQUE,
+        value LONGTEXT NULL,
+        PRIMARY KEY (id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+    const rows = await query("SELECT value FROM app_settings WHERE `key` = 'upcoming_announcements' LIMIT 1");
+    let announcements = [];
+    if (rows[0]?.value) {
+      try {
+        const parsed = JSON.parse(rows[0].value);
+        if (Array.isArray(parsed)) {
+          announcements = parsed.filter(Boolean);
+        } else {
+          announcements = [rows[0].value];
+        }
+      } catch (e) {
+        announcements = [rows[0].value];
+      }
+    }
+    res.json({ announcements });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/settings/announcements", requireAuth, async (req, res, next) => {
+  try {
+    await query(`
+      CREATE TABLE IF NOT EXISTS app_settings (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        \`key\` VARCHAR(100) NOT NULL UNIQUE,
+        value LONGTEXT NULL,
+        PRIMARY KEY (id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+    const { announcements } = req.body;
+    let val = "[]";
+    if (Array.isArray(announcements)) {
+      val = JSON.stringify(announcements.filter(Boolean).map(String));
+    } else if (announcements) {
+      val = JSON.stringify([String(announcements)]);
+    }
+    const rows = await query("SELECT id FROM app_settings WHERE `key` = 'upcoming_announcements'");
+    if (rows.length > 0) {
+      await query("UPDATE app_settings SET value = ? WHERE `key` = 'upcoming_announcements'", [val]);
+    } else {
+      await query("INSERT INTO app_settings (`key`, value) VALUES ('upcoming_announcements', ?)", [val]);
+    }
+    res.json({ success: true, announcements: JSON.parse(val) });
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default router;

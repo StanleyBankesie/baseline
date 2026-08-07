@@ -214,23 +214,8 @@ async function sendAuthResponse(req, res, session) {
     };
 
     await cacheSet(sessionKey, sessionPayload, safeTtl);
-
-    // ── Verification: immediately read back what we just wrote ──────────────
-    // This catches the split-brain condition (write to MySQL, read from Redis)
-    // and surfaces it as an explicit log error rather than a silent 401.
-    const verified = await cacheGet(sessionKey);
-    if (verified && verified.user) {
-      console.log(
-        `[AUTH] ✓ Session verified in store: omnisuite_session:${sessionId.substring(0, 8)}... user=${verified.user.username}`,
-      );
-    } else {
-      console.error(
-        `[AUTH] ✗ Session verification FAILED for omnisuite_session:${sessionId.substring(0, 8)}... — cacheGet returned nothing after cacheSet. ` +
-          `This indicates a Redis write/read split-brain. Check REDIS_URL, REDIS_TLS, and redis.js client configuration.`,
-      );
-    }
   } catch (err) {
-    console.error("[AUTH] Failed to store or verify session", err);
+    console.error("[AUTH] Failed to store session", err);
   }
 
   const isProd = process.env.NODE_ENV === "production";
@@ -304,8 +289,8 @@ export async function completeLogin(req, res, user, rememberMe) {
     rememberMe,
     permissions,
   });
-  await resetFailedLoginAttempts(user.id);
-  await writeLoginLog(user, req);
+  resetFailedLoginAttempts(user.id).catch(console.error);
+  writeLoginLog(user, req).catch(console.error);
   // #region debug-point B:complete-login-before-response
   postDebugEvent(
     "B",

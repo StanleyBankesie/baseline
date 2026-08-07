@@ -513,7 +513,7 @@ export const addTripLocation = async (req, res, next) => {
         try {
           let mapsKey = process.env.GOOGLE_MAPS_API_KEY || process.env.VITE_GOOGLE_MAPS_API_KEY || "";
           if (!mapsKey) {
-            const [setting] = await query("SELECT setting_value FROM adm_system_settings WHERE setting_key = 'GOOGLE_MAPS_API_KEY'");
+            const [setting] = await query("SELECT setting_value FROM app_settings WHERE setting_key = 'GOOGLE_MAPS_API_KEY'");
             if (setting && setting.setting_value) mapsKey = setting.setting_value;
           }
           if (mapsKey) {

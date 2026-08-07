@@ -253,6 +253,7 @@ export function verifyAccessToken(token) {
 export function signAccessToken(payload) {
   const tokenPayload = { ...payload };
   delete tokenPayload.profile_picture_url;
+  delete tokenPayload.permissions; // PREVENT NGINX 400 BAD REQUEST HEADER TOO LARGE
   return jwt.sign(
     {
       ...tokenPayload,
@@ -370,36 +371,34 @@ export async function getUserPermissions(userId) {
 
   if (!roleId) return [];
 
-  const permRows = await query(
-    `
-    SELECT DISTINCT feature_key as code
-    FROM adm_role_permissions rp
-    WHERE rp.role_id = :roleId AND rp.can_view = 1
-    `,
-    { roleId },
-  ).catch(() => []);
-
-  // Also include any legacy permissions if needed
-  const legacyRows = await query(
-    `
-    SELECT DISTINCT p.code
-    FROM adm_users u
-    JOIN adm_user_permissions up ON up.user_id = u.id
-    JOIN adm_pages p ON p.id = up.page_id
-    WHERE u.id = :userId AND up.can_view = 1
-    `,
-    { userId },
-  ).catch(() => []);
-
-  // Include exclusive admin page permissions
-  const exclusiveRows = await query(
-    `
-    SELECT feature_key as code
-    FROM adm_admin_page_permissions
-    WHERE user_id = :userId
-    `,
-    { userId }
-  ).catch(() => []);
+  const [permRows, legacyRows, exclusiveRows] = await Promise.all([
+    query(
+      `
+      SELECT DISTINCT feature_key as code
+      FROM adm_role_permissions rp
+      WHERE rp.role_id = :roleId AND rp.can_view = 1
+      `,
+      { roleId },
+    ).catch(() => []),
+    query(
+      `
+      SELECT DISTINCT p.code
+      FROM adm_users u
+      JOIN adm_user_permissions up ON up.user_id = u.id
+      JOIN adm_pages p ON p.id = up.page_id
+      WHERE u.id = :userId AND up.can_view = 1
+      `,
+      { userId },
+    ).catch(() => []),
+    query(
+      `
+      SELECT feature_key as code
+      FROM adm_admin_page_permissions
+      WHERE user_id = :userId
+      `,
+      { userId },
+    ).catch(() => []),
+  ]);
 
   const allPerms = [
     ...permRows.map((row) => row.code),

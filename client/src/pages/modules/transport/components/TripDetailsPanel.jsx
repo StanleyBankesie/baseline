@@ -8,7 +8,7 @@ export default function TripDetailsPanel({ vehicle, onClose }) {
 
   const handleAction = async (action) => {
     try {
-      await api.post(`/api/tracking/${action}`, { trip_id: vehicle.trip_id });
+      await api.post(`/tracking/${action}`, { trip_id: vehicle.trip_id });
       message.success(`Trip ${action} successful`);
     } catch (err) {
       message.error(err.response?.data?.message || `Failed to ${action} trip`);

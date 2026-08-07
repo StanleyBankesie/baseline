@@ -30,7 +30,7 @@ export const startTracking = (tripId, vId) => {
   console.log("Started GPS tracking for Trip:", tripId);
   
   // Also notify backend that trip started
-  api.post("/api/tracking/start", { trip_id: tripId }).catch(console.error);
+  api.post("/tracking/start", { trip_id: tripId }).catch(console.error);
   if (socket) socket.emit("tracking:trip_started", { trip_id: tripId });
 
   watchId = navigator.geolocation.watchPosition(
@@ -86,13 +86,13 @@ const sendLocationUpdate = async (payload) => {
   }
   
   try {
-    await api.post(`/api/tracking/location`, payload);
+    await api.post(`/tracking/location`, payload);
     
     // Sync offline queue
     while(offlineQueue.length > 0) {
       const item = offlineQueue.shift();
       item.is_offline_point = true;
-      await api.post(`/api/tracking/location`, item).catch(() => offlineQueue.push(item));
+      await api.post(`/tracking/location`, item).catch(() => offlineQueue.push(item));
     }
   } catch (err) {
     offlineQueue.push(payload);
