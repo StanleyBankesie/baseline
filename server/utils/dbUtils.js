@@ -3531,3 +3531,77 @@ export async function ensurePMInvoiceTables() {
     `).catch(() => null);
   }
 }
+
+/**
+ * Ensure social feed tables exist with correct schema.
+ * Handles the warehouse_id → branch_id migration automatically.
+ */
+export async function ensureSocialFeedTables() {
+  // 1. posts table
+  if (!(await hasTable("posts"))) {
+    await query(`
+      CREATE TABLE IF NOT EXISTS posts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        content LONGTEXT NOT NULL,
+        image_url VARCHAR(500),
+        visibility_type ENUM('company', 'branch', 'warehouse') NOT NULL DEFAULT 'company',
+        branch_id INT DEFAULT NULL,
+        warehouse_id INT DEFAULT NULL,
+        like_count INT DEFAULT 0,
+        comment_count INT DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_posts_visibility (visibility_type),
+        INDEX idx_posts_branch (branch_id),
+        INDEX idx_posts_user (user_id),
+        INDEX idx_posts_created_at (created_at DESC)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `).catch(() => null);
+  } else {
+    // Add branch_id if missing (older schema only has warehouse_id)
+    if (!(await hasColumn("posts", "branch_id"))) {
+      await query("ALTER TABLE posts ADD COLUMN branch_id INT DEFAULT NULL").catch(() => null);
+    }
+    // Add warehouse_id if missing
+    if (!(await hasColumn("posts", "warehouse_id"))) {
+      await query("ALTER TABLE posts ADD COLUMN warehouse_id INT DEFAULT NULL").catch(() => null);
+    }
+    // Expand visibility_type enum to include 'branch' and 'warehouse'
+    await query(`
+      ALTER TABLE posts MODIFY COLUMN visibility_type ENUM('company', 'branch', 'warehouse') NOT NULL DEFAULT 'company'
+    `).catch(() => null);
+  }
+
+  // 2. post_likes table
+  if (!(await hasTable("post_likes"))) {
+    await query(`
+      CREATE TABLE IF NOT EXISTS post_likes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        post_id INT NOT NULL,
+        user_id INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_post_like (post_id, user_id),
+        INDEX idx_likes_post (post_id),
+        INDEX idx_likes_user (user_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `).catch(() => null);
+  }
+
+  // 3. post_comments table
+  if (!(await hasTable("post_comments"))) {
+    await query(`
+      CREATE TABLE IF NOT EXISTS post_comments (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        post_id INT NOT NULL,
+        user_id INT NOT NULL,
+        comment_text LONGTEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_comments_post (post_id),
+        INDEX idx_comments_user (user_id),
+        INDEX idx_comments_created (created_at DESC)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `).catch(() => null);
+  }
+}

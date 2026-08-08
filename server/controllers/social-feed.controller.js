@@ -45,7 +45,7 @@ export const getPosts = async (req, res) => {
           p.content,
           p.image_url,
           p.visibility_type,
-          p.branch_id,
+          COALESCE(p.branch_id, p.warehouse_id) AS branch_id,
           p.like_count,
           p.comment_count,
           p.created_at,
@@ -59,7 +59,7 @@ export const getPosts = async (req, res) => {
         WHERE 
           (p.visibility_type = 'company')
           OR
-          (p.visibility_type = 'branch' AND p.branch_id = ?)
+          (p.visibility_type IN ('branch', 'warehouse') AND COALESCE(p.branch_id, p.warehouse_id) = ?)
         ORDER BY p.created_at DESC
         LIMIT ? OFFSET ?
         `,
@@ -103,11 +103,9 @@ export const getPosts = async (req, res) => {
               pc.comment_text,
               pc.created_at,
               u.full_name,
-              u.profile_picture AS profile_picture,
-              uc.username AS created_by_name
+              u.profile_picture AS profile_picture
             FROM post_comments pc
             JOIN adm_users u ON pc.user_id = u.id
-            LEFT JOIN adm_users uc ON uc.id = pc.created_by
             WHERE pc.post_id = ?
             ORDER BY pc.created_at DESC
             LIMIT 3
@@ -178,8 +176,8 @@ export const getPosts = async (req, res) => {
       await connection.release();
     }
   } catch (error) {
-    console.error("Error fetching posts:", error);
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Error fetching posts:", error?.message, error?.sqlMessage, error?.code, error?.stack);
+    res.status(500).json({ success: false, message: error.message, sqlMessage: error?.sqlMessage, code: error?.code });
   }
 };
 
