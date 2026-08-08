@@ -5,8 +5,11 @@ import { getIO } from "../utils/socket.js";
 
 // ── Auto-ensure trans_trip_locations has all needed columns ──
 let _columnsEnsured = false;
+let _isEnsuring = false;
+
 const ensureColumns = async () => {
-  if (_columnsEnsured) return;
+  if (_columnsEnsured || _isEnsuring) return;
+  _isEnsuring = true;
   try {
     const dbNameRow = await query("SELECT DATABASE() as db");
     const dbName = dbNameRow[0]?.db;
@@ -68,6 +71,8 @@ const ensureColumns = async () => {
   } catch (e) {
     console.error("ensureColumns failed:", e);
     _columnsEnsured = true;
+  } finally {
+    _isEnsuring = false;
   }
 };
 

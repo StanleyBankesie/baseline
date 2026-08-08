@@ -1050,6 +1050,9 @@ const apiPaths = [
       const crashPath = path.join(process.cwd(), "CRASH_REPORT.txt");
       if (fs.existsSync(crashPath)) {
         crashReport = fs.readFileSync(crashPath, "utf8");
+        if (crashReport.length > 10000) {
+          crashReport = crashReport.slice(-10000);
+        }
       }
       
       const dbHealth = await (await import("./db/pool.js")).getDbHealth({ probe: true });
