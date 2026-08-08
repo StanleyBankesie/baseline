@@ -83,7 +83,7 @@ export default function TripTrackingPage() {
   useEffect(() => {
     const newSocket = io(getBackendOrigin(), {
       withCredentials: true,
-      transports: ["websocket", "polling"],
+      transports: ["polling"],
     });
 
     newSocket.on("connect", () => console.log("Tracking Socket Connected"));

@@ -25,7 +25,7 @@ export function GpsTrackingProvider({ children }) {
     if (!socketRef.current || !socketRef.current.connected) {
       socketRef.current = io(getBackendOrigin(), {
         withCredentials: true,
-        transports: ["websocket", "polling"],
+        transports: ["polling"],
       });
     }
     return socketRef.current;

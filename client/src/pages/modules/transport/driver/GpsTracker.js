@@ -13,7 +13,7 @@ export const initTrackingSocket = (vId) => {
   if (!socket) {
     socket = io(getBackendOrigin(), {
       withCredentials: true,
-      transports: ["websocket", "polling"],
+      transports: ["polling"],
     });
   }
 };
