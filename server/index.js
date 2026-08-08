@@ -66,6 +66,7 @@ import {
   ensurePMQuotationTables,
   ensurePMInvoiceTables,
   ensureSocialFeedTables,
+  ensureTransportTables,
 } from "./utils/dbUtils.js";
 import { seedDefaultTemplates } from "./services/seed-defaults.js";
 import { ensureIndexes } from "./utils/ensureIndexes.js";
@@ -1290,6 +1291,7 @@ if (process.env.NODE_ENV !== "test") {
             ["pm quotations", () => ensurePMQuotationTables()],
             ["pm invoices", () => ensurePMInvoiceTables()],
             ["social feed tables", () => ensureSocialFeedTables()],
+            ["transport tables", () => ensureTransportTables()],
           ];
           for (const [name, fn] of steps) {
             try {

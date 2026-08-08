@@ -103,11 +103,18 @@ export const getLiveTracking = async (req, res, next) => {
       ) loc ON loc.trip_id = t.id
       WHERE t.company_id = :companyId AND t.status IN ('SCHEDULED', 'IN_TRANSIT', 'STARTED')
     `;
-    const activeTrips = await query(sql, { companyId });
+    const activeTrips = await query(sql, { companyId }).catch(async (err) => {
+      // If table doesn't exist, return empty array (tables will be auto-created on next startup)
+      if (err?.code === 'ER_NO_SUCH_TABLE' || err?.code === 'ER_BAD_FIELD_ERROR') {
+        console.warn("[Tracking] Missing table/column:", err?.sqlMessage || err?.message);
+        return [];
+      }
+      throw err;
+    });
     res.json({ success: true, data: activeTrips });
   } catch (error) {
-    console.error("Live Tracking Error:", error);
-    res.status(500).json({ success: false, message: error.message, stack: error.stack });
+    console.error("Live Tracking Error:", error?.message, error?.sqlMessage, error?.code);
+    res.status(500).json({ success: false, message: error.message, sqlMessage: error?.sqlMessage, code: error?.code });
   }
 };
 
