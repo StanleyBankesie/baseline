@@ -60,6 +60,15 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
         ws: true,
+        configure: (proxy, options) => {
+          proxy.on("error", (err, req, res) => {
+            if (err.code === "ECONNABORTED" || err.code === "ECONNRESET") {
+              // Suppress harmless hot-reloading/socket disconnect errors
+              return;
+            }
+            console.error("proxy error", err);
+          });
+        },
       },
     },
   },

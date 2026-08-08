@@ -10405,10 +10405,10 @@ router.get(
         `
         SELECT COUNT(*) AS count,
                COALESCE(SUM(total_amount), 0) AS total
-         FROM pur_orders
+         FROM pur_bills
          WHERE company_id = :companyId
           AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
-          AND po_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+          AND bill_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
         `,
         { companyId, branchId, branchIdsStr },
       );

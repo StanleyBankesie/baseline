@@ -34,7 +34,7 @@ import {
   listVehicles, createVehicle,
   listDrivers, createDriver, getDriver, updateDriver, toggleDriverStatus,
   listRequests, createRequest, updateRequestStatus,
-  listTrips, getTrip, createTrip, startTrip, returnTrip,
+  listTrips, getTrip, createTrip, updateTrip, startTrip, returnTrip,
   listFuelLogs, createFuelLog, getFuelLog, updateFuelLog, updateFuelLogStatus, deleteFuelLog,
   listFuelExpenses, createFuelExpense,
   listBilling,
@@ -95,6 +95,7 @@ router.put("/requests/:id/status", requireAuth, requireCompanyScope, requirePerm
 router.get("/trips", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.TRIPS.VIEW"), listTrips);
 router.get("/trips/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.TRIPS.VIEW"), getTrip);
 router.post("/trips", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.TRIPS.CREATE"), createTrip);
+router.put("/trips/:id", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.TRIPS.EDIT"), updateTrip);
 router.put("/trips/:id/start", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.TRIPS.EDIT"), startTrip);
 router.put("/trips/:id/return", requireAuth, requireCompanyScope, requirePermission("TRANSPORT.TRIPS.EDIT"), returnTrip);
 

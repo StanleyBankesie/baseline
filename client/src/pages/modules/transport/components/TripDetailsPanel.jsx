@@ -2,14 +2,23 @@ import React from 'react';
 import { User, Truck, MapPin, Navigation, Clock, Activity, Flag } from 'lucide-react';
 import api from '../../../../api/client.js';
 import { message } from 'antd';
+import { useGpsTracking } from '../../../../context/GpsTrackingContext.jsx';
 
 export default function TripDetailsPanel({ vehicle, onClose }) {
+  const gps = useGpsTracking();
+
   if (!vehicle) return null;
 
   const handleAction = async (action) => {
     try {
       await api.post(`/tracking/${action}`, { trip_id: vehicle.trip_id });
       message.success(`Trip ${action} successful`);
+      
+      if (action === 'start') {
+        gps?.startTracking(vehicle.trip_id, vehicle.vehicle_id);
+      } else if (action === 'end' || action === 'pause') {
+        gps?.stopTracking(vehicle.trip_id);
+      }
     } catch (err) {
       message.error(err.response?.data?.message || `Failed to ${action} trip`);
     }

@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../../../api/client.js";
 import AddressMapPicker from "../../../../components/common/AddressMapPicker";
 
 export default function TripForm() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditMode = Boolean(id);
+  
   const [loading, setLoading] = useState(false);
   const [vehicles, setVehicles] = useState([]);
   const [drivers, setDrivers] = useState([]);
@@ -32,19 +35,49 @@ export default function TripForm() {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([
+    const fetchPromises = [
       api.get("/transport/vehicles"),
       api.get("/transport/drivers"),
       api.get("/transport/requests"),
-    ]).then(([vehRes, drvRes, reqRes]) => {
+    ];
+
+    if (isEditMode) {
+      fetchPromises.push(api.get(`/transport/trips/${id}`));
+    }
+
+    Promise.all(fetchPromises).then((responses) => {
       if (!cancelled) {
-        setVehicles(vehRes.data?.data?.items || []);
-        setDrivers(drvRes.data?.data?.items || []);
-        setRequests(reqRes.data?.data?.items || []);
+        setVehicles(responses[0].data?.data?.items || []);
+        
+        // Include drivers who might be ON_TRIP if we are editing an active trip
+        const fetchedDrivers = responses[1].data?.data?.items || [];
+        setDrivers(fetchedDrivers);
+        
+        setRequests(responses[2].data?.data?.items || []);
+
+        if (isEditMode && responses[3]) {
+          const trip = responses[3].data?.data?.trip || responses[3].data?.data || {};
+          setFormData({
+            request_id: trip.request_id || "",
+            vehicle_id: trip.vehicle_id || "",
+            driver_id: trip.driver_id || "",
+            start_time: trip.start_time ? new Date(trip.start_time).toISOString().slice(0, 16) : "",
+            origin_name: trip.origin_name || "",
+            origin_lat: trip.origin_lat || null,
+            origin_lng: trip.origin_lng || null,
+            destination_name: trip.destination_name || "",
+            destination_lat: trip.destination_lat || null,
+            destination_lng: trip.destination_lng || null,
+            requester_name: trip.requester_name || "",
+            notes: trip.notes || "",
+            start_odometer: trip.start_odometer || "",
+          });
+        }
       }
     }).catch((err) => toast.error("Error: " + (err.response?.data?.message || err.message)));
     return () => { cancelled = true; };
-  }, []);
+  }, [id, isEditMode]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -79,26 +112,60 @@ export default function TripForm() {
       if (!payload.request_id) delete payload.request_id;
       if (!payload.start_time) delete payload.start_time;
 
-      if (window.google && window.google.maps && payload.origin_lat && payload.destination_lat) {
-        const service = new window.google.maps.DistanceMatrixService();
-        try {
-          const response = await service.getDistanceMatrix({
-            origins: [{ lat: Number(payload.origin_lat), lng: Number(payload.origin_lng) }],
-            destinations: [{ lat: Number(payload.destination_lat), lng: Number(payload.destination_lng) }],
-            travelMode: 'DRIVING',
-          });
-          const element = response?.rows?.[0]?.elements?.[0];
-          if (element && element.status === 'OK') {
-            payload.distance = element.distance.value / 1000;
-            payload.estimated_time = Math.round(element.duration.value / 60);
+      if (window.google && window.google.maps) {
+        const geocoder = new window.google.maps.Geocoder();
+        
+        if (!payload.origin_lat && payload.origin_name) {
+          try {
+            const res = await geocoder.geocode({ address: payload.origin_name });
+            if (res.results && res.results[0]) {
+              payload.origin_lat = res.results[0].geometry.location.lat();
+              payload.origin_lng = res.results[0].geometry.location.lng();
+            }
+          } catch (e) {
+            console.warn("Failed to geocode origin", e);
           }
-        } catch (mapErr) {
-          console.error("Distance matrix calculation failed", mapErr);
+        }
+        
+        if (!payload.destination_lat && payload.destination_name) {
+          try {
+            const res = await geocoder.geocode({ address: payload.destination_name });
+            if (res.results && res.results[0]) {
+              payload.destination_lat = res.results[0].geometry.location.lat();
+              payload.destination_lng = res.results[0].geometry.location.lng();
+            }
+          } catch (e) {
+            console.warn("Failed to geocode destination", e);
+          }
+        }
+
+        if (payload.origin_lat && payload.destination_lat) {
+          const service = new window.google.maps.DistanceMatrixService();
+          try {
+            const response = await service.getDistanceMatrix({
+              origins: [{ lat: Number(payload.origin_lat), lng: Number(payload.origin_lng) }],
+              destinations: [{ lat: Number(payload.destination_lat), lng: Number(payload.destination_lng) }],
+              travelMode: 'DRIVING',
+            });
+            const element = response?.rows?.[0]?.elements?.[0];
+            if (element && element.status === 'OK') {
+              payload.distance = element.distance.value / 1000;
+              payload.estimated_time = Math.round(element.duration.value / 60);
+            }
+          } catch (mapErr) {
+            console.error("Distance matrix calculation failed", mapErr);
+          }
         }
       }
 
-      await api.post("/transport/trips", payload);
-      toast.success("Trip dispatched successfully");
+      if (isEditMode) {
+        await api.put(`/transport/trips/${id}`, payload);
+        toast.success("Trip updated successfully");
+      } else {
+        await api.post("/transport/trips", payload);
+        toast.success("Trip dispatched successfully");
+      }
+      
       navigate("/transport/trips");
     } catch (err) {
       toast.error(err.response?.data?.message || "Operation failed");
@@ -116,7 +183,7 @@ export default function TripForm() {
             >
               ← Back
             </button>
-            Dispatch Trip
+            {isEditMode ? "Edit Trip" : "Dispatch Trip"}
           </h1>
         </div>
       </div>
@@ -235,6 +302,8 @@ export default function TripForm() {
               </label>
               <AddressMapPicker 
                 value={formData.origin_name}
+                defaultLat={formData.origin_lat}
+                defaultLng={formData.origin_lng}
                 onChange={(val) => setFormData(p => ({...p, origin_name: val.name, origin_lat: val.lat, origin_lng: val.lng}))}
                 placeholder="Enter origin manually, search, or pick on map ->"
                 label="Origin"
@@ -247,6 +316,8 @@ export default function TripForm() {
               </label>
               <AddressMapPicker 
                 value={formData.destination_name}
+                defaultLat={formData.destination_lat}
+                defaultLng={formData.destination_lng}
                 onChange={(val) => setFormData(p => ({...p, destination_name: val.name, destination_lat: val.lat, destination_lng: val.lng}))}
                 placeholder="Enter destination manually, search, or pick on map ->"
                 label="Destination"

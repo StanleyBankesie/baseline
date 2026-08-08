@@ -40,30 +40,56 @@ export default function DriverApp() {
   }, []);
 
   const handleStartTrip = async (tripId, vehicleId) => {
+    // Attempt to capture GPS
+    let lat = null;
+    let lng = null;
+    if (navigator.geolocation) {
+      try {
+        const pos = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 5000 });
+        });
+        lat = pos.coords.latitude;
+        lng = pos.coords.longitude;
+      } catch (e) {
+        console.warn("Could not capture GPS on start", e);
+      }
+    }
+
     const success = startTracking(tripId, vehicleId);
     if (success) {
       message.success("Trip Started! GPS tracking active.");
       
       try {
-        // Update backend status to IN_TRANSIT
-        await api.put(`/transport/trips/${tripId}/status`, { status: "IN_TRANSIT" });
+        // Update backend status to IN_TRANSIT by calling start endpoint
+        await api.put(`/transport/trips/${tripId}/start`, { 
+          latitude: lat,
+          longitude: lng
+        });
         fetchTrips();
       } catch (err) {
-        console.error("Failed to update status", err);
+        console.error("Failed to start trip", err);
       }
 
       // Automatically use Google Maps navigation to track vehicle position / direct the driver
       const trip = trips.find(t => t.id === tripId);
-      if (trip && trip.destination_lat && trip.destination_lng) {
-        const url = `https://www.google.com/maps/dir/?api=1&destination=${trip.destination_lat},${trip.destination_lng}&travelmode=driving`;
-        window.open(url, "_blank");
-      } else if (trip && trip.destination_name) {
-        // Fallback to name search if coordinates are missing
-        const encodedDest = encodeURIComponent(trip.destination_name);
-        const url = `https://www.google.com/maps/dir/?api=1&destination=${encodedDest}&travelmode=driving`;
-        window.open(url, "_blank");
-      } else {
-        message.warning("No destination coordinates available for navigation.");
+      if (trip) {
+        let originQuery = "";
+        if (trip.origin_lat && trip.origin_lng) {
+          originQuery = `&origin=${trip.origin_lat},${trip.origin_lng}`;
+        } else if (trip.origin_name) {
+          originQuery = `&origin=${encodeURIComponent(trip.origin_name)}`;
+        }
+
+        if (trip.destination_lat && trip.destination_lng) {
+          const url = `https://www.google.com/maps/dir/?api=1${originQuery}&destination=${trip.destination_lat},${trip.destination_lng}&travelmode=driving`;
+          window.open(url, "_blank");
+        } else if (trip.destination_name) {
+          const encodedDest = encodeURIComponent(trip.destination_name);
+          const url = `https://www.google.com/maps/dir/?api=1${originQuery}&destination=${encodedDest}&travelmode=driving`;
+          window.open(url, "_blank");
+        } else {
+          message.warning("No destination coordinates available for navigation.");
+        }
       }
     }
   };

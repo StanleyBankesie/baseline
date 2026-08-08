@@ -33,8 +33,8 @@ export const getLiveTracking = async (req, res, next) => {
     const sql = `
       SELECT 
         t.id as trip_id, t.trip_number, t.status, t.tracking_status,
-        t.vehicle_id, v.registration_number,
-        t.driver_id, d.name as driver_name,
+        t.vehicle_id, v.reg_number as registration_number,
+        t.driver_id, d.employee_name as driver_name,
         t.origin_name, t.destination_name, t.origin_lat, t.origin_lng, t.destination_lat, t.destination_lng,
         loc.latitude, loc.longitude, loc.heading, loc.speed, loc.recorded_at, loc.battery_level, loc.accuracy
       FROM trans_trips t

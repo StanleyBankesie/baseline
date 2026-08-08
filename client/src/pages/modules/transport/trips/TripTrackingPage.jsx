@@ -51,8 +51,10 @@ export default function TripTrackingPage() {
                   origin_lng: tripData.origin_lng,
                   destination_lat: tripData.destination_lat,
                   destination_lng: tripData.destination_lng,
-                  origin_address: tripData.origin_address,
-                  destination_address: tripData.destination_address,
+                  origin_address: tripData.origin_address || tripData.origin_name,
+                  destination_address: tripData.destination_address || tripData.destination_name,
+                  origin_name: tripData.origin_name,
+                  destination_name: tripData.destination_name
                 });
               }
             } catch (err) {
@@ -60,13 +62,7 @@ export default function TripTrackingPage() {
             }
           }
 
-          // Ensure GPS tracking is active for this trip via global context
-          if (gps && !gps.isTracking(numId)) {
-            const v = liveVehicles.find(v => v.trip_id === numId);
-            if (v && ['IN_TRANSIT', 'STARTED'].includes(v.status?.toUpperCase())) {
-              gps.startTracking(numId, v.vehicle_id);
-            }
-          }
+          // Do not automatically start tracking the viewer's location. Tracking should only be started by the driver.
         }
 
         setVehicles(liveVehicles);
@@ -92,7 +88,7 @@ export default function TripTrackingPage() {
     // Handle live location updates — also accept NEW trips not yet in the list
     newSocket.on("tracking:location_updated", (data) => {
       setVehicles(prev => {
-        const idx = prev.findIndex(v => v.trip_id === data.trip_id);
+        const idx = prev.findIndex(v => String(v.trip_id) === String(data.trip_id));
         if (idx === -1) {
           return [...prev, {
             trip_id: data.trip_id,
@@ -187,7 +183,7 @@ export default function TripTrackingPage() {
       <div className="flex-1 flex flex-col lg:flex-row gap-4 overflow-hidden">
         {/* Left Panel: List (Hidden in Single Trip Mode) */}
         {!isSingleTripMode && (
-          <div className="w-full lg:w-80 h-1/3 lg:h-full flex-shrink-0">
+          <div className="w-full lg:w-80 h-[40vh] lg:h-full flex-shrink-0">
             <FleetListPanel 
               vehicles={vehiclesWithLiveGps} 
               selectedVehicleId={selectedVehicleId}
@@ -197,7 +193,7 @@ export default function TripTrackingPage() {
         )}
 
         {/* Center: Map */}
-        <div className="flex-1 rounded-xl overflow-hidden shadow-sm border border-base-200/50 relative">
+        <div className="flex-1 min-h-[300px] lg:min-h-0 rounded-xl overflow-hidden shadow-sm border border-base-200/50 relative">
           <EnhancedGoogleMap 
             vehicles={isSingleTripMode ? vehiclesWithLiveGps.filter(v => Number(v.trip_id) === Number(id)) : vehiclesWithLiveGps} 
             selectedVehicleId={selectedVehicleId} 
@@ -207,7 +203,7 @@ export default function TripTrackingPage() {
 
         {/* Right Panel: Details (Slide In) */}
         {selectedVehicleId && (
-          <div className="w-full lg:w-80 h-1/2 lg:h-full flex-shrink-0 transition-all duration-300">
+          <div className="w-full lg:w-80 h-auto max-h-[40vh] lg:max-h-none lg:h-full flex-shrink-0 transition-all duration-300">
             <TripDetailsPanel 
               vehicle={selectedVehicle} 
               onClose={() => !isSingleTripMode && setSelectedVehicleId(null)}

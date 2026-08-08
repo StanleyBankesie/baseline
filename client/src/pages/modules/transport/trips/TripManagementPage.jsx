@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { EnvironmentOutlined, ArrowLeftOutlined, EditOutlined, PlayCircleOutlined, CheckCircleOutlined, UserOutlined, SwapOutlined, CarOutlined, SearchOutlined, CompassOutlined } from "@ant-design/icons";
+import { EnvironmentOutlined, ArrowLeftOutlined, EditOutlined, PlayCircleOutlined, CheckCircleOutlined, UserOutlined, SwapOutlined, CarOutlined, SearchOutlined, CompassOutlined, UnorderedListOutlined } from "@ant-design/icons";
 import api from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import { useAuth } from "@/auth/AuthContext.jsx";
 import { usePermission } from "@/auth/PermissionContext.jsx";
 import { useGpsTracking } from "@/context/GpsTrackingContext.jsx";
+import GlobalLiveTrackingMap from "./GlobalLiveTrackingMap.jsx";
 
 export default function TripManagementPage() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function TripManagementPage() {
   const [endTripModal, setEndTripModal] = useState({ open: false, tripId: null, odometer: "" });
   const [reassignModal, setReassignModal] = useState({ open: false, tripId: null, driverId: "" });
   const [reassigning, setReassigning] = useState(false);
+  const [viewMode, setViewMode] = useState("list"); // 'list' | 'map'
   const gps = useGpsTracking();
 
   // Exceptional permission check for reassigning trips
@@ -51,9 +53,32 @@ export default function TripManagementPage() {
       toast.error("Please enter current odometer reading");
       return;
     }
+    
+    // Attempt to get GPS first
+    let lat = null;
+    let lng = null;
+    
+    if (navigator.geolocation) {
+      toast.info("Capturing current GPS location...", { autoClose: 1500, toastId: "start-loc" });
+      try {
+        const pos = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 5000 });
+        });
+        lat = pos.coords.latitude;
+        lng = pos.coords.longitude;
+      } catch (e) {
+        console.warn("Could not capture GPS on start", e);
+        toast.warning("Could not capture GPS location. Starting trip anyway.");
+      }
+    }
+
     try {
       const tripId = startTripModal.tripId;
-      await api.put(`/transport/trips/${tripId}/start`, { start_odometer: startTripModal.odometer });
+      await api.put(`/transport/trips/${tripId}/start`, { 
+        start_odometer: startTripModal.odometer,
+        latitude: lat,
+        longitude: lng
+      });
       toast.success("Trip started successfully");
       if (gps) gps.startTracking(tripId, null);
       setStartTripModal({ open: false, tripId: null, odometer: "" });
@@ -226,9 +251,29 @@ export default function TripManagementPage() {
             />
             <SearchOutlined className="absolute left-3 top-2.5 text-slate-500 text-xs" />
           </div>
+
+          {/* View Mode Toggle */}
+          <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0">
+            <button
+              onClick={() => setViewMode("list")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                viewMode === "list" ? "bg-brand text-white" : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <UnorderedListOutlined /> List
+            </button>
+            <button
+              onClick={() => setViewMode("map")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                viewMode === "map" ? "bg-brand text-white" : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <EnvironmentOutlined /> Map
+            </button>
+          </div>
         </div>
 
-        {/* Trips Cards Grid */}
+        {/* Trips Cards / Map Area */}
         {loading && trips.length === 0 ? (
           <div className="flex justify-center py-20 text-slate-400">
             <div className="flex flex-col items-center gap-2">
@@ -243,6 +288,13 @@ export default function TripManagementPage() {
             <p className="text-slate-500 text-xs max-w-sm mx-auto">
               There are currently no active or scheduled trips matching your selected filter.
             </p>
+          </div>
+        ) : viewMode === "map" ? (
+          <div className="w-full h-[600px] bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden relative">
+            <GlobalLiveTrackingMap 
+              activeTrips={filteredTrips.filter(t => ['SCHEDULED', 'STARTED', 'IN_TRANSIT'].includes(t.status?.toUpperCase()))} 
+              height="100%" 
+            />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">

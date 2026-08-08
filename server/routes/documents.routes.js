@@ -1212,7 +1212,7 @@ async function loadData(type, id, companyId, branchId) {
       sales_order: {
         id: order.id,
         number: order.order_no,
-        date: order.order_date ? String(order.order_date).slice(0, 10) : null,
+        date: order.order_date ? ((order.order_date) instanceof Date ? (order.order_date).toISOString().slice(0, 10) : String(order.order_date).slice(0, 10)) : null,
         status: order.status,
         expected_delivery_date: order.expected_delivery_date,
         actual_delivery_date: order.actual_delivery_date,
@@ -1397,7 +1397,7 @@ async function loadData(type, id, companyId, branchId) {
       invoice: {
         id: inv.id,
         number: inv.invoice_no,
-        date: inv.invoice_date ? String(inv.invoice_date).slice(0, 10) : null,
+        date: inv.invoice_date ? ((inv.invoice_date) instanceof Date ? (inv.invoice_date).toISOString().slice(0, 10) : String(inv.invoice_date).slice(0, 10)) : null,
         payment_term: inv.payment_type || null,
         status: inv.status,
         payment_status: inv.payment_status,
@@ -1503,7 +1503,7 @@ async function loadData(type, id, companyId, branchId) {
       purchase_order: {
         id: po.id,
         number: po.po_no,
-        date: po.po_date ? String(po.po_date).slice(0, 10) : null,
+        date: po.po_date ? ((po.po_date) instanceof Date ? (po.po_date).toISOString().slice(0, 10) : String(po.po_date).slice(0, 10)) : null,
         status: po.status,
         remarks: po.remarks || "",
         delivery_date: po.delivery_date || null,
@@ -1592,9 +1592,9 @@ async function loadData(type, id, companyId, branchId) {
       direct_purchase: {
         id: hdr.id,
         number: hdr.dp_no,
-        date: hdr.dp_date ? String(hdr.dp_date).slice(0, 10) : null,
+        date: hdr.dp_date ? ((hdr.dp_date) instanceof Date ? (hdr.dp_date).toISOString().slice(0, 10) : String(hdr.dp_date).slice(0, 10)) : null,
         status: hdr.status,
-        invoice_date: hdr.supplier_invoice_date ? String(hdr.supplier_invoice_date).slice(0, 10) : null,
+        invoice_date: hdr.supplier_invoice_date ? ((hdr.supplier_invoice_date) instanceof Date ? (hdr.supplier_invoice_date).toISOString().slice(0, 10) : String(hdr.supplier_invoice_date).slice(0, 10)) : null,
         supplier_invoice_no: hdr.supplier_invoice_number || "",
         warehouse: warehouseName,
         sub_total: Number(hdr.subtotal) || computedSubTotal,
@@ -1694,7 +1694,7 @@ async function loadData(type, id, companyId, branchId) {
       purchase_bill: {
         id: hdr.id,
         number: hdr.bill_no,
-        date: hdr.bill_date ? String(hdr.bill_date).slice(0, 10) : null,
+        date: hdr.bill_date ? ((hdr.bill_date) instanceof Date ? (hdr.bill_date).toISOString().slice(0, 10) : String(hdr.bill_date).slice(0, 10)) : null,
         status: hdr.status,
         remarks: hdr.remarks || "",
         sub_total: hdr.total_amount || 0,
@@ -1775,7 +1775,7 @@ async function loadData(type, id, companyId, branchId) {
       grn: {
         id: hdr.id,
         number: hdr.grn_no,
-        date: hdr.grn_date ? String(hdr.grn_date).slice(0, 10) : null,
+        date: hdr.grn_date ? ((hdr.grn_date) instanceof Date ? (hdr.grn_date).toISOString().slice(0, 10) : String(hdr.grn_date).slice(0, 10)) : null,
         status: hdr.status,
         remarks: hdr.remarks || "",
         total: hdr.net_amount || 0,
@@ -2608,7 +2608,7 @@ async function loadData(type, id, companyId, branchId) {
         id: voucher.id,
         number: voucher.voucher_no,
         date: voucher.voucher_date
-          ? String(voucher.voucher_date).slice(0, 10)
+          ? ((voucher.voucher_date) instanceof Date ? (voucher.voucher_date).toISOString().slice(0, 10) : String(voucher.voucher_date).slice(0, 10))
           : null,
         narration: narration,
         total_debit: voucher.total_debit,
@@ -2734,7 +2734,7 @@ async function loadData(type, id, companyId, branchId) {
         id: voucher.id,
         number: voucher.voucher_no,
         date: voucher.voucher_date
-          ? String(voucher.voucher_date).slice(0, 10)
+          ? ((voucher.voucher_date) instanceof Date ? (voucher.voucher_date).toISOString().slice(0, 10) : String(voucher.voucher_date).slice(0, 10))
           : null,
         narration: narration,
         total_debit: voucher.total_debit,
@@ -2876,7 +2876,7 @@ async function loadData(type, id, companyId, branchId) {
         designation: payslip.position_name || "-",
         job_title: payslip.position_name || "-",
         joining_date: payslip.joining_date
-          ? String(payslip.joining_date).slice(0, 10)
+          ? ((payslip.joining_date) instanceof Date ? (payslip.joining_date).toISOString().slice(0, 10) : String(payslip.joining_date).slice(0, 10))
           : null,
         ssnit_no: payslip.ssnit_no || "-",
         tin: payslip.tin || "-",
@@ -2968,7 +2968,7 @@ async function loadData(type, id, companyId, branchId) {
       maintenance_bill: {
         id: hdr.id,
         number: hdr.bill_no,
-        date: hdr.bill_date ? String(hdr.bill_date).slice(0, 10) : null,
+        date: hdr.bill_date ? ((hdr.bill_date) instanceof Date ? (hdr.bill_date).toISOString().slice(0, 10) : String(hdr.bill_date).slice(0, 10)) : null,
         status: hdr.status,
         remarks: hdr.notes || "",
         sub_total: hdr.subtotal || 0,
@@ -3029,7 +3029,7 @@ async function loadData(type, id, companyId, branchId) {
       service_bill: {
         id: hdr.id,
         number: hdr.bill_no,
-        date: hdr.bill_date ? String(hdr.bill_date).slice(0, 10) : null,
+        date: hdr.bill_date ? ((hdr.bill_date) instanceof Date ? (hdr.bill_date).toISOString().slice(0, 10) : String(hdr.bill_date).slice(0, 10)) : null,
         status: hdr.status,
         remarks: hdr.notes || "",
         sub_total: hdr.subtotal || 0,
@@ -3090,7 +3090,7 @@ async function loadData(type, id, companyId, branchId) {
       supplier_quotation: {
         id: hdr.id,
         number: hdr.quotation_no,
-        date: hdr.quotation_date ? String(hdr.quotation_date).slice(0, 10) : null,
+        date: hdr.quotation_date ? ((hdr.quotation_date) instanceof Date ? (hdr.quotation_date).toISOString().slice(0, 10) : String(hdr.quotation_date).slice(0, 10)) : null,
         status: hdr.status,
         remarks: hdr.notes || "",
         sub_total: hdr.subtotal || 0,

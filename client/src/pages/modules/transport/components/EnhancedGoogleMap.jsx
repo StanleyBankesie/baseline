@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useRef, useEffect } from 'react';
-import { GoogleMap, useJsApiLoader, Marker, InfoWindow, DirectionsRenderer, MarkerClusterer } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, MarkerF as Marker, InfoWindowF as InfoWindow, MarkerClustererF as MarkerClusterer, DirectionsRenderer, PolylineF as Polyline } from '@react-google-maps/api';
 import api from '../../../../api/client.js';
 
 const containerStyle = {
@@ -62,14 +62,28 @@ function EnhancedGoogleMapInner({ apiKey, vehicles, selectedVehicleId, onSelectV
   useEffect(() => {
     if (!mapRef.current) return;
     
-    if (selectedVehicleId) {
-      const v = vehicles.find(v => v.trip_id === selectedVehicleId);
+    const activeVehicleId = vehicles.length === 1 ? vehicles[0].trip_id : selectedVehicleId;
+
+    if (activeVehicleId) {
+      const v = vehicles.find(v => Number(v.trip_id) === Number(activeVehicleId));
       if (v) {
         const lat = v.latitude ? Number(v.latitude) : (v.origin_lat ? Number(v.origin_lat) : null);
         const lng = v.longitude ? Number(v.longitude) : (v.origin_lng ? Number(v.origin_lng) : null);
         if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
           mapRef.current.panTo({ lat, lng });
-          mapRef.current.setZoom(16);
+          
+          if (vehicles.length === 1 && (v.status === 'STARTED' || v.status === 'IN_TRANSIT')) {
+            // Navigation mode!
+            mapRef.current.setZoom(19);
+            if (v.heading !== undefined && v.heading !== null) {
+              mapRef.current.setHeading(v.heading);
+            }
+            mapRef.current.setTilt(60);
+          } else {
+            mapRef.current.setZoom(16);
+            mapRef.current.setTilt(0);
+            mapRef.current.setHeading(0);
+          }
         }
       }
     } else if (vehicles?.length > 0) {
@@ -88,14 +102,22 @@ function EnhancedGoogleMapInner({ apiKey, vehicles, selectedVehicleId, onSelectV
     }
   }, [selectedVehicleId, vehicles]);
 
-  // Fetch directions for selected vehicle
+  // Fetch directions for selected vehicle (or the only vehicle if there's only 1)
   useEffect(() => {
-    if (!selectedVehicleId || !window.google || !isLoaded) {
+    if (!window.google || !isLoaded) return;
+
+    const activeVehicleId = vehicles.length === 1 ? vehicles[0].trip_id : selectedVehicleId;
+
+    if (!activeVehicleId) {
       setDirections(null);
       return;
     }
-    const v = vehicles.find(v => v.trip_id === selectedVehicleId);
-    if (!v || !v.origin_lat || !v.destination_lat) return;
+
+    const v = vehicles.find(v => Number(v.trip_id) === Number(activeVehicleId));
+    if (!v || !v.origin_lat || !v.destination_lat) {
+      setDirections(null);
+      return;
+    }
 
     const directionsService = new window.google.maps.DirectionsService();
     directionsService.route({
@@ -112,20 +134,16 @@ function EnhancedGoogleMapInner({ apiKey, vehicles, selectedVehicleId, onSelectV
   if (loadError) return <div className="p-4 text-red-500">Error loading maps</div>;
   if (!isLoaded) return <div className="p-4 animate-pulse bg-slate-100 h-full w-full"></div>;
 
+  if (!vehicles || vehicles.length === 0) {
+    return <div className="p-4 bg-red-100 text-red-800 absolute z-[1000] top-4 left-1/2 -translate-x-1/2 shadow rounded font-bold">DEBUG: VEHICLES ARRAY IS EMPTY. ID={selectedVehicleId}</div>;
+  }
+
   const getMarkerIcon = (v) => {
-    // Generate SVG for rotated truck icon
-    const color = v.status === 'COMPLETED' ? '#6b7280' : (!v.speed && v.status === 'IN_TRANSIT') ? '#3b82f6' : (v.speed > 0 ? '#10b981' : '#f43f5e');
-    const heading = v.heading || 0;
-    
+    const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#0E3646"><path d="M18.92,6.01C18.72,5.42,18.16,5,17.5,5h-11c-0.66,0-1.21,0.42-1.42,1.01L3,12v8c0,0.55,0.45,1,1,1h1c0.55,0,1-0.45,1-1v-1h12v1c0,0.55,0.45,1,1,1h1c0.55,0,1-0.45,1-1v-8L18.92,6.01z M6.5,16c-0.83,0-1.5-0.67-1.5-1.5S5.67,13,6.5,13s1.5,0.67,1.5,1.5S7.33,16,6.5,16z M17.5,16c-0.83,0-1.5-0.67-1.5-1.5S16.67,13,17.5,13s1.5,0.67,1.5,1.5S18.33,16,17.5,16z M5,11l1.5-4.5h11L19,11H5z"/></svg>`;
     return {
-      path: 'M17.402,0H5.643C4.518,0,3.628,0.89,3.628,2.015v21.579c0,1.125,0.89,2.015,2.015,2.015h11.759c1.125,0,2.015-0.89,2.015-2.015V2.015C19.417,0.89,18.527,0,17.402,0z M11.52,24.321c-0.902,0-1.633-0.73-1.633-1.632c0-0.902,0.73-1.632,1.633-1.632c0.901,0,1.632,0.73,1.632,1.632C13.152,23.591,12.421,24.321,11.52,24.321z M17.387,19.344H5.66V3.882h11.728V19.344z',
-      fillColor: color,
-      fillOpacity: 1,
-      strokeWeight: 1,
-      strokeColor: '#ffffff',
-      rotation: heading,
-      scale: 1.2,
-      anchor: new window.google.maps.Point(11, 13)
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svgStr),
+      scaledSize: new window.google.maps.Size(36, 36),
+      anchor: new window.google.maps.Point(18, 18)
     };
   };
 
@@ -151,42 +169,57 @@ function EnhancedGoogleMapInner({ apiKey, vehicles, selectedVehicleId, onSelectV
           directions={directions}
           options={{
             suppressMarkers: true,
+            markerOptions: { visible: false, opacity: 0 },
             polylineOptions: { strokeColor: '#3b82f6', strokeWeight: 4, strokeOpacity: 0.8 }
           }} 
         />
       )}
 
-      <MarkerClusterer options={{ imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }}>
-        {(clusterer) => (
-          <>
+      {/* Render Destination Markers and Polylines explicitly outside MarkerClusterer */}
+      {vehicles.map(v => {
+        const destLat = v.destination_lat ? Number(v.destination_lat) : null;
+        const destLng = v.destination_lng ? Number(v.destination_lng) : null;
+        const hasDest = destLat !== null && !isNaN(destLat) && destLng !== null && !isNaN(destLng);
+
+        if (!hasDest) return null;
+
+        return [
+          <Marker
+            key={`dest-${v.trip_id}`}
+            position={{ lat: destLat, lng: destLng }}
+          />
+        ];
+      })}
+
+      <>
             {vehicles.map((v) => {
               const lat = v.latitude ? Number(v.latitude) : (v.origin_lat ? Number(v.origin_lat) : null);
               const lng = v.longitude ? Number(v.longitude) : (v.origin_lng ? Number(v.origin_lng) : null);
               if (!lat || !lng || isNaN(lat) || isNaN(lng)) return null;
-              const isSelected = selectedVehicleId === v.trip_id;
+              const isSelected = Number(selectedVehicleId) === Number(v.trip_id);
 
               return (
                 <Marker
-                  key={v.trip_id}
+                  key={`origin-${v.trip_id}`}
                   position={{ lat, lng }}
                   icon={getMarkerIcon(v)}
                   onClick={() => onSelectVehicle(v)}
-                  clusterer={clusterer}
+                  
                   zIndex={isSelected ? 1000 : 1}
                 >
                   {isSelected && (
-                    <InfoWindow onCloseClick={() => onSelectVehicle(null)}>
-                      <div className="p-1 min-w-[200px]">
-                        <h3 className="font-bold text-slate-800">{v.registration_number}</h3>
-                        <p className="text-xs text-slate-500 mb-2">{v.driver_name}</p>
-                        <div className="grid grid-cols-2 gap-2 text-xs">
+                    <InfoWindow position={{ lat, lng }} onCloseClick={() => onSelectVehicle(null)}>
+                      <div className="p-0.5 min-w-[140px]">
+                        <h3 className="font-bold text-sm text-slate-800 leading-tight">{v.registration_number}</h3>
+                        <p className="text-[10px] text-slate-500 mb-1">{v.driver_name}</p>
+                        <div className="grid grid-cols-2 gap-1 text-[10px] border-t pt-1">
                           <div>
                             <p className="text-slate-400">Speed</p>
-                            <p className="font-semibold">{v.speed || 0} km/h</p>
+                            <p className="font-semibold leading-none mt-0.5">{v.speed || 0} km/h</p>
                           </div>
                           <div>
                             <p className="text-slate-400">Status</p>
-                            <p className="font-semibold">{v.status}</p>
+                            <p className="font-semibold leading-none mt-0.5">{v.status}</p>
                           </div>
                         </div>
                       </div>
@@ -197,7 +230,7 @@ function EnhancedGoogleMapInner({ apiKey, vehicles, selectedVehicleId, onSelectV
             })}
           </>
         )}
-      </MarkerClusterer>
+      
     </GoogleMap>
   );
 }

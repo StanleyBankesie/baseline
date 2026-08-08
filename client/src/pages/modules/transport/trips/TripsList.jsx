@@ -70,9 +70,11 @@ export default function TripsList() {
       sortable: false,
       render: (t) => (
         <div className="flex justify-end gap-2">
-          <Link to={`/transport/trips/${t.id}`} className="btn btn-ghost btn-sm text-brand-600">
-            <EditOutlined />
-          </Link>
+          {t.status !== 'COMPLETED' && (
+            <Link to={`/transport/trips/${t.id}`} className="btn btn-ghost btn-sm text-brand-600">
+              <EditOutlined />
+            </Link>
+          )}
           <Link
             to={`/transport/tracking/${t.id}`}
             className="btn btn-ghost btn-sm text-green-600"

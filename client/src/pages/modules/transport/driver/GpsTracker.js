@@ -1,4 +1,4 @@
-import api from "../../../../../api/client.js";
+import api from "../../../../api/client.js";
 import { io } from "socket.io-client";
 
 let watchId = null;

@@ -452,7 +452,7 @@ function PurchaseHomeIndex() {
       label: "Total Purchases",
       change: loading
         ? ""
-        : `${Number(overview?.totalPurchaseOrders || 0)} orders`,
+        : `${Number(overview?.totalPurchaseOrders || 0)} bills`,
       path: "/purchase/reports",
         actions: [
           { label: "View", path: "/purchase/reports", type: "outline" }
