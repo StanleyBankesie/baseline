@@ -65,6 +65,8 @@ export default function TripTrackingPage() {
           // Do not automatically start tracking the viewer's location. Tracking should only be started by the driver.
         }
 
+        console.log("DEBUG: Final liveVehicles array before setVehicles:", liveVehicles);
+        console.log("DEBUG: ID param is:", id);
         setVehicles(liveVehicles);
         setStats(statsRes.data?.data || null);
       } catch (err) {

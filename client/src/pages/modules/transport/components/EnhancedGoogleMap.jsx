@@ -234,7 +234,6 @@ function EnhancedGoogleMapInner({ apiKey, vehicles, selectedVehicleId, onSelectV
               );
             })}
           </>
-        )}
       
     </GoogleMap>
   );

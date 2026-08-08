@@ -8,18 +8,29 @@ let _columnsEnsured = false;
 const ensureColumns = async () => {
   if (_columnsEnsured) return;
   try {
-    const alters = [
-      'ALTER TABLE trans_trip_locations ADD COLUMN IF NOT EXISTS vehicle_id INT DEFAULT NULL AFTER trip_id',
-      'ALTER TABLE trans_trip_locations ADD COLUMN IF NOT EXISTS driver_id INT DEFAULT NULL AFTER vehicle_id',
-      'ALTER TABLE trans_trip_locations ADD COLUMN IF NOT EXISTS altitude DECIMAL(8, 2) DEFAULT NULL AFTER accuracy',
-      'ALTER TABLE trans_trip_locations ADD COLUMN IF NOT EXISTS battery_level DECIMAL(5, 2) DEFAULT NULL AFTER altitude',
-      'ALTER TABLE trans_trip_locations ADD COLUMN IF NOT EXISTS is_offline_point BOOLEAN DEFAULT FALSE AFTER battery_level',
+    const dbNameRow = await query("SELECT DATABASE() as db");
+    const dbName = dbNameRow[0]?.db;
+
+    const columnsToAdd = [
+      { name: 'vehicle_id', def: 'INT DEFAULT NULL AFTER trip_id' },
+      { name: 'driver_id', def: 'INT DEFAULT NULL AFTER vehicle_id' },
+      { name: 'altitude', def: 'DECIMAL(8, 2) DEFAULT NULL AFTER accuracy' },
+      { name: 'battery_level', def: 'DECIMAL(5, 2) DEFAULT NULL AFTER altitude' },
+      { name: 'is_offline_point', def: 'BOOLEAN DEFAULT FALSE AFTER battery_level' }
     ];
-    for (const sql of alters) {
-      await query(sql).catch(() => {});
+
+    for (const col of columnsToAdd) {
+      const existing = await query(
+        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = :dbName AND TABLE_NAME = 'trans_trip_locations' AND COLUMN_NAME = :colName",
+        { dbName, colName: col.name }
+      );
+      if (!existing || existing.length === 0) {
+        await query(`ALTER TABLE trans_trip_locations ADD COLUMN ${col.name} ${col.def}`).catch(e => console.error(`Failed to add column ${col.name}:`, e));
+      }
     }
     _columnsEnsured = true;
   } catch (e) {
+    console.error("ensureColumns failed:", e);
     _columnsEnsured = true;
   }
 };
