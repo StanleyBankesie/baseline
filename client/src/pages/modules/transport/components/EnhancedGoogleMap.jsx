@@ -70,17 +70,26 @@ function EnhancedGoogleMapInner({ apiKey, vehicles, selectedVehicleId, onSelectV
         const lat = v.latitude ? Number(v.latitude) : (v.origin_lat ? Number(v.origin_lat) : null);
         const lng = v.longitude ? Number(v.longitude) : (v.origin_lng ? Number(v.origin_lng) : null);
         if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
-          mapRef.current.panTo({ lat, lng });
-          
           if (vehicles.length === 1 && (v.status === 'STARTED' || v.status === 'IN_TRANSIT')) {
             // Navigation mode!
+            mapRef.current.panTo({ lat, lng });
             mapRef.current.setZoom(19);
             if (v.heading !== undefined && v.heading !== null) {
               mapRef.current.setHeading(v.heading);
             }
             mapRef.current.setTilt(60);
           } else {
-            mapRef.current.setZoom(16);
+            // Focus on trip area
+            const bounds = new window.google.maps.LatLngBounds();
+            bounds.extend({ lat, lng });
+            
+            const destLat = v.destination_lat ? Number(v.destination_lat) : null;
+            const destLng = v.destination_lng ? Number(v.destination_lng) : null;
+            if (destLat && destLng && !isNaN(destLat) && !isNaN(destLng)) {
+              bounds.extend({ lat: destLat, lng: destLng });
+            }
+            
+            mapRef.current.fitBounds(bounds);
             mapRef.current.setTilt(0);
             mapRef.current.setHeading(0);
           }
@@ -133,10 +142,6 @@ function EnhancedGoogleMapInner({ apiKey, vehicles, selectedVehicleId, onSelectV
 
   if (loadError) return <div className="p-4 text-red-500">Error loading maps</div>;
   if (!isLoaded) return <div className="p-4 animate-pulse bg-slate-100 h-full w-full"></div>;
-
-  if (!vehicles || vehicles.length === 0) {
-    return <div className="p-4 bg-red-100 text-red-800 absolute z-[1000] top-4 left-1/2 -translate-x-1/2 shadow rounded font-bold">DEBUG: VEHICLES ARRAY IS EMPTY. ID={selectedVehicleId}</div>;
-  }
 
   const getMarkerIcon = (v) => {
     const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#0E3646"><path d="M18.92,6.01C18.72,5.42,18.16,5,17.5,5h-11c-0.66,0-1.21,0.42-1.42,1.01L3,12v8c0,0.55,0.45,1,1,1h1c0.55,0,1-0.45,1-1v-1h12v1c0,0.55,0.45,1,1,1h1c0.55,0,1-0.45,1-1v-8L18.92,6.01z M6.5,16c-0.83,0-1.5-0.67-1.5-1.5S5.67,13,6.5,13s1.5,0.67,1.5,1.5S7.33,16,6.5,16z M17.5,16c-0.83,0-1.5-0.67-1.5-1.5S16.67,13,17.5,13s1.5,0.67,1.5,1.5S18.33,16,17.5,16z M5,11l1.5-4.5h11L19,11H5z"/></svg>`;

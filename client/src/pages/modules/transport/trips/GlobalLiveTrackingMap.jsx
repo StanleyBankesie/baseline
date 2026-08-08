@@ -68,20 +68,21 @@ function GlobalLiveTrackingMapInner({ apiKey, activeTrips, height }) {
   useEffect(() => {
     if (!socket) return;
     const handleLocationUpdate = (data) => {
-      if (activeTrips.some(t => String(t.id) === String(data.tripId))) {
+      if (activeTrips.some(t => String(t.id) === String(data.trip_id))) {
         setLivePositions(prev => ({
           ...prev,
-          [data.tripId]: {
-            lat: parseFloat(data.location.latitude),
-            lng: parseFloat(data.location.longitude),
-            speed: data.location.speed || 0,
-            updatedAt: data.location.timestamp
+          [data.trip_id]: {
+            lat: parseFloat(data.latitude),
+            lng: parseFloat(data.longitude),
+            speed: data.speed || 0,
+            updatedAt: data.timestamp
           }
         }));
       }
     };
-    socket.on("TRIP_LOCATION_UPDATE", handleLocationUpdate);
-    return () => socket.off("TRIP_LOCATION_UPDATE", handleLocationUpdate);
+
+    socket.on("tracking:location_updated", handleLocationUpdate);
+    return () => socket.off("tracking:location_updated", handleLocationUpdate);
   }, [socket, activeTrips]);
 
   const { isLoaded } = useJsApiLoader({
