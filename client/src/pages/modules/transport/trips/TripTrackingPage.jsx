@@ -6,6 +6,7 @@ import FleetSummaryCards from "../components/FleetSummaryCards";
 import FleetListPanel from "../components/FleetListPanel";
 import TripDetailsPanel from "../components/TripDetailsPanel";
 import EnhancedGoogleMap from "../components/EnhancedGoogleMap";
+import { getBackendOrigin } from "../../../../utils/socketConfig";
 import { useGpsTracking } from "@/context/GpsTrackingContext.jsx";
 
 export default function TripTrackingPage() {
@@ -80,7 +81,7 @@ export default function TripTrackingPage() {
 
   // Setup Socket.IO for receiving supervisor updates
   useEffect(() => {
-    const newSocket = io(window.location.origin, {
+    const newSocket = io(getBackendOrigin(), {
       withCredentials: true,
       transports: ["websocket", "polling"],
     });

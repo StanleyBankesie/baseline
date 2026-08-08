@@ -1,5 +1,6 @@
 import api from "../../../../api/client.js";
 import { io } from "socket.io-client";
+import { getBackendOrigin } from "../../../../utils/socketConfig";
 
 let watchId = null;
 let socket = null;
@@ -10,7 +11,7 @@ const offlineQueue = [];
 export const initTrackingSocket = (vId) => {
   vehicleId = vId;
   if (!socket) {
-    socket = io(window.location.origin, {
+    socket = io(getBackendOrigin(), {
       withCredentials: true,
       transports: ["websocket", "polling"],
     });

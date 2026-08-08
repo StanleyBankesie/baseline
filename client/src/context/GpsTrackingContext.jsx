@@ -7,6 +7,7 @@
 import React, { createContext, useContext, useState, useRef, useCallback, useEffect } from "react";
 import api from "../api/client.js";
 import { io } from "socket.io-client";
+import { getBackendOrigin } from "../utils/socketConfig";
 
 const GpsTrackingContext = createContext(null);
 
@@ -22,7 +23,7 @@ export function GpsTrackingProvider({ children }) {
 
   const ensureSocket = useCallback(() => {
     if (!socketRef.current || !socketRef.current.connected) {
-      socketRef.current = io(window.location.origin, {
+      socketRef.current = io(getBackendOrigin(), {
         withCredentials: true,
         transports: ["websocket", "polling"],
       });
