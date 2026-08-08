@@ -87,15 +87,22 @@ export const getLiveTracking = async (req, res, next) => {
       FROM trans_trips t
       LEFT JOIN trans_vehicles v ON t.vehicle_id = v.id
       LEFT JOIN trans_drivers d ON t.driver_id = d.id
-      LEFT JOIN trans_trip_locations loc ON loc.id = (
-          SELECT id FROM trans_trip_locations WHERE trip_id = t.id ORDER BY recorded_at DESC LIMIT 1
-      )
+      LEFT JOIN (
+          SELECT l1.*
+          FROM trans_trip_locations l1
+          INNER JOIN (
+              SELECT trip_id, MAX(recorded_at) as max_time
+              FROM trans_trip_locations
+              GROUP BY trip_id
+          ) l2 ON l1.trip_id = l2.trip_id AND l1.recorded_at = l2.max_time
+      ) loc ON loc.trip_id = t.id
       WHERE t.company_id = :companyId AND t.status IN ('SCHEDULED', 'IN_TRANSIT', 'STARTED')
     `;
     const activeTrips = await query(sql, { companyId });
     res.json({ success: true, data: activeTrips });
   } catch (error) {
-    next(error);
+    console.error("Live Tracking Error:", error);
+    res.status(500).json({ success: false, message: error.message, stack: error.stack });
   }
 };
 
@@ -121,11 +128,13 @@ export const getTrackingDashboard = async (req, res, next) => {
     try {
       const [moving] = await query(`
         SELECT COUNT(*) as moving
-        FROM (
-          SELECT trip_id, speed, ROW_NUMBER() OVER(PARTITION BY trip_id ORDER BY recorded_at DESC) as rn
-          FROM trans_trip_locations
-        ) sub
-        WHERE rn = 1 AND speed > 0
+        FROM trans_trip_locations l1
+        INNER JOIN (
+            SELECT trip_id, MAX(recorded_at) as max_time
+            FROM trans_trip_locations
+            GROUP BY trip_id
+        ) l2 ON l1.trip_id = l2.trip_id AND l1.recorded_at = l2.max_time
+        WHERE l1.speed > 0
       `);
       movingCount = moving?.moving || 0;
     } catch (e) {
