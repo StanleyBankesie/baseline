@@ -44705,3 +44705,380 @@ Error: Authentication required
     at next (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:280:10)
     at Function.handle (C:\Users\stanl\baseline\server\node_modules\express\lib\router\index.js:175:3)
 --------------------------------------------------------------------------------
+
+[2026-08-09T23:40:53.569Z] HTTP_401
+Summary: Invalid credentials
+Request: POST /api/login (status 401)
+Context:
+status: 401
+code: INVALID_CREDENTIALS
+method: POST
+url: /api/login
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"demo","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: Invalid credentials
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:371:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-09T23:44:41.515Z] HTTP_403
+Summary: Your account has expired
+Request: POST /api/login (status 403)
+Context:
+status: 403
+code: ACCOUNT_EXPIRED
+method: POST
+url: /api/login
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"aja","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: Your account has expired
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:382:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-10T00:01:59.451Z] HTTP_403
+Summary: User is inactive
+Request: POST /api/login (status 403)
+Context:
+status: 403
+code: USER_INACTIVE
+method: POST
+url: /api/login
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"aja","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: User is inactive
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:385:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-10T00:02:12.001Z] HTTP_403
+Summary: User is inactive
+Request: POST /api/login (status 403)
+Context:
+status: 403
+code: USER_INACTIVE
+method: POST
+url: /api/login
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"aja","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: User is inactive
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:385:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-10T00:02:40.275Z] HTTP_403
+Summary: User is inactive
+Request: POST /api/login (status 403)
+Context:
+status: 403
+code: USER_INACTIVE
+method: POST
+url: /api/login
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"aja","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: User is inactive
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:385:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-10T00:04:49.175Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:737:13)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at process.processImmediate (node:internal/timers:459:9)
+--------------------------------------------------------------------------------
+
+[2026-08-10T00:05:12.459Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:737:13)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at process.processImmediate (node:internal/timers:459:9)
+--------------------------------------------------------------------------------
+
+[2026-08-10T00:05:32.154Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:737:13)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at process.processImmediate (node:internal/timers:459:9)
+--------------------------------------------------------------------------------
+
+[2026-08-10T00:18:38.130Z] HTTP_401
+Summary: Invalid credentials
+Request: POST /api/login (status 401)
+Context:
+status: 401
+code: INVALID_CREDENTIALS
+method: POST
+url: /api/login
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"aja","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: Invalid credentials
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:413:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-10T00:22:49.503Z] HTTP_401
+Summary: Invalid credentials
+Request: POST /api/login (status 401)
+Context:
+status: 401
+code: INVALID_CREDENTIALS
+method: POST
+url: /api/login
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"aja","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: Invalid credentials
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:413:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-10T00:24:44.079Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/baseline/server/index.js:1253:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-10T00:30:15.212Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-10T00:30:15.230Z] CLIENT_ERROR
+Summary: write ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: write ECONNRESET
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writevGeneric (node:internal/stream_base_commons:142:3)
+    at Socket._writeGeneric (node:net:969:11)
+    at Socket._writev (node:net:978:8)
+    at doWrite (node:internal/streams/writable:596:12)
+    at clearBuffer (node:internal/streams/writable:775:5)
+    at Writable.uncork (node:internal/streams/writable:531:7)
+    at ServerResponse.end (node:_http_outgoing:1145:19)
+    at respond (C:\Users\stanl\baseline\server\node_modules\engine.io\build\transports\polling.js:234:22)
+    at Polling.doWrite (C:\Users\stanl\baseline\server\node_modules\engine.io\build\transports\polling.js:243:13)
+--------------------------------------------------------------------------------
+
+[2026-08-10T00:30:15.231Z] CLIENT_ERROR
+Summary: write ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: write ECONNRESET
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writevGeneric (node:internal/stream_base_commons:142:3)
+    at Socket._writeGeneric (node:net:969:11)
+    at Socket._writev (node:net:978:8)
+    at doWrite (node:internal/streams/writable:596:12)
+    at clearBuffer (node:internal/streams/writable:775:5)
+    at Writable.uncork (node:internal/streams/writable:531:7)
+    at ServerResponse.end (node:_http_outgoing:1145:19)
+    at respond (C:\Users\stanl\baseline\server\node_modules\engine.io\build\transports\polling.js:234:22)
+    at Polling.doWrite (C:\Users\stanl\baseline\server\node_modules\engine.io\build\transports\polling.js:243:13)
+--------------------------------------------------------------------------------
+
+[2026-08-10T00:30:15.233Z] CLIENT_ERROR
+Summary: write ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: write ECONNRESET
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writevGeneric (node:internal/stream_base_commons:142:3)
+    at Socket._writeGeneric (node:net:969:11)
+    at Socket._writev (node:net:978:8)
+    at doWrite (node:internal/streams/writable:596:12)
+    at clearBuffer (node:internal/streams/writable:775:5)
+    at Writable.uncork (node:internal/streams/writable:531:7)
+    at ServerResponse.end (node:_http_outgoing:1145:19)
+    at respond (C:\Users\stanl\baseline\server\node_modules\engine.io\build\transports\polling.js:234:22)
+    at Polling.doWrite (C:\Users\stanl\baseline\server\node_modules\engine.io\build\transports\polling.js:243:13)
+--------------------------------------------------------------------------------
+
+[2026-08-10T00:30:15.236Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-10T00:30:15.237Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-10T00:31:08.831Z] HTTP_401
+Summary: Invalid credentials
+Request: POST /api/login (status 401)
+Context:
+status: 401
+code: INVALID_CREDENTIALS
+method: POST
+url: /api/login
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"aja","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: Invalid credentials
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:413:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-10T00:32:30.414Z] HTTP_401
+Summary: Invalid credentials
+Request: POST /api/login (status 401)
+Context:
+status: 401
+code: INVALID_CREDENTIALS
+method: POST
+url: /api/login
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"aja","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: Invalid credentials
+    at httpError (file:///C:/Users/stanl/baseline/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/baseline/server/controllers/auth.controller.js:413:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------

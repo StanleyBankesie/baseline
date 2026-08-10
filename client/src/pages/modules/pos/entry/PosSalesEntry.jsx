@@ -1092,10 +1092,13 @@ export default function PosSalesEntry() {
 
   function resolvePaymentMethodForSale(mode) {
     const t = String(mode?.type || "").toLowerCase();
+    const n = String(mode?.name || "").toLowerCase();
+    if (["credit", "on account", "account"].some((k) => n.includes(k)) || t === "credit") {
+      return "CREDIT";
+    }
     if (t === "cash") return "CASH";
     if (t === "card" || t === "bank") return "CARD";
     if (t === "mobile") return "MOBILE";
-    if (t === "credit") return "CREDIT";
     return "CASH";
   }
 

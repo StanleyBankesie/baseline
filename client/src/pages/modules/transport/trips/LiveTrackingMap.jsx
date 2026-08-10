@@ -127,17 +127,24 @@ function LiveTrackingMapInner({ apiKey, tripId, trip, height = 400 }) {
     : (hasValidOrigin ? { lat: startLat, lng: startLng } : { lat: 5.6037, lng: -0.1870 });
 
   useEffect(() => {
-    if (mapInstance && currentPosition && currentPosition.lat && currentPosition.lng) {
-      mapInstance.panTo(currentPosition);
+    if (mapInstance) {
+      if (!validHasLocations && hasValidOrigin && hasValidDest) {
+        const bounds = new window.google.maps.LatLngBounds();
+        bounds.extend({ lat: startLat, lng: startLng });
+        bounds.extend({ lat: destLat, lng: destLng });
+        mapInstance.fitBounds(bounds);
+      } else if (currentPosition && currentPosition.lat && currentPosition.lng) {
+        mapInstance.panTo(currentPosition);
+      }
     }
-  }, [mapInstance, currentPosition?.lat, currentPosition?.lng]);
+  }, [mapInstance, currentPosition?.lat, currentPosition?.lng, validHasLocations, hasValidOrigin, hasValidDest, startLat, startLng, destLat, destLng]);
 
   useEffect(() => {
     if (isLoaded && window.google && currentPosition && !isNaN(destLat) && !isNaN(destLng)) {
       const directionsService = new window.google.maps.DirectionsService();
       directionsService.route(
         {
-          origin: currentPosition,
+          origin: validHasLocations ? { lat: startLat, lng: startLng } : currentPosition,
           destination: { lat: destLat, lng: destLng },
           travelMode: window.google.maps.TravelMode.DRIVING,
         },
@@ -156,7 +163,7 @@ function LiveTrackingMapInner({ apiKey, tripId, trip, height = 400 }) {
         }
       );
     }
-  }, [isLoaded, currentPosition.lat, currentPosition.lng, destLat, destLng]);
+  }, [isLoaded, validHasLocations, startLat, startLng, currentPosition.lat, currentPosition.lng, destLat, destLng]);
 
   if (loadError) {
     return <div style={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'red' }}>Error loading Google Maps.</div>;
@@ -268,8 +275,9 @@ function LiveTrackingMapInner({ apiKey, tripId, trip, height = 400 }) {
               position={currentPosition} 
               zIndex={100}
               icon={{
-                url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
-                scaledSize: new window.google.maps.Size(40, 40)
+                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#0E3646"><path d="M18.92,6.01C18.72,5.42,18.16,5,17.5,5h-11c-0.66,0-1.21,0.42-1.42,1.01L3,12v8c0,0.55,0.45,1,1,1h1c0.55,0,1-0.45,1-1v-1h12v1c0,0.55,0.45,1,1,1h1c0.55,0,1-0.45,1-1v-8L18.92,6.01z M6.5,16c-0.83,0-1.5-0.67-1.5-1.5S5.67,13,6.5,13s1.5,0.67,1.5,1.5S7.33,16,6.5,16z M17.5,16c-0.83,0-1.5-0.67-1.5-1.5S16.67,13,17.5,13s1.5,0.67,1.5,1.5S18.33,16,17.5,16z M5,11l1.5-4.5h11L19,11H5z"/></svg>`),
+                scaledSize: new window.google.maps.Size(36, 36),
+                anchor: new window.google.maps.Point(18, 18)
               }}
             />
             <InfoWindowF position={currentPosition} options={{ pixelOffset: new window.google.maps.Size(0, -20), headerDisabled: true, disableAutoPan: true }}>

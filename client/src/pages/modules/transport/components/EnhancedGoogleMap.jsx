@@ -70,29 +70,19 @@ function EnhancedGoogleMapInner({ apiKey, vehicles, selectedVehicleId, onSelectV
         const lat = v.latitude ? Number(v.latitude) : (v.origin_lat ? Number(v.origin_lat) : null);
         const lng = v.longitude ? Number(v.longitude) : (v.origin_lng ? Number(v.origin_lng) : null);
         if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
-          if (vehicles.length === 1 && (v.status === 'STARTED' || v.status === 'IN_TRANSIT')) {
-            // Navigation mode!
-            mapRef.current.panTo({ lat, lng });
-            mapRef.current.setZoom(19);
-            if (v.heading !== undefined && v.heading !== null) {
-              mapRef.current.setHeading(v.heading);
-            }
-            mapRef.current.setTilt(60);
-          } else {
-            // Focus on trip area
-            const bounds = new window.google.maps.LatLngBounds();
-            bounds.extend({ lat, lng });
-            
-            const destLat = v.destination_lat ? Number(v.destination_lat) : null;
-            const destLng = v.destination_lng ? Number(v.destination_lng) : null;
-            if (destLat && destLng && !isNaN(destLat) && !isNaN(destLng)) {
-              bounds.extend({ lat: destLat, lng: destLng });
-            }
-            
-            mapRef.current.fitBounds(bounds);
-            mapRef.current.setTilt(0);
-            mapRef.current.setHeading(0);
+          // Focus on trip area
+          const bounds = new window.google.maps.LatLngBounds();
+          bounds.extend({ lat, lng });
+          
+          const destLat = v.destination_lat ? Number(v.destination_lat) : null;
+          const destLng = v.destination_lng ? Number(v.destination_lng) : null;
+          if (destLat && destLng && !isNaN(destLat) && !isNaN(destLng)) {
+            bounds.extend({ lat: destLat, lng: destLng });
           }
+          
+          mapRef.current.fitBounds(bounds);
+          mapRef.current.setTilt(0);
+          mapRef.current.setHeading(0);
         }
       }
     } else if (vehicles?.length > 0) {

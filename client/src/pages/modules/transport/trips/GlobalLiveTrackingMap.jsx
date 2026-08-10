@@ -142,6 +142,14 @@ function GlobalLiveTrackingMapInner({ apiKey, activeTrips, height }) {
         });
       }
 
+      // Ensure the entire trip area (origin to destination) is in view
+      activeTrips.forEach(t => {
+        if (t.destination_lat && t.destination_lng) {
+          bounds.extend({ lat: Number(t.destination_lat), lng: Number(t.destination_lng) });
+          hasPoints = true;
+        }
+      });
+
       if (hasPoints && !bounds.isEmpty()) {
         mapInstance.fitBounds(bounds);
         // Prevent zooming in too closely if there's only one marker

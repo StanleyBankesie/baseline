@@ -741,7 +741,7 @@ export default function PosDashboard() {
         <div className="p-4 rounded-lg border border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700">
           <div className="text-xs uppercase text-slate-500 mb-1">Daily Sales</div>
           <div className="text-lg font-bold text-slate-900 dark:text-slate-100">
-            {fmtCurrency(Number(daySummary?.cashAmount || 0) + Number(daySummary?.cardAmount || 0) + Number(daySummary?.mobileAmount || 0))}
+            {fmtCurrency(Number(daySummary?.cashAmount || 0) + Number(daySummary?.cardAmount || 0) + Number(daySummary?.mobileAmount || 0) + Number(daySummary?.creditAmount || 0))}
           </div>
         </div>
       </div>
