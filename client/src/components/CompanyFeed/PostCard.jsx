@@ -26,6 +26,7 @@ export default function PostCard({
   setPosts,
   defaultShowComments = false,
   forceOpenComments = false,
+  setModalPostId,
 }) {
   const [newComment, setNewComment] = useState("");
   const [newCommentFile, setNewCommentFile] = useState(null);
@@ -34,6 +35,10 @@ export default function PostCard({
   const [authorAvatar, setAuthorAvatar] = useState(null);
   const [commenterAvatars, setCommenterAvatars] = useState({});
   const [showComments, setShowComments] = useState(!!defaultShowComments);
+  const [showStatsModal, setShowStatsModal] = useState(false);
+  const [statsTab, setStatsTab] = useState("likes");
+  const [likesData, setLikesData] = useState([]);
+  const [loadingLikes, setLoadingLikes] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const commentFileRef = useRef(null);
@@ -352,10 +357,44 @@ export default function PostCard({
     if (forceOpenComments) setShowComments(true);
   }, [forceOpenComments]);
 
+  const safeFormatTime = (timeStr) => {
+    try {
+      if (!timeStr) return "Some time ago";
+      const d = new Date(timeStr);
+      if (isNaN(d.getTime())) return "Some time ago";
+      return formatDistanceToNow(d, { addSuffix: true });
+    } catch {
+      return "Some time ago";
+    }
+  };
+
+  const openStatsModal = async (tab) => {
+    setStatsTab(tab);
+    setShowStatsModal(true);
+    if (tab === "likes") {
+      try {
+        setLoadingLikes(true);
+        const uid = Number(user?.sub || user?.id) || "";
+        const res = await api.get(`/social-feed/${post.id}/likes`, {
+          headers: { "x-user-id": String(uid) },
+        });
+        const arr = res?.data?.data || res?.data || [];
+        setLikesData(Array.isArray(arr) ? arr : []);
+      } catch (err) {
+        console.error("Error loading likes", err);
+      } finally {
+        setLoadingLikes(false);
+      }
+    }
+  };
+
   return (
     <div
       className="post-card"
-      onClick={() => navigate(`/social-feed/${post.id}`)}
+      onClick={() => {
+        if (setModalPostId) setModalPostId(post.id);
+        else navigate(`/social-feed/${post.id}`);
+      }}
       role="button"
       tabIndex={0}
     >
@@ -367,11 +406,9 @@ export default function PostCard({
             className="avatar"
           />
           <div className="author-details">
-            <h4>{post.full_name}</h4>
+            <h4>{post.full_name || "Unknown Author"}</h4>
             <span className="post-time">
-              {formatDistanceToNow(new Date(post.created_at), {
-                addSuffix: true,
-              })}
+              {safeFormatTime(post.created_at)}
             </span>
           </div>
         </div>
@@ -395,8 +432,18 @@ export default function PostCard({
       </div>
 
       <div className="post-stats">
-        <span>👍 {post.like_count} Likes</span>
-        <span>💬 {post.comment_count} Comments</span>
+        <span 
+          className="cursor-pointer hover:underline"
+          onClick={(e) => { e.stopPropagation(); openStatsModal("likes"); }}
+        >
+          👍 {post.like_count} Likes
+        </span>
+        <span 
+          className="cursor-pointer hover:underline"
+          onClick={(e) => { e.stopPropagation(); openStatsModal("comments"); }}
+        >
+          💬 {post.comment_count} Comments
+        </span>
       </div>
 
       <div className="post-actions">
@@ -421,19 +468,23 @@ export default function PostCard({
           }}
           disabled={
             loading ||
-            ((post.comment_count ?? 0) > 0 &&
+            ((Number(post.comment_count) || 0) > 0 &&
               Array.isArray(post.comments) &&
-              post.comments.length >= (post.comment_count ?? 0))
+              post.comments.length >= (Number(post.comment_count) || 0))
           }
         >
           {(() => {
-            const total = Number(post.comment_count ?? 0);
-            const current = Array.isArray(post.comments)
-              ? post.comments.length
-              : 0;
-            if (showComments && total > 0 && current >= total)
-              return "All Comments Shown";
-            return showComments ? "Hide Comments" : "Show Comments";
+            try {
+              const total = Number(post.comment_count) || 0;
+              const current = Array.isArray(post.comments)
+                ? post.comments.length
+                : 0;
+              if (showComments && total > 0 && current >= total)
+                return "All Comments Shown";
+              return showComments ? "Hide Comments" : "Show Comments";
+            } catch {
+              return "Comments";
+            }
           })()}
         </button>
         <button
@@ -448,7 +499,7 @@ export default function PostCard({
       </div>
 
       {showComments && (
-        <div className="comments-section-inline">
+        <div className="comments-section-inline" onClick={(e) => e.stopPropagation()}>
           <div className="comments-list">
             {post.comments &&
               post.comments.length > 0 &&
@@ -472,12 +523,10 @@ export default function PostCard({
                     className="avatar-small"
                   />
                   <div className="comment-content">
-                    <h5>{comment.full_name}</h5>
+                    <h5>{comment.full_name || "Unknown User"}</h5>
                     <p>{comment.comment_text}</p>
                     <span className="comment-time">
-                      {formatDistanceToNow(new Date(comment.created_at), {
-                        addSuffix: true,
-                      })}
+                      {safeFormatTime(comment.created_at)}
                     </span>
                     {Array.isArray(comment.attachments) &&
                     comment.attachments.length > 0 ? (
@@ -645,6 +694,72 @@ export default function PostCard({
               {loading ? "..." : "Post"}
             </button>
           </form>
+        </div>
+      )}
+
+      {showStatsModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" 
+          onClick={(e) => { e.stopPropagation(); setShowStatsModal(false); }}
+        >
+          <div 
+            className="bg-white rounded-lg w-full max-w-sm max-h-[80vh] overflow-y-auto relative p-4 shadow-xl" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-4 border-b pb-2">
+              <h3 className="font-semibold text-lg text-slate-800">
+                {statsTab === "likes" ? "Liked By" : "Commented By"}
+              </h3>
+              <button onClick={() => setShowStatsModal(false)} className="text-slate-500 hover:text-slate-800 font-bold">
+                ✕
+              </button>
+            </div>
+            <div className="flex flex-col gap-3">
+              {statsTab === "likes" ? (
+                loadingLikes ? (
+                  <p className="text-slate-500 text-sm">Loading...</p>
+                ) : likesData.length > 0 ? (
+                  likesData.map((like) => (
+                    <div key={like.id || like.user_id} className="flex items-center gap-3">
+                      <img 
+                        src={like.profile_picture_url || "/default-avatar.png"} 
+                        alt={like.full_name} 
+                        className="w-10 h-10 rounded-full object-cover border border-slate-200" 
+                      />
+                      <span className="font-medium text-slate-700">{like.full_name || "Unknown User"}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-slate-500 text-sm">No likes yet.</p>
+                )
+              ) : (
+                post.comments && post.comments.length > 0 ? (
+                  Object.values(
+                    post.comments.reduce((acc, c) => {
+                      const id = c.user_id || c.userId || c.author_user_id || c.authorId || c.id;
+                      if (!acc[id]) acc[id] = c;
+                      return acc;
+                    }, {})
+                  ).map((comment) => (
+                    <div key={comment.id} className="flex items-center gap-3">
+                      <img 
+                        src={
+                          commenterAvatars[Number(comment.user_id || comment.userId || comment.author_user_id || comment.authorId || 0)] || 
+                          comment.profile_picture_url || 
+                          "/default-avatar.png"
+                        } 
+                        alt={comment.full_name} 
+                        className="w-10 h-10 rounded-full object-cover border border-slate-200" 
+                      />
+                      <span className="font-medium text-slate-700">{comment.full_name || "Unknown User"}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-slate-500 text-sm">No comments yet.</p>
+                )
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

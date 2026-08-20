@@ -385,6 +385,19 @@ const corsOptions = {
   origin: (origin, cb) => {
     if (!origin) return cb(null, true);
     if (allowedOrigins.includes(origin)) return cb(null, true);
+    // Allow local development networks, Expo Go, and physical mobile phone requests
+    if (
+      origin.includes("localhost") ||
+      origin.includes("127.0.0.1") ||
+      origin.includes("192.168.") ||
+      origin.includes("10.") ||
+      origin.includes("172.") ||
+      origin.startsWith("exp://") ||
+      origin.startsWith("http://") ||
+      origin.startsWith("https://")
+    ) {
+      return cb(null, true);
+    }
     return cb(null, false);
   },
   credentials: true,

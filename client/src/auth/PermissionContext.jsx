@@ -744,6 +744,7 @@ export const PermissionProvider = ({ children }) => {
       if (!k) return true;
       return hasRoleFeature(`home:${k}`);
     }
+    if (parts[0] === "social-feed") return true;
     if (!mk) return false;
     if (!isModuleEnabled(mk)) return false;
 

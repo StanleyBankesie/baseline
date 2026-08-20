@@ -739,7 +739,8 @@ export default function LoginPage() {
           style={{
             backgroundImage: `url(${loginHeroImageUrl || backgroundImage})`,
             backgroundSize: "cover",
-            backgroundPosition: "center",
+            backgroundPosition: "center center",
+            backgroundRepeat: "no-repeat",
           }}
         >
           {/* Overlay to ensure text readability */}

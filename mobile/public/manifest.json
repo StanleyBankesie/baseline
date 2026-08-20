@@ -1,0 +1,21 @@
+{
+  "short_name": "OmniSuite",
+  "name": "OmniSuite Enterprise Mobile",
+  "icons": [
+    {
+      "src": "/assets/images/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/images/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0E3646",
+  "theme_color": "#0E3646",
+  "display": "standalone",
+  "orientation": "portrait"
+}

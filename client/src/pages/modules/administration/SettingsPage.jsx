@@ -257,9 +257,11 @@ export default function SettingsPage() {
                   <div className="text-sm text-slate-500">Change the image shown behind the login form.</div>
                 </div>
                 {loginHeroImageUrl ? (
-                  <div className="w-40 h-24 rounded border border-slate-200 bg-cover bg-center" style={{ backgroundImage: `url(${loginHeroImageUrl})` }} />
+                  <div className="w-44 h-28 rounded-lg border border-slate-200 bg-slate-900 overflow-hidden flex items-center justify-center p-1 shadow-inner">
+                    <img src={loginHeroImageUrl} alt="Hero Background Preview" className="w-full h-full object-contain rounded" />
+                  </div>
                 ) : (
-                  <div className="w-40 h-24 rounded border border-dashed border-slate-300 flex items-center justify-center text-xs text-slate-500">Default image</div>
+                  <div className="w-44 h-28 rounded-lg border border-dashed border-slate-300 flex items-center justify-center text-xs text-slate-500 font-medium">Default image</div>
                 )}
               </div>
               <div className="flex flex-wrap gap-2">

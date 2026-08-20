@@ -31,8 +31,8 @@ const dbConfig = {
   port: parseNumber(optionalEnv("DB_PORT", 3306), 3306),
   connectionLimit: parseNumber(optionalEnv("DB_CONNECTION_LIMIT", 50), 50),
   connectTimeout: parseNumber(
-    optionalEnv("DB_CONNECT_TIMEOUT_MS", 10000),
-    10000,
+    optionalEnv("DB_CONNECT_TIMEOUT_MS", 30000),
+    30000,
   ),
   queryTimeout: parseNumber(optionalEnv("DB_QUERY_TIMEOUT_MS", 15000), 15000),
   reconnectCooldownMs: parseNumber(
@@ -236,7 +236,6 @@ function createPoolInstance() {
     waitForConnections: true,
     connectionLimit: dbConfig.connectionLimit,
     queueLimit: 0,
-    acquireTimeout: 10000,
     namedPlaceholders: true,
     enableKeepAlive: true,
     keepAliveInitialDelay: 10000,

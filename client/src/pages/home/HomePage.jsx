@@ -702,6 +702,13 @@ export default function HomePage() {
       ),
     [notifications],
   );
+  const postNotificationsAll = useMemo(
+    () =>
+      notifications.filter((n) =>
+        String(n.link || "").startsWith("/social-feed")
+      ),
+    [notifications],
+  );
   const otherNotificationsUnread = useMemo(
     () =>
       notifications.filter(
@@ -711,39 +718,13 @@ export default function HomePage() {
       ),
     [notifications],
   );
-  const extractPostIdFromLink = (link) => {
-    const s = String(link || "");
-    const m = s.match(/social-feed\/(\d+)/);
-    return m ? Number(m[1]) : null;
-  };
   const loadPostAlerts = async () => {
-    const ids = Array.from(
-      new Set(
-        postNotificationsUnread
-          .map((n) => extractPostIdFromLink(n.link))
-          .filter((id) => Number.isFinite(id) && id > 0),
-      ),
-    );
-    if (ids.length === 0) {
-      setPostAlerts([]);
-      return;
-    }
     try {
       setPostAlertsLoading(true);
-      const uid = Number(user?.sub || user?.id) || "";
-      const res = await fetch(`/api/social-feed?offset=0&limit=200`, {
-        headers: {
-          "x-user-id": String(uid),
-        },
-      });
-      if (!res.ok) throw new Error("Failed to load posts");
-      const data = await res.json();
+      const res = await client.get(`/social-feed?offset=0&limit=200`);
+      const data = res?.data || {};
       const items = Array.isArray(data.data) ? data.data : [];
-      const byId = new Map(items.map((p) => [Number(p.id), p]));
-      const matched = ids
-        .map((id) => byId.get(id))
-        .filter((p) => p && typeof p.content === "string");
-      setPostAlerts(matched);
+      setPostAlerts(items);
     } catch {
       setPostAlerts([]);
     } finally {

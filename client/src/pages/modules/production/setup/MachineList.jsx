@@ -112,7 +112,7 @@ export default function MachineList() {
             <thead>
               <tr>
                 <th>Machine Details</th>
-                <th>Code</th>
+                <th>Serial Number</th>
                 <th className="text-center">Status</th>
                 <th className="text-right">Actions</th>
               </tr>
@@ -197,13 +197,13 @@ export default function MachineList() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight">Code / Asset ID</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight">Serial Number</label>
                 <input 
                   type="text" 
                   className="input py-3 w-full font-bold font-mono"
                   value={currentMachine.machine_code}
                   onChange={e => setCurrentMachine({...currentMachine, machine_code: e.target.value})}
-                  placeholder="e.g. MAC-001"
+                  placeholder="e.g. SN-994021"
                 />
               </div>
               <div className="flex items-center gap-3 py-1">

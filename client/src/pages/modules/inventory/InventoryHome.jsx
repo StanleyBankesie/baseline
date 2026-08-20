@@ -278,26 +278,6 @@ export const inventorySections = [
     title: "Setup & Parameters",
     features: [
       {
-        name: "Inventory Setup",
-        path: "/inventory/setup",
-        actions: [
-          { label: "View", path: "/inventory/setup", type: "outline" }
-        ],
-        description: "Configure valuation methods and defaults",
-        icon: "⚙️",
-      },
-
-      {
-        name: "Item Attributes",
-        path: "/inventory/item-attributes",
-        actions: [
-          { label: "View", path: "/inventory/item-attributes", type: "outline" },
-          { label: "New", path: "/inventory/item-attributes/new", type: "primary" }
-        ],
-        description: "Custom item parameters and specs",
-        icon: "🎨",
-      },
-      {
         name: "Item Groups & Sub Groups",
         path: "/inventory/item-groups",
         actions: [

@@ -14,7 +14,8 @@ import {
   Calendar,
   Layers,
   Activity,
-  ChevronRight
+  ChevronRight,
+  Warehouse
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -43,6 +44,13 @@ const ReportCard = ({ title, description, icon, path, color }) => (
  */
 export default function ProductionReports() {
   const reports = [
+    {
+      title: "Warehouse Stock Availability",
+      description: "Real-time available quantities of raw materials and WIP across all production warehouses.",
+      icon: <Warehouse className="text-emerald-600" />,
+      path: "/production/reports/warehouse-stock",
+      color: "bg-emerald-50 dark:bg-emerald-900/30"
+    },
     {
       title: "Production Efficiency",
       description: "Comparison of planned quantities versus actual production output by item.",

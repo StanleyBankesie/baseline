@@ -32,6 +32,7 @@ export default function CompanyFeed({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [offset, setOffset] = useState(0);
+  const [modalPostId, setModalPostId] = useState(null);
   const navigate = useNavigate();
   const [forceOpenComments, setForceOpenComments] = useState(false);
   const autoLoadedRef = useRef(false);
@@ -53,7 +54,7 @@ export default function CompanyFeed({
           : {
               method: "get",
               url: `/social-feed`,
-              params: { offset: pageOffset, limit: 20 },
+              params: { offset: pageOffset, limit: 10 },
             };
         const resp = await api.request({
           ...config,
@@ -79,13 +80,13 @@ export default function CompanyFeed({
         setLoading(false);
       }
     },
-    [user],
+    [user, focusId],
   );
 
   // Initial load
   useEffect(() => {
     fetchPosts(0);
-  }, [user, fetchPosts]);
+  }, [fetchPosts]);
 
   // Socket.io listeners for real-time updates (likes only)
   useEffect(() => {
@@ -102,8 +103,19 @@ export default function CompanyFeed({
       );
     });
 
+    socket.on("post_unliked", (data) => {
+      setPosts((prev) =>
+        prev.map((post) =>
+          post.id === data.postId
+            ? { ...post, like_count: Math.max(0, post.like_count - 1) }
+            : post,
+        ),
+      );
+    });
+
     return () => {
       socket.off("post_liked");
+      socket.off("post_unliked");
     };
   }, [socket]);
 
@@ -113,11 +125,6 @@ export default function CompanyFeed({
    */
   const handlePostCreated = (newPost) => {
     setPosts((prev) => [newPost, ...prev]);
-    try {
-      if (compact && Number.isFinite(Number(newPost?.id)) && newPost.id > 0) {
-        navigate(`/social-feed/${newPost.id}`);
-      }
-    } catch {}
   };
 
   /**
@@ -161,7 +168,7 @@ export default function CompanyFeed({
       }
       return;
     }
-    fetchPosts(offset + 20);
+    fetchPosts(offset + 10);
   };
 
   // Auto-load all comments when viewing a single post
@@ -204,6 +211,13 @@ export default function CompanyFeed({
       );
   }, []);
 
+  const handleLoadLess = () => {
+    if (offset === 0) return;
+    const newOffset = Math.max(0, offset - 10);
+    setPosts(prev => prev.slice(0, newOffset || 10)); // keep at least the first page
+    setOffset(newOffset);
+  };
+
   if (!user) {
     return (
       <div className="company-feed-container">
@@ -213,7 +227,7 @@ export default function CompanyFeed({
   }
 
   // For compact mode, show PostCreator only (badge now separate)
-  if (compact) {
+  if (compact && !(Number.isFinite(focusId) && focusId > 0)) {
     return (
       <div className="company-feed-container">
         <PostCreator onPostCreated={handlePostCreated} />
@@ -221,11 +235,14 @@ export default function CompanyFeed({
     );
   }
 
+
   // Full social feed view
   return (
     <div className="company-feed-container">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-slate-800">Social Feed</h2>
+        <h2 className="text-lg font-semibold text-slate-800">
+          Social Feed
+        </h2>
         <button
           onClick={() => navigate("/")}
           className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-medium transition-colors"
@@ -238,7 +255,11 @@ export default function CompanyFeed({
         <PostCreator onPostCreated={handlePostCreated} />
       )}
 
-      {loading && posts.length === 0 ? (
+      {error ? (
+        <div className="error-state text-red-500 p-4 border border-red-200 rounded-xl mb-4 bg-red-50">
+          <p>Error: {error}</p>
+        </div>
+      ) : loading && posts.length === 0 ? (
         <div className="loading-spinner">Loading posts...</div>
       ) : posts.length === 0 ? (
         <div className="empty-state">
@@ -251,30 +272,58 @@ export default function CompanyFeed({
             setPosts={setPosts}
             defaultShowComments={Number.isFinite(focusId) && focusId > 0}
             forceOpenComments={forceOpenComments}
+            setModalPostId={setModalPostId}
           />
-          <button
-            className="btn-load-more"
-            onClick={handleLoadMore}
-            disabled={
-              loading ||
-              (Number.isFinite(focusId) &&
-                focusId > 0 &&
-                (posts[0]?.comment_count ?? 0) > 0 &&
-                (posts[0]?.comments?.length ?? 0) >=
-                  (posts[0]?.comment_count ?? 0))
-            }
-          >
-            {loading
-              ? "Loading..."
-              : Number.isFinite(focusId) &&
+          <div className="flex gap-4 mx-auto mt-5" style={{ width: "75%" }}>
+            <button
+              className="btn-load-more"
+              style={{ flex: 1 }}
+              onClick={handleLoadLess}
+              disabled={loading || offset === 0}
+            >
+              Load Less
+            </button>
+            <button
+              className="btn-load-more"
+              style={{ flex: 1 }}
+              onClick={handleLoadMore}
+              disabled={
+                loading ||
+                (Number.isFinite(focusId) &&
                   focusId > 0 &&
                   (posts[0]?.comment_count ?? 0) > 0 &&
                   (posts[0]?.comments?.length ?? 0) >=
-                    (posts[0]?.comment_count ?? 0)
-                ? "All comments loaded"
-                : "Load More"}
-          </button>
+                    (posts[0]?.comment_count ?? 0))
+              }
+            >
+              {loading
+                ? "Loading..."
+                : Number.isFinite(focusId) &&
+                    focusId > 0 &&
+                    (posts[0]?.comment_count ?? 0) > 0 &&
+                    (posts[0]?.comments?.length ?? 0) >=
+                      (posts[0]?.comment_count ?? 0)
+                  ? "All comments loaded"
+                  : "Load More"}
+            </button>
+          </div>
         </>
+      )}
+
+      {modalPostId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto relative">
+            <button
+              onClick={() => setModalPostId(null)}
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-800 bg-slate-100 rounded-full w-8 h-8 flex items-center justify-center z-10"
+            >
+              ✕
+            </button>
+            <div className="p-6 pt-10">
+              <CompanyFeed focusId={modalPostId} hideCreator compact />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

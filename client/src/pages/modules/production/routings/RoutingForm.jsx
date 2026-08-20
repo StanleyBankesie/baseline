@@ -13,7 +13,8 @@ import {
   Clock,
   Settings2,
   ChevronDown,
-  Loader2
+  Loader2,
+  Activity
 } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "api/client";
