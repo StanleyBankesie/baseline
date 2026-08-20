@@ -1463,13 +1463,13 @@ async function postGrnAccrualTx(
 async function nextSequentialNo(table, column, prefix, connObj = null) {
   const executor = connObj || { query };
   let sql = `
-    SELECT ${column} AS no,
-          created_at,
+    SELECT ${table}.${column} AS no,
+          ${table}.created_at,
           u.username AS created_by_name
          FROM ${table}
-        LEFT JOIN adm_users u ON u.id = created_by
-         WHERE ${column} REGEXP '^${prefix}-[0-9]{6}$'
-    ORDER BY CAST(SUBSTRING(${column}, ${prefix.length + 2}) AS UNSIGNED) DESC
+        LEFT JOIN adm_users u ON u.id = ${table}.created_by
+         WHERE ${table}.${column} REGEXP '^${prefix}-[0-9]{6}$'
+    ORDER BY CAST(SUBSTRING(${table}.${column}, ${prefix.length + 2}) AS UNSIGNED) DESC
     LIMIT 1
   `;
   if (connObj) sql += " FOR UPDATE";
@@ -10405,10 +10405,10 @@ router.get(
         `
         SELECT COUNT(*) AS count,
                COALESCE(SUM(total_amount), 0) AS total
-         FROM pur_orders
+         FROM pur_bills
          WHERE company_id = :companyId
           AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
-          AND po_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+          AND bill_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
         `,
         { companyId, branchId, branchIdsStr },
       );

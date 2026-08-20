@@ -3531,3 +3531,225 @@ export async function ensurePMInvoiceTables() {
     `).catch(() => null);
   }
 }
+
+/**
+ * Ensure social feed tables exist with correct schema.
+ * Handles the warehouse_id → branch_id migration automatically.
+ */
+export async function ensureSocialFeedTables() {
+  // 1. posts table
+  if (!(await hasTable("posts"))) {
+    await query(`
+      CREATE TABLE IF NOT EXISTS posts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        content LONGTEXT NOT NULL,
+        image_url VARCHAR(500),
+        visibility_type ENUM('company', 'branch', 'warehouse') NOT NULL DEFAULT 'company',
+        branch_id INT DEFAULT NULL,
+        warehouse_id INT DEFAULT NULL,
+        like_count INT DEFAULT 0,
+        comment_count INT DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_posts_visibility (visibility_type),
+        INDEX idx_posts_branch (branch_id),
+        INDEX idx_posts_user (user_id),
+        INDEX idx_posts_created_at (created_at DESC)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `).catch(() => null);
+  } else {
+    // Add branch_id if missing (older schema only has warehouse_id)
+    if (!(await hasColumn("posts", "branch_id"))) {
+      await query("ALTER TABLE posts ADD COLUMN branch_id INT DEFAULT NULL").catch(() => null);
+    }
+    // Add warehouse_id if missing
+    if (!(await hasColumn("posts", "warehouse_id"))) {
+      await query("ALTER TABLE posts ADD COLUMN warehouse_id INT DEFAULT NULL").catch(() => null);
+    }
+    // Expand visibility_type enum to include 'branch' and 'warehouse'
+    await query(`
+      ALTER TABLE posts MODIFY COLUMN visibility_type ENUM('company', 'branch', 'warehouse') NOT NULL DEFAULT 'company'
+    `).catch(() => null);
+  }
+
+  // 2. post_likes table
+  if (!(await hasTable("post_likes"))) {
+    await query(`
+      CREATE TABLE IF NOT EXISTS post_likes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        post_id INT NOT NULL,
+        user_id INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_post_like (post_id, user_id),
+        INDEX idx_likes_post (post_id),
+        INDEX idx_likes_user (user_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `).catch(() => null);
+  }
+
+  // 3. post_comments table
+  if (!(await hasTable("post_comments"))) {
+    await query(`
+      CREATE TABLE IF NOT EXISTS post_comments (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        post_id INT NOT NULL,
+        user_id INT NOT NULL,
+        comment_text LONGTEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_comments_post (post_id),
+        INDEX idx_comments_user (user_id),
+        INDEX idx_comments_created (created_at DESC)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `).catch(() => null);
+  }
+}
+
+/**
+ * Ensure core transport module tables exist with all required columns.
+ * Creates tables from scratch if missing, then adds any missing columns.
+ */
+export async function ensureTransportTables() {
+  const ec = async (table, col, ddl) => {
+    if (!(await hasColumn(table, col))) {
+      await query(`ALTER TABLE ${table} ADD COLUMN ${col} ${ddl}`).catch(() => null);
+    }
+  };
+
+  // trans_vehicles
+  if (!(await hasTable("trans_vehicles"))) {
+    await query(`
+      CREATE TABLE IF NOT EXISTS trans_vehicles (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        company_id BIGINT UNSIGNED NOT NULL,
+        branch_id BIGINT UNSIGNED NOT NULL,
+        reg_number VARCHAR(50) NOT NULL,
+        vehicle_type VARCHAR(100) NOT NULL,
+        make VARCHAR(100) NULL,
+        model VARCHAR(100) NULL,
+        year_of_manufacture INT NULL,
+        capacity DECIMAL(15,2) NULL,
+        capacity_unit VARCHAR(20) NULL,
+        current_odometer DECIMAL(15,2) NOT NULL DEFAULT 0,
+        status ENUM('AVAILABLE','ON_TRIP','MAINTENANCE','RETIRED') NOT NULL DEFAULT 'AVAILABLE',
+        insurance_expiry DATE NULL,
+        is_active TINYINT(1) NOT NULL DEFAULT 1,
+        created_by BIGINT UNSIGNED NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_vehicle_status (status)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `).catch(() => null);
+  }
+
+  // trans_drivers – also needs employee_name for JOIN-free queries
+  if (!(await hasTable("trans_drivers"))) {
+    await query(`
+      CREATE TABLE IF NOT EXISTS trans_drivers (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        company_id BIGINT UNSIGNED NOT NULL,
+        branch_id BIGINT UNSIGNED NOT NULL,
+        employee_id BIGINT UNSIGNED NOT NULL,
+        employee_name VARCHAR(255) NULL,
+        license_number VARCHAR(100) NOT NULL,
+        license_type VARCHAR(50) NOT NULL,
+        license_expiry DATE NOT NULL,
+        status ENUM('AVAILABLE','ON_TRIP','ON_LEAVE','SUSPENDED') NOT NULL DEFAULT 'AVAILABLE',
+        is_active TINYINT(1) NOT NULL DEFAULT 1,
+        created_by BIGINT UNSIGNED NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `).catch(() => null);
+  } else {
+    await ec("trans_drivers", "employee_name", "VARCHAR(255) NULL");
+  }
+
+  // trans_trips
+  if (!(await hasTable("trans_trips"))) {
+    await query(`
+      CREATE TABLE IF NOT EXISTS trans_trips (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        company_id BIGINT UNSIGNED NOT NULL,
+        branch_id BIGINT UNSIGNED NOT NULL,
+        trip_number VARCHAR(50) NOT NULL,
+        request_id BIGINT UNSIGNED NULL,
+        route_id BIGINT UNSIGNED NULL,
+        vehicle_id BIGINT UNSIGNED NOT NULL,
+        driver_id BIGINT UNSIGNED NOT NULL,
+        start_time DATETIME NULL,
+        end_time DATETIME NULL,
+        start_odometer DECIMAL(15,2) NULL,
+        end_odometer DECIMAL(15,2) NULL,
+        origin_name VARCHAR(255) NULL,
+        origin_lat DECIMAL(10,8) NULL,
+        origin_lng DECIMAL(11,8) NULL,
+        destination_name VARCHAR(255) NULL,
+        destination_lat DECIMAL(10,8) NULL,
+        destination_lng DECIMAL(11,8) NULL,
+        status ENUM('SCHEDULED','STARTED','IN_TRANSIT','COMPLETED','CANCELLED','DELAYED') NOT NULL DEFAULT 'SCHEDULED',
+        tracking_status VARCHAR(50) DEFAULT 'PENDING',
+        pod_signature_url VARCHAR(255) DEFAULT NULL,
+        pod_photo_url VARCHAR(255) DEFAULT NULL,
+        pod_notes TEXT DEFAULT NULL,
+        pod_timestamp DATETIME DEFAULT NULL,
+        remarks TEXT NULL,
+        is_active TINYINT(1) NOT NULL DEFAULT 1,
+        created_by BIGINT UNSIGNED NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_trip_vehicle (vehicle_id),
+        KEY idx_trip_driver (driver_id),
+        KEY idx_trip_status (status),
+        KEY idx_trip_company (company_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `).catch(() => null);
+  } else {
+    // Add columns added by later migrations
+    await ec("trans_trips", "tracking_status", "VARCHAR(50) DEFAULT 'PENDING' AFTER status");
+    await ec("trans_trips", "origin_name", "VARCHAR(255) NULL");
+    await ec("trans_trips", "origin_lat", "DECIMAL(10,8) NULL");
+    await ec("trans_trips", "origin_lng", "DECIMAL(11,8) NULL");
+    await ec("trans_trips", "destination_name", "VARCHAR(255) NULL");
+    await ec("trans_trips", "destination_lat", "DECIMAL(10,8) NULL");
+    await ec("trans_trips", "destination_lng", "DECIMAL(11,8) NULL");
+    await ec("trans_trips", "pod_signature_url", "VARCHAR(255) DEFAULT NULL");
+    await ec("trans_trips", "pod_photo_url", "VARCHAR(255) DEFAULT NULL");
+    await ec("trans_trips", "pod_notes", "TEXT DEFAULT NULL");
+    await ec("trans_trips", "pod_timestamp", "DATETIME DEFAULT NULL");
+    await ec("trans_trips", "trip_date", "DATE NULL");
+    // Expand status enum to include STARTED and DELAYED
+    await query(`
+      ALTER TABLE trans_trips 
+      MODIFY COLUMN status ENUM('SCHEDULED','STARTED','IN_TRANSIT','COMPLETED','CANCELLED','DELAYED') NOT NULL DEFAULT 'SCHEDULED'
+    `).catch(() => null);
+  }
+
+  // trans_trip_locations
+  if (!(await hasTable("trans_trip_locations"))) {
+    await query(`
+      CREATE TABLE IF NOT EXISTS trans_trip_locations (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        trip_id BIGINT UNSIGNED NOT NULL,
+        vehicle_id BIGINT UNSIGNED NULL,
+        driver_id BIGINT UNSIGNED NULL,
+        latitude DECIMAL(10,8) NOT NULL,
+        longitude DECIMAL(11,8) NOT NULL,
+        heading DECIMAL(5,2) DEFAULT 0,
+        speed DECIMAL(5,2) DEFAULT 0,
+        accuracy DECIMAL(8,2) DEFAULT NULL,
+        altitude DECIMAL(8,2) DEFAULT NULL,
+        battery_level DECIMAL(5,2) DEFAULT NULL,
+        is_offline_point BOOLEAN DEFAULT FALSE,
+        recorded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_loc_trip (trip_id),
+        KEY idx_loc_recorded (recorded_at)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `).catch(() => null);
+  }
+}

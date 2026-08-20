@@ -337,6 +337,77 @@ export const createTrip = async (req, res, next) => {
   }
 };
 
+export const updateTrip = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope;
+    const { id } = req.params;
+    const { request_id, vehicle_id, driver_id, start_time, start_odometer, origin_name, origin_lat, origin_lng, destination_name, destination_lat, destination_lng, distance, estimated_time } = req.body;
+    
+    if (!vehicle_id || !driver_id) {
+      throw httpError(400, "VALIDATION_ERROR", "Vehicle and Driver are required");
+    }
+
+    const [existingTrip] = await query("SELECT id FROM trans_trips WHERE id = :id AND company_id = :companyId", { id, companyId });
+    if (!existingTrip) throw httpError(404, "NOT_FOUND", "Trip not found");
+
+    let route_id = null;
+    if (origin_name && destination_name) {
+      const [existingRoute] = await query("SELECT id FROM trans_routes WHERE company_id = :companyId AND origin = :origin_name AND destination = :destination_name LIMIT 1", { companyId, origin_name, destination_name });
+      if (existingRoute) {
+        route_id = existingRoute.id;
+      } else {
+        const lastRoute = await query("SELECT id FROM trans_routes ORDER BY id DESC LIMIT 1");
+        const nextRouteId = (lastRoute && lastRoute.length > 0) ? Number(lastRoute[0].id) + 1 : 1;
+        const route_code = "RT-" + String(nextRouteId).padStart(4, '0');
+        const route_name = `${origin_name.substring(0, 100)} to ${destination_name.substring(0, 100)}`;
+        const routeResult = await query(
+          `INSERT INTO trans_routes (company_id, route_code, route_name, origin, destination, distance, estimated_time, created_by)
+           VALUES (:companyId, :route_code, :route_name, :origin_name, :destination_name, :distance, :estimated_time, :userId)`,
+          {
+            companyId, route_code, route_name, origin_name, destination_name,
+            distance: distance ? Number(distance) : null,
+            estimated_time: estimated_time ? Number(estimated_time) : null,
+            userId: req.user?.id || null
+          }
+        );
+        route_id = routeResult.insertId;
+      }
+    }
+
+    await query(
+      `UPDATE trans_trips SET 
+        request_id = :request_id, route_id = :route_id, vehicle_id = :vehicle_id, driver_id = :driver_id, 
+        start_time = :start_time, start_odometer = :start_odometer, 
+        origin_name = :origin_name, origin_lat = :origin_lat, origin_lng = :origin_lng, 
+        destination_name = :destination_name, destination_lat = :destination_lat, destination_lng = :destination_lng 
+       WHERE id = :id AND company_id = :companyId`,
+      {
+        id, companyId, 
+        request_id: request_id || null, route_id, vehicle_id, driver_id, start_time: start_time || null,
+        start_odometer: start_odometer ? Number(start_odometer) : null,
+        origin_name: origin_name || null,
+        origin_lat: origin_lat ? Number(origin_lat) : null,
+        origin_lng: origin_lng ? Number(origin_lng) : null,
+        destination_name: destination_name || null,
+        destination_lat: destination_lat ? Number(destination_lat) : null,
+        destination_lng: destination_lng ? Number(destination_lng) : null
+      }
+    );
+    
+    // Update vehicle and driver status
+    await query("UPDATE trans_vehicles SET status = 'ON_TRIP' WHERE id = :vehicle_id", { vehicle_id });
+    await query("UPDATE trans_drivers SET status = 'ON_TRIP' WHERE id = :driver_id", { driver_id });
+
+    if (request_id) {
+      await query("UPDATE trans_requests SET status = 'SCHEDULED' WHERE id = :request_id", { request_id });
+    }
+
+    res.json({ success: true, message: "Trip updated successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // === FUEL & EXPENSES ===
 export const listFuelLogs = async (req, res, next) => {
   try {
@@ -498,47 +569,69 @@ export const listBilling = async (req, res, next) => {
 export const addTripLocation = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { latitude, longitude, speed, heading, accuracy, recorded_at, is_initial, origin_name } = req.body;
+    const { latitude, longitude, speed, heading, accuracy, recorded_at, is_initial, origin_name, vehicle_id, driver_id, battery_level, is_offline_point } = req.body;
+
+    const userId = req.user?.id || req.user?.sub || null;
 
     await query(
-      `INSERT INTO trans_trip_locations (trip_id, latitude, longitude, speed, heading, accuracy, recorded_at)
-       VALUES (:id, :latitude, :longitude, :speed, :heading, :accuracy, :recorded_at)`,
-      { id, latitude, longitude, speed: speed || 0, heading: heading || 0, accuracy: accuracy || 0, recorded_at: recorded_at ? new Date(recorded_at) : new Date() }
+      `INSERT INTO trans_trip_locations (trip_id, vehicle_id, driver_id, latitude, longitude, speed, heading, accuracy, battery_level, is_offline_point, recorded_at)
+       VALUES (:id, :vehicle_id, :driver_id, :latitude, :longitude, :speed, :heading, :accuracy, :battery_level, :is_offline_point, :recorded_at)`,
+      { id, vehicle_id: vehicle_id || null, driver_id: driver_id || userId, latitude, longitude, speed: speed || 0, heading: heading || 0, accuracy: accuracy || 0, battery_level: battery_level || null, is_offline_point: is_offline_point || false, recorded_at: recorded_at ? new Date(recorded_at) : new Date() }
     );
 
     if (is_initial) {
-      let finalOriginName = origin_name;
+      const [trip] = await query(`SELECT origin_lat, origin_lng, route_id FROM trans_trips WHERE id = :id`, { id });
       
-      if (!finalOriginName) {
-        try {
-          let mapsKey = process.env.GOOGLE_MAPS_API_KEY || process.env.VITE_GOOGLE_MAPS_API_KEY || "";
-          if (!mapsKey) {
-            const [setting] = await query("SELECT setting_value FROM app_settings WHERE setting_key = 'GOOGLE_MAPS_API_KEY'");
-            if (setting && setting.setting_value) mapsKey = setting.setting_value;
-          }
-          if (mapsKey) {
-            const geoRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${mapsKey}`);
-            const geoData = await geoRes.json();
-            if (geoData.results && geoData.results[0]) {
-              finalOriginName = geoData.results[0].formatted_address;
-            }
-          }
-        } catch (e) {
-          console.error("Backend geocoding failed", e);
+      let shouldUpdateOrigin = true;
+      if (trip && trip.origin_lat && trip.origin_lng) {
+        // Haversine distance in meters
+        const R = 6371e3;
+        const lat1 = trip.origin_lat * Math.PI/180;
+        const lat2 = latitude * Math.PI/180;
+        const dLat = (latitude - trip.origin_lat) * Math.PI/180;
+        const dLng = (longitude - trip.origin_lng) * Math.PI/180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng/2) * Math.sin(dLng/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const distanceMeters = R * c;
+        
+        if (distanceMeters <= 20) {
+          shouldUpdateOrigin = false;
         }
       }
 
-      await query(
-        `UPDATE trans_trips SET origin_lat = :lat, origin_lng = :lng, origin_name = IFNULL(:name, origin_name) WHERE id = :id`,
-        { lat: latitude, lng: longitude, name: finalOriginName, id }
-      );
-      
-      const [trip] = await query(`SELECT route_id FROM trans_trips WHERE id = :id`, { id });
-      if (trip && trip.route_id && finalOriginName) {
+      if (shouldUpdateOrigin) {
+        let finalOriginName = origin_name;
+        
+        if (!finalOriginName) {
+          try {
+            let mapsKey = process.env.GOOGLE_MAPS_API_KEY || process.env.VITE_GOOGLE_MAPS_API_KEY || "";
+            if (!mapsKey) {
+              const [setting] = await query("SELECT setting_value FROM app_settings WHERE setting_key = 'GOOGLE_MAPS_API_KEY'");
+              if (setting && setting.setting_value) mapsKey = setting.setting_value;
+            }
+            if (mapsKey) {
+              const geoRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${mapsKey}`);
+              const geoData = await geoRes.json();
+              if (geoData.results && geoData.results[0]) {
+                finalOriginName = geoData.results[0].formatted_address;
+              }
+            }
+          } catch (e) {
+            console.error("Backend geocoding failed", e);
+          }
+        }
+
         await query(
-          `UPDATE trans_routes SET origin = :name WHERE id = :rid`,
-          { name: finalOriginName, rid: trip.route_id }
+          `UPDATE trans_trips SET origin_lat = :lat, origin_lng = :lng, origin_name = IFNULL(:name, origin_name) WHERE id = :id`,
+          { lat: latitude, lng: longitude, name: finalOriginName, id }
         );
+        
+        if (trip && trip.route_id && finalOriginName) {
+          await query(
+            `UPDATE trans_routes SET origin = :name WHERE id = :rid`,
+            { name: finalOriginName, rid: trip.route_id }
+          );
+        }
       }
     }
 
@@ -963,7 +1056,7 @@ export const startTrip = async (req, res, next) => {
   try {
     const { companyId } = req.scope;
     const { id } = req.params;
-    const { start_odometer } = req.body;
+    const { start_odometer, latitude, longitude } = req.body;
 
     const [trip] = await query("SELECT id, vehicle_id, driver_id FROM trans_trips WHERE id = :id AND company_id = :companyId", { id, companyId });
     if (!trip) throw httpError(404, "NOT_FOUND", "Trip not found");
@@ -974,6 +1067,38 @@ export const startTrip = async (req, res, next) => {
 
     await query("UPDATE trans_vehicles SET status = 'ON_TRIP' WHERE id = :vehicle_id", { vehicle_id: trip.vehicle_id });
     await query("UPDATE trans_drivers SET status = 'ON_TRIP' WHERE id = :driver_id", { driver_id: trip.driver_id });
+
+    if (latitude && longitude) {
+      await query(
+        `INSERT INTO trans_trip_locations (trip_id, vehicle_id, driver_id, latitude, longitude)
+         VALUES (:trip_id, :vehicle_id, :driver_id, :latitude, :longitude)`,
+        { 
+          trip_id: trip.id, 
+          vehicle_id: trip.vehicle_id, 
+          driver_id: trip.driver_id, 
+          latitude: Number(latitude), 
+          longitude: Number(longitude) 
+        }
+      );
+      
+      try {
+        const io = getIO();
+        if (io) {
+          io.emit("tracking:location_updated", {
+            trip_id: trip.id,
+            vehicle_id: trip.vehicle_id,
+            latitude: Number(latitude),
+            longitude: Number(longitude),
+            speed: 0,
+            heading: 0,
+            accuracy: 0,
+            timestamp: new Date().toISOString()
+          });
+        }
+      } catch (e) {
+        console.error("Socket emit on start failed", e);
+      }
+    }
 
     res.json({ success: true, message: "Trip started successfully" });
   } catch (err) {

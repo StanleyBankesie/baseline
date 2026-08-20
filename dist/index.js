@@ -1,5 +1,5 @@
 import cors from "cors";
-import dotenv from "dotenv";
+import "./utils/loadServerEnv.js";
 import fs from "fs";
 import express from "express";
 import path from "path";
@@ -35,6 +35,7 @@ import uploadRoutes from "./routes/upload.routes.js";
 import workflowRoutes from "./routes/workflow.routes.js";
 import healthRoutes from "./routes/health.route.js";
 import authRoutes from "./routes/auth.routes.js";
+import executiveRoutes from "./routes/executive.routes.js";
 import { logDbError, query, testDbConnection } from "./db/pool.js";
 import { isMailerConfigured, verifyMailer, sendMail } from "./utils/mailer.js";
 import { closeRedis, getRedis } from "./utils/redis.js";
@@ -64,6 +65,8 @@ import {
   verifiedTables,
   ensurePMQuotationTables,
   ensurePMInvoiceTables,
+  ensureSocialFeedTables,
+  ensureTransportTables,
 } from "./utils/dbUtils.js";
 import { seedDefaultTemplates } from "./services/seed-defaults.js";
 import { ensureIndexes } from "./utils/ensureIndexes.js";
@@ -73,48 +76,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /* ---------------- ENV ---------------- */
-const prodPath = path.join(__dirname, ".env.production");
-const localPath = path.join(__dirname, ".env.local");
+import { loadServerEnv } from "./utils/loadServerEnv.js";
+loadServerEnv(import.meta.url);
 
-// Pre-load .env.local to get DEV_FORCE_LOCAL_ENV if it exists without polluting process.env
-let forceLocal = false;
-if (fs.existsSync(localPath)) {
-  const parsed = dotenv.parse(fs.readFileSync(localPath));
-  forceLocal = String(parsed.DEV_FORCE_LOCAL_ENV || "").trim() === "1";
-}
 
-dotenv.config({ path: path.join(__dirname, ".env") });
-const isProd = String(process.env.NODE_ENV).toLowerCase() === "production";
-
-const originalPort = process.env.PORT;
-
-if (forceLocal && fs.existsSync(localPath)) {
-  dotenv.config({ path: localPath, override: true });
-} else if (isProd && fs.existsSync(prodPath)) {
-  dotenv.config({ path: prodPath, override: true });
-} else if (fs.existsSync(localPath)) {
-  dotenv.config({ path: localPath, override: true });
-}
-
-if (originalPort !== undefined && String(originalPort).trim() !== "") {
-  process.env.PORT = originalPort;
-}
-
-try {
-  if (fs.existsSync(prodPath)) {
-    const parsed = dotenv.parse(fs.readFileSync(prodPath, "utf8")) || {};
-    [
-      "SMTP_HOST",
-      "SMTP_PORT",
-      "SMTP_USER",
-      "SMTP_PASS",
-      "SMTP_FROM",
-      "SMTP_SECURE",
-    ].forEach((k) => {
-      if (parsed[k]) process.env[k] = parsed[k];
-    });
-  }
-} catch {}
 
 const serveFrontendFlag = (() => {
   const v1 = String(process.env.SERVE_FRONTEND || "").toLowerCase();
@@ -382,6 +347,19 @@ const corsOptions = {
   origin: (origin, cb) => {
     if (!origin) return cb(null, true);
     if (allowedOrigins.includes(origin)) return cb(null, true);
+    // Allow local development networks, Expo Go, and physical mobile phone requests
+    if (
+      origin.includes("localhost") ||
+      origin.includes("127.0.0.1") ||
+      origin.includes("192.168.") ||
+      origin.includes("10.") ||
+      origin.includes("172.") ||
+      origin.startsWith("exp://") ||
+      origin.startsWith("http://") ||
+      origin.startsWith("https://")
+    ) {
+      return cb(null, true);
+    }
     return cb(null, false);
   },
   credentials: true,
@@ -1000,6 +978,7 @@ app.use("/api/srv-invoices", srvInvoicesRoutes);
 app.use("/api/transport", transportRoutes);
 app.use("/api/tracking", trackingRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/executive-overview", executiveRoutes);
 
 app.use("/api/", healthRoutes);
 app.use("/", healthRoutes);
@@ -1048,6 +1027,9 @@ const apiPaths = [
       const crashPath = path.join(process.cwd(), "CRASH_REPORT.txt");
       if (fs.existsSync(crashPath)) {
         crashReport = fs.readFileSync(crashPath, "utf8");
+        if (crashReport.length > 10000) {
+          crashReport = crashReport.slice(-10000);
+        }
       }
       
       const dbHealth = await (await import("./db/pool.js")).getDbHealth({ probe: true });
@@ -1283,6 +1265,8 @@ if (process.env.NODE_ENV !== "test") {
             ["system logs", () => ensureSystemLogsTable()],
             ["pm quotations", () => ensurePMQuotationTables()],
             ["pm invoices", () => ensurePMInvoiceTables()],
+            ["social feed tables", () => ensureSocialFeedTables()],
+            ["transport tables", () => ensureTransportTables()],
           ];
           for (const [name, fn] of steps) {
             try {

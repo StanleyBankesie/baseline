@@ -16,15 +16,11 @@ function bool(v) {
 
 // Read core SMTP settings from system environment variables
 const host = process.env.SMTP_HOST || "";
-const port = Number(process.env.SMTP_PORT || 465);
+const port = Number(process.env.SMTP_PORT || 587);
 const user = process.env.SMTP_USER || "";
 const pass = process.env.SMTP_PASS || "";
 const from = process.env.SMTP_FROM || "";
 const secure = bool(process.env.SMTP_SECURE || "false");
-
-console.log(
-  `[MAILER] Configuring mailer with host: ${host}, port: ${port}, secure: ${secure}, password: ${pass}`,
-);
 
 // Hold Nodemailer instance and connection status in local memory
 let transporter = null;
@@ -82,15 +78,7 @@ export async function verifyMailer() {
  * @param {Object} [params.meta] - Additional metadata for the email.
  * @returns {Promise<any>} The result of the mail sending operation.
  */
-export async function sendMail({
-  to,
-  subject,
-  text,
-  html,
-  cc,
-  attachments,
-  meta,
-}) {
+export async function sendMail({ to, subject, text, html, cc, attachments, meta }) {
   // Orchestrate email transmission or mock queueing based on config
   if (!configured || !transporter) {
     console.warn(

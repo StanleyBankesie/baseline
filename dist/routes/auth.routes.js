@@ -49,9 +49,29 @@ router.post("/forgot-password/reset", (req, res, next) =>
 
 router.get("/public/upcoming-events", async (req, res, next) => {
   try {
+    await query(`
+      CREATE TABLE IF NOT EXISTS app_settings (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        \`key\` VARCHAR(100) NOT NULL UNIQUE,
+        value LONGTEXT NULL,
+        PRIMARY KEY (id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `).catch(() => {});
     // Announcements
     const annRows = await query("SELECT value FROM app_settings WHERE `key` = 'upcoming_announcements' LIMIT 1").catch(() => []);
-    const announcements = annRows[0]?.value || "";
+    let announcements = [];
+    if (annRows[0]?.value) {
+      try {
+        const parsed = JSON.parse(annRows[0].value);
+        if (Array.isArray(parsed)) {
+          announcements = parsed.filter(Boolean);
+        } else {
+          announcements = [annRows[0].value];
+        }
+      } catch (e) {
+        announcements = [annRows[0].value];
+      }
+    }
 
     // Birthdays
     const bdRows = await query(`

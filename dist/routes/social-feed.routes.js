@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   getPosts,
   createPost,
+  deletePost,
   likePost,
   unlikePost,
   addComment,
@@ -40,6 +41,9 @@ router.get("/:postId/likes", getPostLikes);
 // Create post
 // Adds a new post to the social feed.
 router.post("/", createPost);
+
+// Delete post
+router.delete("/:postId", deletePost);
 
 // Update post image
 // Modifies or adds an image to an existing post.

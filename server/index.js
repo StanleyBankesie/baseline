@@ -1,5 +1,5 @@
 import cors from "cors";
-import dotenv from "dotenv";
+import "./utils/loadServerEnv.js";
 import fs from "fs";
 import express from "express";
 import path from "path";
@@ -76,48 +76,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /* ---------------- ENV ---------------- */
-const prodPath = path.join(__dirname, ".env.production");
-const localPath = path.join(__dirname, ".env.local");
+import { loadServerEnv } from "./utils/loadServerEnv.js";
+loadServerEnv(import.meta.url);
 
-// Pre-load .env.local to get DEV_FORCE_LOCAL_ENV if it exists without polluting process.env
-let forceLocal = false;
-if (fs.existsSync(localPath)) {
-  const parsed = dotenv.parse(fs.readFileSync(localPath));
-  forceLocal = String(parsed.DEV_FORCE_LOCAL_ENV || "").trim() === "1";
-}
 
-dotenv.config({ path: path.join(__dirname, ".env") });
-const isProd = String(process.env.NODE_ENV).toLowerCase() === "production";
-
-const originalPort = process.env.PORT;
-
-if (forceLocal && fs.existsSync(localPath)) {
-  dotenv.config({ path: localPath, override: true });
-} else if (isProd && fs.existsSync(prodPath)) {
-  dotenv.config({ path: prodPath, override: true });
-} else if (fs.existsSync(localPath)) {
-  dotenv.config({ path: localPath, override: true });
-}
-
-if (originalPort !== undefined && String(originalPort).trim() !== "") {
-  process.env.PORT = originalPort;
-}
-
-try {
-  if (fs.existsSync(prodPath)) {
-    const parsed = dotenv.parse(fs.readFileSync(prodPath, "utf8")) || {};
-    [
-      "SMTP_HOST",
-      "SMTP_PORT",
-      "SMTP_USER",
-      "SMTP_PASS",
-      "SMTP_FROM",
-      "SMTP_SECURE",
-    ].forEach((k) => {
-      if (parsed[k]) process.env[k] = parsed[k];
-    });
-  }
-} catch {}
 
 const serveFrontendFlag = (() => {
   const v1 = String(process.env.SERVE_FRONTEND || "").toLowerCase();

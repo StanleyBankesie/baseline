@@ -222,7 +222,7 @@ async function ensureStockBalanceDetailsInfrastructure() {
         itr.created_at,
         sb.entry_date
       ) AS created_at,
-      u.username AS created_by_name
+      COALESCE(u.username, u.full_name, 'System') AS created_by_name
          FROM inv_stock_balances sb
     JOIN inv_items i ON i.id = sb.item_id
     LEFT JOIN inv_warehouses w ON w.id = sb.warehouse_id
@@ -4957,6 +4957,43 @@ router.get(
       next(e);
     }
   },
+);
+
+router.put(
+  "/batches/:id",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      const { companyId } = req.scope || {};
+      const id = toNumber(req.params.id);
+      const { batch_no, serial_no, expiry_date, qty } = req.body || {};
+
+      if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid batch ID");
+
+      await query(
+        `UPDATE inv_stock_balances
+         SET batch_no = COALESCE(:batch_no, batch_no),
+             serial_no = COALESCE(:serial_no, serial_no),
+             expiry_date = :expiry_date,
+             qty = COALESCE(:qty, qty)
+         WHERE id = :id AND company_id = :companyId`,
+        {
+          id,
+          companyId,
+          batch_no: batch_no || null,
+          serial_no: serial_no || null,
+          expiry_date: expiry_date ? expiry_date.split("T")[0] : null,
+          qty: qty !== undefined && qty !== "" ? Number(qty) : null,
+        }
+      );
+
+      res.json({ success: true, message: "Batch details updated successfully" });
+    } catch (e) {
+      next(e);
+    }
+  }
 );
 
 router.get(
