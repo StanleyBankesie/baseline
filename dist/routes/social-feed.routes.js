@@ -10,6 +10,7 @@ import {
   getPostComments,
   getPostLikes,
   updatePostImage,
+  getAvatar,
 } from "../controllers/social-feed.controller.js";
 import {
   requireAuth,
@@ -20,7 +21,10 @@ import { requirePermission } from "../middleware/requirePermission.js";
 
 const router = Router();
 
-// All routes require authentication and scope
+// Public avatar streaming route for <img> tags with browser caching
+router.get("/avatar/:userId", getAvatar);
+
+// All other feed routes require authentication and scope
 router.use(requireAuth, requireCompanyScope, requireBranchScope);
 
 // ============================================

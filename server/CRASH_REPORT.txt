@@ -31865,3 +31865,155 @@ Error: listen EADDRINUSE: address already in use :::4002
     at file:///C:/Users/stanl/demo/server/index.js:1228:10
     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
 --------------------------------------------------------------------------------
+
+[2026-08-22T13:45:15.440Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030576062-421433513.png (status 404)
+Context:
+requestId: mt4fkjoq-55i09m51
+durationMs: 6
+method: GET
+url: /uploads/file-1771030576062-421433513.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:45:15.552Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030118738-58671421.png (status 404)
+Context:
+requestId: mt4fkjrr-0o0ykddq
+durationMs: 9
+method: GET
+url: /uploads/file-1771030118738-58671421.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:45:15.950Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771029994810-929577419.png (status 404)
+Context:
+requestId: mt4fkk2x-1mgg2yea
+durationMs: 5
+method: GET
+url: /uploads/file-1771029994810-929577419.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:45:16.091Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028914245-206760446.png (status 404)
+Context:
+requestId: mt4fkk6j-tnaa96nv
+durationMs: 16
+method: GET
+url: /uploads/file-1771028914245-206760446.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:45:16.414Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028422235-642564131.png (status 404)
+Context:
+requestId: mt4fkkfv-bcxu2e78
+durationMs: 3
+method: GET
+url: /uploads/file-1771028422235-642564131.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:45:16.530Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028320026-422022774.png (status 404)
+Context:
+requestId: mt4fkkix-2j94i0gd
+durationMs: 9
+method: GET
+url: /uploads/file-1771028320026-422022774.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:45:16.949Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771027409254-324391049.jpeg (status 404)
+Context:
+requestId: mt4fkkuq-ixjikzf4
+durationMs: 3
+method: GET
+url: /uploads/file-1771027409254-324391049.jpeg
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:45:17.314Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771019885707-783914769.png (status 404)
+Context:
+requestId: mt4fkl4v-xdxyt5xx
+durationMs: 3
+method: GET
+url: /uploads/file-1771019885707-783914769.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------

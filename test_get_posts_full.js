@@ -4,7 +4,7 @@ async function run() {
   const connection = await pool.getConnection();
   try {
     const userId = 7;
-    const branchId = 2;
+    const branchId = null;
     const limit = 20;
     const offset = 0;
     
@@ -20,23 +20,23 @@ async function run() {
           p.like_count,
           p.comment_count,
           p.created_at,
-          u.full_name,
+          COALESCE(u.full_name, u.username, 'User') AS full_name,
           u.profile_picture AS profile_picture,
           (SELECT COUNT(*)
          FROM post_likes pl
          WHERE pl.post_id = p.id AND pl.user_id = ?) AS user_liked
         FROM posts p
-        JOIN adm_users u ON p.user_id = u.id
+        LEFT JOIN adm_users u ON p.user_id = u.id
         WHERE 
           (p.user_id = ?)
           OR
           (p.visibility_type = 'company')
           OR
-          (p.visibility_type IN ('branch', 'warehouse') AND COALESCE(p.branch_id, p.warehouse_id) = ?)
+          (p.visibility_type IN ('branch', 'warehouse') AND (COALESCE(p.branch_id, p.warehouse_id) = ? OR ? IS NULL OR ? = 0))
         ORDER BY p.created_at DESC
         LIMIT ? OFFSET ?
         `,
-        [userId, userId, branchId, limit, offset]
+        [userId, userId, branchId, branchId, branchId, limit, offset]
       );
       
       const origin = `http://localhost`;

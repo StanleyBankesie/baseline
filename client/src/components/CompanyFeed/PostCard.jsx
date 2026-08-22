@@ -298,18 +298,12 @@ export default function PostCard({
   };
 
   useEffect(() => {
-    const uidHeader = Number(user?.sub || user?.id) || "";
-    /**
-   * Fetches user avatar for a given user ID.
-   * @param {number|string} userId - Target user ID.
-   * @returns {string|null} The resolved avatar URL.
-   */
-  async function fetchAvatar(userId) {
+    async function fetchAvatar(userId) {
       const key = Number(userId);
       if (!Number.isFinite(key) || key <= 0) return null;
       if (avatarCache.has(key)) return avatarCache.get(key);
       try {
-        const res = await api.get(`/admin/users/${key}`);
+        const res = await api.get(`/admin/users/${key}`, { __background: true });
         if (res?.status !== 200) return null;
         const item =
           res.data?.data?.item ||
@@ -324,35 +318,24 @@ export default function PostCard({
         return null;
       }
     }
-    const authorId =
-      post.user_id ||
-      post.userId ||
-      post.author_user_id ||
-      post.authorId ||
-      null;
+
     let mounted = true;
     (async () => {
-      const a = await fetchAvatar(authorId);
-      if (mounted && a) setAuthorAvatar(a);
-      const comments = Array.isArray(post.comments) ? post.comments : [];
-      const ids = comments
-        .map(
-          (c) =>
-            c.user_id || c.userId || c.author_user_id || c.authorId || null,
-        )
-        .filter((x) => Number.isFinite(Number(x)) && Number(x) > 0);
-      const unique = Array.from(new Set(ids));
-      const results = {};
-      for (const id of unique) {
-        const url = await fetchAvatar(id);
-        if (url) results[Number(id)] = url;
+      const authorId =
+        post.user_id ||
+        post.userId ||
+        post.author_user_id ||
+        post.authorId ||
+        null;
+      if (!post.profile_picture_url && authorId) {
+        const a = await fetchAvatar(authorId);
+        if (mounted && a) setAuthorAvatar(a);
       }
-      if (mounted) setCommenterAvatars(results);
     })();
     return () => {
       mounted = false;
     };
-  }, [post, user?.sub, user?.id]);
+  }, [post?.id, post?.user_id, post?.profile_picture_url]);
   useEffect(() => {
     if (forceOpenComments) setShowComments(true);
   }, [forceOpenComments]);
@@ -401,20 +384,21 @@ export default function PostCard({
       <div className="post-header">
         <div className="author-info">
           <img
-            src={authorAvatar || post.profile_picture_url || ""}
-            alt={post.full_name}
+            src={authorAvatar || post.profile_picture_url || "/default-avatar.png"}
+            alt={post.full_name || "User"}
             className="avatar"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = "/default-avatar.png";
+            }}
           />
           <div className="author-details">
             <h4>{post.full_name || "Unknown Author"}</h4>
-            <span className="post-time">
-              {safeFormatTime(post.created_at)}
-            </span>
+            <span className="post-time">{safeFormatTime(post.created_at)}</span>
           </div>
         </div>
         <div className="visibility-badge">
-          {post.visibility_type === "company" && "🌍 Company"}
-          {post.visibility_type === "branch" && "🏬 Branch"}
+          {post.visibility_type === "company" ? "🌍 Company" : "🏬 Branch"}
         </div>
       </div>
 
@@ -432,27 +416,24 @@ export default function PostCard({
       </div>
 
       <div className="post-stats">
-        <span 
+        <span
           className="cursor-pointer hover:underline"
           onClick={(e) => { e.stopPropagation(); openStatsModal("likes"); }}
         >
-          👍 {post.like_count} Likes
+          👍 {post.like_count || 0} Likes
         </span>
-        <span 
+        <span
           className="cursor-pointer hover:underline"
           onClick={(e) => { e.stopPropagation(); openStatsModal("comments"); }}
         >
-          💬 {post.comment_count} Comments
+          💬 {post.comment_count || 0} Comments
         </span>
       </div>
 
       <div className="post-actions">
         <button
           className={`btn-action ${post.user_liked ? "liked" : ""}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleLike();
-          }}
+          onClick={(e) => { e.stopPropagation(); handleLike(); }}
         >
           👍 Like
         </button>
@@ -476,23 +457,15 @@ export default function PostCard({
           {(() => {
             try {
               const total = Number(post.comment_count) || 0;
-              const current = Array.isArray(post.comments)
-                ? post.comments.length
-                : 0;
-              if (showComments && total > 0 && current >= total)
-                return "All Comments Shown";
+              const current = Array.isArray(post.comments) ? post.comments.length : 0;
+              if (showComments && total > 0 && current >= total) return "All Comments Shown";
               return showComments ? "Hide Comments" : "Show Comments";
-            } catch {
-              return "Comments";
-            }
+            } catch { return "Comments"; }
           })()}
         </button>
         <button
           className="btn-action"
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/social-feed/${post.id}`);
-          }}
+          onClick={(e) => { e.stopPropagation(); navigate(`/social-feed/${post.id}`); }}
         >
           🔎 View
         </button>

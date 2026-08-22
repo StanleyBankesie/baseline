@@ -28,7 +28,26 @@ export default function CompanyFeed({
 }) {
   const { user } = useAuth();
   const socket = useSocket();
-  const [posts, setPosts] = useState([]);
+
+  const userId = Number(user?.sub || user?.id) || null;
+  // Per-user cache key so different users never share cached posts
+  const cacheKey = userId ? `omni_social_feed_posts_${userId}` : null;
+
+  const [posts, setPosts] = useState(() => {
+    if (Number.isFinite(focusId) && focusId > 0) return [];
+    try {
+      // Try to load cached posts for the current user immediately on mount
+      // Even before auth context resolves, we can read userId from stored auth
+      const storedAuth = JSON.parse(localStorage.getItem("omnisuite.auth") || "null");
+      const storedUserId = Number(storedAuth?.user?.sub || storedAuth?.user?.id || storedAuth?.id) || null;
+      const key = storedUserId ? `omni_social_feed_posts_${storedUserId}` : null;
+      if (!key) return [];
+      const saved = localStorage.getItem(key);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [offset, setOffset] = useState(0);
@@ -37,56 +56,66 @@ export default function CompanyFeed({
   const [forceOpenComments, setForceOpenComments] = useState(false);
   const autoLoadedRef = useRef(false);
 
+  // Persist posts to localStorage under per-user key on change
+  useEffect(() => {
+    if (cacheKey && !(Number.isFinite(focusId) && focusId > 0) && posts.length > 0) {
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify(posts));
+      } catch {}
+    }
+  }, [posts, focusId, cacheKey]);
+
   /**
    * Fetches posts from the server.
    * @param {number} [pageOffset=0] - The offset for pagination.
    */
   const fetchPosts = useCallback(
     async (pageOffset = 0) => {
-      if (!user) return;
+      if (!userId) return;
 
       try {
         setLoading(true);
-        const uid = Number(user?.sub || user?.id) || "";
         const isFocus = Number.isFinite(focusId) && focusId > 0;
-        const config = isFocus
-          ? { method: "get", url: `/social-feed/${focusId}` }
-          : {
-              method: "get",
-              url: `/social-feed`,
-              params: { offset: pageOffset, limit: 10 },
-            };
-        const resp = await api.request({
-          ...config,
-          headers: { "x-user-id": String(uid) },
+        const url = isFocus ? `/social-feed/${focusId}` : `/social-feed`;
+        const resp = await api.get(url, {
+          params: isFocus ? {} : { offset: pageOffset, limit: 15 },
+          headers: { "x-user-id": String(userId) },
         });
         const data = resp?.data || {};
         if (isFocus) {
           const post = data?.data ? data.data : null;
-          setPosts(post ? [post] : []);
+          if (post) setPosts([post]);
         } else {
           const items = Array.isArray(data.data) ? data.data : [];
           if (pageOffset === 0) {
-            setPosts(items);
+            // Only replace posts if server actually returned data.
+            // If empty, keep any cached posts visible (don't wipe them).
+            if (items.length > 0) {
+              setPosts(items);
+            }
           } else {
-            setPosts((prev) => [...prev, ...items]);
+            setPosts((prev) => {
+              const seen = new Set(prev.map((p) => p.id));
+              return [...prev, ...items.filter((p) => !seen.has(p.id))];
+            });
           }
         }
         setOffset(pageOffset);
       } catch (err) {
         console.error("Error fetching posts:", err);
-        setError(err.message);
+        // On error, don't wipe existing posts
       } finally {
         setLoading(false);
       }
     },
-    [user, focusId],
+    [userId, focusId],
   );
 
-  // Initial load
+  // Fetch fresh posts whenever userId changes (not on every fetchPosts identity change)
   useEffect(() => {
-    fetchPosts(0);
-  }, [fetchPosts]);
+    if (userId) fetchPosts(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, focusId]);
 
   // Socket.io listeners for real-time updates (likes only)
   useEffect(() => {
@@ -171,27 +200,6 @@ export default function CompanyFeed({
     fetchPosts(offset + 10);
   };
 
-  // Auto-load all comments when viewing a single post
-  useEffect(() => {
-    const isFocus = Number.isFinite(focusId) && focusId > 0;
-    const current = posts[0];
-    if (!isFocus || !current) return;
-    const already = Array.isArray(current.comments)
-      ? current.comments.length
-      : 0;
-    const total = Number(current.comment_count || already);
-    if (autoLoadedRef.current) return;
-    if (total > already) {
-      autoLoadedRef.current = true;
-      // load remaining comments once
-      (async () => {
-        try {
-          await handleLoadMore();
-        } catch {}
-      })();
-    }
-  }, [focusId, posts]);
-
   // Listen for post image updates (background upload completion)
   useEffect(() => {
     function onPostImageUpdated(e) {
@@ -235,13 +243,12 @@ export default function CompanyFeed({
     );
   }
 
-
-  // Full social feed view
+  // Full post history view
   return (
     <div className="company-feed-container">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-slate-800">
-          Social Feed
+          Post History
         </h2>
         <button
           onClick={() => navigate("/")}

@@ -14,6 +14,10 @@ import { requirePermission } from "../middleware/requirePermission.js";
 import { query } from "../db/pool.js";
 import { httpError } from "../utils/httpError.js";
 import * as productionController from "../controllers/production.controller.js";
+import { 
+  inv_getStockBalances, 
+  inv_getWarehouseStockSummary 
+} from "../controllers/inventory.controller.js";
 
 const router = express.Router();
 
@@ -401,6 +405,77 @@ async function ensureProductionTables() {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     `);
   }
+  
+  if (await hasTable("prod_job_cards")) {
+    try {
+      const cols = (await query("SHOW COLUMNS FROM prod_job_cards") || []).map(c => c.Field);
+      if (!cols.includes("job_card_no")) await query("ALTER TABLE prod_job_cards ADD COLUMN job_card_no VARCHAR(50) NULL");
+      if (!cols.includes("job_card_date")) await query("ALTER TABLE prod_job_cards ADD COLUMN job_card_date DATE NULL");
+      if (!cols.includes("batch_no")) await query("ALTER TABLE prod_job_cards ADD COLUMN batch_no VARCHAR(100) NULL");
+      if (!cols.includes("mfg_date")) await query("ALTER TABLE prod_job_cards ADD COLUMN mfg_date DATE NULL");
+      if (!cols.includes("expiry_date")) await query("ALTER TABLE prod_job_cards ADD COLUMN expiry_date DATE NULL");
+      if (!cols.includes("good_qty")) await query("ALTER TABLE prod_job_cards ADD COLUMN good_qty DECIMAL(18,3) DEFAULT 0");
+      if (!cols.includes("rejected_qty")) await query("ALTER TABLE prod_job_cards ADD COLUMN rejected_qty DECIMAL(18,3) DEFAULT 0");
+      if (!cols.includes("scrap_qty")) await query("ALTER TABLE prod_job_cards ADD COLUMN scrap_qty DECIMAL(18,3) DEFAULT 0");
+      if (!cols.includes("operator_id")) await query("ALTER TABLE prod_job_cards ADD COLUMN operator_id BIGINT UNSIGNED NULL");
+      if (!cols.includes("operator_name")) await query("ALTER TABLE prod_job_cards ADD COLUMN operator_name VARCHAR(100) NULL");
+      if (!cols.includes("assistant_name")) await query("ALTER TABLE prod_job_cards ADD COLUMN assistant_name VARCHAR(100) NULL");
+      if (!cols.includes("defect_reason")) await query("ALTER TABLE prod_job_cards ADD COLUMN defect_reason TEXT NULL");
+      if (!cols.includes("total_wastage")) await query("ALTER TABLE prod_job_cards ADD COLUMN total_wastage DECIMAL(18,3) DEFAULT 0");
+      if (!cols.includes("total_overhead")) await query("ALTER TABLE prod_job_cards ADD COLUMN total_overhead DECIMAL(18,3) DEFAULT 0");
+      if (!cols.includes("total_consumption")) await query("ALTER TABLE prod_job_cards ADD COLUMN total_consumption DECIMAL(18,3) DEFAULT 0");
+      if (!cols.includes("total_production_cost")) await query("ALTER TABLE prod_job_cards ADD COLUMN total_production_cost DECIMAL(18,3) DEFAULT 0");
+      if (!cols.includes("consumption_details")) await query("ALTER TABLE prod_job_cards ADD COLUMN consumption_details LONGTEXT NULL");
+      if (!cols.includes("overhead_details")) await query("ALTER TABLE prod_job_cards ADD COLUMN overhead_details LONGTEXT NULL");
+      if (!cols.includes("by_products_details")) await query("ALTER TABLE prod_job_cards ADD COLUMN by_products_details LONGTEXT NULL");
+      if (!cols.includes("breakdown_details")) await query("ALTER TABLE prod_job_cards ADD COLUMN breakdown_details LONGTEXT NULL");
+      if (!cols.includes("wastage_details")) await query("ALTER TABLE prod_job_cards ADD COLUMN wastage_details LONGTEXT NULL");
+      if (!cols.includes("qc_status")) await query("ALTER TABLE prod_job_cards ADD COLUMN qc_status VARCHAR(30) NULL");
+      if (!cols.includes("qc_inspected_at")) await query("ALTER TABLE prod_job_cards ADD COLUMN qc_inspected_at TIMESTAMP NULL");
+    } catch {}
+  }
+
+  if (!(await hasTable("prod_qc_checklists"))) {
+    await query(`
+      CREATE TABLE IF NOT EXISTS prod_qc_checklists (
+        id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        company_id BIGINT UNSIGNED NULL,
+        checklist_name VARCHAR(150) NOT NULL,
+        category VARCHAR(100) DEFAULT 'General Inspection',
+        min_pass_score DECIMAL(5,2) DEFAULT 70.00,
+        items LONGTEXT NULL,
+        is_active TINYINT(1) DEFAULT 1,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+  }
+
+  if (!(await hasTable("prod_qc_inspections"))) {
+    await query(`
+      CREATE TABLE IF NOT EXISTS prod_qc_inspections (
+        id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        company_id BIGINT UNSIGNED NULL,
+        branch_id BIGINT UNSIGNED NULL,
+        job_card_id BIGINT UNSIGNED NOT NULL,
+        checklist_id BIGINT UNSIGNED NULL,
+        inspection_date DATE NOT NULL,
+        warehouse_id BIGINT UNSIGNED NULL,
+        batch_no VARCHAR(100) NULL,
+        mfg_date DATE NULL,
+        expiry_date DATE NULL,
+        planned_qty DECIMAL(18,3) DEFAULT 0,
+        inspected_qty DECIMAL(18,3) DEFAULT 0,
+        good_qty DECIMAL(18,3) DEFAULT 0,
+        rejected_qty DECIMAL(18,3) DEFAULT 0,
+        quality_score DECIMAL(5,2) DEFAULT 100,
+        quality_status VARCHAR(30) DEFAULT 'PASSED',
+        criteria_scores LONGTEXT NULL,
+        remarks TEXT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        KEY idx_qc_job (job_card_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+  }
 
   if (!(await hasTable("prod_material_receipts"))) {
     await query(`
@@ -590,13 +665,71 @@ async function ensureProductionTables() {
         company_id BIGINT UNSIGNED NOT NULL,
         branch_id BIGINT UNSIGNED NOT NULL,
         journal_no VARCHAR(50) NOT NULL,
+        plan_id BIGINT UNSIGNED NULL,
         journal_date DATE NOT NULL,
-        item_id BIGINT UNSIGNED NOT NULL,
-        qty DECIMAL(18,3) NOT NULL,
-        type ENUM('IN', 'OUT') NOT NULL,
+        item_id BIGINT UNSIGNED NULL,
+        qty DECIMAL(18,3) NULL,
+        type ENUM('IN', 'OUT') NULL,
         reason VARCHAR(150) NULL,
+        remarks TEXT NULL,
+        items JSON NULL,
+        status VARCHAR(50) DEFAULT 'POSTED',
+        created_by BIGINT UNSIGNED NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         KEY idx_psj_scope (company_id, branch_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+  } else {
+    try {
+      const sjCols = await query("SHOW COLUMNS FROM prod_stock_journals");
+      const colNames = (sjCols || []).map(c => c.Field);
+      if (!colNames.includes("plan_id")) {
+        await query("ALTER TABLE prod_stock_journals ADD COLUMN plan_id BIGINT UNSIGNED NULL").catch(() => {});
+      }
+      if (!colNames.includes("remarks")) {
+        await query("ALTER TABLE prod_stock_journals ADD COLUMN remarks TEXT NULL").catch(() => {});
+      }
+      if (!colNames.includes("items")) {
+        await query("ALTER TABLE prod_stock_journals ADD COLUMN items JSON NULL").catch(() => {});
+      }
+      if (!colNames.includes("status")) {
+        await query("ALTER TABLE prod_stock_journals ADD COLUMN status VARCHAR(50) DEFAULT 'POSTED'").catch(() => {});
+      }
+      if (!colNames.includes("created_by")) {
+        await query("ALTER TABLE prod_stock_journals ADD COLUMN created_by BIGINT UNSIGNED NULL").catch(() => {});
+      }
+    } catch {}
+  }
+
+  if (!(await hasTable("prod_stock_journal_items"))) {
+    await query(`
+      CREATE TABLE IF NOT EXISTS prod_stock_journal_items (
+        id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        journal_id BIGINT UNSIGNED NOT NULL,
+        item_id BIGINT UNSIGNED NOT NULL,
+        type ENUM('IN', 'OUT') NOT NULL DEFAULT 'IN',
+        qty DECIMAL(18,3) NOT NULL DEFAULT 1,
+        uom VARCHAR(50) DEFAULT 'Pcs',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        KEY idx_sji_journal (journal_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+  }
+
+  if (!(await hasTable("prod_operators"))) {
+    await query(`
+      CREATE TABLE IF NOT EXISTS prod_operators (
+        id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        company_id BIGINT UNSIGNED NOT NULL DEFAULT 1,
+        branch_id BIGINT UNSIGNED NOT NULL DEFAULT 1,
+        user_id BIGINT UNSIGNED NULL,
+        operator_name VARCHAR(150) NOT NULL,
+        employee_code VARCHAR(50) NULL,
+        machine_id BIGINT UNSIGNED NULL,
+        shift_id BIGINT UNSIGNED NULL,
+        is_active TINYINT(1) DEFAULT 1,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        KEY idx_op_scope (company_id, branch_id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     `);
   }
@@ -651,8 +784,9 @@ router.post("/setup/departments", requireAuth, requireCompanyScope, requirePermi
 router.put("/setup/departments/:id", requireAuth, requireCompanyScope, requirePermission("PROD.SETUP.MANAGE"), productionController.updateDepartment);
 router.delete("/setup/departments/:id", requireAuth, requireCompanyScope, requirePermission("PROD.SETUP.MANAGE"), productionController.deleteDepartment);
 
-router.get("/setup/warehouses", requireAuth, requireCompanyScope, requirePermission("PROD.SETUP.MANAGE"), productionController.listProductionWarehouses);
+router.get("/setup/warehouses", requireAuth, requireCompanyScope, productionController.listProductionWarehouses);
 router.post("/setup/warehouses", requireAuth, requireCompanyScope, requirePermission("PROD.SETUP.MANAGE"), productionController.createProductionWarehouse);
+router.put("/setup/warehouses/:id/default", requireAuth, requireCompanyScope, requirePermission("PROD.SETUP.MANAGE"), productionController.setDefaultProductionWarehouse);
 router.put("/setup/warehouses/:id", requireAuth, requireCompanyScope, requirePermission("PROD.SETUP.MANAGE"), productionController.updateProductionWarehouse);
 router.delete("/setup/warehouses/:id", requireAuth, requireCompanyScope, requirePermission("PROD.SETUP.MANAGE"), productionController.deleteProductionWarehouse);
 
@@ -676,6 +810,16 @@ router.post("/setup/overheads", requireAuth, requireCompanyScope, requirePermiss
 router.put("/setup/overheads/:id", requireAuth, requireCompanyScope, requirePermission("PROD.SETUP.MANAGE"), productionController.updateOverhead);
 router.delete("/setup/overheads/:id", requireAuth, requireCompanyScope, requirePermission("PROD.SETUP.MANAGE"), productionController.deleteOverhead);
 
+router.get("/setup/qc-checklists", requireAuth, requireCompanyScope, productionController.listQcChecklists);
+router.post("/setup/qc-checklists", requireAuth, requireCompanyScope, requirePermission("PROD.SETUP.MANAGE"), productionController.createQcChecklist);
+router.put("/setup/qc-checklists/:id", requireAuth, requireCompanyScope, requirePermission("PROD.SETUP.MANAGE"), productionController.updateQcChecklist);
+router.delete("/setup/qc-checklists/:id", requireAuth, requireCompanyScope, requirePermission("PROD.SETUP.MANAGE"), productionController.deleteQcChecklist);
+
+router.get("/setup/operators", requireAuth, requireCompanyScope, productionController.listOperators);
+router.post("/setup/operators", requireAuth, requireCompanyScope, requirePermission("PROD.SETUP.MANAGE"), productionController.createOperator);
+router.put("/setup/operators/:id", requireAuth, requireCompanyScope, requirePermission("PROD.SETUP.MANAGE"), productionController.updateOperator);
+router.delete("/setup/operators/:id", requireAuth, requireCompanyScope, requirePermission("PROD.SETUP.MANAGE"), productionController.deleteOperator);
+
 // ===== PLANNING & EXECUTION =====
 router.get("/routings", requireAuth, requireCompanyScope, requirePermission("PROD.ROUTING.VIEW"), productionController.listRoutings);
 router.get("/routings/:id", requireAuth, requireCompanyScope, requirePermission("PROD.ROUTING.VIEW"), productionController.getRoutingById);
@@ -692,6 +836,12 @@ router.get("/execution/job-cards/:id", requireAuth, requireCompanyScope, require
 router.post("/execution/job-cards/generate", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.MANAGE"), productionController.generateJobCards);
 router.put("/execution/job-cards/:id", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.MANAGE"), productionController.updateJobCard);
 
+router.get("/qc/executions", requireAuth, requireCompanyScope, productionController.listCompletedExecutionsForQc);
+router.get("/qc/inspections", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.VIEW"), productionController.listQcInspections);
+router.get("/qc/inspections/:id", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.VIEW"), productionController.getQcInspectionById);
+router.post("/qc/inspections", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.MANAGE"), productionController.createQcInspection);
+router.delete("/qc/inspections/:id", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.MANAGE"), productionController.deleteQcInspection);
+
 router.get("/execution/material-requisition", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.VIEW"), productionController.listMaterialRequisitions);
 router.get("/execution/material-requisition/:id", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.VIEW"), productionController.getMaterialRequisitionById);
 router.post("/execution/material-requisition", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.MANAGE"), productionController.createMaterialRequisition);
@@ -702,18 +852,41 @@ router.get("/execution/material-receipt/:id", requireAuth, requireCompanyScope, 
 router.post("/execution/material-receipt", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.MANAGE"), productionController.createMaterialReceipt);
 
 router.get("/execution/material-utilization", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.VIEW"), productionController.listMaterialUtilizations);
+router.get("/execution/material-utilization/next-no", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.VIEW"), productionController.getNextMaterialUtilizationNo);
 router.get("/execution/material-utilization/:id", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.VIEW"), productionController.getMaterialUtilizationById);
 router.post("/execution/material-utilization", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.MANAGE"), productionController.createMaterialUtilization);
 
 router.get("/execution/transfer", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.VIEW"), productionController.listProductionTransfers);
 router.post("/execution/transfer", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.MANAGE"), productionController.createProductionTransfer);
 
-// ===== INVENTORY & REPORTS =====
+router.get("/execution/fg-transfer", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.VIEW"), productionController.listFinishedGoodsTransfers);
+router.get("/execution/fg-transfer/next-no", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.VIEW"), productionController.getNextFgTransferNo);
+router.get("/execution/fg-transfer/eligible-executions", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.VIEW"), productionController.getEligibleExecutionsForFgTransfer);
+router.get("/execution/fg-transfer/:id", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.VIEW"), productionController.getFinishedGoodsTransferById);
+router.post("/execution/fg-transfer", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.MANAGE"), productionController.createFinishedGoodsTransfer);
+router.delete("/execution/fg-transfer/:id", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.EXECUTION.MANAGE"), productionController.deleteFinishedGoodsTransfer);
+
+// ===== INVENTORY & STOCK BALANCES =====
+router.get("/stock", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.INVENTORY.VIEW"), inv_getStockBalances);
+router.get("/stock/warehouses", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.INVENTORY.VIEW"), inv_getWarehouseStockSummary);
+router.get("/inventory/stock-journal/next-no", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.INVENTORY.VIEW"), productionController.getNextProductionStockJournalNo);
 router.get("/inventory/stock-journal", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.INVENTORY.VIEW"), productionController.listStockJournals);
 router.post("/inventory/stock-journal", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.INVENTORY.MANAGE"), productionController.createStockJournal);
+router.get("/stock-journal/next-no", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.INVENTORY.VIEW"), productionController.getNextProductionStockJournalNo);
+router.get("/stock-journal", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.INVENTORY.VIEW"), productionController.listStockJournals);
+router.post("/stock-journal", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.INVENTORY.MANAGE"), productionController.createStockJournal);
+router.get("/inventory/journal/next-no", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.INVENTORY.VIEW"), productionController.getNextProductionStockJournalNo);
+router.get("/inventory/journal", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.INVENTORY.VIEW"), productionController.listStockJournals);
+router.post("/inventory/journal", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.INVENTORY.MANAGE"), productionController.createStockJournal);
 
 router.get("/reports/efficiency", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.REPORT.VIEW"), productionController.getEfficiencyReport);
 router.get("/reports/warehouse-stock", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.REPORT.VIEW"), productionController.getProductionWarehouseStockReport);
+router.get("/reports/variance", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.REPORT.VIEW"), productionController.getMaterialVarianceReport);
+router.get("/reports/bom-explosion", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.REPORT.VIEW"), productionController.getBomExplosionReport);
+router.get("/reports/machines", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.REPORT.VIEW"), productionController.getMachineUtilizationReport);
+router.get("/reports/production-detail", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.REPORT.VIEW"), productionController.getProductionReportDetails);
+router.get("/reports/costing-data", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.REPORT.VIEW"), productionController.getProductionCostingData);
+router.get("/reports/summary", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.REPORT.VIEW"), productionController.getProductionSummaryReport);
 
 router.get("/dashboard/stats", requireAuth, requireCompanyScope, requireBranchScope, productionController.getProductionStats);
 
