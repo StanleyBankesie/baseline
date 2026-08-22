@@ -341,6 +341,12 @@ export default function PosDayManagement() {
         if (cancelled) return;
         const item = res?.data?.item;
         const suggestedNext = Number(res?.data?.nextOpeningFloat ?? 0);
+        const suggestedNextMomoMain = Number(
+          res?.data?.nextMomoOpeningMain ?? item?.momo_closing_main ?? 0,
+        );
+        const suggestedNextMomoPay = Number(
+          res?.data?.nextMomoOpeningPay ?? item?.momo_closing_pay ?? 0,
+        );
         if (!item) {
           setDayOpen(false);
           setOpenData((prev) => ({
@@ -350,8 +356,8 @@ export default function PosDayManagement() {
                 ? String(suggestedNext)
                 : prev.float,
           }));
-          setMomoOpeningMain(0);
-          setMomoOpeningPay(0);
+          setMomoOpeningMain(suggestedNextMomoMain);
+          setMomoOpeningPay(suggestedNextMomoPay);
           setSessionHistory([]);
           return;
         }
@@ -377,6 +383,9 @@ export default function PosDayManagement() {
         if (isOpen) {
           setMomoOpeningMain(Number(item.momo_opening_main || 0));
           setMomoOpeningPay(Number(item.momo_opening_pay || 0));
+        } else {
+          setMomoOpeningMain(suggestedNextMomoMain);
+          setMomoOpeningPay(suggestedNextMomoPay);
         }
         setCloseDenomCounts(
           parseDenominationCounts(item.close_denomination_counts),
@@ -592,6 +601,8 @@ export default function PosDayManagement() {
         actualMoMo: Number(actualMoMo || 0),
         momoOpeningBalance: momoOpenTotal,
         momoClosingBalance: momoCloseTotal,
+        momoClosingMain: Number(momoClosingRef.current.main || 0),
+        momoClosingPay: Number(momoClosingRef.current.pay || 0),
         nextOpeningFloat: Number(closing.nextOpeningFloat || 0),
         notes: closing.notes,
         denominationCounts: closeDenomCounts,

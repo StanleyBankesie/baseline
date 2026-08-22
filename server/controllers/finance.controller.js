@@ -3132,7 +3132,7 @@ export const outstandingReceivableReport = async (req, res, next) => {
 
 export const trialBalanceReport = async (req, res, next) => {
   try {
-    const { companyId = null } = req.scope || {};
+    const { companyId = null, branchId = null, branchIdsStr = '' } = req.scope || {};
     const from = req.query.from ? String(req.query.from) : null;
     const to = req.query.to ? String(req.query.to) : null;
     const groupId = req.query.groupId ? Number(req.query.groupId) : null;
@@ -3140,7 +3140,7 @@ export const trialBalanceReport = async (req, res, next) => {
 
     // Build WHERE clauses dynamically for optional filters
     let whereClause = "WHERE a.company_id = :companyId";
-    const params = { companyId };
+    const params = { companyId, branchId, branchIdsStr };
 
     if (from) {
       params.from = from;
@@ -3182,7 +3182,9 @@ export const trialBalanceReport = async (req, res, next) => {
       FROM fin_accounts a
       JOIN fin_account_groups ag ON ag.id = a.group_id
       LEFT JOIN fin_voucher_lines vl ON vl.account_id = a.id
-      LEFT JOIN fin_vouchers v ON v.id = vl.voucher_id AND v.status = 'POSTED'
+      LEFT JOIN fin_vouchers v ON v.id = vl.voucher_id 
+        AND COALESCE(v.status, 'DRAFT') NOT IN ('REVERSED', 'CANCELLED')
+        AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(v.branch_id, :branchIdsStr)) OR v.branch_id IS NULL)
       LEFT JOIN fin_account_opening_balances ob ON ob.account_id = a.id AND ob.company_id = a.company_id
       ${whereClause}
       GROUP BY a.id, a.code, a.name, ag.name, ag.nature, ob.opening_debit, ob.opening_credit
@@ -4888,7 +4890,7 @@ export const generalLedgerReport = async (req, res, next) => {
            FROM fin_vouchers v
            JOIN fin_voucher_lines vl ON vl.voucher_id = v.id
           WHERE v.company_id = :companyId
-            AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR v.branch_id IS NULL)
+            AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(v.branch_id, :branchIdsStr)) OR v.branch_id IS NULL)
             AND (:from IS NULL OR v.voucher_date < :from)
             AND vl.account_id = :accountId
             AND COALESCE(v.status, 'DRAFT') NOT IN ('REVERSED', 'CANCELLED')`,
@@ -4903,7 +4905,7 @@ export const generalLedgerReport = async (req, res, next) => {
            FROM fin_vouchers v
            JOIN fin_voucher_lines vl ON vl.voucher_id = v.id
           WHERE v.company_id = :companyId
-            AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR v.branch_id IS NULL)
+            AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(v.branch_id, :branchIdsStr)) OR v.branch_id IS NULL)
             AND vl.account_id = :accountId
             AND COALESCE(v.status, 'DRAFT') NOT IN ('REVERSED', 'CANCELLED')`,
         { companyId, branchId, branchIdsStr, accountId },
@@ -4962,7 +4964,7 @@ export const generalLedgerReport = async (req, res, next) => {
            FROM fin_vouchers v
            JOIN fin_voucher_lines vl ON vl.voucher_id = v.id
           WHERE v.company_id = :companyId
-            AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR v.branch_id IS NULL)
+            AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(v.branch_id, :branchIdsStr)) OR v.branch_id IS NULL)
             AND v.voucher_date < :from
             AND COALESCE(v.status, 'DRAFT') NOT IN ('REVERSED', 'CANCELLED')
           GROUP BY vl.account_id`,
@@ -4988,7 +4990,7 @@ export const generalLedgerReport = async (req, res, next) => {
          LEFT JOIN fin_currencies c ON c.id = v.currency_id AND c.company_id = v.company_id
          LEFT JOIN fin_currencies lc ON lc.id = vl.currency_id AND lc.company_id = v.company_id
         WHERE v.company_id = :companyId
-          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) OR v.branch_id IS NULL)
+          AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(v.branch_id, :branchIdsStr)) OR v.branch_id IS NULL)
           AND (:from IS NULL OR v.voucher_date >= :from)
           AND (:to IS NULL OR v.voucher_date <= :to)
           ${accountFilter}

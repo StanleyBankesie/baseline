@@ -2167,7 +2167,7 @@ export default function PosSalesEntry() {
           payment: method,
           customer: customerNameSelected || undefined,
           items: itemsArr,
-          subtotal: subtotal,
+          subtotal: gross,
           discount: discountTotal,
           tax: tax,
           total: total,
@@ -2237,7 +2237,7 @@ export default function PosSalesEntry() {
           </tbody>
         </table>
         <div class="totals">
-          <div class="row"><span>Subtotal</span><span>GH₵ ${subtotal.toFixed(
+          <div class="row"><span>Subtotal</span><span>GH₵ ${gross.toFixed(
             2,
           )}</span></div>
           <div class="row"><span>Discount</span><span>GH₵ ${discountTotal.toFixed(2)}</span></div>${
@@ -2672,7 +2672,7 @@ export default function PosSalesEntry() {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <div>Subtotal</div>
-                  <div>{`GH₵ ${subtotal.toFixed(2)}`}</div>
+                  <div>{`GH₵ ${gross.toFixed(2)}`}</div>
                 </div>
                 <div className="flex justify-between">
                   <div>{`Discount${globalDiscountInfo.type === "percent" && globalDiscountInfo.value ? ` (${globalDiscountInfo.value}%)` : ""}`}</div>
