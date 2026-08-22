@@ -27,8 +27,30 @@ import {
 } from "../services/stock.service.js";
 import { isMailerConfigured, sendMail } from "../utils/mailer.js";
 import { sendExternalNotification } from "../utils/externalNotification.js";
+import { 
+  inv_getStockBalances, 
+  inv_getStockLedger, 
+  inv_getWarehouseStockSummary, 
+  inv_getStockOverviewStats,
+  inv_listStockJournals,
+  inv_getStockJournalById,
+  inv_getNextStockJournalNo,
+  inv_createStockJournal
+} from "../controllers/inventory.controller.js";
 
 const router = express.Router();
+
+// ─── Inv Stock Overview & Balances ────────────────────────────────────────────
+router.get("/stock", requireAuth, inv_getStockBalances);
+router.get("/stock/overview", requireAuth, inv_getStockOverviewStats);
+router.get("/stock/summary", requireAuth, inv_getWarehouseStockSummary);
+router.get("/stock/ledger/:itemId", requireAuth, inv_getStockLedger);
+
+// ─── Inv Stock Journals (Issue / Receipt) ─────────────────────────────────────
+router.get("/stock-journal", requireAuth, inv_listStockJournals);
+router.get("/stock-journal/next-no", requireAuth, inv_getNextStockJournalNo);
+router.get("/stock-journal/:id", requireAuth, inv_getStockJournalById);
+router.post("/stock-journal", requireAuth, inv_createStockJournal);
 
 function toNumber(v, fb = null) {
   if (v === null || v === undefined || v === "") return fb;

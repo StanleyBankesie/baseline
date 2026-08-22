@@ -17,13 +17,15 @@ import {
   CheckCircle2,
   AlertCircle
 } from "lucide-react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import { api } from "api/client";
 import { toast } from "react-toastify";
 
 export default function DailyPlanForm() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isViewOnly = location.pathname.includes("/view/");
   const printRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
@@ -308,13 +310,18 @@ export default function DailyPlanForm() {
         ? Math.round(calcBomTime)
         : (parseFloat(op.total_time_mins) ? Math.round(parseFloat(op.total_time_mins) * scale) : Math.round((parseFloat(targetProc?.cycle_time_mins) || 0) * scale));
 
+      const opMachineId = op.machine_id || (Array.isArray(op.machines) ? (typeof op.machines[0] === 'object' ? (op.machines[0].id || op.machines[0].machine_id) : op.machines[0]) : "") || (targetProc?.machines?.[0] ? (typeof targetProc.machines[0] === 'object' ? (targetProc.machines[0].id || targetProc.machines[0].machine_id) : targetProc.machines[0]) : "");
+      const opShiftId = op.shift_id || (Array.isArray(op.shifts) ? (typeof op.shifts[0] === 'object' ? (op.shifts[0].id || op.shifts[0].shift_id) : op.shifts[0]) : "") || (targetProc?.shifts?.[0] ? (typeof targetProc.shifts[0] === 'object' ? (targetProc.shifts[0].id || targetProc.shifts[0].shift_id) : targetProc.shifts[0]) : "");
+
       return {
         process_id: op.process_id || targetProc?.id || "",
         process_name: procName,
         output_desc: outputText,
         planned_qty: calcPlannedQty,
         uom: outputUom,
+        machine_id: opMachineId || "",
         machine_name: opMachine || "CNC Lathe Workstation 1",
+        shift_id: opShiftId || "",
         shift_name: opShift || "Day Shift (08:00 - 16:00)",
         production_area: deptName,
         job_date: currentFormState.plan_date || new Date().toISOString().split('T')[0],
@@ -365,7 +372,23 @@ export default function DailyPlanForm() {
   // Update process row
   const updateProcessRow = (index, field, value) => {
     const updated = [...formData.processes];
-    updated[index][field] = value;
+    const row = { ...updated[index], [field]: value };
+
+    if (field === "machine_name") {
+      const matchedMac = masterMachines.find(m => (m.machine_name || m.name) === value);
+      if (matchedMac) {
+        row.machine_id = matchedMac.id;
+      }
+    }
+
+    if (field === "shift_name") {
+      const matchedShift = masterShifts.find(s => (s.shift_name || s.name) === value);
+      if (matchedShift) {
+        row.shift_id = matchedShift.id;
+      }
+    }
+
+    updated[index] = row;
     setFormData(prev => ({ ...prev, processes: updated }));
   };
 
@@ -488,9 +511,21 @@ export default function DailyPlanForm() {
             <ArrowLeft size={20} />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-              {id ? `Production Plan: ${formData.plan_no}` : "New Production Plan"}
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+                {isViewOnly ? `View Production Plan: ${formData.plan_no}` : (id ? `Edit Production Plan: ${formData.plan_no}` : "New Production Plan")}
+              </h1>
+              {formData.status && (
+                <span className={`badge ${
+                  formData.status === 'COMPLETED' ? 'badge-success' : 
+                  formData.status === 'IN_PROGRESS' ? 'badge-info' : 
+                  formData.status === 'RELEASED' ? 'badge-primary' :
+                  'badge-secondary'
+                }`}>
+                  {formData.status}
+                </span>
+              )}
+            </div>
             <p className="text-xs text-slate-500">
               Schedule operation processes, linked machines, work shifts, job card tracking, and material sheets
             </p>
@@ -507,19 +542,22 @@ export default function DailyPlanForm() {
             Input Material Sheet
           </button>
           
-          <button
-            form="prod-plan-form"
-            type="submit"
-            disabled={saving}
-            className="btn btn-primary flex items-center gap-2"
-          >
-            {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-            Save Production Plan
-          </button>
+          {!isViewOnly && (
+            <button
+              form="prod-plan-form"
+              type="submit"
+              disabled={saving}
+              className="btn btn-primary flex items-center gap-2"
+            >
+              {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+              Save Production Plan
+            </button>
+          )}
         </div>
       </div>
 
       <form id="prod-plan-form" onSubmit={handleSubmit} className="space-y-8 print:hidden">
+        <fieldset disabled={isViewOnly} className="space-y-8 border-none p-0 m-0">
         {/* Hidden Field: Plan No */}
         <input type="hidden" name="plan_no" value={formData.plan_no} />
 
@@ -1130,6 +1168,7 @@ export default function DailyPlanForm() {
             </table>
           </div>
         </div>
+        </fieldset>
       </form>
 
       {/* Printable Material Requirement Details Sheet Modal */}

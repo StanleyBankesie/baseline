@@ -62,8 +62,7 @@ export default function ProcessList() {
     output_items: [],
     by_products: [],
     overheads: [],
-    machines: [],
-    shifts: []
+    machines: []
   };
 
   const [currentProcess, setCurrentProcess] = useState(initialForm);
@@ -71,15 +70,14 @@ export default function ProcessList() {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      const [procRes, deptRes, botRes, invRes, cfgRes, ovhRes, machRes, shiftRes] = await Promise.allSettled([
+      const [procRes, deptRes, botRes, invRes, cfgRes, ovhRes, machRes] = await Promise.allSettled([
         api.get("/production/setup/processes"),
         api.get("/production/setup/departments"),
         api.get("/production/setup/bom-output-types"),
         api.get("/inventory/items?all=1"),
         api.get("/production/setup/config"),
         api.get("/production/setup/overheads"),
-        api.get("/production/setup/machines"),
-        api.get("/production/setup/shifts")
+        api.get("/production/setup/machines")
       ]);
 
       if (procRes.status === "fulfilled") {
@@ -99,9 +97,6 @@ export default function ProcessList() {
       }
       if (machRes.status === "fulfilled") {
         setAllMachines(machRes.value.data?.items || []);
-      }
-      if (shiftRes.status === "fulfilled") {
-        setAllShifts(shiftRes.value.data?.items || []);
       }
       if (cfgRes.status === "fulfilled" && cfgRes.value.data?.settings) {
         const scrap = parseFloat(cfgRes.value.data.settings.default_scrap_allowance_pct);
@@ -276,6 +271,42 @@ export default function ProcessList() {
     }));
   };
 
+  const addMachineRow = () => {
+    setCurrentProcess(prev => ({
+      ...prev,
+      machines: [...(prev.machines || []), { machine_name: "", machine_id: "", status: "Active" }]
+    }));
+  };
+
+  const updateMachineRow = (index, field, value) => {
+    setCurrentProcess(prev => {
+      const next = [...(prev.machines || [])];
+      const updatedRow = { ...next[index], [field]: value };
+
+      if (field === "machine_name") {
+        const matched = allMachines.find(
+          m => (m.machine_name || m.name || "").toLowerCase().trim() === (value || "").toLowerCase().trim()
+        );
+        if (matched) {
+          updatedRow.id = matched.id;
+          updatedRow.machine_id = matched.id;
+          updatedRow.code = matched.code || matched.machine_code || "";
+          updatedRow.status = matched.status || "Active";
+        }
+      }
+
+      next[index] = updatedRow;
+      return { ...prev, machines: next };
+    });
+  };
+
+  const removeMachineRow = (index) => {
+    setCurrentProcess(prev => ({
+      ...prev,
+      machines: (prev.machines || []).filter((_, i) => i !== index)
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!currentProcess.process_name.trim()) return toast.error("Process name is required");
@@ -434,7 +465,8 @@ export default function ProcessList() {
                                 inputs: item.inputs || [],
                                 output_items: item.output_items || [],
                                 by_products: item.by_products || [],
-                                overheads: item.overheads || []
+                                overheads: item.overheads || [],
+                                machines: item.machines || []
                               });
                               setActiveTab("basic");
                               setShowModal(true);
@@ -535,13 +567,12 @@ export default function ProcessList() {
                                 )}
                               </div>
 
-                              {/* Machines & Shifts */}
+                              {/* Machines */}
                               <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
                                 <h4 className="font-bold text-xs text-teal-700 dark:text-teal-400 uppercase tracking-wider flex items-center gap-1">
-                                  💻 Machines & Shifts
+                                  💻 Linked Machines & Workstations
                                 </h4>
                                 <div>
-                                  <span className="text-[11px] font-bold text-slate-400 uppercase block mb-1">Linked Machines:</span>
                                   {item.machines?.length ? (
                                     <div className="flex flex-wrap gap-1">
                                       {item.machines.map((m, idx) => {
@@ -554,25 +585,7 @@ export default function ProcessList() {
                                       })}
                                     </div>
                                   ) : (
-                                    <p className="text-xs text-slate-400 italic">All Machines</p>
-                                  )}
-                                </div>
-
-                                <div>
-                                  <span className="text-[11px] font-bold text-slate-400 uppercase block mb-1">Linked Shifts:</span>
-                                  {item.shifts?.length ? (
-                                    <div className="flex flex-wrap gap-1">
-                                      {item.shifts.map((s, idx) => {
-                                        const sName = typeof s === 'object' ? (s.shift_name || s.name) : s;
-                                        return (
-                                          <span key={idx} className="px-2 py-0.5 rounded bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 dark:text-cyan-300 text-[11px] font-semibold border border-cyan-200 dark:border-cyan-800">
-                                            {sName}
-                                          </span>
-                                        );
-                                      })}
-                                    </div>
-                                  ) : (
-                                    <p className="text-xs text-slate-400 italic">All Shifts</p>
+                                    <p className="text-xs text-slate-400 italic">All Machines / Workstations</p>
                                   )}
                                 </div>
                               </div>
@@ -676,7 +689,7 @@ export default function ProcessList() {
                     : "text-slate-500 border-transparent hover:text-slate-700"
                 }`}
               >
-                💻 Machines & Shifts ({ (currentProcess.machines?.length || 0) + (currentProcess.shifts?.length || 0) })
+                💻 Linked Machines ({ currentProcess.machines?.length || 0 })
               </button>
             </div>
 
@@ -1168,159 +1181,82 @@ export default function ProcessList() {
                 </div>
               )}
 
-              {/* TAB 6: LINKED MACHINES & SHIFTS */}
+              {/* TAB 6: LINKED MACHINES */}
               {activeTab === "resources" && (
-                <div className="space-y-6 animate-in fade-in duration-200">
-                  <div>
-                    <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
-                      💻 Linked Machines & Operation Shifts
-                    </h3>
-                    <p className="text-xs text-slate-500">
-                      Link specific equipment, workstations, and work shifts that can execute this manufacturing process
-                    </p>
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
+                        💻 Linked Machines & Workstations
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        Link specific equipment and workstations that can execute this manufacturing process
+                      </p>
+                    </div>
+                    <button type="button" onClick={addMachineRow} className="btn btn-secondary text-xs flex items-center gap-1.5">
+                      <PlusCircle size={14} /> Add Machine
+                    </button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Machines Linking Card */}
-                    <div className="bg-slate-50 dark:bg-slate-850 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
-                      <div className="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-slate-700">
-                        <h4 className="font-bold text-xs uppercase tracking-wider text-teal-700 dark:text-teal-400 flex items-center gap-1.5">
-                          💻 Select Machines / Workstations
-                        </h4>
-                        <span className="text-[11px] font-bold text-slate-400">
-                          {currentProcess.machines?.length || 0} selected
-                        </span>
-                      </div>
-
-                      {allMachines.length === 0 ? (
-                        <p className="text-xs text-slate-400 italic py-4 text-center">
-                          No machines configured in Manufacturing Setup → Machines
-                        </p>
-                      ) : (
-                        <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
-                          {allMachines.map((m) => {
-                            const isSelected = (currentProcess.machines || []).some(
-                              (x) => String(typeof x === 'object' ? x.id : x) === String(m.id)
-                            );
-                            return (
-                              <label
-                                key={m.id}
-                                className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
-                                  isSelected
-                                    ? "bg-teal-50/80 dark:bg-teal-950/40 border-teal-300 dark:border-teal-700"
-                                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300"
-                                }`}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <input
-                                    type="checkbox"
-                                    checked={isSelected}
-                                    onChange={(e) => {
-                                      const checked = e.target.checked;
-                                      setCurrentProcess((prev) => {
-                                        const prevM = prev.machines || [];
-                                        let updated;
-                                        if (checked) {
-                                          updated = [...prevM, { id: m.id, machine_name: m.machine_name || m.name }];
-                                        } else {
-                                          updated = prevM.filter(
-                                            (x) => String(typeof x === 'object' ? x.id : x) !== String(m.id)
-                                          );
-                                        }
-                                        return { ...prev, machines: updated };
-                                      });
-                                    }}
-                                    className="w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
-                                  />
-                                  <div>
-                                    <span className="text-xs font-bold text-slate-900 dark:text-white block">
-                                      {m.machine_name || m.name}
-                                    </span>
-                                    {m.code && <span className="text-[10px] text-slate-400">Code: {m.code}</span>}
-                                  </div>
-                                </div>
-                                <span className="text-[11px] font-semibold text-slate-500">
-                                  {m.status || "Active"}
-                                </span>
-                              </label>
-                            );
-                          })}
-                        </div>
-                      )}
+                  {currentProcess.machines?.length === 0 ? (
+                    <div className="text-center py-10 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+                      <Settings2 className="mx-auto mb-2 text-teal-500 opacity-60" size={32} />
+                      <p className="text-sm text-slate-500 font-medium">No machines linked to this process step yet.</p>
+                      <button type="button" onClick={addMachineRow} className="btn btn-primary text-xs mt-3">
+                        + Add First Machine
+                      </button>
                     </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {currentProcess.machines.map((row, idx) => {
+                        const rowName = typeof row === 'object' ? (row.machine_name || row.name || '') : String(row);
+                        return (
+                          <div key={idx} className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                            <div className="md:col-span-7">
+                              <label className="text-[10px] font-bold text-slate-500 uppercase">Machine / Workstation Name</label>
+                              <input
+                                type="text"
+                                value={rowName}
+                                onChange={(e) => updateMachineRow(idx, "machine_name", e.target.value)}
+                                placeholder="Select or type machine name..."
+                                className="input w-full py-1.5 text-xs font-semibold text-slate-900 dark:text-white"
+                                list={`setup-machines-list-${idx}`}
+                              />
+                              <datalist id={`setup-machines-list-${idx}`}>
+                                {allMachines.map((m) => (
+                                  <option key={m.id} value={m.machine_name || m.name}>
+                                    {m.code ? `${m.code} - ` : ""}[{m.status || "Active"}]
+                                  </option>
+                                ))}
+                              </datalist>
+                            </div>
 
-                    {/* Shifts Linking Card */}
-                    <div className="bg-slate-50 dark:bg-slate-850 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
-                      <div className="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-slate-700">
-                        <h4 className="font-bold text-xs uppercase tracking-wider text-cyan-700 dark:text-cyan-400 flex items-center gap-1.5">
-                          🕒 Select Operating Shifts
-                        </h4>
-                        <span className="text-[11px] font-bold text-slate-400">
-                          {currentProcess.shifts?.length || 0} selected
-                        </span>
-                      </div>
+                            <div className="md:col-span-4">
+                              <label className="text-[10px] font-bold text-slate-500 uppercase">Status</label>
+                              <input
+                                type="text"
+                                value={typeof row === 'object' ? (row.status || "Active") : "Active"}
+                                onChange={(e) => updateMachineRow(idx, "status", e.target.value)}
+                                placeholder="Active / Standby"
+                                className="input w-full py-1.5 text-xs"
+                              />
+                            </div>
 
-                      {allShifts.length === 0 ? (
-                        <p className="text-xs text-slate-400 italic py-4 text-center">
-                          No shifts configured in Manufacturing Setup → Work Shifts
-                        </p>
-                      ) : (
-                        <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
-                          {allShifts.map((s) => {
-                            const isSelected = (currentProcess.shifts || []).some(
-                              (x) => String(typeof x === 'object' ? x.id : x) === String(s.id)
-                            );
-                            return (
-                              <label
-                                key={s.id}
-                                className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
-                                  isSelected
-                                    ? "bg-cyan-50/80 dark:bg-cyan-950/40 border-cyan-300 dark:border-cyan-700"
-                                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300"
-                                }`}
+                            <div className="md:col-span-1 flex justify-end pt-4">
+                              <button
+                                type="button"
+                                onClick={() => removeMachineRow(idx)}
+                                className="text-rose-500 hover:text-rose-700 p-1"
+                                title="Remove Machine"
                               >
-                                <div className="flex items-center gap-3">
-                                  <input
-                                    type="checkbox"
-                                    checked={isSelected}
-                                    onChange={(e) => {
-                                      const checked = e.target.checked;
-                                      setCurrentProcess((prev) => {
-                                        const prevS = prev.shifts || [];
-                                        let updated;
-                                        if (checked) {
-                                          updated = [...prevS, { id: s.id, shift_name: s.shift_name || s.name }];
-                                        } else {
-                                          updated = prevS.filter(
-                                            (x) => String(typeof x === 'object' ? x.id : x) !== String(s.id)
-                                          );
-                                        }
-                                        return { ...prev, shifts: updated };
-                                      });
-                                    }}
-                                    className="w-4 h-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
-                                  />
-                                  <div>
-                                    <span className="text-xs font-bold text-slate-900 dark:text-white block">
-                                      {s.shift_name || s.name}
-                                    </span>
-                                    {s.start_time && (
-                                      <span className="text-[10px] text-slate-400">
-                                        {s.start_time} - {s.end_time}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                                <span className="text-[11px] font-semibold text-slate-500">
-                                  {s.code || "Shift"}
-                                </span>
-                              </label>
-                            );
-                          })}
-                        </div>
-                      )}
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
 

@@ -1,6 +1,11 @@
+/**
+ * @fileoverview MaterialUtilizationList component.
+ * Displays all Material Utilization logs linked to Production Plans and Job Cards.
+ */
+
 import React, { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Plus, Search, RotateCcw, Package, Layers, Eye, Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { api } from "api/client";
 import { filterAndSort } from "@/utils/searchUtils.js";
@@ -10,129 +15,176 @@ import { useViewMode } from "@/hooks/useViewMode";
 import ViewToggle from "@/components/ViewToggle";
 
 export default function MaterialUtilizationList() {
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useViewMode();
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [items, setItems] = useState([]);
-  const [confirmingId, setConfirmingId] = useState(null);
 
-  const fetchItems = () => {
+  const fetchItems = async () => {
     setLoading(true);
-    api.get("/production/execution/material-utilization")
-      .then(res => { setItems(Array.isArray(res.data?.items) ? res.data.items : []); })
-      .catch(e => setError(e?.response?.data?.message || "Failed to load"))
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => { fetchItems(); }, []);
-
-  const handleConfirm = async (id) => {
-    setConfirmingId(id);
     try {
-      await api.post(`/production/execution/material-utilization/${id}/confirm`);
-      toast.success("Utilization confirmed and stock deducted");
-      fetchItems();
-    } catch (e2) {
-      toast.error(e2?.response?.data?.message || "Failed to confirm");
+      const res = await api.get("/production/execution/material-utilization");
+      setItems(Array.isArray(res.data?.items) ? res.data.items : []);
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Failed to load material utilization list");
     } finally {
-      setConfirmingId(null);
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
   const filtered = useMemo(() => {
     if (!searchTerm.trim()) return items.slice();
-    return filterAndSort(items, { query: searchTerm, getKeys: (r) => [r.utilization_no, r.work_order_no, r.receipt_no, r.warehouse_name, r.status] });
+    return filterAndSort(items, { 
+      query: searchTerm, 
+      getKeys: (r) => [r.utilization_no, r.plan_no, r.job_card_no, r.receipt_no, r.warehouse_name, r.item_names, r.items_summary, r.status] 
+    });
   }, [items, searchTerm]);
 
-  const { sorted, sortKey, sortDir, toggle } = useSort(filtered, "created_at", "desc");
+  const { sorted, sortKey, sortDir, toggle } = useSort(filtered, "utilization_date", "desc");
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6 animate-in fade-in duration-300">
+      
+      {/* Header Banner */}
       <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold dark:text-brand-300">Material Utilization</h1>
-              <p className="text-sm mt-1">Track material consumption against production runs</p>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={() => window.history.back()} className="btn btn-secondary">Back</button>
-              <Link to="/production/execution/material-utilization/new" className="btn-success flex items-center gap-2"><Plus size={16} />New Utilization</Link>
-            </div>
+        <div className="card-header bg-brand-900 text-white dark:bg-brand-950 rounded-t-lg flex flex-wrap justify-between items-center gap-4">
+          <div>
+            <h1 className="text-2xl font-bold dark:text-brand-300 flex items-center gap-2">
+              <Package className="h-7 w-7 text-amber-400" />
+              Material Utilization Logs
+            </h1>
+            <p className="text-sm mt-1 text-slate-100">
+              Track actual consumed materials against Production Plans, Job Cards, and Production Warehouses.
+            </p>
+          </div>
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            <Link to="/production?section=Shop%20Floor%20%26%20Execution" className="font-sans btn btn-secondary text-sm">
+              Return to Menu
+            </Link>
+            <button
+              type="button"
+              className="btn-success flex items-center gap-1.5 text-sm font-bold"
+              onClick={fetchItems}
+              disabled={loading}
+            >
+              <RotateCcw size={15} className={loading ? "animate-spin" : ""} /> Refresh
+            </button>
+            <Link to="/production/execution/material-utilization/new" className="btn-success flex items-center gap-1.5 text-sm font-bold">
+              <Plus size={16} /> New Material Utilization
+            </Link>
           </div>
         </div>
       </div>
 
-      <div className="card">
-        <div className="card-body">
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="flex-1">
-              <input type="text" placeholder="Search utilization..." className="input" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-            </div>
+      {/* Search and Filter Row */}
+      <div className="card p-5 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="relative flex-1 min-w-[280px] max-w-md">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input
+              type="text"
+              placeholder="Search by utilization #, item, plan #, job card #, warehouse..."
+              className="input pl-10 w-full text-sm font-semibold"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
-
-          <div className="flex justify-end mb-4">
+          <div className="flex items-center gap-3">
             <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
           </div>
-          
-          <div className="overflow-x-auto">
-            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
-              <thead>
+        </div>
+      </div>
+
+      {/* Table Card */}
+      <div className="card overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800">
+        <div className="overflow-x-auto">
+          <table className={"w-full text-left text-sm " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
+            <thead className="bg-brand-900 text-white dark:bg-brand-950 font-bold uppercase tracking-wider border-b border-brand-800 text-xs">
+              <tr>
+                <SortableHeader label="Utilization No" sortKey="utilization_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="px-4 py-3.5 text-white" />
+                <SortableHeader label="Date" sortKey="utilization_date" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="px-4 py-3.5 text-white" />
+                <th className="px-4 py-3.5 text-white">Production Plan</th>
+                <th className="px-4 py-3.5 text-white">Job Card #</th>
+                <th className="px-4 py-3.5 text-white">Item</th>
+                <th className="px-4 py-3.5 text-white text-right">Utilized Qty</th>
+                <th className="px-4 py-3.5 text-white">Material Receipt</th>
+                <th className="px-4 py-3.5 text-white">Production Warehouse</th>
+                <SortableHeader label="Status" sortKey="status" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="px-4 py-3.5 text-center text-white" />
+                <th className="px-4 py-3.5 text-right text-white">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
+              {loading ? (
                 <tr>
-                  <SortableHeader label="Utilization No" sortKey="utilization_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                  <SortableHeader label="Date" sortKey="utilization_date" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                  <th>Work Order / Plan</th>
-                  <th>Storage/Warehouse</th>
-                  <th>Status</th>
-                  <SortableHeader label="Utilized By" sortKey="utilized_by_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                  <th className="w-px whitespace-nowrap pl-4">Actions</th>
+                  <td colSpan="10" className="px-6 py-12 text-center text-slate-400 font-bold">
+                    <Loader2 className="animate-spin inline-block mr-2" size={18} />
+                    Loading material utilization logs...
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr><td colSpan="7" className="text-center py-8 text-slate-400">Loading...</td></tr>
-                ) : sorted.length > 0 ? sorted.map(r => (
-                  <tr key={r.id}>
-                    <td className="font-medium text-sm text-brand-700 dark:text-brand-300">{r.utilization_no}</td>
-                    <td className="text-sm whitespace-nowrap">{r.utilization_date ? new Date(r.utilization_date).toLocaleDateString() : "—"}</td>
-                    <td className="text-sm">{r.work_order_no || r.receipt_no || "—"}</td>
-                    <td className="text-sm">{r.warehouse_name || "—"}</td>
-                    <td className="text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        r.status === "COMPLETED" || r.status === "POSTED" || r.status === "CONFIRMED" ? "bg-green-100 text-green-700" :
-                        r.status === "DRAFT" ? "bg-yellow-100 text-yellow-700" :
-                        "bg-slate-100 text-slate-700"
-                      }`}>
+              ) : sorted.length > 0 ? (
+                sorted.map((r) => (
+                  <tr key={r.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
+                    <td className="px-4 py-3.5 font-bold text-brand-600 font-mono">
+                      {r.utilization_no}
+                    </td>
+                    <td className="px-4 py-3.5 text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                      {r.utilization_date ? new Date(r.utilization_date).toLocaleDateString() : "—"}
+                    </td>
+                    <td className="px-4 py-3.5 font-semibold text-slate-700 dark:text-slate-200">
+                      {r.plan_no || "—"}
+                    </td>
+                    <td className="px-4 py-3.5 font-semibold text-indigo-600 dark:text-indigo-400">
+                      {r.job_card_no || "—"}
+                    </td>
+                    <td className="px-4 py-3.5 font-medium text-slate-900 dark:text-slate-100 max-w-[200px] truncate" title={r.items_summary || r.item_names || ""}>
+                      {r.item_names || (r.item_count > 0 ? `${r.item_count} item(s)` : "—")}
+                    </td>
+                    <td className="px-4 py-3.5 font-bold text-slate-900 dark:text-slate-100 text-right whitespace-nowrap">
+                      {r.total_utilized_qty !== undefined && r.total_utilized_qty !== null ? (
+                        <span>
+                          {Number(r.total_utilized_qty).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          {r.uom ? <span className="text-xs text-slate-500 font-normal ml-1">{r.uom}</span> : ""}
+                        </span>
+                      ) : "—"}
+                    </td>
+                    <td className="px-4 py-3.5 text-slate-500">
+                      {r.receipt_no || "—"}
+                    </td>
+                    <td className="px-4 py-3.5 text-slate-700 dark:text-slate-300">
+                      {r.warehouse_name || "Production Store"}
+                    </td>
+                    <td className="px-4 py-3.5 text-center">
+                      <span className="px-2.5 py-1 text-xs font-bold rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
                         {r.status || "COMPLETED"}
                       </span>
                     </td>
-                    <td className="text-sm">{r.utilized_by_name || "—"}</td>
-                    <td className="w-px whitespace-nowrap pl-4">
-                      <div className="flex items-center gap-2">
-                        {r.status === "DRAFT" && (
-                          <button
-                            type="button"
-                            className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50"
-                            disabled={confirmingId === r.id}
-                            onClick={() => handleConfirm(r.id)}
-                          >
-                            {confirmingId === r.id ? "Confirming..." : "Confirm"}
-                          </button>
-                        )}
-                        <Link to={`/production/execution/material-utilization/${r.id}`}
-                          className="px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 inline-block">View</Link>
-                      </div>
+                    <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                      <Link
+                        to={`/production/execution/material-utilization/${r.id}`}
+                        className="btn btn-secondary text-xs font-bold inline-flex items-center gap-1"
+                      >
+                        <Eye size={13} /> View
+                      </Link>
                     </td>
                   </tr>
-                )) : (
-                  <tr><td colSpan="7" className="text-center py-8 text-slate-400">No utilization records found.</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="10" className="px-6 py-12 text-center text-slate-400 font-medium">
+                    No material utilization logs found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
+
     </div>
   );
 }

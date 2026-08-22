@@ -13,7 +13,9 @@ import {
   ArrowLeft,
   ChevronRight,
   Package,
-  AlertTriangle
+  AlertTriangle,
+  Eye,
+  Edit
 } from "lucide-react";
 import { api } from "api/client";
 import { toast } from "react-toastify";
@@ -141,15 +143,15 @@ export default function WorkOrderList() {
       {/* Orders Table */}
       <div className="card overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
+          <table className="w-full table-fixed divide-y divide-slate-200 dark:divide-slate-700">
             <thead>
-              <tr>
-                <SortableHeader label="Order No" sortKey="work_order_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                <SortableHeader label="Target Product" sortKey="item_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                <SortableHeader label="Planned Qty" sortKey="qty_to_produce" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                <SortableHeader label="Date" sortKey="work_order_date" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                <SortableHeader label="Status" sortKey="status" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-center" />
-                <th className="text-right">Actions</th>
+              <tr className="bg-slate-50 dark:bg-slate-800 text-xs font-bold uppercase tracking-wider text-slate-500">
+                <SortableHeader label="Order No" sortKey="work_order_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="w-1/6 px-4 py-3" />
+                <SortableHeader label="Target Product" sortKey="item_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="w-1/6 px-4 py-3" />
+                <SortableHeader label="Planned Qty" sortKey="qty_to_produce" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="w-1/6 px-4 py-3" />
+                <SortableHeader label="Date" sortKey="work_order_date" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="w-1/6 px-4 py-3" />
+                <SortableHeader label="Status" sortKey="status" currentKey={sortKey} direction={sortDir} onToggle={toggle} className="w-1/6 px-4 py-3 text-center" />
+                <th className="w-1/6 px-4 py-3 text-center uppercase tracking-wider text-xs font-bold text-slate-500">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
@@ -160,46 +162,38 @@ export default function WorkOrderList() {
                   </td>
                 </tr>
               ) : filteredOrders.length > 0 ? filteredOrders.map((order) => (
-                <tr key={order.id} className="group">
-                  <td className="px-6 py-4">
+                <tr key={order.id} className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/50">
+                  <td className="w-1/6 px-4 py-4 truncate">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg text-brand-600">
+                      <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg text-brand-600 shrink-0">
                         <ClipboardList size={18} />
                       </div>
-                      <div>
-                        <span className="font-bold text-brand-900 dark:text-brand-300 block">{order.work_order_no}</span>
-                        <span className="text-xs text-slate-400">{order.bom_name || "Custom BOM"}</span>
+                      <div className="truncate">
+                        <span className="font-bold text-brand-900 dark:text-brand-300 block truncate">{order.work_order_no}</span>
+                        <span className="text-xs text-slate-400 truncate block">{order.bom_name || "Custom BOM"}</span>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 font-medium text-slate-700 dark:text-slate-200">
+                  <td className="w-1/6 px-4 py-4 font-medium text-slate-700 dark:text-slate-200 truncate">
                     {order.item_name ? `${order.item_name} (${order.item_code || ''})` : "General Output"}
                   </td>
-                  <td className="px-6 py-4 font-bold text-brand-600">
+                  <td className="w-1/6 px-4 py-4 font-bold text-brand-600 truncate">
                     {order.qty_to_produce} {order.uom || "Pcs"}
                   </td>
-                  <td className="px-6 py-4 text-slate-500 text-sm">
+                  <td className="w-1/6 px-4 py-4 text-slate-500 text-sm truncate">
                     {order.work_order_date ? new Date(order.work_order_date).toLocaleDateString() : "—"}
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="w-1/6 px-4 py-4 text-center">
                     <StatusBadge status={order.status} />
                   </td>
-                  <td className="px-6 py-4 text-right space-x-2">
+                  <td className="w-1/6 px-4 py-4 text-center space-x-1.5 whitespace-nowrap">
                     {/* Status Action Buttons */}
                     {order.status === "DRAFT" && (
                       <button
                         onClick={() => handleStatusChange(order.id, "RELEASED")}
-                        className="px-2.5 py-1 text-xs font-bold rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100"
+                        className="px-3 py-1 text-xs font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
                       >
-                        Release Order
-                      </button>
-                    )}
-                    {order.status === "RELEASED" && (
-                      <button
-                        onClick={() => handleStatusChange(order.id, "IN_PROGRESS")}
-                        className="px-2.5 py-1 text-xs font-bold rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100"
-                      >
-                        Start Production
+                        Confirm
                       </button>
                     )}
                     {order.status === "IN_PROGRESS" && (
@@ -211,13 +205,25 @@ export default function WorkOrderList() {
                       </button>
                     )}
 
+                    {/* View Button */}
                     <Link
                       to={`/production/work-orders/${order.id}`}
-                      className="p-1.5 text-slate-400 hover:text-brand-600 transition-colors inline-block"
-                      title="View Order Details & Material Shortages"
+                      className="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 inline-flex items-center gap-1"
+                      title="View Order Details"
                     >
-                      <ChevronRight size={18} />
+                      <Eye size={13} /> View
                     </Link>
+
+                    {/* Edit Button - Visible when status is DRAFT, PLANNED, or RELEASED */}
+                    {(order.status === "DRAFT" || order.status === "PLANNED" || order.status === "RELEASED") && (
+                      <Link
+                        to={`/production/work-orders/${order.id}`}
+                        className="px-2.5 py-1 text-xs font-bold rounded-lg bg-brand-50 text-brand-700 dark:bg-brand-950/40 dark:text-brand-300 hover:bg-brand-100 inline-flex items-center gap-1"
+                        title="Edit Order Specifications"
+                      >
+                        <Edit size={13} /> Edit
+                      </Link>
+                    )}
                   </td>
                 </tr>
               )) : (

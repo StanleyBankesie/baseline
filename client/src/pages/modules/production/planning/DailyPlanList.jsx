@@ -16,7 +16,11 @@ import {
   BarChart2,
   PieChart,
   TrendingUp,
-  Layers
+  Layers,
+  Eye,
+  X,
+  Cpu,
+  Clock
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "api/client";
@@ -26,15 +30,11 @@ import SortableHeader from "@/components/SortableHeader.jsx";
 import { useViewMode } from "@/hooks/useViewMode";
 import ViewToggle from "@/components/ViewToggle";
 
-/**
- *  component
- * 
- * @returns {JSX.Element} The rendered component
- */
 export default function DailyPlanList() {
   const [viewMode, setViewMode] = useViewMode("table");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPlan, setSelectedPlan] = useState(null);
   const navigate = useNavigate();
 
   const fetchPlans = async () => {
@@ -52,8 +52,23 @@ export default function DailyPlanList() {
     fetchPlans();
   }, []);
 
+  const handleConfirmPlan = async (planId) => {
+    try {
+      const plan = items.find(p => p.id === planId);
+      if (!plan) return;
+      await api.put(`/production/planning/daily/${planId}`, {
+        ...plan,
+        status: "RELEASED"
+      });
+      toast.success("Production Plan confirmed & status updated to RELEASED");
+      fetchPlans();
+    } catch {
+      toast.error("Failed to confirm production plan");
+    }
+  };
+
   const { sorted: sortedItems, sortKey, sortDir, toggle } = useSort(items, "created_at", "desc");
-  const [showCharts, setShowCharts] = useState(true);
+  const [showCharts, setShowCharts] = useState(false);
 
   // Compute graphical report metrics from loaded plans
   const totalPlans = items.length;
@@ -89,7 +104,7 @@ export default function DailyPlanList() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <Link to="/production?section=Planning%20%26%20Scheduling" className="btn btn-secondary p-2">
+          <Link to="/production?section=Planning%20%26%20Requirements" className="btn btn-secondary p-2">
             <ArrowLeft size={20} />
           </Link>
           <div>
@@ -357,14 +372,32 @@ export default function DailyPlanList() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <div className="flex items-center justify-center">
+                    <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
                       <button 
-                        onClick={() => navigate(`/production/planning/daily/edit/${item.id}`)}
-                        className="btn btn-secondary text-xs px-2.5 py-1.5 flex items-center gap-1 font-semibold"
-                        title="Edit Plan"
+                        onClick={() => navigate(`/production/planning/daily/view/${item.id}`)}
+                        className="btn btn-secondary text-xs px-2.5 py-1 flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-200"
+                        title="View Full Production Plan Details"
                       >
-                        <Edit2 size={14} /> Edit
+                        <Eye size={13} /> View
                       </button>
+
+                      {(item.status === 'DRAFT' || !item.status) && (
+                        <button
+                          onClick={() => handleConfirmPlan(item.id)}
+                          className="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
+                        >
+                          Confirm Plan
+                        </button>
+                      )}
+                      {(item.status === 'DRAFT' || !item.status) && (
+                        <button 
+                          onClick={() => navigate(`/production/planning/daily/edit/${item.id}`)}
+                          className="btn btn-secondary text-xs px-2.5 py-1 flex items-center gap-1 font-semibold"
+                          title="Edit Plan"
+                        >
+                          <Edit2 size={13} /> Edit
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -383,6 +416,125 @@ export default function DailyPlanList() {
           </table>
         </div>
       </div>
+
+      {/* View Plan Modal */}
+      {selectedPlan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-150 border border-slate-200 dark:border-slate-700">
+            <div className="p-5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/80">
+              <div className="flex items-center gap-3">
+                <FileSpreadsheet className="text-brand-600" size={20} />
+                <div>
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    Production Plan Details ({selectedPlan.plan_no})
+                  </h3>
+                  <p className="text-xs text-slate-500 font-mono">ID: #{selectedPlan.id}</p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setSelectedPlan(null)} 
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto text-xs">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-700/60">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Status</span>
+                  <span className={`badge ${
+                    selectedPlan.status === 'COMPLETED' ? 'badge-success' : 
+                    selectedPlan.status === 'IN_PROGRESS' ? 'badge-info' : 
+                    selectedPlan.status === 'RELEASED' ? 'badge-primary' :
+                    'badge-secondary'
+                  }`}>
+                    {selectedPlan.status || 'DRAFT'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Planned Output</span>
+                  <span className="font-bold text-slate-900 dark:text-white text-sm">
+                    {selectedPlan.quantity ? Math.round(parseFloat(selectedPlan.quantity)) : 1} Pcs
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Batch / Lot No</span>
+                  <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                    {selectedPlan.batch_number || '—'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Plan Date</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300">
+                    {selectedPlan.plan_date ? new Date(selectedPlan.plan_date).toLocaleDateString() : '—'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h4 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider">Target Finished Good & References</h4>
+                <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-medium">Finished Product:</span>
+                    <strong className="text-slate-900 dark:text-white">{selectedPlan.product_name || "Finished Good"}</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-medium">Work Order No:</span>
+                    <strong className="font-mono text-indigo-600">{selectedPlan.work_order_no || "WO-DIRECT"}</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-medium">Manufacture Date:</span>
+                    <span className="font-bold">{selectedPlan.manufacture_date ? new Date(selectedPlan.manufacture_date).toLocaleDateString() : "—"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-medium">Expiry Date:</span>
+                    <span className="font-bold">{selectedPlan.expiry_date ? new Date(selectedPlan.expiry_date).toLocaleDateString() : "—"}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Processes configured */}
+              {selectedPlan.processes && (
+                <div className="space-y-3">
+                  <h4 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider">Configured Manufacturing Processes</h4>
+                  <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-100 dark:bg-slate-900 font-bold uppercase text-[10px] text-slate-500">
+                        <tr>
+                          <th className="p-3">Process Name</th>
+                          <th className="p-3">Work Center / Machine</th>
+                          <th className="p-3">Shift</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
+                        {(typeof selectedPlan.processes === 'string' ? JSON.parse(selectedPlan.processes) : selectedPlan.processes).map((pr, idx) => (
+                          <tr key={idx}>
+                            <td className="p-3 font-bold text-slate-800 dark:text-slate-200">{pr.process_name || pr.name || `Process Step ${idx + 1}`}</td>
+                            <td className="p-3 font-mono">{pr.machine_name || (pr.machine_id ? `Machine #${pr.machine_id}` : "Default Machine")}</td>
+                            <td className="p-3">{pr.shift_name || (pr.shift_id ? `Shift #${pr.shift_id}` : "Default Shift")}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex justify-end">
+              <button 
+                type="button" 
+                onClick={() => setSelectedPlan(null)} 
+                className="btn btn-secondary text-xs"
+              >
+                Close View
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

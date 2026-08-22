@@ -66,6 +66,16 @@ export default function ProductionWarehouseList() {
     }
   };
 
+  const handleSetDefault = async (whId) => {
+    try {
+      await api.put(`/production/setup/warehouses/${whId}/default`);
+      toast.success("Default production warehouse updated successfully");
+      fetchWarehouses();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to set default warehouse");
+    }
+  };
+
   const visibleWarehouses = warehouses.filter((w) => (showInactive ? true : !!w.is_active));
 
   return (
@@ -92,38 +102,39 @@ export default function ProductionWarehouseList() {
           </button>
           <button
             onClick={() => {
-              setCurrentWh({ warehouse_name: "", description: "", is_active: true });
+              setCurrentWh({ warehouse_name: "", description: "", is_active: true, is_default: false });
               setShowModal(true);
             }}
             className="btn btn-primary flex items-center gap-2"
           >
             <Plus size={18} />
-            Add Warehouse Location
+            Add Warehouse
           </button>
         </div>
       </div>
 
-      {/* Warehouses Table */}
-      <div className="card overflow-hidden shadow-sm">
+      {/* Warehouse List Table */}
+      <div className="card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
-            <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 uppercase tracking-wider text-xs border-b border-slate-200 dark:border-slate-700">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-50 dark:bg-slate-800 text-xs font-semibold text-slate-500 uppercase tracking-wider">
               <tr>
-                <th className="px-6 py-4">Warehouse / Location Name</th>
-                <th className="px-6 py-4">Code</th>
-                <th className="px-6 py-4">Description</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Actions</th>
+                <th className="px-6 py-3">Warehouse Location</th>
+                <th className="px-6 py-3">Code</th>
+                <th className="px-6 py-3">Description</th>
+                <th className="px-6 py-3">Status</th>
+                <th className="px-6 py-3">Default</th>
+                <th className="px-6 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center text-slate-400 font-medium">Loading production warehouses...</td>
+                  <td colSpan="6" className="px-6 py-12 text-center text-slate-400 font-medium">Loading production warehouses...</td>
                 </tr>
               ) : visibleWarehouses.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center text-slate-400 font-medium">
+                  <td colSpan="6" className="px-6 py-12 text-center text-slate-400 font-medium">
                     <Warehouse className="mx-auto mb-2 opacity-50" size={32} />
                     {showInactive ? "No production warehouses found." : "No active production warehouses configured."}
                   </td>
@@ -148,7 +159,22 @@ export default function ProductionWarehouseList() {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-right space-x-2">
+                    <td className="px-6 py-4">
+                      {wh.is_default ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-extrabold bg-blue-100 text-blue-800 border border-blue-300">
+                          ★ Default
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleSetDefault(wh.id)}
+                          className="text-xs font-semibold text-slate-500 hover:text-blue-600 hover:underline"
+                        >
+                          Set Default
+                        </button>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-right space-x-2 whitespace-nowrap">
                       <button
                         onClick={() => handleToggleStatus(wh)}
                         className={`btn p-1.5 text-xs font-bold ${
@@ -217,16 +243,25 @@ export default function ProductionWarehouseList() {
                 />
               </div>
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="whActive"
-                  checked={!!currentWh.is_active}
-                  onChange={(e) => setCurrentWh({ ...currentWh, is_active: e.target.checked })}
-                  className="rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-                />
-                <label htmlFor="whActive" className="text-sm text-slate-700 dark:text-slate-300 font-medium">
-                  Active Location
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(currentWh.is_active)}
+                    onChange={(e) => setCurrentWh({ ...currentWh, is_active: e.target.checked })}
+                    className="checkbox"
+                  />
+                  Active
+                </label>
+
+                <label className="flex items-center gap-2 text-sm font-bold text-blue-700 dark:text-blue-400 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(currentWh.is_default)}
+                    onChange={(e) => setCurrentWh({ ...currentWh, is_default: e.target.checked })}
+                    className="checkbox"
+                  />
+                  Set as Default Production Warehouse
                 </label>
               </div>
 

@@ -929,7 +929,7 @@ export default function DirectPurchase() {
             <h3 className="text-sm font-semibold text-[#0E3646] mb-3">
               Add Item
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-3">
+            <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-3">
               <div className="md:col-span-2">
                 <label className="block text-xs font-medium text-gray-700 mb-1">
                   Item *
@@ -1062,6 +1062,17 @@ export default function DirectPurchase() {
                   value={newItem.unit_price}
                   onChange={handleNewItemChange}
                   disabled={isViewMode}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Total
+                </label>
+                <input
+                  type="text"
+                  disabled
+                  className="input w-32 bg-slate-100 dark:bg-slate-800 font-mono font-bold text-brand-700 dark:text-brand-300"
+                  value={(Number(newItem.qty || 0) * Number(newItem.unit_price || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 />
               </div>
               <div>

@@ -37,6 +37,9 @@ import MachineList from "./MachineList";
 import ShiftList from "./ShiftList";
 import OverheadList from "./OverheadList";
 import ProductionItemList from "./ProductionItemList";
+import QcChecklistList from "./QcChecklistList";
+import OperatorList from "./OperatorList";
+import { UserCheck } from "lucide-react";
 
 const TAB_LABELS = [
   { key: "general", label: "General", icon: <Warehouse size={16} /> },
@@ -47,6 +50,8 @@ const TAB_LABELS = [
   { key: "overheads", label: "Operational Overheads", icon: <DollarSign size={16} /> },
   { key: "machines", label: "Machines & Resources", icon: <Cpu size={16} /> },
   { key: "shifts", label: "Shifts", icon: <Clock size={16} /> },
+  { key: "operators", label: "Machine Operators", icon: <UserCheck size={16} /> },
+  { key: "qc-checklists", label: "Quality Checklists", icon: <FileText size={16} /> },
 ];
 
 export default function ProductionSetup() {
@@ -99,9 +104,12 @@ export default function ProductionSetup() {
     setSaving(true);
     try {
       await api.post("/production/setup/config", { settings });
+      if (settings.default_warehouse_id) {
+        await api.put(`/production/setup/warehouses/${settings.default_warehouse_id}/default`).catch(() => {});
+      }
       toast.success("Manufacturing setup parameters saved successfully");
     } catch {
-      toast.success("Manufacturing setup parameters saved");
+      toast.error("Failed to save manufacturing setup parameters");
     } finally {
       setSaving(false);
     }
@@ -206,23 +214,6 @@ export default function ProductionSetup() {
                 <p className="text-[11px] text-slate-400 mt-1">Central Inventory stores warehouse (inv_warehouses table)</p>
               </div>
 
-              {/* Costing Method */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                  Production Costing Valuation Basis
-                </label>
-                <select
-                  value={settings.costing_method || "FIFO"}
-                  onChange={(e) => setSettings({ ...settings, costing_method: e.target.value })}
-                  className="input w-full font-bold"
-                >
-                  <option value="FIFO">First-In, First-Out (FIFO)</option>
-                  <option value="WEIGHTED_AVERAGE">Weighted Average Cost (WAC)</option>
-                  <option value="STANDARD_COST">Standard Costing</option>
-                </select>
-                <p className="text-[11px] text-slate-400 mt-1">Cost valuation model applied on output inventory</p>
-              </div>
-
               {/* Tolerances */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
@@ -310,6 +301,8 @@ export default function ProductionSetup() {
         {activeTab === "overheads" && <OverheadList />}
         {activeTab === "machines" && <MachineList />}
         {activeTab === "shifts" && <ShiftList />}
+        {activeTab === "operators" && <OperatorList />}
+        {activeTab === "qc-checklists" && <QcChecklistList />}
       </div>
     </div>
   );

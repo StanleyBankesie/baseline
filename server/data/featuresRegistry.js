@@ -123,6 +123,7 @@ export const FEATURES_REGISTRY = {
   // Inventory Module: Contains features for material requisitions, stock management, and warehousing
   inventory: {
     features: [
+      { feature_key: "inventory:stock", type: "feature", label: "Stock Balances & Overview", path: "/inventory/stock" },
       { feature_key: "inventory:material-requisitions", type: "feature", label: "Material Requisitions", path: "/inventory/material-requisitions" },
       { feature_key: "inventory:stock-upload", type: "feature", label: "Stock Upload", path: "/inventory/stock-upload" },
       { feature_key: "inventory:stock-updation", type: "feature", label: "Stock Updation", path: "/inventory/stock-updation" },
@@ -267,11 +268,13 @@ export const FEATURES_REGISTRY = {
   // Production Module: Contains features for manufacturing processes, BOMs, routings, and work orders
   production: {
     features: [
+      { feature_key: "production:stock", type: "feature", label: "Production Stock Overview", path: "/production/stock" },
       { feature_key: "production:boms", type: "feature", label: "Bills of Materials", path: "/production/boms" },
       { feature_key: "production:routings", type: "feature", label: "Routing & Operations", path: "/production/routings" },
       { feature_key: "production:work-orders", type: "feature", label: "Work Orders", path: "/production/work-orders" },
       { feature_key: "production:production-planning", type: "feature", label: "Production Planning", path: "/production/production-planning" },
       { feature_key: "production:job-cards", type: "feature", label: "Job Cards", path: "/production/job-cards" },
+      { feature_key: "production:warehouse-stock-report", type: "feature", label: "Production Warehouse Stock Report", path: "/production/reports/warehouse-stock" },
 
       { feature_key: "production:setup", type: "feature", label: "Manufacturing Setup", path: "/production/setup" },
     ],

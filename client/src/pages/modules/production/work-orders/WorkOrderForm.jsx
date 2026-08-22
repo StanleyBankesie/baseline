@@ -40,10 +40,13 @@ export default function WorkOrderForm() {
   const [baseCurrency, setBaseCurrency] = useState({ symbol: "$", code: "USD" });
   const [selectedBomDetails, setSelectedBomDetails] = useState(null);
 
+  const [inventoryItems, setInventoryItems] = useState([]);
+  const [warehouseStockMap, setWarehouseStockMap] = useState({});
   const [formData, setFormData] = useState({
     work_order_no: "WO-000001",
     work_order_date: new Date().toISOString().split('T')[0],
     target_completion_date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
+    item_id: "",
     bom_id: "",
     qty_to_produce: 1,
     warehouse_id: "",
@@ -55,17 +58,49 @@ export default function WorkOrderForm() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [bomsRes, whRes, invRes, currRes, woListRes, woRes] = await Promise.all([
+        const [bomsRes, whRes, prodWhRes, cfgRes, invRes, currRes, woListRes, woRes] = await Promise.all([
           api.get("/production/boms"),
           api.get("/inventory/warehouses"),
+          api.get("/production/setup/warehouses").catch(() => ({ data: { items: [] } })),
+          api.get("/production/setup/config").catch(() => ({ data: null })),
           api.get("/inventory/items?all=1"),
           api.get("/finance/currencies").catch(() => ({ data: { items: [] } })),
           !isEdit ? api.get("/production/work-orders") : Promise.resolve({ data: null }),
           isEdit ? api.get(`/production/work-orders/${id}`) : Promise.resolve({ data: null })
         ]);
         
-        setBoms(bomsRes.data?.items || []);
-        setWarehouses(whRes.data?.items || []);
+        const fetchedBoms = bomsRes.data?.items || [];
+        const fetchedItems = invRes.data?.items || [];
+        const fetchedWh = whRes.data?.items || [];
+        const fetchedProdWh = prodWhRes.data?.items || [];
+        const cfg = cfgRes.data || {};
+
+        setBoms(fetchedBoms);
+        setInventoryItems(fetchedItems);
+
+        // Deduplicate & normalize warehouses
+        const combinedWh = [...fetchedProdWh, ...fetchedWh];
+        const uniqueWhMap = new Map();
+        combinedWh.forEach(w => {
+          if (w && w.id && !uniqueWhMap.has(String(w.id))) {
+            uniqueWhMap.set(String(w.id), {
+              id: String(w.id),
+              name: w.warehouse_name || w.name || w.title || `Warehouse #${w.id}`,
+              code: w.warehouse_code || w.code || '',
+              is_default: Number(w.is_default) === 1 || w.is_default === true
+            });
+          }
+        });
+        const allWarehouses = Array.from(uniqueWhMap.values());
+        setWarehouses(allWarehouses);
+
+        // Determine Default Production Warehouse from Setup
+        const cfgSettings = cfg.settings || cfg || {};
+        let defaultWhId = cfgSettings.default_production_warehouse_id || cfgSettings.default_warehouse_id || cfgSettings.production_warehouse_id || "";
+        if (!defaultWhId) {
+          const defWh = allWarehouses.find(w => w.is_default) || allWarehouses[0];
+          if (defWh) defaultWhId = String(defWh.id);
+        }
 
         const curList = Array.isArray(currRes.data?.items) ? currRes.data.items : [];
         const base = curList.find((c) => Number(c.is_base) === 1 || c.is_base === true || Number(c.is_base_currency) === 1);
@@ -79,11 +114,20 @@ export default function WorkOrderForm() {
         if (!isEdit && woListRes?.data?.items) {
           const count = (woListRes.data.items || []).length + 1;
           const nextWoNo = `WO-${String(count).padStart(6, '0')}`;
-          setFormData((prev) => ({ ...prev, work_order_no: nextWoNo }));
+          setFormData((prev) => ({ 
+            ...prev, 
+            work_order_no: nextWoNo,
+            warehouse_id: prev.warehouse_id || defaultWhId
+          }));
+        } else if (!isEdit) {
+          setFormData((prev) => ({ 
+            ...prev, 
+            warehouse_id: prev.warehouse_id || defaultWhId
+          }));
         }
 
         const map = {};
-        (invRes.data?.items || []).forEach(i => {
+        fetchedItems.forEach(i => {
           map[i.id] = i.current_stock || 0;
         });
         setStockMap(map);
@@ -94,6 +138,7 @@ export default function WorkOrderForm() {
             work_order_no: item.work_order_no,
             work_order_date: item.work_order_date ? item.work_order_date.split('T')[0] : new Date().toISOString().split('T')[0],
             target_completion_date: item.target_completion_date ? item.target_completion_date.split('T')[0] : new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
+            item_id: item.item_id || "",
             bom_id: item.bom_id,
             qty_to_produce: item.qty_to_produce,
             warehouse_id: item.warehouse_id || "",
@@ -114,6 +159,45 @@ export default function WorkOrderForm() {
     };
     fetchData();
   }, [id, isEdit]);
+
+  const fetchWarehouseStock = async (whId) => {
+    if (!whId) return;
+    try {
+      const res = await api.get("/production/reports/warehouse-stock", {
+        params: { warehouse_id: whId }
+      });
+      const items = res.data?.items || [];
+      const map = {};
+      items.forEach(i => {
+        map[i.item_id] = Number(i.available_qty !== undefined ? i.available_qty : (i.stock_qty || 0));
+      });
+      setWarehouseStockMap(map);
+    } catch {
+      setWarehouseStockMap({});
+    }
+  };
+
+  useEffect(() => {
+    if (formData.warehouse_id) {
+      fetchWarehouseStock(formData.warehouse_id);
+    }
+  }, [formData.warehouse_id]);
+
+  const handleItemChange = (itemId) => {
+    setFormData(prev => ({ ...prev, item_id: itemId }));
+    if (!itemId) {
+      handleBomChange("");
+      return;
+    }
+    const linkedBom = boms.find(b => String(b.item_id) === String(itemId));
+    if (linkedBom) {
+      handleBomChange(linkedBom.id);
+      toast.info(`Auto-populated linked BOM: ${linkedBom.bom_name}`);
+    } else {
+      toast.warning("No linked BOM found for this item. Please select a BOM manually or create one in BOM setup.");
+      handleBomChange("");
+    }
+  };
 
   const handleBomChange = async (bomId, customQty = null) => {
     if (!bomId) {
@@ -170,21 +254,29 @@ export default function WorkOrderForm() {
     }
   };
 
-  const handleQtyChange = (qty) => {
-    const newQty = Math.max(1, parseFloat(qty) || 1);
+  const handleQtyChange = (val) => {
     setFormData(prev => {
-      const selectedBom = boms.find(b => String(b.id) === String(prev.bom_id));
-      const ratio = newQty / (selectedBom?.output_qty || 1);
-      
-      const updatedItems = (prev.items || []).map(i => ({
-        ...i,
-        planned_qty: Number(((i.base_qty || i.planned_qty || 1) * ratio).toFixed(3)),
-        actual_qty: Number(((i.base_qty || i.actual_qty || 1) * ratio).toFixed(3))
-      }));
+      const numQty = parseFloat(val);
+      if (isNaN(numQty) || numQty < 0) {
+        return { ...prev, qty_to_produce: val };
+      }
+
+      const selectedBom = selectedBomDetails || boms.find(b => String(b.id) === String(prev.bom_id));
+      const baseBatch = selectedBom?.output_qty || selectedBom?.batch_size || 1;
+
+      const updatedItems = (prev.items || []).map(i => {
+        const unitPerOutput = i.unit_per_output || (i.planned_qty ? i.planned_qty / (parseFloat(prev.qty_to_produce) || 1) : 1);
+        return {
+          ...i,
+          unit_per_output: unitPerOutput,
+          planned_qty: Number((unitPerOutput * numQty).toFixed(3)),
+          actual_qty: Number((unitPerOutput * numQty).toFixed(3))
+        };
+      });
 
       return {
         ...prev,
-        qty_to_produce: newQty,
+        qty_to_produce: val,
         items: updatedItems
       };
     });
@@ -214,7 +306,11 @@ export default function WorkOrderForm() {
   // Calculate Shortages & Financials
   const materialAnalysis = (formData.items || []).map(item => {
     const required = Number(item.planned_qty || 0);
-    const available = Number(stockMap[item.item_id] || 0);
+    const available = Number(
+      warehouseStockMap[item.item_id] !== undefined 
+        ? warehouseStockMap[item.item_id] 
+        : (stockMap[item.item_id] || 0)
+    );
     const shortage = Math.max(0, required - available);
     const lineCost = required * (item.unit_cost || 0);
     return {
@@ -248,15 +344,9 @@ export default function WorkOrderForm() {
           </div>
         </div>
 
-        {/* Quick Action Shortcuts for Requisitions, Receipts, Utilizations */}
+        {/* Quick Action Shortcuts for Receipts, Utilizations */}
         {isEdit && (
           <div className="flex items-center gap-2">
-            <Link
-              to={`/purchase/requisitions/new`}
-              className="btn btn-secondary text-xs flex items-center gap-1.5"
-            >
-              + Requisition
-            </Link>
             <Link
               to={`/production/execution/material-receipt/new`}
               className="btn btn-secondary text-xs flex items-center gap-1.5"
@@ -275,37 +365,28 @@ export default function WorkOrderForm() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Order Header */}
-        <div className="card p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="card p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-              Production Order # *
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.work_order_no}
-              onChange={(e) => setFormData({ ...formData, work_order_no: e.target.value })}
-              className="input w-full font-mono font-bold"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-              Select BOM Specification *
+              Select Item / Product *
             </label>
             <select
-              required
-              value={formData.bom_id}
-              onChange={(e) => handleBomChange(e.target.value)}
-              className="input w-full"
+              value={formData.item_id}
+              onChange={(e) => handleItemChange(e.target.value)}
+              className="input w-full font-bold text-brand-700 dark:text-brand-300"
             >
-              <option value="">Select Specification...</option>
-              {boms.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.bom_name} ({b.item_name || 'Recipe'})
+              <option value="">Select Item to Produce...</option>
+              {inventoryItems.map((i) => (
+                <option key={i.id} value={i.id}>
+                  {i.item_name}
                 </option>
               ))}
             </select>
+            {selectedBomDetails && (
+              <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-1 block">
+                ✓ Auto-linked BOM: {selectedBomDetails.bom_name}
+              </span>
+            )}
           </div>
 
           <div>
@@ -329,12 +410,12 @@ export default function WorkOrderForm() {
             <select
               value={formData.warehouse_id}
               onChange={(e) => setFormData({ ...formData, warehouse_id: e.target.value })}
-              className="input w-full"
+              className="input w-full font-semibold"
             >
               <option value="">Select Warehouse...</option>
               {warehouses.map((w) => (
                 <option key={w.id} value={w.id}>
-                  {w.name} ({w.code})
+                  {w.name}
                 </option>
               ))}
             </select>
@@ -403,12 +484,6 @@ export default function WorkOrderForm() {
                 <strong>Material Shortage Detected:</strong> {totalShortages} material(s) have stock shortages for this planned quantity.
               </span>
             </div>
-            <Link
-              to="/purchase/requisitions/new"
-              className="btn btn-secondary text-xs font-bold text-amber-900 border-amber-300 bg-white hover:bg-amber-100 flex items-center gap-1.5"
-            >
-              <Plus size={14} /> Create Purchase Requisition
-            </Link>
           </div>
         )}
 
@@ -423,7 +498,7 @@ export default function WorkOrderForm() {
               {selectedBomDetails.operations.map((op, idx) => (
                 <div key={idx} className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs space-y-1 shadow-sm">
                   <div className="font-bold text-slate-900 dark:text-white flex justify-between">
-                    <span>Seq #{idx + 1}: Process Item</span>
+                    <span>Seq #{idx + 1}: {op.process_name || op.operation_name || op.name || op.title || `Process Operation #${idx + 1}`}</span>
                     <span className="text-indigo-600 dark:text-indigo-400 font-mono">{(op.cycle_time_mins || 0) * (formData.qty_to_produce || 1)} mins</span>
                   </div>
                   <div className="text-slate-500 flex justify-between text-[11px]">

@@ -35,6 +35,9 @@ export default function GeneralLedgerReportPage() {
   const [accountQuery, setAccountQuery] = useState("");
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
   const [opening, setOpening] = useState(0);
+  const [accountOpeningBalances, setAccountOpeningBalances] = useState({});
+  const [reportCurrencyCode, setReportCurrencyCode] = useState("GHS");
+  const [reportExchangeRate, setReportExchangeRate] = useState(1.0);
   const [items, setItems] = useState([]);
   const [accountMeta, setAccountMeta] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -99,6 +102,9 @@ export default function GeneralLedgerReportPage() {
       const res = await api.get("/finance/reports/general-ledger", { params });
       setOpening(Number(res.data?.opening_balance || 0));
       setAccountMeta(res.data?.account || null);
+      setAccountOpeningBalances(res.data?.account_opening_balances || {});
+      setReportCurrencyCode(res.data?.currency_code || "GHS");
+      setReportExchangeRate(Number(res.data?.exchange_rate || 1.0));
       setItems(res.data?.items || []);
     } catch (e) {
       toast.error(
@@ -441,22 +447,32 @@ export default function GeneralLedgerReportPage() {
           </div>
 
           {accountId ? (
-            <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-700 mb-4">
-              <div className="text-sm">Opening Balance</div>
-              <div className="text-xl font-semibold">
-                {Number(opening || 0).toLocaleString()}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 mb-5">
+              <div>
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-500">Opening Balance (B/F)</div>
+                <div className="text-xl font-extrabold text-brand-600 dark:text-brand-400 mt-1">
+                  {Math.abs(Number(opening || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{" "}
+                  <span className={opening >= 0 ? "text-blue-600 font-bold" : "text-red-600 font-bold"}>
+                    {opening >= 0 ? "Dr" : "Cr"}
+                  </span>
+                </div>
               </div>
-              <div className="text-sm mt-2">
-                Balance Type:{" "}
-                {String(
-                  accountMeta?.current_balance_type ||
-                    accountMeta?.balance_type ||
-                    "-",
-                )}
+              <div>
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-500">Normal Balance Nature</div>
+                <div className="text-base font-semibold text-slate-800 dark:text-slate-200 mt-1">
+                  <span className="px-2.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-xs font-bold">
+                    {String(accountMeta?.current_balance_type || accountMeta?.balance_type || "DEBIT")}
+                  </span>
+                </div>
               </div>
-              <div className="text-sm">
-                Current Balance:{" "}
-                {Number(accountMeta?.current_balance || 0).toLocaleString()}
+              <div>
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-500">Current Ledger Balance</div>
+                <div className="text-xl font-extrabold text-slate-900 dark:text-slate-100 mt-1">
+                  {Number(accountMeta?.current_balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{" "}
+                  <span className={accountMeta?.current_balance_type === "CREDIT" ? "text-red-600" : "text-blue-600"}>
+                    {accountMeta?.current_balance_type === "CREDIT" ? "Cr" : "Dr"}
+                  </span>
+                </div>
               </div>
             </div>
           ) : null}
@@ -543,11 +559,34 @@ export default function GeneralLedgerReportPage() {
                   const totalCr = rows.reduce((acc, r) => acc + Number(r.credit || 0), 0);
                   const lastBalance = rows.length > 0 ? Number(rows[rows.length - 1].balance || 0) : 0;
                   const balanceType = lastBalance >= 0 ? "Dr" : "Cr";
+                  const accId = rows[0]?.account_id || (accounts || []).find(a => a.name === accountName || a.code === accountName)?.id;
+                  const accOb = (accId && accountOpeningBalances) ? (accountOpeningBalances[accId] || accountOpeningBalances[String(accId)] || null) : null;
+                  const obBalance = accOb ? Number(accOb.opening_balance || 0) : 0;
+                  const obDate = accOb?.opening_date ? new Date(accOb.opening_date).toLocaleDateString() : (from ? new Date(from).toLocaleDateString() : "Opening");
+                  const obCurrency = accOb?.currency_code || rows[0]?.currency_code || reportCurrencyCode || "GHS";
+                  const obRate = Number(accOb?.exchange_rate || rows[0]?.exchange_rate || reportExchangeRate || 1.0);
                   return (
                     <tbody key={accountName} className="border-b-[8px] border-slate-200/50">
                       <tr className="bg-slate-100 dark:bg-slate-800">
                         <td colSpan="8" className="font-bold text-slate-700 dark:text-slate-200 py-3 px-4">
                           Account: <span className="text-brand-600 dark:text-brand-400">{accountName}</span>
+                        </td>
+                      </tr>
+                      <tr className="bg-slate-50/90 dark:bg-slate-800/60 font-semibold border-b border-slate-200 dark:border-slate-700">
+                        <td>{obDate}</td>
+                        <td className="font-mono text-xs font-bold text-slate-500 dark:text-slate-400">OPENING</td>
+                        <td className="italic text-slate-700 dark:text-slate-300">Opening Balance B/F</td>
+                        <td className="text-right font-mono font-bold text-slate-800 dark:text-slate-200">
+                          {obBalance > 0 ? Number(obBalance).toLocaleString(undefined, { minimumFractionDigits: 2 }) : "—"}
+                        </td>
+                        <td className="text-right font-mono font-bold text-slate-800 dark:text-slate-200">
+                          {obBalance < 0 ? Math.abs(obBalance).toLocaleString(undefined, { minimumFractionDigits: 2 }) : "—"}
+                        </td>
+                        <td className="text-right font-mono text-xs font-bold text-slate-700 dark:text-slate-300">{obCurrency}</td>
+                        <td className="text-right font-mono text-xs font-bold text-slate-700 dark:text-slate-300">{Number(obRate || 1).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 6 })}</td>
+                        <td className="text-right font-mono font-bold">
+                          {Math.abs(obBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })}{" "}
+                          <span className={obBalance >= 0 ? "text-blue-600" : "text-red-600"}>{obBalance >= 0 ? "Dr" : "Cr"}</span>
                         </td>
                       </tr>
                       {rows.map((r, idx) => {
@@ -590,6 +629,25 @@ export default function GeneralLedgerReportPage() {
                 })
               ) : (
                 <tbody>
+                  {accountId && (
+                    <tr className="bg-slate-50/90 dark:bg-slate-800/60 font-semibold border-b border-slate-200 dark:border-slate-700">
+                      <td>{from ? new Date(from).toLocaleDateString() : "Opening"}</td>
+                      <td className="font-mono text-xs font-bold text-slate-500 dark:text-slate-400">OPENING</td>
+                      <td className="italic text-slate-700 dark:text-slate-300">Opening Balance B/F</td>
+                      <td className="text-right font-mono font-bold text-slate-800 dark:text-slate-200">
+                        {opening > 0 ? Number(opening).toLocaleString(undefined, { minimumFractionDigits: 2 }) : "—"}
+                      </td>
+                      <td className="text-right font-mono font-bold text-slate-800 dark:text-slate-200">
+                        {opening < 0 ? Math.abs(opening).toLocaleString(undefined, { minimumFractionDigits: 2 }) : "—"}
+                      </td>
+                      <td className="text-right font-mono text-xs font-bold text-slate-700 dark:text-slate-300">{reportCurrencyCode || "GHS"}</td>
+                      <td className="text-right font-mono text-xs font-bold text-slate-700 dark:text-slate-300">{Number(reportExchangeRate || 1).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 6 })}</td>
+                      <td className="text-right font-mono font-bold">
+                        {Math.abs(opening).toLocaleString(undefined, { minimumFractionDigits: 2 })}{" "}
+                        <span className={opening >= 0 ? "text-blue-600" : "text-red-600"}>{opening >= 0 ? "Dr" : "Cr"}</span>
+                      </td>
+                    </tr>
+                  )}
                   {sortedItems.map((r, idx) => {
                     const balance = Number(r.balance || 0);
                     const balanceType = balance >= 0 ? "Dr" : "Cr";

@@ -40,17 +40,26 @@ import MaterialUtilizationList from "./execution/MaterialUtilizationList";
 import MaterialUtilizationForm from "./execution/MaterialUtilizationForm";
 import MaterialRequirementPage from "./planning/MaterialRequirementPage";
 import ProductionOutputPage from "./execution/ProductionOutputPage";
+import QualityControlList from "./execution/QualityControlList";
 import ProductionCostingPage from "./reports/ProductionCostingPage";
 
 import ProductionTransferList from "./execution/ProductionTransferList";
 import ProductionTransferForm from "./execution/ProductionTransferForm";
+import FinishedGoodsTransferList from "./execution/FinishedGoodsTransferList";
+import FinishedGoodsTransferForm from "./execution/FinishedGoodsTransferForm";
 
 import ProductionReports from "./reports/ProductionReports";
 import EfficiencyReport from "./reports/EfficiencyReport";
 import ProductionWarehouseStockReport from "./reports/ProductionWarehouseStockReport";
+import MaterialVarianceReport from "./reports/MaterialVarianceReport";
+import BomExplosionReport from "./reports/BomExplosionReport";
+import MachineUtilizationReport from "./reports/MachineUtilizationReport";
+import ProductionSummaryReport from "./reports/ProductionSummaryReport";
+import ProductionDetailReportPage from "./reports/ProductionDetailReportPage";
 
 import StockJournalList from "./inventory/StockJournalList";
 import StockJournalForm from "./inventory/StockJournalForm";
+import ProductionStockPage from "./inventory/ProductionStockPage";
 
 import ProductionSetup from "./setup/ProductionSetup";
 
@@ -135,6 +144,16 @@ export const productionSections = [
     title: "Shop Floor & Execution",
     features: [
       {
+        name: "Production Stock Overview",
+        path: "/production/stock",
+        actions: [
+          { label: "View Stock", path: "/production/stock", type: "primary" }
+        ],
+        description:
+          "Floor stock balances across Raw Materials, WIP, and Finished Goods",
+        icon: "🏭",
+      },
+      {
         name: "Production Orders",
         path: "/production/work-orders",
         actions: [
@@ -179,14 +198,47 @@ export const productionSections = [
         icon: "♻️",
       },
       {
-        name: "Production Output & Quality",
-        path: "/production/execution/output",
+        name: "Job Cards Execution",
+        path: "/production/execution/job-cards",
         actions: [
-          { label: "Record Output", path: "/production/execution/output", type: "primary" }
+          { label: "View Job Cards", path: "/production/execution/job-cards", type: "primary" }
         ],
         description:
-          "Record produced good qty, quality verification, scrap, and post Finished Goods to stock",
-        icon: "📦",
+          "Manage shop floor job tickets, process runtime tracking, machine allocation, and shift execution",
+        icon: "🎟️",
+      },
+      {
+        name: "Quality Control",
+        path: "/production/execution/qc",
+        actions: [
+          { label: "New QC Inspection", path: "/production/execution/output", type: "primary" },
+          { label: "View QC List", path: "/production/execution/qc", type: "secondary" }
+        ],
+        description:
+          "Perform quality control inspection, checklist criteria scoring, batch/lot shelf life verification, and finished goods warehouse stock transfer",
+        icon: "🛡️",
+      },
+      {
+        name: "Finished Goods Transfer",
+        path: "/production/execution/fg-transfer",
+        actions: [
+          { label: "New FG Transfer", path: "/production/execution/fg-transfer/new", type: "primary" },
+          { label: "View Transfers", path: "/production/execution/fg-transfer", type: "secondary" }
+        ],
+        description:
+          "Transfer inspected products from FG warehouse to target inventory warehouse for Transfer Acceptance receipt",
+        icon: "🚚",
+      },
+      {
+        name: "Stock Journal",
+        path: "/production/inventory/journal",
+        actions: [
+          { label: "View", path: "/production/inventory/journal", type: "outline" },
+          { label: "New", path: "/production/inventory/journal/new", type: "primary" }
+        ],
+        description:
+          "Register material consumption and finished goods stock journal entries",
+        icon: "📖",
       },
     ],
   },
@@ -194,6 +246,33 @@ export const productionSections = [
     icon: "📊",
     title: "Reports & Costing",
     features: [
+      {
+        name: "Detailed Production Report",
+        path: "/production/reports/production-detail",
+        actions: [
+          { label: "View Report", path: "/production/reports/production-detail", type: "primary" }
+        ],
+        description: "Breakdown by Production Date, Unit, Machine, Shift, Process, Manufacturing Date, Item, Planned and Produced Qty",
+        icon: "📊",
+      },
+      {
+        name: "Executive Summary Report",
+        path: "/production/reports/summary",
+        actions: [
+          { label: "View Summary", path: "/production/reports/summary", type: "primary" }
+        ],
+        description: "High-level summary covering production output, material consumption, completed and pending orders",
+        icon: "📄",
+      },
+      {
+        name: "Warehouse Stock Availability",
+        path: "/production/reports/warehouse-stock",
+        actions: [
+          { label: "View Availability", path: "/production/reports/warehouse-stock", type: "primary" }
+        ],
+        description: "Real-time available quantities of raw materials and WIP across all production warehouses",
+        icon: "🏬",
+      },
       {
         name: "Production Costing",
         path: "/production/reports/costing",
@@ -212,6 +291,33 @@ export const productionSections = [
         ],
         description: "Monitor planned vs actual performance and line throughput",
         icon: "📈",
+      },
+      {
+        name: "Material Usage Variance",
+        path: "/production/reports/variance",
+        actions: [
+          { label: "View Variance", path: "/production/reports/variance", type: "outline" }
+        ],
+        description: "Analyze the gap between estimated BOM consumption and actual material logs",
+        icon: "📉",
+      },
+      {
+        name: "BOM Explosion Analysis",
+        path: "/production/reports/bom-explosion",
+        actions: [
+          { label: "View Explosion", path: "/production/reports/bom-explosion", type: "outline" }
+        ],
+        description: "Detailed breakdown of all levels of multi-stage Bill of Materials and material valuation",
+        icon: "🌿",
+      },
+      {
+        name: "Machine Utilization",
+        path: "/production/reports/machines",
+        actions: [
+          { label: "View Equipment", path: "/production/reports/machines", type: "outline" }
+        ],
+        description: "Equipment throughput, active job cards, and capacity utilization across shop floor machines",
+        icon: "⚙️",
       },
     ],
   },
@@ -356,6 +462,9 @@ export default function ProductionHome() {
         {/* Planning & Requirements Routes */}
         <Route path="planning/daily" element={<DailyPlanList />} />
         <Route path="planning/daily/new" element={<DailyPlanForm />} />
+        <Route path="planning/daily/edit/:id" element={<DailyPlanForm />} />
+        <Route path="planning/daily/view/:id" element={<DailyPlanForm />} />
+        <Route path="planning/daily/:id" element={<DailyPlanForm />} />
         <Route path="planning/requirements" element={<MaterialRequirementPage />} />
         <Route
           path="planning/schedule"
@@ -368,7 +477,9 @@ export default function ProductionHome() {
         {/* Execution Routes */}
         <Route path="execution/job-cards" element={<JobCardList />} />
         <Route path="execution/job-cards/:id" element={<JobCardExecution />} />
+        <Route path="execution/qc" element={<QualityControlList />} />
         <Route path="execution/output" element={<ProductionOutputPage />} />
+        <Route path="execution/qc/new" element={<ProductionOutputPage />} />
         <Route
           path="execution/material-receipt"
           element={<MaterialReceiptList />}
@@ -405,24 +516,38 @@ export default function ProductionHome() {
           path="execution/transfer/new"
           element={<ProductionTransferForm />}
         />
+        <Route
+          path="execution/fg-transfer"
+          element={<FinishedGoodsTransferList />}
+        />
+        <Route
+          path="execution/fg-transfer/new"
+          element={<FinishedGoodsTransferForm />}
+        />
 
         {/* Reports Routes */}
         <Route path="reports" element={<ProductionReports />} />
+        <Route path="reports/production-detail" element={<ProductionDetailReportPage />} />
         <Route path="reports/efficiency" element={<EfficiencyReport />} />
         <Route path="reports/warehouse-stock" element={<ProductionWarehouseStockReport />} />
         <Route path="reports/costing" element={<ProductionCostingPage />} />
-        <Route
-          path="reports/variance"
-          element={<ProductionPlaceholder title="Material Variance Report" />}
-        />
-        <Route
-          path="reports/machines"
-          element={<ProductionPlaceholder title="Machine Utilization" />}
-        />
+        <Route path="reports/variance" element={<MaterialVarianceReport />} />
+        <Route path="reports/bom-explosion" element={<BomExplosionReport />} />
+        <Route path="reports/machines" element={<MachineUtilizationReport />} />
+        <Route path="reports/summary" element={<ProductionSummaryReport />} />
 
         {/* Inventory & Setup Routes */}
+        <Route path="stock" element={<ProductionStockPage />} />
+        <Route path="warehouse-stock" element={<ProductionStockPage />} />
         <Route path="inventory/journal" element={<StockJournalList />} />
         <Route path="inventory/journal/new" element={<StockJournalForm />} />
+        <Route path="inventory/journal/:id" element={<StockJournalForm />} />
+        <Route path="stock-journal" element={<StockJournalList />} />
+        <Route path="stock-journal/new" element={<StockJournalForm />} />
+        <Route path="stock-journal/:id" element={<StockJournalForm />} />
+        <Route path="inventory/stock-journal" element={<StockJournalList />} />
+        <Route path="inventory/stock-journal/new" element={<StockJournalForm />} />
+        <Route path="inventory/stock-journal/:id" element={<StockJournalForm />} />
         <Route
           path="inventory/updation"
           element={<ProductionPlaceholder title="Inventory Updation" />}

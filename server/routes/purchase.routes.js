@@ -10404,11 +10404,12 @@ router.get(
       const purchaseRows = await query(
         `
         SELECT COUNT(*) AS count,
-               COALESCE(SUM(total_amount), 0) AS total
+               COALESCE(SUM(net_amount), 0) AS total
          FROM pur_bills
-         WHERE company_id = :companyId
+         WHERE (company_id = :companyId OR company_id IS NULL)
           AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
-          AND bill_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+          AND status = 'POSTED'
+          AND (bill_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) OR (bill_date IS NULL AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)))
         `,
         { companyId, branchId, branchIdsStr },
       );
@@ -10419,7 +10420,7 @@ router.get(
         `
         SELECT COUNT(*) AS count
          FROM pur_orders
-         WHERE company_id = :companyId
+         WHERE (company_id = :companyId OR company_id IS NULL)
           AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
           AND status NOT IN ('RECEIVED', 'CANCELLED', 'CLOSED', 'REJECTED')
         `,
@@ -10431,7 +10432,7 @@ router.get(
         `
         SELECT COUNT(*) AS count
          FROM pur_suppliers
-         WHERE company_id = :companyId
+         WHERE (company_id = :companyId OR company_id IS NULL)
           AND is_active = 1
         `,
         { companyId },
@@ -10442,7 +10443,7 @@ router.get(
         `
         SELECT COUNT(*) AS count
          FROM adm_document_workflows dw
-         WHERE dw.company_id = :companyId
+         WHERE (dw.company_id = :companyId OR dw.company_id IS NULL)
           AND dw.status = 'PENDING'
           AND dw.assigned_to_user_id = :userId
           AND (
@@ -10462,9 +10463,10 @@ router.get(
                  0
                ) AS total
          FROM pur_bills
-         WHERE company_id = :companyId
+         WHERE (company_id = :companyId OR company_id IS NULL)
           AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
           AND status = 'POSTED'
+          AND payment_status IN ('UNPAID', 'PARTIALLY PAID', 'PARTIALLY_PAID', 'PARTIAL')
           AND COALESCE(amount_paid, 0) < COALESCE(net_amount, 0)
         `,
         { companyId, branchId, branchIdsStr },

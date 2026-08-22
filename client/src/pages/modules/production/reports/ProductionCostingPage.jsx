@@ -1,30 +1,41 @@
 /**
  * @fileoverview ProductionCostingPage component.
  * Dedicated Production Costing Summary Page.
- * Corresponds to Step 12 of the Production Process Flow:
- * Material Cost + Direct Labor + Machine Cost + Overhead = Total Production Cost & Cost Variance.
+ * Connects to live database costing data, uses base currency from fin_currencies,
+ * and uses bg-brand-900 for the Select Production Order card.
  */
 
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, DollarSign, Calculator, TrendingUp, Layers, CheckCircle2, RefreshCw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Calculator, RefreshCw, DollarSign, Layers, CheckCircle2 } from "lucide-react";
 import { api } from "api/client";
 import { toast } from "react-toastify";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
 
 export default function ProductionCostingPage() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [workOrders, setWorkOrders] = useState([]);
   const [selectedOrderId, setSelectedOrderId] = useState("");
+  const [costing, setCosting] = useState(null);
+  const [currencySymbol, setCurrencySymbol] = useState("$");
 
-  const fetchData = async () => {
+  const fetchData = async (orderId = selectedOrderId) => {
     setLoading(true);
     try {
-      const res = await api.get("/production/work-orders");
-      const orders = res.data?.items || [];
+      const res = await api.get("/production/reports/costing-data", {
+        params: { order_id: orderId || undefined }
+      });
+      const orders = res.data?.work_orders || [];
       setWorkOrders(orders);
-      if (orders.length > 0) {
-        setSelectedOrderId(String(orders[0].id));
+      if (res.data?.currency?.symbol) {
+        setCurrencySymbol(res.data.currency.symbol);
       }
+      if (res.data?.selected_order_id && !selectedOrderId) {
+        setSelectedOrderId(String(res.data.selected_order_id));
+      }
+      setCosting(res.data?.costing || null);
     } catch {
       toast.error("Failed to load production order costing data");
     } finally {
@@ -36,142 +47,222 @@ export default function ProductionCostingPage() {
     fetchData();
   }, []);
 
-  const activeOrder = workOrders.find((w) => String(w.id) === String(selectedOrderId));
+  const handleOrderChange = (e) => {
+    const newId = e.target.value;
+    setSelectedOrderId(newId);
+    fetchData(newId);
+  };
 
-  // Compute Cost Elements
-  const produceQty = Number(activeOrder?.qty_to_produce || 1);
-  const estMaterialCost = produceQty * 45.0; // Base material cost estimation
-  const estLaborCost = produceQty * 12.5; // Direct labor estimation
-  const estMachineCost = produceQty * 8.0; // Machine depreciation/power
-  const estOverheadCost = produceQty * 5.5; // Factory overheads
-  const totalProductionCost = estMaterialCost + estLaborCost + estMachineCost + estOverheadCost;
-  const unitProductionCost = totalProductionCost / produceQty;
+  const produceQty = costing?.produce_qty || 1;
+  const matCost = costing?.material_cost || 0;
+  const labCost = costing?.labor_cost || 0;
+  const macCost = costing?.machine_cost || 0;
+  const ovhCost = costing?.overhead_cost || 0;
+  const totCost = costing?.total_cost || (matCost + labCost + macCost + ovhCost);
+  const unitCost = costing?.unit_cost || (totCost / produceQty);
+
+  function exportExcel() {
+    if (!costing) return;
+    const rows = [
+      { Element: "Material Cost", Valuation: matCost },
+      { Element: "Direct Labor Cost", Valuation: labCost },
+      { Element: "Machine & Equipment Cost", Valuation: macCost },
+      { Element: "Factory Overhead Cost", Valuation: ovhCost },
+      { Element: "Total Production Valuation", Valuation: totCost },
+      { Element: "Unit Production Cost", Valuation: unitCost }
+    ];
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "CostingValuation");
+    XLSX.writeFile(wb, `production-costing-${costing.order_no || 'order'}.xlsx`);
+  }
+
+  function exportPDF() {
+    if (!costing) return;
+    const doc = new jsPDF("p", "mm", "a4");
+    doc.setFontSize(14);
+    doc.text(`Production Costing & Valuation - Order #${costing.order_no}`, 10, 15);
+    doc.setFontSize(10);
+    doc.text(`Finished Product: ${costing.item_name} (${costing.item_code})`, 10, 25);
+    doc.text(`Planned Quantity: ${produceQty}`, 10, 32);
+    doc.text(`Material Cost: ${currencySymbol}${matCost.toFixed(2)}`, 10, 42);
+    doc.text(`Labor Cost: ${currencySymbol}${labCost.toFixed(2)}`, 10, 49);
+    doc.text(`Machine Cost: ${currencySymbol}${macCost.toFixed(2)}`, 10, 56);
+    doc.text(`Overhead Cost: ${currencySymbol}${ovhCost.toFixed(2)}`, 10, 63);
+    doc.text(`Total Valuation: ${currencySymbol}${totCost.toFixed(2)}`, 10, 72);
+    doc.text(`Unit Cost: ${currencySymbol}${unitCost.toFixed(2)} / Unit`, 10, 79);
+    doc.save(`production-costing-${costing.order_no || 'order'}.pdf`);
+  }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-300">
+    <div className="space-y-4">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <Link to="/production" className="btn btn-secondary p-2">
-            <ArrowLeft size={20} />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-brand-900 dark:text-brand-300">Production Costing & Valuation</h1>
-            <p className="text-slate-500 text-sm">Material Cost + Direct Labor + Machine Cost + Overhead = Production Cost Breakdown</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <button 
+            onClick={() => navigate("/production?section=Reports%20%26%20Costing")} 
+            className="font-sans text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
+          >
+            ← Back to Reports & Costing
+          </button>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-2">
+            Production Costing & Valuation
+          </h1>
+          <p className="text-sm mt-1 text-slate-500">Material Cost + Direct Labor + Machine Cost + Overhead = Production Cost Breakdown</p>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        {/* Select Order Card - bg-brand-900 */}
+        <div className="card p-6 bg-brand-900 dark:bg-brand-950 text-white flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl rounded-2xl border border-brand-800">
+          <div className="space-y-1">
+            <p className="text-xs font-bold uppercase tracking-wider text-brand-300">Select Production Order</p>
+            <h2 className="text-lg font-bold text-white">Calculate Live Production Cost & Valuation Breakdown</h2>
+          </div>
+
+          <div className="w-full md:w-96">
+            <select
+              value={selectedOrderId}
+              onChange={handleOrderChange}
+              className="input bg-brand-950 border-brand-700 text-white w-full py-2.5 font-bold focus:ring-brand-500"
+            >
+              {workOrders.map((wo) => (
+                <option key={wo.id} value={wo.id}>
+                  Order #{wo.work_order_no} — {wo.item_name || "Output"} ({wo.qty_to_produce} Units)
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
-        <button onClick={fetchData} className="btn btn-secondary flex items-center gap-2 text-xs">
-          <RefreshCw size={16} /> Refresh Costing
-        </button>
-      </div>
-
-      {/* Select Order */}
-      <div className="card p-6 bg-slate-900 text-white flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl">
-        <div className="space-y-1">
-          <p className="text-xs font-bold uppercase tracking-wider text-brand-300">Select Production Order</p>
-          <h2 className="text-lg font-bold">Calculate Detailed Production Cost Breakdown</h2>
-        </div>
-
-        <div className="w-full md:w-96">
-          <select
-            value={selectedOrderId}
-            onChange={(e) => setSelectedOrderId(e.target.value)}
-            className="input bg-slate-800 border-slate-700 text-white w-full py-2.5 font-bold"
+        {/* Action Controls */}
+        <div className="flex justify-end gap-3">
+          <button
+            type="button"
+            className="btn-secondary px-4 whitespace-nowrap"
+            onClick={exportExcel}
+            disabled={!costing}
           >
-            {workOrders.map((wo) => (
-              <option key={wo.id} value={wo.id}>
-                Order #{wo.work_order_no} — {wo.item_name || "Output"} ({wo.qty_to_produce} Units)
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Cost Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="card p-6 border-l-4 border-l-brand-600 space-y-2">
-          <p className="text-xs font-bold text-slate-500 uppercase">Material Cost</p>
-          <p className="text-2xl font-bold text-slate-900 dark:text-white">${estMaterialCost.toFixed(2)}</p>
-          <p className="text-xs text-slate-400">Raw materials & component consumption</p>
-        </div>
-
-        <div className="card p-6 border-l-4 border-l-blue-600 space-y-2">
-          <p className="text-xs font-bold text-slate-500 uppercase">Direct Labor Cost</p>
-          <p className="text-2xl font-bold text-slate-900 dark:text-white">${estLaborCost.toFixed(2)}</p>
-          <p className="text-xs text-slate-400">Operator wages & shift labor hours</p>
+            Export Excel
+          </button>
+          <button
+            type="button"
+            className="btn-primary px-4 whitespace-nowrap"
+            onClick={exportPDF}
+            disabled={!costing}
+          >
+            Export PDF
+          </button>
+          <button
+            type="button"
+            className="btn-primary px-4 whitespace-nowrap"
+            onClick={() => window.print()}
+          >
+            Print
+          </button>
         </div>
 
-        <div className="card p-6 border-l-4 border-l-purple-600 space-y-2">
-          <p className="text-xs font-bold text-slate-500 uppercase">Machine & Equipment Cost</p>
-          <p className="text-2xl font-bold text-slate-900 dark:text-white">${estMachineCost.toFixed(2)}</p>
-          <p className="text-xs text-slate-400">Power, fuel & machine depreciation</p>
+        {/* Cost Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="card p-6 border-l-4 border-l-brand-600 space-y-2 shadow-sm">
+            <p className="text-xs font-bold text-slate-500 uppercase">Material Cost</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">
+              {currencySymbol}{matCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            </p>
+            <p className="text-xs text-slate-400">Raw materials & component consumption</p>
+          </div>
+
+          <div className="card p-6 border-l-4 border-l-blue-600 space-y-2 shadow-sm">
+            <p className="text-xs font-bold text-slate-500 uppercase">Direct Labor Cost</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">
+              {currencySymbol}{labCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            </p>
+            <p className="text-xs text-slate-400">Operator wages & shift labor hours</p>
+          </div>
+
+          <div className="card p-6 border-l-4 border-l-purple-600 space-y-2 shadow-sm">
+            <p className="text-xs font-bold text-slate-500 uppercase">Machine & Equipment Cost</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">
+              {currencySymbol}{macCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            </p>
+            <p className="text-xs text-slate-400">Power, fuel & machine depreciation</p>
+          </div>
+
+          <div className="card p-6 border-l-4 border-l-emerald-600 space-y-2 shadow-sm">
+            <p className="text-xs font-bold text-slate-500 uppercase">Total Production Cost</p>
+            <p className="text-2xl font-bold text-emerald-600">
+              {currencySymbol}{totCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            </p>
+            <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
+              Unit Cost: {currencySymbol}{unitCost.toLocaleString(undefined, { minimumFractionDigits: 2 })} / Unit
+            </p>
+          </div>
         </div>
 
-        <div className="card p-6 border-l-4 border-l-emerald-600 space-y-2">
-          <p className="text-xs font-bold text-slate-500 uppercase">Total Production Cost</p>
-          <p className="text-2xl font-bold text-emerald-600">${totalProductionCost.toFixed(2)}</p>
-          <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
-            Unit Cost: ${unitProductionCost.toFixed(2)} / Unit
-          </p>
-        </div>
-      </div>
-
-      {/* Costing Summary Table */}
-      <div className="card overflow-hidden shadow-sm">
-        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
-          <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm uppercase tracking-wider">
-            Cost Element Breakdown — Order #{activeOrder?.work_order_no || "N/A"}
-          </h3>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
-            <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 uppercase tracking-wider text-xs border-b border-slate-200 dark:border-slate-700">
-              <tr>
-                <th className="px-6 py-4">Cost Element</th>
-                <th className="px-6 py-4">Allocation Basis</th>
-                <th className="px-6 py-4">Estimated Rate</th>
-                <th className="px-6 py-4 font-bold text-right">Total Cost ($)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              <tr>
-                <td className="px-6 py-4 font-bold text-slate-900 dark:text-white">Raw Material Consumption</td>
-                <td className="px-6 py-4 text-xs text-slate-500">BOM Material Requirements * Qty</td>
-                <td className="px-6 py-4 text-slate-600 dark:text-slate-300">$45.00 / Unit</td>
-                <td className="px-6 py-4 font-bold text-right text-slate-900 dark:text-white">${estMaterialCost.toFixed(2)}</td>
-              </tr>
-              <tr>
-                <td className="px-6 py-4 font-bold text-slate-900 dark:text-white">Direct Line Labor</td>
-                <td className="px-6 py-4 text-xs text-slate-500">Operation Cycle Hours</td>
-                <td className="px-6 py-4 text-slate-600 dark:text-slate-300">$12.50 / Unit</td>
-                <td className="px-6 py-4 font-bold text-right text-slate-900 dark:text-white">${estLaborCost.toFixed(2)}</td>
-              </tr>
-              <tr>
-                <td className="px-6 py-4 font-bold text-slate-900 dark:text-white">Machine Depreciation & Power</td>
-                <td className="px-6 py-4 text-xs text-slate-500">Machine Run Hours</td>
-                <td className="px-6 py-4 text-slate-600 dark:text-slate-300">$8.00 / Unit</td>
-                <td className="px-6 py-4 font-bold text-right text-slate-900 dark:text-white">${estMachineCost.toFixed(2)}</td>
-              </tr>
-              <tr>
-                <td className="px-6 py-4 font-bold text-slate-900 dark:text-white">Factory Overheads & Quality</td>
-                <td className="px-6 py-4 text-xs text-slate-500">Fixed Overhead Allocation</td>
-                <td className="px-6 py-4 text-slate-600 dark:text-slate-300">$5.50 / Unit</td>
-                <td className="px-6 py-4 font-bold text-right text-slate-900 dark:text-white">${estOverheadCost.toFixed(2)}</td>
-              </tr>
-            </tbody>
-            <tfoot className="bg-slate-50 dark:bg-slate-800 font-bold border-t border-slate-200 dark:border-slate-700">
-              <tr>
-                <td colSpan="3" className="px-6 py-4 uppercase text-slate-700 dark:text-slate-300 text-xs">
-                  Total Production Order Cost ({produceQty} Units)
-                </td>
-                <td className="px-6 py-4 text-right text-emerald-600 text-base">
-                  ${totalProductionCost.toFixed(2)}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
+        {/* Costing Summary Table */}
+        <div className="card">
+          <div className="card-body">
+            <div className="overflow-x-auto">
+              <table className="table">
+                <thead className="sticky top-0 z-10">
+                  <tr>
+                    <th>Cost Element / Component</th>
+                    <th className="text-right">Valuation Rate / Unit</th>
+                    <th className="text-right">Total Allocated Cost ({currencySymbol})</th>
+                    <th className="text-center">Share %</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
+                  {loading ? (
+                    <tr>
+                      <td colSpan="4" className="py-12 text-center text-slate-400 font-bold animate-pulse">
+                        Calculating live production costing...
+                      </td>
+                    </tr>
+                  ) : costing ? (
+                    <>
+                      <tr>
+                        <td className="font-semibold text-sm text-slate-900 dark:text-slate-100">Raw Material & Component Consumption</td>
+                        <td className="text-right font-mono text-sm text-slate-700 dark:text-slate-300">{currencySymbol}{(matCost / produceQty).toFixed(2)} / Unit</td>
+                        <td className="text-right font-mono font-bold text-sm text-slate-900 dark:text-slate-100">{currencySymbol}{matCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        <td className="text-center font-mono font-bold text-xs">{totCost > 0 ? Math.round((matCost / totCost) * 100) : 0}%</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold text-sm text-slate-900 dark:text-slate-100">Direct Operator & Labor Allocation</td>
+                        <td className="text-right font-mono text-sm text-slate-700 dark:text-slate-300">{currencySymbol}{(labCost / produceQty).toFixed(2)} / Unit</td>
+                        <td className="text-right font-mono font-bold text-sm text-slate-900 dark:text-slate-100">{currencySymbol}{labCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        <td className="text-center font-mono font-bold text-xs">{totCost > 0 ? Math.round((labCost / totCost) * 100) : 0}%</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold text-sm text-slate-900 dark:text-slate-100">Machine Power, Fuel & Operating Hours</td>
+                        <td className="text-right font-mono text-sm text-slate-700 dark:text-slate-300">{currencySymbol}{(macCost / produceQty).toFixed(2)} / Unit</td>
+                        <td className="text-right font-mono font-bold text-sm text-slate-900 dark:text-slate-100">{currencySymbol}{macCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        <td className="text-center font-mono font-bold text-xs">{totCost > 0 ? Math.round((macCost / totCost) * 100) : 0}%</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold text-sm text-slate-900 dark:text-slate-100">Factory Overheads & Facility Utility Allocation</td>
+                        <td className="text-right font-mono text-sm text-slate-700 dark:text-slate-300">{currencySymbol}{(ovhCost / produceQty).toFixed(2)} / Unit</td>
+                        <td className="text-right font-mono font-bold text-sm text-slate-900 dark:text-slate-100">{currencySymbol}{ovhCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        <td className="text-center font-mono font-bold text-xs">{totCost > 0 ? Math.round((ovhCost / totCost) * 100) : 0}%</td>
+                      </tr>
+                      <tr className="bg-slate-50 dark:bg-slate-800/80 font-bold">
+                        <td className="text-base text-slate-900 dark:text-white">Total Production Valuation</td>
+                        <td className="text-right font-mono text-base text-brand-600 dark:text-brand-400">{currencySymbol}{unitCost.toFixed(2)} / Unit</td>
+                        <td className="text-right font-mono text-lg text-emerald-600">{currencySymbol}{totCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        <td className="text-center font-mono text-sm text-emerald-600">100%</td>
+                      </tr>
+                    </>
+                  ) : (
+                    <tr>
+                      <td colSpan="4" className="py-12 text-center text-slate-400 font-medium">
+                        No production costing records found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>

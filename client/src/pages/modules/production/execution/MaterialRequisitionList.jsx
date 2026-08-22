@@ -80,7 +80,7 @@ export default function MaterialRequisitionList() {
             <p className="text-sm mt-1">List, review, and manage factory floor material requisitions</p>
           </div>
           <div className="flex gap-2">
-            <Link to="/production?section=Execution%20%26%20Floor" className="font-sans btn btn-secondary">
+            <Link to="/production?section=Shop%20Floor%20%26%20Execution" className="font-sans btn btn-secondary">
               Return to Menu
             </Link>
             <button
