@@ -62,6 +62,7 @@ import StockJournalForm from "./inventory/StockJournalForm";
 import ProductionStockPage from "./inventory/ProductionStockPage";
 
 import ProductionSetup from "./setup/ProductionSetup";
+import ProductionDashboardPage from "./ProductionDashboardPage";
 
 export const productionSections = [
   {
@@ -380,23 +381,23 @@ function ProductionHomeIndex() {
     async function load() {
       try {
         const resp = await api.get("/production/dashboard/stats");
-        const d = resp?.data?.data;
+        const d = resp?.data?.data || resp?.data || {};
         if (d && mounted) {
           setStats((prev) => {
             const next = [...prev];
             next[0] = {
               ...next[0],
-              value: String(d.activeWorkOrders ?? "—"),
+              value: String(d.activeOrders ?? d.activeWorkOrders ?? "0"),
             };
             next[1] = {
               ...next[1],
-              value: String(d.openJobCards ?? "—"),
+              value: String(d.jobCards ?? d.openJobCards ?? "0"),
             };
             next[2] = {
               ...next[2],
-              value: String(d.pendingRequisitions ?? "—"),
+              value: String(d.pendingRequisitions ?? "0"),
             };
-            next[3] = { ...next[3], value: String(d.boms ?? "—") };
+            next[3] = { ...next[3], value: String(d.boms ?? "0") };
             return next;
           });
         }
@@ -410,9 +411,13 @@ function ProductionHomeIndex() {
 
   return (
     <ModuleDashboard
+      moduleKey="production"
       useSectionNavigation={true}
       title="Production"
       description="Modern industrial suite for end-to-end manufacturing control, from design and planning to shop floor execution."
+      headerActions={[
+        { label: "Dashboard", path: "/production/dashboard", icon: "📊" },
+      ]}
       stats={stats}
       sections={productionSections}
       features={productionFeatures}
@@ -449,6 +454,8 @@ export default function ProductionHome() {
     <ModuleLayout sections={productionSections} moduleKey="production">
       <Routes>
         <Route index element={<ProductionHomeIndex />} />
+        <Route path="dashboard" element={<ProductionDashboardPage />} />
+        <Route path="dashboards" element={<ProductionDashboardPage />} />
 
         {/* Existing Modules */}
         <Route path="boms" element={<BomList />} />

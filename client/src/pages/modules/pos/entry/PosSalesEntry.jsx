@@ -2291,10 +2291,12 @@ export default function PosSalesEntry() {
     <div className="space-y-3 pos-sales-entry pr-1">
       <div className="flex items-center justify-between">
         <div>
-          <button onClick={() => window.history.back()} className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
+          <Link
+            to="/pos?section=Transactions"
+            className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300 inline-flex items-center gap-1"
           >
             ← Back to POS
-          </button>
+          </Link>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-2">
             POS Sales Entry
           </h1>

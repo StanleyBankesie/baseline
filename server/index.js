@@ -49,6 +49,7 @@ import documentsRoutes from "./routes/documents.routes.js";
 import socialFeedRoutes from "./routes/social-feed.routes.js";
 import accessRoutes from "./routes/access.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
+import aiRoutes from "./routes/ai.routes.js";
 import emailTestRoutes from "./routes/email-test.routes.js";
 import visitorsRoutes from "./routes/visitors.routes.js";
 import licenseRoutes from "./routes/license.routes.js";
@@ -1014,6 +1015,7 @@ const apiPaths = [
   { path: "/social-feed", router: socialFeedRoutes },
   { path: "/access", router: accessRoutes },
   { path: "/chat", router: chatRoutes },
+  { path: "/ai", router: aiRoutes },
   { path: "/email-test", router: emailTestRoutes },
   { path: "/visitors", router: visitorsRoutes },
 ];

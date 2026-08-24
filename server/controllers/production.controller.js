@@ -3247,9 +3247,228 @@ export const createStockJournal = async (req, res) => {
 
 // ===== DASHBOARD STATS =====
 
+export const getProductionDashboardAnalytics = async (req, res, next) => {
+  try {
+    const companyId = req.scope?.companyId || req.user?.company_id || req.user?.companyId || 1;
+    const branchId = req.scope?.branchId || req.user?.branch_id || req.user?.branchId || null;
+    const branchIdsStr = req.scope?.branchIdsStr || (branchId ? String(branchId) : "");
+    const { from = null, to = null } = req.query || {};
+
+    const whereBranch = "(:branchId IS NULL OR branch_id = :branchId OR :branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr) OR branch_id IS NULL)";
+    const dateFilterWO = from && to ? "AND work_order_date BETWEEN :from AND :to" : from ? "AND work_order_date >= :from" : to ? "AND work_order_date <= :to" : "";
+
+    // 1. Overall Work Orders & Output KPIs
+    const [woSummary] = await query(
+      `SELECT 
+         COUNT(*) as total_orders,
+         SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) as completed_orders,
+         SUM(CASE WHEN status = 'IN_PROGRESS' THEN 1 ELSE 0 END) as in_progress_orders,
+         SUM(CASE WHEN status IN ('DRAFT', 'RELEASED') THEN 1 ELSE 0 END) as pending_orders,
+         SUM(CASE WHEN status = 'CANCELLED' THEN 1 ELSE 0 END) as cancelled_orders,
+         COALESCE(SUM(qty_to_produce), 0) as total_planned_qty,
+         COALESCE(SUM(CASE WHEN status = 'COMPLETED' THEN qty_to_produce ELSE 0 END), 0) as total_produced_qty
+       FROM prod_work_orders 
+       WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} ${dateFilterWO}`,
+      { companyId, branchId, branchIdsStr: String(branchIdsStr || ""), from, to },
+    );
+
+    // 2. Active BOMs
+    const [bomSummary] = await query(
+      `SELECT COUNT(*) as total_boms, SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active_boms 
+       FROM prod_boms WHERE (company_id = :companyId OR company_id IS NULL)`,
+      { companyId },
+    );
+
+    // 3. Machines & Plant Capacity
+    let machineSummary = { total_machines: 0, active_machines: 0, maintenance_machines: 0, avg_utilization: 0 };
+    try {
+      const [mRow] = await query(
+        `SELECT 
+           COUNT(*) as total_machines,
+           SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active_machines,
+           SUM(CASE WHEN is_active = 0 THEN 1 ELSE 0 END) as maintenance_machines
+         FROM prod_machines 
+         WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch}`,
+        { companyId, branchId, branchIdsStr: String(branchIdsStr || "") },
+      );
+      if (mRow) {
+        const totM = Number(mRow.total_machines || 0);
+        const actM = Number(mRow.active_machines || 0);
+        machineSummary = {
+          total_machines: totM,
+          active_machines: actM,
+          maintenance_machines: Number(mRow.maintenance_machines || 0),
+          avg_utilization: totM > 0 ? Math.round((actM / totM) * 100) : 0,
+        };
+      }
+    } catch {}
+
+    // 4. Job Cards, Completed Output & Scrap
+    let scrapRate = 0;
+    let jobCardsSummary = { total: 0, completed: 0, in_progress: 0, scrap_qty: 0, yield_percent: 100 };
+    try {
+      const [jcRow] = await query(
+        `SELECT 
+           COUNT(*) as total,
+           SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) as completed,
+           SUM(CASE WHEN status = 'IN_PROGRESS' THEN 1 ELSE 0 END) as in_progress,
+           COALESCE(SUM(planned_qty), 0) as planned_qty,
+           COALESCE(SUM(good_qty), SUM(actual_qty), 0) as completed_qty,
+           COALESCE(SUM(scrap_qty), SUM(rejected_qty), 0) as scrap_qty
+         FROM prod_job_cards 
+         WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch}`,
+        { companyId, branchId, branchIdsStr: String(branchIdsStr || "") },
+      );
+      if (jcRow) {
+        const planned = Number(jcRow.planned_qty || 0);
+        const comp = Number(jcRow.completed_qty || 0);
+        const scrap = Number(jcRow.scrap_qty || 0);
+        const totalOutput = comp + scrap;
+        scrapRate = totalOutput > 0 ? Math.round((scrap / totalOutput) * 1000) / 10 : 0;
+        const yieldPercent = totalOutput > 0 ? Math.min(100, Math.round((comp / totalOutput) * 1000) / 10) : (planned > 0 ? Math.min(100, Math.round((comp / planned) * 1000) / 10) : 100);
+        jobCardsSummary = {
+          total: Number(jcRow.total || 0),
+          completed: Number(jcRow.completed || 0),
+          in_progress: Number(jcRow.in_progress || 0),
+          scrap_qty: scrap,
+          yield_percent: yieldPercent,
+        };
+      }
+    } catch {}
+
+    // 5. Quality Inspections (QC)
+    let qcSummary = { total_inspections: 0, passed: 0, failed: 0, rework: 0, pass_rate: 100 };
+    try {
+      const [qcRow] = await query(
+        `SELECT 
+           COUNT(*) as total,
+           SUM(CASE WHEN quality_status = 'PASSED' THEN 1 ELSE 0 END) as passed,
+           SUM(CASE WHEN quality_status = 'FAILED' THEN 1 ELSE 0 END) as failed,
+           SUM(CASE WHEN quality_status = 'REWORK' THEN 1 ELSE 0 END) as rework,
+           COALESCE(SUM(rejected_qty), 0) as total_defects,
+           COALESCE(SUM(inspected_qty), 0) as total_inspected
+         FROM prod_qc_inspections 
+         WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch}`,
+        { companyId, branchId, branchIdsStr: String(branchIdsStr || "") },
+      );
+      if (qcRow) {
+        const totalQc = Number(qcRow.total || 0);
+        const passedQc = Number(qcRow.passed || 0);
+        qcSummary = {
+          total_inspections: totalQc,
+          passed: passedQc,
+          failed: Number(qcRow.failed || 0),
+          rework: Number(qcRow.rework || 0),
+          pass_rate: totalQc > 0 ? Math.round((passedQc / totalQc) * 1000) / 10 : 100,
+        };
+      }
+    } catch {}
+
+    // 6. Monthly Output Trend (Last 6 Months)
+    const monthlyTrend = await query(
+      `SELECT 
+         DATE_FORMAT(work_order_date, '%Y-%m') as month_key,
+         DATE_FORMAT(work_order_date, '%b %Y') as month_label,
+         COUNT(*) as order_count,
+         COALESCE(SUM(qty_to_produce), 0) as planned_volume,
+         COALESCE(SUM(CASE WHEN status = 'COMPLETED' THEN qty_to_produce ELSE 0 END), 0) as produced_volume
+       FROM prod_work_orders
+       WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch}
+         AND work_order_date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+       GROUP BY DATE_FORMAT(work_order_date, '%Y-%m'), DATE_FORMAT(work_order_date, '%b %Y')
+       ORDER BY month_key ASC`,
+      { companyId, branchId, branchIdsStr: String(branchIdsStr || "") },
+    );
+
+    // 7. Work Orders Status Distribution
+    const statusDistribution = [
+      { status: "Completed", count: Number(woSummary?.completed_orders || 0), color: "#10b981" },
+      { status: "In Progress", count: Number(woSummary?.in_progress_orders || 0), color: "#3b82f6" },
+      { status: "Draft / Released", count: Number(woSummary?.pending_orders || 0), color: "#f59e0b" },
+      { status: "Cancelled", count: Number(woSummary?.cancelled_orders || 0), color: "#ef4444" },
+    ];
+
+    // 8. Recent Work Orders with Progress
+    const recentWorkOrders = await query(
+      `SELECT 
+         wo.id,
+         wo.work_order_no,
+         wo.work_order_date,
+         wo.qty_to_produce,
+         wo.status,
+         wo.bom_id,
+         b.bom_name,
+         i.item_name,
+         i.item_code,
+         w.warehouse_name,
+         CASE WHEN wo.status = 'COMPLETED' THEN wo.qty_to_produce WHEN wo.status = 'IN_PROGRESS' THEN ROUND(wo.qty_to_produce * 0.5, 2) ELSE 0 END as completed_qty
+       FROM prod_work_orders wo
+       LEFT JOIN prod_boms b ON wo.bom_id = b.id
+       LEFT JOIN inv_items i ON b.item_id = i.id
+       LEFT JOIN inv_warehouses w ON wo.warehouse_id = w.id
+       WHERE (wo.company_id = :companyId OR wo.company_id IS NULL) AND (:branchId IS NULL OR wo.branch_id = :branchId OR :branchIdsStr = '' OR FIND_IN_SET(wo.branch_id, :branchIdsStr) OR wo.branch_id IS NULL)
+       ORDER BY wo.work_order_date DESC, wo.id DESC
+       LIMIT 10`,
+      { companyId, branchId, branchIdsStr: String(branchIdsStr || "") },
+    );
+
+    // 9. Top Produced Products
+    const topProducts = await query(
+      `SELECT 
+         COALESCE(i.item_name, b.bom_name, 'Manufactured Item') as item_name,
+         COALESCE(i.item_code, CONCAT('BOM-', b.id)) as item_code,
+         COUNT(wo.id) as total_runs,
+         COALESCE(SUM(wo.qty_to_produce), 0) as total_quantity
+       FROM prod_work_orders wo
+       LEFT JOIN prod_boms b ON wo.bom_id = b.id
+       LEFT JOIN inv_items i ON b.item_id = i.id
+       WHERE (wo.company_id = :companyId OR wo.company_id IS NULL) AND (:branchId IS NULL OR wo.branch_id = :branchId OR :branchIdsStr = '' OR FIND_IN_SET(wo.branch_id, :branchIdsStr) OR wo.branch_id IS NULL)
+       GROUP BY b.id, i.id, i.item_name, b.bom_name, i.item_code
+       ORDER BY total_quantity DESC
+       LIMIT 5`,
+      { companyId, branchId, branchIdsStr: String(branchIdsStr || "") },
+    );
+
+    res.json({
+      kpis: {
+        totalOrders: Number(woSummary?.total_orders || 0),
+        completedOrders: Number(woSummary?.completed_orders || 0),
+        inProgressOrders: Number(woSummary?.in_progress_orders || 0),
+        pendingOrders: Number(woSummary?.pending_orders || 0),
+        totalPlannedQty: Number(woSummary?.total_planned_qty || 0),
+        totalProducedQty: Number(woSummary?.total_produced_qty || 0),
+        activeBoms: Number(bomSummary?.active_boms || bomSummary?.total_boms || 0),
+        totalBoms: Number(bomSummary?.total_boms || 0),
+        yieldPercent: jobCardsSummary.yield_percent,
+        scrapRate: scrapRate,
+        qualityPassRate: qcSummary.pass_rate,
+      },
+      machines: machineSummary,
+      qc: qcSummary,
+      monthlyTrend: monthlyTrend || [],
+      statusDistribution,
+      recentWorkOrders: (recentWorkOrders || []).map((wo) => {
+        const planned = Number(wo.qty_to_produce || 0);
+        const comp = Number(wo.completed_qty || 0);
+        const progress = planned > 0 ? Math.min(100, Math.round((comp / planned) * 100)) : (wo.status === "COMPLETED" ? 100 : 0);
+        return {
+          ...wo,
+          progress,
+        };
+      }),
+      topProducts: topProducts || [],
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getProductionStats = async (req, res) => {
-  const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
-  
+  const companyId = req.scope?.companyId || req.user?.company_id || req.user?.companyId || 1;
+  const branchId = req.scope?.branchId || req.user?.branch_id || req.user?.branchId || null;
+  const branchIdsStr = req.scope?.branchIdsStr || (branchId ? String(branchId) : "");
+  const whereBranch = "(:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr) OR branch_id IS NULL)";
+
   const safeCount = async (sql, params) => {
     try {
       const [row] = await query(sql, params);
@@ -3259,26 +3478,24 @@ export const getProductionStats = async (req, res) => {
     }
   };
 
-  const whereBranch = "(:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))";
-
   const boms = await safeCount(
-    `SELECT COUNT(*) as count FROM prod_boms WHERE company_id = :companyId`,
+    `SELECT COUNT(*) as count FROM prod_boms WHERE (company_id = :companyId OR company_id IS NULL)`,
     { companyId },
   );
   const activeOrders = await safeCount(
-    `SELECT COUNT(*) as count FROM prod_work_orders WHERE company_id = :companyId AND ${whereBranch} AND status != 'COMPLETED'`,
+    `SELECT COUNT(*) as count FROM prod_work_orders WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND status != 'COMPLETED'`,
     { companyId, branchId, branchIdsStr },
   );
   const dailyPlans = await safeCount(
-    `SELECT COUNT(*) as count FROM prod_daily_plans WHERE company_id = :companyId AND ${whereBranch}`,
+    `SELECT COUNT(*) as count FROM prod_daily_plans WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch}`,
     { companyId, branchId, branchIdsStr },
   );
   const jobCards = await safeCount(
-    `SELECT COUNT(*) as count FROM prod_job_cards WHERE company_id = :companyId AND ${whereBranch} AND status = 'PENDING'`,
+    `SELECT COUNT(*) as count FROM prod_job_cards WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch}`,
     { companyId, branchId, branchIdsStr },
   );
   const pendingRequisitions = await safeCount(
-    `SELECT COUNT(*) as count FROM prod_material_requisitions WHERE company_id = :companyId AND ${whereBranch} AND status = 'PENDING'`,
+    `SELECT COUNT(*) as count FROM prod_material_requisitions WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND status = 'PENDING'`,
     { companyId, branchId, branchIdsStr },
   );
 

@@ -67,7 +67,9 @@ export const getPosts = async (req, res) => {
         SELECT DISTINCT
           p.id, p.user_id, p.content, p.image_url, p.visibility_type,
           COALESCE(p.branch_id, p.warehouse_id) AS branch_id,
-          p.like_count, p.comment_count, p.created_at,
+          (SELECT COUNT(*) FROM post_likes pl WHERE pl.post_id = p.id) AS like_count,
+          (SELECT COUNT(*) FROM post_comments pc WHERE pc.post_id = p.id) AS comment_count,
+          p.created_at,
           COALESCE(u.full_name, u.username, 'User') AS full_name,
           u.profile_picture AS profile_picture,
           (SELECT COUNT(*) FROM post_likes pl WHERE pl.post_id = p.id AND pl.user_id = ?) AS user_liked
@@ -81,7 +83,9 @@ export const getPosts = async (req, res) => {
         SELECT DISTINCT
           p.id, p.user_id, p.content, p.image_url, p.visibility_type,
           COALESCE(p.branch_id, p.warehouse_id) AS branch_id,
-          p.like_count, p.comment_count, p.created_at,
+          (SELECT COUNT(*) FROM post_likes pl WHERE pl.post_id = p.id) AS like_count,
+          (SELECT COUNT(*) FROM post_comments pc WHERE pc.post_id = p.id) AS comment_count,
+          p.created_at,
           COALESCE(u.full_name, u.username, 'User') AS full_name,
           u.profile_picture AS profile_picture,
           (SELECT COUNT(*) FROM post_likes pl WHERE pl.post_id = p.id AND pl.user_id = ?) AS user_liked
@@ -125,22 +129,6 @@ export const getPosts = async (req, res) => {
       }
     };
 
-    const toUrl = (blob) => {
-      if (!blob) return null;
-      const b = Buffer.isBuffer(blob) ? blob : Buffer.from(blob);
-      const str = b.toString("utf8");
-      if (str.startsWith("http://") || str.startsWith("https://") || str.startsWith("data:")) return str;
-      let mime = "image/jpeg";
-      if (b.length >= 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) {
-        mime = "image/jpeg";
-      } else if (b.length >= 8 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) {
-        mime = "image/png";
-      } else if (b.length >= 12 && b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46) {
-        mime = "image/webp";
-      }
-      return `data:${mime};base64,${b.toString("base64")}`;
-    };
-
     const postsWithComments = [];
     for (const post of posts) {
       const [comments] = await pool.query(
@@ -168,10 +156,12 @@ export const getPosts = async (req, res) => {
       const { profile_picture: postPic, ...cleanPost } = post;
       postsWithComments.push({
         ...cleanPost,
+        like_count: Number(post.like_count) || 0,
+        comment_count: Number(post.comment_count) || 0,
         image_url: toAbsoluteImageUrl(post.image_url),
         profile_picture_url: post.user_id ? `/api/social-feed/avatar/${post.user_id}` : "/default-avatar.png",
         comments: mappedComments,
-        user_liked: post.user_liked === 1,
+        user_liked: Number(post.user_liked) > 0,
       });
     }
 
@@ -655,74 +645,32 @@ export const getPostLikes = async (req, res) => {
     const { postId } = req.params;
     const limit = parseInt(req.query.limit) || 100;
     const offset = parseInt(req.query.offset) || 0;
-    const connection = await pool.getConnection();
-    try {
-      const [likes] = await connection.query(
-        `
-        SELECT 
-          pl.user_id,
-          u.full_name,
-          u.profile_picture AS profile_picture,
-          pl.created_at,
-          u.username AS created_by_name
-         FROM post_likes pl
-        JOIN adm_users u ON pl.user_id = u.id
-         WHERE pl.post_id = ?
-        ORDER BY u.full_name ASC
-        LIMIT ? OFFSET ?
-        `,
-        [postId, limit, offset],
-      );
-      const toUrl = (blob) => {
-        if (!blob) return null;
-        const b = Buffer.isBuffer(blob) ? blob : Buffer.from(blob);
-        const str = b.toString("utf8");
-        if (str.startsWith("http://") || str.startsWith("https://") || str.startsWith("data:")) return str;
-        let mime = "image/jpeg";
-        if (b.length >= 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) {
-          mime = "image/jpeg";
-        } else if (
-          b.length >= 8 &&
-          b[0] === 0x89 &&
-          b[1] === 0x50 &&
-          b[2] === 0x4e &&
-          b[3] === 0x47 &&
-          b[4] === 0x0d &&
-          b[5] === 0x0a &&
-          b[6] === 0x1a &&
-          b[7] === 0x0a
-        ) {
-          mime = "image/png";
-        } else if (
-          b.length >= 12 &&
-          b[0] === 0x52 &&
-          b[1] === 0x49 &&
-          b[2] === 0x46 &&
-          b[3] === 0x46 &&
-          b[8] === 0x57 &&
-          b[9] === 0x45 &&
-          b[10] === 0x42 &&
-          b[11] === 0x50
-        ) {
-          mime = "image/webp";
-        }
-        return `data:${mime};base64,${b.toString("base64")}`;
-      };
-      const mapped = likes.map((l) => {
-        const { profile_picture: pic, ...cleanL } = l;
-        return {
-          ...cleanL,
-          profile_picture_url: toUrl(pic),
-        };
-      });
-      res.json({
-        success: true,
-        data: mapped,
-        pagination: { offset, limit, total: mapped.length },
-      });
-    } finally {
-      await connection.release();
-    }
+    const [likes] = await pool.query(
+      `
+      SELECT 
+        pl.user_id,
+        COALESCE(u.full_name, u.username, 'User') AS full_name,
+        u.username,
+        pl.created_at
+      FROM post_likes pl
+      JOIN adm_users u ON pl.user_id = u.id
+      WHERE pl.post_id = ?
+      ORDER BY pl.created_at DESC
+      LIMIT ? OFFSET ?
+      `,
+      [postId, limit, offset],
+    );
+
+    const mapped = likes.map((l) => ({
+      ...l,
+      profile_picture_url: l.user_id ? `/api/social-feed/avatar/${l.user_id}` : "/default-avatar.png",
+    }));
+
+    res.json({
+      success: true,
+      data: mapped,
+      pagination: { offset, limit, total: mapped.length },
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

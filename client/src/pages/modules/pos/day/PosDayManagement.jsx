@@ -594,11 +594,12 @@ export default function PosDayManagement() {
         Number(momoOpeningMain || 0) + Number(momoOpeningPay || 0);
       const momoCloseTotal =
         Number(momoClosingRef.current.main || 0) + Number(momoClosingRef.current.pay || 0);
+      const effectiveActualMoMo = momoCloseTotal;
       const payload = {
         terminal: terminalId,
         closingDateTime: closing.dateTime,
         actualCash: effectiveActualCash,
-        actualMoMo: Number(actualMoMo || 0),
+        actualMoMo: effectiveActualMoMo,
         momoOpeningBalance: momoOpenTotal,
         momoClosingBalance: momoCloseTotal,
         momoClosingMain: Number(momoClosingRef.current.main || 0),
@@ -650,8 +651,10 @@ export default function PosDayManagement() {
           );
           const momoOpenMain = Number(item.momo_opening_main ?? base.momoOpeningMain ?? momoOpeningMain ?? 0);
           const momoOpenPay = Number(item.momo_opening_pay ?? base.momoOpeningPay ?? momoOpeningPay ?? 0);
-          const momoExpected = momoOpenMain + momoOpenPay + Number(endSummary.mobileAmount || 0);
-          const momoActual = Number(item.actual_momo ?? actualMoMo ?? 0);
+          const momoOpening = momoOpenMain + momoOpenPay;
+          const totalMomoSales = Number(endSummary.mobileAmount || 0);
+          const momoExpected = momoOpening + totalMomoSales;
+          const momoActual = Number(item.actual_momo ?? effectiveActualMoMo ?? 0);
           const updated = {
             ...base,
             dayStatusId: Number(item.id || base.dayStatusId || 0) || null,
@@ -679,7 +682,8 @@ export default function PosDayManagement() {
             cashVariance: actualCash - expectedAtClose,
             momoOpeningMain: momoOpenMain,
             momoOpeningPay: momoOpenPay,
-            openingMoMo: momoCloseTotal,
+            openingMoMo: momoOpening,
+            totalMomoSales,
             expectedMoMo: momoExpected,
             actualMoMo: momoActual,
             momoVariance: momoActual - momoExpected,
@@ -909,10 +913,12 @@ export default function PosDayManagement() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <button onClick={() => window.history.back()} className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300"
+          <Link
+            to="/pos?section=Transactions"
+            className="text-sm text-brand hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300 inline-flex items-center gap-1"
           >
             ← Back to POS
-          </button>
+          </Link>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
             POS Day Management
           </h1>

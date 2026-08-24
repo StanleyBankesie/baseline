@@ -32017,3 +32017,2608 @@ status: 404
 Technical details:
 (no stack)
 --------------------------------------------------------------------------------
+
+[2026-08-22T13:54:51.516Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030576062-421433513.png (status 404)
+Context:
+requestId: mt4fww6g-mdvb0vsm
+durationMs: 19
+method: GET
+url: /uploads/file-1771030576062-421433513.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:54:51.533Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030118738-58671421.png (status 404)
+Context:
+requestId: mt4fww6q-dempqpja
+durationMs: 27
+method: GET
+url: /uploads/file-1771030118738-58671421.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:54:51.666Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771029994810-929577419.png (status 404)
+Context:
+requestId: mt4fwwaw-w0itawpa
+durationMs: 9
+method: GET
+url: /uploads/file-1771029994810-929577419.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:54:51.672Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028914245-206760446.png (status 404)
+Context:
+requestId: mt4fwwb2-minte0w3
+durationMs: 10
+method: GET
+url: /uploads/file-1771028914245-206760446.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:54:51.679Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028422235-642564131.png (status 404)
+Context:
+requestId: mt4fwwb9-xw7gju4y
+durationMs: 10
+method: GET
+url: /uploads/file-1771028422235-642564131.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:54:51.852Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028320026-422022774.png (status 404)
+Context:
+requestId: mt4fwwg8-5a6k0u3o
+durationMs: 4
+method: GET
+url: /uploads/file-1771028320026-422022774.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:54:51.869Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771027409254-324391049.jpeg (status 404)
+Context:
+requestId: mt4fwwgn-p5myvl8n
+durationMs: 6
+method: GET
+url: /uploads/file-1771027409254-324391049.jpeg
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:54:52.113Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771019885707-783914769.png (status 404)
+Context:
+requestId: mt4fwwn9-mkhnhe83
+durationMs: 12
+method: GET
+url: /uploads/file-1771019885707-783914769.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:54:52.400Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030576062-421433513.png (status 404)
+Context:
+requestId: mt4fwwvh-nxt1ve4d
+durationMs: 3
+method: GET
+url: /uploads/file-1771030576062-421433513.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:54:52.411Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030118738-58671421.png (status 404)
+Context:
+requestId: mt4fwwvq-f0tzfceq
+durationMs: 5
+method: GET
+url: /uploads/file-1771030118738-58671421.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:54:52.463Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771029994810-929577419.png (status 404)
+Context:
+requestId: mt4fwwx8-8x0zurxi
+durationMs: 3
+method: GET
+url: /uploads/file-1771029994810-929577419.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:54:52.473Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028914245-206760446.png (status 404)
+Context:
+requestId: mt4fwwxh-68mk1dlb
+durationMs: 4
+method: GET
+url: /uploads/file-1771028914245-206760446.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:54:52.519Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028422235-642564131.png (status 404)
+Context:
+requestId: mt4fwwyo-0g48rt7h
+durationMs: 6
+method: GET
+url: /uploads/file-1771028422235-642564131.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:54:52.749Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028320026-422022774.png (status 404)
+Context:
+requestId: mt4fwx4t-ygwqvm0h
+durationMs: 16
+method: GET
+url: /uploads/file-1771028320026-422022774.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:54:52.760Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771027409254-324391049.jpeg (status 404)
+Context:
+requestId: mt4fwx4z-g2kn0du8
+durationMs: 21
+method: GET
+url: /uploads/file-1771027409254-324391049.jpeg
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:54:52.772Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771019885707-783914769.png (status 404)
+Context:
+requestId: mt4fwx50-psue5lqs
+durationMs: 32
+method: GET
+url: /uploads/file-1771019885707-783914769.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:56:28.516Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030576062-421433513.png (status 404)
+Context:
+requestId: mt4fyz1c-k30pa584
+durationMs: 4
+method: GET
+url: /uploads/file-1771030576062-421433513.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T13:56:42.062Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030118738-58671421.png (status 404)
+Context:
+requestId: mt4fz9hk-gvsh0jll
+durationMs: 6
+method: GET
+url: /uploads/file-1771030118738-58671421.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:02:36.327Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030576062-421433513.png (status 404)
+Context:
+requestId: mt4g6utz-aseo6ovc
+durationMs: 15
+method: GET
+url: /uploads/file-1771030576062-421433513.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:02:36.965Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030118738-58671421.png (status 404)
+Context:
+requestId: mt4g6uu0-4j3vlvzu
+durationMs: 653
+method: GET
+url: /uploads/file-1771030118738-58671421.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:02:37.043Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771029994810-929577419.png (status 404)
+Context:
+requestId: mt4g6vc9-v5qet3ig
+durationMs: 74
+method: GET
+url: /uploads/file-1771029994810-929577419.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:02:37.050Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028914245-206760446.png (status 404)
+Context:
+requestId: mt4g6vca-04abgp73
+durationMs: 80
+method: GET
+url: /uploads/file-1771028914245-206760446.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:02:37.054Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028422235-642564131.png (status 404)
+Context:
+requestId: mt4g6vca-sd58uqwp
+durationMs: 84
+method: GET
+url: /uploads/file-1771028422235-642564131.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:02:37.063Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028320026-422022774.png (status 404)
+Context:
+requestId: mt4g6vcf-fxn1necw
+durationMs: 88
+method: GET
+url: /uploads/file-1771028320026-422022774.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:02:37.083Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771027409254-324391049.jpeg (status 404)
+Context:
+requestId: mt4g6vcg-d7i98onx
+durationMs: 107
+method: GET
+url: /uploads/file-1771027409254-324391049.jpeg
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:02:37.086Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771019885707-783914769.png (status 404)
+Context:
+requestId: mt4g6vch-xfz9n4j0
+durationMs: 109
+method: GET
+url: /uploads/file-1771019885707-783914769.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:05:00.009Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030576062-421433513.png (status 404)
+Context:
+requestId: mt4g9xpf-ku84r7vn
+durationMs: 5
+method: GET
+url: /uploads/file-1771030576062-421433513.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:05:00.031Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771029994810-929577419.png (status 404)
+Context:
+requestId: mt4g9xpr-039pf23g
+durationMs: 16
+method: GET
+url: /uploads/file-1771029994810-929577419.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:05:00.034Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028914245-206760446.png (status 404)
+Context:
+requestId: mt4g9xps-e33zn9qa
+durationMs: 18
+method: GET
+url: /uploads/file-1771028914245-206760446.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:05:00.040Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028422235-642564131.png (status 404)
+Context:
+requestId: mt4g9xpt-2bvtpfhg
+durationMs: 23
+method: GET
+url: /uploads/file-1771028422235-642564131.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:05:00.043Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028320026-422022774.png (status 404)
+Context:
+requestId: mt4g9xpt-e1bi23cl
+durationMs: 26
+method: GET
+url: /uploads/file-1771028320026-422022774.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:05:00.051Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030118738-58671421.png (status 404)
+Context:
+requestId: mt4g9xpv-3n7i9vvf
+durationMs: 32
+method: GET
+url: /uploads/file-1771030118738-58671421.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:05:00.064Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771027409254-324391049.jpeg (status 404)
+Context:
+requestId: mt4g9xpw-xxip8lab
+durationMs: 44
+method: GET
+url: /uploads/file-1771027409254-324391049.jpeg
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:05:00.075Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771019885707-783914769.png (status 404)
+Context:
+requestId: mt4g9xpx-k3919yfv
+durationMs: 54
+method: GET
+url: /uploads/file-1771019885707-783914769.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:10:51.313Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030576062-421433513.png (status 404)
+Context:
+requestId: mt4ghgre-nxkui6q8
+durationMs: 23
+method: GET
+url: /uploads/file-1771030576062-421433513.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:10:51.343Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030118738-58671421.png (status 404)
+Context:
+requestId: mt4ghgrf-jomc3nyc
+durationMs: 52
+method: GET
+url: /uploads/file-1771030118738-58671421.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:10:51.351Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771029994810-929577419.png (status 404)
+Context:
+requestId: mt4ghgrg-w0599y9g
+durationMs: 59
+method: GET
+url: /uploads/file-1771029994810-929577419.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:10:51.366Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028914245-206760446.png (status 404)
+Context:
+requestId: mt4ghgrh-wr4fnp3p
+durationMs: 73
+method: GET
+url: /uploads/file-1771028914245-206760446.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:10:51.443Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028422235-642564131.png (status 404)
+Context:
+requestId: mt4ghgri-9xf4ifll
+durationMs: 149
+method: GET
+url: /uploads/file-1771028422235-642564131.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:10:51.578Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028320026-422022774.png (status 404)
+Context:
+requestId: mt4ghgxk-nq1gzbhp
+durationMs: 66
+method: GET
+url: /uploads/file-1771028320026-422022774.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:10:51.583Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771027409254-324391049.jpeg (status 404)
+Context:
+requestId: mt4ghgxl-f89nx672
+durationMs: 70
+method: GET
+url: /uploads/file-1771027409254-324391049.jpeg
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:10:51.596Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771019885707-783914769.png (status 404)
+Context:
+requestId: mt4ghgxm-cqia4yfh
+durationMs: 82
+method: GET
+url: /uploads/file-1771019885707-783914769.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:17:35.977Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030576062-421433513.png (status 404)
+Context:
+requestId: mt4gq50c-u2d5v56f
+durationMs: 12
+method: GET
+url: /uploads/file-1771030576062-421433513.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:17:35.984Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030118738-58671421.png (status 404)
+Context:
+requestId: mt4gq50d-ma4z39je
+durationMs: 19
+method: GET
+url: /uploads/file-1771030118738-58671421.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:17:36.011Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771029994810-929577419.png (status 404)
+Context:
+requestId: mt4gq50g-abkz5l42
+durationMs: 43
+method: GET
+url: /uploads/file-1771029994810-929577419.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:17:36.016Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028914245-206760446.png (status 404)
+Context:
+requestId: mt4gq50h-60z7revk
+durationMs: 47
+method: GET
+url: /uploads/file-1771028914245-206760446.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:17:36.022Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028422235-642564131.png (status 404)
+Context:
+requestId: mt4gq50t-5lm35odb
+durationMs: 40
+method: GET
+url: /uploads/file-1771028422235-642564131.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:17:36.026Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028320026-422022774.png (status 404)
+Context:
+requestId: mt4gq50z-39ricy9g
+durationMs: 39
+method: GET
+url: /uploads/file-1771028320026-422022774.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:17:36.029Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771027409254-324391049.jpeg (status 404)
+Context:
+requestId: mt4gq511-oh71e4h0
+durationMs: 40
+method: GET
+url: /uploads/file-1771027409254-324391049.jpeg
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:17:36.034Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771019885707-783914769.png (status 404)
+Context:
+requestId: mt4gq512-cm86j693
+durationMs: 43
+method: GET
+url: /uploads/file-1771019885707-783914769.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:22:59.712Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030576062-421433513.png (status 404)
+Context:
+requestId: mt4gx2ss-boi9e8f6
+durationMs: 19
+method: GET
+url: /uploads/file-1771030576062-421433513.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:22:59.717Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030118738-58671421.png (status 404)
+Context:
+requestId: mt4gx2su-p633ogyo
+durationMs: 23
+method: GET
+url: /uploads/file-1771030118738-58671421.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:22:59.721Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771029994810-929577419.png (status 404)
+Context:
+requestId: mt4gx2sy-16jc5ro4
+durationMs: 23
+method: GET
+url: /uploads/file-1771029994810-929577419.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:22:59.723Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028914245-206760446.png (status 404)
+Context:
+requestId: mt4gx2t0-440fa82d
+durationMs: 23
+method: GET
+url: /uploads/file-1771028914245-206760446.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:22:59.727Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028422235-642564131.png (status 404)
+Context:
+requestId: mt4gx2t1-aphxrhqs
+durationMs: 25
+method: GET
+url: /uploads/file-1771028422235-642564131.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:22:59.730Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028320026-422022774.png (status 404)
+Context:
+requestId: mt4gx2t2-97m5jlsn
+durationMs: 28
+method: GET
+url: /uploads/file-1771028320026-422022774.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:22:59.733Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771027409254-324391049.jpeg (status 404)
+Context:
+requestId: mt4gx2t3-hp5ctqyp
+durationMs: 30
+method: GET
+url: /uploads/file-1771027409254-324391049.jpeg
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-22T14:22:59.735Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771019885707-783914769.png (status 404)
+Context:
+requestId: mt4gx2t6-mqkonnkx
+durationMs: 29
+method: GET
+url: /uploads/file-1771019885707-783914769.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:22:56.384Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1228:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:23:00.117Z] HTTP_500
+Summary: Unknown column 'jc.completed_qty' in 'field list'
+Request: GET /api/production/dashboard/analytics?from=2026-07-24&to=2026-08-23 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/production/dashboard/analytics?from=2026-07-24&to=2026-08-23
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-07-24","to":"2026-08-23"}
+Technical details:
+Error: Unknown column 'jc.completed_qty' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getProductionDashboardAnalytics (file:///C:/Users/stanl/demo/server/controllers/production.controller.js:3387:30)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:23:00.807Z] HTTP_500
+Summary: Unknown column 'jc.completed_qty' in 'field list'
+Request: GET /api/production/dashboard/analytics?from=2026-07-24&to=2026-08-23 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/production/dashboard/analytics?from=2026-07-24&to=2026-08-23
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-07-24","to":"2026-08-23"}
+Technical details:
+Error: Unknown column 'jc.completed_qty' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getProductionDashboardAnalytics (file:///C:/Users/stanl/demo/server/controllers/production.controller.js:3387:30)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:23:02.396Z] HTTP_500
+Summary: Unknown column 'jc.completed_qty' in 'field list'
+Request: GET /api/production/dashboard/analytics?from=2026-07-24&to=2026-08-23 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/production/dashboard/analytics?from=2026-07-24&to=2026-08-23
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-07-24","to":"2026-08-23"}
+Technical details:
+Error: Unknown column 'jc.completed_qty' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getProductionDashboardAnalytics (file:///C:/Users/stanl/demo/server/controllers/production.controller.js:3387:30)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:23:03.807Z] HTTP_500
+Summary: Unknown column 'jc.completed_qty' in 'field list'
+Request: GET /api/production/dashboard/analytics?from=2026-07-24&to=2026-08-23 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/production/dashboard/analytics?from=2026-07-24&to=2026-08-23
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-07-24","to":"2026-08-23"}
+Technical details:
+Error: Unknown column 'jc.completed_qty' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getProductionDashboardAnalytics (file:///C:/Users/stanl/demo/server/controllers/production.controller.js:3387:30)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:24:42.751Z] HTTP_500
+Summary: Unknown column 'jc.completed_qty' in 'field list'
+Request: GET /api/production/dashboard/analytics?from=2026-08-16&to=2026-08-23 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/production/dashboard/analytics?from=2026-08-16&to=2026-08-23
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-08-16","to":"2026-08-23"}
+Technical details:
+Error: Unknown column 'jc.completed_qty' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getProductionDashboardAnalytics (file:///C:/Users/stanl/demo/server/controllers/production.controller.js:3387:30)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:24:43.468Z] HTTP_500
+Summary: Unknown column 'jc.completed_qty' in 'field list'
+Request: GET /api/production/dashboard/analytics?from=2026-08-16&to=2026-08-23 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/production/dashboard/analytics?from=2026-08-16&to=2026-08-23
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-08-16","to":"2026-08-23"}
+Technical details:
+Error: Unknown column 'jc.completed_qty' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getProductionDashboardAnalytics (file:///C:/Users/stanl/demo/server/controllers/production.controller.js:3387:30)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:24:44.386Z] HTTP_500
+Summary: Unknown column 'jc.completed_qty' in 'field list'
+Request: GET /api/production/dashboard/analytics?from=2026-08-16&to=2026-08-23 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/production/dashboard/analytics?from=2026-08-16&to=2026-08-23
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-08-16","to":"2026-08-23"}
+Technical details:
+Error: Unknown column 'jc.completed_qty' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getProductionDashboardAnalytics (file:///C:/Users/stanl/demo/server/controllers/production.controller.js:3387:30)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:24:44.766Z] HTTP_500
+Summary: Unknown column 'jc.completed_qty' in 'field list'
+Request: GET /api/production/dashboard/analytics?from=2026-08-23&to=2026-08-23 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/production/dashboard/analytics?from=2026-08-23&to=2026-08-23
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-08-23","to":"2026-08-23"}
+Technical details:
+Error: Unknown column 'jc.completed_qty' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getProductionDashboardAnalytics (file:///C:/Users/stanl/demo/server/controllers/production.controller.js:3387:30)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:24:45.629Z] HTTP_500
+Summary: Unknown column 'jc.completed_qty' in 'field list'
+Request: GET /api/production/dashboard/analytics?from=2026-08-23&to=2026-08-23 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/production/dashboard/analytics?from=2026-08-23&to=2026-08-23
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-08-23","to":"2026-08-23"}
+Technical details:
+Error: Unknown column 'jc.completed_qty' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getProductionDashboardAnalytics (file:///C:/Users/stanl/demo/server/controllers/production.controller.js:3387:30)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:24:45.998Z] HTTP_500
+Summary: Unknown column 'jc.completed_qty' in 'field list'
+Request: GET /api/production/dashboard/analytics?from=2026-08-16&to=2026-08-23 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/production/dashboard/analytics?from=2026-08-16&to=2026-08-23
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-08-16","to":"2026-08-23"}
+Technical details:
+Error: Unknown column 'jc.completed_qty' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getProductionDashboardAnalytics (file:///C:/Users/stanl/demo/server/controllers/production.controller.js:3387:30)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:24:46.583Z] HTTP_500
+Summary: Unknown column 'jc.completed_qty' in 'field list'
+Request: GET /api/production/dashboard/analytics?from=2026-07-24&to=2026-08-23 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/production/dashboard/analytics?from=2026-07-24&to=2026-08-23
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-07-24","to":"2026-08-23"}
+Technical details:
+Error: Unknown column 'jc.completed_qty' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getProductionDashboardAnalytics (file:///C:/Users/stanl/demo/server/controllers/production.controller.js:3387:30)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:24:46.950Z] HTTP_500
+Summary: Unknown column 'jc.completed_qty' in 'field list'
+Request: GET /api/production/dashboard/analytics?from=2026-08-23&to=2026-08-23 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/production/dashboard/analytics?from=2026-08-23&to=2026-08-23
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-08-23","to":"2026-08-23"}
+Technical details:
+Error: Unknown column 'jc.completed_qty' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getProductionDashboardAnalytics (file:///C:/Users/stanl/demo/server/controllers/production.controller.js:3387:30)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:24:47.262Z] HTTP_500
+Summary: Unknown column 'jc.completed_qty' in 'field list'
+Request: GET /api/production/dashboard/analytics?from=2026-07-24&to=2026-08-23 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/production/dashboard/analytics?from=2026-07-24&to=2026-08-23
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-07-24","to":"2026-08-23"}
+Technical details:
+Error: Unknown column 'jc.completed_qty' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getProductionDashboardAnalytics (file:///C:/Users/stanl/demo/server/controllers/production.controller.js:3387:30)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:24:48.025Z] HTTP_500
+Summary: Unknown column 'jc.completed_qty' in 'field list'
+Request: GET /api/production/dashboard/analytics?from=2026-08-23&to=2026-08-23 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/production/dashboard/analytics?from=2026-08-23&to=2026-08-23
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-08-23","to":"2026-08-23"}
+Technical details:
+Error: Unknown column 'jc.completed_qty' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getProductionDashboardAnalytics (file:///C:/Users/stanl/demo/server/controllers/production.controller.js:3387:30)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:24:48.364Z] HTTP_500
+Summary: Unknown column 'jc.completed_qty' in 'field list'
+Request: GET /api/production/dashboard/analytics?from=2026-07-24&to=2026-08-23 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/production/dashboard/analytics?from=2026-07-24&to=2026-08-23
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-07-24","to":"2026-08-23"}
+Technical details:
+Error: Unknown column 'jc.completed_qty' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getProductionDashboardAnalytics (file:///C:/Users/stanl/demo/server/controllers/production.controller.js:3387:30)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:24:49.436Z] HTTP_500
+Summary: Unknown column 'jc.completed_qty' in 'field list'
+Request: GET /api/production/dashboard/analytics?from=2026-07-24&to=2026-08-23 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/production/dashboard/analytics?from=2026-07-24&to=2026-08-23
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"from":"2026-07-24","to":"2026-08-23"}
+Technical details:
+Error: Unknown column 'jc.completed_qty' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getProductionDashboardAnalytics (file:///C:/Users/stanl/demo/server/controllers/production.controller.js:3387:30)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:26:44.392Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1228:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:39:32.309Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1228:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:57:07.824Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1228:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-23T14:59:10.233Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1228:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-23T15:04:09.864Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1228:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-23T15:15:12.775Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1228:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-23T20:58:05.717Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1228:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:03:08.477Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 64972
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:21:21.780Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1228:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:21:50.119Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/bi/executive-dashboard (status 404)
+Context:
+requestId: mt6bbk79-od82csxq
+durationMs: 33
+method: GET
+url: /api/bi/executive-dashboard
+ip: ::1
+origin: 
+userAgent: node
+userId: 1
+companyId: 1
+branchId: 1
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:21:50.162Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/bi/financial (status 404)
+Context:
+requestId: mt6bbk8u-nful7wye
+durationMs: 20
+method: GET
+url: /api/bi/financial
+ip: ::1
+origin: 
+userAgent: node
+userId: 1
+companyId: 1
+branchId: 1
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:21:50.198Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/bi/inventory (status 404)
+Context:
+requestId: mt6bbk9i-kfdxuuz6
+durationMs: 31
+method: GET
+url: /api/bi/inventory
+ip: ::1
+origin: 
+userAgent: node
+userId: 1
+companyId: 1
+branchId: 1
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:21:50.233Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/bi/projects (status 404)
+Context:
+requestId: mt6bbkag-sh57hbl5
+durationMs: 32
+method: GET
+url: /api/bi/projects
+ip: ::1
+origin: 
+userAgent: node
+userId: 1
+companyId: 1
+branchId: 1
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:21:50.266Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/bi/production (status 404)
+Context:
+requestId: mt6bbkbf-qyzy451p
+durationMs: 31
+method: GET
+url: /api/bi/production
+ip: ::1
+origin: 
+userAgent: node
+userId: 1
+companyId: 1
+branchId: 1
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:21:50.291Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/bi/purchase (status 404)
+Context:
+requestId: mt6bbkcc-9f6lmxr7
+durationMs: 23
+method: GET
+url: /api/bi/purchase
+ip: ::1
+origin: 
+userAgent: node
+userId: 1
+companyId: 1
+branchId: 1
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:21:50.326Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/bi/pos (status 404)
+Context:
+requestId: mt6bbkd2-3q28jjwt
+durationMs: 32
+method: GET
+url: /api/bi/pos
+ip: ::1
+origin: 
+userAgent: node
+userId: 1
+companyId: 1
+branchId: 1
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:21:50.358Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/bi/hr (status 404)
+Context:
+requestId: mt6bbke0-spukitmh
+durationMs: 30
+method: GET
+url: /api/bi/hr
+ip: ::1
+origin: 
+userAgent: node
+userId: 1
+companyId: 1
+branchId: 1
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:21:50.389Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/bi/transport (status 404)
+Context:
+requestId: mt6bbkey-7xnaivli
+durationMs: 27
+method: GET
+url: /api/bi/transport
+ip: ::1
+origin: 
+userAgent: node
+userId: 1
+companyId: 1
+branchId: 1
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:21:50.412Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/bi/maintenance-analytics (status 404)
+Context:
+requestId: mt6bbkfs-4y6pttzs
+durationMs: 20
+method: GET
+url: /api/bi/maintenance-analytics
+ip: ::1
+origin: 
+userAgent: node
+userId: 1
+companyId: 1
+branchId: 1
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:21:50.493Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/bi/service (status 404)
+Context:
+requestId: mt6bbkgg-nxucbh2v
+durationMs: 77
+method: GET
+url: /api/bi/service
+ip: ::1
+origin: 
+userAgent: node
+userId: 1
+companyId: 1
+branchId: 1
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:21:50.788Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/bi/administration (status 404)
+Context:
+requestId: mt6bbkin-6j20io9v
+durationMs: 293
+method: GET
+url: /api/bi/administration
+ip: ::1
+origin: 
+userAgent: node
+userId: 1
+companyId: 1
+branchId: 1
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:21:50.827Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/bi/cross-module (status 404)
+Context:
+requestId: mt6bbkqu-2gydqtoc
+durationMs: 37
+method: GET
+url: /api/bi/cross-module
+ip: ::1
+origin: 
+userAgent: node
+userId: 1
+companyId: 1
+branchId: 1
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:21:50.839Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 50613
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:21:50.840Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 50619
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:25:55.078Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1228:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:25:57.476Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 51313
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:25:57.479Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 51348
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:40:03.744Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1228:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:42:29.361Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 53909
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:42:29.365Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 53910
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-23T21:45:26.730Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:03:27.891Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 55569
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:03:27.895Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 55592
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:03:30.703Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1230:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:42:39.164Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mt6e7hrl-rioihjbn
+durationMs: 11
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:42:39.194Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mt6e7hsm-aue14u87
+durationMs: 4
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:48:13.217Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/ai/save-key (status 400)
+Context:
+requestId: mt6een2v-z7uqmp6t
+durationMs: 586
+method: POST
+url: /api/ai/save-key
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: 1
+branchId: 1
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:49:25.871Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/ai/save-key (status 400)
+Context:
+requestId: mt6eg7c8-0p1t6kj3
+durationMs: 327
+method: POST
+url: /api/ai/save-key
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: 1
+branchId: 1
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:49:55.712Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 59224
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:50:54.287Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1230:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:51:18.145Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/ai/save-key (status 400)
+Context:
+requestId: mt6eilzg-ut5xiicl
+durationMs: 309
+method: POST
+url: /api/ai/save-key
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: 1
+branchId: 1
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:52:30.584Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/ai/save-key (status 400)
+Context:
+requestId: mt6ek5uy-ort8myoe
+durationMs: 334
+method: POST
+url: /api/ai/save-key
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: 1
+branchId: 1
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:52:39.956Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mt6ekdcc-vxgy5ybs
+durationMs: 8
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:52:39.998Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mt6ekddn-w4iuy3wa
+durationMs: 3
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:52:47.517Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/ai/save-key (status 400)
+Context:
+requestId: mt6ekixu-wynqs59g
+durationMs: 315
+method: POST
+url: /api/ai/save-key
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: 1
+branchId: 1
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:52:54.639Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/ai/save-key (status 400)
+Context:
+requestId: mt6ekodz-jlwxfw74
+durationMs: 376
+method: POST
+url: /api/ai/save-key
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: 1
+branchId: 1
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:53:52.693Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mt6elxfn-09t4a8oq
+durationMs: 49
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:53:52.746Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mt6elxi1-3fdghbr0
+durationMs: 17
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:54:01.111Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/ai/save-key (status 400)
+Context:
+requestId: mt6em3et-sm8grxez
+durationMs: 722
+method: POST
+url: /api/ai/save-key
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: 1
+branchId: 1
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:55:04.587Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1230:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-23T22:58:48.884Z] HTTP_500
+Summary: Request failed with status 500
+Request: POST /api/ai/chat (status 500)
+Context:
+requestId: mt6es9o2-axpfl36i
+durationMs: 450
+method: POST
+url: /api/ai/chat
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: 1
+branchId: 1
+status: 500
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T23:07:59.500Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mt6f42vc-f1p0o7nu
+durationMs: 4
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T23:07:59.533Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mt6f42wa-t93rlmbr
+durationMs: 3
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T23:09:04.855Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1230:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-23T23:10:27.138Z] HTTP_500
+Summary: Request failed with status 500
+Request: POST /api/ai/chat (status 500)
+Context:
+requestId: mt6f78hc-k8ce83w4
+durationMs: 402
+method: POST
+url: /api/ai/chat
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: 1
+branchId: 1
+status: 500
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T23:19:33.600Z] HTTP_500
+Summary: Request failed with status 500
+Request: POST /api/ai/chat (status 500)
+Context:
+requestId: mt6fixua-h28cxhqz
+durationMs: 782
+method: POST
+url: /api/ai/chat
+ip: ::1
+origin: 
+userAgent: node
+userId: null
+companyId: 1
+branchId: null
+status: 500
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T23:19:33.891Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 62753
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-23T23:21:44.122Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1230:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-23T23:25:35.924Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1230:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-23T23:25:38.415Z] HTTP_500
+Summary: Request failed with status 500
+Request: POST /api/ai/chat (status 500)
+Context:
+requestId: mt6fqrgm-caquretn
+durationMs: 617
+method: POST
+url: /api/ai/chat
+ip: ::1
+origin: 
+userAgent: node
+userId: null
+companyId: 1
+branchId: null
+status: 500
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T23:25:38.605Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 63204
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-23T23:26:16.917Z] HTTP_500
+Summary: Request failed with status 500
+Request: POST /api/ai/chat (status 500)
+Context:
+requestId: mt6frlep-y6f6zfv9
+durationMs: 308
+method: POST
+url: /api/ai/chat
+ip: ::1
+origin: 
+userAgent: node
+userId: null
+companyId: 1
+branchId: null
+status: 500
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-23T23:26:17.122Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 63756
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-23T23:29:35.739Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 64188
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-23T23:29:46.096Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 64203
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-23T23:47:57.313Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1230:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-24T00:26:41.373Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mt6hxaa1-125wpvbk
+durationMs: 20
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-24T00:26:41.406Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mt6hxaba-yi02wysp
+durationMs: 8
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-24T00:28:16.513Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mt6hzbpa-k50tb1sk
+durationMs: 3
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-24T00:28:16.531Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mt6hzbps-zols3q6a
+durationMs: 3
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-24T00:35:38.096Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------

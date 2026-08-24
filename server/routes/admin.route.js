@@ -5,6 +5,7 @@
 // Module Dependencies
 import express from "express";
 import multer from "multer";
+import { setRuntimeApiKey } from "../services/ai/banks.service.js";
 
 // Controller Imports
 import {
@@ -3335,6 +3336,7 @@ router.get("/settings/env", requireAuth, async (req, res, next) => {
     });
     return res.json({
       GOOGLE_MAPS_API_KEY: envVars.GOOGLE_MAPS_API_KEY ? "********" : "",
+      GROQ_API_KEY: envVars.GROQ_API_KEY ? "********" : "",
       ARKESEL_API_KEY: envVars.ARKESEL_API_KEY ? "********" : "",
       ARKESEL_SENDER_ID: envVars.ARKESEL_SENDER_ID ? "********" : "",
       GREEN_API_ID_INSTANCE: envVars.GREEN_API_ID_INSTANCE || "",
@@ -3372,7 +3374,7 @@ router.post("/settings/env", requireAuth, async (req, res, next) => {
 
     const updates = req.body;
     const allowedKeys = [
-      "GOOGLE_MAPS_API_KEY", "ARKESEL_API_KEY", "ARKESEL_SENDER_ID", "GREEN_API_ID_INSTANCE", "GREEN_API_TOKEN_INSTANCE",
+      "GOOGLE_MAPS_API_KEY", "GROQ_API_KEY", "ARKESEL_API_KEY", "ARKESEL_SENDER_ID", "GREEN_API_ID_INSTANCE", "GREEN_API_TOKEN_INSTANCE",
       "SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "SMTP_FROM", "SMTP_SECURE",
       "TEMPLATE_SALES_ORDER", "TEMPLATE_PURCHASE_ORDER", "TEMPLATE_SERVICE_ORDER", 
       "TEMPLATE_MAINTENANCE_JOB", "TEMPLATE_PAYMENT_VOUCHER"
@@ -3389,6 +3391,9 @@ router.post("/settings/env", requireAuth, async (req, res, next) => {
           lines.push(`${key}=${val}`);
         }
         process.env[key] = val; // Update in-memory
+        if (key === "GROQ_API_KEY") {
+          setRuntimeApiKey(val);
+        }
       }
     }
     

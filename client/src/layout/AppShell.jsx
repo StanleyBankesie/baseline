@@ -80,6 +80,7 @@ import {
   Home,
 } from "lucide-react";
 import FloatingChat from "../components/chat/FloatingChat.jsx";
+import BanksAiFloating from "../components/ai/BanksAiFloating.jsx";
 import FloatingCreateButton from "../components/FloatingCreateButton.jsx";
 import useSocket from "../hooks/useSocket.js";
 
@@ -2009,6 +2010,7 @@ export default function AppShell() {
       ) : null}
       <PaymentPackageModal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)} companyId={user?.company_id || user?.companyIds?.[0]} />
       <FloatingChat />
+      <BanksAiFloating />
     </div>
   );
 }

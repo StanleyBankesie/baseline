@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { api } from "../../../api/client.js";
 import { toast } from "react-toastify";
 import { useAuth } from "../../../auth/AuthContext.jsx";
+import { Brain, Sparkles, CheckCircle, ShieldCheck } from "lucide-react";
 
 export default function GeneralSettingsPage() {
   const { user } = useAuth();
@@ -49,6 +50,13 @@ export default function GeneralSettingsPage() {
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState("");
   const [googleMapsLoading, setGoogleMapsLoading] = useState(false);
   const [googleMapsSaving, setGoogleMapsSaving] = useState(false);
+
+  // Groq AI Configuration State
+  const [groqKey, setGroqKey] = useState("");
+  const [groqStatus, setGroqStatus] = useState(null);
+  const [groqSaving, setGroqSaving] = useState(false);
+  const [groqTesting, setGroqTesting] = useState(false);
+  const [groqModel, setGroqModel] = useState("llama-3.3-70b-versatile");
 
   useEffect(() => {
     let mounted = true;
@@ -103,6 +111,16 @@ export default function GeneralSettingsPage() {
 
     (async () => {
       try {
+        const res = await api.get("/ai/status");
+        if (mounted && res.data) {
+          setGroqStatus(res.data);
+          if (res.data.defaultModel) setGroqModel(res.data.defaultModel);
+        }
+      } catch {}
+    })();
+
+    (async () => {
+      try {
         const res = await api.get("/admin/settings/announcements");
         if (mounted && res?.data?.announcements !== undefined) {
           setAnnouncements(res.data.announcements);
@@ -118,9 +136,9 @@ export default function GeneralSettingsPage() {
       const res = await api.get("/admin/settings/login-bg-info");
       if (res.data) {
         const hasBackground = !!res?.data?.hasBackground;
-        const version = res?.data?.updatedAt || Date.now();
-        setLoginBackgroundVersion(String(version || ""));
-        setLoginBackgroundUrl(hasBackground ? `/api/admin/settings/login-background?v=${encodeURIComponent(String(version))}` : "");
+        const version = res?.data?.version ? `?v=${res.data.version}` : "";
+        setLoginBackgroundUrl(hasBackground ? `/api/admin/settings/login-background${version}` : "");
+        setLoginBackgroundVersion(res?.data?.version || "");
       }
     } catch {
       setLoginBackgroundUrl("");
@@ -199,11 +217,20 @@ export default function GeneralSettingsPage() {
       const res = await api.post("/admin/email/test", { to: emailTestTo || undefined });
       const configured = !!res?.data?.configured;
       const sent = !!res?.data?.sent;
-      if (!configured) toast.error("Mailer not configured");
-      else if (sent) toast.success("Test email sent");
-      else toast.error("Mailer configured but send failed");
-    } catch { toast.error("Failed to send test email"); }
-    finally { setEmailTesting(false); }
+      const error = res?.data?.error;
+      if (sent) {
+        toast.success(`Test email sent to ${res?.data?.to || emailTestTo || "your address"}`);
+      } else if (!configured) {
+        toast.error("SMTP is not configured. Set SMTP_HOST and credentials first.");
+      } else {
+        toast.error(error ? `Failed to send: ${error}` : "Failed to send test email");
+      }
+    } catch (e) {
+      const msg = e?.response?.data?.error || e?.response?.data?.message || e?.message || "Failed to send test email";
+      toast.error(msg);
+    } finally {
+      setEmailTesting(false);
+    }
   }
 
   async function saveAnnouncements() {
@@ -224,7 +251,6 @@ export default function GeneralSettingsPage() {
       await api.post("/admin/settings/env", envVars);
       toast.success("Environment configurations saved successfully.");
       
-      // Reload the variables to get the "********" masked values from the backend
       const res = await api.get("/admin/settings/env");
       setEnvVars(prev => ({
         ...prev,
@@ -254,135 +280,260 @@ export default function GeneralSettingsPage() {
     } finally { setGoogleMapsSaving(false); }
   }
 
+  async function saveGroqSettings() {
+    if (!groqKey.trim()) return;
+    try {
+      setGroqSaving(true);
+      const res = await api.post("/ai/save-key", { apiKey: groqKey.trim() });
+      toast.success(res.data?.message || "Groq AI Key verified and saved successfully!");
+      setGroqKey("");
+      const statusRes = await api.get("/ai/status");
+      setGroqStatus(statusRes.data);
+    } catch (e) {
+      toast.error(e?.response?.data?.message || e?.message || "Failed to verify Groq key");
+    } finally {
+      setGroqSaving(false);
+    }
+  }
+
+  async function testGroqConnection() {
+    try {
+      setGroqTesting(true);
+      const res = await api.get("/ai/status");
+      if (res.data?.connected) {
+        toast.success("Groq Cloud AI Engine is connected and responding!");
+      } else {
+        toast.warn(res.data?.statusMessage || "Groq API key is not yet configured.");
+      }
+      setGroqStatus(res.data);
+    } catch (e) {
+      toast.error("Failed to test connection to Groq API.");
+    } finally {
+      setGroqTesting(false);
+    }
+  }
+
   if (user?.id !== 1) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-slate-500">
         <h2 className="text-xl font-bold mb-2 text-slate-700">Access Denied</h2>
-        <p>You must be a system administrator (User ID: 1) to view this page.</p>
+        <p className="text-sm">You do not have permission to view System Configurations.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 pb-12">
-      <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg">
-          <div className="flex justify-between items-center text-white">
-            <div>
-              <h1 className="text-2xl font-bold dark:text-brand-300">General Settings</h1>
-              <p className="text-sm mt-1">Configure global application variables</p>
-            </div>
-            <button onClick={() => window.history.back()} className="btn btn-secondary">Back</button>
-          </div>
+    <div className="p-6 max-w-4xl space-y-6">
+      <div>
+        <div className="text-xs text-slate-500 mb-1">
+          <Link to="/system-configuration" className="text-brand-600 hover:underline">System Configuration</Link> / General Settings
         </div>
+        <h1 className="text-2xl font-bold text-slate-800">General Settings</h1>
+        <p className="text-sm text-slate-500">Manage environment configurations, API integrations, AI copilot, and system defaults.</p>
       </div>
 
-      <div className="space-y-4">
-        
-          {/* Upcoming Announcements Section */}
-          <div className="card border-l-4 border-l-brand">
-            <div className="card-body space-y-3">
-              <div className="flex justify-between items-start gap-4">
+      <div className="space-y-6">
+        {/* Groq AI Configuration ("Banks" AI Copilot) Card */}
+        <div className="card border-brand-200 dark:border-brand-800 shadow-sm bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-900/80">
+          <div className="card-body space-y-4">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-brand-900 text-white flex items-center justify-center shadow-inner">
+                  <Brain size={22} className="text-primary animate-pulse" />
+                </div>
                 <div>
-                  <div className="text-lg font-semibold text-gray-800">Upcoming Announcements</div>
-                  <div className="text-sm text-gray-500">
-                    Enter announcements to be displayed on the login page widget.
+                  <div className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <span>Groq AI Configuration ("Banks" AI)</span>
+                  </div>
+                  <div className="text-xs text-slate-500">
+                    Configure your Groq Cloud API Key to empower "Banks" with ultra-fast LLM inference and live database analysis.
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-4 pt-3">
-                <textarea
-                  className="input w-full min-h-[100px]"
-                  placeholder="Enter upcoming announcements here..."
-                  value={announcements}
-                  onChange={(e) => setAnnouncements(e.target.value)}
-                ></textarea>
-                
-                <div className="flex justify-end pt-3">
+              <div className="flex items-center gap-2">
+                {groqStatus?.isConfigured ? (
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 px-3 py-1 rounded-full border border-emerald-300 dark:border-emerald-800">
+                    <CheckCircle size={13} className="text-emerald-500" /> Connected ({groqStatus.maskedKey})
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 px-3 py-1 rounded-full border border-amber-300 dark:border-amber-800">
+                    Key Not Configured
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  Groq API Key {groqStatus?.isConfigured && `(Current: ${groqStatus.maskedKey})`}
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="password"
+                    placeholder="Enter gsk_... key"
+                    className="input w-full text-xs"
+                    value={groqKey}
+                    onChange={(e) => setGroqKey(e.target.value)}
+                    disabled={groqSaving}
+                  />
                   <button
-                    className="btn btn-primary"
-                    onClick={saveAnnouncements}
-                    disabled={announcementsSaving}
+                    type="button"
+                    className="btn-primary whitespace-nowrap text-xs px-4"
+                    onClick={saveGroqSettings}
+                    disabled={groqSaving || !groqKey.trim()}
                   >
-                    {announcementsSaving ? "Saving..." : "Save Announcements"}
+                    {groqSaving ? "Verifying..." : "Save Key"}
                   </button>
+                </div>
+                <div className="mt-1.5 flex items-center justify-between text-[11px] text-slate-400">
+                  <span>Get your free API key at <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer" className="text-brand-600 dark:text-brand-400 underline font-medium">console.groq.com/keys</a></span>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  Active Model & Capabilities
+                </label>
+                <select
+                  value={groqModel}
+                  onChange={(e) => setGroqModel(e.target.value)}
+                  className="input w-full text-xs"
+                >
+                  <optgroup label="🔥 High Intelligence & Deep Reasoning (Recommended)">
+                    <option value="openai/gpt-oss-120b">GPT-OSS 120B (Best: Deep ERP Reasoning, Complex Analytics & Tool Calling)</option>
+                    <option value="groq/compound">Groq Compound (Multi-Agent Fast Synthesis & Reasoning)</option>
+                    <option value="qwen/qwen3.6-27b">Qwen 3.6 27B (High Capability Enterprise & Code Reasoning)</option>
+                    <option value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile (Meta Flagship Enterprise Model)</option>
+                  </optgroup>
+                  <optgroup label="⚡ Ultra-Fast & Lightweight">
+                    <option value="openai/gpt-oss-20b">GPT-OSS 20B (High Speed & Accurate Tool Execution)</option>
+                    <option value="groq/compound-mini">Groq Compound Mini (Sub-Second Response Time)</option>
+                    <option value="llama-3.1-8b-instant">Llama 3.1 8B Instant (Ultra-Fast Lightweight)</option>
+                    <option value="allam-2-7b">ALLaM 2 7B (Fast Conversational Assistant)</option>
+                  </optgroup>
+                  <optgroup label="🌐 Specialized & Multilingual">
+                    <option value="canopylabs/orpheus-v1-english">Canopy Orpheus v1 (Specialized English Reasoning)</option>
+                    <option value="mixtral-8x7b-32768">Mixtral 8x7B (32k Extended Context Window)</option>
+                  </optgroup>
+                </select>
+                <div className="mt-2 flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="btn-outline text-xs py-1 px-2.5 flex items-center gap-1"
+                    onClick={testGroqConnection}
+                    disabled={groqTesting}
+                  >
+                    <Sparkles size={12} className="text-primary" />
+                    <span>{groqTesting ? "Testing..." : "Test AI Connection"}</span>
+                  </button>
+                  <span className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                    <ShieldCheck size={12} /> Safe read-only ERP database tools enabled
+                  </span>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* SMS and WhatsApp Configuration Section */}
-        <div className="card border-l-4 border-l-brand">
-          <div className="card-body space-y-3">
-            <div className="flex justify-between items-start gap-4">
-              <div>
-                <div className="text-lg font-semibold text-gray-800">SMS & WhatsApp APIs</div>
-                <div className="text-sm text-slate-500">Configure credentials for Arkesel (SMS) and Meta Cloud API (WhatsApp)</div>
-              </div>
+        <div className="card">
+          <div className="card-body space-y-4">
+            <div>
+              <div className="text-lg font-semibold">Global Broadcast / Announcements</div>
+              <div className="text-sm text-slate-500">Post a message that displays on the dashboard or header for all system users.</div>
             </div>
+            <div>
+              <textarea
+                className="input w-full h-24 resize-none"
+                placeholder="e.g. System maintenance scheduled for tonight at 11:00 PM."
+                value={announcements}
+                onChange={e => setAnnouncements(e.target.value)}
+                disabled={announcementsSaving}
+              />
+            </div>
+            <div className="flex justify-end">
+              <button type="button" className="btn-primary" onClick={saveAnnouncements} disabled={announcementsSaving}>
+                {announcementsSaving ? "Saving..." : "Save Announcement"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-body space-y-4">
+            <div>
+              <div className="text-lg font-semibold">Communication & Service Credentials</div>
+              <div className="text-sm text-slate-500">Configure external API integrations and keys for SMS, WhatsApp, and Mail.</div>
+            </div>
+
             {envLoading ? (
               <div className="text-sm text-slate-500">Loading configurations...</div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-medium text-slate-700">Arkesel API Key</label>
-                  <input className="input w-full" value={envVars.ARKESEL_API_KEY} onChange={e => setEnvVars(p => ({ ...p, ARKESEL_API_KEY: e.target.value }))} disabled={envSaving} />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-700">Arkesel Sender ID</label>
-                  <input className="input w-full" value={envVars.ARKESEL_SENDER_ID} onChange={e => setEnvVars(p => ({ ...p, ARKESEL_SENDER_ID: e.target.value }))} disabled={envSaving} />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-700">Green API Id Instance</label>
-                  <input className="input w-full" value={envVars.GREEN_API_ID_INSTANCE} onChange={e => setEnvVars(p => ({ ...p, GREEN_API_ID_INSTANCE: e.target.value }))} disabled={envSaving} />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-700">Green API Token Instance</label>
-                  <input className="input w-full" value={envVars.GREEN_API_TOKEN_INSTANCE} onChange={e => setEnvVars(p => ({ ...p, GREEN_API_TOKEN_INSTANCE: e.target.value }))} disabled={envSaving} />
-                </div>
-              </div>
-            )}
-            {!envLoading && (
-              <div className="mt-8 border-t border-gray-100 pt-6">
-                <div className="text-lg font-semibold text-gray-800 mb-2">Email Configuration (SMTP)</div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div>
-                    <label className="text-xs font-medium text-slate-700">SMTP Host</label>
-                    <input className="input w-full" value={envVars.SMTP_HOST} onChange={e => setEnvVars(p => ({ ...p, SMTP_HOST: e.target.value }))} disabled={envSaving} />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-slate-700">SMTP Port</label>
-                    <input type="number" className="input w-full" value={envVars.SMTP_PORT} onChange={e => setEnvVars(p => ({ ...p, SMTP_PORT: e.target.value }))} disabled={envSaving} />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-slate-700">SMTP Secure (SSL/TLS)</label>
-                    <select className="input w-full" value={envVars.SMTP_SECURE} onChange={e => setEnvVars(p => ({ ...p, SMTP_SECURE: e.target.value }))} disabled={envSaving}>
-                      <option value="true">Yes</option>
-                      <option value="false">No</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-slate-700">SMTP User</label>
-                    <input className="input w-full" value={envVars.SMTP_USER} onChange={e => setEnvVars(p => ({ ...p, SMTP_USER: e.target.value }))} disabled={envSaving} />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-slate-700">SMTP Password</label>
-                    <input type="password" placeholder="********" className="input w-full" value={envVars.SMTP_PASS} onChange={e => setEnvVars(p => ({ ...p, SMTP_PASS: e.target.value }))} disabled={envSaving} />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-slate-700">From Address</label>
-                    <input className="input w-full" placeholder="noreply@omnisuite.com" value={envVars.SMTP_FROM} onChange={e => setEnvVars(p => ({ ...p, SMTP_FROM: e.target.value }))} disabled={envSaving} />
+              <div className="space-y-4">
+                <div className="border-b pb-3">
+                  <div className="font-medium text-slate-700 mb-2">Arkesel SMS Gateway</div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-medium text-slate-700">API Key</label>
+                      <input type="password" placeholder={envVars.ARKESEL_API_KEY === "********" ? "•••••••• (unchanged)" : ""} className="input w-full" value={envVars.ARKESEL_API_KEY === "********" ? "" : envVars.ARKESEL_API_KEY} onChange={e => setEnvVars(p => ({ ...p, ARKESEL_API_KEY: e.target.value }))} disabled={envSaving} />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-slate-700">Sender ID</label>
+                      <input type="text" placeholder={envVars.ARKESEL_SENDER_ID === "********" ? "•••••••• (unchanged)" : ""} className="input w-full" value={envVars.ARKESEL_SENDER_ID === "********" ? "" : envVars.ARKESEL_SENDER_ID} onChange={e => setEnvVars(p => ({ ...p, ARKESEL_SENDER_ID: e.target.value }))} disabled={envSaving} />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-            
-            {!envLoading && (
-              <div className="mt-8 border-t border-gray-100 pt-6">
-                <div className="text-lg font-semibold text-gray-800 mb-1">Notification Trigger Templates</div>
-                <div className="text-sm text-slate-500 mb-4">Available variables: {'{customer_name}'}, {'{document_type}'}, {'{document_no}'}, {'{amount}'}, {'{status}'}</div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <div className="border-b pb-3">
+                  <div className="font-medium text-slate-700 mb-2">Green API (WhatsApp)</div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-medium text-slate-700">ID Instance</label>
+                      <input type="text" className="input w-full" value={envVars.GREEN_API_ID_INSTANCE} onChange={e => setEnvVars(p => ({ ...p, GREEN_API_ID_INSTANCE: e.target.value }))} disabled={envSaving} />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-slate-700">Token Instance</label>
+                      <input type="password" placeholder={envVars.GREEN_API_TOKEN_INSTANCE === "********" ? "•••••••• (unchanged)" : ""} className="input w-full" value={envVars.GREEN_API_TOKEN_INSTANCE === "********" ? "" : envVars.GREEN_API_TOKEN_INSTANCE} onChange={e => setEnvVars(p => ({ ...p, GREEN_API_TOKEN_INSTANCE: e.target.value }))} disabled={envSaving} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-b pb-3">
+                  <div className="font-medium text-slate-700 mb-2">SMTP Mail Configuration</div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <label className="text-xs font-medium text-slate-700">Host</label>
+                      <input type="text" className="input w-full" value={envVars.SMTP_HOST} onChange={e => setEnvVars(p => ({ ...p, SMTP_HOST: e.target.value }))} disabled={envSaving} />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-slate-700">Port</label>
+                      <input type="text" className="input w-full" value={envVars.SMTP_PORT} onChange={e => setEnvVars(p => ({ ...p, SMTP_PORT: e.target.value }))} disabled={envSaving} />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-slate-700">Secure (SSL/TLS)</label>
+                      <select className="input w-full" value={envVars.SMTP_SECURE} onChange={e => setEnvVars(p => ({ ...p, SMTP_SECURE: e.target.value }))} disabled={envSaving}>
+                        <option value="false">False (Port 587)</option>
+                        <option value="true">True (Port 465)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-slate-700">Username</label>
+                      <input type="text" className="input w-full" value={envVars.SMTP_USER} onChange={e => setEnvVars(p => ({ ...p, SMTP_USER: e.target.value }))} disabled={envSaving} />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-slate-700">Password</label>
+                      <input type="password" placeholder={envVars.SMTP_PASS === "********" ? "•••••••• (unchanged)" : ""} className="input w-full" value={envVars.SMTP_PASS === "********" ? "" : envVars.SMTP_PASS} onChange={e => setEnvVars(p => ({ ...p, SMTP_PASS: e.target.value }))} disabled={envSaving} />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-slate-700">From Address</label>
+                      <input type="text" className="input w-full" value={envVars.SMTP_FROM} onChange={e => setEnvVars(p => ({ ...p, SMTP_FROM: e.target.value }))} disabled={envSaving} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="font-medium text-slate-700">Messaging Templates</div>
                   <div>
                     <label className="text-xs font-medium text-slate-700">Sales Order Template</label>
                     <textarea className="input w-full h-24 resize-none" value={envVars.TEMPLATE_SALES_ORDER} onChange={e => setEnvVars(p => ({ ...p, TEMPLATE_SALES_ORDER: e.target.value }))} disabled={envSaving}></textarea>
@@ -413,8 +564,6 @@ export default function GeneralSettingsPage() {
             </div>
           </div>
         </div>
-
-
 
         <div className="card">
           <div className="card-body space-y-3">
@@ -548,10 +697,10 @@ function ComplianceTemplateSection() {
     async function load() {
       try {
         setLoading(true);
-        const res = await api.get("/admin/settings/compliance-template");
-        setTemplate(res?.data?.template || "Your {{compliance_type}} for {{vehicle_reg}} is {{status}}. Please renew as soon as possible.");
+        const res = await api.get("/transport/templates/compliance");
+        setTemplate(res.data?.template || "");
       } catch (err) {
-        toast.error("Failed to load compliance template");
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -559,42 +708,39 @@ function ComplianceTemplateSection() {
     load();
   }, []);
 
-  async function save() {
+  async function handleSave() {
     try {
       setSaving(true);
-      await api.post("/admin/settings/compliance-template", { template });
-      toast.success("Compliance template saved successfully");
+      await api.put("/transport/templates/compliance", { template });
+      toast.success("Compliance template updated");
     } catch (err) {
-      toast.error("Failed to save compliance template");
+      toast.error(err.response?.data?.error || "Failed to update compliance template");
     } finally {
       setSaving(false);
     }
   }
 
+  if (loading) return <div className="text-sm text-slate-500">Loading template...</div>;
+
   return (
-    <div className="space-y-4">
-      {loading ? (
-        <div className="text-sm text-slate-500">Loading...</div>
-      ) : (
-        <>
-          <div className="bg-blue-50 border border-blue-200 p-3 rounded text-sm text-blue-800">
-            <strong>Available Placeholders:</strong> <code>{"{{vehicle_reg}}"}</code>, <code>{"{{compliance_type}}"}</code>, <code>{"{{status}}"}</code>, <code>{"{{expiry_date}}"}</code>
-          </div>
-          <textarea
-            className="input w-full min-h-[100px]"
-            value={template}
-            onChange={(e) => setTemplate(e.target.value)}
-            placeholder="Template message..."
-          ></textarea>
-          <button
-            className="btn-primary"
-            onClick={save}
-            disabled={saving}
-          >
-            {saving ? "Saving..." : "Save Template"}
-          </button>
-        </>
-      )}
+    <div className="space-y-3">
+      <textarea
+        className="input w-full h-24"
+        value={template}
+        onChange={(e) => setTemplate(e.target.value)}
+        placeholder="Enter template..."
+      />
+      <div className="flex justify-between items-center text-xs text-slate-500">
+        <div>Variables: {"{registration_number}"}, {"{compliance_type}"}, {"{expiry_date}"}, {"{days_left}"}</div>
+        <button
+          type="button"
+          className="btn-primary"
+          onClick={handleSave}
+          disabled={saving}
+        >
+          {saving ? "Saving..." : "Save Template"}
+        </button>
+      </div>
     </div>
   );
 }
@@ -608,10 +754,10 @@ function ServicingTemplateSection() {
     async function load() {
       try {
         setLoading(true);
-        const res = await api.get("/admin/settings/servicing-template");
-        setTemplate(res?.data?.template || "Your vehicle {{vehicle_reg}} is due for {{service_type}} servicing. Please schedule an appointment.");
+        const res = await api.get("/transport/templates/servicing");
+        setTemplate(res.data?.template || "");
       } catch (err) {
-        toast.error("Failed to load servicing template");
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -619,42 +765,39 @@ function ServicingTemplateSection() {
     load();
   }, []);
 
-  async function save() {
+  async function handleSave() {
     try {
       setSaving(true);
-      await api.post("/admin/settings/servicing-template", { template });
-      toast.success("Servicing template saved successfully");
+      await api.put("/transport/templates/servicing", { template });
+      toast.success("Servicing template updated");
     } catch (err) {
-      toast.error("Failed to save servicing template");
+      toast.error(err.response?.data?.error || "Failed to update servicing template");
     } finally {
       setSaving(false);
     }
   }
 
+  if (loading) return <div className="text-sm text-slate-500">Loading template...</div>;
+
   return (
-    <div className="space-y-4">
-      {loading ? (
-        <div className="text-sm text-slate-500">Loading...</div>
-      ) : (
-        <>
-          <div className="bg-blue-50 border border-blue-200 p-3 rounded text-sm text-blue-800">
-            <strong>Available Placeholders:</strong> <code>{"{{vehicle_reg}}"}</code>, <code>{"{{service_type}}"}</code>, <code>{"{{due_date}}"}</code>
-          </div>
-          <textarea
-            className="input w-full min-h-[100px]"
-            value={template}
-            onChange={(e) => setTemplate(e.target.value)}
-            placeholder="Template message..."
-          ></textarea>
-          <button
-            className="btn-primary"
-            onClick={save}
-            disabled={saving}
-          >
-            {saving ? "Saving..." : "Save Template"}
-          </button>
-        </>
-      )}
+    <div className="space-y-3">
+      <textarea
+        className="input w-full h-24"
+        value={template}
+        onChange={(e) => setTemplate(e.target.value)}
+        placeholder="Enter template..."
+      />
+      <div className="flex justify-between items-center text-xs text-slate-500">
+        <div>Variables: {"{registration_number}"}, {"{current_mileage}"}, {"{next_service_mileage}"}, {"{due_date}"}</div>
+        <button
+          type="button"
+          className="btn-primary"
+          onClick={handleSave}
+          disabled={saving}
+        >
+          {saving ? "Saving..." : "Save Template"}
+        </button>
+      </div>
     </div>
   );
 }

@@ -8,7 +8,7 @@ import {
   LayoutDashboard, TrendingUp, Package, ShoppingCart, Users, Wrench,
   Factory, FolderKanban, Truck, HeadphonesIcon, Zap, Shield,
   Layers, Target, PieChart, FileText, Database, Brain, Bell,
-  Settings, ChevronDown, ArrowLeft
+  Settings, ChevronDown, ArrowLeft, Sparkles
 } from "lucide-react";
 
 import { usePermission } from "../../../auth/PermissionContext.jsx";
@@ -30,9 +30,11 @@ const AdminAnalytics        = lazy(() => import("./AdminAnalytics.jsx"));
 const CrossModuleAnalytics  = lazy(() => import("./CrossModuleAnalytics.jsx"));
 const KPICenter             = lazy(() => import("./KPICenter.jsx"));
 const DashboardList         = lazy(() => import("./dashboards/DashboardList.jsx"));
+const DashboardForm         = lazy(() => import("./dashboards/DashboardForm.jsx"));
 const ReportCenter          = lazy(() => import("./ReportCenter.jsx"));
 const DataExplorer          = lazy(() => import("./DataExplorer.jsx"));
 const AIInsights            = lazy(() => import("./AIInsights.jsx"));
+const BanksAiPage           = lazy(() => import("./BanksAiPage.jsx"));
 const AlertsCenter          = lazy(() => import("./AlertsCenter.jsx"));
 const BISettings            = lazy(() => import("./BISettings.jsx"));
 
@@ -146,6 +148,10 @@ const NAV_GROUPS = [
           { label: "View", path: "/business-intelligence/ai-insights", type: "outline" },
           { label: "New", path: "/business-intelligence/ai-insights/new", type: "primary" }
         ],   icon: Brain },
+      { label: "Ask Banks", path: "/business-intelligence/banks-ai",
+        actions: [
+          { label: "Open Studio", path: "/business-intelligence/banks-ai", type: "primary" }
+        ], icon: Sparkles },
       { label: "Alerts Center",  path: "/business-intelligence/alerts",
         actions: [
           { label: "View", path: "/business-intelligence/alerts", type: "outline" },
@@ -382,9 +388,12 @@ export default function BusinessIntelligenceHome() {
             <Route path="/cross-module"         element={<div className="p-6"><CrossModuleAnalytics /></div>} />
             <Route path="/kpi-center"           element={<div className="p-6"><KPICenter /></div>} />
             <Route path="/dashboards"           element={<div className="p-6"><DashboardList /></div>} />
+            <Route path="/dashboards/new"       element={<div className="p-6"><DashboardForm /></div>} />
+            <Route path="/dashboards/:id/edit"  element={<div className="p-6"><DashboardForm /></div>} />
             <Route path="/report-center"        element={<div className="p-6"><ReportCenter /></div>} />
             <Route path="/data-explorer"        element={<div className="p-6"><DataExplorer /></div>} />
             <Route path="/ai-insights"          element={<div className="p-6"><AIInsights /></div>} />
+            <Route path="/banks-ai"             element={<div className="p-6"><BanksAiPage /></div>} />
             <Route path="/alerts"               element={<div className="p-6"><AlertsCenter /></div>} />
             <Route path="/settings"             element={<div className="p-6"><BISettings /></div>} />
           </Routes>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { useAuth } from "../../auth/AuthContext";
@@ -6,7 +6,7 @@ import api from "../../api/client";
 
 /**
  * SocialFeedPage / Post History Page
- * Displays the historical company and branch posts with search, filter tabs, likes, and comments.
+ * Displays the historical company and branch posts with search, filter tabs, likers modal, and comment replies.
  */
 export default function SocialFeedPage() {
   const navigate = useNavigate();
@@ -35,7 +35,15 @@ export default function SocialFeedPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [openCommentsPostId, setOpenCommentsPostId] = useState(focusId || null);
   const [commentInputs, setCommentInputs] = useState({});
+  const [replyingTo, setReplyingTo] = useState({}); // { [postId]: { commentId, userName } }
   const [submittingComment, setSubmittingComment] = useState({});
+
+  // Likes Modal state
+  const [likesModalPost, setLikesModalPost] = useState(null); // post object or null
+  const [likesList, setLikesList] = useState([]);
+  const [loadingLikes, setLoadingLikes] = useState(false);
+
+  const commentInputRefs = useRef({});
 
   // Sync to localStorage
   useEffect(() => {
@@ -60,6 +68,11 @@ export default function SocialFeedPage() {
       const items = Array.isArray(data.data) ? data.data : [];
       if (items.length > 0) {
         setPosts(items);
+        if (cacheKey) {
+          try {
+            localStorage.setItem(cacheKey, JSON.stringify(items));
+          } catch {}
+        }
       }
     } catch (err) {
       console.error("Error loading post history:", err);
@@ -67,44 +80,129 @@ export default function SocialFeedPage() {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [userId, cacheKey]);
 
   useEffect(() => {
     fetchPosts();
   }, [fetchPosts]);
 
-  // Like / Unlike handler
+  // Like / Unlike handler with immediate persistence
   const handleToggleLike = async (post) => {
-    const isLiked = post.user_liked;
+    const isLiked = Boolean(post.user_liked);
     const activeUid = userId || 1;
 
-    // Optimistic UI update
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === post.id
-          ? {
-              ...p,
-              user_liked: !isLiked,
-              like_count: Math.max(0, (p.like_count || 0) + (isLiked ? -1 : 1)),
-            }
-          : p
-      )
+    // Optimistic UI update & immediate cache sync
+    const optimisticPosts = posts.map((p) =>
+      p.id === post.id
+        ? {
+            ...p,
+            user_liked: !isLiked,
+            like_count: Math.max(0, (Number(p.like_count) || 0) + (isLiked ? -1 : 1)),
+          }
+        : p
     );
+    setPosts(optimisticPosts);
+    if (cacheKey) {
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify(optimisticPosts));
+      } catch {}
+    }
 
     try {
+      let resp;
       if (isLiked) {
-        await api.delete(`/social-feed/${post.id}/like`, {
+        resp = await api.delete(`/social-feed/${post.id}/like`, {
           headers: { "x-user-id": String(activeUid) },
         });
       } else {
-        await api.post(`/social-feed/${post.id}/like`, {}, {
+        resp = await api.post(`/social-feed/${post.id}/like`, {}, {
           headers: { "x-user-id": String(activeUid) },
+        });
+      }
+
+      if (resp?.data && resp.data.like_count !== undefined) {
+        const confirmedLikes = Number(resp.data.like_count);
+        const confirmedUserLiked = resp.data.user_liked !== undefined ? Boolean(resp.data.user_liked) : !isLiked;
+
+        setPosts((prev) => {
+          const next = prev.map((p) =>
+            p.id === post.id
+              ? {
+                  ...p,
+                  user_liked: confirmedUserLiked,
+                  like_count: confirmedLikes,
+                }
+              : p
+          );
+          if (cacheKey) {
+            try {
+              localStorage.setItem(cacheKey, JSON.stringify(next));
+            } catch {}
+          }
+          return next;
         });
       }
     } catch (err) {
       console.error("Error liking post:", err);
       fetchPosts();
     }
+  };
+
+  // Open Likers Modal
+  const handleOpenLikesModal = async (post) => {
+    setLikesModalPost(post);
+    setLikesList([]);
+    setLoadingLikes(true);
+    const activeUid = userId || 1;
+    try {
+      const resp = await api.get(`/social-feed/${post.id}/likes`, {
+        headers: { "x-user-id": String(activeUid) },
+      });
+      const data = resp?.data?.data || resp?.data || [];
+      setLikesList(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Error fetching likers:", err);
+    } finally {
+      setLoadingLikes(false);
+    }
+  };
+
+  // Trigger Reply to a Comment
+  const handleStartReply = (postId, comment) => {
+    const commenterName = comment.full_name || comment.created_by_name || "User";
+    setOpenCommentsPostId(postId);
+    setReplyingTo((prev) => ({
+      ...prev,
+      [postId]: {
+        commentId: comment.id,
+        userName: commenterName,
+      },
+    }));
+
+    const currentText = commentInputs[postId] || "";
+    const prefix = `@${commenterName} `;
+    if (!currentText.startsWith(prefix)) {
+      setCommentInputs((prev) => ({
+        ...prev,
+        [postId]: prefix + currentText,
+      }));
+    }
+
+    // Focus input
+    setTimeout(() => {
+      if (commentInputRefs.current[postId]) {
+        commentInputRefs.current[postId].focus();
+      }
+    }, 100);
+  };
+
+  // Cancel Reply
+  const handleCancelReply = (postId) => {
+    setReplyingTo((prev) => {
+      const next = { ...prev };
+      delete next[postId];
+      return next;
+    });
   };
 
   // Add Comment handler
@@ -145,6 +243,7 @@ export default function SocialFeedPage() {
       );
 
       setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
+      handleCancelReply(postId);
     } catch (err) {
       console.error("Error adding comment:", err);
       alert("Failed to submit comment. Please try again.");
@@ -163,6 +262,26 @@ export default function SocialFeedPage() {
     } catch {
       return "Recently";
     }
+  };
+
+  // Render formatted comment text highlighting @mentions
+  const renderCommentText = (text) => {
+    if (!text) return "";
+    const mentionRegex = /^(@[^\s:]+)\s*(.*)/s;
+    const match = text.match(mentionRegex);
+    if (match) {
+      const mention = match[1];
+      const rest = match[2];
+      return (
+        <span>
+          <span className="inline-block px-1.5 py-0.5 rounded-md bg-brand-50 text-brand-700 font-semibold text-[11px] mr-1.5">
+            {mention}
+          </span>
+          {rest}
+        </span>
+      );
+    }
+    return text;
   };
 
   // Filter posts based on active tab and search query
@@ -327,6 +446,7 @@ export default function SocialFeedPage() {
         {filteredPosts.map((post) => {
           const isCommentsOpen = openCommentsPostId === post.id;
           const commentsList = post.comments || [];
+          const currentReplying = replyingTo[post.id];
 
           return (
             <article
@@ -387,34 +507,52 @@ export default function SocialFeedPage() {
                 )}
               </div>
 
-              {/* Stats Bar */}
-              <div className="px-5 py-2.5 bg-slate-50/50 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
-                <div className="flex items-center gap-4">
-                  <span className="flex items-center gap-1 font-medium">
-                    <span>👍</span> {post.like_count || 0} {post.like_count === 1 ? "like" : "likes"}
-                  </span>
-                  <span className="flex items-center gap-1 font-medium">
-                    <span>💬</span> {post.comment_count || 0} {post.comment_count === 1 ? "comment" : "comments"}
-                  </span>
+              {/* Stats Bar with Prominent Badges */}
+              <div className="px-5 py-3 bg-slate-50 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {/* High visibility clickable Likes badge */}
+                  <button
+                    type="button"
+                    onClick={() => handleOpenLikesModal(post)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-bold text-xs border border-blue-200 dark:border-blue-800 transition cursor-pointer shadow-2xs"
+                    title="Click to view users who liked this post"
+                  >
+                    <span>👍</span>
+                    <span>{post.like_count || 0} {post.like_count === 1 ? "Like" : "Likes"}</span>
+                    <span className="text-[10px] text-blue-500 font-normal ml-0.5">• View</span>
+                  </button>
+
+                  {/* High visibility Comments badge */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenCommentsPostId(isCommentsOpen ? null : post.id)
+                    }
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs border border-slate-200 dark:border-slate-700 transition cursor-pointer shadow-2xs"
+                  >
+                    <span>💬</span>
+                    <span>{post.comment_count || 0} {post.comment_count === 1 ? "Comment" : "Comments"}</span>
+                  </button>
                 </div>
-                <span className="text-[11px] text-slate-400">
+
+                <span className="text-[11px] font-medium text-slate-400">
                   Post #{post.id}
                 </span>
               </div>
 
               {/* Action Buttons */}
-              <div className="px-5 py-2 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2">
+              <div className="px-5 py-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => handleToggleLike(post)}
                   className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold transition ${
                     post.user_liked
-                      ? "bg-amber-100/70 text-amber-900 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-300"
+                      ? "bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-200 border border-amber-300 shadow-2xs"
                       : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200"
                   }`}
                 >
                   <span>{post.user_liked ? "❤️" : "👍"}</span>
-                  {post.user_liked ? "Liked" : "Like"}
+                  <span>{post.user_liked ? "Liked" : "Like"} ({post.like_count || 0})</span>
                 </button>
 
                 <button
@@ -429,7 +567,7 @@ export default function SocialFeedPage() {
                   }`}
                 >
                   <span>💬</span>
-                  {isCommentsOpen ? "Hide Comments" : "Comments"}
+                  <span>{isCommentsOpen ? "Hide Comments" : "Comments"} ({post.comment_count || 0})</span>
                 </button>
               </div>
 
@@ -446,7 +584,7 @@ export default function SocialFeedPage() {
                       {commentsList.map((c) => (
                         <div
                           key={c.id}
-                          className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200/80 dark:border-slate-800 flex items-start gap-2.5 shadow-sm"
+                          className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200/80 dark:border-slate-800 flex items-start gap-2.5 shadow-sm group"
                         >
                           <img
                             src={c.profile_picture_url || "/default-avatar.png"}
@@ -460,14 +598,25 @@ export default function SocialFeedPage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2">
                               <h5 className="text-xs font-bold text-slate-800 dark:text-white truncate">
-                                {c.full_name || "User"}
+                                {c.full_name || c.created_by_name || "User"}
                               </h5>
-                              <span className="text-[10px] text-slate-400 whitespace-nowrap">
-                                {formatTime(c.created_at)}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-slate-400 whitespace-nowrap">
+                                  {formatTime(c.created_at)}
+                                </span>
+                                {/* Reply button */}
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartReply(post.id, c)}
+                                  className="text-[11px] font-semibold text-brand hover:underline flex items-center gap-0.5"
+                                  title={`Reply to ${c.full_name || "user"}`}
+                                >
+                                  <span>↩️</span> Reply
+                                </button>
+                              </div>
                             </div>
                             <p className="text-xs text-slate-700 dark:text-slate-300 mt-1 whitespace-pre-wrap">
-                              {c.comment_text}
+                              {renderCommentText(c.comment_text)}
                             </p>
                           </div>
                         </div>
@@ -475,14 +624,33 @@ export default function SocialFeedPage() {
                     </div>
                   )}
 
+                  {/* Active Reply Banner */}
+                  {currentReplying && (
+                    <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800 text-xs text-brand-800 dark:text-brand-300">
+                      <span>Replying to <span className="font-bold">{currentReplying.userName}</span></span>
+                      <button
+                        type="button"
+                        onClick={() => handleCancelReply(post.id)}
+                        className="text-slate-400 hover:text-slate-600 text-xs font-bold"
+                      >
+                        ✕ Cancel
+                      </button>
+                    </div>
+                  )}
+
                   {/* Comment Input */}
                   <form
                     onSubmit={(e) => handleAddComment(post.id, e)}
-                    className="flex items-center gap-2 pt-2"
+                    className="flex items-center gap-2 pt-1"
                   >
                     <input
+                      ref={(el) => (commentInputRefs.current[post.id] = el)}
                       type="text"
-                      placeholder="Write a comment..."
+                      placeholder={
+                        currentReplying
+                          ? `Reply to @${currentReplying.userName}...`
+                          : "Write a comment..."
+                      }
                       value={commentInputs[post.id] || ""}
                       onChange={(e) =>
                         setCommentInputs((prev) => ({
@@ -509,6 +677,93 @@ export default function SocialFeedPage() {
           );
         })}
       </div>
+
+      {/* Likers Modal */}
+      {likesModalPost && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4"
+          onClick={() => setLikesModalPost(null)}
+        >
+          <div
+            className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="p-4 px-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">👍</span>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Users who liked this post
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setLikesModalPost(null)}
+                className="w-7 h-7 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-4 max-h-80 overflow-y-auto space-y-3">
+              {loadingLikes ? (
+                <div className="py-8 text-center text-xs text-slate-500">
+                  <span className="inline-block animate-spin mr-2">🔄</span> Loading likers...
+                </div>
+              ) : likesList.length === 0 ? (
+                <div className="py-8 text-center text-xs text-slate-400">
+                  No likes found for this post yet.
+                </div>
+              ) : (
+                likesList.map((liker, idx) => (
+                  <div
+                    key={liker.user_id || idx}
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800"
+                  >
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={liker.profile_picture_url || "/default-avatar.png"}
+                        alt={liker.full_name || "User"}
+                        className="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-700"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = "/default-avatar.png";
+                        }}
+                      />
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-800 dark:text-white">
+                          {liker.full_name || liker.username || "User"}
+                        </h4>
+                        {liker.username && (
+                          <p className="text-[10px] text-slate-400">
+                            @{liker.username}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <span className="text-[10px] text-slate-400">
+                      {formatTime(liker.created_at)}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-3 px-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 text-right">
+              <button
+                type="button"
+                onClick={() => setLikesModalPost(null)}
+                className="px-4 py-1.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold hover:bg-slate-300"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
