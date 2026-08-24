@@ -9,7 +9,6 @@ import BanksAiModal from "./BanksAiModal.jsx";
 
 export default function BanksAiFloating() {
   const [isOpen, setIsOpen] = useState(false);
-  const [hasUnreadPulse, setHasUnreadPulse] = useState(true);
 
   // Global hotkey listener (Alt + B)
   useEffect(() => {
@@ -25,7 +24,6 @@ export default function BanksAiFloating() {
 
   const handleOpen = () => {
     setIsOpen(true);
-    setHasUnreadPulse(false);
   };
 
   return (
@@ -42,12 +40,6 @@ export default function BanksAiFloating() {
           {/* Banks Icon */}
           <div className="relative flex items-center justify-center">
             <img src={banksIcon} alt="Banks" className="w-5 h-5 object-contain" />
-            {hasUnreadPulse && (
-              <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary" />
-              </span>
-            )}
           </div>
 
           <span className="relative text-xs font-black tracking-wider uppercase text-white drop-shadow-sm flex items-center gap-1">

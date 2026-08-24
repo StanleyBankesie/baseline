@@ -10305,7 +10305,7 @@ router.post(
 
       let recipients = await query(
         `
-        SELECT DISTINCT u.id, u.email, u.phone,
+        SELECT DISTINCT u.id, u.email, COALESCE(u.telephone, '') AS phone,
           np.email_enabled, np.sms_enabled, np.whatsapp_enabled,
           u.created_at,
           cu.username AS created_by_name
@@ -10325,7 +10325,7 @@ router.post(
       if (!recipients.length) {
         recipients = await query(
           `
-          SELECT id, email, phone,
+          SELECT id, email, COALESCE(telephone, '') AS phone,
           1 as email_enabled, 0 as sms_enabled, 0 as whatsapp_enabled,
           created_at,
           u.username AS created_by_name

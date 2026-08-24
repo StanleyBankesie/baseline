@@ -51,12 +51,15 @@ export default function GeneralSettingsPage() {
   const [googleMapsLoading, setGoogleMapsLoading] = useState(false);
   const [googleMapsSaving, setGoogleMapsSaving] = useState(false);
 
-  // Groq AI Configuration State
+  // AI Configuration State (Groq & OpenRouter / 0x Alpha)
   const [groqKey, setGroqKey] = useState("");
-  const [groqStatus, setGroqStatus] = useState(null);
+  const [openRouterKey, setOpenRouterKey] = useState("");
+  const [aiStatus, setAiStatus] = useState(null);
   const [groqSaving, setGroqSaving] = useState(false);
   const [groqTesting, setGroqTesting] = useState(false);
-  const [groqModel, setGroqModel] = useState("llama-3.3-70b-versatile");
+  const [openRouterSaving, setOpenRouterSaving] = useState(false);
+  const [openRouterTesting, setOpenRouterTesting] = useState(false);
+  const [selectedAiModel, setSelectedAiModel] = useState("openai/gpt-oss-120b");
 
   useEffect(() => {
     let mounted = true;
@@ -113,8 +116,8 @@ export default function GeneralSettingsPage() {
       try {
         const res = await api.get("/ai/status");
         if (mounted && res.data) {
-          setGroqStatus(res.data);
-          if (res.data.defaultModel) setGroqModel(res.data.defaultModel);
+          setAiStatus(res.data);
+          if (res.data.defaultModel) setSelectedAiModel(res.data.defaultModel);
         }
       } catch {}
     })();
@@ -130,6 +133,72 @@ export default function GeneralSettingsPage() {
 
     return () => { mounted = false; };
   }, []);
+
+  async function saveGroqSettings() {
+    if (!groqKey.trim()) return;
+    try {
+      setGroqSaving(true);
+      const res = await api.post("/ai/save-key", { apiKey: groqKey.trim() });
+      toast.success(res.data?.message || "Groq AI Key verified and saved successfully!");
+      setGroqKey("");
+      const statusRes = await api.get("/ai/status");
+      setAiStatus(statusRes.data);
+    } catch (e) {
+      toast.error(e?.response?.data?.message || e?.message || "Failed to verify Groq key");
+    } finally {
+      setGroqSaving(false);
+    }
+  }
+
+  async function saveOpenRouterSettings() {
+    if (!openRouterKey.trim()) return;
+    try {
+      setOpenRouterSaving(true);
+      const res = await api.post("/ai/save-openrouter-key", { apiKey: openRouterKey.trim() });
+      toast.success(res.data?.message || "OpenRouter (0x Alpha) Key verified and saved successfully!");
+      setOpenRouterKey("");
+      const statusRes = await api.get("/ai/status");
+      setAiStatus(statusRes.data);
+    } catch (e) {
+      toast.error(e?.response?.data?.message || e?.message || "Failed to verify OpenRouter key");
+    } finally {
+      setOpenRouterSaving(false);
+    }
+  }
+
+  async function testGroqConnection() {
+    try {
+      setGroqTesting(true);
+      const res = await api.get("/ai/status");
+      if (res.data?.groq?.connected) {
+        toast.success("Groq Cloud AI Engine is connected and responding!");
+      } else {
+        toast.warn(res.data?.groq?.statusMessage || "Groq API key is not configured.");
+      }
+      setAiStatus(res.data);
+    } catch (e) {
+      toast.error("Failed to test connection to Groq API.");
+    } finally {
+      setGroqTesting(false);
+    }
+  }
+
+  async function testOpenRouterConnection() {
+    try {
+      setOpenRouterTesting(true);
+      const res = await api.get("/ai/status");
+      if (res.data?.openRouter?.connected) {
+        toast.success("OpenRouter (0x Alpha) AI Engine is connected and responding!");
+      } else {
+        toast.warn(res.data?.openRouter?.statusMessage || "OpenRouter API key is not configured.");
+      }
+      setAiStatus(res.data);
+    } catch (e) {
+      toast.error("Failed to test connection to OpenRouter API.");
+    } finally {
+      setOpenRouterTesting(false);
+    }
+  }
 
   async function loadLoginBackgroundMeta() {
     try {
@@ -333,9 +402,9 @@ export default function GeneralSettingsPage() {
       </div>
 
       <div className="space-y-6">
-        {/* Groq AI Configuration ("Banks" AI Copilot) Card */}
+        {/* Banks AI Dual-Provider Configuration (Groq + OpenRouter 0x Alpha) */}
         <div className="card border-brand-200 dark:border-brand-800 shadow-sm bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-900/80">
-          <div className="card-body space-y-4">
+          <div className="card-body space-y-5">
             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-brand-900 text-white flex items-center justify-center shadow-inner">
@@ -343,32 +412,48 @@ export default function GeneralSettingsPage() {
                 </div>
                 <div>
                   <div className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                    <span>Groq AI Configuration ("Banks" AI)</span>
+                    <span>Banks AI Intelligence Engine (Groq + OpenRouter 0x Alpha)</span>
                   </div>
                   <div className="text-xs text-slate-500">
-                    Configure your Groq Cloud API Key to empower "Banks" with ultra-fast LLM inference and live database analysis.
+                    Configure API keys for Groq (high-speed LPU) and OpenRouter (0x Alpha / free failover engine with 1M token context).
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                {groqStatus?.isConfigured ? (
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 px-3 py-1 rounded-full border border-emerald-300 dark:border-emerald-800">
-                    <CheckCircle size={13} className="text-emerald-500" /> Connected ({groqStatus.maskedKey})
+              <div className="flex flex-wrap items-center gap-2">
+                {aiStatus?.groq?.connected ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 px-2.5 py-1 rounded-full border border-emerald-300 dark:border-emerald-800">
+                    <CheckCircle size={12} className="text-emerald-500" /> Groq Active ({aiStatus.groq.maskedKey})
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 px-3 py-1 rounded-full border border-amber-300 dark:border-amber-800">
-                    Key Not Configured
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 px-2.5 py-1 rounded-full border border-amber-300 dark:border-amber-800">
+                    Groq Unset
+                  </span>
+                )}
+
+                {aiStatus?.openRouter?.connected ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 px-2.5 py-1 rounded-full border border-purple-300 dark:border-purple-800">
+                    <CheckCircle size={12} className="text-purple-500" /> 0x Alpha Active ({aiStatus.openRouter.maskedKey})
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2.5 py-1 rounded-full border border-slate-300 dark:border-slate-700">
+                    0x Alpha Unset
                   </span>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                  Groq API Key {groqStatus?.isConfigured && `(Current: ${groqStatus.maskedKey})`}
-                </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Groq Cloud Key Card */}
+              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">
+                    1. Groq Cloud API Key (Primary Fast Engine)
+                  </span>
+                  {aiStatus?.groq?.connected && (
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">● Connected</span>
+                  )}
+                </div>
                 <div className="flex gap-2">
                   <input
                     type="password"
@@ -380,58 +465,102 @@ export default function GeneralSettingsPage() {
                   />
                   <button
                     type="button"
-                    className="btn-primary whitespace-nowrap text-xs px-4"
+                    className="btn-primary whitespace-nowrap text-xs px-3.5"
                     onClick={saveGroqSettings}
                     disabled={groqSaving || !groqKey.trim()}
                   >
-                    {groqSaving ? "Verifying..." : "Save Key"}
+                    {groqSaving ? "Saving..." : "Save Groq Key"}
                   </button>
                 </div>
-                <div className="mt-1.5 flex items-center justify-between text-[11px] text-slate-400">
-                  <span>Get your free API key at <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer" className="text-brand-600 dark:text-brand-400 underline font-medium">console.groq.com/keys</a></span>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                  Active Model & Capabilities
-                </label>
-                <select
-                  value={groqModel}
-                  onChange={(e) => setGroqModel(e.target.value)}
-                  className="input w-full text-xs"
-                >
-                  <optgroup label="🔥 High Intelligence & Deep Reasoning (Recommended)">
-                    <option value="openai/gpt-oss-120b">GPT-OSS 120B (Best: Deep ERP Reasoning, Complex Analytics & Tool Calling)</option>
-                    <option value="groq/compound">Groq Compound (Multi-Agent Fast Synthesis & Reasoning)</option>
-                    <option value="qwen/qwen3.6-27b">Qwen 3.6 27B (High Capability Enterprise & Code Reasoning)</option>
-                    <option value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile (Meta Flagship Enterprise Model)</option>
-                  </optgroup>
-                  <optgroup label="⚡ Ultra-Fast & Lightweight">
-                    <option value="openai/gpt-oss-20b">GPT-OSS 20B (High Speed & Accurate Tool Execution)</option>
-                    <option value="groq/compound-mini">Groq Compound Mini (Sub-Second Response Time)</option>
-                    <option value="llama-3.1-8b-instant">Llama 3.1 8B Instant (Ultra-Fast Lightweight)</option>
-                    <option value="allam-2-7b">ALLaM 2 7B (Fast Conversational Assistant)</option>
-                  </optgroup>
-                  <optgroup label="🌐 Specialized & Multilingual">
-                    <option value="canopylabs/orpheus-v1-english">Canopy Orpheus v1 (Specialized English Reasoning)</option>
-                    <option value="mixtral-8x7b-32768">Mixtral 8x7B (32k Extended Context Window)</option>
-                  </optgroup>
-                </select>
-                <div className="mt-2 flex items-center gap-2">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="text-slate-400">Get free key at <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer" className="text-brand-600 dark:text-brand-400 underline font-medium">console.groq.com/keys</a></span>
                   <button
                     type="button"
-                    className="btn-outline text-xs py-1 px-2.5 flex items-center gap-1"
+                    className="text-brand-600 dark:text-brand-400 hover:underline font-medium"
                     onClick={testGroqConnection}
                     disabled={groqTesting}
                   >
-                    <Sparkles size={12} className="text-primary" />
-                    <span>{groqTesting ? "Testing..." : "Test AI Connection"}</span>
+                    {groqTesting ? "Testing..." : "Test Groq"}
                   </button>
-                  <span className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                    <ShieldCheck size={12} /> Safe read-only ERP database tools enabled
-                  </span>
                 </div>
+              </div>
+
+              {/* OpenRouter 0x Alpha Key Card */}
+              <div className="p-4 rounded-xl border border-purple-200 dark:border-purple-900/50 bg-purple-50/20 dark:bg-purple-950/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-purple-900 dark:text-purple-300 uppercase tracking-wider">
+                    2. OpenRouter API Key (0x Alpha / Failover)
+                  </span>
+                  {aiStatus?.openRouter?.connected && (
+                    <span className="text-[10px] text-purple-600 dark:text-purple-400 font-semibold">● Connected</span>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="password"
+                    placeholder="Enter sk-or-v1-... key"
+                    className="input w-full text-xs"
+                    value={openRouterKey}
+                    onChange={(e) => setOpenRouterKey(e.target.value)}
+                    disabled={openRouterSaving}
+                  />
+                  <button
+                    type="button"
+                    className="btn-primary bg-purple-600 hover:bg-purple-700 border-none text-white whitespace-nowrap text-xs px-3.5"
+                    onClick={saveOpenRouterSettings}
+                    disabled={openRouterSaving || !openRouterKey.trim()}
+                  >
+                    {openRouterSaving ? "Saving..." : "Save 0x Alpha Key"}
+                  </button>
+                </div>
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="text-slate-400">Get OpenRouter key at <a href="https://openrouter.ai/keys" target="_blank" rel="noreferrer" className="text-purple-600 dark:text-purple-400 underline font-medium">openrouter.ai/keys</a></span>
+                  <button
+                    type="button"
+                    className="text-purple-600 dark:text-purple-400 hover:underline font-medium"
+                    onClick={testOpenRouterConnection}
+                    disabled={openRouterTesting}
+                  >
+                    {openRouterTesting ? "Testing..." : "Test OpenRouter"}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Model Selection & Auto-Failover Summary */}
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+              <div>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  Default AI Model Preference
+                </label>
+                <select
+                  value={selectedAiModel}
+                  onChange={(e) => setSelectedAiModel(e.target.value)}
+                  className="input w-full text-xs"
+                >
+                  <optgroup label="🚀 OpenRouter (0x Alpha & Free Models)">
+                    <option value="stealth/ox-alpha">0x Alpha (stealth/ox-alpha: 1M Context, High Reasoning & Tools)</option>
+                    <option value="openrouter/free">OpenRouter Free Auto-Router (Dynamic Free Tool Engine)</option>
+                    <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B Instruct [OpenRouter Free Tier]</option>
+                    <option value="qwen/qwen-2.5-72b-instruct:free">Qwen 2.5 72B Instruct [OpenRouter Free Tier]</option>
+                  </optgroup>
+                  <optgroup label="⚡ Groq Cloud High Speed Models">
+                    <option value="openai/gpt-oss-120b">GPT-OSS 120B (Best: Deep ERP Reasoning & Tools)</option>
+                    <option value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile (Meta Flagship)</option>
+                    <option value="qwen/qwen3.6-27b">Qwen 3.6 27B (High Efficiency & Code Reasoning)</option>
+                    <option value="llama-3.1-8b-instant">Llama 3.1 8B Instant (Ultra-Fast)</option>
+                  </optgroup>
+                </select>
+              </div>
+
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 space-y-1 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-lg border border-slate-200/60 dark:border-slate-800">
+                <div className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                  <ShieldCheck size={13} className="text-emerald-500" />
+                  <span>Smart Auto-Failover Active</span>
+                </div>
+                <p>
+                  If Groq reaches its daily free token quota (HTTP 429), Banks AI automatically routes prompts to OpenRouter <strong>0x Alpha</strong> with zero user downtime.
+                </p>
               </div>
             </div>
           </div>

@@ -1071,9 +1071,13 @@ export default function AppShell() {
   }, []);
   const currentBranchName = useMemo(() => {
     const targetId = Number(scope?.branchId ?? selectedBranchId);
-    const found =
-      branchOptions.find((b) => Number(b.id) === targetId) ||
-      (branchOptions.length ? branchOptions[0] : null);
+    let found = null;
+    if (targetId) {
+      found = branchOptions.find((b) => Number(b.id) === targetId);
+    }
+    if (!found) {
+      found = branchOptions.find((b) => b.name === profile.branchName) || (branchOptions.length ? branchOptions[0] : null);
+    }
     if (found) {
       const comp = found.company_name || `Company #${found.company_id}`;
       return `${found.name} (${comp})`;

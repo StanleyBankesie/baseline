@@ -34622,3 +34622,1719 @@ Technical details:
 Error: read ECONNRESET
     at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
 --------------------------------------------------------------------------------
+
+[2026-08-24T06:40:42.803Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:40:43.946Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:40:45.164Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:40:46.137Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:48:28.373Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:48:28.753Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:48:29.390Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:48:30.269Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:48:41.212Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:48:41.627Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:48:42.238Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:48:43.107Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:48:58.353Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:48:58.775Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:48:59.401Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:49:00.211Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:49:20.427Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:49:20.730Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:49:21.302Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:49:22.105Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:50:23.958Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:50:24.259Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:50:24.835Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:50:25.640Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:168:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:54:57.349Z] HTTP_500
+Summary: hasColumn is not defined
+Request: PUT /api/access/notification-prefs/low-stock (status 500)
+Context:
+status: 500
+code: null
+method: PUT
+url: /api/access/notification-prefs/low-stock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"user_id":1,"push_enabled":1,"email_enabled":1,"sms_enabled":1,"whatsapp_enabled":1}
+query: {}
+Technical details:
+ReferenceError: hasColumn is not defined
+    at ensureNotificationPrefsTable (file:///C:/Users/stanl/demo/server/routes/access.routes.js:130:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:198:7
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:13.401Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:13.708Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:14.275Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:15.073Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:16.740Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:17.042Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:17.606Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:18.456Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:21.328Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:21.635Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:22.188Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:23.004Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:31.235Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:31.536Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:32.087Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:32.892Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:34.195Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:34.497Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:35.050Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:57:35.849Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:58:14.449Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:58:14.830Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:58:15.386Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:58:16.193Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:58:20.197Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:58:20.500Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:58:21.067Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:58:21.868Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:58:24.580Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:58:24.877Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:58:25.479Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T06:58:26.284Z] HTTP_500
+Summary: Unknown column 'u.phone' in 'field list'
+Request: GET /api/access/notification-prefs?key=low-stock (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/access/notification-prefs?key=low-stock
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"key":"low-stock"}
+Technical details:
+Error: Unknown column 'u.phone' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/access.routes.js:171:22
+--------------------------------------------------------------------------------
+
+[2026-08-24T09:06:54.979Z] HTTP_500
+Summary: Request failed with status 500
+Request: POST /api/ai/chat (status 500)
+Context:
+requestId: mt70i8zc-mx94rb9b
+durationMs: 2443
+method: POST
+url: /api/ai/chat
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: 1
+branchId: 1
+status: 500
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-24T13:14:52.278Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mt79d696-f10c9ken
+durationMs: 11
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-24T13:14:52.315Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mt79d6aa-yl9z81s8
+durationMs: 9
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-24T13:19:32.569Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-24T13:21:59.709Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mt79mbyz-uudy08ph
+durationMs: 130
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-24T13:21:59.758Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mt79mc37-8jox621a
+durationMs: 27
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-24T15:02:10.271Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mt7d75ui-kuralz7z
+durationMs: 4
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-24T15:02:10.296Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mt7d75v3-2yrlwu2g
+durationMs: 9
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-24T15:09:33.798Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mt7dgo1w-sn2kif5i
+durationMs: 34
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-24T15:09:33.857Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mt7dgo2y-ddiy2dag
+durationMs: 55
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------

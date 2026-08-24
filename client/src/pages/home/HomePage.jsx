@@ -20,7 +20,7 @@ import { DASHBOARD_CARDS } from "../../data/dashboardCards.js";
  * @returns {JSX.Element} The home page view.
  */
 export default function HomePage() {
-  const { user, token } = useAuth();
+  const { user, token, scope } = useAuth();
   const {
     canAccessPath,
     hasRoleFeature,
@@ -52,6 +52,7 @@ export default function HomePage() {
   const [allFeatures, setAllFeatures] = useState([]);
   const [activeModule, setActiveModule] = useState(null);
   const [profileData, setProfileData] = useState(null);
+  const [userBranches, setUserBranches] = useState([]);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [showPhotoMenu, setShowPhotoMenu] = useState(false);
   const photoInputRef = useRef(null);
@@ -338,10 +339,32 @@ export default function HomePage() {
         if (cancelled) return;
         setProfileData(null);
       });
+    client
+      .get("/auth/user-branches")
+      .then((res) => {
+        if (cancelled) return;
+        setUserBranches(Array.isArray(res.data?.items) ? res.data.items : []);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setUserBranches([]);
+      });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  const activeBranch = useMemo(() => {
+    if (!Array.isArray(userBranches) || userBranches.length === 0) return null;
+    const targetId = Number(scope?.branchId);
+    if (targetId) {
+      return userBranches.find((b) => Number(b.id) === targetId) || null;
+    }
+    return userBranches[0] || null;
+  }, [userBranches, scope?.branchId]);
+
+  const displayCompanyName = activeBranch?.company_name || profileData?.company_name || user?.companyName || "";
+  const displayBranchName = activeBranch?.name || profileData?.branch_name || user?.branchName || "";
 
   const normalizeType = (s) =>
     String(s || "")
@@ -832,9 +855,9 @@ export default function HomePage() {
                   {profileData.role_name}
                 </p>
               )}
-              {(user?.companyName || user?.branchName) && (
+              {(displayCompanyName || displayBranchName) && (
                 <p className="hidden sm:block mt-1 text-brand-200 text-sm">
-                  {[user?.companyName, user?.branchName]
+                  {[displayCompanyName, displayBranchName]
                     .filter(Boolean)
                     .join(" — ")}
                 </p>

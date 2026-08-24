@@ -889,6 +889,7 @@ router.get("/reports/costing-data", requireAuth, requireCompanyScope, requireBra
 router.get("/reports/summary", requireAuth, requireCompanyScope, requireBranchScope, requirePermission("PROD.REPORT.VIEW"), productionController.getProductionSummaryReport);
 
 router.get("/dashboard/stats", requireAuth, requireCompanyScope, requireBranchScope, productionController.getProductionStats);
+router.get("/dashboard/analytics", requireAuth, requireCompanyScope, requireBranchScope, productionController.getProductionDashboardAnalytics);
 
 // Warm up production schema checks without crashing startup when DB is offline.
 ensureProductionTables().catch((err) => {

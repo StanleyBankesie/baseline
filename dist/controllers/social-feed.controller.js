@@ -696,81 +696,52 @@ export const likePost = async (req, res) => {
     const { postId } = req.params;
     const companyId = Number(req.scope?.companyId) || 1;
 
-    const connection = await pool.getConnection();
+    // Check if user already liked
+    const [existingLike] = await pool.query(
+      `SELECT id FROM post_likes WHERE post_id = ? AND user_id = ?`,
+      [postId, userId],
+    );
 
-    try {
-      // Check if user already liked
-      const [existingLike] = await connection.query(
-        `SELECT pl.id,
-          pl.created_at,
-          u.username AS created_by_name
-         FROM post_likes pl
-        LEFT JOIN adm_users u ON u.id = pl.user_id
-         WHERE pl.post_id = ? AND pl.user_id = ?`,
-        [postId, userId],
-      );
-
-      if (existingLike.length > 0) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Already liked this post" });
-      }
-
+    if (existingLike.length === 0) {
       // Add like
-      await connection.query(
+      await pool.query(
         `INSERT INTO post_likes (post_id, user_id) VALUES (?, ?)`,
         [postId, userId],
       );
 
-      // Increment like count
-      await connection.query(
-        `UPDATE posts SET like_count = like_count + 1 WHERE id = ?`,
-        [postId],
-      );
-
       // Get post info for notifications
-      const [postRows] = await connection.query(
-        `SELECT p.user_id, p.visibility_type, p.branch_id,
-          p.created_at,
-          u.username AS created_by_name
-         FROM posts p
-        LEFT JOIN adm_users u ON u.id = p.user_id
-         WHERE p.id = ?`,
-        [postId],
-      );
-
-      const postOwnerId = postRows[0]?.user_id;
-
-      // 🔔 BROADCAST LIKE VIA SOCKET.IO
       try {
-        broadcastLike(postId, userId, postOwnerId);
+        const [postRows] = await pool.query(
+          `SELECT user_id, visibility_type, branch_id FROM posts WHERE id = ?`,
+          [postId],
+        );
+        const postOwnerId = postRows[0]?.user_id;
+
+        if (postOwnerId) {
+          try { broadcastLike(postId, userId, postOwnerId); } catch {}
+          if (postOwnerId !== userId) {
+            try { await triggerLikeNotification(postId, userId, postOwnerId, companyId); } catch {}
+          }
+        }
       } catch {}
-
-      // 📧 TRIGGER LIKE NOTIFICATION
-      if (postOwnerId !== userId) {
-        try {
-          await triggerLikeNotification(postId, userId, postOwnerId, companyId);
-        } catch {}
-      }
-
-      res.json({
-        success: true,
-        message: "Post liked",
-        like_count: (
-          await connection.query(
-            `SELECT p.like_count,
-          p.created_at,
-          u.username AS created_by_name
-         FROM posts p
-        LEFT JOIN adm_users u ON u.id = p.user_id
-         WHERE p.id = ?`,
-            [postId],
-          )
-        )[0][0].like_count,
-      });
-    } finally {
-      await connection.release();
     }
+
+    // Always get true count from post_likes
+    const [[countRow]] = await pool.query(
+      `SELECT COUNT(*) AS total FROM post_likes WHERE post_id = ?`,
+      [postId],
+    );
+    const totalLikes = Number(countRow?.total) || 0;
+
+    // Update posts table cache
+    await pool.query(`UPDATE posts SET like_count = ? WHERE id = ?`, [totalLikes, postId]);
+
+    res.json({
+      success: true,
+      message: "Post liked",
+      user_liked: true,
+      like_count: totalLikes,
+    });
   } catch (error) {
     console.error("Error liking post:", error);
     res.status(500).json({ success: false, message: error.message });
@@ -796,56 +767,28 @@ export const unlikePost = async (req, res) => {
       null;
     const { postId } = req.params;
 
-    const connection = await pool.getConnection();
+    // Remove like if exists
+    await pool.query(
+      `DELETE FROM post_likes WHERE post_id = ? AND user_id = ?`,
+      [postId, userId],
+    );
 
-    try {
-      // Check if user liked
-      const [existingLike] = await connection.query(
-        `SELECT pl.id,
-          pl.created_at,
-          u.username AS created_by_name
-         FROM post_likes pl
-        LEFT JOIN adm_users u ON u.id = pl.user_id
-         WHERE pl.post_id = ? AND pl.user_id = ?`,
-        [postId, userId],
-      );
+    // Always get true count from post_likes
+    const [[countRow]] = await pool.query(
+      `SELECT COUNT(*) AS total FROM post_likes WHERE post_id = ?`,
+      [postId],
+    );
+    const totalLikes = Number(countRow?.total) || 0;
 
-      if (existingLike.length === 0) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Haven't liked this post" });
-      }
+    // Update posts table cache
+    await pool.query(`UPDATE posts SET like_count = ? WHERE id = ?`, [totalLikes, postId]);
 
-      // Remove like
-      await connection.query(
-        `DELETE FROM post_likes WHERE post_id = ? AND user_id = ?`,
-        [postId, userId],
-      );
-
-      // Decrement like count
-      await connection.query(
-        `UPDATE posts SET like_count = GREATEST(like_count - 1, 0) WHERE id = ?`,
-        [postId],
-      );
-
-      res.json({
-        success: true,
-        message: "Post unliked",
-        like_count: (
-          await connection.query(
-            `SELECT p.like_count,
-          p.created_at,
-          u.username AS created_by_name
-         FROM posts p
-        LEFT JOIN adm_users u ON u.id = p.user_id
-         WHERE p.id = ?`,
-            [postId],
-          )
-        )[0][0].like_count,
-      });
-    } finally {
-      await connection.release();
-    }
+    res.json({
+      success: true,
+      message: "Post unliked",
+      user_liked: false,
+      like_count: totalLikes,
+    });
   } catch (error) {
     console.error("Error unliking post:", error);
     res.status(500).json({ success: false, message: error.message });

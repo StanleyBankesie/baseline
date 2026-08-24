@@ -1,0 +1,578 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "OmniSuite ERP Enterprise REST API",
+    "version": "4.5.0",
+    "description": "Comprehensive RESTful API Specification for OmniSuite Enterprise Resource Planning (ERP) platform. Covers authentication, multi-tenant branch scoping, sales, procurement, inventory, POS, manufacturing, finance, HR, fleet, project delivery, and Banks AI.",
+    "contact": {
+      "name": "OmniSuite Core Engineering Team",
+      "email": "engineering@omnisuite-erp.com",
+      "url": "https://omnisuite-erp.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000/api",
+      "description": "Local Development Server"
+    },
+    {
+      "url": "https://erp.yourcompany.com/api",
+      "description": "Production API Gateway"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "User login, JWT validation, token refresh, and profile management"
+    },
+    {
+      "name": "Administration",
+      "description": "Multi-company setup, branch management, roles, and RBAC permissions"
+    },
+    {
+      "name": "Finance & Accounting",
+      "description": "Chart of Accounts, Journal/Payment/Receipt Vouchers, GL, and GRA Taxes"
+    },
+    {
+      "name": "Inventory & Stores",
+      "description": "Item master, multi-warehouse bins, stock balances, and internal transfers"
+    },
+    {
+      "name": "Purchasing & Procurement",
+      "description": "Purchase requisitions, RFQs, Local Purchase Orders (LPO), and GRNs"
+    },
+    {
+      "name": "Sales & Commercial Billing",
+      "description": "Customer master, price lists, quotations, sales orders, and tax invoices"
+    },
+    {
+      "name": "Point of Sale (POS)",
+      "description": "Cashier shift register sessions, barcode retail checkout, and Z-Reports"
+    },
+    {
+      "name": "Production & Manufacturing",
+      "description": "Bill of Materials (BOM), Work Orders, Job Cards, and QC inspections"
+    },
+    {
+      "name": "Human Resources & Payroll",
+      "description": "Employees, biometric attendance, leave approvals, and automated PAYE/SSNIT"
+    },
+    {
+      "name": "Project Management",
+      "description": "WBS task scheduling, timesheets, project expenses, and milestone billing"
+    },
+    {
+      "name": "Transport & Fleet",
+      "description": "Vehicles, drivers, digital trip waybills, and fuel logs"
+    },
+    {
+      "name": "Maintenance & Assets",
+      "description": "Fixed asset register, preventive schedules, and repair job orders"
+    },
+    {
+      "name": "Service Invoicing",
+      "description": "Customer service tickets, technician work orders, and service invoices"
+    },
+    {
+      "name": "Visitor Management",
+      "description": "Pre-registration, gate check-in, badge printing, and host notifications"
+    },
+    {
+      "name": "Business Intelligence (BI)",
+      "description": "Executive KPI cards, revenue trends, inventory aging, and data explorer"
+    },
+    {
+      "name": "Banks AI Copilot",
+      "description": "Natural language ERP query interface with multi-turn database tools"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JSON Web Token (JWT) issued upon successful login. Include in the Authorization header: Bearer <token>"
+      },
+      "CompanyScopeHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-company-id",
+        "description": "Active Company ID for multi-tenant data isolation (default: 1)"
+      },
+      "BranchScopeHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-branch-id",
+        "description": "Active Branch ID for branch-level transaction scoping"
+      }
+    },
+    "schemas": {
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Operation completed successfully."
+          },
+          "data": {
+            "type": "object"
+          }
+        }
+      },
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "example": "Invalid credentials or permission denied."
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "admin@omnisuite.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "Password123!"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "example": 1
+              },
+              "username": {
+                "type": "string",
+                "example": "admin"
+              },
+              "email": {
+                "type": "string",
+                "example": "admin@omnisuite.com"
+              },
+              "role_name": {
+                "type": "string",
+                "example": "Super Admin"
+              },
+              "isSuperAdmin": {
+                "type": "boolean",
+                "example": true
+              },
+              "company_id": {
+                "type": "integer",
+                "example": 1
+              },
+              "branch_id": {
+                "type": "integer",
+                "example": 1
+              }
+            }
+          }
+        }
+      },
+      "Item": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 42
+          },
+          "item_code": {
+            "type": "string",
+            "example": "ITM-00428"
+          },
+          "item_name": {
+            "type": "string",
+            "example": "Portland Cement 50kg"
+          },
+          "category_id": {
+            "type": "integer",
+            "example": 3
+          },
+          "uom": {
+            "type": "string",
+            "example": "BAG"
+          },
+          "cost_price": {
+            "type": "number",
+            "example": 85.0
+          },
+          "selling_price": {
+            "type": "number",
+            "example": 110.0
+          },
+          "quantity_on_hand": {
+            "type": "number",
+            "example": 450.0
+          }
+        }
+      },
+      "SalesInvoice": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 80
+          },
+          "invoice_no": {
+            "type": "string",
+            "example": "INV000040"
+          },
+          "customer_id": {
+            "type": "integer",
+            "example": 12
+          },
+          "customer_name": {
+            "type": "string",
+            "example": "Abandenden Enterprises"
+          },
+          "invoice_date": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-08-23"
+          },
+          "gross_amount": {
+            "type": "number",
+            "example": 180.0
+          },
+          "tax_amount": {
+            "type": "number",
+            "example": 36.0
+          },
+          "total_amount": {
+            "type": "number",
+            "example": 216.0
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "POSTED",
+              "PAID",
+              "CANCELLED"
+            ],
+            "example": "POSTED"
+          }
+        }
+      },
+      "POSSale": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 220
+          },
+          "receipt_no": {
+            "type": "string",
+            "example": "POS-000130"
+          },
+          "gross_amount": {
+            "type": "number",
+            "example": 180.0
+          },
+          "net_amount": {
+            "type": "number",
+            "example": 180.0
+          },
+          "payment_method": {
+            "type": "string",
+            "enum": [
+              "CASH",
+              "MOBILE",
+              "CARD",
+              "SPLIT"
+            ],
+            "example": "CASH"
+          },
+          "sale_datetime": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-08-23T07:52:44.000Z"
+          },
+          "status": {
+            "type": "string",
+            "example": "COMPLETED"
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "BearerAuth": []
+    },
+    {
+      "CompanyScopeHeader": []
+    },
+    {
+      "BranchScopeHeader": []
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Authenticate user and receive JWT bearer token",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid username or password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Retrieve current authenticated user context and permitted modules",
+        "responses": {
+          "200": {
+            "description": "User context retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inventory/items": {
+      "get": {
+        "tags": [
+          "Inventory & Stores"
+        ],
+        "summary": "List all inventory items scoped by company and active branch",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search item code or name"
+          },
+          {
+            "name": "category_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by product category"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of inventory items returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Item"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Inventory & Stores"
+        ],
+        "summary": "Create a new inventory item in catalog",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Item"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Item created successfully"
+          }
+        }
+      }
+    },
+    "/sales/invoices": {
+      "get": {
+        "tags": [
+          "Sales & Commercial Billing"
+        ],
+        "summary": "List all official sales invoices",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by invoice status (POSTED, DRAFT, PAID)"
+          },
+          {
+            "name": "customer_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by customer ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of invoices returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SalesInvoice"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pos/sales": {
+      "get": {
+        "tags": [
+          "Point of Sale (POS)"
+        ],
+        "summary": "List completed retail POS sales transactions",
+        "responses": {
+          "200": {
+            "description": "List of POS receipts returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/POSSale"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Point of Sale (POS)"
+        ],
+        "summary": "Process and complete a new retail POS checkout sale",
+        "responses": {
+          "201": {
+            "description": "POS sale completed and inventory deducted"
+          }
+        }
+      }
+    },
+    "/ai/chat": {
+      "post": {
+        "tags": [
+          "Banks AI Copilot"
+        ],
+        "summary": "Send user prompt to Banks AI with multi-turn database tool execution",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "messages": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "userContext": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Synthesized AI response with executed tool traces",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

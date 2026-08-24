@@ -38,6 +38,8 @@ import authRoutes from "./routes/auth.routes.js";
 import executiveRoutes from "./routes/executive.routes.js";
 import { logDbError, query, testDbConnection } from "./db/pool.js";
 import { isMailerConfigured, verifyMailer, sendMail } from "./utils/mailer.js";
+import { isSMSConfigured, sendSMS } from "./utils/sms.js";
+import { isWhatsAppConfigured, sendWhatsApp } from "./utils/whatsapp.js";
 import { closeRedis, getRedis } from "./utils/redis.js";
 import { getLowStockQueue, closeJobQueues } from "./utils/jobQueue.js";
 import pushRoutes, {
@@ -63,6 +65,7 @@ import {
   ensureUserPermissionCacheAndTriggers,
   ensureUserBranchMapping,
   ensurePagesTable,
+  hasColumn,
   verifiedTables,
   ensurePMQuotationTables,
   ensurePMInvoiceTables,
@@ -1366,21 +1369,31 @@ if (process.env.NODE_ENV !== "test") {
                 pref_key VARCHAR(100) NOT NULL,
                 push_enabled TINYINT(1) NOT NULL DEFAULT 0,
                 email_enabled TINYINT(1) NOT NULL DEFAULT 0,
+                sms_enabled TINYINT(1) NOT NULL DEFAULT 0,
+                whatsapp_enabled TINYINT(1) NOT NULL DEFAULT 0,
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 PRIMARY KEY (user_id, pref_key),
                 INDEX idx_pref_key (pref_key)
               ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             `);
+            if (!(await hasColumn("adm_notification_prefs", "sms_enabled"))) {
+              await query("ALTER TABLE adm_notification_prefs ADD COLUMN sms_enabled TINYINT(1) NOT NULL DEFAULT 0");
+            }
+            if (!(await hasColumn("adm_notification_prefs", "whatsapp_enabled"))) {
+              await query("ALTER TABLE adm_notification_prefs ADD COLUMN whatsapp_enabled TINYINT(1) NOT NULL DEFAULT 0");
+            }
             verifiedTables.add("adm_notification_prefs");
           }
           const recipients = await query(
-            `SELECT u.id, u.email, np.push_enabled, np.email_enabled
+            `SELECT u.id, u.username, u.email, COALESCE(u.telephone, '') AS phone,
+                    np.push_enabled, np.email_enabled, np.sms_enabled, np.whatsapp_enabled
              FROM adm_users u
              JOIN adm_notification_prefs np ON np.user_id = u.id AND np.pref_key = 'low-stock'
              WHERE u.is_active = 1 
                AND u.company_id = :companyId 
-               AND u.branch_id = :branchId`,
+               AND u.branch_id = :branchId
+               AND (np.push_enabled = 1 OR np.email_enabled = 1 OR np.sms_enabled = 1 OR np.whatsapp_enabled = 1)`,
             { companyId, branchId },
           );
           for (const u of recipients) {
@@ -1417,6 +1430,8 @@ if (process.env.NODE_ENV !== "test") {
               )
               .join("");
             const html = `<p>${count} items are at or below reorder levels.</p><table border="1" cellpadding="6" cellspacing="0"><thead><tr><th>Code</th><th>Name</th><th>Qty</th><th>Reorder</th></tr></thead><tbody>${htmlRows}</tbody></table><p><a href="/inventory/alerts/low-stock">Open Alerts</a></p>`;
+            
+            // Email Channel
             if (
               Number(u?.email_enabled) === 1 &&
               isMailerConfigured() &&
@@ -1441,11 +1456,46 @@ if (process.env.NODE_ENV !== "test") {
               } catch (e) {
                 console.log(`[EMAIL ERROR] ${e?.message || e}`);
               }
-            } else {
+            } else if (Number(u?.email_enabled) === 1) {
               console.log(
                 `[MOCK ERROR] To: ${u.email || "(none)"} | Subject: ${subject}`,
               );
             }
+
+            // SMS Channel
+            if (Number(u?.sms_enabled) === 1 && u.phone) {
+              try {
+                const smsText = `Low Stock Alert: ${count} item${count === 1 ? "" : "s"} at/below reorder limit. Check ERP /inventory/alerts/low-stock`;
+                await sendSMS({
+                  to: u.phone,
+                  message: smsText,
+                });
+              } catch (e) {
+                console.log(`[SMS ERROR] ${e?.message || e}`);
+              }
+            }
+
+            // WhatsApp Channel
+            if (Number(u?.whatsapp_enabled) === 1 && u.phone) {
+              try {
+                const sampleLines = items
+                  .slice(0, 5)
+                  .map(
+                    (it) =>
+                      `• ${it.item_code} ${it.item_name}: ${Number(it.qty || 0)} left (reorder ${Number(it.reorder_level || 0)})`,
+                  )
+                  .join("\n");
+                const waText = `⚠️ *Low Stock Alert*\n${count} items are at or below reorder levels.\n\n${sampleLines}${count > 5 ? `\n...and ${count - 5} more items` : ""}\n\nOpen ERP: /inventory/alerts/low-stock`;
+                await sendWhatsApp({
+                  to: u.phone,
+                  message: waText,
+                });
+              } catch (e) {
+                console.log(`[WHATSAPP ERROR] ${e?.message || e}`);
+              }
+            }
+
+            // In-App Push Channel
             if (Number(u?.push_enabled) === 1) {
               await query(
                 `INSERT INTO adm_notifications (company_id, user_id, title, message, link, is_read)

@@ -453,14 +453,17 @@ export default function BanksAiModal({ isOpen, onClose }) {
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              className={`p-2.5 rounded-xl transition-all flex items-center justify-center flex-shrink-0 shadow-md ${
+              className={`p-2.5 rounded-xl transition-all flex items-center justify-center flex-shrink-0 shadow-sm ${
                 input.trim()
-                  ? "bg-brand-900 hover:bg-brand-800 text-white shadow-lg cursor-pointer scale-105"
-                  : "bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed opacity-50"
+                  ? "bg-brand-900 hover:bg-brand-800 text-white shadow-md cursor-pointer scale-105"
+                  : "bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 cursor-not-allowed opacity-90"
               }`}
               title="Send Prompt (Enter)"
             >
-              <Send size={18} className={input.trim() ? "text-primary stroke-[2.5]" : "text-slate-400"} />
+              <Send
+                size={18}
+                className={input.trim() ? "text-white stroke-[2.5]" : "text-brand-900 dark:text-brand-300 stroke-[2.5]"}
+              />
             </button>
           </form>
           <div className="text-center mt-2 text-[10px] text-slate-400">
