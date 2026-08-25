@@ -1657,21 +1657,26 @@ router.get(
 
       const rows = await query(
         `
-        SELECT qty,
-          created_at,
-          u.username AS created_by_name
+        SELECT COALESCE(SUM(qty), 0) AS qty
          FROM inv_stock_balances
-        LEFT JOIN adm_users u ON u.id = created_by
          WHERE company_id = :companyId
-          AND branch_id = :branchId
-          AND warehouse_id = :warehouseId
-          AND item_id = :itemId
-        LIMIT 1
+           AND warehouse_id = :warehouseId
+           AND item_id = :itemId
         `,
-        { companyId, branchId, warehouseId, itemId },
+        { companyId, warehouseId, itemId },
       ).catch(() => []);
 
-      const qty = rows && rows.length ? Number(rows[0].qty || 0) : 0;
+      let qty = rows && rows.length ? Number(rows[0].qty || 0) : 0;
+      if (qty === 0) {
+        const itemRows = await query(
+          `SELECT stock_qty FROM inv_items WHERE id = :itemId AND company_id = :companyId LIMIT 1`,
+          { itemId, companyId },
+        ).catch(() => []);
+        if (itemRows && itemRows.length && Number(itemRows[0].stock_qty) > 0) {
+          qty = Number(itemRows[0].stock_qty);
+        }
+      }
+
       res.json({ qty });
     } catch (err) {
       next(err);

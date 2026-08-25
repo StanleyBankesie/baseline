@@ -48,6 +48,9 @@ tags:
   description: Executive KPI cards, revenue trends, inventory aging, and data explorer
 - name: Banks AI Copilot
   description: Natural language ERP query interface with multi-turn database tools
+- name: Business Intelligence & ETL
+  description: Data ingestion, ETL pipelines, star schema fact tables, data quality
+    quarantine, OLAP analysis, and automated insights
 components:
   securitySchemes:
     BearerAuth:
@@ -373,3 +376,163 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
+  /bi/data-sources:
+    get:
+      tags:
+      - Business Intelligence & ETL
+      summary: List all configured ERP and external data sources
+      responses:
+        '200':
+          description: List of data sources
+    post:
+      tags:
+      - Business Intelligence & ETL
+      summary: Create a new data source configuration
+      responses:
+        '201':
+          description: Data source created
+  /bi/data-sources/{id}/test:
+    post:
+      tags:
+      - Business Intelligence & ETL
+      summary: Test connection and connectivity health for a data source
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Connection test result
+  /bi/data-sources/{id}/sync:
+    post:
+      tags:
+      - Business Intelligence & ETL
+      summary: Trigger immediate synchronization of a data source
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Sync completed
+  /bi/upload-source-file:
+    post:
+      tags:
+      - Business Intelligence & ETL
+      summary: Upload Excel or CSV file for dataset ingestion
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: File parsed and dataset registered
+  /bi/datasets:
+    get:
+      tags:
+      - Business Intelligence & ETL
+      summary: Get catalog of registered analytical datasets
+      responses:
+        '200':
+          description: Catalog of datasets
+  /bi/datasets/{id}/preview:
+    get:
+      tags:
+      - Business Intelligence & ETL
+      summary: Sample latest tabular records from an analytical dataset
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Dataset sample preview rows
+  /bi/data-preparation/preview-transform:
+    post:
+      tags:
+      - Business Intelligence & ETL
+      summary: Preview data transformation recipe with live quality checks
+      responses:
+        '200':
+          description: Transformed records and quality score
+  /bi/etl-pipelines:
+    get:
+      tags:
+      - Business Intelligence & ETL
+      summary: List all ETL pipelines and schedules
+      responses:
+        '200':
+          description: List of pipelines
+  /bi/etl-pipelines/{id}/run:
+    post:
+      tags:
+      - Business Intelligence & ETL
+      summary: Execute an ETL pipeline run
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Pipeline run execution results
+  /bi/data-quality/summary:
+    get:
+      tags:
+      - Business Intelligence & ETL
+      summary: Get data quality summary score and quarantined records
+      responses:
+        '200':
+          description: Data quality score and quarantined rejected records
+  /bi/multidimensional-analysis:
+    post:
+      tags:
+      - Business Intelligence & ETL
+      summary: Execute multidimensional OLAP aggregation query
+      responses:
+        '200':
+          description: Aggregated multidimensional items and summary
+  /bi/insights/automated:
+    get:
+      tags:
+      - Business Intelligence & ETL
+      summary: Get automated anomaly detections and operational exceptions
+      responses:
+        '200':
+          description: List of active business insights
+  /bi/custom-dashboards:
+    get:
+      tags:
+      - Business Intelligence & ETL
+      summary: List custom BI dashboards
+      responses:
+        '200':
+          description: List of custom dashboards
+    post:
+      tags:
+      - Business Intelligence & ETL
+      summary: Create a new custom dashboard with modular widgets
+      responses:
+        '201':
+          description: Custom dashboard created
+  /bi/export-custom:
+    post:
+      tags:
+      - Business Intelligence & ETL
+      summary: Export analytical data to Excel (multi-sheet) or CSV format
+      responses:
+        '200':
+          description: File stream

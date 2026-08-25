@@ -1993,7 +1993,7 @@ export const listVouchers = async (req, res, next) => {
     const total = Number(countRes[0]?.total || 0);
 
     const items = await query(
-      `SELECT v.id, v.voucher_no, v.voucher_date, v.status, v.project_id,
+      `SELECT v.id, v.voucher_no, v.voucher_date, COALESCE(NULLIF(TRIM(v.status), ''), 'APPROVED') AS status, v.project_id,
               COALESCE(
                 (
                   SELECT l.description
@@ -2043,7 +2043,7 @@ export const getVoucherById = async (req, res, next) => {
     const id = Number(req.params.id || 0);
     if (!id) return next(httpError(400, "VALIDATION_ERROR", "Invalid id"));
     const headerRows = await query(
-      `SELECT v.id, v.voucher_no, v.voucher_date, v.status, v.project_id, v.cost_center_id,
+      `SELECT v.id, v.voucher_no, v.voucher_date, COALESCE(NULLIF(TRIM(v.status), ''), 'APPROVED') AS status, v.project_id, v.cost_center_id,
               v.narration AS remarks, v.narration, v.total_debit, v.total_credit, v.balanced_amount,
               v.total_debit AS total_amount,
               v.voucher_type_id, vt.code AS voucher_type_code, vt.name AS voucher_type_name,

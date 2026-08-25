@@ -36338,3 +36338,1715 @@ status: 404
 Technical details:
 (no stack)
 --------------------------------------------------------------------------------
+
+[2026-08-25T10:35:10.834Z] HTTP_500
+Summary: Unknown column 'i.invoice_number' in 'field list'
+Request: GET /api/bi/datasets/1/preview (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/bi/datasets/1/preview
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'i.invoice_number' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async extractFromErp (file:///C:/Users/stanl/demo/server/services/bi/etl.engine.js:62:20)
+    at async getDatasetPreview (file:///C:/Users/stanl/demo/server/controllers/bi.controller.js:296:16)
+--------------------------------------------------------------------------------
+
+[2026-08-25T10:35:11.179Z] HTTP_500
+Summary: Unknown column 'i.invoice_number' in 'field list'
+Request: GET /api/bi/datasets/1/preview (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/bi/datasets/1/preview
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'i.invoice_number' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async extractFromErp (file:///C:/Users/stanl/demo/server/services/bi/etl.engine.js:62:20)
+    at async getDatasetPreview (file:///C:/Users/stanl/demo/server/controllers/bi.controller.js:296:16)
+--------------------------------------------------------------------------------
+
+[2026-08-25T10:35:11.811Z] HTTP_500
+Summary: Unknown column 'i.invoice_number' in 'field list'
+Request: GET /api/bi/datasets/1/preview (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/bi/datasets/1/preview
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'i.invoice_number' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async extractFromErp (file:///C:/Users/stanl/demo/server/services/bi/etl.engine.js:62:20)
+    at async getDatasetPreview (file:///C:/Users/stanl/demo/server/controllers/bi.controller.js:296:16)
+--------------------------------------------------------------------------------
+
+[2026-08-25T10:35:12.719Z] HTTP_500
+Summary: Unknown column 'i.invoice_number' in 'field list'
+Request: GET /api/bi/datasets/1/preview (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/bi/datasets/1/preview
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'i.invoice_number' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async extractFromErp (file:///C:/Users/stanl/demo/server/services/bi/etl.engine.js:62:20)
+    at async getDatasetPreview (file:///C:/Users/stanl/demo/server/controllers/bi.controller.js:296:16)
+--------------------------------------------------------------------------------
+
+[2026-08-25T13:35:31.559Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-25T13:35:31.589Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-25T13:35:31.592Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-08-25T17:59:46.197Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=PAYV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=PAYV
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"PAYV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T18:21:51.914Z] HTTP_500
+Summary: Database query timeout after 15000ms
+Request: GET /api/admin/users (status 500)
+Context:
+status: 500
+code: DB_QUERY_TIMEOUT
+method: GET
+url: /api/admin/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Database query timeout after 15000ms
+    at Timeout.<anonymous> (file:///C:/Users/stanl/demo/server/db/pool.js:309:28)
+    at listOnTimeout (node:internal/timers:594:17)
+    at process.processTimers (node:internal/timers:529:7)
+--------------------------------------------------------------------------------
+
+[2026-08-25T20:08:43.436Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T20:08:43.751Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T20:08:44.357Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T20:08:45.177Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T20:08:45.682Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: POST /api/purchase/direct-purchases (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: POST
+url: /api/purchase/direct-purchases
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"supplier_id":9,"purchase_date":"2026-08-25","supplier_invoice_number":"5747","supplier_invoice_date":null,"warehouse_id":1,"currency_id":1,"exchange_rate":1,"payment_type":"CASH","payment_terms":30,"remarks":null,"status":"POSTED","auto_payment":true,"payment_account_id":81,"payment_method":"Cash","payment_reference":"testing auto payment","cheque_date":null,"paid_amount":5,"details":[{"item_id":36,"qty":1,"unit_price":5,"discount_percent":0,"tax_percent":0,"uom":"PCS","tax_code_id":"3","batch_no":null,"mfg_date":null,"exp_date":null}]}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at file:///C:/Users/stanl/demo/server/db/pool.js:550:48
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at Proxy.<anonymous> (file:///C:/Users/stanl/demo/server/db/pool.js:550:18)
+    at postDirectPurchasePaymentVoucherTx (file:///C:/Users/stanl/demo/server/routes/purchase.routes.js:2258:32)
+    at file:///C:/Users/stanl/demo/server/routes/purchase.routes.js:11735:29
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T20:18:03.470Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T20:18:03.812Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T20:18:04.365Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T20:18:05.379Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T20:19:18.658Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=PAYV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=PAYV
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"PAYV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T21:09:47.202Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/routes/sales.route.js:4348:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T21:10:48.761Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/routes/sales.route.js:4348:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T21:28:28.027Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mt96fskq-q1cqubip
+durationMs: 17
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-25T21:28:28.053Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mt96fslk-9nviwwwc
+durationMs: 13
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-25T21:30:03.694Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/routes/sales.route.js:4565:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T21:37:21.261Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/routes/sales.route.js:4565:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T21:37:53.440Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/routes/sales.route.js:4565:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T21:38:04.277Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/routes/sales.route.js:4565:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T21:38:14.851Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/routes/sales.route.js:4565:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T21:49:23.610Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/routes/sales.route.js:4565:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T21:53:51.221Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/routes/sales.route.js:4565:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T21:54:40.101Z] HTTP_500
+Summary: Table 'omnisuite.adm_workflow_instances' doesn't exist
+Request: POST /api/sales/invoices (status 500)
+Context:
+status: 500
+code: ER_NO_SUCH_TABLE
+method: POST
+url: /api/sales/invoices
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {"invoice_no":"INV-000001","invoice_date":"2026-08-25","customer_id":19,"sales_order_id":"","status":"POSTED","warehouse_id":1,"price_type":"Retail","currency_id":1,"exchange_rate":1,"address":"","address2":"","city":"Kumasi","state":"Greater Accra","country":"Ghana","phone":"+2330248877123","remarks":"","project_id":null,"salesperson":"","auto_receipt":true,"payment_method":"Cash","deposit_account_id":81,"payment_reference":"","cheque_date":null,"paid_amount":216,"due_date":"2026-08-25","total_amount":216,"tax_amount":36,"net_amount":180,"payment_account_id":81,"received_amount":216,"items":[{"item_id":2,"quantity":2,"unit_price":90,"discount_percent":0,"tax_id":1,"tax_rate":20,"tax_amount":36,"total_amount":216,"net_amount":180,"uom":"PCS"}]}
+query: {}
+Technical details:
+Error: Table 'omnisuite.adm_workflow_instances' doesn't exist
+    at file:///C:/Users/stanl/demo/server/db/pool.js:550:48
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at Proxy.<anonymous> (file:///C:/Users/stanl/demo/server/db/pool.js:550:18)
+    at postSalesInvoiceReceiptVoucherTx (file:///C:/Users/stanl/demo/server/routes/sales.route.js:1611:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///C:/Users/stanl/demo/server/routes/sales.route.js:5410:23
+--------------------------------------------------------------------------------
+
+[2026-08-25T21:59:48.298Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/routes/sales.route.js:4565:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:07:56.351Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/routes/sales.route.js:4586:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:09:11.996Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/routes/sales.route.js:4586:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:10:28.083Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/routes/sales.route.js:4586:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:11:41.156Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/routes/sales.route.js:4586:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:14:35.201Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=RV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=RV
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"RV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:266:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:14:52.901Z] HTTP_500
+Summary: Unknown column 'customer_id' in 'where clause'
+Request: GET /api/sales/invoices/outstanding-by-account?account_id=83 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/sales/invoices/outstanding-by-account?account_id=83
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"account_id":"83"}
+Technical details:
+Error: Unknown column 'customer_id' in 'where clause'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/sales.route.js:4447:24
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:14:53.246Z] HTTP_500
+Summary: Unknown column 'customer_id' in 'where clause'
+Request: GET /api/sales/invoices/outstanding-by-account?account_id=83 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/sales/invoices/outstanding-by-account?account_id=83
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"account_id":"83"}
+Technical details:
+Error: Unknown column 'customer_id' in 'where clause'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/sales.route.js:4447:24
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:14:53.853Z] HTTP_500
+Summary: Unknown column 'customer_id' in 'where clause'
+Request: GET /api/sales/invoices/outstanding-by-account?account_id=83 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/sales/invoices/outstanding-by-account?account_id=83
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"account_id":"83"}
+Technical details:
+Error: Unknown column 'customer_id' in 'where clause'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/sales.route.js:4447:24
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:14:54.816Z] HTTP_500
+Summary: Unknown column 'customer_id' in 'where clause'
+Request: GET /api/sales/invoices/outstanding-by-account?account_id=83 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/sales/invoices/outstanding-by-account?account_id=83
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"account_id":"83"}
+Technical details:
+Error: Unknown column 'customer_id' in 'where clause'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async file:///C:/Users/stanl/demo/server/routes/sales.route.js:4447:24
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:21:58.451Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:21:59.118Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:21:59.982Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:22:00.873Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:25:51.205Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/routes/sales.route.js:4604:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:26:27.045Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/routes/sales.route.js:4604:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:27:42.253Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/routes/sales.route.js:4604:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:29:57.105Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:29:57.454Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:29:58.037Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:29:58.925Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:36:29.030Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mt98v9he-yj1un8we
+durationMs: 36
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:36:29.092Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mt98v9jk-m14607ij
+durationMs: 20
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:40:16.464Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mt9904zf-6aiurl25
+durationMs: 21
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:40:16.508Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mt990515-0ib1f0ca
+durationMs: 3
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:54:34.487Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mt99ij1v-nwi4l8aw
+durationMs: 4
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-25T22:54:34.514Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mt99ij2a-ur9zxvzp
+durationMs: 16
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-25T23:04:05.886Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mt99urxw-79wgaiwz
+durationMs: 10
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-25T23:04:05.968Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mt99us03-mbvwk5p2
+durationMs: 13
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-25T23:07:29.888Z] HTTP_500
+Summary: Request failed with status 500
+Request: POST /api/ai/chat (status 500)
+Context:
+requestId: mt99yz4q-bdp7x8ol
+durationMs: 8070
+method: POST
+url: /api/ai/chat
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: 1
+branchId: 1
+status: 500
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-25T23:08:22.420Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mt9a09vf-ngsasvmz
+durationMs: 25
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-25T23:08:22.460Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mt9a09x0-h5ngwmp9
+durationMs: 8
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-08-25T23:14:38.494Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T23:14:38.887Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T23:14:39.579Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T23:14:40.437Z] HTTP_500
+Summary: Unknown column 'opening_balance' in 'field list'
+Request: GET /api/finance/accounts/81/balance (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/accounts/81/balance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'opening_balance' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getAccountBalance (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:1762:18)
+--------------------------------------------------------------------------------
+
+[2026-08-25T23:15:51.985Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/sales/invoices/next-no (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/sales/invoices/next-no
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/routes/sales.route.js:4604:15
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedAnyMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:97:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------

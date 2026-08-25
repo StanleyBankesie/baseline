@@ -199,7 +199,7 @@ export default function GeneralLedgerReportPage() {
     sortKey,
     sortDir,
     toggle,
-  } = useSort(items, "voucher_date", "desc");
+  } = useSort(items, "voucher_date", "asc");
 
   const groupedItems = useMemo(() => {
     if (!controlBreak) return null;
@@ -545,7 +545,7 @@ export default function GeneralLedgerReportPage() {
           ) : null}
 
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table table-fixed w-full min-w-[1100px]">
               <thead className="sticky top-0 z-10">
                 <tr>
                   {!accountId && !controlBreak ? (
@@ -555,6 +555,7 @@ export default function GeneralLedgerReportPage() {
                       currentKey={sortKey}
                       direction={sortDir}
                       onToggle={toggle}
+                      className="w-[11.11%] min-w-[130px]"
                     />
                   ) : null}
                   <SortableHeader
@@ -563,6 +564,7 @@ export default function GeneralLedgerReportPage() {
                     currentKey={sortKey}
                     direction={sortDir}
                     onToggle={toggle}
+                    className="w-[12.5%] min-w-[130px]"
                   />
                   <SortableHeader
                     label="Voucher No"
@@ -570,6 +572,7 @@ export default function GeneralLedgerReportPage() {
                     currentKey={sortKey}
                     direction={sortDir}
                     onToggle={toggle}
+                    className="w-[12.5%] min-w-[130px]"
                   />
                   <SortableHeader
                     label="Description"
@@ -577,6 +580,7 @@ export default function GeneralLedgerReportPage() {
                     currentKey={sortKey}
                     direction={sortDir}
                     onToggle={toggle}
+                    className="w-[12.5%] min-w-[130px]"
                   />
                   <SortableHeader
                     label="Debit"
@@ -584,7 +588,7 @@ export default function GeneralLedgerReportPage() {
                     currentKey={sortKey}
                     direction={sortDir}
                     onToggle={toggle}
-                    className="text-right"
+                    className="text-right w-[12.5%] min-w-[130px]"
                   />
                   <SortableHeader
                     label="Credit"
@@ -592,7 +596,7 @@ export default function GeneralLedgerReportPage() {
                     currentKey={sortKey}
                     direction={sortDir}
                     onToggle={toggle}
-                    className="text-right"
+                    className="text-right w-[12.5%] min-w-[130px]"
                   />
                   <SortableHeader
                     label="Currency"
@@ -600,7 +604,7 @@ export default function GeneralLedgerReportPage() {
                     currentKey={sortKey}
                     direction={sortDir}
                     onToggle={toggle}
-                    className="text-right"
+                    className="text-right w-[12.5%] min-w-[130px]"
                   />
                   <SortableHeader
                     label="Exch. Rate"
@@ -608,7 +612,7 @@ export default function GeneralLedgerReportPage() {
                     currentKey={sortKey}
                     direction={sortDir}
                     onToggle={toggle}
-                    className="text-right"
+                    className="text-right w-[12.5%] min-w-[130px]"
                   />
                   <SortableHeader
                     label="Balance (Dr/Cr)"
@@ -616,7 +620,7 @@ export default function GeneralLedgerReportPage() {
                     currentKey={sortKey}
                     direction={sortDir}
                     onToggle={toggle}
-                    className="text-right"
+                    className="text-right w-[12.5%] min-w-[130px]"
                   />
                 </tr>
               </thead>
@@ -642,7 +646,7 @@ export default function GeneralLedgerReportPage() {
                       <tr className="bg-slate-50/90 dark:bg-slate-800/60 font-semibold border-b border-slate-200 dark:border-slate-700">
                         <td>{obDate}</td>
                         <td className="font-mono text-xs font-bold text-slate-500 dark:text-slate-400">OPENING</td>
-                        <td className="italic text-slate-700 dark:text-slate-300">{from ? `Opening Balance (As of ${new Date(from).toLocaleDateString()})` : "Opening Balance B/F"}</td>
+                        <td className="italic text-slate-700 dark:text-slate-300 break-words whitespace-normal">{from ? `Opening Balance (As of ${new Date(from).toLocaleDateString()})` : "Opening Balance B/F"}</td>
                         <td className="text-right font-mono font-bold text-slate-800 dark:text-slate-200">
                           {obBalance > 0 ? Number(obBalance).toLocaleString(undefined, { minimumFractionDigits: 2 }) : "—"}
                         </td>
@@ -668,14 +672,14 @@ export default function GeneralLedgerReportPage() {
                                 {r.voucher_no}
                               </Link>
                             </td>
-                            <td>{r.description || "-"}</td>
-                            <td className="text-right">{Number(r.debit || 0).toLocaleString()}</td>
-                            <td className="text-right">{Number(r.credit || 0).toLocaleString()}</td>
+                            <td className="break-words whitespace-normal leading-relaxed">{r.description || "-"}</td>
+                            <td className="text-right">{Number(r.debit || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                            <td className="text-right">{Number(r.credit || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                             <td className="text-right">{r.currency_code || "-"}</td>
-                            <td className="text-right">{Number(r.exchange_rate || 1).toLocaleString()}</td>
+                            <td className="text-right">{Number(r.exchange_rate || 1).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 6 })}</td>
                             <td className="text-right">
                               <span className="font-medium">
-                                {displayBalance.toLocaleString()}{" "}
+                                {displayBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{" "}
                                 <span className={balance >= 0 ? "text-blue-600" : "text-red-600"}>{rBalanceType}</span>
                               </span>
                             </td>
@@ -700,7 +704,7 @@ export default function GeneralLedgerReportPage() {
                     <tr className="bg-slate-50/90 dark:bg-slate-800/60 font-semibold border-b border-slate-200 dark:border-slate-700">
                       <td>{from ? new Date(from).toLocaleDateString() : "Opening"}</td>
                       <td className="font-mono text-xs font-bold text-slate-500 dark:text-slate-400">OPENING</td>
-                      <td className="italic text-slate-700 dark:text-slate-300">{from ? `Opening Balance (As of ${new Date(from).toLocaleDateString()})` : "Opening Balance B/F"}</td>
+                      <td className="italic text-slate-700 dark:text-slate-300 break-words whitespace-normal">{from ? `Opening Balance (As of ${new Date(from).toLocaleDateString()})` : "Opening Balance B/F"}</td>
                       <td className="text-right font-mono font-bold text-slate-800 dark:text-slate-200">
                         {opening > 0 ? Number(opening).toLocaleString(undefined, { minimumFractionDigits: 2 }) : "—"}
                       </td>
@@ -733,22 +737,22 @@ export default function GeneralLedgerReportPage() {
                             {r.voucher_no}
                           </Link>
                         </td>
-                        <td>{r.description || "-"}</td>
+                        <td className="break-words whitespace-normal leading-relaxed">{r.description || "-"}</td>
                         <td className="text-right">
-                          {Number(r.debit || 0).toLocaleString()}
+                          {Number(r.debit || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </td>
                         <td className="text-right">
-                          {Number(r.credit || 0).toLocaleString()}
+                          {Number(r.credit || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </td>
                         <td className="text-right">
                           {r.currency_code || "-"}
                         </td>
                         <td className="text-right">
-                          {Number(r.exchange_rate || 1).toLocaleString()}
+                          {Number(r.exchange_rate || 1).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 6 })}
                         </td>
                         <td className="text-right">
                           <span className="font-medium">
-                            {displayBalance.toLocaleString()}{" "}
+                            {displayBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{" "}
                             <span
                               className={
                                 balance >= 0 ? "text-blue-600" : "text-red-600"

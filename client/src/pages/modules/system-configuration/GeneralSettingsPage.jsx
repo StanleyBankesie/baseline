@@ -60,6 +60,33 @@ export default function GeneralSettingsPage() {
   const [openRouterSaving, setOpenRouterSaving] = useState(false);
   const [openRouterTesting, setOpenRouterTesting] = useState(false);
   const [selectedAiModel, setSelectedAiModel] = useState("openai/gpt-oss-120b");
+  const [banksAiEnabled, setBanksAiEnabled] = useState(() => {
+    try {
+      const val = localStorage.getItem("omnisuite.banks_ai_enabled");
+      if (val !== null) return val === "true";
+    } catch {}
+    return true;
+  });
+
+  async function toggleBanksAi(checked) {
+    setBanksAiEnabled(checked);
+    try {
+      localStorage.setItem("omnisuite.banks_ai_enabled", String(checked));
+      window.dispatchEvent(
+        new CustomEvent("omni.banks_ai.visibility", {
+          detail: { enabled: checked },
+        }),
+      );
+      await api.post("/ai/toggle-visibility", { enabled: checked });
+      toast.success(
+        checked
+          ? "Ask Banks AI floating assistant is now enabled and visible."
+          : "Ask Banks AI floating assistant is now disabled and hidden.",
+      );
+    } catch (e) {
+      toast.error("Failed to update Ask Banks visibility");
+    }
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -118,6 +145,12 @@ export default function GeneralSettingsPage() {
         if (mounted && res.data) {
           setAiStatus(res.data);
           if (res.data.defaultModel) setSelectedAiModel(res.data.defaultModel);
+          if (res.data.enabled !== undefined) {
+            setBanksAiEnabled(Boolean(res.data.enabled));
+            try {
+              localStorage.setItem("omnisuite.banks_ai_enabled", String(res.data.enabled));
+            } catch {}
+          }
         }
       } catch {}
     })();
@@ -441,6 +474,28 @@ export default function GeneralSettingsPage() {
                   </span>
                 )}
               </div>
+            </div>
+
+            {/* Ask Banks Global Visibility Switch */}
+            <div className="flex items-center justify-between p-4 rounded-xl bg-brand-50/60 dark:bg-brand-950/30 border border-brand-200 dark:border-brand-800/60">
+              <div className="space-y-0.5">
+                <div className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                  <Sparkles size={16} className="text-primary" />
+                  <span>Floating "Ask Banks" AI Button Visibility</span>
+                </div>
+                <div className="text-xs text-slate-600 dark:text-slate-400">
+                  When enabled, the floating "Ask Banks" button is visible across the entire application. When disabled, the floating button is hidden.
+                </div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={banksAiEnabled}
+                  onChange={(e) => toggleBanksAi(e.target.checked)}
+                />
+                <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+              </label>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
