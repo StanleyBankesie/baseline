@@ -770,41 +770,144 @@ export const getHomeOverview = async (req, res, next) => {
   try {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const p = { companyId, branchId, branchIdsStr: String(branchIdsStr || '') };
-    const whereBranch = "(:branchId IS NULL OR branch_id = :branchId OR :branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr) OR branch_id IS NULL)";
+    const whereBranch = (branchId !== null && branchId !== undefined && String(branchId).trim() !== '')
+      ? "branch_id = :branchId"
+      : (branchIdsStr && String(branchIdsStr).trim() !== '')
+      ? "FIND_IN_SET(branch_id, :branchIdsStr)"
+      : "1=1";
     
     const [
       [todaySalesData],
       [thisMonthData],
       [lastMonthData],
       [customersData],
-      [allTimeSalesData]
+      [allTimeSalesData],
+      [inventoryData],
+      [purchaseData],
+      [hrData],
+      [adminData],
+      [maintData],
+      [prodData],
+      [projData],
+      [transData],
+      [finData]
     ] = await Promise.all([
       safeQuery(`SELECT 
-          (SELECT COALESCE(SUM(total_amount),0) FROM sal_invoices WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND DATE(invoice_date) = CURDATE() AND status NOT IN ('CANCELLED','DRAFT')) +
-          (SELECT COALESCE(SUM(net_amount),0) FROM pos_sales WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND DATE(sale_datetime) = CURDATE() AND status != 'VOID') as total,
-          (SELECT COUNT(*) FROM sal_invoices WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND DATE(invoice_date) = CURDATE() AND status NOT IN ('CANCELLED','DRAFT')) +
-          (SELECT COUNT(*) FROM pos_sales WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND DATE(sale_datetime) = CURDATE() AND status != 'VOID') as count`, p, [{ total: 0, count: 0 }]),
+          (
+            (SELECT COALESCE(SUM(COALESCE(gross_amount,0) + COALESCE(tax_amount,0) - COALESCE(discount_amount,0)), 0) 
+             FROM pos_sales WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND DATE(sale_datetime) = CURDATE() AND status = 'COMPLETED')
+            -
+            (SELECT COALESCE(SUM(total_refund), 0) 
+             FROM pos_returns WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND DATE(return_datetime) = CURDATE())
+            +
+            (SELECT COALESCE(SUM(total_amount), 0) 
+             FROM sal_invoices WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND DATE(invoice_date) = CURDATE() AND status NOT IN ('CANCELLED','DRAFT'))
+          ) as total,
+          (
+            (SELECT COUNT(*) FROM pos_sales WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND DATE(sale_datetime) = CURDATE() AND status = 'COMPLETED')
+            +
+            (SELECT COUNT(*) FROM sal_invoices WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND DATE(invoice_date) = CURDATE() AND status NOT IN ('CANCELLED','DRAFT'))
+          ) as count`, p, [{ total: 0, count: 0 }]),
       safeQuery(`SELECT 
-          (SELECT COALESCE(SUM(total_amount),0) FROM sal_invoices WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND MONTH(invoice_date) = MONTH(CURDATE()) AND YEAR(invoice_date) = YEAR(CURDATE()) AND status NOT IN ('CANCELLED','DRAFT')) +
-          (SELECT COALESCE(SUM(net_amount),0) FROM pos_sales WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND MONTH(sale_datetime) = MONTH(CURDATE()) AND YEAR(sale_datetime) = YEAR(CURDATE()) AND status != 'VOID') as total`, p, [{ total: 0 }]),
+          (
+            (SELECT COALESCE(SUM(COALESCE(gross_amount,0) + COALESCE(tax_amount,0) - COALESCE(discount_amount,0)), 0) 
+             FROM pos_sales WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND MONTH(sale_datetime) = MONTH(CURDATE()) AND YEAR(sale_datetime) = YEAR(CURDATE()) AND status = 'COMPLETED')
+            -
+            (SELECT COALESCE(SUM(total_refund), 0) 
+             FROM pos_returns WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND MONTH(return_datetime) = MONTH(CURDATE()) AND YEAR(return_datetime) = YEAR(CURDATE()))
+            +
+            (SELECT COALESCE(SUM(total_amount), 0) 
+             FROM sal_invoices WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND MONTH(invoice_date) = MONTH(CURDATE()) AND YEAR(invoice_date) = YEAR(CURDATE()) AND status NOT IN ('CANCELLED','DRAFT'))
+          ) as total`, p, [{ total: 0 }]),
       safeQuery(`SELECT 
-          (SELECT COALESCE(SUM(total_amount),0) FROM sal_invoices WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND MONTH(invoice_date) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) AND YEAR(invoice_date) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) AND status NOT IN ('CANCELLED','DRAFT')) +
-          (SELECT COALESCE(SUM(net_amount),0) FROM pos_sales WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND MONTH(sale_datetime) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) AND YEAR(sale_datetime) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) AND status != 'VOID') as total`, p, [{ total: 0 }]),
+          (
+            (SELECT COALESCE(SUM(COALESCE(gross_amount,0) + COALESCE(tax_amount,0) - COALESCE(discount_amount,0)), 0) 
+             FROM pos_sales WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND MONTH(sale_datetime) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) AND YEAR(sale_datetime) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) AND status = 'COMPLETED')
+            -
+            (SELECT COALESCE(SUM(total_refund), 0) 
+             FROM pos_returns WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND MONTH(return_datetime) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) AND YEAR(return_datetime) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)))
+            +
+            (SELECT COALESCE(SUM(total_amount), 0) 
+             FROM sal_invoices WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND MONTH(invoice_date) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) AND YEAR(invoice_date) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) AND status NOT IN ('CANCELLED','DRAFT'))
+          ) as total`, p, [{ total: 0 }]),
       safeQuery(`SELECT COUNT(*) as count FROM sal_customers WHERE (company_id = :companyId OR company_id IS NULL) AND is_active = 1`, p, [{ count: 0 }]),
       safeQuery(`SELECT 
-          (SELECT COALESCE(SUM(total_amount),0) FROM sal_invoices WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND status NOT IN ('CANCELLED','DRAFT')) +
-          (SELECT COALESCE(SUM(net_amount),0) FROM pos_sales WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND status != 'VOID') as total,
-          (SELECT COUNT(*) FROM sal_invoices WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND status NOT IN ('CANCELLED','DRAFT')) +
-          (SELECT COUNT(*) FROM pos_sales WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND status != 'VOID') as count`, p, [{ total: 0, count: 0 }]),
+          (
+            (SELECT COALESCE(SUM(COALESCE(gross_amount,0) + COALESCE(tax_amount,0) - COALESCE(discount_amount,0)), 0) 
+             FROM pos_sales WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND status = 'COMPLETED')
+            -
+            (SELECT COALESCE(SUM(total_refund), 0) 
+             FROM pos_returns WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch})
+            +
+            (SELECT COALESCE(SUM(total_amount), 0) 
+             FROM sal_invoices WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND status NOT IN ('CANCELLED','DRAFT'))
+          ) as total,
+          (
+            (SELECT COUNT(*) FROM pos_sales WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND status = 'COMPLETED')
+            +
+            (SELECT COUNT(*) FROM sal_invoices WHERE (company_id = :companyId OR company_id IS NULL) AND ${whereBranch} AND status NOT IN ('CANCELLED','DRAFT'))
+          ) as count`, p, [{ total: 0, count: 0 }]),
+      safeQuery(`SELECT 
+          (SELECT COUNT(*) FROM inv_items WHERE (company_id = :companyId OR company_id IS NULL) AND is_active = 1) as totalItems,
+          (SELECT COUNT(*) FROM inv_items WHERE (company_id = :companyId OR company_id IS NULL) AND is_active = 1 AND reorder_level > 0) as lowStockItems,
+          (SELECT COUNT(*) FROM inv_warehouses WHERE (company_id = :companyId OR company_id IS NULL) AND is_active = 1) as totalWarehouses`, p, [{ totalItems: 0, lowStockItems: 0, totalWarehouses: 1 }]),
+      safeQuery(`SELECT 
+          (SELECT COALESCE(SUM(total_amount),0) FROM pur_purchase_orders WHERE (company_id = :companyId OR company_id IS NULL) AND status NOT IN ('CANCELLED','DRAFT')) as totalPurchases,
+          (SELECT COUNT(*) FROM pur_purchase_orders WHERE (company_id = :companyId OR company_id IS NULL) AND status = 'APPROVED') as activePOs,
+          (SELECT COUNT(*) FROM pur_suppliers WHERE (company_id = :companyId OR company_id IS NULL) AND is_active = 1) as activeSuppliers`, p, [{ totalPurchases: 0, activePOs: 0, activeSuppliers: 0 }]),
+      safeQuery(`SELECT 
+          (SELECT COUNT(*) FROM hr_employees WHERE (company_id = :companyId OR company_id IS NULL) AND status = 'ACTIVE') as activeEmployees,
+          (SELECT COUNT(*) FROM hr_leaves WHERE (company_id = :companyId OR company_id IS NULL) AND status = 'APPROVED' AND CURDATE() BETWEEN start_date AND end_date) as onLeave`, p, [{ activeEmployees: 0, onLeave: 0 }]),
+      safeQuery(`SELECT 
+          (SELECT COUNT(*) FROM adm_users WHERE (company_id = :companyId OR company_id IS NULL) AND is_active = 1) as activeUsers,
+          (SELECT COUNT(*) FROM adm_roles WHERE (company_id = :companyId OR company_id IS NULL) AND is_active = 1) as roleCount`, p, [{ activeUsers: 0, roleCount: 0 }]),
+      safeQuery(`SELECT 
+          (SELECT COUNT(*) FROM maint_work_orders WHERE (company_id = :companyId OR company_id IS NULL) AND status NOT IN ('COMPLETED','CANCELLED')) as openWorkOrders,
+          (SELECT COUNT(*) FROM maint_assets WHERE (company_id = :companyId OR company_id IS NULL)) as totalAssets`, p, [{ openWorkOrders: 0, totalAssets: 0 }]),
+      safeQuery(`SELECT 
+          (SELECT COUNT(*) FROM prod_production_orders WHERE (company_id = :companyId OR company_id IS NULL) AND status NOT IN ('COMPLETED','CANCELLED')) as activeProductionOrders,
+          (SELECT COUNT(*) FROM prod_production_orders WHERE (company_id = :companyId OR company_id IS NULL) AND status = 'COMPLETED') as completedOrders`, p, [{ activeProductionOrders: 0, completedOrders: 0 }]),
+      safeQuery(`SELECT 
+          (SELECT COUNT(*) FROM pm_projects WHERE (company_id = :companyId OR company_id IS NULL) AND status = 'ACTIVE') as activeProjects,
+          (SELECT COUNT(*) FROM pm_tasks WHERE (company_id = :companyId OR company_id IS NULL) AND status != 'DONE' AND due_date < CURDATE()) as overdueTasks`, p, [{ activeProjects: 0, overdueTasks: 0 }]),
+      safeQuery(`SELECT 
+          (SELECT COUNT(*) FROM trans_vehicles WHERE (company_id = :companyId OR company_id IS NULL) AND status = 'ACTIVE') as totalVehicles,
+          (SELECT COUNT(*) FROM trans_trips WHERE (company_id = :companyId OR company_id IS NULL) AND status = 'IN_PROGRESS') as activeTrips`, p, [{ totalVehicles: 0, activeTrips: 0 }]),
+      safeQuery(`SELECT 
+          (SELECT COALESCE(SUM(total_amount - COALESCE(paid_amount, 0)), 0) FROM sal_invoices WHERE (company_id = :companyId OR company_id IS NULL) AND status NOT IN ('PAID','CANCELLED','DRAFT')) as arOutstanding,
+          (SELECT COALESCE(SUM(total_amount), 0) FROM pur_purchase_orders WHERE (company_id = :companyId OR company_id IS NULL) AND status = 'APPROVED') as apOutstanding`, p, [{ arOutstanding: 0, apOutstanding: 0 }]),
     ]);
 
     const todaySales = Number(todaySalesData?.total || 0);
+    const todayTransactions = Number(todaySalesData?.count || 0);
     const monthlyRevenue = Number(thisMonthData?.total || 0);
     const lastMonthSales = Number(lastMonthData?.total || 0);
     const totalCustomers = Number(customersData?.count || 0);
     const allTimeRevenue = Number(allTimeSalesData?.total || 0);
     const allTimeCount = Number(allTimeSalesData?.count || 0);
     const averageOrder = allTimeCount > 0 ? (allTimeRevenue / allTimeCount) : 0;
+
+    const itemsTracked = Number(inventoryData?.totalItems || 0);
+    const lowStockItems = Number(inventoryData?.lowStockItems || 0);
+    const totalWarehouses = Number(inventoryData?.totalWarehouses || 1);
+    const totalPurchases = Number(purchaseData?.totalPurchases || 0);
+    const activePOs = Number(purchaseData?.activePOs || 0);
+    const activeSuppliers = Number(purchaseData?.activeSuppliers || 0);
+    const activeEmployees = Number(hrData?.activeEmployees || 0);
+    const onLeave = Number(hrData?.onLeave || 0);
+    const activeUsers = Number(adminData?.activeUsers || 0);
+    const roleCount = Number(adminData?.roleCount || 0);
+    const openWorkOrders = Number(maintData?.openWorkOrders || 0);
+    const totalAssets = Number(maintData?.totalAssets || 0);
+    const activeProductionOrders = Number(prodData?.activeProductionOrders || 0);
+    const completedOrders = Number(prodData?.completedOrders || 0);
+    const activeProjects = Number(projData?.activeProjects || 0);
+    const overdueTasks = Number(projData?.overdueTasks || 0);
+    const totalVehicles = Number(transData?.totalVehicles || 0);
+    const activeTrips = Number(transData?.activeTrips || 0);
+    const arOutstanding = Number(finData?.arOutstanding || 0);
+    const apOutstanding = Number(finData?.apOutstanding || 0);
+    const cashBalance = todaySales + monthlyRevenue;
 
     let growthPct = 0;
     if (lastMonthSales > 0) {
@@ -814,18 +917,42 @@ export const getHomeOverview = async (req, res, next) => {
     }
 
     const badges = {
-      "today-sales": { text: `Active Today: ${todaySalesData?.count || 0} txn(s)` },
+      "today-sales": { text: `Active Today: ${todayTransactions} txn(s)` },
       "total-customers": { text: "Active" },
       "average-order": { text: `${allTimeCount} Orders Total` },
       "monthly-revenue": { text: `${growthPct >= 0 ? '+' : ''}${growthPct}% vs last mo` },
+      "sales-total-revenue": { text: `${growthPct >= 0 ? '+' : ''}${growthPct}% vs last mo` },
     };
 
     res.json({
       todaySales,
+      totalTransactions: todayTransactions,
       totalCustomers,
       averageOrder,
       monthlyRevenue,
       allTimeRevenue,
+      itemsTracked,
+      totalItems: itemsTracked,
+      lowStockItems,
+      totalWarehouses,
+      totalPurchases,
+      activePOs,
+      activeSuppliers,
+      activeEmployees,
+      onLeave,
+      activeUsers,
+      roleCount,
+      openWorkOrders,
+      totalAssets,
+      activeProductionOrders,
+      completedOrders,
+      activeProjects,
+      overdueTasks,
+      totalVehicles,
+      activeTrips,
+      arOutstanding,
+      apOutstanding,
+      cashBalance,
       badges
     });
   } catch (err) { next(err); }
@@ -835,17 +962,17 @@ export const getDashboards = async (req, res, next) => {
   try {
     const { companyId, branchIdsStr = '' } = req.scope || {};
     const [salesStats, purchaseStats, inventoryStats, hrStats] = await Promise.all([
-      safeQuery(`SELECT COUNT(*) as count, SUM(total_amount) as total FROM sal_invoices WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) AND invoice_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)`, { companyId, branchIdsStr }, [{ count: 0, total: 0 }]),
-      safeQuery(`SELECT COUNT(*) as count, SUM(total_amount) as total FROM pur_orders WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) AND po_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)`, { companyId, branchIdsStr }, [{ count: 0, total: 0 }]),
-      safeQuery(`SELECT COUNT(*) as item_count, SUM(qty) as total_qty FROM inv_stock_balances WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`, { companyId, branchIdsStr }, [{ item_count: 0, total_qty: 0 }]),
-      safeQuery(`SELECT COUNT(*) as employee_count FROM hr_employees WHERE company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) AND is_active = 1`, { companyId, branchIdsStr }, [{ employee_count: 0 }]),
+      safeQuery(`SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as total FROM sal_invoices WHERE (company_id = :companyId OR company_id IS NULL) AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) AND invoice_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)`, { companyId, branchIdsStr }, [{ count: 0, total: 0 }]),
+      safeQuery(`SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as total FROM pur_purchase_orders WHERE (company_id = :companyId OR company_id IS NULL) AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) AND po_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)`, { companyId, branchIdsStr }, [{ count: 0, total: 0 }]),
+      safeQuery(`SELECT COUNT(*) as item_count, COALESCE(SUM(qty), 0) as total_qty FROM inv_stock_balances WHERE (company_id = :companyId OR company_id IS NULL) AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`, { companyId, branchIdsStr }, [{ item_count: 0, total_qty: 0 }]),
+      safeQuery(`SELECT COUNT(*) as employee_count FROM hr_employees WHERE (company_id = :companyId OR company_id IS NULL) AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr)) AND status = 'ACTIVE'`, { companyId, branchIdsStr }, [{ employee_count: 0 }]),
     ]);
     res.json({
       summary: {
-        sales: { documents: salesStats[0]?.count || 0, total: salesStats[0]?.total || 0 },
-        purchase: { documents: purchaseStats[0]?.count || 0, total: purchaseStats[0]?.total || 0 },
-        inventory: { items: inventoryStats[0]?.item_count || 0, quantity: inventoryStats[0]?.total_qty || 0 },
-        hr: { employees: hrStats[0]?.employee_count || 0 },
+        sales: { documents: Number(salesStats[0]?.count || 0), total: Number(salesStats[0]?.total || 0) },
+        purchase: { documents: Number(purchaseStats[0]?.count || 0), total: Number(purchaseStats[0]?.total || 0) },
+        inventory: { items: Number(inventoryStats[0]?.item_count || 0), quantity: Number(inventoryStats[0]?.total_qty || 0) },
+        hr: { employees: Number(hrStats[0]?.employee_count || 0) },
       },
     });
   } catch (err) { next(err); }
@@ -901,20 +1028,68 @@ export const getModuleAnalytics = async (req, res, next) => {
   try {
     const { companyId } = req.scope || {};
     const p = { companyId };
-    const [sales, pos, po, inv, emp] = await Promise.all([
-      safeQuery(`SELECT COALESCE(SUM(total_amount), 0) as v FROM sal_invoices WHERE company_id = :companyId`, p, [{ v: 0 }]),
-      safeQuery(`SELECT COALESCE(SUM(net_amount), 0) as v FROM pos_sales WHERE company_id = :companyId`, p, [{ v: 0 }]),
-      safeQuery(`SELECT COALESCE(SUM(total_amount), 0) as v FROM pur_orders WHERE company_id = :companyId`, p, [{ v: 0 }]),
-      safeQuery(`SELECT COUNT(*) as v FROM inv_items WHERE company_id = :companyId`, p, [{ v: 0 }]),
-      safeQuery(`SELECT COUNT(*) as v FROM hr_employees WHERE company_id = :companyId AND deleted_at IS NULL`, p, [{ v: 0 }])
+    const [
+      sales,
+      pos,
+      posToday,
+      po,
+      inv,
+      emp,
+      cust,
+      openQuotes,
+      lowStock,
+      wh,
+      wo,
+      prod,
+      proj,
+      trans,
+      users
+    ] = await Promise.all([
+      safeQuery(`SELECT COALESCE(SUM(total_amount), 0) as v FROM sal_invoices WHERE (company_id = :companyId OR company_id IS NULL) AND status NOT IN ('CANCELLED','DRAFT')`, p, [{ v: 0 }]),
+      safeQuery(`SELECT COALESCE(SUM(net_amount), 0) as v, COUNT(*) as c FROM pos_sales WHERE (company_id = :companyId OR company_id IS NULL) AND status != 'VOID'`, p, [{ v: 0, c: 0 }]),
+      safeQuery(`SELECT COALESCE(SUM(net_amount), 0) as v, COUNT(*) as c FROM pos_sales WHERE (company_id = :companyId OR company_id IS NULL) AND DATE(sale_datetime) = CURDATE() AND status != 'VOID'`, p, [{ v: 0, c: 0 }]),
+      safeQuery(`SELECT COALESCE(SUM(total_amount), 0) as v, COUNT(*) as c FROM pur_purchase_orders WHERE (company_id = :companyId OR company_id IS NULL) AND status NOT IN ('CANCELLED','DRAFT')`, p, [{ v: 0, c: 0 }]),
+      safeQuery(`SELECT COUNT(*) as v FROM inv_items WHERE (company_id = :companyId OR company_id IS NULL) AND is_active = 1`, p, [{ v: 0 }]),
+      safeQuery(`SELECT COUNT(*) as v FROM hr_employees WHERE (company_id = :companyId OR company_id IS NULL) AND status = 'ACTIVE'`, p, [{ v: 0 }]),
+      safeQuery(`SELECT COUNT(*) as v FROM sal_customers WHERE (company_id = :companyId OR company_id IS NULL) AND is_active = 1`, p, [{ v: 0 }]),
+      safeQuery(`SELECT COUNT(*) as v FROM sal_quotations WHERE (company_id = :companyId OR company_id IS NULL) AND status IN ('OPEN','SENT','PENDING')`, p, [{ v: 0 }]),
+      safeQuery(`SELECT COUNT(*) as v FROM inv_items WHERE (company_id = :companyId OR company_id IS NULL) AND is_active = 1 AND reorder_level > 0`, p, [{ v: 0 }]),
+      safeQuery(`SELECT COUNT(*) as v FROM inv_warehouses WHERE (company_id = :companyId OR company_id IS NULL) AND is_active = 1`, p, [{ v: 0 }]),
+      safeQuery(`SELECT COUNT(*) as v FROM maint_work_orders WHERE (company_id = :companyId OR company_id IS NULL) AND status NOT IN ('COMPLETED','CANCELLED')`, p, [{ v: 0 }]),
+      safeQuery(`SELECT COUNT(*) as v FROM prod_production_orders WHERE (company_id = :companyId OR company_id IS NULL) AND status NOT IN ('COMPLETED','CANCELLED')`, p, [{ v: 0 }]),
+      safeQuery(`SELECT COUNT(*) as v FROM pm_projects WHERE (company_id = :companyId OR company_id IS NULL) AND status = 'ACTIVE'`, p, [{ v: 0 }]),
+      safeQuery(`SELECT COUNT(*) as v FROM trans_vehicles WHERE (company_id = :companyId OR company_id IS NULL) AND status = 'ACTIVE'`, p, [{ v: 0 }]),
+      safeQuery(`SELECT COUNT(*) as v FROM adm_users WHERE (company_id = :companyId OR company_id IS NULL) AND is_active = 1`, p, [{ v: 0 }]),
     ]);
+
+    const totalSalesRev = Number(sales[0]?.v || 0) + Number(pos[0]?.v || 0);
+    const totalPosToday = Number(posToday[0]?.v || 0);
+    const totalPosTxn = Number(pos[0]?.c || 0);
+    const avgOrder = totalPosTxn > 0 ? (totalSalesRev / totalPosTxn) : 0;
+
     res.json({
       success: true,
       data: {
-        'sales-total-revenue': Number(sales[0]?.v || 0) + Number(pos[0]?.v || 0),
+        'sales-total-revenue': totalSalesRev,
+        'sales-pending-orders': Number(openQuotes[0]?.v || 0),
+        'sales-active-customers': Number(cust[0]?.v || 0),
         'purchase-total-value': Number(po[0]?.v || 0),
+        'purchase-pending-pos': Number(po[0]?.c || 0),
         'inventory-total-items': Number(inv[0]?.v || 0),
+        'inventory-low-stock': Number(lowStock[0]?.v || 0),
+        'inventory-warehouses': Number(wh[0]?.v || 1),
+        'finance-cash-balance': totalSalesRev,
         'hr-total-employees': Number(emp[0]?.v || 0),
+        'maint-open-work-orders': Number(wo[0]?.v || 0),
+        'prod-active-orders': Number(prod[0]?.v || 0),
+        'pm-active-projects': Number(proj[0]?.v || 0),
+        'pos-today-sales': totalPosToday,
+        'pos-total-transactions': totalPosTxn,
+        'pos-avg-order': avgOrder,
+        'pos-monthly-revenue': totalSalesRev,
+        'bi-company-revenue': totalSalesRev,
+        'trans-active-vehicles': Number(trans[0]?.v || 0),
+        'admin-active-users': Number(users[0]?.v || 0),
       }
     });
   } catch (err) { next(err); }

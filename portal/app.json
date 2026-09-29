@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "OmniSuite ESS Portal",
+    "slug": "omnisuite-portal",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/resources/OMNISUITE_LOGO_CLEAR.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/resources/OMNISUITE_LOGO_CLEAR.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0E3646"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/resources/OMNISUITE_LOGO_CLEAR.png",
+        "backgroundColor": "#0E3646"
+      }
+    },
+    "web": {
+      "favicon": "./assets/resources/OMNISUITE_LOGO_CLEAR.png"
+    }
+  }
+}

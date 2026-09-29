@@ -35,6 +35,7 @@ export default function UserForm() {
     isActive: true,
     profilePicture: "",
     isEmployee: false,
+    employeeId: "",
     userType: "Internal",
     validFrom: "",
     validTo: "",
@@ -44,6 +45,7 @@ export default function UserForm() {
   const [companies, setCompanies] = useState([]);
   const [branches, setBranches] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [showPassword, setShowPassword] = useState(false);
   const [isBranchModalOpen, setIsBranchModalOpen] = useState(false);
 
@@ -56,12 +58,15 @@ export default function UserForm() {
 
   async function fetchDependencies() {
     try {
-      const [compRes, branchRes, roleRes] = await Promise.all([
+      const [compRes, branchRes, roleRes, empRes] = await Promise.all([
         api.get("/admin/companies"),
         api.get("/admin/branches"),
         api
           .get("/access/roles")
           .catch(() => api.get("/admin/roles"))
+          .catch(() => ({ data: { items: [] } })),
+        api
+          .get("/hr/employees")
           .catch(() => ({ data: { items: [] } })),
       ]);
       setCompanies(
@@ -72,6 +77,12 @@ export default function UserForm() {
       setBranches(
         (branchRes.data && branchRes.data.data && branchRes.data.data.items) ||
           branchRes.data?.items ||
+          [],
+      );
+      setEmployees(
+        (empRes.data && empRes.data.data && empRes.data.data.items) ||
+          empRes.data?.items ||
+          empRes.data?.data ||
           [],
       );
       setRoles(
@@ -113,6 +124,7 @@ export default function UserForm() {
           password: "", // Don't populate password
           profilePicture: u.profile_picture_url || "",
           isEmployee: Boolean(u.is_employee),
+          employeeId: u.employee_id ? String(u.employee_id) : "",
           userType: u.user_type || "Internal",
           validFrom: u.valid_from ? u.valid_from.split("T")[0] : "",
           validTo: u.valid_to ? u.valid_to.split("T")[0] : "",
@@ -212,6 +224,7 @@ export default function UserForm() {
         is_active: form.isActive,
         profile_picture: form.profilePicture || null,
         is_employee: form.isEmployee,
+        employee_id: form.isEmployee && form.employeeId ? Number(form.employeeId) : null,
         user_type: form.userType,
         valid_from: form.validFrom || null,
         valid_to: form.validTo || null,
@@ -417,7 +430,11 @@ export default function UserForm() {
                     <input
                       type="checkbox"
                       checked={form.isEmployee}
-                      onChange={(e) => update("isEmployee", e.target.checked)}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        update("isEmployee", checked);
+                        if (!checked) update("employeeId", "");
+                      }}
                       className="w-4 h-4 text-brand rounded focus:ring-brand"
                     />
                     <span className="text-sm font-medium">Is Employee</span>
@@ -433,6 +450,40 @@ export default function UserForm() {
                   </label>
                 </div>
               </div>
+
+              {/* Linked Employee Dropdown (shown when Is Employee is checked) */}
+              {form.isEmployee && (
+                <div>
+                  <label className="label">
+                    Linked Employee Profile <span className="text-brand">*</span>
+                  </label>
+                  <select
+                    className="input w-60"
+                    value={form.employeeId}
+                    onChange={(e) => {
+                      const empId = e.target.value;
+                      update("employeeId", empId);
+                      const selectedEmp = employees.find((emp) => String(emp.id) === String(empId));
+                      if (selectedEmp && !form.fullName) {
+                        update("fullName", `${selectedEmp.first_name || ''} ${selectedEmp.last_name || ''}`.trim());
+                      }
+                      if (selectedEmp && !form.email && selectedEmp.email) {
+                        update("email", selectedEmp.email);
+                      }
+                    }}
+                  >
+                    <option value="">-- Select Employee --</option>
+                    {employees.map((emp) => (
+                      <option key={emp.id} value={emp.id}>
+                        {emp.emp_code} - {emp.first_name} {emp.last_name} {emp.dept_name ? `(${emp.dept_name})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Links this user account in adm_users to the employee profile in hr_employees.
+                  </p>
+                </div>
+              )}
 
               {/* Valid From */}
               <div>

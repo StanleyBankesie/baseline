@@ -22,8 +22,11 @@ import {
   CheckCircle2
 } from "lucide-react";
 
+import { usePermission } from "@/auth/PermissionContext.jsx";
+
 export default function OpeningBalancesPage() {
   const { scope, user } = useAuth();
+  const { canAccessFeatureKey, isSuper } = usePermission();
   const [accessAllowed, setAccessAllowed] = useState(null);
   const [fiscalYears, setFiscalYears] = useState([]);
   const [selectedFyId, setSelectedFyId] = useState("");
@@ -58,8 +61,10 @@ export default function OpeningBalancesPage() {
       const curList = curRes.data?.items || [];
       setCurrencies(curList);
       const base = curList.find((c) => Number(c.is_base) === 1) || curList[0];
-      setBaseCurrencyCode(base?.code || "GHS");
-      setBaseCurrencyId(base?.id || 1);
+      if (base?.id) {
+        setBaseCurrencyId(Number(base.id));
+        setBaseCurrencyCode(base.code || "GHS");
+      }
 
       const rMap = new Map();
       if (base?.id) rMap.set(Number(base.id), 1.0);
@@ -75,9 +80,14 @@ export default function OpeningBalancesPage() {
     }
   }
 
-  // Check branch-level access restriction
+  // Check exclusive admin permission and branch-level access restriction
   useEffect(() => {
     async function checkAccess() {
+      const hasPerm = isSuper || canAccessFeatureKey("finance", "opening-balances");
+      if (!hasPerm) {
+        setAccessAllowed(false);
+        return;
+      }
       const bid = scope?.branchId;
       if (!bid) { setAccessAllowed(true); return; }
       try {
@@ -95,28 +105,37 @@ export default function OpeningBalancesPage() {
       }
     }
     if (user?.id) checkAccess();
-  }, [scope?.branchId, user?.id]);
+  }, [scope?.branchId, user?.id, isSuper, canAccessFeatureKey]);
 
   async function loadData() {
-    if (!selectedFyId) return;
     try {
       setLoading(true);
-      const [accRes, obRes] = await Promise.all([
-        api.get("/finance/accounts", { params: { postable: 1, active: 1 } }),
-        api.get("/finance/opening-balances", {
-          params: { fiscalYearId: Number(selectedFyId) },
-        }),
-      ]);
-      const arr = accRes.data?.items || [];
+      const promises = [
+        api.get("/finance/accounts"),
+      ];
+      if (selectedFyId) {
+        promises.push(
+          api.get("/finance/opening-balances", {
+            params: {
+              fiscalYearId: Number(selectedFyId),
+              branchId: scope?.branchId || undefined,
+            },
+          }).catch(() => ({ data: { items: [] } }))
+        );
+      }
+      const [accRes, obRes] = await Promise.all(promises);
+      const arr = accRes?.data?.items || accRes?.data || [];
       setAccounts(arr);
       const map = new Map();
-      for (const r of obRes.data?.items || []) {
-        map.set(String(r.account_id || r._id), {
-          debit: Number(r.opening_debit || 0),
-          credit: Number(r.opening_credit || 0),
-          currencyId: r.currency_id ? Number(r.currency_id) : (baseCurrencyId || null),
-          exchangeRate: Number(r.exchange_rate || 1) > 0 ? Number(r.exchange_rate) : 1,
-        });
+      if (obRes?.data?.items) {
+        for (const r of obRes.data.items || []) {
+          map.set(String(r.account_id || r._id), {
+            debit: Number(r.opening_debit || 0),
+            credit: Number(r.opening_credit || 0),
+            currencyId: r.currency_id ? Number(r.currency_id) : (baseCurrencyId || null),
+            exchangeRate: Number(r.exchange_rate || 1) > 0 ? Number(r.exchange_rate) : 1,
+          });
+        }
       }
       setOpeningMap(map);
     } catch (e) {
@@ -128,10 +147,13 @@ export default function OpeningBalancesPage() {
 
   useEffect(() => {
     loadFiscalYearsAndCurrencies();
+    loadData();
   }, []);
 
   useEffect(() => {
-    loadData();
+    if (selectedFyId) {
+      loadData();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFyId]);
 
@@ -264,7 +286,12 @@ export default function OpeningBalancesPage() {
       }
       const resp = await api.post(
         "/finance/opening-balances/bulk",
-        { fiscalYearId: fy, openingDate, items },
+        {
+          fiscalYearId: fy,
+          openingDate,
+          items,
+          branchId: scope?.branchId || null,
+        },
         { headers: { "x-skip-offline-queue": "1" } },
       );
       const n = Number(resp?.data?.upserted || items.length || 0);

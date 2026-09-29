@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "OmniSuite Customer",
+    "slug": "omnisuite-customer",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#0E3646"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0E3646"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b52e9f32-88d5-4d40-9657-0b1eec547629"
+      }
+    },
+    "owner": "stanleybankesie"
+  }
+}

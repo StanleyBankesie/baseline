@@ -9,6 +9,7 @@ import React, {
 import { useAuth } from "../auth/AuthContext.jsx";
 import { api } from "../api/client.js";
 import { MODULES_REGISTRY } from "../data/modulesRegistry.js";
+import { DASHBOARD_CARDS } from "../data/dashboardCards.js";
 
 /**
  * PermissionContext - Centralized permission management
@@ -23,7 +24,7 @@ import { MODULES_REGISTRY } from "../data/modulesRegistry.js";
 const PermissionContext = createContext();
 const RBAC_CACHE_KEY = "rbac.permission.snapshot.v1";
 const PAGE_PERM_RETRY_MS = 30_000;
-const DASHBOARD_PERM_POLL_MS = 5 * 60_000; // 5 minutes — reduced from 1 min to ease load on slow connections
+const DASHBOARD_PERM_POLL_MS = 15_000; // 15 seconds fast sync
 const BACKGROUND_GET_CONFIG = { __background: true };
 
 function isTransientBackendError(err) {
@@ -595,7 +596,18 @@ export const PermissionProvider = ({ children }) => {
   }, [permissions]);
 
   const isSuper = useMemo(() => {
+    const uid = Number(user?.id || user?.sub || 0);
+    const roleName = String(
+      user?.role || user?.role_name || user?.role_code || "",
+    )
+      .toLowerCase()
+      .trim();
     return (
+      uid === 1 ||
+      roleName === "admin" ||
+      roleName === "superadmin" ||
+      roleName === "super admin" ||
+      roleName === "super_admin" ||
       modules.has("*") ||
       permByFeatureKey.has("*") ||
       (user?.permissions || []).includes("*")
@@ -620,7 +632,26 @@ export const PermissionProvider = ({ children }) => {
     const mk = String(moduleKey || "");
     if (!mk) return false;
     if (isSuper) return true;
-    if (modules.size > 0) return modules.has(mk);
+    if (mk === "system-configuration" || mk === "system") {
+      return Number(user?.id) === 1 || Number(user?.id) === 2;
+    }
+    if (modules.size > 0) {
+      if (!modules.has(mk)) return false;
+      // If administration module, also verify user has at least one viewable administration feature
+      if (mk === "administration" || mk === "admin") {
+        const hasAdminFeature =
+          Array.from(roleFeatures).some(
+            (f) => f.startsWith("administration:") || f.startsWith("admin:"),
+          ) ||
+          Array.from(permByFeatureKey.keys()).some(
+            (f) =>
+              (f.startsWith("administration:") || f.startsWith("admin:")) &&
+              permByFeatureKey.get(f)?.can_view,
+          );
+        return hasAdminFeature;
+      }
+      return true;
+    }
     return isSuper;
   };
 
@@ -674,6 +705,13 @@ export const PermissionProvider = ({ children }) => {
     if (permByFeatureKey.has(allowKey)) return true;
     if (mk === "purchase") {
       if (
+        (seg === "purchase-upload" || seg === "upload") &&
+        (roleFeatures.has("purchase:purchase-upload") ||
+          permByFeatureKey.has("purchase:purchase-upload"))
+      ) {
+        return true;
+      }
+      if (
         seg === "direct-purchase" &&
         (roleFeatures.has("purchase:direct-purchases") ||
           permByFeatureKey.has("purchase:direct-purchases"))
@@ -686,7 +724,41 @@ export const PermissionProvider = ({ children }) => {
       )
         return true;
     }
+    if (mk === "sales") {
+      if (
+        (seg === "sales-upload" || seg === "upload") &&
+        (roleFeatures.has("sales:sales-upload") ||
+          permByFeatureKey.has("sales:sales-upload"))
+      ) {
+        return true;
+      }
+    }
+    if (mk === "finance") {
+      if (
+        (seg === "import-vouchers" || seg === "import") &&
+        (roleFeatures.has("finance:import-vouchers") ||
+          permByFeatureKey.has("finance:import-vouchers") ||
+          roleFeatures.has("finance:import") ||
+          permByFeatureKey.has("finance:import"))
+      ) {
+        return true;
+      }
+      if (
+        seg === "opening-balances" &&
+        (roleFeatures.has("finance:opening-balances") ||
+          permByFeatureKey.has("finance:opening-balances"))
+      ) {
+        return true;
+      }
+    }
     if (mk === "inventory") {
+      if (
+        seg === "stock-upload" &&
+        (roleFeatures.has("inventory:stock-upload") ||
+          permByFeatureKey.has("inventory:stock-upload"))
+      ) {
+        return true;
+      }
       if (
         seg === "items" &&
         (roleFeatures.has("inventory:item-master") ||
@@ -722,15 +794,30 @@ export const PermissionProvider = ({ children }) => {
     const mk = String(parts[0] || "");
     const seg = String(parts[1] || "");
 
+    const moduleInfo = MODULES_REGISTRY[mk];
+
     let isExclusive = false;
-    if (mk && seg) {
-      const moduleInfo = MODULES_REGISTRY[mk];
-      if (moduleInfo && moduleInfo.features) {
-        const feature = moduleInfo.features.find((f) => String(f.key) === seg);
-        if (feature && feature.isExclusive) {
-          isExclusive = true;
-        }
+    let exclusiveFeatureKey = null;
+    if (mk && moduleInfo && moduleInfo.features) {
+      const feature = moduleInfo.features.find((f) => {
+        const k = String(f.key);
+        return (
+          parts.slice(1).includes(k) ||
+          (k === "import-vouchers" && (parts.includes("import") || parts.includes("import-vouchers"))) ||
+          (k === "opening-balances" && parts.includes("opening-balances")) ||
+          (k === "stock-upload" && parts.includes("stock-upload")) ||
+          (k === "purchase-upload" && (parts.includes("purchase-upload") || parts.includes("upload"))) ||
+          (k === "sales-upload" && (parts.includes("sales-upload") || parts.includes("upload")))
+        );
+      });
+      if (feature && feature.isExclusive) {
+        isExclusive = true;
+        exclusiveFeatureKey = feature.key;
       }
+    }
+
+    if (isExclusive && exclusiveFeatureKey) {
+      return canAccessFeatureKey(mk, exclusiveFeatureKey);
     }
 
     if (!isExclusive) {
@@ -752,7 +839,6 @@ export const PermissionProvider = ({ children }) => {
     // Feature-level restrictions are applied on deeper paths and via UI filtering.
     if (parts.length === 1) return true;
 
-    const moduleInfo = MODULES_REGISTRY[mk];
     if (!seg) {
       return true;
     }
@@ -801,7 +887,18 @@ export const PermissionProvider = ({ children }) => {
       return globalOverrides[act] === true;
     }
 
-    const perm = permByFeatureKey.get(fk);
+    let perm = permByFeatureKey.get(fk);
+    if (!perm) {
+      if (fk === "purchase:direct-purchase") {
+        perm = permByFeatureKey.get("purchase:direct-purchases");
+      } else if (fk === "purchase:direct-purchases") {
+        perm = permByFeatureKey.get("purchase:direct-purchase");
+      } else if (fk === "inventory:items") {
+        perm = permByFeatureKey.get("inventory:item-master");
+      } else if (fk === "inventory:item-master") {
+        perm = permByFeatureKey.get("inventory:items");
+      }
+    }
     if (!perm) return false;
 
     const key =
@@ -1054,6 +1151,30 @@ export const PermissionProvider = ({ children }) => {
       if (guardCleanupRef.current) guardCleanupRef.current();
 
       const path = window?.location?.pathname || "/";
+      if (
+        path.startsWith("/pos/") ||
+        path === "/pos" ||
+        path.endsWith("/new") ||
+        path.endsWith("/create") ||
+        path.includes("/new/") ||
+        path.includes("/create/") ||
+        path.includes("/edit") ||
+        /\/\d+$/.test(path) ||
+        /\/[0-9a-fA-F-]{8,}$/.test(path)
+      ) {
+        document.body.classList.remove("create-guard-disabled", "delete-guard-disabled");
+        document.querySelectorAll("[data-create-guard]").forEach((el) => {
+          if (el.getAttribute("data-create-guard") === "visible") el.style.display = "";
+          el.removeAttribute("data-create-guard");
+        });
+        document.querySelectorAll("[data-delete-guard]").forEach((el) => {
+          if (el.getAttribute("data-delete-guard") === "visible") el.style.display = "";
+          el.removeAttribute("data-delete-guard");
+        });
+        guardCleanupRef.current = null;
+        return;
+      }
+
       const canCreate = canCreateOnPage(path);
       const canDelete = canDeleteOnPage(path);
       document.body.classList.toggle("create-guard-disabled", !canCreate);
@@ -1065,25 +1186,33 @@ export const PermissionProvider = ({ children }) => {
 
       let timer = null;
       const createSelectors =
-        'a[href*="/new"], a[href*="/create"], .btn-success, .btn-primary';
+        'a[href*="/new"], a[href*="/create"], .list-header .btn-primary, .list-header .btn-success';
       const applyGuards = () => {
         if (timer) return;
         timer = requestAnimationFrame(() => {
           timer = null;
           if (!canCreate) {
             document.querySelectorAll(createSelectors).forEach((el) => {
-              const exempt =
-                el.getAttribute?.("data-rbac-exempt") === "" ||
-                el.getAttribute?.("data-rbac-exempt") === "true";
-              if (exempt) return;
+              // Never hide elements inside forms, detail views, or marked exempt
+              if (
+                el.closest("form") ||
+                el.closest("[data-form]") ||
+                el.closest(".form-section") ||
+                el.closest(".pos-sales-entry") ||
+                el.getAttribute?.("data-rbac-exempt") === "true" ||
+                el.closest("[data-rbac-exempt='true']") ||
+                el.closest("[data-rbac-exempt]")
+              ) {
+                return;
+              }
               const text = (el.textContent || "").trim();
               const href = (el.getAttribute("href") || "").toLowerCase();
               if (
                 href.includes("/new") ||
                 href.includes("/create") ||
-                /^\+/.test(text) ||
-                /\bNew\b/.test(text) ||
-                /\bCreate\b/.test(text)
+                /^(New|Create)\s+[A-Z]/i.test(text) ||
+                text === "New" ||
+                text === "Create"
               ) {
                 if (!el.hasAttribute("data-create-guard")) {
                   el.setAttribute(
@@ -1099,10 +1228,18 @@ export const PermissionProvider = ({ children }) => {
             document
               .querySelectorAll('.btn-danger, a[href*="/delete"]')
               .forEach((el) => {
-                const exempt =
-                  el.getAttribute?.("data-rbac-exempt") === "" ||
-                  el.getAttribute?.("data-rbac-exempt") === "true";
-                if (exempt) return;
+                // Never hide elements inside forms or marked exempt
+                if (
+                  el.closest("form") ||
+                  el.closest("[data-form]") ||
+                  el.closest(".form-section") ||
+                  el.closest(".pos-sales-entry") ||
+                  el.getAttribute?.("data-rbac-exempt") === "true" ||
+                  el.closest("[data-rbac-exempt='true']") ||
+                  el.closest("[data-rbac-exempt]")
+                ) {
+                  return;
+                }
                 const text = (el.textContent || "").trim().toLowerCase();
                 const href = (el.getAttribute("href") || "").toLowerCase();
                 if (
@@ -1157,8 +1294,17 @@ export const PermissionProvider = ({ children }) => {
     function onChanged() {
       refreshPermissions();
     }
+    function onStorage(e) {
+      if (e?.key === "rbac:bump") {
+        refreshPermissions();
+      }
+    }
     window.addEventListener("rbac:changed", onChanged);
-    return () => window.removeEventListener("rbac:changed", onChanged);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("rbac:changed", onChanged);
+      window.removeEventListener("storage", onStorage);
+    };
   }, []);
 
   const value = {
@@ -1222,7 +1368,7 @@ export const PermissionProvider = ({ children }) => {
             "sales-total-revenue",
             "sales-pending-orders",
             "sales-active-customers",
-            "purchase-total-value"
+            "purchase-total-value",
           ];
           return defaultCards.includes(normKey);
         }

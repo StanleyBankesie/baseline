@@ -56,6 +56,8 @@ import emailTestRoutes from "./routes/email-test.routes.js";
 import visitorsRoutes from "./routes/visitors.routes.js";
 import licenseRoutes from "./routes/license.routes.js";
 import paymentPackageRoutes from "./routes/paymentPackages.js";
+import portalRoutes from "./routes/portal.routes.js";
+import customerPortalRoutes from "./routes/customerPortal.routes.js";
 import { requireLicense } from "./middleware/license.middleware.js";
 import { initializeSocket } from "./utils/socket.js";
 import {
@@ -247,6 +249,10 @@ app.use((req, res, next) => {
   res.setHeader(
     "Content-Security-Policy",
     `default-src 'self'; script-src ${scriptSrc}; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' data: https://cdn.jsdelivr.net; connect-src ${connectSrc};`,
+  );
+  res.setHeader(
+    "X-Robots-Tag",
+    "noindex, nofollow, noarchive, nosnippet, noimageindex",
   );
   next();
 });
@@ -1021,6 +1027,8 @@ const apiPaths = [
   { path: "/ai", router: aiRoutes },
   { path: "/email-test", router: emailTestRoutes },
   { path: "/visitors", router: visitorsRoutes },
+  { path: "/portal", router: portalRoutes },
+  { path: "/customer-portal", router: customerPortalRoutes },
 ];
 
   // Debug Endpoint to view production crash reports directly from the browser

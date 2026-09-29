@@ -6,6 +6,7 @@
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
 import { useAuth } from "../auth/AuthContext";
+import { getBackendOrigin } from "../utils/socketConfig";
 
 /**
  * Hook to manage Socket.io connection
@@ -67,30 +68,16 @@ export function useSocket() {
       globalHolder.authKey = "";
     }
 
-    let backendOrigin =
-      import.meta.env.VITE_API_PROXY_TARGET || window.location.origin;
-      
-    if (typeof window !== "undefined") {
-      const hostname = window.location.hostname;
-      if (hostname.includes("kindheart") || hostname.includes("kindtreat")) {
-        backendOrigin = "https://kindserver.omnisuite-erp.com";
-      } else if (hostname === "kaf.omnisuite-erp.com" || hostname === "kafserver.omnisuite-erp.com") {
-        backendOrigin = "https://kafserver.omnisuite-erp.com";
-      } else if (hostname === "demo.omnisuite-erp.com" || hostname === "demoserver.omnisuite-erp.com") {
-        backendOrigin = "https://demoserver.omnisuite-erp.com";
-      }
-    }
+    const backendOrigin = getBackendOrigin();
 
     const transportPref = (
       import.meta.env.VITE_SOCKET_TRANSPORT || ""
     ).toLowerCase();
     
-    // Force polling by default to prevent WebSocket upgrade errors on strict Nginx/Plesk servers
-    const transports = transportPref === "websocket" 
-      ? ["websocket"] 
-      : transportPref === "both" 
-        ? ["polling", "websocket"] 
-        : ["polling"];
+    // Prefer WebSocket with polling fallback to avoid repeated session ID errors on reverse proxy
+    const transports = transportPref === "polling" 
+      ? ["polling"] 
+      : ["websocket", "polling"];
       
     const disableSockets = import.meta.env.VITE_DISABLE_SOCKETS === "true";
 

@@ -98,12 +98,14 @@ export const getUserById = async (req, res, next) => {
       SELECT 
         u.*,
         r.name AS role_name,
+        e.id AS employee_id,
         IF(u.profile_picture IS NULL, NULL, IF(LEFT(u.profile_picture, 4) = 'http' OR LEFT(u.profile_picture, 5) = 'data:', CONVERT(u.profile_picture USING utf8), CONCAT('data:image/jpeg;base64,', REPLACE(TO_BASE64(u.profile_picture), '\\n', '')))) AS profile_picture_url,
           u.created_at,
           uc.username AS created_by_name
          FROM adm_users u
         LEFT JOIN adm_users uc ON uc.id = u.created_by
         LEFT JOIN adm_roles r ON u.role_id = r.id
+        LEFT JOIN hr_employees e ON (e.user_id = u.id AND e.deleted_at IS NULL)
          WHERE u.id = :id
       LIMIT 1
       `,
@@ -163,10 +165,7 @@ export const updateUserBranches = async (req, res, next) => {
       .filter((n) => Number.isFinite(n));
     await ensureUserBranchMapping();
 
-    const validBranches = await query(`SELECT id,
-          created_at,
-          u.username AS created_by_name
-         FROM adm_branches
+    const validBranches = await query(`SELECT b.id FROM adm_branches b
         LEFT JOIN adm_users u ON u.id = created_by
          WHERE company_id = :company_id`,
       { company_id },
@@ -224,6 +223,7 @@ export const createUser = async (req, res, next) => {
       is_active,
       profile_picture,
       is_employee,
+      employee_id,
       user_type,
       valid_from,
       valid_to,
@@ -290,6 +290,15 @@ export const createUser = async (req, res, next) => {
       );
     }
 
+    // Link employee record if is_employee and employee_id provided
+    if (is_employee && employee_id) {
+      await query(`UPDATE hr_employees SET user_id = :userId WHERE id = :empId AND company_id = :companyId`, {
+        userId: newUserId,
+        empId: Number(employee_id),
+        companyId: company_id,
+      }).catch(() => {});
+    }
+
     res.status(201).json({
       success: true,
       message: "User created",
@@ -323,6 +332,7 @@ export const updateUser = async (req, res, next) => {
       is_active,
       profile_picture,
       is_employee,
+      employee_id,
       user_type,
       valid_from,
       valid_to,
@@ -399,6 +409,16 @@ export const updateUser = async (req, res, next) => {
     // Invalidate permission cache when user role changes
     if (role_id !== undefined) {
       await permissionCache.invalidateUser(id);
+    }
+
+    // Link/unlink employee record in hr_employees
+    if (is_employee && employee_id) {
+      // Clear any prior links for this user
+      await query(`UPDATE hr_employees SET user_id = NULL WHERE user_id = :id AND id != :empId`, { id, empId: Number(employee_id) }).catch(() => {});
+      // Link selected employee
+      await query(`UPDATE hr_employees SET user_id = :id WHERE id = :empId`, { id, empId: Number(employee_id) }).catch(() => {});
+    } else if (!is_employee) {
+      await query(`UPDATE hr_employees SET user_id = NULL WHERE user_id = :id`, { id }).catch(() => {});
     }
 
     if (Array.isArray(branch_ids)) {

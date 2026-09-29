@@ -366,84 +366,27 @@ export default function PosSalesEntry() {
         setTerminalCode(code);
         setTerminalWarehouseId(wId);
 
-        // Check sessionStorage first (most recent), then localStorage (survives tab close)
-        for (const store of [sessionStorage, localStorage]) {
-          try {
-            const raw = store.getItem("omni.pos.day");
-            if (!raw) continue;
-            const data = JSON.parse(raw);
-            const t = String(data?.terminal || data?.terminalCode || "");
-            const status = String(data?.status || "").toUpperCase();
-            const recent = Number(data?.ts || 0) > Date.now() - 5000;
-            // sessionStorage: accept only if written <5s ago (from PosDayManagement)
-            // localStorage: accept any OPEN status regardless of age
-            const isSession = store === sessionStorage;
-            if (
-              status === "OPEN" &&
-              (!isSession || recent) &&
-              (!code || !t || t === code)
-            ) {
-              setDayExists(true);
-              setDayStatus("OPEN");
-              setDayOpen(true);
-              setDayLoading(false);
-              if (cancelled) return;
-              break;
-            }
-          } catch {}
-        }
-
-        // Query server for authoritative day status
+        // Query server for authoritative day status for the current user
         try {
           const params = code ? { params: { terminal: code } } : undefined;
           const res = await api.get("/pos/day/status", params);
           const item = res?.data?.item || null;
           const status = String(item?.status || "").toUpperCase();
-          const exists = !!item;
+          const isOpen = status === "OPEN";
           if (!cancelled) {
-            setDayExists(exists);
+            setDayExists(!!item);
             setDayStatus(status);
-            setDayOpen(status === "OPEN");
-            // Persist authoritative status to localStorage
-            if (exists) {
-              try {
-                localStorage.setItem(
-                  "omni.pos.day",
-                  JSON.stringify({
-                    status,
-                    terminal: code,
-                    terminalCode: code,
-                    ts: Date.now(),
-                  }),
-                );
-              } catch {}
-            }
+            setDayOpen(isOpen);
           }
         } catch {
-          // Network failed — day status already set from cache above, nothing more to do
+          if (!cancelled) {
+            setDayExists(false);
+            setDayStatus("");
+            setDayOpen(false);
+          }
         }
       } catch {
         if (cancelled) return;
-        // Full offline fallback: check both storage layers
-        for (const store of [sessionStorage, localStorage]) {
-          try {
-            const raw = store.getItem("omni.pos.day");
-            if (!raw) continue;
-            const data = JSON.parse(raw);
-            const t = String(data?.terminal || data?.terminalCode || "");
-            const status = String(data?.status || "").toUpperCase();
-            if (
-              status === "OPEN" &&
-              (!terminalCode || !t || t === terminalCode)
-            ) {
-              setDayExists(true);
-              setDayStatus("OPEN");
-              setDayOpen(true);
-              setDayLoading(false);
-              return;
-            }
-          } catch {}
-        }
         setDayExists(false);
         setDayStatus("");
         setDayOpen(false);
@@ -464,6 +407,9 @@ export default function PosSalesEntry() {
         const d = e.detail || {};
         const t = String(d.terminal || d.terminalCode || "");
         if (terminalCode && t && t !== terminalCode) return;
+        const eventUserId = d.userId;
+        const currentUserId = user?.id ?? user?.sub;
+        if (eventUserId && currentUserId && String(eventUserId) !== String(currentUserId)) return;
         const status = String(d.status || "").toUpperCase();
         if (status === "OPEN") {
           setDayExists(true);
@@ -478,27 +424,7 @@ export default function PosSalesEntry() {
     }
     window.addEventListener("omni.pos.day", onPosDayEvent);
     return () => window.removeEventListener("omni.pos.day", onPosDayEvent);
-  }, [terminalCode]);
-
-  useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem("omni.pos.day");
-      if (!raw) return;
-      const data = JSON.parse(raw);
-      const t = String(data?.terminal || data?.terminalCode || "");
-      if (terminalCode && t && t !== terminalCode) return;
-      const status = String(data?.status || "").toUpperCase();
-      if (status === "OPEN") {
-        setDayExists(true);
-        setDayOpen(true);
-        setDayStatus("OPEN");
-      } else if (status === "CLOSED") {
-        setDayExists(true);
-        setDayOpen(false);
-        setDayStatus("CLOSED");
-      }
-    } catch {}
-  }, [terminalCode]);
+  }, [terminalCode, user?.id, user?.sub]);
 
   useEffect(() => {
     let mounted = true;
@@ -2288,7 +2214,7 @@ export default function PosSalesEntry() {
   }
 
   return (
-    <div className="space-y-3 pos-sales-entry pr-1">
+    <div className="space-y-3 pos-sales-entry pr-1" data-rbac-exempt="true">
       <div className="flex items-center justify-between">
         <div>
           <Link
@@ -2436,7 +2362,7 @@ export default function PosSalesEntry() {
           <div className="card">
             <div className="card-body space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-                <div className="md:col-span-5">
+                <div className="md:col-span-4">
                   <label className="label">Barcode / Item Search</label>
                   <div className="relative">
                     <input
@@ -2530,6 +2456,22 @@ export default function PosSalesEntry() {
                     placeholder="0.00"
                   />
                 </div>
+                <div className="md:col-span-1 flex items-end">
+                  <button
+                    type="button"
+                    className="btn btn-primary w-full h-[42px] flex items-center justify-center text-lg font-bold"
+                    onClick={() => {
+                      if (itemSearchResults.length) {
+                        handleSelectItemById(itemSearchResults[0].value);
+                      } else {
+                        addEntryToCart();
+                      }
+                    }}
+                    title="Add item to cart"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -2549,7 +2491,7 @@ export default function PosSalesEntry() {
                           <th className="px-3 py-2 text-left sticky top-0 bg-slate-50 shadow-sm z-10">Item Name</th>
                           
                           <th className="px-3 py-2 text-right sticky top-0 bg-slate-50 shadow-sm z-10">Price</th>
-                          <th className="px-3 py-2 text-right sticky top-0 bg-slate-50 shadow-sm z-10">QTY</th>
+                          <th className="px-3 py-2 text-center sticky top-0 bg-slate-50 shadow-sm z-10 min-w-[130px]">QTY</th>
                           <th className="px-3 py-2 text-right sticky top-0 bg-slate-50 shadow-sm z-10">Discount</th>
                           <th className="px-3 py-2 text-right sticky top-0 bg-slate-50 shadow-sm z-10">Total</th>
                           <th className="px-3 py-2 text-right sticky top-0 bg-slate-50 shadow-sm z-10">Actions</th>
@@ -2574,22 +2516,24 @@ export default function PosSalesEntry() {
                               <td className="px-3 py-2 text-right">
                                 {`GH₵ ${unitPrice.toFixed(2)}`}
                               </td>
-                              <td className="px-3 py-2 text-right">
-                                <div className="flex items-center gap-2 justify-end">
+                              <td className="px-3 py-2 text-center whitespace-nowrap min-w-[130px]">
+                                <div className="inline-flex items-center gap-1.5 justify-center">
                                   <button
                                     type="button"
-                                    className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"
+                                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 font-bold text-base select-none shrink-0"
                                     onClick={() => updateQuantity(it.id, -1)}
+                                    title="Decrease quantity"
                                   >
                                     -
                                   </button>
-                                  <span className="w-8 text-center font-semibold inline-block">
+                                  <span className="w-7 text-center font-bold inline-block">
                                     {qty}
                                   </span>
                                   <button
                                     type="button"
-                                    className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"
+                                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 font-bold text-base select-none shrink-0"
                                     onClick={() => updateQuantity(it.id, 1)}
+                                    title="Increase quantity"
                                   >
                                     +
                                   </button>
@@ -2790,35 +2734,61 @@ export default function PosSalesEntry() {
                 >
                   Hold
                 </button>
-                <button
-                  type="button"
-                  className="btn-success w-full text-base"
-                  onClick={() => {
-                    const isCredit = selectedPaymentMode && ["credit","on account","account"].some(s => String(selectedPaymentMode.name || "").toLowerCase().includes(s));
-                    if (isCredit && paymentStatus === "PAID") {
-                      setShowCreditPaymentModal(true);
-                    } else if (isCredit && paymentStatus === "UNPAID") {
-                      checkout();
-                    } else if (tendered < total && !additionalPaymentModeIds.length) {
-                      setSplitPrimaryAmount(tendered);
-                      setShowSplitPaymentModal(true);
-                    } else {
-                      checkout();
+
+                {receiptNo && !cart.length ? (
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        className="btn btn-primary flex-1 text-base font-semibold py-2.5 flex items-center justify-center gap-1 shadow-sm"
+                        onClick={newSale}
+                      >
+                        + New Sale
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary flex-1 text-base font-semibold py-2.5 flex items-center justify-center gap-1 shadow-sm"
+                        onClick={printReceipt}
+                      >
+                        🖨️ Print Receipt
+                      </button>
+                    </div>
+                    <div className="text-center text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 py-1.5 px-2 rounded-md">
+                      ✓ Sale Completed: {receiptNo}
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn-success w-full text-base"
+                    onClick={() => {
+                      const isCredit = selectedPaymentMode && ["credit","on account","account"].some(s => String(selectedPaymentMode.name || "").toLowerCase().includes(s));
+                      if (isCredit && paymentStatus === "PAID") {
+                        setShowCreditPaymentModal(true);
+                      } else if (isCredit && paymentStatus === "UNPAID") {
+                        checkout();
+                      } else if (tendered < total && !additionalPaymentModeIds.length) {
+                        setSplitPrimaryAmount(tendered);
+                        setShowSplitPaymentModal(true);
+                      } else {
+                        checkout();
+                      }
+                    }}
+                    disabled={
+                      !cart.length ||
+                      saving ||
+                      paymentModesLoading ||
+                      !paymentModes.length ||
+                      !selectedPaymentModeId ||
+                      (selectedPaymentMode && ["credit","on account","account"].some(s => String(selectedPaymentMode.name || "").toLowerCase().includes(s)) && !selectedCustomerId)
                     }
-                  }}
-                  disabled={
-                    !cart.length ||
-                    saving ||
-                    paymentModesLoading ||
-                    !paymentModes.length ||
-                    !selectedPaymentModeId ||
-                    (selectedPaymentMode && ["credit","on account","account"].some(s => String(selectedPaymentMode.name || "").toLowerCase().includes(s)) && !selectedCustomerId)
-                  }
-                >
-                  {tendered < total && !additionalPaymentModeIds.length
-                    ? `Amount Due: GH₵ ${(total - tendered).toFixed(2)}`
-                    : "Complete Sale"}
-                </button>
+                  >
+                    {tendered < total && !additionalPaymentModeIds.length
+                      ? `Amount Due: GH₵ ${(total - tendered).toFixed(2)}`
+                      : "Complete Sale"}
+                  </button>
+                )}
+
                 <Link
                   to="/pos/holds"
                   className="block text-center text-xs text-brand hover:text-brand-600 dark:text-brand-400 underline mt-1"
@@ -2832,9 +2802,18 @@ export default function PosSalesEntry() {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <div className="text-2xl font-bold text-brand-700">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" data-rbac-exempt="true">
+          <div className="bg-white dark:bg-slate-900 rounded-lg p-6 w-full max-w-md relative shadow-xl border border-slate-200 dark:border-slate-800" data-rbac-exempt="true">
+            <button
+              type="button"
+              data-rbac-exempt="true"
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-2xl leading-none"
+              onClick={newSale}
+              title="Close and start new sale"
+            >
+              ×
+            </button>
+            <div className="text-2xl font-bold text-brand-700 dark:text-brand-400">
               Sale Completed
             </div>
             <div className="mt-4 space-y-2">
@@ -2919,20 +2898,22 @@ export default function PosSalesEntry() {
                 </div>
               </div>
             </div>
-            <div className="mt-6 flex gap-2">
+            <div className="mt-6 flex gap-3" data-rbac-exempt="true">
               <button
                 type="button"
-                className="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors"
+                data-rbac-exempt="true"
+                className="btn btn-primary flex-1 font-semibold px-4 py-2.5 rounded-lg shadow-sm flex items-center justify-center gap-1"
                 onClick={newSale}
               >
-                New Sale
+                + New Sale
               </button>
               <button
                 type="button"
-                className="flex-1 bg-white hover:bg-slate-50 text-slate-700 font-semibold px-4 py-2 rounded-lg border border-slate-300 transition-colors"
+                data-rbac-exempt="true"
+                className="btn btn-secondary flex-1 font-semibold px-4 py-2.5 rounded-lg shadow-sm flex items-center justify-center gap-1 border border-slate-300 dark:border-slate-700"
                 onClick={printReceipt}
               >
-                Print Receipt
+                🖨️ Print Receipt
               </button>
             </div>
           </div>

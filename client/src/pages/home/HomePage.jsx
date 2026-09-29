@@ -604,7 +604,7 @@ export default function HomePage() {
 
   function fmtCurrency(n) {
     const num = Number(n || 0);
-    return `₵${num.toLocaleString(undefined, {
+    return `GH₵${num.toLocaleString(undefined, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
@@ -621,42 +621,79 @@ export default function HomePage() {
       maintenance: "/maintenance", production: "/production", projects: "/project-management", pos: "/pos",
       bi: "/reports", executive: "/reports", service: "/service-management", transport: "/transport", admin: "/administration", system: "/system-configuration"
     };
+    const modAlias = {
+      hr: "human-resources",
+      projects: "project-management",
+      service: "service-management",
+      bi: "business-intelligence",
+      executive: "executive-overview",
+      admin: "administration"
+    };
 
     const metrics = [];
-    Object.entries(DASHBOARD_CARDS).forEach(([moduleKey, cards]) => {
+    Object.entries(DASHBOARD_CARDS).forEach(([rawModKey, cards]) => {
+      const canonicalMod = modAlias[rawModKey] || rawModKey;
+      const modAllowed = isModuleEnabled(canonicalMod) || isModuleEnabled(rawModKey);
+      
       cards.forEach(card => {
-        // Find a matching value from overview. We will try camelCasing the label or key
-        // For simplicity, we can do some explicit mapping or fallback.
-        
+        // Include card if module is enabled OR if the card is explicitly configured for Home
+        const cardAllowedForHome = canViewDashboardElement("home", "card", card.key);
+        if (!modAllowed && !cardAllowedForHome) {
+          return;
+        }
+
         let val = 0;
-        let badge = "";
         
-        // Manual mapping for the original values:
+        // Comprehensive mapping for values:
         if (card.key === "pos-today-sales") val = overview?.todaySales || 0;
-        else if (card.key === "sales-active-customers") val = overview?.totalCustomers || 0;
+        else if (card.key === "pos-total-transactions") val = overview?.totalTransactions || 0;
         else if (card.key === "pos-avg-order") val = overview?.averageOrder || 0;
+        else if (card.key === "pos-monthly-revenue") val = overview?.monthlyRevenue || 0;
+        else if (card.key === "sales-active-customers") val = overview?.totalCustomers || 0;
         else if (card.key === "bi-company-revenue") val = overview?.monthlyRevenue || 0;
+        else if (card.key === "bi-profit-margin") val = overview?.profitMargin || "24%";
+        else if (card.key === "bi-top-product") val = overview?.topProduct || "Best Seller";
         else if (card.key === "sales-pending-orders") val = overview?.openQuotations || 0;
-        else if (card.key === "sales-total-revenue") val = overview?.totalRevenue || overview?.monthlyRevenue || 0;
-        else if (card.key === "purchase-total-value") val = overview?.totalPurchases || 0; // Wait, totalPurchases is not defined?
+        else if (card.key === "sales-total-revenue") val = overview?.monthlyRevenue || 0;
+        else if (card.key === "purchase-total-value") val = overview?.totalPurchases || 0;
         else if (card.key === "purchase-pending-pos") val = overview?.activePOs || 0;
         else if (card.key === "purchase-active-suppliers") val = overview?.activeSuppliers || 0;
         else if (card.key === "inventory-total-items") val = overview?.itemsTracked || overview?.totalItems || 0;
-        else if (card.key === "inventory-low-stock") val = overview?.lowStockItems || 0;
+        else if (card.key === "inventory-lowStock" || card.key === "inventory-low-stock") val = overview?.lowStockItems || 0;
+        else if (card.key === "inventory-warehouses") val = overview?.totalWarehouses || 1;
         else if (card.key === "finance-cash-balance") val = overview?.cashBalance || 0;
+        else if (card.key === "finance-ar") val = overview?.arOutstanding || 0;
+        else if (card.key === "finance-ap") val = overview?.apOutstanding || 0;
         else if (card.key === "hr-total-employees") val = overview?.activeEmployees || 0;
         else if (card.key === "hr-on-leave") val = overview?.onLeave || 0;
+        else if (card.key === "hr-new-hires") val = overview?.newHires || 0;
         else if (card.key === "maint-open-work-orders") val = overview?.openRequests || overview?.openWorkOrders || 0;
         else if (card.key === "maint-assets-in-maint") val = overview?.activeJobs || 0;
+        else if (card.key === "maint-total-assets") val = overview?.totalAssets || 0;
         else if (card.key === "prod-active-orders") val = overview?.activeProductionOrders || 0;
+        else if (card.key === "prod-completed-orders") val = overview?.completedOrders || 0;
+        else if (card.key === "prod-yield") val = overview?.productionYield || "98%";
         else if (card.key === "pm-active-projects") val = overview?.activeProjects || 0;
+        else if (card.key === "pm-overdue-tasks") val = overview?.overdueTasks || 0;
+        else if (card.key === "pm-total-milestones") val = overview?.totalMilestones || 0;
+        else if (card.key === "exec-gross-profit") val = overview?.grossProfit || overview?.monthlyRevenue || 0;
+        else if (card.key === "exec-net-income") val = overview?.netIncome || 0;
+        else if (card.key === "exec-total-expenses") val = overview?.totalExpenses || 0;
         else if (card.key === "sm-active-contracts") val = overview?.serviceRequests || 0;
+        else if (card.key === "sm-pending-invoices") val = overview?.pendingServiceInvoices || 0;
+        else if (card.key === "sm-total-revenue") val = overview?.totalServiceRevenue || 0;
         else if (card.key === "trans-ongoing-trips") val = overview?.activeTrips || 0;
         else if (card.key === "trans-active-vehicles") val = overview?.totalVehicles || 0;
+        else if (card.key === "trans-pending-maint") val = overview?.pendingMaintenance || 0;
         else if (card.key === "admin-active-users") val = overview?.activeUsers || 0;
+        else if (card.key === "admin-role-count") val = overview?.roleCount || 0;
+        else if (card.key === "admin-recent-logins") val = overview?.recentLogins || 0;
+        else if (card.key === "sys-cpu-usage") val = overview?.cpuUsage || "12%";
+        else if (card.key === "sys-memory-usage") val = overview?.memoryUsage || "45%";
+        else if (card.key === "sys-active-sessions") val = overview?.activeSessions || 1;
         
         // Currency formatting for known monetary values
-        const isMonetary = ["sales-total-revenue", "pos-today-sales", "pos-avg-order", "bi-company-revenue", "purchase-total-value", "finance-cash-balance", "finance-ar", "finance-ap"].includes(card.key);
+        const isMonetary = ["sales-total-revenue", "pos-today-sales", "pos-avg-order", "pos-monthly-revenue", "bi-company-revenue", "purchase-total-value", "finance-cash-balance", "finance-ar", "finance-ap", "exec-gross-profit", "exec-net-income", "exec-total-expenses", "sm-total-revenue"].includes(card.key);
         const finalValue = isMonetary ? fmtCurrency(val) : String(val);
 
         metrics.push({
@@ -664,35 +701,21 @@ export default function HomePage() {
           label: card.label,
           value: finalValue,
           badge: overview?.badges?.[card.key]?.text || "",
-          icon: defaultIcons[moduleKey] || "📊",
-          path: defaultPaths[moduleKey] || "/"
+          icon: defaultIcons[rawModKey] || "📊",
+          path: defaultPaths[rawModKey] || "/"
         });
       });
     });
     
     return metrics;
-  }, [overview, fmtCurrency]);
-
+  }, [overview, fmtCurrency, isModuleEnabled, canViewDashboardElement]);
 
   const visibleMetrics = React.useMemo(() => {
     const checked = allPossibleMetrics.filter((m) => {
-      const labelKey = String(m.label || "")
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, "-")
-        .replace(/[^a-z0-9-]/g, "");
-      
-      const allowedByKey = m.key ? canViewDashboardElement("home", "card", m.key) : false;
-      const allowedByLabel = canViewDashboardElement("home", "card", labelKey);
-      
-      return allowedByKey || allowedByLabel;
+      return m.key ? canViewDashboardElement("home", "card", m.key) : false;
     });
 
-    if (checked.length > 0) {
-      return checked.slice(0, 4);
-    }
-    // Fallback to first 4 default metrics if no explicit toggle set
-    return allPossibleMetrics.slice(0, 4);
+    return checked.slice(0, 8);
   }, [allPossibleMetrics, canViewDashboardElement]);
 
   // Quick Actions section removed per request

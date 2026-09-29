@@ -69,6 +69,7 @@ export const MODULES_REGISTRY = {
       { key: "discount-schemes", label: "Discount Schemes", type: "feature" },
       { key: "customer-credit", label: "Customer Credit", type: "feature" },
       { key: "bulk-upload", label: "Bulk Customer Upload", type: "feature" },
+      { key: "sales-upload", label: "Sales Upload", type: "feature", isExclusive: true },
       { key: "prospect-customers", label: "Prospective Customers", type: "feature" },
       { key: "prospect-conversion", label: "Prospect Conversion", type: "feature" },
     ],
@@ -76,7 +77,7 @@ export const MODULES_REGISTRY = {
 
 
 
-          { key: "sales-total-revenue", label: "Total Revenue", type: "dashboard" },
+          { key: "sales-total-revenue", label: "Total Revenue This Month", type: "dashboard" },
       { key: "sales-pending-orders", label: "Pending Orders", type: "dashboard" },
       { key: "sales-active-customers", label: "Active Customers", type: "dashboard" },
 ]
@@ -97,6 +98,7 @@ export const MODULES_REGISTRY = {
       { key: "port-clearances", label: "Port Clearances", type: "feature" },
       { key: "purchase-bills-local", label: "Local Purchase Bills", type: "feature" },
       { key: "purchase-bills-import", label: "Import Purchase Bills", type: "feature" },
+      { key: "purchase-upload", label: "Purchase Upload", type: "feature", isExclusive: true },
       { key: "suppliers", label: "Suppliers", type: "feature" },
       { key: "purchase-returns", label: "Purchase Returns", type: "feature" },
 
@@ -196,6 +198,7 @@ export const MODULES_REGISTRY = {
       { key: "bank-reconciliation", label: "Bank Reconciliation", type: "feature" },
       { key: "fixed-assets", label: "Fixed Assets", type: "feature" },
       { key: "opening-balances", label: "Opening Balances", type: "feature", isExclusive: true },
+      { key: "import-vouchers", label: "Import Vouchers", type: "feature", isExclusive: true },
       { key: "pdc-postings", label: "Post-Dated Cheques", type: "feature" },
 
       { key: "audittrailreport", label: " Audit Trail Report", type: "feature" },
@@ -210,6 +213,7 @@ export const MODULES_REGISTRY = {
       { key: "outstandingreceivablereport", label: " Outstanding Receivable Report", type: "feature" },
       { key: "paymentduereport", label: " Payment Due Report", type: "feature" },
       { key: "profitandlossreport", label: " Profit And Loss Report", type: "feature" },
+      { key: "profitlossocireport", label: " Statement of Profit or Loss and Other Comprehensive Income", type: "feature" },
       { key: "ratioanalysisreport", label: " Ratio Analysis Report", type: "feature" },
       { key: "supplieroutstandingreport", label: " Supplier Outstanding Report", type: "feature" },
       { key: "trialbalancereport", label: " Trial Balance Report", type: "feature" },
@@ -515,10 +519,12 @@ export function getModuleInfo(moduleKey) {
   return MODULES_REGISTRY[moduleKey] || null;
 }
 
-export function getAllFeatures() {
+export function getAllFeatures(includeExclusive = false) {
   const features = [];
   Object.entries(MODULES_REGISTRY).forEach(([moduleKey, moduleInfo]) => {
-    const allItems = [...(moduleInfo.features || []), ...(moduleInfo.dashboards || [])];
+    const allItems = [...(moduleInfo.features || []), ...(moduleInfo.dashboards || [])].filter(
+      (item) => includeExclusive || !item.isExclusive,
+    );
     allItems.forEach(feature => {
       features.push({
         module_key: moduleKey,
@@ -526,10 +532,32 @@ export function getAllFeatures() {
         label: feature.label,
         type: feature.type || "feature",
         path: `/${moduleKey}/${feature.key}`,
+        isExclusive: !!feature.isExclusive,
       });
     });
   });
   return features;
+}
+
+export function getExclusiveFeatures() {
+  const exclusive = [];
+  Object.entries(MODULES_REGISTRY).forEach(([moduleKey, moduleInfo]) => {
+    const allItems = [...(moduleInfo.features || []), ...(moduleInfo.dashboards || [])].filter(
+      (item) => item.isExclusive,
+    );
+    allItems.forEach((feature) => {
+      exclusive.push({
+        module_key: moduleKey,
+        feature_key: `${moduleKey}:${feature.key}`,
+        key: feature.key,
+        label: feature.label,
+        type: feature.type || "feature",
+        path: `/${moduleKey}/${feature.key}`,
+        isExclusive: true,
+      });
+    });
+  });
+  return exclusive;
 }
 
 export function getAllDashboards() {

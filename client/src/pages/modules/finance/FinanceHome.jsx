@@ -28,7 +28,7 @@ import { api } from "../../../api/client.js";
  */
 function fmt(n) {
   if (n == null || Number.isNaN(Number(n))) return "—";
-  return `₵${Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `GH₵${Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 
@@ -70,12 +70,12 @@ export const financeSections = [
           <ActionButton key="view" label="View" path="/finance/contra-voucher" type="outline" featureKey="finance:contra-voucher" action="view" />,
           <ActionButton key="add" label="Add" path="/finance/contra-voucher/create" type="primary" featureKey="finance:contra-voucher" action="create" />
         ], },
-      { title: "Import Vouchers", path: "/finance/import", description: "Bulk import vouchers from Excel template", icon: "📥" , actions: [
-          <ActionButton key="view" label="View" path="/finance/import" type="outline" featureKey="finance:import" action="view" />,
-          <ActionButton key="add" label="Add" path="/finance/import/create" type="primary" featureKey="finance:import" action="create" />
+      { title: "Import Vouchers", path: "/finance/vouchers/import", description: "Bulk import vouchers from Excel template", icon: "📥" , actions: [
+          <ActionButton key="view" label="View" path="/finance/vouchers/import" type="outline" featureKey="finance:import-vouchers" action="view" />,
+          <ActionButton key="add" label="Add" path="/finance/vouchers/import" type="primary" featureKey="finance:import-vouchers" action="create" />
         ], },
-      { title: "Voucher Register Report", path: "/finance/reports", description: "Voucher listing with filters (report)", icon: "📊" , actions: [
-          <ActionButton key="view" label="View" path="/finance/reports" type="outline" featureKey="finance:reports" action="view" />,
+      { title: "Voucher Register Report", path: "/finance/reports/voucher-register", description: "Voucher listing with filters (report)", icon: "📊" , actions: [
+          <ActionButton key="view" label="View" path="/finance/reports/voucher-register" type="outline" featureKey="finance:reports" action="view" />,
         ], },
     ],
   },
@@ -156,6 +156,9 @@ export const financeSections = [
         ], },
       { title: "Profit & Loss", path: "/finance/reports/profit-and-loss", description: "Income vs. expenses summary", icon: "💹" , actions: [
           <ActionButton key="view" label="View" path="/finance/reports/profit-and-loss" type="outline" featureKey="finance:profit-and-loss" action="view" />,
+        ], },
+      { title: "Statement of Profit or Loss & OCI", path: "/finance/reports/profit-loss-oci", description: "Authoritative IFRS statement with OCI, comparative analysis, and drill-down", icon: "📑" , actions: [
+          <ActionButton key="view" label="View" path="/finance/reports/profit-loss-oci" type="outline" featureKey="finance:profitlossocireport" action="view" />,
         ], },
       { title: "Balance Sheet", path: "/finance/reports/balance-sheet", description: "Assets, liabilities, and equity", icon: "🧮" , actions: [
           <ActionButton key="view" label="View" path="/finance/reports/balance-sheet" type="outline" featureKey="finance:balance-sheet" action="view" />,
@@ -277,8 +280,8 @@ export default function FinanceHome() {
         { label: "Dashboard", path: "/finance/dashboard", icon: "📊" },
       ]}
       sections={financeSections}
-      features={financeFeatures}
       useSectionNavigation={true}
+      hideOtherPages={true}
     />
   );
 }

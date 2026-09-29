@@ -38050,3 +38050,136 @@ Error: Invalid id
     at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:248:14)
     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
 --------------------------------------------------------------------------------
+
+[2026-09-01T13:07:46.658Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::ffff:127.0.0.1
+remotePort: 54168
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-09-01T14:14:45.941Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/sales/dashboard-stats (status 404)
+Context:
+requestId: mtir10f5-790729wr
+durationMs: 83
+method: GET
+url: /api/sales/dashboard-stats
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-09-04T14:48:54.813Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 57008
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-09-04T15:15:08.311Z] HTTP_500
+Summary: Unknown column 'i.code' in 'field list'
+Request: GET /api/customer-portal/catalog (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/customer-portal/catalog
+ip: ::ffff:192.168.100.34
+origin: 
+userAgent: okhttp/4.12.0
+userId: null
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'i.code' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getCustomerCatalog (file:///C:/Users/stanl/demo/server/controllers/customerPortal.controller.js:357:19)
+--------------------------------------------------------------------------------
+
+[2026-09-04T15:19:27.000Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::ffff:192.168.100.34
+remotePort: 50972
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-09-04T15:19:27.002Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::ffff:192.168.100.34
+remotePort: 50948
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-09-04T15:22:55.803Z] HTTP_500
+Summary: Unknown column 'i.code' in 'field list'
+Request: GET /api/customer-portal/catalog (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/customer-portal/catalog
+ip: ::ffff:192.168.100.34
+origin: 
+userAgent: okhttp/4.12.0
+userId: null
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'i.code' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:682:20)
+    at async getCustomerCatalog (file:///C:/Users/stanl/demo/server/controllers/customerPortal.controller.js:357:19)
+--------------------------------------------------------------------------------
+
+[2026-09-04T15:25:56.285Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::ffff:192.168.100.34
+remotePort: 51172
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-09-04T15:25:56.288Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::ffff:192.168.100.34
+remotePort: 51174
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
