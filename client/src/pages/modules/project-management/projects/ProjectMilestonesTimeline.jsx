@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '../../../../api/client.js';
 import { toast } from 'react-toastify';
-import { Loader2, Calendar, Layout, ListTree, User, Clock, CheckCircle, MapPin } from 'lucide-react';
+import { Loader2, Calendar, Layout, ListTree, User, Clock, CheckCircle, MapPin, ArrowLeft } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { Link } from 'react-router-dom';
 
@@ -17,11 +17,11 @@ export default function ProjectMilestonesTimeline() {
     async function loadProjects() {
       try {
         setLoading(true);
-        const res = await api.get('/projects/projects');
-        setProjects(res.data?.items || res.data?.projects || []);
-        if (res.data?.items?.length > 0 || res.data?.projects?.length > 0) {
-          const projs = res.data?.items || res.data?.projects;
-          setSelectedProjectId(projs[0].id);
+        const res = await api.get('/projects/projects', { params: { active: 'all' } }).catch(() => api.get('/projects?active=all'));
+        const list = res.data?.items || res.data?.projects || res.data?.data || (Array.isArray(res.data) ? res.data : []);
+        setProjects(list);
+        if (list.length > 0) {
+          setSelectedProjectId(prev => prev || list[0].id);
         }
       } catch (e) {
         toast.error('Failed to load projects');
@@ -78,45 +78,60 @@ export default function ProjectMilestonesTimeline() {
 
   return (
     <div className="p-4 space-y-6">
-      <div className="mb-2">
-        <Link to="/project-management?section=Reports%20%26%20Analytics" className="text-brand-600 hover:text-brand-700 flex items-center gap-2 font-medium w-fit">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-          Back to Module Home
-        </Link>
-      </div>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <MapPin className="text-brand-600" /> Project Milestones
-          </h2>
-          <p className="text-sm text-slate-500">Graphical visualization of project progress and task stages</p>
+      {/* Canonical Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Link to="/project-management" className="btn btn-secondary inline-flex items-center gap-1.5 text-sm">
+            <ArrowLeft size={16} /> Back
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
+              <MapPin size={26} className="text-brand-900 dark:text-brand-400" />
+              Project Milestones
+            </h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+              Graphical visualization of project progress and task stages
+            </p>
+          </div>
         </div>
-        
-        <div className="flex items-center gap-2 bg-white dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
-          <button 
-            className={`px-3 py-1.5 text-sm font-medium rounded-md flex items-center gap-2 transition-colors ${viewMode === 'STEP' ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/20 dark:text-brand-300' : 'text-slate-600 hover:bg-slate-50'}`}
-            onClick={() => setViewMode('STEP')}
-          >
-            <ListTree size={16} /> Chronological
-          </button>
-          <button 
-            className={`px-3 py-1.5 text-sm font-medium rounded-md flex items-center gap-2 transition-colors ${viewMode === 'GANTT' ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/20 dark:text-brand-300' : 'text-slate-600 hover:bg-slate-50'}`}
-            onClick={() => setViewMode('GANTT')}
-          >
-            <Layout size={16} /> Gantt Chart
-          </button>
+
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Link to="/project-management/tasks/new" className="btn btn-primary inline-flex items-center gap-2 text-sm font-semibold shadow-sm">
+            + New Task / Milestone
+          </Link>
+          <div className="flex items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
+            <button 
+              type="button"
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-2 transition-colors ${viewMode === 'STEP' ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/20 dark:text-brand-300' : 'text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+              onClick={() => setViewMode('STEP')}
+            >
+              <ListTree size={15} /> Chronological
+            </button>
+            <button 
+              type="button"
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-2 transition-colors ${viewMode === 'GANTT' ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/20 dark:text-brand-300' : 'text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+              onClick={() => setViewMode('GANTT')}
+            >
+              <Layout size={15} /> Gantt Schedule
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center gap-4">
         <div className="flex-1 max-w-sm">
-          <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Select Project</label>
+          <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+            Project <span className="text-red-500">*</span>
+          </label>
           {loading ? (
             <div className="h-10 bg-slate-100 dark:bg-slate-700 animate-pulse rounded-lg"></div>
           ) : (
             <select className="select w-full" value={selectedProjectId} onChange={(e) => setSelectedProjectId(e.target.value)}>
+              <option value="">-- Select Project --</option>
               {projects.map(p => (
-                <option key={p.id} value={p.id}>{p.project_code} - {p.project_name}</option>
+                <option key={p.id} value={p.id}>
+                  {p.project_code ? `${p.project_code} - ` : ''}{p.project_name || p.name || `Project #${p.id}`}
+                </option>
               ))}
             </select>
           )}
@@ -125,6 +140,12 @@ export default function ProjectMilestonesTimeline() {
 
       {fetchingTasks ? (
         <div className="py-20 flex justify-center"><Loader2 size={32} className="animate-spin text-brand-500" /></div>
+      ) : !selectedProjectId ? (
+        <div className="bg-white dark:bg-slate-800 p-12 text-center rounded-xl border border-slate-100 dark:border-slate-700">
+          <MapPin size={48} className="mx-auto text-slate-300 mb-4" />
+          <h3 className="text-lg font-semibold text-slate-700 mb-1">Please Select a Project</h3>
+          <p className="text-slate-500">Choose a project from the dropdown above to view its milestones and timeline.</p>
+        </div>
       ) : sortedTasks.length === 0 ? (
         <div className="bg-white dark:bg-slate-800 p-12 text-center rounded-xl border border-slate-100 dark:border-slate-700">
           <MapPin size={48} className="mx-auto text-slate-300 mb-4" />
@@ -217,13 +238,13 @@ export default function ProjectMilestonesTimeline() {
                       return (
                         <div 
                           key={t.id} 
-                          className={`flex items-center group cursor-pointer ${selectedTask?.id === t.id ? 'bg-slate-50 dark:bg-slate-700/50 rounded-lg' : ''}`}
+                          className={`flex items-center group cursor-pointer ${selectedTask?.id === t.id ? 'bg-brand-50/50 dark:bg-slate-800/60 rounded-lg' : ''}`}
                           onClick={() => setSelectedTask(t)}
                         >
                           <div className="w-48 shrink-0 p-2 text-sm font-medium text-slate-700 dark:text-slate-200 truncate pr-4 border-r border-slate-200 dark:border-slate-700">
                             {t.task_title}
                           </div>
-                          <div className="flex-1 relative h-10 flex items-center bg-slate-50/50 dark:bg-slate-900/20">
+                          <div className="flex-1 relative h-10 flex items-center bg-white dark:bg-slate-900">
                             <div 
                               className={`absolute h-6 rounded-md shadow-sm transition-all ${isComplete ? 'bg-emerald-500' : 'bg-brand-500'}`}
                               style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}
@@ -310,7 +331,7 @@ export default function ProjectMilestonesTimeline() {
                 </div>
               </div>
             ) : (
-              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 p-8 flex flex-col items-center justify-center text-center h-full min-h-[300px]">
+              <div className="bg-white dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 p-8 flex flex-col items-center justify-center text-center h-full min-h-[300px]">
                 <MapPin size={32} className="text-slate-300 mb-3" />
                 <p className="text-sm font-medium text-slate-500">Select a milestone or task from the timeline to view its details.</p>
               </div>

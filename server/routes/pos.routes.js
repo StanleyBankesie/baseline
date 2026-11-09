@@ -986,6 +986,49 @@ async function nextSessionNo(companyId) {
   return `S-${String(nextNum).padStart(6, "0")}`;
 }
 
+router.get(
+  "/customers",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      const companyId = req.scope.companyId;
+      const items = await query(
+        `SELECT 
+           c.id,
+           c.company_id,
+           c.branch_id,
+           c.customer_code,
+           c.customer_name,
+           c.customer_type,
+           c.price_type_id,
+           c.contact_person,
+           c.email,
+           c.phone,
+           c.mobile,
+           c.credit_limit,
+           c.enforce_credit_limit,
+           c.temp_credit_limit,
+           c.temp_credit_limit_date,
+           c.is_active,
+           c.address,
+           c.city,
+           c.state,
+           c.zone,
+           c.country,
+           c.payment_terms
+         FROM sal_customers c
+         WHERE c.company_id = :companyId AND c.is_active = 1
+         ORDER BY c.customer_name ASC`,
+        { companyId },
+      ).catch(() => []);
+      res.json({ items: Array.isArray(items) ? items : [] });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
 
 router.get(
   "/analytics/overview",
@@ -2893,32 +2936,52 @@ router.post(
       await ensurePosTables();
       await ensureStockBalancesWarehouseInfrastructure();
       // Enforce daily POS day requirement:
-      // - A day must be opened for today's business date before sales are allowed
-      // - Sales remain allowed even if the day has been closed, as long as it's the same date
+      // - If POS_ENABLE_DAY_OPEN_CLOSE is '0' (inactivated in General Settings), bypass day open requirement
+      // - Otherwise, a day must be opened for today's business date before sales are allowed
       {
-        const [dayRows] = await conn.execute(
-          `
-          SELECT id, status
-          FROM pos_day_status
-          WHERE company_id = :companyId
-            AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
-            AND business_date = CURDATE()
-            ${terminal ? "AND terminal_code = :terminal" : ""}
-          ORDER BY open_datetime DESC
-          LIMIT 1
-          `,
-          terminal
-            ? { companyId, branchId, branchIdsStr, terminal: String(terminal || "") }
-            : { companyId, branchId, branchIdsStr },
-        );
-        if (!dayRows || dayRows.length === 0) {
-          throw httpError(
-            400,
-            "VALIDATION_ERROR",
-            "Open POS day required for today. Please open day in POS Setup.",
+        const [settingsRows] = await conn.execute(
+          `SELECT setting_value FROM adm_system_settings
+           WHERE (company_id = :companyId OR company_id IS NULL)
+             AND setting_key = 'POS_ENABLE_DAY_OPEN_CLOSE'
+           ORDER BY company_id DESC
+           LIMIT 1`,
+          { companyId: companyId ?? null },
+        ).catch(() => [[]]);
+
+        const settingVal = Array.isArray(settingsRows)
+          ? settingsRows[0]?.setting_value
+          : settingsRows?.setting_value;
+
+        const isDayOpenCloseEnabled =
+          settingVal === undefined ||
+          settingVal === null ||
+          settingVal === "1" ||
+          settingVal === "true";
+
+        if (isDayOpenCloseEnabled) {
+          const [dayRows] = await conn.execute(
+            `
+            SELECT id, status
+            FROM pos_day_status
+            WHERE company_id = :companyId
+              AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
+              AND business_date = CURDATE()
+              ${terminal ? "AND terminal_code = :terminal" : ""}
+            ORDER BY open_datetime DESC
+            LIMIT 1
+            `,
+            terminal
+              ? { companyId, branchId, branchIdsStr, terminal: String(terminal || "") }
+              : { companyId, branchId, branchIdsStr },
           );
+          if (!dayRows || dayRows.length === 0) {
+            throw httpError(
+              400,
+              "VALIDATION_ERROR",
+              "Open POS day required for today. Please open day in POS Setup.",
+            );
+          }
         }
-        // If found and status is OPEN or CLOSED, proceed (CLOSED still allowed same day)
       }
       await conn.beginTransaction();
 
@@ -3290,6 +3353,25 @@ router.get(
         ? requestedDate
         : null;
       await ensurePosTables();
+
+      const settingsRows = await query(
+        `SELECT setting_value FROM adm_system_settings
+         WHERE (company_id = :companyId OR company_id IS NULL)
+           AND setting_key = 'POS_ENABLE_DAY_OPEN_CLOSE'
+         ORDER BY company_id DESC
+         LIMIT 1`,
+        { companyId: companyId ?? null },
+      ).catch(() => []);
+
+      const settingVal = Array.isArray(settingsRows)
+        ? settingsRows[0]?.setting_value
+        : settingsRows?.setting_value;
+
+      const isDayOpenCloseEnabled =
+        settingVal === undefined ||
+        settingVal === null ||
+        settingVal === "1" ||
+        settingVal === "true";
       const coerceJsonValue = (value) => {
         if (value === null || value === undefined) return null;
         if (typeof value === "string") {
@@ -3449,7 +3531,13 @@ router.get(
           }
         }
       }
-      res.json({ item, nextOpeningFloat, nextMomoOpeningMain, nextMomoOpeningPay });
+      res.json({
+        item,
+        nextOpeningFloat,
+        nextMomoOpeningMain,
+        nextMomoOpeningPay,
+        enable_day_open_close: isDayOpenCloseEnabled,
+      });
     } catch (err) {
       next(err);
     }

@@ -843,7 +843,9 @@ export const reverseByDocument = async (req, res, next) => {
         STOCK_VERIFICATION: "inv_stock_verifications",
         GENERAL_REQUISITION: "pur_general_requisitions",
         SERVICE_REQUEST: "srv_service_requests",
-        CUSTOMER_PROSPECT: "sal_prospect_customers"
+        CUSTOMER_PROSPECT: "sal_prospect_customers",
+        FM_PURCHASE_REQUISITION: "fm_purchase_requisitions",
+        "FM PURCHASE REQUISITION": "fm_purchase_requisitions"
       };
       const tableName = tableMap[docTypeRaw.toUpperCase()];
       if (tableName) {
@@ -1497,6 +1499,107 @@ export const getPendingApprovals = async (req, res, next) => {
          WHERE dw.company_id = :companyId
            AND dw.status = 'PENDING'
            AND dw.assigned_to_user_id = :userId
+         ORDER BY dw.created_at DESC`,
+      { companyId, userId },
+    );
+    res.json({ items });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getSentApprovals = async (req, res, next) => {
+  try {
+    await ensureWorkflowTables();
+    const { companyId = null } = req.scope || {};
+    const userId = req.user.sub;
+    const items = await query(
+      `SELECT 
+          dw.id as workflow_instance_id,
+          dw.document_id,
+          dw.document_type,
+          dw.amount,
+          dw.status,
+          dw.current_step_order,
+          dw.created_at as submitted_at,
+          w.workflow_name,
+          ws.step_name,
+          COALESCE(so.order_no, fv.voucher_no, po.po_no, mr.requisition_no, rts.rts_no, sa.adjustment_no, grn.grn_no, pm_ord.order_no, pm_pr.requisition_no, gr.requisition_no, inv.invoice_no) as doc_ref,
+          po.po_type as po_type,
+          u.username as initiator,
+          assigned_u.username as assigned_to
+         FROM adm_document_workflows dw
+         JOIN adm_workflows w ON dw.workflow_id = w.id
+         LEFT JOIN adm_workflow_steps ws ON w.id = ws.workflow_id AND dw.current_step_order = ws.step_order
+         LEFT JOIN adm_users assigned_u ON assigned_u.id = dw.assigned_to_user_id
+         LEFT JOIN sal_invoices inv
+           ON (dw.document_type = 'SALES_INVOICE' OR dw.document_type = 'Sales Invoice')
+          AND inv.id = dw.document_id
+         LEFT JOIN sal_orders so
+           ON (dw.document_type = 'SALES_ORDER' OR dw.document_type = 'Sales Order')
+          AND so.id = dw.document_id
+         LEFT JOIN pur_orders po
+           ON (dw.document_type = 'PURCHASE_ORDER' OR dw.document_type = 'Purchase Order')
+          AND po.id = dw.document_id
+         LEFT JOIN inv_material_requisitions mr 
+           ON (dw.document_type = 'MATERIAL_REQUISITION' OR dw.document_type = 'Material Requisition') 
+          AND mr.id = dw.document_id
+         LEFT JOIN inv_return_to_stores rts 
+           ON (dw.document_type = 'RETURN_TO_STORES' OR dw.document_type = 'Return to Stores') 
+          AND rts.id = dw.document_id
+         LEFT JOIN inv_stock_adjustments sa
+           ON (dw.document_type = 'STOCK_ADJUSTMENT' OR dw.document_type = 'Stock Adjustment')
+          AND sa.id = dw.document_id
+         LEFT JOIN inv_goods_receipt_notes grn
+           ON (
+             dw.document_type = 'GOODS_RECEIPT' OR 
+             dw.document_type = 'Goods Receipt' OR
+             dw.document_type = 'GRN' OR
+             dw.document_type = 'Goods Receipt Note'
+           )
+           AND grn.id = dw.document_id
+         LEFT JOIN pm_orders pm_ord
+           ON (dw.document_type = 'PROJECT_ORDER' OR dw.document_type = 'Project Order')
+          AND pm_ord.id = dw.document_id
+         LEFT JOIN pm_purchase_requisitions pm_pr
+           ON (dw.document_type = 'PURCHASE_REQUISITION' OR dw.document_type = 'Purchase Requisition')
+          AND pm_pr.id = dw.document_id
+         LEFT JOIN pur_general_requisitions gr
+           ON (dw.document_type = 'GENERAL_REQUISITION' OR dw.document_type = 'General Requisition')
+          AND gr.id = dw.document_id
+         LEFT JOIN fin_vouchers fv
+          ON (
+            dw.document_type = 'PAYMENT_VOUCHER' OR
+            dw.document_type = 'Payment Voucher' OR
+            dw.document_type = 'PV' OR
+            dw.document_type = 'RECEIPT_VOUCHER' OR
+            dw.document_type = 'Receipt Voucher' OR
+            dw.document_type = 'RV' OR
+            dw.document_type = 'JOURNAL_VOUCHER' OR
+            dw.document_type = 'Journal Voucher' OR
+            dw.document_type = 'JV' OR
+            dw.document_type = 'CONTRA_VOUCHER' OR
+            dw.document_type = 'Contra Voucher' OR
+            dw.document_type = 'CV' OR
+            dw.document_type = 'DEBIT_NOTE' OR
+            dw.document_type = 'Debit Note' OR
+            dw.document_type = 'DN' OR
+            dw.document_type = 'CREDIT_NOTE' OR
+            dw.document_type = 'Credit Note' OR
+            dw.document_type = 'CN'
+          ) AND fv.id = dw.document_id
+         LEFT JOIN adm_users u ON u.id = (
+             SELECT actor_user_id FROM adm_workflow_logs 
+             WHERE document_workflow_id = dw.id AND action = 'SUBMIT' LIMIT 1
+         )
+         WHERE dw.company_id = :companyId
+           AND (
+             dw.created_by = :userId 
+             OR EXISTS (
+               SELECT 1 FROM adm_workflow_logs wl 
+               WHERE wl.document_workflow_id = dw.id AND wl.actor_user_id = :userId AND wl.action = 'SUBMIT'
+             )
+           )
          ORDER BY dw.created_at DESC`,
       { companyId, userId },
     );

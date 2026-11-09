@@ -82,13 +82,10 @@ export const financeSections = [
   {
     title: "Accounting Setup",
     items: [
-      { title: "Chart of Account Groups", path: "/finance/setup/account-groups", description: "Setup account group hierarchy", icon: "🗂" , actions: [
-          <ActionButton key="view" label="View" path="/finance/setup/account-groups" type="outline" featureKey="finance:account-groups" action="view" />,
-          <ActionButton key="add" label="Add" path="/finance/setup/account-groups/create" type="primary" featureKey="finance:account-groups" action="create" />
-        ], },
-      { title: "Accounts Creation", path: "/finance/setup/accounts", description: "Create and manage accounts", icon: "🏦" , actions: [
-          <ActionButton key="view" label="View" path="/finance/setup/accounts" type="outline" featureKey="finance:accounts" action="view" />,
-          <ActionButton key="add" label="Add" path="/finance/setup/accounts/create" type="primary" featureKey="finance:accounts" action="create" />
+      { title: "Chart of Accounts & Groups Setup", path: "/finance/setup/finance", description: "Setup account groups, create accounts & bulk import via Excel template", icon: "🏦" , actions: [
+          <ActionButton key="accounts" label="Accounts" path="/finance/setup/finance?tab=accounts" type="outline" featureKey="finance:accounts" action="view" />,
+          <ActionButton key="groups" label="Groups" path="/finance/setup/finance?tab=groups" type="outline" featureKey="finance:account-groups" action="view" />,
+          <ActionButton key="add" label="Add Account" path="/finance/setup/finance?tab=accounts&action=create" type="primary" featureKey="finance:accounts" action="create" />
         ], },
       { title: "Cost Centers", path: "/finance/setup/cost-centers", description: "Define and manage cost centers", icon: "🏷️" , actions: [
           <ActionButton key="view" label="View" path="/finance/setup/cost-centers" type="outline" featureKey="finance:cost-centers" action="view" />,
@@ -109,6 +106,10 @@ export const financeSections = [
       { title: "Opening Balances", path: "/finance/setup/opening-balances", description: "Set beginning balances for all accounts", icon: "🧮" , actions: [
           <ActionButton key="view" label="View" path="/finance/setup/opening-balances" type="outline" featureKey="finance:opening-balances" action="view" />,
           <ActionButton key="add" label="Add" path="/finance/setup/opening-balances/create" type="primary" featureKey="finance:opening-balances" action="create" />
+        ], },
+      { title: "Budget Management", path: "/finance/budget", description: "Allocate corporate and cost center financial budgets", icon: "💵" , actions: [
+          <ActionButton key="view" label="View" path="/finance/budget" type="outline" featureKey="finance:budget" action="view" />,
+          <ActionButton key="add" label="Add" path="/finance/budget" type="primary" featureKey="finance:budget" action="create" />
         ], },
     ],
   },
@@ -171,6 +172,9 @@ export const financeSections = [
         ], },
       { title: "Graphical Chart of Accounts", path: "/finance/reports/chart-of-accounts-graphical", description: "Hierarchical visual view of accounts", icon: "🌳" , actions: [
           <ActionButton key="view" label="View" path="/finance/reports/chart-of-accounts-graphical" type="outline" featureKey="finance:chart-of-accounts-graphical" action="view" />,
+        ], },
+      { title: "Budget vs. Actual Report", path: "/finance/reports/budget-vs-actual", description: "General Ledger & Cost Center budget variance analysis", icon: "📈" , actions: [
+          <ActionButton key="view" label="View" path="/finance/reports/budget-vs-actual" type="outline" featureKey="finance:budget-vs-actual" action="view" />,
         ], },
     ],
   },
@@ -273,11 +277,13 @@ export default function FinanceHome() {
 
   return (
     <ModuleDashboard
+      moduleKey="finance"
       title="Finance Module"
       description="Comprehensive accounting, budgeting, and financial reporting system"
       stats={stats}
       headerActions={[
         { label: "Dashboard", path: "/finance/dashboard", icon: "📊" },
+        { label: "Budget Dashboard", path: "/finance/budget-dashboard", icon: "📈" },
       ]}
       sections={financeSections}
       useSectionNavigation={true}
@@ -343,14 +349,8 @@ export const financeFeatures = [
   },
   {
     module_key: "finance",
-    label: "Chart of Account Groups",
-    path: "/finance/account-groups",
-    type: "feature",
-  },
-  {
-    module_key: "finance",
-    label: "Accounts Creation",
-    path: "/finance/accounts",
+    label: "Account Groups & Accounts Setup",
+    path: "/finance/setup/finance",
     type: "feature",
   },
   {
@@ -490,5 +490,17 @@ export const financeFeatures = [
     label: "Post-Dated Cheques (PDC)",
     path: "/finance/pdc-postings",
     type: "feature",
+  },
+  {
+    module_key: "finance",
+    label: "Budget Management",
+    path: "/finance/budget",
+    type: "feature",
+  },
+  {
+    module_key: "finance",
+    label: "Budget vs. Actual Report",
+    path: "/finance/reports/budget-vs-actual",
+    type: "dashboard",
   },
 ];

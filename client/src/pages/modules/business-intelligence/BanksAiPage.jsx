@@ -5,13 +5,19 @@
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
-  Send, Sparkles, RefreshCw, CheckCircle, Copy, Check, Database
+  Send, Sparkles, RefreshCw, CheckCircle, Copy, Check, Database, Trash2, AlertTriangle, Plus,
+  Mic, MicOff, Volume2, VolumeX, Headphones
 } from "lucide-react";
+import { useSpeech } from "../../../components/ai/useSpeech.js";
+import VoiceVisualizer from "../../../components/ai/VoiceVisualizer.jsx";
+import { toast } from "react-toastify";
 import banksIcon from "../../../assets/banks_ai_icon.png";
 import { api } from "../../../api/client.js";
 import { PageHeader } from "./bi.shared.jsx";
 import { useAuth } from "../../../auth/AuthContext.jsx";
 import { usePermission } from "../../../auth/PermissionContext.jsx";
+import InteractiveFormCard from "../../../components/ai/InteractiveFormCard.jsx";
+import { useBanksChat } from "../../../components/ai/useBanksChat.js";
 
 // Helper for rendering Markdown
 function MarkdownBody({ content }) {
@@ -90,6 +96,11 @@ function MarkdownBody({ content }) {
 }
 
 const STATIC_PROMPTS = [
+  { category: "transport", path: "/transport", title: "📝 Vehicle Inspection Form", prompt: "Create a vehicle pre-trip inspection form with driver, odometer, fluids, tires, and checklist fields" },
+  { category: "hr", path: "/human-resource", title: "📝 Employee Onboarding Form", prompt: "Create an employee onboarding form with personal info, department, role, emergency contact, and bank details" },
+  { category: "sales", path: "/sales", title: "📝 Customer Complaint Form", prompt: "Create a customer feedback and complaint form with customer details, order reference, category, and issue description" },
+  { category: "purchases", path: "/purchases", title: "📝 Purchase Requisition Form", prompt: "Create a purchase requisition form with item specifications, quantity, estimated cost, and justification" },
+  { category: "maintenance", path: "/maintenance", title: "📝 Maintenance Work Order Form", prompt: "Create an equipment maintenance work order form with machine name, location, fault type, and urgency" },
   { category: "sales", path: "/sales", title: "Executive Business Summary", prompt: "Give me an executive summary of our overall revenue, sales, expenses, and gross profit." },
   { category: "inventory", path: "/inventory", title: "Inventory Health & Reorder", prompt: "Check inventory health: which items are below their safety reorder level and need replenishment?" },
   { category: "production", path: "/production", title: "Production & Work Orders", prompt: "What is our current production status, active work orders, completed units, and machine status?" },
@@ -102,19 +113,59 @@ const STATIC_PROMPTS = [
 
 export default function BanksAiPage() {
   const { user } = useAuth();
-  const { isSuperAdmin, canAccessPath, modules } = usePermission();
+  const { isSuperAdmin, canAccessPath } = usePermission();
 
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content: "Welcome to **Banks AI Studio**. How can I assist you with OmniSuite ERP today?",
+  const {
+    messages,
+    input,
+    setInput,
+    loading,
+    aiStatus,
+    sendMessage,
+    deleteChatHistory,
+    startNewChat,
+  } = useBanksChat();
+
+  const {
+    isListening,
+    isSpeaking,
+    speakingId,
+    isVoiceMode,
+    speechError,
+    audioLevel,
+    isTranscribing,
+    activeEngine,
+    startListening,
+    stopListening,
+    toggleListening,
+    speak,
+    stopSpeaking,
+    toggleSpeak,
+    toggleVoiceMode,
+  } = useSpeech({
+    onAutoSend: (spokenText) => {
+      if (spokenText && spokenText.trim()) {
+        sendMessage(spokenText, activeModel);
+      }
     },
-  ]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [aiStatus, setAiStatus] = useState(null);
+  });
+
+  // Auto-speak in continuous Voice Mode
+  const prevMsgCountRef = useRef(messages.length);
+  useEffect(() => {
+    if (isVoiceMode && messages.length > prevMsgCountRef.current) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg && lastMsg.role === "assistant" && lastMsg.content) {
+        speak(lastMsg.content, messages.length - 1);
+      }
+    }
+    prevMsgCountRef.current = messages.length;
+  }, [messages, isVoiceMode, speak]);
+
   const [activeModel, setActiveModel] = useState("openai/gpt-oss-120b");
   const [copiedIdx, setCopiedIdx] = useState(null);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const messagesEndRef = useRef(null);
 
@@ -124,72 +175,18 @@ export default function BanksAiPage() {
     return STATIC_PROMPTS.filter((p) => canAccessPath(p.path));
   }, [isSuperAdmin, user, canAccessPath]);
 
-  // Extract allowed modules list for backend RBAC enforcement
-  const userAllowedModules = useMemo(() => {
-    if (isSuperAdmin || user?.id === 1) return ["*"];
-    const list = Array.from(modules || []);
-    return list.length ? list : ["general"];
-  }, [isSuperAdmin, user, modules]);
-
-  useEffect(() => {
-    loadStatus();
-  }, []);
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const loadStatus = async () => {
-    try {
-      const res = await api.get("/ai/status");
-      setAiStatus(res.data);
-      if (res.data?.defaultModel) setActiveModel(res.data.defaultModel);
-    } catch {}
-  };
-
-  const handleSend = async (customPrompt = null) => {
-    const text = (customPrompt || input).trim();
-    if (!text || loading) return;
-
-    const updated = [...messages, { role: "user", content: text }];
-    setMessages(updated);
-    setInput("");
-    setLoading(true);
-
-    try {
-      const res = await api.post("/ai/chat", {
-        messages: updated,
-        model: activeModel,
-        userContext: {
-          roleName: user?.role_name || user?.role || "User",
-          isSuperAdmin: Boolean(isSuperAdmin || user?.id === 1),
-          allowedModules: userAllowedModules,
-        },
-      });
-
-      const reply = res.data?.data?.reply;
-      const tools = res.data?.data?.toolCallsExecuted || [];
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: reply,
-          tools,
-        },
-      ]);
-    } catch (err) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: `⚠️ **Error:** ${err?.response?.data?.message || "Failed to contact AI service. Please verify your Groq API key in System Configuration -> General Settings."}`,
-          isError: true,
-        },
-      ]);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (aiStatus?.defaultModel) {
+      setActiveModel(aiStatus.defaultModel);
     }
+  }, [aiStatus]);
+
+  const handleSend = (customPrompt = null) => {
+    sendMessage(customPrompt, activeModel);
   };
 
   const handleCopy = (text, idx) => {
@@ -198,19 +195,94 @@ export default function BanksAiPage() {
     setTimeout(() => setCopiedIdx(null), 2000);
   };
 
+  // Automatically delete user's chat history from the database when leaving/closing the page
+  useEffect(() => {
+    return () => {
+      deleteChatHistory().catch(() => {});
+    };
+  }, [deleteChatHistory]);
+
+  const handleNewChat = () => {
+    startNewChat();
+    setShowConfirmDelete(false);
+    toast.info("Started new conversation.");
+  };
+
+  const handleDeleteHistory = async () => {
+    try {
+      setDeleting(true);
+      await deleteChatHistory();
+      setShowConfirmDelete(false);
+      toast.success("Your chat history was deleted successfully.");
+    } catch {
+      toast.error("Failed to delete chat history.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Banks AI Studio"
         description="OmniSuite Enterprise AI Assistant — with full real-time database query execution"
       >
-        {aiStatus?.isConfigured && (
-          <span className="text-xs text-emerald-300 bg-emerald-500/20 border border-emerald-500/30 px-3 py-1 rounded-full font-semibold flex items-center gap-1.5">
-            <CheckCircle size={13} className="text-emerald-400" />
-            Connected
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {aiStatus?.isConfigured && (
+            <span className="text-xs text-emerald-300 bg-emerald-500/20 border border-emerald-500/30 px-3 py-1 rounded-full font-semibold flex items-center gap-1.5">
+              <CheckCircle size={13} className="text-emerald-400" />
+              Connected
+            </span>
+          )}
+          <button
+            onClick={handleNewChat}
+            className="btn btn-primary text-xs flex items-center gap-1.5 py-1 px-3 shadow-sm active:scale-95"
+            title="Start a new conversation"
+          >
+            <Plus size={13} />
+            <span>New Chat</span>
+          </button>
+          <button
+            onClick={() => setShowConfirmDelete((prev) => !prev)}
+            className={`btn text-xs flex items-center gap-1.5 py-1 px-3 transition-colors ${
+              showConfirmDelete
+                ? "bg-rose-600 hover:bg-rose-700 text-white border-transparent"
+                : "btn-secondary text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40"
+            }`}
+            title="Delete My Chat History"
+          >
+            <Trash2 size={13} />
+            <span>{showConfirmDelete ? "Cancel" : "Delete My Chat History"}</span>
+          </button>
+        </div>
       </PageHeader>
+
+      {/* Inline Confirmation Banner */}
+      {showConfirmDelete && (
+        <div className="bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/60 rounded-xl p-3 flex items-center justify-between text-xs text-rose-800 dark:text-rose-200 animate-fadeIn flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <AlertTriangle size={15} className="text-rose-600 dark:text-rose-400 flex-shrink-0" />
+            <span className="font-medium">Permanently delete your personal chat history? Only your own conversation records will be deleted from the database.</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleDeleteHistory}
+              disabled={deleting}
+              className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-md font-semibold text-xs shadow-sm transition-colors"
+            >
+              {deleting ? "Deleting..." : "Yes, Delete My History"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowConfirmDelete(false)}
+              className="px-3 py-1 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 rounded-md font-medium text-xs border border-slate-300 dark:border-slate-700 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Main Studio Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -265,13 +337,67 @@ export default function BanksAiPage() {
                 <span className="text-xs font-bold text-slate-800 dark:text-white">Banks AI</span>
               </div>
             </div>
-            <button
-              onClick={() => setMessages([{ role: "assistant", content: "Conversation reset. How can I help you today?" }])}
-              className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center gap-1"
-            >
-              <RefreshCw size={12} /> Clear
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  toggleVoiceMode(
+                    (interim) => setInput(interim),
+                    (final) => setInput(final)
+                  )
+                }
+                title={isVoiceMode ? "Disable Voice Mode (Speech-to-Speech)" : "Enable Voice Mode (Speech-to-Speech Continuous Conversation)"}
+                className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1.5 text-xs font-semibold shadow-sm active:scale-95 ${
+                  isVoiceMode
+                    ? "bg-emerald-500 text-white animate-pulse"
+                    : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 border border-slate-200 dark:border-slate-700"
+                }`}
+              >
+                <Headphones size={13} />
+                <span>{isVoiceMode ? "Voice Mode ON" : "Voice Mode"}</span>
+              </button>
+              <button
+                onClick={() => setMessages([{ role: "assistant", content: "Conversation reset. How can I help you today?" }])}
+                className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center gap-1 px-2 py-1"
+              >
+                <RefreshCw size={12} /> Clear
+              </button>
+            </div>
           </div>
+
+          {/* Live Speaking Status */}
+          {isSpeaking && (
+            <div className="bg-emerald-50 dark:bg-emerald-950/70 border-b border-emerald-200 dark:border-emerald-900/60 px-5 py-2 flex items-center justify-between text-xs text-emerald-800 dark:text-emerald-200 animate-fadeIn">
+              <span className="flex items-center gap-2 font-medium">
+                <Volume2 size={14} className="text-emerald-600 dark:text-emerald-400 animate-bounce" />
+                <span>Banks is speaking...</span>
+              </span>
+              <button
+                type="button"
+                onClick={stopSpeaking}
+                className="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-200 dark:bg-emerald-800 text-emerald-900 dark:text-emerald-100 hover:bg-emerald-300 transition-colors"
+              >
+                Stop Audio
+              </button>
+            </div>
+          )}
+
+          {/* Live Microphone Status */}
+          {isListening && (
+            <div className="bg-rose-50 dark:bg-rose-950/70 border-b border-rose-200 dark:border-rose-900/60 px-5 py-2 flex items-center justify-between text-xs text-rose-800 dark:text-rose-200 animate-pulse">
+              <span className="flex items-center gap-2 font-medium">
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                <span>Listening... speak into your microphone</span>
+              </span>
+              <button
+                type="button"
+                onClick={stopListening}
+                className="px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-200 dark:bg-rose-800 text-rose-900 dark:text-rose-100 hover:bg-rose-300 transition-colors"
+              >
+                Stop Mic
+              </button>
+            </div>
+          )}
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-slate-50/40 dark:bg-slate-950/40">
@@ -304,6 +430,7 @@ export default function BanksAiPage() {
                   ) : (
                     <div>
                       <MarkdownBody content={msg.content} />
+                      {msg.form && <InteractiveFormCard form={msg.form} />}
                       {msg.tools && msg.tools.length > 0 && (
                         <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-wrap gap-1.5">
                           {msg.tools.map((t, tIdx) => (
@@ -321,13 +448,26 @@ export default function BanksAiPage() {
                   )}
 
                   {msg.role === "assistant" && (
-                    <button
-                      onClick={() => handleCopy(msg.content, idx)}
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                      title="Copy Answer"
-                    >
-                      {copiedIdx === idx ? <Check size={13} className="text-secondary" /> : <Copy size={13} />}
-                    </button>
+                    <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        type="button"
+                        onClick={() => toggleSpeak(msg.content, idx)}
+                        className={`p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ${
+                          isSpeaking && speakingId === idx ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        }`}
+                        title={isSpeaking && speakingId === idx ? "Stop Audio" : "Read Aloud (Speech-to-Speech)"}
+                      >
+                        {isSpeaking && speakingId === idx ? <VolumeX size={13} /> : <Volume2 size={13} />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(msg.content, idx)}
+                        className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        title="Copy Answer"
+                      >
+                        {copiedIdx === idx ? <Check size={13} className="text-secondary" /> : <Copy size={13} />}
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -350,6 +490,21 @@ export default function BanksAiPage() {
 
           {/* Prompt input */}
           <div className="p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+            {/* Live Audio Visualizer & Level Indicator */}
+            <VoiceVisualizer
+              isListening={isListening}
+              isSpeaking={isSpeaking}
+              isTranscribing={isTranscribing}
+              audioLevel={audioLevel}
+              activeEngine={activeEngine}
+              onStopAndSend={() => {
+                stopListening(true);
+                if (input.trim()) {
+                  handleSend();
+                }
+              }}
+            />
+
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -361,10 +516,45 @@ export default function BanksAiPage() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask Banks anything about your ERP data, analytics, or workflows..."
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                placeholder={isListening ? "Listening... speak now..." : "Ask Banks anything about your ERP data, analytics, or workflows..."}
+                className={`w-full bg-white dark:bg-slate-900 border rounded-xl px-4 py-3 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all ${
+                  isListening ? "border-rose-500 ring-1 ring-rose-500" : "border-slate-200 dark:border-slate-700"
+                }`}
                 disabled={loading}
               />
+              {/* Voice Input (Speech-to-Text) Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (isListening) {
+                    stopListening(true);
+                    if (input.trim()) {
+                      handleSend();
+                    }
+                  } else {
+                    toggleListening(
+                      (interim) => setInput(interim),
+                      (final) => setInput(final)
+                    );
+                  }
+                }}
+                disabled={loading}
+                className={`p-3 rounded-xl transition-all flex items-center justify-center flex-shrink-0 shadow-sm ${
+                  isListening
+                    ? "bg-rose-600 text-white animate-pulse shadow-md scale-105 ring-2 ring-rose-400"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 active:scale-95"
+                }`}
+                title={isListening ? "Finish & Send (or click to stop)" : "Voice Input (Speech-to-Text)"}
+              >
+                {isListening ? (
+                  <div className="flex items-center gap-1">
+                    <MicOff size={18} />
+                    {audioLevel > 15 && <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />}
+                  </div>
+                ) : (
+                  <Mic size={18} />
+                )}
+              </button>
               <button
                 type="submit"
                 disabled={loading || !input.trim()}

@@ -20,6 +20,7 @@ import {
 // ---- Database Configuration & Services ----
 import { query, pool } from "../db/pool.js";
 import { httpError } from "../utils/httpError.js";
+import { isBranchSharingEnabled } from "../utils/branchSharing.js";
 import { updateItemAverageCostTx } from "../services/costing.service.js";
 import { checkAndSendAutomaticNotification } from "../utils/externalNotification.js";
 import {
@@ -855,6 +856,27 @@ async function ensureServiceOrderColumns() {
     try {
       await pool.query(
         "ALTER TABLE pur_service_orders ADD COLUMN project_id BIGINT UNSIGNED NULL AFTER cost_center",
+      );
+    } catch {}
+  }
+  if (!(await hasColumn("pur_service_orders", "supplier_id"))) {
+    try {
+      await pool.query(
+        "ALTER TABLE pur_service_orders ADD COLUMN supplier_id BIGINT UNSIGNED NULL AFTER customer_phone",
+      );
+    } catch {}
+  }
+  if (!(await hasColumn("pur_service_orders", "requisition_id"))) {
+    try {
+      await pool.query(
+        "ALTER TABLE pur_service_orders ADD COLUMN requisition_id BIGINT UNSIGNED NULL AFTER project_id",
+      );
+    } catch {}
+  }
+  if (!(await hasColumn("pur_service_orders", "requisition_no"))) {
+    try {
+      await pool.query(
+        "ALTER TABLE pur_service_orders ADD COLUMN requisition_no VARCHAR(50) NULL AFTER requisition_id",
       );
     } catch {}
   }
@@ -2751,6 +2773,13 @@ router.get(
         supplier_invoice_date: hdr.supplier_invoice_date,
         payment_type: hdr.payment_type,
         payment_terms: hdr.payment_terms,
+        payment_account_id: hdr.payment_account_id,
+        payment_method: hdr.payment_method,
+        payment_reference: hdr.payment_reference,
+        cheque_date: hdr.cheque_date,
+        paid_amount: hdr.paid_amount,
+        auto_payment: Boolean(hdr.auto_payment || hdr.payment_account_id || hdr.payment_voucher_id),
+        payment_voucher_id: hdr.payment_voucher_id,
         remarks: hdr.remarks,
         subtotal: hdr.subtotal,
         discount_amount: hdr.discount_amount,
@@ -3420,6 +3449,11 @@ router.get(
             h.payment_type,
             h.status,
             h.net_amount AS grand_total,
+            h.payment_account_id,
+            h.payment_voucher_id,
+            h.auto_payment,
+            h.payment_method,
+            h.paid_amount,
             h.grn_id,
             g.grn_no,
             h.bill_id,
@@ -3953,6 +3987,9 @@ router.post(
           department: body.department || null,
           cost_center: body.cost_center || null,
           project_id: body.project_id ? Number(body.project_id) : null,
+          requisition_id: body.requisition_id ? Number(body.requisition_id) : null,
+          requisition_no: body.requisition_no || null,
+          supplier_id: body.supplier_id ? Number(body.supplier_id) : null,
           requestor_name: body.requestor_name || null,
           requestor_title: body.requestor_title || null,
           requestor_email: body.requestor_email || null,
@@ -4060,6 +4097,133 @@ router.post(
       });
 
       res.json(results);
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+// Dedicated Procurement Service Requests Endpoints
+router.get(
+  "/procurement-service-requests",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  requireAnyPermission(["PURCHASE.ORDER.VIEW", "PURCHASE.ORDER.MANAGE", "SERVICE.MANAGE"]),
+  async (req, res, next) => {
+    try {
+      await ensureServiceOrderTables();
+      await ensureServiceOrderColumns();
+      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const items = await query(
+        `SELECT
+           o.id,
+           o.order_no AS request_no,
+           o.order_date AS request_date,
+           o.order_type,
+           o.supplier_id,
+           COALESCE(s.supplier_name, o.contractor_name) AS supplier_name,
+           o.contractor_name,
+           o.contractor_phone,
+           o.contractor_email,
+           o.service_category,
+           o.department,
+           o.cost_center,
+           o.project_id,
+           p.project_name,
+           o.requisition_id,
+           o.requisition_no,
+           o.scope_of_work,
+           o.work_location,
+           o.start_date,
+           o.end_date,
+           o.total_amount,
+           o.status,
+           o.created_at,
+           o.created_by,
+           u.username AS created_by_name
+         FROM pur_service_orders o
+         LEFT JOIN pur_suppliers s ON s.id = o.supplier_id
+         LEFT JOIN adm_users u ON u.id = o.created_by
+         LEFT JOIN pm_projects p ON p.id = o.project_id AND p.company_id = o.company_id
+         WHERE o.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(o.branch_id, :branchIdsStr))
+         ORDER BY o.order_date DESC, o.id DESC
+         LIMIT 200`,
+        { companyId, branchId, branchIdsStr }
+      );
+      res.json({ items });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get(
+  "/procurement-service-requests/next-no",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      await ensureServiceOrderTables();
+      const nextNo = await nextSequentialNo("pur_service_orders", "order_no", "SVR");
+      res.json({ nextNo });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get(
+  "/procurement-service-requests/:id",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  requireAnyPermission(["PURCHASE.ORDER.VIEW", "PURCHASE.ORDER.MANAGE", "SERVICE.MANAGE"]),
+  async (req, res, next) => {
+    try {
+      const id = toNumber(req.params.id, 0);
+      await ensureServiceOrderTables();
+      await ensureServiceOrderColumns();
+      const [order] = await query(
+        `SELECT o.*, o.order_no AS request_no, o.order_date AS request_date,
+                COALESCE(s.supplier_name, o.contractor_name) AS supplier_name
+         FROM pur_service_orders o
+         LEFT JOIN pur_suppliers s ON s.id = o.supplier_id
+         WHERE o.id = :id LIMIT 1`,
+        { id }
+      );
+      if (!order) throw httpError(404, "NOT_FOUND", "Service request not found");
+      const lines = await query(
+        "SELECT id, line_no, item_id, item_name, description, qty, unit_price, line_total FROM pur_service_order_lines WHERE order_id = :id ORDER BY line_no ASC",
+        { id }
+      );
+      res.json({ item: order, lines });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.put(
+  "/procurement-service-requests/:id/status",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  requireAnyPermission(["PURCHASE.ORDER.MANAGE"]),
+  async (req, res, next) => {
+    try {
+      const { companyId, branchIdsStr = "" } = req.scope || {};
+      const id = Number(req.params.id);
+      const { status } = req.body;
+      if (!["DRAFT", "PENDING", "APPROVED", "REJECTED", "CANCELLED", "DONE"].includes(status)) {
+        throw httpError(400, "VALIDATION_ERROR", "Invalid status");
+      }
+      await query(
+        `UPDATE pur_service_orders SET status = :status WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
+        { id, status, companyId, branchIdsStr }
+      );
+      res.json({ ok: true, status });
     } catch (e) {
       next(e);
     }
@@ -6201,16 +6365,23 @@ router.get(
   requirePermission("PURCHASE.RFQ.VIEW"),
   async (req, res, next) => {
     try {
-      const { companyId = null } = req.scope || {};
+      const { companyId = null, branchIdsStr = '' } = req.scope || {};
       const { active, contractor } = req.query;
 
       await ensureSupplierTypeColumn();
       await ensureSupplierCurrencyColumn();
       await ensureSupplierServiceContractorColumn();
       await ensureSupplierExpenseAccountColumn();
+      const hasBranchCol = await hasColumn("pur_suppliers", "branch_id");
 
       let sql = "SELECT * FROM pur_suppliers WHERE company_id = :companyId";
       const params = { companyId };
+
+      const shareSuppliers = await isBranchSharingEnabled(companyId, "BRANCH_SHARE_SUPPLIERS");
+      if (hasBranchCol && branchIdsStr && !shareSuppliers) {
+        sql += " AND (:branchIdsStr = '' OR branch_id IS NULL OR FIND_IN_SET(branch_id, :branchIdsStr))";
+        params.branchIdsStr = branchIdsStr;
+      }
 
       if (active === "true") {
         sql += " AND is_active = 1";
@@ -6241,16 +6412,19 @@ router.get(
   requirePermission("PURCHASE.RFQ.VIEW"),
   async (req, res, next) => {
     try {
-      const { companyId = null } = req.scope || {};
+      const { companyId = null, branchIdsStr = '' } = req.scope || {};
       const id = toNumber(req.params.id);
       if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
       await ensureSupplierTypeColumn();
       await ensureSupplierCurrencyColumn();
       await ensureSupplierServiceContractorColumn();
       await ensureSupplierExpenseAccountColumn();
+      const hasBranchCol = await hasColumn("pur_suppliers", "branch_id");
+      const shareSuppliers = await isBranchSharingEnabled(companyId, "BRANCH_SHARE_SUPPLIERS");
+      const branchClause = hasBranchCol && branchIdsStr && !shareSuppliers ? " AND (:branchIdsStr = '' OR branch_id IS NULL OR FIND_IN_SET(branch_id, :branchIdsStr))" : "";
       const rows = await query(
-        "SELECT * FROM pur_suppliers WHERE id = :id AND company_id = :companyId",
-        { id, companyId },
+        `SELECT * FROM pur_suppliers WHERE id = :id AND company_id = :companyId${branchClause}`,
+        { id, companyId, branchIdsStr },
       );
       if (!rows.length) throw httpError(404, "NOT_FOUND", "Supplier not found");
       res.json({ item: rows[0] });
@@ -6323,11 +6497,19 @@ router.post(
           supplierCode = `SU-${String(nextNum).padStart(6, "0")}`;
       }
 
+      const hasBranchCol = await hasColumn("pur_suppliers", "branch_id");
+      const targetBranchId = body.branch_id !== undefined
+        ? (Number(body.branch_id) || null)
+        : (req.scope?.branchId ? Number(req.scope.branchId) : null);
+      const cols = `company_id, ${hasBranchCol ? "branch_id, " : ""}supplier_code, supplier_name, contact_person, email, phone, address, city, state, country, payment_terms, supplier_type, currency_id, service_contractor, is_active, expense_account_id`;
+      const vals = `:companyId, ${hasBranchCol ? ":branchId, " : ""}:supplierCode, :supplierName, :contactPerson, :email, :phone, :address, :city, :state, :country, :paymentTerms, :supplierType, :currencyId, :serviceContractor, :isActive, :expenseAccountId`;
+
       const [resHeader] = await conn.execute(
-        `INSERT INTO pur_suppliers (company_id, supplier_code, supplier_name, contact_person, email, phone, address, city, state, country, payment_terms, supplier_type, currency_id, service_contractor, is_active, expense_account_id)
-         VALUES (:companyId, :supplierCode, :supplierName, :contactPerson, :email, :phone, :address, :city, :state, :country, :paymentTerms, :supplierType, :currencyId, :serviceContractor, :isActive, :expenseAccountId)`,
+        `INSERT INTO pur_suppliers (${cols})
+         VALUES (${vals})`,
         {
           companyId,
+          branchId: targetBranchId,
           supplierCode,
           supplierName: body.supplier_name || null,
           contactPerson: body.contact_person || null,
@@ -6441,6 +6623,8 @@ router.put(
       await ensureSupplierServiceContractorColumn();
       await ensureSupplierLocationColumns();
       await ensureSupplierExpenseAccountColumn();
+      const hasBranchCol = await hasColumn("pur_suppliers", "branch_id");
+      const branchUpdateClause = hasBranchCol && body.branch_id !== undefined ? ", branch_id = :branchId" : "";
 
       await conn.beginTransaction();
       await conn.execute(
@@ -6459,10 +6643,12 @@ router.put(
              service_contractor = :serviceContractor,
              is_active = :isActive,
              expense_account_id = :expenseAccountId
+             ${branchUpdateClause}
          WHERE id = :id AND company_id = :companyId`,
         {
           id,
           companyId,
+          branchId: body.branch_id !== undefined ? (Number(body.branch_id) || null) : null,
           supplierName: body.supplier_name || null,
           contactPerson: body.contact_person || null,
           email: body.email || null,
@@ -11656,6 +11842,12 @@ async function ensureDirectPurchaseTables() {
       supplier_invoice_number VARCHAR(100) NULL,
       supplier_invoice_date DATE NULL,
       payment_terms INT NULL,
+      payment_account_id BIGINT UNSIGNED NULL,
+      payment_method VARCHAR(50) NULL,
+      payment_reference VARCHAR(100) NULL,
+      cheque_date DATE NULL,
+      paid_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
+      auto_payment TINYINT(1) NOT NULL DEFAULT 0,
       remarks VARCHAR(255) NULL,
       subtotal DECIMAL(18,2) NOT NULL DEFAULT 0,
       discount_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
@@ -11666,6 +11858,7 @@ async function ensureDirectPurchaseTables() {
       bill_id BIGINT UNSIGNED NULL,
       grn_voucher_id BIGINT UNSIGNED NULL,
       bill_voucher_id BIGINT UNSIGNED NULL,
+      payment_voucher_id BIGINT UNSIGNED NULL,
       created_by BIGINT UNSIGNED NULL,
       approved_by BIGINT UNSIGNED NULL,
       posted_by BIGINT UNSIGNED NULL,
@@ -11731,6 +11924,55 @@ async function ensureDirectPurchaseExtendedColumns() {
     await pool
       .query(
         "ALTER TABLE pur_direct_purchase_hdr ADD COLUMN supplier_invoice_date DATE NULL AFTER supplier_invoice_number",
+      )
+      .catch(() => {});
+  }
+  if (!(await hasColumn("pur_direct_purchase_hdr", "payment_account_id"))) {
+    await pool
+      .query(
+        "ALTER TABLE pur_direct_purchase_hdr ADD COLUMN payment_account_id BIGINT UNSIGNED NULL AFTER payment_terms",
+      )
+      .catch(() => {});
+  }
+  if (!(await hasColumn("pur_direct_purchase_hdr", "payment_method"))) {
+    await pool
+      .query(
+        "ALTER TABLE pur_direct_purchase_hdr ADD COLUMN payment_method VARCHAR(50) NULL AFTER payment_account_id",
+      )
+      .catch(() => {});
+  }
+  if (!(await hasColumn("pur_direct_purchase_hdr", "payment_reference"))) {
+    await pool
+      .query(
+        "ALTER TABLE pur_direct_purchase_hdr ADD COLUMN payment_reference VARCHAR(100) NULL AFTER payment_method",
+      )
+      .catch(() => {});
+  }
+  if (!(await hasColumn("pur_direct_purchase_hdr", "cheque_date"))) {
+    await pool
+      .query(
+        "ALTER TABLE pur_direct_purchase_hdr ADD COLUMN cheque_date DATE NULL AFTER payment_reference",
+      )
+      .catch(() => {});
+  }
+  if (!(await hasColumn("pur_direct_purchase_hdr", "paid_amount"))) {
+    await pool
+      .query(
+        "ALTER TABLE pur_direct_purchase_hdr ADD COLUMN paid_amount DECIMAL(18,2) NOT NULL DEFAULT 0 AFTER cheque_date",
+      )
+      .catch(() => {});
+  }
+  if (!(await hasColumn("pur_direct_purchase_hdr", "auto_payment"))) {
+    await pool
+      .query(
+        "ALTER TABLE pur_direct_purchase_hdr ADD COLUMN auto_payment TINYINT(1) NOT NULL DEFAULT 0 AFTER paid_amount",
+      )
+      .catch(() => {});
+  }
+  if (!(await hasColumn("pur_direct_purchase_hdr", "payment_voucher_id"))) {
+    await pool
+      .query(
+        "ALTER TABLE pur_direct_purchase_hdr ADD COLUMN payment_voucher_id BIGINT UNSIGNED NULL AFTER bill_voucher_id",
       )
       .catch(() => {});
   }
@@ -11883,11 +12125,13 @@ router.post(
         `INSERT INTO pur_direct_purchase_hdr
          (company_id, branch_id, dp_no, dp_date, supplier_id, warehouse_id, 
           ${currencyBindings.insertColumns.length ? `${currencyBindings.insertColumns.join(", ")},` : ""}
-         payment_type, payment_terms, supplier_invoice_number, supplier_invoice_date, remarks, subtotal, discount_amount, tax_amount, net_amount, status, created_by)
+         payment_type, payment_terms, payment_account_id, payment_method, payment_reference, cheque_date, paid_amount, auto_payment,
+         supplier_invoice_number, supplier_invoice_date, remarks, subtotal, discount_amount, tax_amount, net_amount, status, created_by)
          VALUES
          (:companyId, :branchId, :dpNo, :dpDate, :supplierId, :warehouseId, 
           ${currencyBindings.insertValues.length ? `${currencyBindings.insertValues.join(", ")},` : ""}
-          :paymentType, :paymentTerms, :supplierInvoiceNumber, :supplierInvoiceDate, :remarks, :subtotal, :discountAmount, :taxAmount, :netAmount, 'DRAFT', :createdBy)`,
+          :paymentType, :paymentTerms, :paymentAccountId, :paymentMethod, :paymentReference, :chequeDate, :paidAmount, :autoPayment,
+          :supplierInvoiceNumber, :supplierInvoiceDate, :remarks, :subtotal, :discountAmount, :taxAmount, :netAmount, 'DRAFT', :createdBy)`,
         {
           companyId,
           branchId, branchIdsStr,
@@ -11897,6 +12141,12 @@ router.post(
           warehouseId,
           paymentType,
           paymentTerms,
+          paymentAccountId,
+          paymentMethod,
+          paymentReference,
+          chequeDate,
+          paidAmount: autoPayment ? (paidAmount > 0 ? paidAmount : netAmount) : 0,
+          autoPayment: autoPayment ? 1 : 0,
           supplierInvoiceNumber,
           supplierInvoiceDate,
           remarks,
@@ -12103,6 +12353,8 @@ router.post(
                bill_id = :billId,
                grn_voucher_id = :grnVoucherId,
                bill_voucher_id = :billVoucherId,
+               payment_voucher_id = :paymentVoucherId,
+               payment_account_id = :paymentAccountId,
                approved_by = :userId,
                posted_by = :userId
          WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
@@ -12114,6 +12366,8 @@ router.post(
           billId,
           grnVoucherId,
           billVoucherId,
+          paymentVoucherId,
+          paymentAccountId: autoPayment ? paymentAccountId : null,
           userId: req.user?.sub || null,
         },
       );

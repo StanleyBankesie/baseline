@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { api } from "../../api/client.js";
 import { toast } from "react-toastify";
 import { usePermission } from "../../auth/PermissionContext.jsx";
-import { MODULES_REGISTRY } from "../../data/modulesRegistry.js";
+import Swal from "sweetalert2";
+import { MODULES_REGISTRY, getModuleSections } from "../../data/modulesRegistry.js";
 import { DASHBOARD_CARDS } from "../../data/dashboardCards.js";
 import { useAuth } from "../../auth/AuthContext.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -224,6 +225,14 @@ export default function LicenseManagement() {
 
       await refreshPermissions();
 
+      try {
+        window.dispatchEvent(
+          new CustomEvent("license:updated", {
+            detail: { companyId: selectedCompanyId, modules: selectedModules },
+          })
+        );
+      } catch {}
+
       toast.success("License saved successfully");
       fetchLicense(selectedCompanyId);
     } catch (err) {
@@ -231,11 +240,245 @@ export default function LicenseManagement() {
     }
   };
 
+  const showModulePagesSweetAlert = (moduleKey) => {
+    const mod = MODULES_REGISTRY[moduleKey];
+    const moduleName = mod?.name || moduleKey.toUpperCase();
+    const sections = getModuleSections(moduleKey, mod);
+
+    // Compute currently selected page keys
+    const existingTokens = selectedModules.filter(m => m.startsWith(`page:${moduleKey}:`));
+    let preselectedKeys = new Set();
+    
+    if (existingTokens.length > 0) {
+      existingTokens.forEach(t => preselectedKeys.add(t.slice(`page:${moduleKey}:`.length).toLowerCase().trim()));
+    } else {
+      // By default, select all if no granular tokens exist
+      sections.forEach(sec => {
+        (sec.features || []).forEach(f => preselectedKeys.add(String(f.key).toLowerCase().trim()));
+      });
+    }
+
+    // Build HTML for Swal
+    let sectionsHtml = "";
+    sections.forEach((sec, sIdx) => {
+      const features = sec.features || [];
+      if (features.length === 0) return;
+      const checkedInSec = features.filter(f => preselectedKeys.has(String(f.key).toLowerCase().trim())).length;
+      const allChecked = checkedInSec === features.length && features.length > 0;
+
+      let itemsHtml = "";
+      features.forEach(f => {
+        const isChecked = preselectedKeys.has(String(f.key).toLowerCase().trim());
+        itemsHtml += `
+          <label class="swal-page-item flex items-center gap-2 p-2 rounded-md border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer text-xs transition" data-name="${(f.label || f.key).toLowerCase()}">
+            <input type="checkbox" class="swal-page-checkbox rounded text-blue-600 focus:ring-blue-500 w-3.5 h-3.5" data-sec-idx="${sIdx}" data-key="${f.key}" ${isChecked ? 'checked' : ''} />
+            <span class="font-medium text-slate-800 dark:text-slate-200">${f.label || f.key}</span>
+            ${f.type === 'dashboard' ? '<span class="ml-auto text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded font-mono">dashboard</span>' : ''}
+          </label>
+        `;
+      });
+
+      sectionsHtml += `
+        <div class="swal-section-card border border-slate-200 dark:border-slate-700 rounded-lg p-3 bg-slate-50/50 dark:bg-slate-800/50 mb-3" data-sec-idx="${sIdx}">
+          <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 dark:border-slate-700">
+            <label class="flex items-center gap-2 cursor-pointer text-sm font-semibold text-slate-900 dark:text-white">
+              <input type="checkbox" class="swal-section-toggle rounded text-blue-600 focus:ring-blue-500 w-4 h-4" data-sec-idx="${sIdx}" ${allChecked ? 'checked' : ''} />
+              <span>${sec.icon || '📄'} ${sec.title}</span>
+            </label>
+            <span class="swal-section-badge text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 font-mono font-medium" data-sec-idx="${sIdx}">
+              (${checkedInSec}/${features.length})
+            </span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            ${itemsHtml}
+          </div>
+        </div>
+      `;
+    });
+
+    const htmlContent = `
+      <div class="text-left">
+        <div class="mb-3">
+          <input
+            type="text"
+            id="swal-search-pages"
+            placeholder="🔍 Search pages and sections in ${moduleName}..."
+            class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+          />
+        </div>
+        <div class="flex items-center justify-between mb-3 text-xs">
+          <div class="flex items-center gap-2">
+            <button type="button" id="swal-select-all-btn" class="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded font-medium transition">
+              Select All
+            </button>
+            <button type="button" id="swal-deselect-all-btn" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded font-medium transition">
+              Deselect All
+            </button>
+          </div>
+          <div id="swal-total-summary" class="font-semibold text-slate-600 dark:text-slate-300"></div>
+        </div>
+        <div id="swal-sections-container" class="max-h-[55vh] overflow-y-auto pr-1">
+          ${sectionsHtml}
+        </div>
+      </div>
+    `;
+
+    Swal.fire({
+      title: `<div class="text-lg font-bold flex items-center justify-center gap-2"><span>${mod?.icon || '⚙️'}</span><span>Configure Licensed Pages: ${moduleName}</span></div>`,
+      html: htmlContent,
+      width: "720px",
+      showCancelButton: true,
+      confirmButtonText: "Apply Selection",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#2563eb",
+      cancelButtonColor: "#64748b",
+      focusConfirm: false,
+      didOpen: (popup) => {
+        const searchInput = popup.querySelector("#swal-search-pages");
+        const btnSelectAll = popup.querySelector("#swal-select-all-btn");
+        const btnDeselectAll = popup.querySelector("#swal-deselect-all-btn");
+        const totalSummary = popup.querySelector("#swal-total-summary");
+        const sectionCards = popup.querySelectorAll(".swal-section-card");
+        const pageCheckboxes = popup.querySelectorAll(".swal-page-checkbox");
+        const sectionToggles = popup.querySelectorAll(".swal-section-toggle");
+
+        const updateCounts = () => {
+          let totalAll = pageCheckboxes.length;
+          let checkedAll = popup.querySelectorAll(".swal-page-checkbox:checked").length;
+          if (totalSummary) {
+            totalSummary.textContent = `Selected: ${checkedAll}/${totalAll} pages`;
+          }
+
+          sectionCards.forEach(card => {
+            const sIdx = card.getAttribute("data-sec-idx");
+            const secBoxes = card.querySelectorAll(".swal-page-checkbox");
+            const secChecked = card.querySelectorAll(".swal-page-checkbox:checked");
+            const badge = card.querySelector(`.swal-section-badge[data-sec-idx="${sIdx}"]`);
+            const toggle = card.querySelector(`.swal-section-toggle[data-sec-idx="${sIdx}"]`);
+            if (badge) {
+              badge.textContent = `(${secChecked.length}/${secBoxes.length})`;
+            }
+            if (toggle) {
+              toggle.checked = secBoxes.length > 0 && secChecked.length === secBoxes.length;
+              toggle.indeterminate = secChecked.length > 0 && secChecked.length < secBoxes.length;
+            }
+          });
+        };
+
+        updateCounts();
+
+        // Search handler
+        if (searchInput) {
+          searchInput.addEventListener("input", (e) => {
+            const query = (e.target.value || "").toLowerCase().trim();
+            sectionCards.forEach(card => {
+              let hasVisible = false;
+              const items = card.querySelectorAll(".swal-page-item");
+              items.forEach(item => {
+                const name = item.getAttribute("data-name") || "";
+                if (!query || name.includes(query)) {
+                  item.style.display = "";
+                  hasVisible = true;
+                } else {
+                  item.style.display = "none";
+                }
+              });
+              card.style.display = hasVisible ? "" : "none";
+            });
+          });
+        }
+
+        // Section toggle handlers
+        sectionToggles.forEach(toggle => {
+          toggle.addEventListener("change", (e) => {
+            const sIdx = toggle.getAttribute("data-sec-idx");
+            const card = popup.querySelector(`.swal-section-card[data-sec-idx="${sIdx}"]`);
+            if (card) {
+              const boxes = card.querySelectorAll(".swal-page-checkbox");
+              boxes.forEach(b => {
+                if (b.closest(".swal-page-item")?.style.display !== "none") {
+                  b.checked = e.target.checked;
+                }
+              });
+            }
+            updateCounts();
+          });
+        });
+
+        // Individual page checkbox handlers
+        pageCheckboxes.forEach(box => {
+          box.addEventListener("change", () => {
+            updateCounts();
+          });
+        });
+
+        // Select all / Deselect all
+        if (btnSelectAll) {
+          btnSelectAll.addEventListener("click", () => {
+            pageCheckboxes.forEach(b => {
+              if (b.closest(".swal-page-item")?.style.display !== "none") {
+                b.checked = true;
+              }
+            });
+            updateCounts();
+          });
+        }
+
+        if (btnDeselectAll) {
+          btnDeselectAll.addEventListener("click", () => {
+            pageCheckboxes.forEach(b => {
+              if (b.closest(".swal-page-item")?.style.display !== "none") {
+                b.checked = false;
+              }
+            });
+            updateCounts();
+          });
+        }
+      },
+      preConfirm: () => {
+        const popup = Swal.getPopup();
+        const checkedBoxes = Array.from(popup.querySelectorAll(".swal-page-checkbox:checked"));
+        return checkedBoxes.map(b => b.getAttribute("data-key"));
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const selectedKeys = result.value || [];
+        setSelectedModules(prev => {
+          // Remove all existing page tokens for this module
+          const next = prev.filter(m => !m.startsWith(`page:${moduleKey}:`));
+          if (selectedKeys.length > 0) {
+            // Ensure module code is present
+            if (!next.includes(moduleKey)) {
+              next.push(moduleKey);
+            }
+            // Add new page tokens
+            selectedKeys.forEach(k => {
+              next.push(`page:${moduleKey}:${k}`);
+            });
+          } else {
+            // If all pages unselected, also remove module
+            const idx = next.indexOf(moduleKey);
+            if (idx !== -1) next.splice(idx, 1);
+          }
+          return next;
+        });
+      }
+    });
+  };
+
+  const handleModuleCheckboxChange = (code, checked) => {
+    if (checked) {
+      showModulePagesSweetAlert(code);
+    } else {
+      setSelectedModules(prev => prev.filter(m => m !== code && !m.startsWith(`page:${code}:`)));
+    }
+  };
+
   const toggleModule = (code) => {
     if (selectedModules.includes(code)) {
-      setSelectedModules(selectedModules.filter(m => m !== code));
+      setSelectedModules(selectedModules.filter(m => m !== code && !m.startsWith(`page:${code}:`)));
     } else {
-      setSelectedModules([...selectedModules, code]);
+      showModulePagesSweetAlert(code);
     }
   };
 
@@ -463,18 +706,47 @@ export default function LicenseManagement() {
               <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                   <h3 className="text-lg font-bold border-b pb-2 mb-4">Licensed Modules</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {moduleList.map(mod => (
-                      <label key={mod.code} className="flex items-center space-x-2 p-2 border rounded hover:bg-slate-50 dark:bg-slate-800/50 cursor-pointer">
-                        <input 
-                          type="checkbox" 
-                          checked={selectedModules.includes(mod.code)}
-                          onChange={() => toggleModule(mod.code)}
-                          className="rounded"
-                        />
-                        <span className="text-sm font-medium">{mod.name}</span>
-                      </label>
-                    ))}
+                  <div className="grid grid-cols-1 gap-2.5">
+                    {moduleList.map(mod => {
+                      const isChecked = selectedModules.includes(mod.code);
+                      const sections = getModuleSections(mod.code);
+                      const allPageKeys = new Set();
+                      sections.forEach(sec => (sec.features || []).forEach(f => allPageKeys.add(f.key)));
+                      const totalPages = allPageKeys.size;
+                      const selectedTokens = selectedModules.filter(m => m.startsWith(`page:${mod.code}:`));
+                      const selectedPagesCount = isChecked
+                        ? (selectedTokens.length > 0 ? selectedTokens.length : totalPages)
+                        : 0;
+
+                      return (
+                        <div
+                          key={mod.code}
+                          className="flex items-center justify-between p-2.5 border dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition"
+                        >
+                          <label className="flex items-center space-x-2.5 cursor-pointer flex-1">
+                            <input 
+                              type="checkbox" 
+                              checked={isChecked}
+                              onChange={(e) => handleModuleCheckboxChange(mod.code, e.target.checked)}
+                              className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4"
+                            />
+                            <span className="text-sm font-semibold">{mod.name}</span>
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => showModulePagesSweetAlert(mod.code)}
+                            className={`text-xs px-2.5 py-1 rounded font-medium transition flex items-center gap-1 border ${
+                              isChecked
+                                ? "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700"
+                                : "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600"
+                            }`}
+                          >
+                            <span>⚙️</span>
+                            <span>Pages ({selectedPagesCount}/{totalPages})</span>
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 

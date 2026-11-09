@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "react-toastify";
 import { api } from "../../../../api/client";
 import { usePermission } from "@/auth/PermissionContext.jsx";
@@ -211,9 +212,9 @@ export default function MaintenanceScheduleForm() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <button onClick={() => window.history.back()} className="btn-secondary">
-          ← Back
-        </button>
+        <Link to="/maintenance/schedules" className="btn btn-secondary flex items-center gap-1.5">
+          <ArrowLeft size={16} /> Back
+        </Link>
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
             {isEdit ? "Edit" : "New"} Maintenance Schedule
@@ -294,7 +295,7 @@ export default function MaintenanceScheduleForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Available Assets */}
                 <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white dark:bg-slate-800">
-                  <div className="bg-slate-50 dark:bg-slate-800/80 px-3 py-2 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                  <div className="bg-white dark:bg-slate-900 px-3 py-2 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
                     <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
                       Available Assets{" "}
                       {form.group_name && `(${form.group_name})`}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   Search,
   Plus,
@@ -8,17 +8,29 @@ import {
   FolderTree,
   Package,
   Ruler,
+  Layers,
   X,
 } from "lucide-react";
 import { api } from "api/client";
 import { toast } from "react-toastify";
+import Modal from "@/components/common/Modal.jsx";
 import { useUoms } from "@/hooks/useUoms";
 import { useItemCategories } from "@/hooks/useItemCategories";
 import { useItemTypes } from "@/hooks/useItemTypes";
 import { filterAndSort } from "@/utils/searchUtils.js";
 
 const ItemGroupForm = () => {
-  const [activeTab, setActiveTab] = useState("groups");
+  const [searchParams] = useSearchParams();
+  const queryTab = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState(
+    ["groups", "categories", "types", "uom"].includes(queryTab) ? queryTab : "groups"
+  );
+
+  useEffect(() => {
+    if (queryTab && ["groups", "categories", "types", "uom"].includes(queryTab)) {
+      setActiveTab(queryTab);
+    }
+  }, [queryTab]);
   const [itemGroups, setItemGroups] = useState([]);
 
   // Use hooks for UOMs and Categories
@@ -40,6 +52,8 @@ const ItemGroupForm = () => {
     type: "COUNT",
     parent: "",
     active: "Y",
+    item_type_id: "",
+    item_group_id: "",
   });
 
   const uomTypes = [
@@ -54,6 +68,12 @@ const ItemGroupForm = () => {
   ).map((c) => ({
     ...c,
     category_id: c.category_id ?? c.id,
+    item_group_id: c.item_group_id,
+    item_group_code: c.item_group_code,
+    item_group_name: c.item_group_name,
+    item_type_id: c.item_type_id,
+    item_type_code: c.item_type_code,
+    item_type_name: c.item_type_name,
     is_active:
       c.is_active === 1 || c.is_active === true || c.is_active === "Y"
         ? "Y"
@@ -105,6 +125,9 @@ const ItemGroupForm = () => {
         group_id: g.id,
         group_code: g.group_code,
         group_name: g.group_name,
+        item_type_id: g.item_type_id,
+        item_type_code: g.item_type_code,
+        item_type_name: g.item_type_name,
         is_active: g.is_active ? "Y" : "N",
       }));
       setItemGroups(mappedGroups);
@@ -155,6 +178,8 @@ const ItemGroupForm = () => {
         type: "COUNT",
         parent: "",
         active: "Y",
+        item_type_id: "",
+        item_group_id: "",
       });
     } else if (mode === "edit" && item) {
       setFormData({
@@ -171,6 +196,8 @@ const ItemGroupForm = () => {
         type: item.uom_type || "COUNT",
         parent: item.parent_category_id || "",
         active: item.is_active === 1 || item.is_active === "Y" ? "Y" : "N",
+        item_type_id: item.item_type_id ? String(item.item_type_id) : "",
+        item_group_id: item.item_group_id ? String(item.item_group_id) : "",
       });
       setSelectedItem(item);
     }
@@ -178,8 +205,8 @@ const ItemGroupForm = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.name) {
-      alert("Please fill in all required fields");
+    if (!formData.name?.trim() || !formData.code?.trim()) {
+      toast.error("Please fill in all required fields (Code and Name)");
       return;
     }
 
@@ -199,9 +226,15 @@ const ItemGroupForm = () => {
           return;
         }
 
+        if (!formData.item_type_id) {
+          toast.error("Please select an Item Type that this item group falls under.");
+          return;
+        }
+
         const payload = {
           group_code: formData.code.trim(),
           group_name: formData.name.trim(),
+          item_type_id: Number(formData.item_type_id),
           is_active: formData.active === "Y" ? 1 : 0,
         };
 
@@ -239,9 +272,15 @@ const ItemGroupForm = () => {
           return;
         }
 
+        if (!formData.item_group_id) {
+          toast.error("Please select an Item Group that this item category falls under.");
+          return;
+        }
+
         const payload = {
           category_code: formData.code.trim(),
           category_name: formData.name.trim(),
+          item_group_id: Number(formData.item_group_id),
           parent_category_id: formData.parent || null,
           is_active: formData.active === "Y" ? 1 : 0,
         };
@@ -411,21 +450,21 @@ const ItemGroupForm = () => {
   ]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-6 no-overview" data-no-overview="true">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <div className="mb-2">
             <button onClick={() => window.history.back()} className="inline-flex items-center gap-2 text-sm text-brand hover:text-brand-700"
               data-rbac-exempt="true"
             >
-              ← Back to Item Groups
+              ← Back to Item Classification
             </button>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Item Setup Management
+            Item Classification Management
           </h1>
           <p className="text-gray-600">
-            Manage item groups, categories, and units of measure
+            Manage item groups, categories, item types, and units of measure
           </p>
         </div>
 
@@ -565,8 +604,7 @@ const ItemGroupForm = () => {
                     "create",
                   )
                 }
-                className="flex items-center gap-2 px-4 py-2 text-white rounded-lg hover:opacity-90"
-                style={{ backgroundColor: "#0E3646" }}
+                className="btn-success flex items-center gap-2 px-4 py-2 text-sm font-medium"
                 data-rbac-exempt="true"
               >
                 <Plus className="w-5 h-5" />
@@ -587,6 +625,9 @@ const ItemGroupForm = () => {
                       Group Name
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase">
+                      Item Type
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase">
                       Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase">
@@ -597,7 +638,7 @@ const ItemGroupForm = () => {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {loading && (
                     <tr>
-                      <td colSpan="4" className="text-center py-4">
+                      <td colSpan="5" className="text-center py-4">
                         Loading...
                       </td>
                     </tr>
@@ -610,6 +651,11 @@ const ItemGroupForm = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {group.group_name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded border border-blue-200">
+                            {group.item_type_name || group.item_type_code || "-"}
+                          </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
@@ -651,6 +697,9 @@ const ItemGroupForm = () => {
                       Category Name
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase">
+                      Item Group
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase">
                       Parent
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase">
@@ -669,6 +718,11 @@ const ItemGroupForm = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {category.category_name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 text-xs rounded border border-indigo-200">
+                          {category.item_group_name || category.item_group_code || "-"}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         {getCategoryParentName(category.parent_category_id)}
@@ -849,35 +903,56 @@ const ItemGroupForm = () => {
         </div>
       </div>
 
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-lg w-full">
-            <div
-              className="p-6 border-b"
-              style={{ backgroundColor: "#0E3646" }}
+      <Modal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        title={`${modalMode === "create" ? "Add" : "Edit"} ${
+          modalType === "group"
+            ? "Group"
+            : modalType === "category"
+              ? "Category"
+              : modalType === "type"
+                ? "Item Type"
+                : "UOM"
+        }`}
+        subtitle="Configure item classification attributes"
+        icon={
+          modalType === "group"
+            ? FolderTree
+            : modalType === "category"
+              ? Package
+              : modalType === "type"
+                ? Layers
+                : Ruler
+        }
+        maxWidth="max-w-lg"
+        footer={
+          <div className="flex justify-end gap-3 w-full">
+            <button
+              type="button"
+              onClick={() => setShowModal(false)}
+              className="btn btn-secondary px-4 py-2 text-sm font-medium"
             >
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-white">
-                  {modalMode === "create" ? "Add" : "Edit"}{" "}
-                  {modalType === "group"
-                    ? "Group"
-                    : modalType === "category"
-                      ? "Category"
-                      : modalType === "type"
-                        ? "Item Type"
-                        : "UOM"}
-                </h2>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="text-white hover:text-gray-200"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <div>
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={loading}
+              className={
+                modalMode === "create"
+                  ? "btn-success px-5 py-2 font-medium"
+                  : "btn btn-primary px-5 py-2 text-sm font-medium"
+              }
+              data-rbac-exempt="true"
+            >
+              {loading ? "Saving..." : modalMode === "create" ? "Add" : "Save Changes"}
+            </button>
+          </div>
+        }
+      >
+        <div className="space-y-4 text-sm">
+          <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Code *
                 </label>
@@ -888,7 +963,8 @@ const ItemGroupForm = () => {
                     setFormData({ ...formData, code: e.target.value })
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  readOnly={modalType !== "uom" && modalMode === "create"}
+                  readOnly={modalType !== "uom" && modalType !== "type" && modalMode === "create"}
+                  placeholder={modalType === "type" ? "e.g. RAW_MATERIAL, PROD_01" : ""}
                 />
               </div>
 
@@ -906,6 +982,54 @@ const ItemGroupForm = () => {
                   placeholder="Enter name"
                 />
               </div>
+
+              {modalType === "group" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Item Type *
+                  </label>
+                  <select
+                    value={formData.item_type_id}
+                    onChange={(e) =>
+                      setFormData({ ...formData, item_type_id: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="">-- Select Item Type --</option>
+                    {itemTypeList.map((t) => (
+                      <option key={t.type_id || t.id} value={t.type_id || t.id}>
+                        {t.type_name || t.type_code}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">Item groups must fall under an item type.</p>
+                </div>
+              )}
+
+              {modalType === "category" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Item Group *
+                  </label>
+                  <select
+                    value={formData.item_group_id}
+                    onChange={(e) =>
+                      setFormData({ ...formData, item_group_id: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="">-- Select Item Group --</option>
+                    {itemGroups.map((g) => (
+                      <option key={g.group_id || g.id} value={g.group_id || g.id}>
+                        {g.group_name} {g.item_type_name ? `(${g.item_type_name})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">Item categories must fall under an item group.</p>
+                </div>
+              )}
 
               {modalType === "category" && (
                 <div>
@@ -969,27 +1093,8 @@ const ItemGroupForm = () => {
                   <option value="N">Inactive</option>
                 </select>
               </div>
-            </div>
-
-            <div className="p-6 border-t bg-gray-50 flex justify-end gap-3 rounded-b-lg">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmit}
-                className="px-4 py-2 text-white rounded-lg hover:opacity-90"
-                style={{ backgroundColor: "#0E3646" }}
-                data-rbac-exempt="true"
-              >
-                {modalMode === "create" ? "Create" : "Save Changes"}
-              </button>
-            </div>
-          </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 };

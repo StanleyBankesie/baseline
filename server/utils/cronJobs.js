@@ -3,6 +3,10 @@ import { runBackup } from "../scripts/backup.js";
 import { runComplianceNotifications } from "../scripts/complianceNotification.js";
 import { runServicingNotifications } from "../scripts/servicingNotification.js";
 import { query } from "../db/pool.js";
+import { autoPostMidnightPosSalesToFinance } from "../services/posFinanceAutoPost.service.js";
+import { cleanupExpiredAiChatHistory } from "../services/ai/banks.history.service.js";
+
+export { autoPostMidnightPosSalesToFinance };
 
 /**
  * Automatically closes unclosed POS days/shifts at midnight or for prior dates.
@@ -167,6 +171,19 @@ export function initCronJobs() {
   // Run auto-close on startup to catch any leftover unclosed shifts from previous days
   autoCloseMidnightPosDays().catch(() => {});
 
+  // Schedule automated POS sales posting to Finance at 11:59 PM (59 23 * * *)
+  // Only runs when Day Open & Day Close is unchecked (inactivated) and sales exist for the day
+  cron.schedule("59 23 * * *", async () => {
+    console.log("[Cron] Triggering 11:59 PM automated POS sales posting to Finance...");
+    try {
+      const res = await autoPostMidnightPosSalesToFinance();
+      console.log("[Cron] 11:59 PM POS Auto-Post completed:", res);
+    } catch (err) {
+      console.error("[Cron] 11:59 PM POS Auto-Post failed:", err);
+    }
+  });
+  console.log("[Cron] Scheduled automated POS sales finance posting for 11:59 PM (59 23 * * *)");
+
   // Schedule automatic POS Day Closing at 12:00 AM midnight (0 0 * * *)
   cron.schedule("0 0 * * *", async () => {
     console.log("[Cron] Triggering midnight POS auto-close for unclosed days...");
@@ -219,5 +236,21 @@ export function initCronJobs() {
     }
   });
   console.log("[Cron] Scheduled servicing notifications for 10:00 AM (0 10 * * *)");
+
+  // Run Banks AI chat history auto-cleanup on startup
+  cleanupExpiredAiChatHistory().catch((err) => {
+    console.error("[Cron] Startup Banks AI chat history cleanup failed:", err?.message || err);
+  });
+
+  // Schedule Banks AI chat history auto-cleanup daily at 1:00 AM (0 1 * * *)
+  cron.schedule("0 1 * * *", async () => {
+    console.log("[Cron] Triggering scheduled daily Banks AI chat history auto-cleanup...");
+    try {
+      await cleanupExpiredAiChatHistory();
+    } catch (err) {
+      console.error("[Cron] Banks AI chat history auto-cleanup failed:", err?.message || err);
+    }
+  });
+  console.log("[Cron] Scheduled Banks AI chat history auto-cleanup for 1:00 AM (0 1 * * *)");
 }
 

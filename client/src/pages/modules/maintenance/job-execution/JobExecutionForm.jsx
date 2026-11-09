@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "react-toastify";
 import { api } from "../../../../api/client";
 import { usePermission } from "@/auth/PermissionContext.jsx";
@@ -298,9 +299,9 @@ export default function JobExecutionForm() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <button onClick={() => window.history.back()} className="btn-secondary">
-            ← Back
-          </button>
+          <Link to="/maintenance/job-executions" className="btn btn-secondary flex items-center gap-1.5">
+            <ArrowLeft size={16} /> Back
+          </Link>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               {isEdit ? "Edit" : "New"} Job Execution
@@ -421,7 +422,7 @@ export default function JobExecutionForm() {
                   </div>
 
                   {selectedJobOrder && (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2 p-3 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2 p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm">
                       <div>
                         <div className="text-xs text-slate-500 dark:text-slate-400">Asset</div>
                         <div className="font-medium">{selectedJobOrder.asset_name || "—"}</div>
@@ -738,15 +739,15 @@ export default function JobExecutionForm() {
 
                   {/* Cost Summary */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
-                    <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
+                    <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
                       <div className="text-xs text-slate-500">Labor Hours</div>
                       <div className="text-lg font-semibold">{totalLaborHours.toFixed(2)}</div>
                     </div>
-                    <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
+                    <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
                       <div className="text-xs text-slate-500">Labor Cost</div>
                       <div className="text-lg font-semibold">{laborCost.toFixed(2)}</div>
                     </div>
-                    <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
+                    <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
                       <div className="text-xs text-slate-500">Materials Cost</div>
                       <div className="text-lg font-semibold">{materialsCost.toFixed(2)}</div>
                     </div>

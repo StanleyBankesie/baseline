@@ -138,6 +138,7 @@ export const FEATURES_REGISTRY = {
       { feature_key: "inventory:grn-local", type: "feature", label: "Material Receipt (GRN) - Local", path: "/inventory/grn-local" },
       { feature_key: "inventory:grn-import", type: "feature", label: "Material Receipt (GRN) - Import", path: "/inventory/grn-import" },
       { feature_key: "inventory:items", type: "feature", label: "Item Management", path: "/inventory/items" },
+      { feature_key: "inventory:item-classification", type: "feature", label: "Item Classification", path: "/inventory/item-groups" },
 
       { feature_key: "inventory:unit-conversions", type: "feature", label: "Unit Conversion", path: "/inventory/unit-conversions" },
       { feature_key: "inventory:warehouses", type: "feature", label: "Warehouse Management", path: "/inventory/warehouses" },
@@ -308,6 +309,21 @@ export const FEATURES_REGISTRY = {
       { feature_key: "project-management:project-status-report", type: "feature", label: "Project Status Report", path: "/project-management/reports/project-status" },
       { feature_key: "project-management:project-income-report", type: "feature", label: "Project Income Report", path: "/project-management/reports/project-income" },
       { feature_key: "project-management:project-expense-report", type: "feature", label: "Project Expense Report", path: "/project-management/reports/project-expense" },
+      { feature_key: "project-management:project-expense-income-report", type: "feature", label: "Project Expense and Income Report", path: "/project-management/reports/project-expense-income" },
+      { feature_key: "project-management:tenders", type: "feature", label: "Tenders & Bidding", path: "/project-management/tenders" },
+      { feature_key: "project-management:boqs", type: "feature", label: "Bill of Quantities (BOQ)", path: "/project-management/boqs" },
+      { feature_key: "project-management:cost-control", type: "feature", label: "Cost Control & EVM", path: "/project-management/cost-control" },
+      { feature_key: "project-management:gantt-schedule", type: "feature", label: "Planning & CPM Schedule", path: "/project-management/schedule" },
+      { feature_key: "project-management:daily-reports", type: "feature", label: "Daily Site Diary (DSR)", path: "/project-management/daily-reports" },
+      { feature_key: "project-management:subcontractors", type: "feature", label: "Subcontractors & IPCs", path: "/project-management/subcontracts" },
+      { feature_key: "project-management:client-valuations", type: "feature", label: "Client Valuations", path: "/project-management/client-valuations" },
+      { feature_key: "project-management:payment-applications", type: "feature", label: "Interim Payment Applications (IPAs)", path: "/project-management/payment-applications" },
+      { feature_key: "project-management:variations", type: "feature", label: "Variations & Change Orders", path: "/project-management/variations" },
+      { feature_key: "project-management:quality-control", type: "feature", label: "Quality Control (QA/QC)", path: "/project-management/quality-control" },
+      { feature_key: "project-management:safety", type: "feature", label: "Safety Management (HSE)", path: "/project-management/safety" },
+      { feature_key: "project-management:documents", type: "feature", label: "Drawings & Documents", path: "/project-management/documents" },
+      { feature_key: "project-management:rfis", type: "feature", label: "RFIs (Requests for Information)", path: "/project-management/rfis" },
+      { feature_key: "project-management:equipment-logs", type: "feature", label: "Plant & Equipment Logs", path: "/project-management/equipment-logs" },
     ],
     dashboards: [
 
@@ -325,6 +341,10 @@ export const FEATURES_REGISTRY = {
       { feature_key: "pos:post-to-finance", type: "feature", label: "Post to Finance", path: "/pos/post-to-finance" },
       { feature_key: "pos:returns", type: "feature", label: "POS Returns", path: "/pos/returns" },
       { feature_key: "pos:register", type: "feature", label: "POS Register", path: "/pos/register" },
+      { feature_key: "pos:direct-purchase", type: "feature", label: "Direct Purchase", path: "/pos/direct-purchase" },
+      { feature_key: "pos:items", type: "feature", label: "Store Inventory", path: "/pos/store-inventory" },
+      { feature_key: "pos:reports", type: "feature", label: "POS Reports", path: "/pos/reports" },
+      { feature_key: "pos:dashboard", type: "feature", label: "POS Dashboard", path: "/pos/dashboard" },
 
 
       { feature_key: "pos:customer-history", type: "feature", label: "Customer Accounts", path: "/pos/customer-history" },

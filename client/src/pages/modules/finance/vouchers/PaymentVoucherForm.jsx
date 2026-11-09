@@ -591,41 +591,38 @@ export default function PaymentVoucherForm() {
         }));
         setRvIsTaxIncluded(isTaxIncludedFromLines);
       } else if (isPAYV) {
-        const debitAccIds = new Set(mapped.filter((l) => Number(l.debit || 0) > 0).map((l) => String(l.accountId)));
-        const supplierSettledLine = mapped.find((l) => Number(l.credit || 0) > 0 && debitAccIds.has(String(l.accountId)));
-        const isDirect = !!supplierSettledLine;
+        const creditLine = mapped.find((l) => Number(l.credit || 0) > 0);
+        const debitLines = mapped.filter((l) => Number(l.debit || 0) > 0);
+        const debitFirstRaw = rawDebit[0] || null;
+        const narrLower = narr.toLowerCase();
+        const isDirect = narrLower.includes("direct payment") || narrLower.includes("direct purchase") || debitLines.length <= 1;
 
         if (isDirect) setPaymentType("DIRECT");
         else setPaymentType("AGAINST_BILL");
 
-        const creditLine = mapped.find((l) => Number(l.credit || 0) > 0);
-        const debitLines = mapped.filter((l) => Number(l.debit || 0) > 0);
-        const debitFirstRaw = rawDebit[0] || null;
         const pvName = token("Paid to") || debitFirstRaw?.account_name || "";
         const pvCode = debitFirstRaw?.account_code ? String(debitFirstRaw.account_code) : "";
-        
         let pvPayAccId = debitFirstRaw?.account_id ? String(debitFirstRaw.account_id) : "";
-        let bankAccId = creditLine?.accountId || "";
+        let bankAccId = creditLine?.accountId ? String(creditLine.accountId) : "";
 
-        if (isDirect) {
-          pvPayAccId = String(supplierSettledLine.accountId);
-          const bankLine = mapped.find(l => Number(l.credit || 0) > 0 && String(l.accountId) !== pvPayAccId);
-          bankAccId = bankLine ? String(bankLine.accountId) : bankAccId;
-        }
+        const rawMethod = rawLines.find((l) => l.payment_method)?.payment_method;
+        const rawRef = rawLines.find((l) => l.reference_no)?.reference_no;
+        const rawChequeDate = rawLines.find((l) => l.cheque_date)?.cheque_date;
 
         setPvForm((prev) => ({
           ...prev,
-          paymentAccountId: bankAccId || "",
+          paymentAccountId: bankAccId || prev.paymentAccountId,
           payTo: pvName || prev.payTo,
           payToCode: pvCode || prev.payToCode,
           payToAccountId: pvPayAccId || prev.payToAccountId,
           taxCodeId: taxCodeIdFromLines || prev.taxCodeId,
-          paymentMethod: rawLines.find((l) => l.payment_method)?.payment_method || token("Method") || prev.paymentMethod,
-          reference: token("Ref") || prev.reference,
+          paymentMethod: rawMethod || token("Method") || prev.paymentMethod,
+          reference: rawRef || token("Ref") || prev.reference,
+          chequeDate: rawChequeDate ? String(rawChequeDate).slice(0, 10) : prev.chequeDate,
           items:
             isDirect
               ? [{
-                  description: supplierSettledLine?.description || debitFirstRaw?.description || "",
+                  description: debitFirstRaw?.description || "",
                   accountId: String(pvPayAccId),
                   amount: Number(v.total_debit || 0),
                   currencyCode: getAccountCurrencyCode(String(pvPayAccId)) || String(v.currency_code || ""),
@@ -2842,6 +2839,7 @@ export default function PaymentVoucherForm() {
 
   useEffect(() => {
     if (!isPAYV) return;
+    if (readOnly || isEdit) return;
     const acc = accounts.find(
       (a) => String(a.id) === String(pvForm.paymentAccountId || ""),
     );
@@ -2850,10 +2848,10 @@ export default function PaymentVoucherForm() {
     const gn = String(acc.group_name || "").toUpperCase();
     const wantsBank = isChequeLike;
     const ok = wantsBank
-      ? gc === "AST_BANK" || gn === "BANK ACCOUNTS"
-      : gc === "AST_CASH" || gn === "CASH AND CASH EQUIVALENTS";
+      ? gc === "AST_BANK" || gn === "BANK ACCOUNTS" || gn.includes("BANK") || gc === "1006"
+      : gc === "AST_CASH" || gn === "CASH AND CASH EQUIVALENTS" || gn.includes("CASH") || gc === "1005";
     if (!ok) updatePv({ paymentAccountId: "" });
-  }, [isPAYV, isChequeLike, accounts, pvForm.paymentAccountId]);
+  }, [isPAYV, isChequeLike, accounts, pvForm.paymentAccountId, readOnly, isEdit]);
   useEffect(() => {
     if (!isRV) return;
     const acc = accounts.find(
@@ -3940,7 +3938,7 @@ export default function PaymentVoucherForm() {
                     <label className="label">Payment Account *</label>
                     <select
                       className={`input md:w-64 ${disabledClass}`}
-                      value={pvForm.paymentAccountId}
+                      value={pvForm.paymentAccountId || ""}
                       onChange={(e) => {
                         const accountId = e.target.value;
                         const acc = accounts.find(
@@ -3951,29 +3949,36 @@ export default function PaymentVoucherForm() {
                           currencyId: acc?.currency_id || null,
                         });
                       }}
+                      disabled={readOnly}
                       required
                     >
                       <option value="">Select account</option>
-                      {accounts
-                        .filter((a) => {
+                      {(() => {
+                        const currentAcc = accounts.find(
+                          (a) => String(a.id) === String(pvForm.paymentAccountId || ""),
+                        );
+                        const filtered = accounts.filter((a) => {
                           const gc = String(a.group_code || "").toUpperCase();
                           const gn = String(a.group_name || "").toUpperCase();
                           return isChequeLike
-                            ? gc === "AST_BANK" || gn === "BANK ACCOUNTS"
-                            : gc === "AST_CASH" ||
-                                gn === "CASH AND CASH EQUIVALENTS";
-                        })
-                        .map((a) => (
+                            ? gc === "AST_BANK" || gn === "BANK ACCOUNTS" || gn.includes("BANK") || gc === "1006"
+                            : gc === "AST_CASH" || gn === "CASH AND CASH EQUIVALENTS" || gn.includes("CASH") || gc === "1005";
+                        });
+                        if (currentAcc && !filtered.some((a) => String(a.id) === String(currentAcc.id))) {
+                          filtered.unshift(currentAcc);
+                        }
+                        return filtered.map((a) => (
                           <option key={a.id} value={a.id}>
                             {a.code} - {a.name}
                           </option>
-                        ))}
+                        ));
+                      })()}
                     </select>
                   </div>
                   <div className="md:w-64">
                     <label className="label">Balance</label>
                     <input
-                      className="input md:w-64 bg-slate-50 dark:bg-slate-800 text-right"
+                      className="input md:w-64 bg-white dark:bg-slate-900 text-right"
                       value={
                         pvForm.paymentAccountId
                           ? accountBalances[String(pvForm.paymentAccountId)] !==

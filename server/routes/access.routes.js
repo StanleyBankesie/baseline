@@ -257,13 +257,18 @@ router.get(
         return res.json({ items: [] });
       }
       const rows = await query(
-        `SELECT user_id, module_key, dashboard_key, card_key, ticker_key, can_view, created_at, updated_at
+        `SELECT user_id, module_key, dashboard_key, card_key, ticker_key, can_view, created_at, updated_at, id
          FROM adm_dashboard_permissions
          WHERE user_id = :userId
-         ORDER BY module_key ASC, dashboard_key ASC, card_key ASC, ticker_key ASC`,
+         ORDER BY id ASC`,
         { userId },
       );
-      res.json({ items: rows || [] });
+      const dedupMap = new Map();
+      for (const r of rows) {
+        const k = `${r.module_key}|${r.dashboard_key || ""}|${r.card_key || ""}|${r.ticker_key || ""}`;
+        dedupMap.set(k, r);
+      }
+      res.json({ items: Array.from(dedupMap.values()) });
     } catch (err) {
       next(err);
     }
@@ -710,8 +715,38 @@ router.put(
       const { modules } = req.body || {};
       if (!Array.isArray(modules))
         return res.status(400).json({ message: "modules must be array" });
+
+      // Fetch role's company to enforce license
+      const roleRow = await query("SELECT company_id FROM adm_roles WHERE id = :id LIMIT 1", { id });
+      const companyId = roleRow?.[0]?.company_id || req.scope?.companyId || 1;
+
+      // Fetch active licensed modules for this company
+      const licRows = await query(`
+        SELECT lm.module_code 
+        FROM adm_license_modules lm
+        JOIN adm_company_licenses cl ON lm.license_id = cl.id
+        WHERE cl.company_id = :companyId
+      `, { companyId });
+      const allowedModuleCodes = new Set(licRows.map(m => m.module_code));
+
+      // Filter submitted modules against allowed licensed modules
+      const validModules = modules.filter(mk => {
+        const smk = String(mk);
+        if (smk === "administration") return true;
+        if (allowedModuleCodes.has(smk)) return true;
+        if (smk.startsWith("page:")) {
+          const parts = smk.split(":");
+          const parentMod = parts[1];
+          return allowedModuleCodes.has(smk) || allowedModuleCodes.has(parentMod);
+        }
+        for (const code of allowedModuleCodes) {
+          if (code === smk || code.startsWith(`page:${smk}:`)) return true;
+        }
+        return false;
+      });
+
       await query("DELETE FROM adm_role_modules WHERE role_id = :id", { id });
-      for (const mk of modules) {
+      for (const mk of validModules) {
         await query(
           "INSERT INTO adm_role_modules (role_id, module_key) VALUES (:id, :mk)",
           { id, mk: String(mk) },

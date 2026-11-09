@@ -10,6 +10,7 @@ import {
   resolveWorkflowSelection,
 } from "../utils/workflowResolution.js";
 import { cacheGet, cacheSet, cacheDel, cacheDelPattern } from "../utils/redis.js";
+import { ensureTaxTables, hasColumn as dbHasColumn } from "../utils/dbUtils.js";
 import * as XLSX from "xlsx";
 
 // Page ID mapping for tax code applicable pages
@@ -35,6 +36,19 @@ const PAGE_ID_MAP = {
   SALES_RETURN: 19,
   PURCHASE_RETURN: 20,
   DELIVERY_NOTE: 21,
+  TRANSPORT_EXPENSES: 22,
+  TRANSPORT_INCOME: 23,
+  ASSET_INVOICE: 24,
+  ASSET_INVOICES: 24,
+  ASSET_DISPOSAL_INVOICE: 24,
+  FACILITIES_SERVICE_BILLING: 25,
+  FACILITIES_INVOICE: 25,
+  FACILITIES_INVOICES: 25,
+  PROJECT_INVOICE: 26,
+  PROJECT_INVOICES: 26,
+  SERVICE_INVOICE: 27,
+  SERVICE_INVOICES: 27,
+  TRANSPORT_BILLING: 28,
 };
 
 // Function to convert page codes to page IDs
@@ -471,23 +485,22 @@ function toYmd(d) {
 
 /**
  * Checks if a specific column exists in a given table.
- * @param {Object} conn - The database connection.
- * @param {string} tableName - The name of the table.
- * @param {string} columnName - The name of the column to check.
+ * Supports both hasColumn(conn, tableName, columnName) and hasColumn(tableName, columnName).
+ * @param {Object|string} connOrTable - The database connection or table name.
+ * @param {string} tableOrCol - The table name or column name.
+ * @param {string} [col] - The column name if connection was passed as first argument.
  * @returns {Promise<boolean>} True if the column exists, false otherwise.
  */
-async function hasColumn(conn, tableName, columnName) {
-  const [rows] = await conn.execute(
-    `
-    SELECT COUNT(*) AS c
-    FROM information_schema.columns
-    WHERE table_schema = DATABASE()
-      AND table_name = :tableName
-      AND column_name = :columnName
-    `,
-    { tableName, columnName },
-  );
-  return Number(rows?.[0]?.c || 0) > 0;
+async function hasColumn(connOrTable, tableOrCol, col) {
+  let tableName, columnName;
+  if (col !== undefined) {
+    tableName = tableOrCol;
+    columnName = col;
+  } else {
+    tableName = connOrTable;
+    columnName = tableOrCol;
+  }
+  return dbHasColumn(tableName, columnName);
 }
 
 // ============================================================================
@@ -593,7 +606,7 @@ async function loadTaxComponentsByCodeTx(conn, { companyId, taxCodeId }) {
     `SELECT c.tax_detail_id,
             COALESCE(c.rate_percent, d.rate_percent, 0) AS rate_percent,
             COALESCE(c.compound_level, 0) AS compound_level,
-            COALESCE(c.sort_order, 100) AS sort_order,
+            COALESCE(c.sort_order, 1) AS sort_order,
             d.component_name
        FROM fin_tax_components c
        JOIN fin_tax_details d
@@ -1548,7 +1561,8 @@ export const listAccountGroups = async (req, res, next) => {
 export const listChartOfAccounts = async (req, res, next) => {
   try {
     await ensureAccountBalanceObjects();
-    const companyId = req.scope.companyId;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+    const hasBranchCol = await hasColumn("fin_accounts", "branch_id");
     const search = req.query.search ? String(req.query.search).trim() : null;
     const groupId = req.query.groupId ? Number(req.query.groupId) : null;
     const nature = req.query.nature ? String(req.query.nature).trim().toUpperCase() : null;
@@ -1556,6 +1570,7 @@ export const listChartOfAccounts = async (req, res, next) => {
     const postable = req.query.postable !== undefined && req.query.postable !== "" && req.query.postable !== null ? Number(req.query.postable) : null;
     const items = await query(
       `SELECT a.id, a.code, a.name, a.balance_type, a.is_postable, a.is_active, a.currency_id,
+              ${hasBranchCol ? "a.branch_id," : ""}
               c.code AS currency_code,
               g.id AS group_id, g.code AS group_code, g.name AS group_name, g.nature,
               COALESCE(ab.balance_amount, 0) AS current_balance,
@@ -1567,13 +1582,14 @@ export const listChartOfAccounts = async (req, res, next) => {
        LEFT JOIN fin_account_balances ab ON ab.account_id = a.id AND ab.company_id = a.company_id
        LEFT JOIN fin_account_groups pg ON pg.id = g.parent_id
        WHERE a.company_id = :companyId
+         ${hasBranchCol && branchIdsStr ? "AND (:branchIdsStr = '' OR a.branch_id IS NULL OR FIND_IN_SET(a.branch_id, :branchIdsStr))" : ""}
          AND (:search IS NULL OR a.code LIKE CONCAT('%', :search, '%') OR a.name LIKE CONCAT('%', :search, '%') OR g.name LIKE CONCAT('%', :search, '%'))
          AND (:groupId IS NULL OR a.group_id = :groupId)
          AND (:nature IS NULL OR g.nature = :nature)
          AND (:active IS NULL OR a.is_active = :active)
          AND (:postable IS NULL OR a.is_postable = :postable)
        ORDER BY g.code ASC, a.code ASC`,
-      { companyId, search, groupId, nature, active, postable },
+      { companyId, branchIdsStr, search, groupId, nature, active, postable },
     );
     res.json({ items });
   } catch (e) {
@@ -1583,19 +1599,22 @@ export const listChartOfAccounts = async (req, res, next) => {
 
 export const listExpenseAccounts = async (req, res, next) => {
   try {
-    const companyId = req.scope.companyId;
+    const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+    const hasBranchCol = await hasColumn("fin_accounts", "branch_id");
     const items = await query(
       `SELECT a.id, a.code, a.name, a.is_postable, a.is_active, a.currency_id,
+              ${hasBranchCol ? "a.branch_id," : ""}
               c.code AS currency_code,
               g.id AS group_id, g.code AS group_code, g.name AS group_name, g.nature
        FROM fin_accounts a
        JOIN fin_account_groups g ON g.id = a.group_id AND g.company_id = a.company_id
-       LEFT JOIN fin_currencies c ON c.id = a.currency_id AND c.company_id = a.currency_id
+       LEFT JOIN fin_currencies c ON c.id = a.currency_id
        WHERE a.company_id = :companyId
+         ${hasBranchCol && branchIdsStr ? "AND (:branchIdsStr = '' OR a.branch_id IS NULL OR FIND_IN_SET(a.branch_id, :branchIdsStr))" : ""}
          AND g.nature = 'EXPENSE'
          AND a.is_active = 1
        ORDER BY g.code ASC, a.code ASC`,
-      { companyId },
+      { companyId, branchIdsStr },
     );
     res.json({ items });
   } catch (e) {
@@ -1612,7 +1631,11 @@ export const listExpenseAccounts = async (req, res, next) => {
  */
 export const createAccount = async (req, res, next) => {
   try {
-    const companyId = req.scope.companyId;
+    const { companyId, branchId = null } = req.scope || {};
+    const hasBranchCol = await hasColumn("fin_accounts", "branch_id");
+    const targetBranchId = req.body.branch_id !== undefined
+      ? (Number(req.body.branch_id) || null)
+      : (branchId ? Number(branchId) : null);
     const {
       groupId,
       name,
@@ -1692,11 +1715,15 @@ export const createAccount = async (req, res, next) => {
       }
     }
 
+    const cols = `company_id, ${hasBranchCol ? "branch_id, " : ""}group_id, code, name, currency_id, is_postable, is_control_account, is_active`;
+    const vals = `:companyId, ${hasBranchCol ? ":branchId, " : ""}:groupId, :code, :name, :currencyId, :isPostable, :isControlAccount, :isActive`;
+
     const result = await query(
-      `INSERT INTO fin_accounts (company_id, group_id, code, name, currency_id, is_postable, is_control_account, is_active)
-       VALUES (:companyId, :groupId, :code, :name, :currencyId, :isPostable, :isControlAccount, :isActive)`,
+      `INSERT INTO fin_accounts (${cols})
+       VALUES (${vals})`,
       {
         companyId,
+        branchId: targetBranchId,
         groupId,
         code,
         name: name.trim(),
@@ -1744,6 +1771,9 @@ export const updateAccount = async (req, res, next) => {
       }
     }
 
+    const hasBranchCol = await hasColumn("fin_accounts", "branch_id");
+    const branchUpdateClause = hasBranchCol && req.body.branch_id !== undefined ? ", branch_id = :branchId" : "";
+
     await query(
       `UPDATE fin_accounts SET
         group_id = COALESCE(:groupId, group_id),
@@ -1753,10 +1783,12 @@ export const updateAccount = async (req, res, next) => {
         is_postable = COALESCE(:isPostable, is_postable),
         is_control_account = COALESCE(:isControlAccount, is_control_account),
         is_active = COALESCE(:isActive, is_active)
+        ${branchUpdateClause}
        WHERE id = :id AND company_id = :companyId`,
       {
         id,
         companyId,
+        branchId: req.body.branch_id !== undefined ? (Number(req.body.branch_id) || null) : null,
         groupId: groupId || null,
         name: name ? name.trim() : null,
         code: code ? code.trim() : null,
@@ -1901,50 +1933,121 @@ export const getAccountBalance = async (req, res, next) => {
 
 export const listTaxCodes = async (req, res, next) => {
   try {
-    const companyId = req.scope.companyId;
+    await ensureTaxTables();
+    const companyId = Number(
+      req.scope?.companyId ||
+      req.user?.company_id ||
+      req.headers["x-company-id"] ||
+      1
+    );
     const form = req.query.form ? String(req.query.form).trim() : null;
     const pageId = req.query.pageId ? Number(req.query.pageId) : null;
-    const active =
-      req.query.active === undefined || req.query.active === null
-        ? null
-        : Number(Boolean(req.query.active));
+    let active = null;
+    if (
+      req.query.active !== undefined &&
+      req.query.active !== null &&
+      req.query.active !== ""
+    ) {
+      const activeStr = String(req.query.active).trim().toLowerCase();
+      active = activeStr === "1" || activeStr === "true" ? 1 : 0;
+    }
 
-    // Resolve form code to pageId if necessary
+    // Resolve form code to pageId if necessary (support both camelCase and kebab-case)
     let resolvedPageId = pageId;
     if (!resolvedPageId && form) {
-      resolvedPageId = PAGE_ID_MAP[form] || null;
+      resolvedPageId =
+        PAGE_ID_MAP[form] ||
+        PAGE_ID_MAP[form.toUpperCase().replace(/-/g, "_")] ||
+        null;
     }
 
+    // The Setup page loads without form or pageId to manage all codes.
+    // Setup management queries MUST always query fresh data from the database.
+    const isSetupQuery = !resolvedPageId && !form && active === null;
     const cacheKey = `taxes:company:${companyId}:page:${resolvedPageId}:active:${active}`;
-    const cached = await cacheGet(cacheKey);
-    if (cached) {
-      return res.json({ items: cached });
+
+    if (!isSetupQuery) {
+      try {
+        const cached = await cacheGet(cacheKey);
+        if (cached && Array.isArray(cached) && cached.length > 0) {
+          return res.json({ items: cached });
+        }
+      } catch (cacheErr) {
+        console.warn("[listTaxCodes] Cache read failed:", cacheErr?.message || cacheErr);
+      }
+    } else {
+      // Purge any stale setup cache
+      await cacheDel(cacheKey).catch(() => {});
+      await cacheDelPattern(`taxes:company:${companyId}:*`).catch(() => {});
+      await cacheDelPattern("taxes:*").catch(() => {});
     }
 
-    const items = await query(
-      `SELECT id, code, name, rate_percent, type, is_active,
-              valid_pages, is_sales_tax, is_purchase_tax, is_service_tax
-         FROM fin_tax_codes
-        WHERE company_id = :companyId
-          AND (:active IS NULL OR is_active = :active)
-          AND (
-            :resolvedPageId IS NULL OR
-            FIND_IN_SET(:resolvedPageId, REPLACE(valid_pages, ' ', '')) > 0
-          )
-        ORDER BY code ASC`,
-      { companyId, resolvedPageId, active },
-    );
-    
-    await cacheSet(cacheKey, items, 86400).catch(() => {});
-    res.json({ items });
+    // Flexible company matching: match current company OR company 1 (default ERP company) OR NULL/0
+    const conditions = ["(company_id = :companyId OR company_id = 1 OR company_id IS NULL OR company_id = 0)"];
+    const params = { companyId };
+
+    if (active !== null) {
+      conditions.push("is_active = :active");
+      params.active = active;
+    }
+
+    if (resolvedPageId !== null) {
+      conditions.push(
+        "FIND_IN_SET(:resolvedPageId, REPLACE(COALESCE(valid_pages, ''), ' ', '')) > 0",
+      );
+      params.resolvedPageId = resolvedPageId;
+    }
+
+    let items = [];
+    try {
+      items = await query(
+        `SELECT id, code, name, rate_percent, type, is_active,
+                valid_pages, is_sales_tax, is_purchase_tax, is_service_tax
+           FROM fin_tax_codes
+          WHERE ${conditions.join(" AND ")}
+          ORDER BY is_active DESC, code ASC`,
+        params,
+      );
+    } catch (queryErr) {
+      console.error("[listTaxCodes] Query error:", queryErr?.message || queryErr);
+      // Fallback: If table or column issue occurred, attempt simplified query
+      try {
+        items = await query(
+          `SELECT id, code, name, rate_percent, type, is_active
+             FROM fin_tax_codes
+            WHERE (company_id = :companyId OR company_id = 1 OR company_id IS NULL OR company_id = 0)
+            ${active !== null ? "AND is_active = :active" : ""}
+            ORDER BY is_active DESC, code ASC`,
+          params,
+        );
+      } catch (fallbackErr) {
+        console.error("[listTaxCodes] Fallback query error:", fallbackErr?.message || fallbackErr);
+        return res.json({ items: [] });
+      }
+    }
+
+    // Only cache non-empty transactional lookups (max 5 minutes, never 24 hours)
+    if (!isSetupQuery && Array.isArray(items) && items.length > 0) {
+      try {
+        await cacheSet(cacheKey, items, 300);
+      } catch {}
+    }
+
+    res.json({ items: Array.isArray(items) ? items : [] });
   } catch (e) {
-    next(e);
+    console.error("[listTaxCodes] Unhandled error:", e?.message || e);
+    res.json({ items: [] });
   }
 };
 
 export const getTaxCodesByPageId = async (req, res, next) => {
   try {
-    const companyId = req.scope.companyId;
+    const companyId = Number(
+      req.scope?.companyId ||
+      req.user?.company_id ||
+      req.headers["x-company-id"] ||
+      1
+    );
     const pageId = Number(req.params.pageId || 0);
 
     if (!pageId) {
@@ -1952,26 +2055,42 @@ export const getTaxCodesByPageId = async (req, res, next) => {
     }
 
     const cacheKey = `taxes:company:${companyId}:page:${pageId}:active:1`;
-    const cached = await cacheGet(cacheKey);
-    if (cached) {
-      return res.json({ items: cached });
+    try {
+      const cached = await cacheGet(cacheKey);
+      if (cached && Array.isArray(cached) && cached.length > 0) {
+        return res.json({ items: cached });
+      }
+    } catch (cacheErr) {
+      console.warn("[getTaxCodesByPageId] Cache read failed:", cacheErr?.message || cacheErr);
     }
 
-    const items = await query(
-      `SELECT id, code, name, rate_percent, type, is_active,
-              valid_pages, is_sales_tax, is_purchase_tax, is_service_tax
-         FROM fin_tax_codes
-        WHERE company_id = :companyId
-          AND is_active = 1
-          AND FIND_IN_SET(:pageId, REPLACE(valid_pages, ' ', '')) > 0
-        ORDER BY code ASC`,
-      { companyId, pageId },
-    );
-    
-    await cacheSet(cacheKey, items, 86400).catch(() => {});
-    res.json({ items });
+    let items = [];
+    try {
+      items = await query(
+        `SELECT id, code, name, rate_percent, type, is_active,
+                valid_pages, is_sales_tax, is_purchase_tax, is_service_tax
+           FROM fin_tax_codes
+          WHERE (company_id = :companyId OR company_id = 1 OR company_id IS NULL OR company_id = 0)
+            AND is_active = 1
+            AND FIND_IN_SET(:pageId, REPLACE(COALESCE(valid_pages, ''), ' ', '')) > 0
+          ORDER BY code ASC`,
+        { companyId, pageId },
+      );
+    } catch (queryErr) {
+      console.error("[getTaxCodesByPageId] Query error:", queryErr?.message || queryErr);
+      return res.json({ items: [] });
+    }
+
+    if (Array.isArray(items) && items.length > 0) {
+      try {
+        await cacheSet(cacheKey, items, 300);
+      } catch {}
+    }
+
+    res.json({ items: Array.isArray(items) ? items : [] });
   } catch (e) {
-    next(e);
+    console.error("[getTaxCodesByPageId] Unhandled error:", e?.message || e);
+    res.json({ items: [] });
   }
 };
 
@@ -2021,13 +2140,20 @@ export const getItemPurchaseTax = async (req, res, next) => {
 
 export const listTaxCodeComponents = async (req, res, next) => {
   try {
-    const companyId = req.scope.companyId;
+    await ensureTaxTables();
+    const companyId = Number(
+      req.scope?.companyId ||
+      req.user?.company_id ||
+      req.headers["x-company-id"] ||
+      1
+    );
     const taxCodeId = Number(req.params.id || req.params.taxCodeId || 0);
     if (!taxCodeId) {
       return next(httpError(400, "VALIDATION_ERROR", "Invalid taxCodeId"));
     }
-    const items = await query(
+    let items = await query(
       `SELECT c.id, c.tax_detail_id, c.rate_percent, c.sort_order, c.is_active,
+              c.compound_level, c.compound_levels,
               d.component_name, d.account_id,
               a.code AS account_code, a.name AS account_name
          FROM fin_tax_components c
@@ -2040,9 +2166,78 @@ export const listTaxCodeComponents = async (req, res, next) => {
         ORDER BY c.sort_order ASC, c.id ASC`,
       { companyId, taxCodeId },
     );
+
+    if (Array.isArray(items) && items.length > 0) {
+      const hasUnsequenced = items.some(
+        (it) =>
+          it.sort_order === null ||
+          it.sort_order === undefined ||
+          Number(it.sort_order) >= 100 ||
+          Number(it.sort_order) <= 0,
+      );
+      if (hasUnsequenced) {
+        for (let i = 0; i < items.length; i++) {
+          const newOrder = i + 1;
+          items[i].sort_order = newOrder;
+          await query(
+            `UPDATE fin_tax_components SET sort_order = :newOrder WHERE id = :id AND company_id = :companyId`,
+            { newOrder, id: items[i].id, companyId },
+          ).catch(() => {});
+        }
+      }
+    }
+
     res.json({ items });
   } catch (e) {
     next(e);
+  }
+};
+
+
+export const listAllTaxComponents = async (req, res, next) => {
+  try {
+    await ensureTaxTables();
+    const companyId = Number(
+      req.scope?.companyId ||
+      req.user?.company_id ||
+      req.headers['x-company-id'] ||
+      1
+    );
+
+    const components = await query(
+      `SELECT 
+        d.id as detail_id,
+        COALESCE(c.id, d.id) as component_id,
+        d.tax_code_id,
+        tc.code as tax_code,
+        tc.name as tax_code_name,
+        d.component_name,
+        COALESCE(c.rate_percent, d.rate_percent, 0) as rate_percent,
+        d.account_id,
+        d.is_active
+      FROM fin_tax_details d
+      LEFT JOIN fin_tax_components c ON c.tax_detail_id = d.id AND c.company_id = d.company_id
+      LEFT JOIN fin_tax_codes tc ON tc.id = d.tax_code_id
+      WHERE d.company_id = :companyId AND d.is_active = 1
+      ORDER BY tc.code ASC, d.id ASC`,
+      { companyId }
+    );
+
+    const taxCodes = await query(
+      `SELECT id, code, name, rate_percent, is_sales_tax, is_purchase_tax, is_service_tax
+       FROM fin_tax_codes
+       WHERE company_id = :companyId AND is_active = 1
+       ORDER BY id ASC, name ASC`,
+      { companyId }
+    );
+
+    res.json({
+      success: true,
+      items: Array.isArray(components) ? components : [],
+      taxCodes: Array.isArray(taxCodes) ? taxCodes : []
+    });
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -2133,12 +2328,40 @@ export const listVouchers = async (req, res, next) => {
                   COALESCE((SELECT SUM(l.credit) FROM fin_voucher_lines l WHERE l.voucher_id = v.id), 0)
                 ) AS total_amount,
                 v.voucher_type_id, vt.code AS voucher_type_code, vt.name AS voucher_type_name,
-                v.currency_id, c.code AS currency_code
+                v.currency_id, c.code AS currency_code,
+                v.created_by, v.created_at,
+                u.username AS created_by_username,
+                COALESCE(u.full_name, u.username) AS created_by_name,
+                (
+                  SELECT a.name
+                  FROM fin_voucher_lines l
+                  JOIN fin_accounts a ON a.id = l.account_id
+                  WHERE l.voucher_id = v.id AND l.credit > 0
+                  ORDER BY l.line_no ASC, l.id ASC
+                  LIMIT 1
+                ) AS payment_account_name,
+                (
+                  SELECT a.code
+                  FROM fin_voucher_lines l
+                  JOIN fin_accounts a ON a.id = l.account_id
+                  WHERE l.voucher_id = v.id AND l.credit > 0
+                  ORDER BY l.line_no ASC, l.id ASC
+                  LIMIT 1
+                ) AS payment_account_code,
+                (
+                  SELECT l.account_id
+                  FROM fin_voucher_lines l
+                  WHERE l.voucher_id = v.id AND l.credit > 0
+                  ORDER BY l.line_no ASC, l.id ASC
+                  LIMIT 1
+                ) AS payment_account_id
            FROM fin_vouchers v
            LEFT JOIN fin_voucher_types vt
              ON vt.id = v.voucher_type_id
            LEFT JOIN fin_currencies c
              ON c.id = v.currency_id
+           LEFT JOIN adm_users u
+             ON u.id = v.created_by
           ${whereClause}
           ORDER BY v.voucher_date DESC, v.id DESC LIMIT ${limit} OFFSET ${offset}`,
         params,
@@ -2153,10 +2376,38 @@ export const listVouchers = async (req, res, next) => {
                   COALESCE(v.total_credit, 0) AS total_credit,
                   COALESCE(v.balanced_amount, 0) AS balanced_amount,
                   GREATEST(COALESCE(v.total_debit, 0), COALESCE(v.total_credit, 0), COALESCE(v.balanced_amount, 0)) AS total_amount,
-                  v.voucher_type_id, vt.code AS voucher_type_code, vt.name AS voucher_type_name
+                  v.voucher_type_id, vt.code AS voucher_type_code, vt.name AS voucher_type_name,
+                  v.created_by, v.created_at,
+                  u.username AS created_by_username,
+                  COALESCE(u.full_name, u.username) AS created_by_name,
+                  (
+                    SELECT a.name
+                    FROM fin_voucher_lines l
+                    JOIN fin_accounts a ON a.id = l.account_id
+                    WHERE l.voucher_id = v.id AND l.credit > 0
+                    ORDER BY l.line_no ASC, l.id ASC
+                    LIMIT 1
+                  ) AS payment_account_name,
+                  (
+                    SELECT a.code
+                    FROM fin_voucher_lines l
+                    JOIN fin_accounts a ON a.id = l.account_id
+                    WHERE l.voucher_id = v.id AND l.credit > 0
+                    ORDER BY l.line_no ASC, l.id ASC
+                    LIMIT 1
+                  ) AS payment_account_code,
+                  (
+                    SELECT l.account_id
+                    FROM fin_voucher_lines l
+                    WHERE l.voucher_id = v.id AND l.credit > 0
+                    ORDER BY l.line_no ASC, l.id ASC
+                    LIMIT 1
+                  ) AS payment_account_id
              FROM fin_vouchers v
              LEFT JOIN fin_voucher_types vt
                ON vt.id = v.voucher_type_id
+             LEFT JOIN adm_users u
+               ON u.id = v.created_by
             ${whereClause}
             ORDER BY v.id DESC LIMIT ${limit} OFFSET ${offset}`,
           params,
@@ -2208,12 +2459,17 @@ export const getVoucherById = async (req, res, next) => {
                 COALESCE((SELECT SUM(l.credit) FROM fin_voucher_lines l WHERE l.voucher_id = v.id), 0)
               ) AS total_amount,
               v.voucher_type_id, vt.code AS voucher_type_code, vt.name AS voucher_type_name,
-              v.currency_id, c.code AS currency_code, v.exchange_rate
+              v.currency_id, c.code AS currency_code, v.exchange_rate,
+              v.created_by, v.created_at,
+              u.username AS created_by_username,
+              COALESCE(u.full_name, u.username) AS created_by_name
          FROM fin_vouchers v
          LEFT JOIN fin_voucher_types vt
            ON vt.id = v.voucher_type_id
          LEFT JOIN fin_currencies c
            ON c.id = v.currency_id
+         LEFT JOIN adm_users u
+           ON u.id = v.created_by
         WHERE v.company_id = :companyId
           AND (:branchId IS NULL OR :branchId = 'all' OR (:branchIdsStr = '' OR FIND_IN_SET(v.branch_id, :branchIdsStr)) OR v.branch_id IS NULL)
           AND v.id = :id
@@ -3415,7 +3671,13 @@ export const journalsReport = async (req, res, next) => {
 
 export const createTaxCode = async (req, res, next) => {
   try {
-    const companyId = req.scope.companyId;
+    await ensureTaxTables();
+    const companyId = Number(
+      req.scope?.companyId ||
+      req.user?.company_id ||
+      req.headers["x-company-id"] ||
+      1
+    );
     const {
       code,
       name,
@@ -3427,19 +3689,40 @@ export const createTaxCode = async (req, res, next) => {
       isServiceTax,
       validPages,
     } = req.body || {};
-    if (!code || !name || !type)
-      throw httpError(400, "VALIDATION_ERROR", "code, name, type are required");
-    if (!["TAX", "DEDUCTION"].includes(String(type)))
-      throw httpError(400, "VALIDATION_ERROR", "Invalid type");
+
+    const trimmedCode = String(code || "").trim();
+    const trimmedName = String(name || "").trim();
+    const normalizedType = String(type || "TAX").trim().toUpperCase();
+
+    if (!trimmedCode || !trimmedName) {
+      throw httpError(400, "VALIDATION_ERROR", "code and name are required");
+    }
+    if (!["TAX", "DEDUCTION"].includes(normalizedType)) {
+      throw httpError(400, "VALIDATION_ERROR", "type must be TAX or DEDUCTION");
+    }
+
+    const existing = await query(
+      "SELECT id FROM fin_tax_codes WHERE company_id = :companyId AND code = :code LIMIT 1",
+      { companyId, code: trimmedCode },
+    );
+    if (existing.length > 0) {
+      throw httpError(409, "DUPLICATE_CODE", `Tax/deduction code "${trimmedCode}" already exists.`);
+    }
+
     const result = await query(
-      `INSERT INTO fin_tax_codes (company_id, code, name, rate_percent, type, is_active, is_sales_tax, is_purchase_tax, is_service_tax, valid_pages)
-       VALUES (:companyId, :code, :name, :ratePercent, :type, :isActive, :isSalesTax, :isPurchaseTax, :isServiceTax, :validPages)`,
+      `INSERT INTO fin_tax_codes (
+         company_id, code, name, rate_percent, type, is_active,
+         is_sales_tax, is_purchase_tax, is_service_tax, valid_pages
+       ) VALUES (
+         :companyId, :code, :name, :ratePercent, :type, :isActive,
+         :isSalesTax, :isPurchaseTax, :isServiceTax, :validPages
+       )`,
       {
         companyId,
-        code,
-        name,
+        code: trimmedCode,
+        name: trimmedName,
         ratePercent: Number(ratePercent || 0),
-        type: String(type),
+        type: normalizedType,
         isActive: isActive === undefined ? 1 : Number(Boolean(isActive)),
         isSalesTax: isSalesTax ? 1 : 0,
         isPurchaseTax: isPurchaseTax ? 1 : 0,
@@ -3449,15 +3732,26 @@ export const createTaxCode = async (req, res, next) => {
         ),
       },
     );
+    await cacheDelPattern(`taxes:company:${companyId}:*`).catch(() => {});
+    await cacheDelPattern("taxes:*").catch(() => {});
     res.status(201).json({ id: result.insertId });
   } catch (e) {
+    if (e?.code === "ER_DUP_ENTRY" || e?.errno === 1062) {
+      return next(httpError(409, "DUPLICATE_CODE", "Tax/deduction code already exists."));
+    }
     next(e);
   }
 };
 
 export const updateTaxCode = async (req, res, next) => {
   try {
-    const companyId = req.scope.companyId;
+    await ensureTaxTables();
+    const companyId = Number(
+      req.scope?.companyId ||
+      req.user?.company_id ||
+      req.headers["x-company-id"] ||
+      1
+    );
     const taxCodeId = Number(req.params.taxCodeId || req.params.id);
     const {
       name,
@@ -3470,11 +3764,12 @@ export const updateTaxCode = async (req, res, next) => {
       validPages,
     } = req.body || {};
     const rows = await query(
-      "SELECT id FROM fin_tax_codes WHERE company_id = :companyId AND id = :id",
+      "SELECT id FROM fin_tax_codes WHERE (company_id = :companyId OR company_id = 1 OR company_id IS NULL OR company_id = 0) AND id = :id",
       { companyId, id: taxCodeId },
     );
     if (!rows.length) throw httpError(404, "NOT_FOUND", "Tax code not found");
-    if (type && !["TAX", "DEDUCTION"].includes(String(type)))
+    const normalizedType = type ? String(type).trim().toUpperCase() : undefined;
+    if (normalizedType && !["TAX", "DEDUCTION"].includes(normalizedType))
       throw httpError(400, "VALIDATION_ERROR", "Invalid type");
     await query(
       `UPDATE fin_tax_codes
@@ -3486,14 +3781,13 @@ export const updateTaxCode = async (req, res, next) => {
              is_purchase_tax = COALESCE(:isPurchaseTax, is_purchase_tax),
              is_service_tax = COALESCE(:isServiceTax, is_service_tax),
              valid_pages = COALESCE(:validPages, valid_pages)
-       WHERE company_id = :companyId AND id = :id`,
+       WHERE id = :id`,
       {
-        companyId,
         id: taxCodeId,
-        name: name || null,
+        name: name !== undefined ? String(name).trim() : null,
         ratePercent:
           ratePercent === undefined ? null : Number(ratePercent || 0),
-        type: type || null,
+        type: normalizedType || null,
         isActive: isActive === undefined ? null : Number(Boolean(isActive)),
         isSalesTax:
           isSalesTax === undefined ? null : Number(Boolean(isSalesTax)),
@@ -3509,6 +3803,8 @@ export const updateTaxCode = async (req, res, next) => {
               ),
       },
     );
+    await cacheDelPattern(`taxes:company:${companyId}:*`).catch(() => {});
+    await cacheDelPattern("taxes:*").catch(() => {});
     res.json({ ok: true });
   } catch (e) {
     next(e);
@@ -3517,7 +3813,12 @@ export const updateTaxCode = async (req, res, next) => {
 
 export const rectifyTaxCodePages = async (req, res, next) => {
   try {
-    const companyId = req.scope.companyId;
+    const companyId = Number(
+      req.scope?.companyId ||
+      req.user?.company_id ||
+      req.headers["x-company-id"] ||
+      1
+    );
     // Get all tax codes with valid_pages
     const taxCodes = await query(
       `SELECT id, valid_pages FROM fin_tax_codes WHERE company_id = :companyId AND valid_pages IS NOT NULL AND valid_pages != ''`,
@@ -3548,39 +3849,121 @@ export const rectifyTaxCodePages = async (req, res, next) => {
 
 export const createTaxCodeComponent = async (req, res, next) => {
   try {
-    const companyId = req.scope.companyId;
+    await ensureTaxTables();
+    const companyId = Number(
+      req.scope?.companyId ||
+      req.user?.company_id ||
+      req.headers["x-company-id"] ||
+      1
+    );
     const taxCodeId = Number(req.params.taxCodeId || req.params.id);
-    const { componentName, ratePercent, sortOrder, isActive, accountId } =
-      req.body || {};
+    const {
+      componentName,
+      ratePercent,
+      sortOrder,
+      isActive,
+      accountId,
+      compoundLevel,
+      compoundLevels,
+    } = req.body || {};
     if (!taxCodeId)
       return next(httpError(400, "VALIDATION_ERROR", "Invalid taxCodeId"));
     if (!componentName)
       throw httpError(400, "VALIDATION_ERROR", "componentName is required");
+
+    let parsedAccountId = Number(accountId) || null;
+
     const detail = await query(
       `INSERT INTO fin_tax_details (company_id, tax_code_id, component_name, rate_percent, account_id, is_active)
        VALUES (:companyId, :taxCodeId, :componentName, :ratePercent, :accountId, :isActive)`,
       {
         companyId,
         taxCodeId,
-        componentName,
+        componentName: String(componentName).trim(),
         ratePercent: Number(ratePercent || 0),
-        accountId: Number(accountId) || null,
+        accountId: parsedAccountId,
         isActive: isActive === undefined ? 1 : Number(Boolean(isActive)),
       },
     );
     const taxDetailId = detail.insertId;
+
+    // If accountId wasn't passed, attempt auto-creating GL account under Tax Receivables/Payables
+    if (!parsedAccountId && taxDetailId) {
+      try {
+        const tcRows = await query(
+          "SELECT is_purchase_tax FROM fin_tax_codes WHERE id = :taxCodeId",
+          { taxCodeId },
+        );
+        const isPurchase = !!tcRows?.[0]?.is_purchase_tax;
+        const conn = await pool.getConnection();
+        try {
+          await conn.beginTransaction();
+          parsedAccountId = await ensureTaxComponentAccountTx(conn, {
+            companyId,
+            taxDetailId,
+            componentName: String(componentName).trim(),
+            isPurchase,
+          });
+          await conn.commit();
+        } catch (txErr) {
+          await conn.rollback().catch(() => {});
+        } finally {
+          conn.release();
+        }
+      } catch (accErr) {
+        console.warn("[createTaxCodeComponent] Auto account creation skipped:", accErr?.message || accErr);
+      }
+    }
+
+    const compLevel =
+      compoundLevel !== undefined && compoundLevel !== null
+        ? Number(compoundLevel)
+        : 0;
+    const compLevelsStr = Array.isArray(compoundLevels)
+      ? compoundLevels.join(",")
+      : compoundLevels
+        ? String(compoundLevels)
+        : "0";
+
+    let finalSortOrder =
+      sortOrder !== undefined && sortOrder !== null && sortOrder !== ""
+        ? Number(sortOrder)
+        : null;
+    if (
+      !finalSortOrder ||
+      isNaN(finalSortOrder) ||
+      finalSortOrder >= 100 ||
+      finalSortOrder <= 0
+    ) {
+      const [maxOrderRow] = await query(
+        `SELECT COALESCE(MAX(sort_order), 0) AS max_order
+           FROM fin_tax_components
+          WHERE company_id = :companyId AND tax_code_id = :taxCodeId AND sort_order < 100`,
+        { companyId, taxCodeId },
+      );
+      finalSortOrder = Number(maxOrderRow?.max_order || 0) + 1;
+    }
+
     await query(
-      `INSERT INTO fin_tax_components (company_id, tax_code_id, tax_detail_id, rate_percent, sort_order, is_active)
-       VALUES (:companyId, :taxCodeId, :taxDetailId, :ratePercent, :sortOrder, :isActive)`,
+      `INSERT INTO fin_tax_components (
+         company_id, tax_code_id, tax_detail_id, rate_percent, sort_order,
+         is_active, compound_level, compound_levels
+       ) VALUES (
+         :companyId, :taxCodeId, :taxDetailId, :ratePercent, :sortOrder,
+         :isActive, :compLevel, :compLevelsStr
+       )`,
       {
         companyId,
         taxCodeId,
         taxDetailId,
         ratePercent: Number(ratePercent || 0),
-        sortOrder: sortOrder || 100,
+        sortOrder: finalSortOrder,
         isActive: isActive === undefined ? 1 : Number(Boolean(isActive)),
+        compLevel,
+        compLevelsStr,
       },
     );
+    await cacheDelPattern(`taxes:company:${companyId}:*`).catch(() => {});
     res.status(201).json({ id: taxDetailId });
   } catch (e) {
     next(e);
@@ -3590,10 +3973,23 @@ export const createTaxCodeComponent = async (req, res, next) => {
 export const updateTaxCodeComponent = async (req, res, next) => {
   const conn = await pool.getConnection();
   try {
-    const companyId = req.scope.companyId;
+    await ensureTaxTables();
+    const companyId = Number(
+      req.scope?.companyId ||
+      req.user?.company_id ||
+      req.headers["x-company-id"] ||
+      1
+    );
     const componentId = Number(req.params.id);
-    const { componentName, accountId, ratePercent, sortOrder, isActive } =
-      req.body || {};
+    const {
+      componentName,
+      accountId,
+      ratePercent,
+      sortOrder,
+      isActive,
+      compoundLevel,
+      compoundLevels,
+    } = req.body || {};
 
     await conn.beginTransaction();
 
@@ -3613,17 +4009,30 @@ export const updateTaxCodeComponent = async (req, res, next) => {
         {
           companyId,
           id: taxDetailId,
-          componentName: componentName || null,
+          componentName: componentName ? String(componentName).trim() : null,
           accountId: accountId === null ? null : Number(accountId) || null,
         },
       );
     }
 
+    const compLevel =
+      compoundLevel !== undefined && compoundLevel !== null
+        ? Number(compoundLevel)
+        : null;
+    const compLevelsStr =
+      compoundLevels !== undefined
+        ? Array.isArray(compoundLevels)
+          ? compoundLevels.join(",")
+          : String(compoundLevels)
+        : null;
+
     await conn.execute(
       `UPDATE fin_tax_components
        SET rate_percent = COALESCE(:ratePercent, rate_percent),
            sort_order = COALESCE(:sortOrder, sort_order),
-           is_active = COALESCE(:isActive, is_active)
+           is_active = COALESCE(:isActive, is_active),
+           compound_level = COALESCE(:compLevel, compound_level),
+           compound_levels = COALESCE(:compLevelsStr, compound_levels)
        WHERE company_id = :companyId AND id = :id`,
       {
         companyId,
@@ -3631,6 +4040,8 @@ export const updateTaxCodeComponent = async (req, res, next) => {
         ratePercent: ratePercent === undefined ? null : Number(ratePercent),
         sortOrder: sortOrder === undefined ? null : Number(sortOrder),
         isActive: isActive === undefined ? null : Number(Boolean(isActive)),
+        compLevel,
+        compLevelsStr,
       },
     );
 
@@ -3649,7 +4060,12 @@ export const updateTaxCodeComponent = async (req, res, next) => {
 
 export const deleteTaxCodeComponent = async (req, res, next) => {
   try {
-    const companyId = req.scope.companyId;
+    const companyId = Number(
+      req.scope?.companyId ||
+      req.user?.company_id ||
+      req.headers["x-company-id"] ||
+      1
+    );
     const componentId = Number(req.params.id);
     await query(
       "DELETE FROM fin_tax_components WHERE company_id = :companyId AND id = :id",
@@ -3658,6 +4074,7 @@ export const deleteTaxCodeComponent = async (req, res, next) => {
         id: componentId,
       },
     );
+    await cacheDelPattern(`taxes:company:${companyId}:*`).catch(() => {});
     res.json({ ok: true });
   } catch (e) {
     next(e);
@@ -4318,10 +4735,18 @@ export const createAccountGroup = async (req, res, next) => {
       }
     }
 
+    const hasBranchCol = await hasColumn("fin_account_groups", "branch_id");
+    const targetBranchId = req.body.branch_id !== undefined
+      ? (Number(req.body.branch_id) || null)
+      : (req.scope?.branchId ? Number(req.scope.branchId) : null);
+    const cols = `company_id, ${hasBranchCol ? "branch_id, " : ""}code, name, nature, parent_id, is_active`;
+    const vals = `:companyId, ${hasBranchCol ? ":branchId, " : ""}:code, :name, :nature, :parentId, :isActive`;
+
     const result = await query(
-      "INSERT INTO fin_account_groups (company_id, code, name, nature, parent_id, is_active) VALUES (:companyId, :code, :name, :nature, :parentId, :isActive)",
+      `INSERT INTO fin_account_groups (${cols}) VALUES (${vals})`,
       {
         companyId,
+        branchId: targetBranchId,
         code,
         name,
         nature,
@@ -7326,5 +7751,635 @@ export const getDashboardMetrics = async (req, res, next) => {
     });
   } catch (e) {
     next(e);
+  }
+};
+
+/* =========================================================================
+   BUDGET MANAGEMENT & BUDGET VS ACTUAL REPORT
+========================================================================= */
+
+export const listBudgets = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const { fiscal_year_id, status } = req.query;
+
+    let whereClause = "WHERE b.company_id = :companyId";
+    const params = { companyId };
+
+    if (fiscal_year_id) {
+      whereClause += " AND b.fiscal_year_id = :fiscal_year_id";
+      params.fiscal_year_id = Number(fiscal_year_id);
+    }
+    if (status) {
+      whereClause += " AND b.status = :status";
+      params.status = status;
+    }
+
+    const budgets = await query(
+      `SELECT 
+        b.*,
+        fy.code AS fiscal_year_code,
+        cc.name AS cost_center_name,
+        cur.code AS currency_code,
+        COUNT(bl.id) AS line_count,
+        COALESCE(SUM(bl.budget_amount), b.total_budget, 0) AS calculated_total
+       FROM fin_budgets b
+       LEFT JOIN fin_fiscal_years fy ON fy.id = b.fiscal_year_id
+       LEFT JOIN fin_cost_centers cc ON cc.id = b.cost_center_id
+       LEFT JOIN fin_currencies cur ON cur.id = b.currency_id
+       LEFT JOIN fin_budget_lines bl ON bl.budget_id = b.id
+       ${whereClause}
+       GROUP BY b.id
+       ORDER BY b.id DESC`,
+      params
+    );
+
+    res.json({ status: "success", data: budgets });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getBudgetById = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const id = Number(req.params.id);
+
+    const budgets = await query(
+      `SELECT b.*, fy.code AS fiscal_year_code, cc.name AS cost_center_name
+       FROM fin_budgets b
+       LEFT JOIN fin_fiscal_years fy ON fy.id = b.fiscal_year_id
+       LEFT JOIN fin_cost_centers cc ON cc.id = b.cost_center_id
+       WHERE b.id = :id AND b.company_id = :companyId`,
+      { id, companyId }
+    );
+    if (!budgets.length) {
+      return res.status(404).json({ error: "Budget not found" });
+    }
+
+    const lines = await query(
+      `SELECT bl.*, a.code AS account_code, a.name AS account_name, g.nature AS account_nature, cc.name AS cost_center_name
+       FROM fin_budget_lines bl
+       JOIN fin_accounts a ON a.id = bl.account_id
+       LEFT JOIN fin_account_groups g ON g.id = a.group_id
+       LEFT JOIN fin_cost_centers cc ON cc.id = bl.cost_center_id
+       WHERE bl.budget_id = :id
+       ORDER BY a.code ASC`,
+      { id }
+    );
+
+    res.json({ status: "success", data: { ...budgets[0], lines } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createBudget = async (req, res, next) => {
+  try {
+    const { companyId, branchId } = req.scope || {};
+    const userId = Number(req.user?.sub || req.user?.id);
+    const { fiscal_year_id, budget_code, budget_name, cost_center_id, currency_id, description, status, lines } = req.body;
+
+    if (!fiscal_year_id || !budget_name) {
+      return res.status(400).json({ error: "Fiscal year and budget name are required" });
+    }
+
+    const code = budget_code?.trim() || `BUD-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    let totalBudget = 0;
+    if (Array.isArray(lines)) {
+      totalBudget = lines.reduce((acc, l) => acc + (Number(l.budget_amount) || 0), 0);
+    }
+
+    const result = await query(
+      `INSERT INTO fin_budgets 
+       (company_id, branch_id, fiscal_year_id, budget_code, budget_name, cost_center_id, currency_id, description, total_budget, status, created_by)
+       VALUES (:companyId, :branchId, :fiscal_year_id, :code, :budget_name, :cost_center_id, :currency_id, :description, :totalBudget, :status, :userId)`,
+      {
+        companyId,
+        branchId: branchId || null,
+        fiscal_year_id: Number(fiscal_year_id),
+        code,
+        budget_name,
+        cost_center_id: cost_center_id ? Number(cost_center_id) : null,
+        currency_id: currency_id ? Number(currency_id) : null,
+        description: description || null,
+        totalBudget,
+        status: status || 'ACTIVE',
+        userId: userId || null
+      }
+    );
+
+    const budgetId = result.insertId;
+
+    if (Array.isArray(lines) && lines.length > 0) {
+      for (const line of lines) {
+        if (!line.account_id) continue;
+        await query(
+          `INSERT INTO fin_budget_lines (budget_id, account_id, cost_center_id, period_month, budget_amount, notes)
+           VALUES (:budgetId, :accountId, :costCenterId, :periodMonth, :amount, :notes)`,
+          {
+            budgetId,
+            accountId: Number(line.account_id),
+            costCenterId: line.cost_center_id ? Number(line.cost_center_id) : (cost_center_id ? Number(cost_center_id) : null),
+            periodMonth: line.period_month ? Number(line.period_month) : null,
+            amount: Number(line.budget_amount) || 0,
+            notes: line.notes || null
+          }
+        );
+      }
+    }
+
+    res.status(201).json({ status: "success", data: { id: budgetId, budget_code: code } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateBudget = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const id = Number(req.params.id);
+    const { fiscal_year_id, budget_name, cost_center_id, currency_id, description, status, lines } = req.body;
+
+    let totalBudget = 0;
+    if (Array.isArray(lines)) {
+      totalBudget = lines.reduce((acc, l) => acc + (Number(l.budget_amount) || 0), 0);
+    }
+
+    await query(
+      `UPDATE fin_budgets 
+       SET fiscal_year_id = COALESCE(:fiscal_year_id, fiscal_year_id),
+           budget_name = COALESCE(:budget_name, budget_name),
+           cost_center_id = :cost_center_id,
+           currency_id = :currency_id,
+           description = :description,
+           total_budget = :totalBudget,
+           status = COALESCE(:status, status)
+       WHERE id = :id AND company_id = :companyId`,
+      {
+        id,
+        companyId,
+        fiscal_year_id: fiscal_year_id ? Number(fiscal_year_id) : null,
+        budget_name: budget_name || null,
+        cost_center_id: cost_center_id ? Number(cost_center_id) : null,
+        currency_id: currency_id ? Number(currency_id) : null,
+        description: description || null,
+        totalBudget,
+        status: status || null
+      }
+    );
+
+    if (Array.isArray(lines)) {
+      await query(`DELETE FROM fin_budget_lines WHERE budget_id = :id`, { id });
+      for (const line of lines) {
+        if (!line.account_id) continue;
+        await query(
+          `INSERT INTO fin_budget_lines (budget_id, account_id, cost_center_id, period_month, budget_amount, notes)
+           VALUES (:budgetId, :accountId, :costCenterId, :periodMonth, :amount, :notes)`,
+          {
+            budgetId: id,
+            accountId: Number(line.account_id),
+            costCenterId: line.cost_center_id ? Number(line.cost_center_id) : (cost_center_id ? Number(cost_center_id) : null),
+            periodMonth: line.period_month ? Number(line.period_month) : null,
+            amount: Number(line.budget_amount) || 0,
+            notes: line.notes || null
+          }
+        );
+      }
+    }
+
+    res.json({ status: "success", message: "Budget updated successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteBudget = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const id = Number(req.params.id);
+
+    await query(`DELETE FROM fin_budget_lines WHERE budget_id = :id`, { id });
+    await query(`DELETE FROM fin_budgets WHERE id = :id AND company_id = :companyId`, { id, companyId });
+
+    res.json({ status: "success", message: "Budget deleted successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getBudgetVsActualReport = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const { fiscal_year_id, budget_id, cost_center_id, period_month, group_id, nature } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({ error: "Company scope required" });
+    }
+
+    // 1. Determine target fiscal year
+    let targetFiscalYearId = fiscal_year_id ? Number(fiscal_year_id) : null;
+    let fiscalYearInfo = null;
+    if (targetFiscalYearId) {
+      const fyRows = await query(`SELECT * FROM fin_fiscal_years WHERE id = :id AND company_id = :companyId`, { id: targetFiscalYearId, companyId });
+      fiscalYearInfo = fyRows[0] || null;
+    } else {
+      const fyRows = await query(`SELECT * FROM fin_fiscal_years WHERE company_id = :companyId ORDER BY is_open DESC, start_date DESC LIMIT 1`, { companyId });
+      fiscalYearInfo = fyRows[0] || null;
+      targetFiscalYearId = fiscalYearInfo?.id || null;
+    }
+
+    // 2. Fetch budget header (if budget_id specified or pick active budget for fiscal year)
+    let selectedBudgetId = budget_id ? Number(budget_id) : null;
+    let budgetInfo = null;
+    if (selectedBudgetId) {
+      const bRows = await query(`SELECT * FROM fin_budgets WHERE id = :id AND company_id = :companyId`, { id: selectedBudgetId, companyId });
+      budgetInfo = bRows[0] || null;
+    } else if (targetFiscalYearId) {
+      const bRows = await query(`SELECT * FROM fin_budgets WHERE company_id = :companyId AND fiscal_year_id = :fyId AND status IN ('ACTIVE', 'APPROVED') ORDER BY id DESC LIMIT 1`, { companyId, fyId: targetFiscalYearId });
+      budgetInfo = bRows[0] || null;
+      selectedBudgetId = budgetInfo?.id || null;
+    }
+
+    // 3. Date filters: fiscal year start/end or custom from/to
+    const fromDate = req.query.from || fiscalYearInfo?.start_date || null;
+    const toDate = req.query.to || fiscalYearInfo?.end_date || null;
+
+    const params = {
+      companyId,
+      budgetId: selectedBudgetId || 0,
+      fromDate: fromDate ? String(fromDate).substring(0, 10) : null,
+      toDate: toDate ? String(toDate).substring(0, 10) : null,
+      costCenterId: cost_center_id ? Number(cost_center_id) : null,
+      month: period_month ? Number(period_month) : null,
+    };
+
+    let natureFilter = "";
+    if (nature && ['INCOME', 'EXPENSE', 'ASSET', 'LIABILITY', 'EQUITY'].includes(String(nature).toUpperCase())) {
+      natureFilter = `AND g.nature = '${String(nature).toUpperCase()}'`;
+    }
+
+    let groupFilter = "";
+    if (group_id) {
+      groupFilter = `AND a.group_id = ${Number(group_id)}`;
+    }
+
+    const reportQuery = `
+      SELECT 
+        a.id AS account_id,
+        a.code AS account_code,
+        a.name AS account_name,
+        g.id AS group_id,
+        g.name AS group_name,
+        g.nature AS account_nature,
+        COALESCE(b_agg.budget_amount, 0) AS budget_amount,
+        COALESCE(act_agg.total_debit, 0) AS total_debit,
+        COALESCE(act_agg.total_credit, 0) AS total_credit
+      FROM fin_accounts a
+      JOIN fin_account_groups g ON g.id = a.group_id
+      LEFT JOIN (
+        SELECT 
+          bl.account_id,
+          SUM(bl.budget_amount) AS budget_amount
+        FROM fin_budget_lines bl
+        JOIN fin_budgets b ON b.id = bl.budget_id
+        WHERE b.company_id = :companyId
+          AND (:budgetId = 0 OR bl.budget_id = :budgetId)
+          AND (:costCenterId IS NULL OR bl.cost_center_id = :costCenterId)
+          AND (:month IS NULL OR bl.period_month = :month)
+        GROUP BY bl.account_id
+      ) b_agg ON b_agg.account_id = a.id
+      LEFT JOIN (
+        SELECT 
+          vl.account_id,
+          SUM(COALESCE(vl.debit, 0)) AS total_debit,
+          SUM(COALESCE(vl.credit, 0)) AS total_credit
+        FROM fin_voucher_lines vl
+        JOIN fin_vouchers v ON v.id = vl.voucher_id
+        WHERE v.company_id = :companyId
+          AND (v.status = 'POSTED' OR v.status IS NULL OR v.status NOT IN ('CANCELLED', 'VOID', 'REJECTED'))
+          AND (:costCenterId IS NULL OR vl.cost_center = :costCenterId OR v.cost_center_id = :costCenterId)
+          AND (:fromDate IS NULL OR DATE(v.voucher_date) >= :fromDate)
+          AND (:toDate IS NULL OR DATE(v.voucher_date) <= :toDate)
+          AND (:month IS NULL OR MONTH(v.voucher_date) = :month)
+        GROUP BY vl.account_id
+      ) act_agg ON act_agg.account_id = a.id
+      WHERE a.company_id = :companyId
+        AND a.is_active = 1
+        ${natureFilter}
+        ${groupFilter}
+        AND (COALESCE(b_agg.budget_amount, 0) > 0 OR COALESCE(act_agg.total_debit, 0) > 0 OR COALESCE(act_agg.total_credit, 0) > 0)
+      ORDER BY g.nature, a.code ASC
+    `;
+
+    const rows = await query(reportQuery, params);
+
+    let totalBudgetExpense = 0;
+    let totalActualExpense = 0;
+    let totalBudgetIncome = 0;
+    let totalActualIncome = 0;
+
+    const items = rows.map((r) => {
+      const budget = Number(r.budget_amount || 0);
+      const debit = Number(r.total_debit || 0);
+      const credit = Number(r.total_credit || 0);
+      const nature = r.account_nature || "EXPENSE";
+
+      let actual = 0;
+      let variance = 0;
+      let status = "ON_TRACK";
+
+      if (nature === "EXPENSE") {
+        actual = debit - credit;
+        variance = budget - actual;
+        totalBudgetExpense += budget;
+        totalActualExpense += actual;
+        if (budget > 0) {
+          const util = (actual / budget) * 100;
+          if (util > 100) status = "OVER_BUDGET";
+          else if (util >= 85) status = "NEARING_LIMIT";
+          else status = "WITHIN_BUDGET";
+        } else if (actual > 0) {
+          status = "OVER_BUDGET";
+        }
+      } else if (nature === "INCOME") {
+        actual = credit - debit;
+        variance = actual - budget;
+        totalBudgetIncome += budget;
+        totalActualIncome += actual;
+        if (budget > 0) {
+          const util = (actual / budget) * 100;
+          if (util >= 100) status = "TARGET_EXCEEDED";
+          else if (util >= 75) status = "ON_TRACK";
+          else status = "BEHIND_TARGET";
+        } else if (actual > 0) {
+          status = "TARGET_EXCEEDED";
+        }
+      } else {
+        actual = debit - credit;
+        variance = budget - actual;
+        status = actual <= budget ? "WITHIN_BUDGET" : "OVER_BUDGET";
+      }
+
+      const utilizationPct = budget > 0 ? (actual / budget) * 100 : (actual > 0 ? 100 : 0);
+
+      return {
+        account_id: r.account_id,
+        account_code: r.account_code,
+        account_name: r.account_name,
+        group_id: r.group_id,
+        group_name: r.group_name,
+        account_nature: nature,
+        budget_amount: Math.round(budget * 100) / 100,
+        actual_amount: Math.round(actual * 100) / 100,
+        variance_amount: Math.round(variance * 100) / 100,
+        utilization_pct: Math.round(utilizationPct * 10) / 10,
+        status,
+      };
+    });
+
+    const expenseVariance = totalBudgetExpense - totalActualExpense;
+    const incomeVariance = totalActualIncome - totalBudgetIncome;
+    const netBudget = totalBudgetIncome - totalBudgetExpense;
+    const netActual = totalActualIncome - totalActualExpense;
+    const netVariance = netActual - netBudget;
+
+    res.json({
+      status: "success",
+      data: {
+        fiscal_year: fiscalYearInfo,
+        budget: budgetInfo,
+        date_range: { from: fromDate, to: toDate },
+        summary: {
+          total_budget_expense: Math.round(totalBudgetExpense * 100) / 100,
+          total_actual_expense: Math.round(totalActualExpense * 100) / 100,
+          expense_variance: Math.round(expenseVariance * 100) / 100,
+          expense_utilization_pct: totalBudgetExpense > 0 ? Math.round((totalActualExpense / totalBudgetExpense) * 1000) / 10 : 0,
+
+          total_budget_income: Math.round(totalBudgetIncome * 100) / 100,
+          total_actual_income: Math.round(totalActualIncome * 100) / 100,
+          income_variance: Math.round(incomeVariance * 100) / 100,
+          income_achievement_pct: totalBudgetIncome > 0 ? Math.round((totalActualIncome / totalBudgetIncome) * 1000) / 10 : 0,
+
+          net_budget_profit: Math.round(netBudget * 100) / 100,
+          net_actual_profit: Math.round(netActual * 100) / 100,
+          net_profit_variance: Math.round(netVariance * 100) / 100,
+        },
+        items,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+
+/**
+ * Upload and process Excel accounts template.
+ * Parses AccountGroups and Accounts sheets, creating missing groups and accounts.
+ * @route POST /api/finance/template/upload
+ */
+export const uploadAccountsTemplate = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    if (!companyId) return next(httpError(401, "UNAUTHORIZED", "Company scope required"));
+    if (!req.file || !req.file.buffer) {
+      return next(httpError(400, "VALIDATION_ERROR", "Excel file is required"));
+    }
+
+    const wb = XLSX.read(req.file.buffer, { type: "buffer" });
+    let createdGroups = 0;
+    let createdAccounts = 0;
+    const errors = [];
+
+    const normalizeNature = (val) => {
+      if (!val) return "ASSET";
+      const s = String(val).trim().toUpperCase();
+      if (s.includes("ASSET")) return "ASSET";
+      if (s.includes("LIAB")) return "LIABILITY";
+      if (s.includes("EQU")) return "EQUITY";
+      if (s.includes("INC") || s.includes("REV")) return "INCOME";
+      if (s.includes("EXP") || s.includes("COST")) return "EXPENSE";
+      return "ASSET";
+    };
+
+    const baseCurRows = await query(
+      "SELECT id, code FROM fin_currencies WHERE company_id = :companyId AND is_base = 1 LIMIT 1",
+      { companyId }
+    );
+    const baseCurrencyId = baseCurRows[0]?.id || null;
+
+    const curRows = await query("SELECT id, code, name FROM fin_currencies WHERE company_id = :companyId", { companyId });
+    const curMap = new Map();
+    curRows.forEach((c) => {
+      curMap.set(String(c.code).trim().toUpperCase(), c.id);
+      curMap.set(String(c.name).trim().toUpperCase(), c.id);
+    });
+
+    let existingGroups = await query(
+      "SELECT id, code, name, nature FROM fin_account_groups WHERE company_id = :companyId",
+      { companyId }
+    );
+    const groupNameMap = new Map();
+    existingGroups.forEach((g) => {
+      groupNameMap.set(String(g.name).trim().toUpperCase(), g);
+      if (g.code) groupNameMap.set(String(g.code).trim().toUpperCase(), g);
+    });
+
+    // 1. Process AccountGroups sheet if present
+    if (wb.SheetNames.includes("AccountGroups")) {
+      const agWs = wb.Sheets["AccountGroups"];
+      const agRows = XLSX.utils.sheet_to_json(agWs, { defval: "" });
+      for (const row of agRows) {
+        try {
+          const groupName = String(row["GroupName*"] || row["GroupName"] || row["Group Name"] || "").trim();
+          if (!groupName) continue;
+          if (groupNameMap.has(groupName.toUpperCase())) continue;
+
+          const rawClass = row["GroupLevel1*"] || row["GroupLevel1"] || row["AccountClass"] || row["Class"] || "ASSET";
+          const nature = normalizeNature(rawClass);
+          let groupCode = String(row["GroupCode"] || row["Code"] || "").trim().toUpperCase();
+          if (!groupCode) {
+            const prefix = nature === "ASSET" ? "AST" : nature === "LIABILITY" ? "LIA" : nature === "EQUITY" ? "EQU" : nature === "INCOME" ? "INC" : "EXP";
+            const token = groupName.replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 8);
+            groupCode = `${prefix}_${token || "GRP"}`;
+          }
+
+          const insertRes = await query(
+            "INSERT INTO fin_account_groups (company_id, code, name, nature, is_active) VALUES (:companyId, :groupCode, :groupName, :nature, 1)",
+            { companyId, groupCode, groupName, nature }
+          );
+          const newGrp = { id: insertRes.insertId, code: groupCode, name: groupName, nature };
+          groupNameMap.set(groupName.toUpperCase(), newGrp);
+          groupNameMap.set(groupCode.toUpperCase(), newGrp);
+          createdGroups++;
+        } catch (gErr) {
+          errors.push(`Group error: ${gErr.message}`);
+        }
+      }
+    }
+
+    // 2. Process Accounts sheet
+    const acctSheetName = wb.SheetNames.includes("Accounts") ? "Accounts" : wb.SheetNames[0];
+    const acctWs = wb.Sheets[acctSheetName];
+    const acctRows = XLSX.utils.sheet_to_json(acctWs, { defval: "" });
+
+    for (let i = 0; i < acctRows.length; i++) {
+      const row = acctRows[i];
+      const rowNum = i + 2;
+      try {
+        const accountName = String(row["AccountName*"] || row["AccountName"] || row["Account Name"] || row["Name"] || "").trim();
+        if (!accountName) continue;
+
+        const rawClass = row["GroupLevel1*"] || row["GroupLevel1"] || row["AccountClass"] || row["Class"] || row["Nature"] || "ASSET";
+        const nature = normalizeNature(rawClass);
+        const groupName = String(row["AccountGroupName*"] || row["AccountGroupName"] || row["GroupName"] || row["Group"] || "").trim();
+
+        let group = groupName ? groupNameMap.get(groupName.toUpperCase()) : null;
+        if (!group && groupName) {
+          const prefix = nature === "ASSET" ? "AST" : nature === "LIABILITY" ? "LIA" : nature === "EQUITY" ? "EQU" : nature === "INCOME" ? "INC" : "EXP";
+          const token = groupName.replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 8);
+          const gCode = `${prefix}_${token || "GRP"}`;
+          const gRes = await query(
+            "INSERT INTO fin_account_groups (company_id, code, name, nature, is_active) VALUES (:companyId, :gCode, :groupName, :nature, 1)",
+            { companyId, gCode, groupName, nature }
+          );
+          group = { id: gRes.insertId, code: gCode, name: groupName, nature };
+          groupNameMap.set(groupName.toUpperCase(), group);
+          groupNameMap.set(gCode.toUpperCase(), group);
+          createdGroups++;
+        }
+
+        if (!group) {
+          const fallback = existingGroups.find((g) => g.nature === nature);
+          if (fallback) {
+            group = fallback;
+          } else {
+            const defName = `${nature.charAt(0) + nature.slice(1).toLowerCase()} General`;
+            const defCode = `${nature.slice(0, 3)}_GEN`;
+            const gRes = await query(
+              "INSERT INTO fin_account_groups (company_id, code, name, nature, is_active) VALUES (:companyId, :defCode, :defName, :nature, 1)",
+              { companyId, defCode, defName, nature }
+            );
+            group = { id: gRes.insertId, code: defCode, name: defName, nature };
+            groupNameMap.set(defName.toUpperCase(), group);
+            createdGroups++;
+          }
+        }
+
+        const rawCur = String(row["Currency*"] || row["Currency"] || "").trim().toUpperCase();
+        const currencyId = (rawCur && curMap.get(rawCur)) ? curMap.get(rawCur) : baseCurrencyId;
+
+        let accCode = String(row["AccountNumber"] || row["AccountCode"] || row["Code"] || "").trim();
+        const natureMap = { ASSET: 1, LIABILITY: 2, EQUITY: 3, INCOME: 4, EXPENSE: 5 };
+        const naturePrefix = (natureMap[nature] || 1).toString();
+
+        if (accCode) {
+          const exists = await query(
+            "SELECT id FROM fin_accounts WHERE company_id = :companyId AND code = :code LIMIT 1",
+            { companyId, code: accCode }
+          );
+          if (exists.length) {
+            let seq = 1;
+            while (true) {
+              const candidate = `${naturePrefix}${String(seq).padStart(3, "0")}`;
+              const cCheck = await query("SELECT id FROM fin_accounts WHERE company_id = :companyId AND code = :code LIMIT 1", { companyId, code: candidate });
+              if (!cCheck.length) {
+                accCode = candidate;
+                break;
+              }
+              seq++;
+            }
+          }
+        } else {
+          const maxRows = await query(
+            `SELECT MAX(CAST(code AS UNSIGNED)) as maxCode FROM fin_accounts WHERE company_id = :companyId AND code REGEXP '^[1-5][0-9]{3}$' AND code LIKE :prefix`,
+            { companyId, prefix: `${naturePrefix}%` }
+          );
+          if (maxRows[0]?.maxCode) {
+            accCode = (Number(maxRows[0].maxCode) + 1).toString();
+          } else {
+            accCode = (Number(naturePrefix) * 1000 + 1).toString();
+          }
+        }
+
+        const rawPostable = String(row["IsPostable*"] || row["IsPostable"] || row["Postable"] || "Yes").trim().toLowerCase();
+        const isPostable = rawPostable === "no" || rawPostable === "0" || rawPostable === "false" ? 0 : 1;
+
+        const rawBal = String(row["BalanceType"] || "").trim().toUpperCase();
+        const balanceType = (rawBal === "DEBIT" || rawBal === "CREDIT")
+          ? rawBal
+          : (nature === "ASSET" || nature === "EXPENSE" ? "DEBIT" : "CREDIT");
+
+        await query(
+          `INSERT INTO fin_accounts (company_id, group_id, code, name, balance_type, currency_id, is_postable, is_active)
+           VALUES (:companyId, :groupId, :accCode, :accountName, :balanceType, :currencyId, :isPostable, 1)`,
+          {
+            companyId,
+            groupId: group.id,
+            accCode,
+            accountName,
+            balanceType,
+            currencyId,
+            isPostable,
+          }
+        );
+        createdAccounts++;
+      } catch (rowErr) {
+        errors.push(`Row ${rowNum}: ${rowErr.message}`);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Successfully processed template: ${createdAccounts} account(s) created, ${createdGroups} group(s) created.`,
+      accountsCreated: createdAccounts,
+      groupsCreated: createdGroups,
+      errors,
+    });
+  } catch (err) {
+    next(err);
   }
 };

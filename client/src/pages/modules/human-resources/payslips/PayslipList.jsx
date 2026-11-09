@@ -41,6 +41,12 @@ export default function PayslipList() {
   const [expandedLoans, setExpandedLoans] = useState({});
   const [sendingEmailId, setSendingEmailId] = useState(null); // tracks which row is sending
   const [emailProgress, setEmailProgress] = useState(0); // countdown seconds elapsed
+  const [periodApproval, setPeriodApproval] = useState({
+    is_approved: true,
+    status: "ALL",
+    forwarded_to: null,
+    approved_by: null,
+  });
 
   // Template Modal State
   const [selectedRecord, setSelectedRecord] = useState(null);
@@ -70,7 +76,18 @@ export default function PayslipList() {
         branch_id: filterBranch,
       };
       const res = await api.get("/hr/payslips", { params });
-      setItems(res?.data?.items || []);
+      const list = res?.data?.items || [];
+      setItems(list);
+      if (filterPeriod) {
+        setPeriodApproval({
+          is_approved: res?.data?.is_approved ?? (list.length > 0 ? list.every(it => it.is_approved !== false) : true),
+          status: res?.data?.payroll_status || (list.length > 0 ? list[0]?.payroll_status : "OPEN"),
+          forwarded_to: res?.data?.forwarded_to_username || list[0]?.forwarded_to_username || null,
+          approved_by: res?.data?.approved_by_username || list[0]?.approved_by_username || null,
+        });
+      } else {
+        setPeriodApproval({ is_approved: true, status: "ALL", forwarded_to: null, approved_by: null });
+      }
     } catch {
       toast.error("Failed to load payslips");
     } finally {
@@ -88,6 +105,10 @@ export default function PayslipList() {
 
   const sendBulkEmails = async () => {
     if (!items.length) return;
+    if (filterPeriod && !periodApproval.is_approved) {
+      toast.error("Cannot send bulk payslips: Processed salary for this period has not been approved yet.");
+      return;
+    }
     if (!window.confirm(`Send emails to ${items.length} employees?`)) return;
 
     setSendingBulk(true);
@@ -133,6 +154,10 @@ export default function PayslipList() {
 
   const sendEmail = async (r) => {
     if (sendingEmailId) return; // prevent double-clicks
+    if (r.is_approved === false) {
+      toast.error("Cannot send payslip: Processed salary has not been approved yet in Salary Processing.");
+      return;
+    }
     setSendingEmailId(r.id);
     setEmailProgress(0);
 
@@ -178,6 +203,10 @@ export default function PayslipList() {
   };
 
   const handleActionClick = (r, type) => {
+    if (r.is_approved === false) {
+      toast.error(`Cannot ${type === 'PRINT' ? 'print' : 'generate PDF for'} payslip: Processed salary has not been approved yet in Salary Processing.`);
+      return;
+    }
     setSelectedRecord(r);
     setActionType(type);
     executeAction(r, type);
@@ -217,7 +246,47 @@ export default function PayslipList() {
           document.body.removeChild(iframe);
           return;
         }
-        const printStyle = `<style>@media print { img, svg { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }</style>`;
+        const printStyle = `<style>
+          @page {
+            size: A4 portrait;
+            margin: 0;
+          }
+          @media print {
+            html, body {
+              width: 100% !important;
+              height: auto !important;
+              min-height: 0 !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              background: #fff !important;
+              overflow: visible !important;
+            }
+            .page-wrap {
+              width: 100% !important;
+              height: auto !important;
+              min-height: 0 !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              box-shadow: none !important;
+              page-break-after: avoid !important;
+              break-after: avoid !important;
+            }
+            .doc {
+              height: auto !important;
+              padding: 0.8cm 1cm !important;
+              page-break-after: avoid !important;
+              break-after: avoid !important;
+            }
+            img, svg {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            * {
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
+            }
+          }
+        </style>`;
         doc.open();
         doc.write(printStyle + html);
         doc.close();
@@ -240,7 +309,15 @@ export default function PayslipList() {
           "-" +
           (r.emp_code || r.id) +
           ".pdf";
-        await renderHtmlToPdf(html, fname);
+        const pdfStyle = `<style>
+          html, body, .page-wrap, .doc {
+            height: auto !important;
+            min-height: 0 !important;
+            box-shadow: none !important;
+            margin: 0 auto !important;
+          }
+        </style>`;
+        await renderHtmlToPdf(pdfStyle + html, fname);
       }
     } catch (e) {
       toast.error(
@@ -267,13 +344,12 @@ export default function PayslipList() {
               </p>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => window.history.back()} className="btn btn-secondary">
-                Back to Menu
-              </button>
+              <Link to="/human-resources" className="btn btn-secondary">Back to Menu</Link>
               <button
                 onClick={sendBulkEmails}
-                disabled={sendingBulk || !items.length}
-                className="btn btn-success"
+                disabled={sendingBulk || !items.length || (Boolean(filterPeriod) && !periodApproval.is_approved)}
+                className="btn btn-success disabled:opacity-50 disabled:cursor-not-allowed"
+                title={Boolean(filterPeriod) && !periodApproval.is_approved ? "Payroll must be approved before emailing payslips" : "Send email to all listed employees"}
               >
                 {sendingBulk ? "Sending..." : "📧 Bulk Email"}
               </button>
@@ -360,9 +436,44 @@ export default function PayslipList() {
           </div>
 
           
-                <div className="flex justify-end mb-4">
-                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+          {/* Approval Warning Banner */}
+          {Boolean(filterPeriod) && !periodApproval.is_approved && (
+            <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800 rounded-xl p-4 flex items-start gap-3 shadow-sm mb-4">
+              <div className="p-2 bg-amber-100 dark:bg-amber-900/60 rounded-lg text-amber-700 dark:text-amber-300 mt-0.5 shrink-0">
+                <span className="text-xl">🔒</span>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-semibold text-amber-900 dark:text-amber-200 text-sm">
+                    Salary Slips Restricted — Payroll Approval Required
+                  </h3>
+                  <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold bg-amber-200 dark:bg-amber-850 text-amber-900 dark:text-amber-100 uppercase tracking-wide">
+                    {periodApproval.status || "PENDING"}
+                  </span>
                 </div>
+                <p className="text-xs text-amber-800 dark:text-amber-300/90 mt-1 leading-relaxed">
+                  Processed salary for this payroll period must pass through the approval workflow before employee salary slips can be visible, printed, or emailed to staff.
+                  {periodApproval.forwarded_to && (
+                    <span className="block mt-1 font-medium text-amber-900 dark:text-amber-100">
+                      Currently forwarded for approval to: <span className="underline">{periodApproval.forwarded_to}</span>
+                    </span>
+                  )}
+                </p>
+                <div className="mt-2.5">
+                  <Link
+                    to="/human-resources/payroll"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-all"
+                  >
+                    Go to Salary Processing to Review & Approve →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end mb-4">
+            <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+          </div>
                 <div className="overflow-x-auto">
             <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
               <thead>
@@ -376,6 +487,9 @@ export default function PayslipList() {
                   </th>
                   <th className="text-right bg-amber-50/50 dark:bg-amber-900/10">
                     Tier 3
+                  </th>
+                  <th className="text-right bg-teal-50/50 dark:bg-teal-900/10 text-teal-800 dark:text-teal-300">
+                    Tax Relief
                   </th>
                   <th className="text-right bg-red-50/50 dark:bg-red-900/10">
                     PAYE Tax
@@ -407,22 +521,29 @@ export default function PayslipList() {
                           {r.emp_code}
                         </div>
                       </td>
-                      <td className="text-right font-mono text-slate-700 dark:text-slate-300">
+                      <td className="text-right  text-slate-700 dark:text-slate-300">
                         {fmt(r.basic_salary)}
                       </td>
-                      <td className="text-right font-mono text-slate-700 dark:text-slate-300">
+                      <td className="text-right  text-slate-700 dark:text-slate-300">
                         {fmt(r.allowances)}
                       </td>
-                      <td className="text-right font-mono text-amber-700 dark:text-amber-400 bg-amber-50/30 dark:bg-amber-900/10">
+                      <td className="text-right  text-amber-700 dark:text-amber-400 bg-amber-50/30 dark:bg-amber-900/10">
                         {fmt(r.ssf_employee)}
                       </td>
-                      <td className="text-right font-mono text-amber-700 dark:text-amber-400 bg-amber-50/30 dark:bg-amber-900/10">
+                      <td className="text-right  text-amber-700 dark:text-amber-400 bg-amber-50/30 dark:bg-amber-900/10">
                         {fmt(r.tier3_employee)}
                       </td>
-                      <td className="text-right font-mono text-red-600 dark:text-red-400 bg-red-50/30 dark:bg-red-900/10">
+                      <td className="text-right  text-teal-700 dark:text-teal-400 bg-teal-50/20 dark:bg-teal-900/5">
+                        {Number(r.tax_relief || 0) > 0 ? (
+                          <span className="font-semibold">{fmt(r.tax_relief)}</span>
+                        ) : (
+                          <span className="text-slate-400">—</span>
+                        )}
+                      </td>
+                      <td className="text-right  text-red-600 dark:text-red-400 bg-red-50/30 dark:bg-red-900/10">
                         {fmt(r.income_tax)}
                       </td>
-                      <td className="text-right font-mono text-red-700 dark:text-red-300 bg-red-50/30 dark:bg-red-900/10">
+                      <td className="text-right  text-red-700 dark:text-red-300 bg-red-50/30 dark:bg-red-900/10">
                         <div className="flex items-center gap-2 justify-end">
                           <span>{fmt(r.loan_deductions_total || 0)}</span>
                           {r.loan_items &&
@@ -441,48 +562,69 @@ export default function PayslipList() {
                             )}
                         </div>
                       </td>
-                      <td className="text-right font-mono text-red-700 dark:text-red-300 bg-red-50/30 dark:bg-red-900/10 font-semibold">
+                      <td className="text-right  text-red-700 dark:text-red-300 bg-red-50/30 dark:bg-red-900/10 font-semibold">
                         {fmt(r.deductions)}
                       </td>
-                      <td className="text-right font-mono font-bold text-green-700 dark:text-green-400 bg-green-50/30 dark:bg-green-900/10">
+                      <td className="text-right  font-bold text-green-700 dark:text-green-400 bg-green-50/30 dark:bg-green-900/10">
                         {fmt(r.net_salary)}
                       </td>
                       <td className="text-center">
-                        <div className="flex justify-center gap-2 whitespace-nowrap">
-                          <button
-                            onClick={() => handleActionClick(r, "PRINT")}
-                            className="inline-flex items-center px-4 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all"
-                          >
-                            Print
-                          </button>
-                          <button
-                            onClick={() => handleActionClick(r, "PDF")}
-                            className="inline-flex items-center px-4 py-1.5 rounded bg-red-900 hover:bg-red-900 text-white text-xs font-semibold shadow-sm transition-all"
-                          >
-                            PDF
-                          </button>
-                          <button
-                            onClick={() => sendEmail(r)}
-                            disabled={sendingEmailId === r.id}
-                            className={`inline-flex items-center px-4 py-1.5 rounded text-white text-xs font-semibold shadow-sm transition-all ${
-                              sendingEmailId === r.id
-                                ? "bg-amber-500 cursor-wait animate-pulse"
-                                : "bg-brand hover:bg-brand-700"
-                            }`}
-                          >
-                            {sendingEmailId === r.id
-                              ? `⏳ Sending... ${emailProgress}s`
-                              : "Email"}
-                          </button>
-                        </div>
+                        {r.is_approved === false ? (
+                          <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
+                            <span
+                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/40 px-2.5 py-1 rounded border border-amber-200 dark:border-amber-800"
+                              title="Salary slip locked until payroll is approved in Salary Processing"
+                            >
+                              <span>🔒</span> Pending Approval
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex justify-center gap-2 whitespace-nowrap">
+                            <button
+                              onClick={() => handleActionClick(r, "PRINT")}
+                              className="inline-flex items-center px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all"
+                            >
+                              Print
+                            </button>
+                            <button
+                              onClick={() => handleActionClick(r, "PDF")}
+                              className="inline-flex items-center px-3 py-1.5 rounded bg-red-800 hover:bg-red-900 text-white text-xs font-semibold shadow-sm transition-all"
+                            >
+                              PDF
+                            </button>
+                            <button
+                              onClick={() => sendEmail(r)}
+                              disabled={sendingEmailId === r.id}
+                              className={`inline-flex items-center px-3 py-1.5 rounded text-white text-xs font-semibold shadow-sm transition-all ${
+                                sendingEmailId === r.id
+                                  ? "bg-amber-500 cursor-wait animate-pulse"
+                                  : "bg-brand hover:bg-brand-700"
+                              }`}
+                            >
+                              {sendingEmailId === r.id
+                                ? `⏳ Sending... ${emailProgress}s`
+                                : "Email"}
+                            </button>
+                          </div>
+                        )}
                       </td>
-                      <td>{p.created_by_name || "-"}</td>
-                      <td>{p.created_at ? new Date(p.created_at).toLocaleDateString() : "-"}</td>
+                      <td className="text-xs text-slate-700 dark:text-slate-300">
+                        {r.created_by_name || "System Admin"}
+                      </td>
+                      <td className="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                        {r.created_at
+                          ? new Date(r.created_at).toLocaleDateString("en-GB", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            })
+                          : "-"}
+                      </td>
                     </tr>
                     {expandedLoans[r.id] && r.loan_items && (
                       <tr className="bg-slate-50/70 dark:bg-slate-700/40 animate-in fade-in slide-in-from-top-1">
                         <td
-                          colSpan={11}
+                          colSpan={14}
                           className="px-4 py-2 border-b border-slate-100 dark:border-slate-700"
                         >
                           <div className="flex flex-wrap gap-2 items-center">
@@ -499,7 +641,7 @@ export default function PayslipList() {
                                     ? `${item.loan_type}`
                                     : `Loan ${lid}`}
                                 </span>
-                                <span className="text-[11px] font-bold font-mono text-slate-700 dark:text-slate-300 italic">
+                                <span className="text-[11px] font-bold  text-slate-700 dark:text-slate-300 italic">
                                   {fmt(item.amount)}
                                 </span>
                               </div>
@@ -513,7 +655,7 @@ export default function PayslipList() {
                 {!items.length && !loading && (
                   <tr>
                     <td
-                      colSpan={11}
+                      colSpan={14}
                       className="text-center py-12 text-slate-500 italic"
                     >
                       No payslips found for the current selection.

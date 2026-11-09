@@ -16,6 +16,7 @@ import { toast } from "react-toastify";
 export default function UserOverrides() {
   const navigate = useNavigate();
   const STANDARD_EXCEPTIONS = [
+    { code: "BANKS.AI.FLOATING_WIDGET", label: "Banks AI - Floating Assistant Widget Visibility" },
     { code: "SALES.DISCOUNT.ALLOW", label: "Permission to give discount" },
     { code: "WORKFLOW.APPROVAL.REVERSE", label: "Reversal of approval" },
     {
@@ -77,6 +78,10 @@ export default function UserOverrides() {
     {
       code: "TASK.REASSIGN",
       label: "Task Management - Reassign Task to Users",
+    },
+    {
+      code: "FACILITIES.TASK.CANCEL",
+      label: "FM Task Management - Cancel Task Assignment",
     },
     {
       code: "TRANSPORT.TRIP.REASSIGN",

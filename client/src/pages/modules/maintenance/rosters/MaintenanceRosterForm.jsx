@@ -17,6 +17,7 @@ import {
   ClipboardList,
   AlertCircle,
   ArrowRight,
+  ArrowLeft,
   X,
 } from "lucide-react";
 import { usePermission } from "@/auth/PermissionContext.jsx";
@@ -273,9 +274,9 @@ export default function MaintenanceRosterForm() {
     <div className="space-y-5">
       {/* ── Page header ── */}
       <div className="flex items-center gap-3">
-        <button onClick={() => window.history.back()} className="btn-secondary">
-          ← Back
-        </button>
+        <Link to="/maintenance/rosters" className="btn btn-secondary flex items-center gap-1.5">
+          <ArrowLeft size={16} /> Back
+        </Link>
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
             {isEdit ? (isView ? "View" : "Edit") : "New"} Maintenance Roster
@@ -468,7 +469,7 @@ export default function MaintenanceRosterForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Available Assets */}
                 <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white dark:bg-slate-800">
-                  <div className="bg-slate-50 dark:bg-slate-800/80 px-3 py-2 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                  <div className="bg-white dark:bg-slate-900 px-3 py-2 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
                     <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
                       Available Assets{" "}
                       {form.asset_group && `(${form.asset_group})`}

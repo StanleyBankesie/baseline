@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { Link, Route, Routes } from "react-router-dom";
+import { Link, Route, Routes, Navigate } from "react-router-dom";
 import ModuleDashboard from "../../../components/ModuleDashboard";
 import ModuleLayout from "../../../components/ModuleLayout.jsx";
 import { api } from "../../../api/client.js";
@@ -12,6 +12,7 @@ import { api } from "../../../api/client.js";
 import ProjectList from "./projects/ProjectList.jsx";
 import ProjectForm from "./projects/ProjectForm.jsx";
 import ProjectDetailDashboard from "./projects/ProjectDetailDashboard.jsx";
+import ProjectMilestonesTimeline from "./projects/ProjectMilestonesTimeline.jsx";
 import TaskList from "./tasks/TaskList.jsx";
 import TaskForm from "./tasks/TaskForm.jsx";
 import TaskExecution from "./tasks/TaskExecution.jsx";
@@ -33,13 +34,28 @@ import PMPurchaseRequisitionList from "./purchase-requisitions/PMPurchaseRequisi
 import PMPurchaseRequisitionForm from "./purchase-requisitions/PMPurchaseRequisitionForm.jsx";
 import ProjectIncomeReport from "./reports/ProjectIncomeReport.jsx";
 import ProjectExpenseReport from "./reports/ProjectExpenseReport.jsx";
+import ProjectExpenseIncomeReport from "./reports/ProjectExpenseIncomeReport.jsx";
 import TaskExecutionReportPage from "./reports/TaskExecutionReportPage.jsx";
 import TaskManagementAndExecutionPage from "./reports/TaskManagementAndExecutionPage.jsx";
 import ProjectManagementDashboardPage from "./ProjectManagementDashboardPage.jsx";
+import ResourceManagement from "./resources/ResourceManagement.jsx";
 import ProjectQuotationList from "./quotations/ProjectQuotationList.jsx";
 import ProjectQuotationForm from "./quotations/ProjectQuotationForm.jsx";
 import ProjectInvoiceList from "./project-invoices/ProjectInvoiceList.jsx";
 import ProjectInvoiceForm from "./project-invoices/ProjectInvoiceForm.jsx";
+
+import BOQManager from "./construction/BOQManager.jsx";
+import CostControlDashboard from "./construction/CostControlDashboard.jsx";
+import GanttScheduleView from "./construction/GanttScheduleView.jsx";
+import DailySiteReportList from "./construction/DailySiteReportList.jsx";
+import DailySiteReportForm from "./construction/DailySiteReportForm.jsx";
+import SubcontractorManager from "./construction/SubcontractorManager.jsx";
+import ClientValuationList from "./construction/ClientValuationList.jsx";
+import PaymentApplicationList from "./construction/PaymentApplicationList.jsx";
+import VariationRegister from "./construction/VariationRegister.jsx";
+import QualityControlPage from "./construction/QualityControlPage.jsx";
+import DocumentRegisterPage from "./construction/DocumentRegisterPage.jsx";
+import EquipmentLogsPage from "./construction/EquipmentLogsPage.jsx";
 
 export const projectManagementSections = [
   {
@@ -67,12 +83,12 @@ export const projectManagementSections = [
         icon: "📜",
       },
       {
-        title: "Setup & WBS",
+        title: "Operations Setup",
         path: "/project-management/setup",
         actions: [
           { label: "View", path: "/project-management/setup", type: "outline" }
         ],
-        description: "Project categories, types, and WBS templates",
+        description: "Project categories, types, and operations setup",
         icon: "⚙️",
       },
       {
@@ -80,7 +96,7 @@ export const projectManagementSections = [
         path: "/project-management/milestones",
         actions: [
           { label: "View", path: "/project-management/milestones", type: "outline" },
-          { label: "New", path: "/project-management/milestones/new", type: "primary" }
+          { label: "New", path: "/project-management/tasks/new", type: "primary" }
         ],
         description: "Track key project events and deadlines",
         icon: "🎯",
@@ -275,6 +291,139 @@ export const projectManagementSections = [
         description: "Payment vouchers linked to projects",
         icon: "💳",
       },
+      {
+        title: "Project Expense and Income Report",
+        path: "/project-management/reports/project-expense-income",
+        actions: [
+          { label: "View", path: "/project-management/reports/project-expense-income", type: "outline" }
+        ],
+        description: "Profit and loss report showing deficit and surplus per project",
+        icon: "⚖️",
+      },
+    ],
+  },
+  {
+    title: "Construction Estimating & Cost Control",
+    badge: "Commercial",
+    items: [
+      {
+        title: "Bill of Quantities (BOQ)",
+        path: "/project-management/boqs",
+        actions: [
+          { label: "View", path: "/project-management/boqs", type: "outline" },
+        ],
+        description: "Hierarchical work breakdown, rate build-up, and takeoff sheets",
+        icon: "📐",
+      },
+      {
+        title: "Cost Control & EVM",
+        path: "/project-management/cost-control",
+        actions: [
+          { label: "View", path: "/project-management/cost-control", type: "outline" },
+        ],
+        description: "Earned Value Management, CPI, SPI, EAC, and cost code tracking",
+        icon: "📊",
+      },
+      {
+        title: "Variations & Change Orders",
+        path: "/project-management/variations",
+        actions: [
+          { label: "View", path: "/project-management/variations", type: "outline" },
+        ],
+        description: "Change orders, scope additions, and contract adjustments",
+        icon: "📝",
+      },
+    ],
+  },
+  {
+    title: "Valuations & Contracts",
+    badge: "Billing",
+    items: [
+      {
+        title: "Client Valuations",
+        path: "/project-management/client-valuations",
+        actions: [
+          { label: "View", path: "/project-management/client-valuations", type: "outline" },
+        ],
+        description: "Physical work measurement, BOQ items, variations, and assessed value",
+        icon: "📐",
+      },
+      {
+        title: "Interim Payment Applications (IPAs)",
+        path: "/project-management/payment-applications",
+        actions: [
+          { label: "View", path: "/project-management/payment-applications", type: "outline" },
+        ],
+        description: "Formal payment applications, certifications, deductions, and payment tracking",
+        icon: "📑",
+      },
+      {
+        title: "Subcontractors & IPCs",
+        path: "/project-management/subcontracts",
+        actions: [
+          { label: "View", path: "/project-management/subcontracts", type: "outline" },
+        ],
+        description: "Trade agreements, interim payment certificates, and retention",
+        icon: "🤝",
+      },
+    ],
+  },
+  {
+    title: "Site Operations & Plant",
+    badge: "Field",
+    items: [
+      {
+        title: "Daily Site Diary (DSR)",
+        path: "/project-management/daily-reports",
+        actions: [
+          { label: "View", path: "/project-management/daily-reports", type: "outline" },
+          { label: "New", path: "/project-management/daily-reports/new", type: "primary" },
+        ],
+        description: "Weather, daily workforce headcount, plant deployment, and work logs",
+        icon: "🏗️",
+      },
+      {
+        title: "Plant & Equipment Logs",
+        path: "/project-management/equipment-logs",
+        actions: [
+          { label: "View", path: "/project-management/equipment-logs", type: "outline" },
+        ],
+        description: "Machine operating hours, idle/breakdown downtime, and fuel costing",
+        icon: "🚜",
+      },
+    ],
+  },
+  {
+    title: "Planning & QA/QC",
+    badge: "Compliance",
+    items: [
+      {
+        title: "Schedule & Critical Path",
+        path: "/project-management/schedule",
+        actions: [
+          { label: "View", path: "/project-management/schedule", type: "outline" },
+        ],
+        description: "CPM network analysis, float calculations, and EOT claims",
+        icon: "📅",
+      },
+      {
+        title: "Quality Control (QA/QC)",
+        path: "/project-management/quality-control",
+        actions: [
+          { label: "View", path: "/project-management/quality-control", type: "outline" },
+        ],
+        description: "Inspection requests (IR), NCRs, punch lists, and material tests",
+        icon: "🛡️",
+      },
+            {
+        title: "Drawings & RFIs",
+        path: "/project-management/documents",
+        actions: [
+          { label: "View", path: "/project-management/documents", type: "outline" },
+        ],
+        description: "Approved drawing register and requests for information",
+        icon: "📋",
+      },
     ],
   },
 ];
@@ -403,7 +552,38 @@ function ProjectManagementLanding() {
  */
 export default function ProjectManagementHome() {
   return (
-    <ModuleLayout
+    <div className="pm-module-scope w-full">
+      <style>{`
+        /* Canonical Omnisuite Project Management Module Styling */
+        .pm-module-scope {
+          --pm-brand: #0E3646;
+          --pm-brand-hover: #215876;
+        }
+
+        /* Ensure table header styling matches enterprise design standard */
+        .pm-module-scope thead th {
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          font-weight: 700;
+          color: #64748b;
+          border-bottom: 1px solid #e2e8f0;
+          background-color: #f8fafc;
+        }
+        :is(.dark) .pm-module-scope thead th {
+          color: #94a3b8;
+          border-bottom-color: #334155;
+          background-color: rgba(30, 41, 59, 0.8);
+        }
+
+        /* Standardize input and select surfaces across all PM pages */
+        .pm-module-scope .input,
+        .pm-module-scope select.input,
+        .pm-module-scope input.input {
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+      `}</style>
+      <ModuleLayout
       sections={projectManagementSections}
       moduleKey="project-management"
     >
@@ -426,9 +606,23 @@ export default function ProjectManagementHome() {
         <Route path="/tasks/:id" element={<TaskForm />} />
 
         <Route path="/expenses" element={<ExpenseList />} />
+        <Route path="/expenses/new" element={<ExpenseList />} />
         <Route path="/income" element={<ProjectIncomeList />} />
+        <Route path="/income/new" element={<ProjectIncomeList />} />
 
         <Route path="/reports" element={<ProjectReports />} />
+        <Route
+          path="/reports/task-management"
+          element={<TaskExecutionReportPage />}
+        />
+        <Route
+          path="/reports/task-management-execution"
+          element={<TaskExecutionReportPage />}
+        />
+        <Route
+          path="/reports/task-management-and-execution"
+          element={<TaskExecutionReportPage />}
+        />
         <Route
           path="/reports/task-execution"
           element={<TaskExecutionReportPage />}
@@ -446,8 +640,8 @@ export default function ProjectManagementHome() {
           element={<ProjectExpenseReport />}
         />
         <Route
-          path="/reports/task-management-and-execution"
-          element={<TaskManagementAndExecutionPage />}
+          path="/reports/project-expense-income"
+          element={<ProjectExpenseIncomeReport />}
         />
 
         <Route path="/setup" element={<PMSetup />} />
@@ -503,9 +697,12 @@ export default function ProjectManagementHome() {
           element={<ProjectInvoiceForm />}
         />
 
-        <Route path="/milestones" element={<ProjectManagementDashboardPage />} />
-        <Route path="/resources" element={<ProjectManagementDashboardPage />} />
+        <Route path="/milestones" element={<ProjectMilestonesTimeline />} />
+        <Route path="/milestones/new" element={<TaskForm />} />
+        <Route path="/resources" element={<ResourceManagement />} />
+        <Route path="/resources/new" element={<ResourceManagement />} />
         <Route path="/timesheets" element={<TimesheetList />} />
+        <Route path="/timesheets/new" element={<TimesheetList />} />
         <Route path="/income" element={<ProjectIncomeList />} />
 
         <Route
@@ -520,8 +717,31 @@ export default function ProjectManagementHome() {
           path="/purchase-requisitions/:id"
           element={<PMPurchaseRequisitionForm />}
         />
+        <Route
+          path="/purchase-requisitions/:id/edit"
+          element={<PMPurchaseRequisitionForm />}
+        />
+        {/* Construction Management Module Routes */}
+        <Route path="/boqs" element={<BOQManager />} />
+        <Route path="/cost-control" element={<CostControlDashboard />} />
+        <Route path="/schedule" element={<GanttScheduleView />} />
+        <Route path="/daily-reports" element={<DailySiteReportList />} />
+        <Route path="/daily-reports/new" element={<DailySiteReportForm />} />
+        <Route path="/daily-reports/:id" element={<DailySiteReportForm />} />
+        <Route path="/subcontracts" element={<SubcontractorManager />} />
+        <Route path="/client-valuations" element={<ClientValuationList />} />
+        <Route path="/payment-applications" element={<PaymentApplicationList />} />
+        <Route path="/variations" element={<VariationRegister />} />
+        <Route path="/quality-control" element={<QualityControlPage />} />
+        <Route path="/safety" element={<Navigate to="/environmental-health-safety/safety" replace />} />
+        <Route path="/safety/incidents" element={<Navigate to="/environmental-health-safety/incidents" replace />} />
+        <Route path="/safety/toolbox-talks" element={<Navigate to="/environmental-health-safety/toolbox-talks" replace />} />
+        <Route path="/documents" element={<DocumentRegisterPage />} />
+        <Route path="/rfis" element={<DocumentRegisterPage />} />
+        <Route path="/equipment-logs" element={<EquipmentLogsPage />} />
       </Routes>
     </ModuleLayout>
+    </div>
   );
 }
 
@@ -568,7 +788,7 @@ export const projectManagementFeatures = [
   },
   {
     module_key: "project-management",
-    label: "Project Setup",
+    label: "Operations Setup",
     path: "/project-management/setup",
         actions: [
           { label: "View", path: "/project-management/setup", type: "outline" }
@@ -631,7 +851,7 @@ export const projectManagementFeatures = [
     path: "/project-management/milestones",
         actions: [
           { label: "View", path: "/project-management/milestones", type: "outline" },
-          { label: "New", path: "/project-management/milestones/new", type: "primary" }
+          { label: "New", path: "/project-management/tasks/new", type: "primary" }
         ],
     type: "feature",
   },
@@ -715,6 +935,15 @@ export const projectManagementFeatures = [
   },
   {
     module_key: "project-management",
+    label: "Project Expense and Income Report",
+    path: "/project-management/reports/project-expense-income",
+    actions: [
+      { label: "View", path: "/project-management/reports/project-expense-income", type: "outline" }
+    ],
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
     label: "Task Management Report",
     path: "/project-management/reports/task-management",
         actions: [
@@ -729,6 +958,86 @@ export const projectManagementFeatures = [
         actions: [
           { label: "View", path: "/project-management/reports/task-execution", type: "outline" }
         ],
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Bill of Quantities (BOQ)",
+    path: "/project-management/boqs",
+    actions: [{ label: "View", path: "/project-management/boqs", type: "outline" }],
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Cost Control & EVM",
+    path: "/project-management/cost-control",
+    actions: [{ label: "View", path: "/project-management/cost-control", type: "outline" }],
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Planning & CPM Schedule",
+    path: "/project-management/schedule",
+    actions: [{ label: "View", path: "/project-management/schedule", type: "outline" }],
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Daily Site Diary (DSR)",
+    path: "/project-management/daily-reports",
+    actions: [
+      { label: "View", path: "/project-management/daily-reports", type: "outline" },
+      { label: "New", path: "/project-management/daily-reports/new", type: "primary" },
+    ],
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Subcontractors & IPCs",
+    path: "/project-management/subcontracts",
+    actions: [{ label: "View", path: "/project-management/subcontracts", type: "outline" }],
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Client Valuations",
+    path: "/project-management/client-valuations",
+    actions: [{ label: "View", path: "/project-management/client-valuations", type: "outline" }],
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Interim Payment Applications (IPAs)",
+    path: "/project-management/payment-applications",
+    actions: [{ label: "View", path: "/project-management/payment-applications", type: "outline" }],
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Variations & Change Orders",
+    path: "/project-management/variations",
+    actions: [{ label: "View", path: "/project-management/variations", type: "outline" }],
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Quality Control (QA/QC)",
+    path: "/project-management/quality-control",
+    actions: [{ label: "View", path: "/project-management/quality-control", type: "outline" }],
+    type: "feature",
+  },
+    {
+    module_key: "project-management",
+    label: "Drawings & Documents",
+    path: "/project-management/documents",
+    actions: [{ label: "View", path: "/project-management/documents", type: "outline" }],
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Plant & Equipment Logs",
+    path: "/project-management/equipment-logs",
+    actions: [{ label: "View", path: "/project-management/equipment-logs", type: "outline" }],
     type: "feature",
   },
 ];

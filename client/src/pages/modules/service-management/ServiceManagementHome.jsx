@@ -26,6 +26,12 @@ import ServiceInvoiceList from "./service-invoices/ServiceInvoiceList.jsx";
 import ServiceInvoiceForm from "./service-invoices/ServiceInvoiceForm.jsx";
 import ServiceParametersPage from "./setup/ServiceParametersPage.jsx";
 import ServiceReportsPage from "./reports/ServiceReportsPage.jsx";
+import PropertiesList from "../maintenance/properties/PropertiesList.jsx";
+import FMContractsList from "../maintenance/fm-contracts/FMContractsList.jsx";
+import FieldTechnicianJobCard from "../maintenance/field-service/FieldTechnicianJobCard.jsx";
+import ChecklistTemplatesList from "../maintenance/checklists/ChecklistTemplatesList.jsx";
+import SoftServicesPage from "../maintenance/soft-services/SoftServicesPage.jsx";
+import FacilitiesOperationsDashboard from "../maintenance/operations-dashboard/FacilitiesOperationsDashboard.jsx";
 
 export const serviceManagementSections = [
   {
@@ -192,12 +198,12 @@ export const serviceManagementSections = [
         ]
       },
       {
-        title: "Service Parameters",
-        description: "Configure SLAs, categories, and service settings",
-        path: "/service-management/setup/parameters",
+        title: "Service Setup",
+        description: "Configure SLAs, categories, clients, and service parameters",
+        path: "/service-management/setup",
         icon: "⚙️",
         actions: [
-          { label: "Manage", path: "/service-management/setup/parameters", type: "primary", featureKey: "SERVICE.MANAGE", action: "view" }
+          { label: "Manage", path: "/service-management/setup", type: "primary", featureKey: "SERVICE.MANAGE", action: "view" }
         ]
       }
     ],
@@ -286,8 +292,8 @@ function ServiceManagementLanding() {
 
   return (
     <ModuleDashboard
-      title="Service Management"
-      description="End-to-end service request, confirmation, and billing"
+      title="Field Service Management"
+      description="End-to-end customer & supplier service requests, work orders, field execution, confirmations, and billing"
       stats={stats}
       moduleKey="service-management"
       useSectionNavigation={true}
@@ -317,6 +323,12 @@ export default function ServiceManagementHome() {
     >
       <Routes>
         <Route path="/" element={<ServiceManagementLanding />} />
+        <Route path="facilities-dashboard" element={<FacilitiesOperationsDashboard />} />
+        <Route path="properties" element={<PropertiesList />} />
+        <Route path="fm-contracts" element={<FMContractsList />} />
+        <Route path="field-service" element={<FieldTechnicianJobCard />} />
+        <Route path="checklists" element={<ChecklistTemplatesList />} />
+        <Route path="soft-services" element={<SoftServicesPage />} />
         <Route
           path="dashboard"
           element={
@@ -361,6 +373,18 @@ export default function ServiceManagementHome() {
         />
         <Route path="service-execution" element={<ServiceExecutionForm />} />
         <Route
+          path="service-confirmations"
+          element={<ServiceConfirmationsList />}
+        />
+        <Route
+          path="service-confirmations/new"
+          element={<ServiceConfirmationForm />}
+        />
+        <Route
+          path="service-confirmations/:id"
+          element={<ServiceConfirmationForm />}
+        />
+        <Route
           path="service-confirmation"
           element={<ServiceConfirmationsList />}
         />
@@ -378,7 +402,9 @@ export default function ServiceManagementHome() {
         <Route path="service-bills" element={<ServiceBillsList />} />
         <Route path="service-bills/new" element={<ServiceBillForm />} />
         <Route path="service-bills/:id" element={<ServiceBillForm />} />
+        <Route path="setup" element={<ServiceParametersPage />} />
         <Route path="setup/parameters" element={<ServiceParametersPage />} />
+        <Route path="setup/*" element={<ServiceParametersPage />} />
         <Route
           path="visitors-log"
           element={

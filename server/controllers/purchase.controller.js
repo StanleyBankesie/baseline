@@ -429,6 +429,152 @@ async function ensureServiceConfirmationTables() {
       "ALTER TABLE inv_service_confirmation_details ADD COLUMN item_id BIGINT UNSIGNED NULL AFTER confirmation_id",
     );
   }
+  if (!(await hasColumn("inv_service_confirmations", "auto_create_bill"))) {
+    try {
+      await pool.query(
+        "ALTER TABLE inv_service_confirmations ADD COLUMN auto_create_bill TINYINT(1) NOT NULL DEFAULT 0 AFTER status",
+      );
+    } catch {}
+  }
+  if (!(await hasColumn("pur_bills", "service_confirmation_id"))) {
+    try {
+      await pool.query(
+        "ALTER TABLE pur_bills ADD COLUMN service_confirmation_id BIGINT UNSIGNED NULL AFTER grn_id",
+      );
+    } catch {}
+  }
+  if (!(await hasColumn("pur_service_bills", "service_confirmation_id"))) {
+    try {
+      await pool.query(
+        "ALTER TABLE pur_service_bills ADD COLUMN service_confirmation_id BIGINT UNSIGNED NULL AFTER order_id",
+      );
+    } catch {}
+  }
+}
+
+export async function createPurchaseBillFromServiceConfirmationTx(
+  conn,
+  { companyId, branchId, scId, orderId, supplierId, scDate, userId }
+) {
+  if (!scId) return null;
+
+  // Check if Service Bill already exists for this service confirmation
+  const [existingServiceBills] = await conn.execute(
+    `SELECT id, bill_no
+       FROM pur_service_bills
+      WHERE company_id = :companyId
+        AND service_confirmation_id = :scId
+      LIMIT 1`,
+    { companyId, scId }
+  );
+  if (existingServiceBills?.length) {
+    return { id: Number(existingServiceBills[0].id), bill_no: existingServiceBills[0].bill_no };
+  }
+
+  // Get service confirmation header
+  const [scHeaders] = await conn.execute(
+    `SELECT sc_no, supplier_id, order_id, sc_date, total_amount, remarks
+       FROM inv_service_confirmations
+      WHERE id = :scId
+      LIMIT 1`,
+    { scId }
+  );
+  const scHdr = scHeaders?.[0] || {};
+  const effectiveSupplierId = supplierId || scHdr.supplier_id || null;
+  const effectiveOrderId = orderId || scHdr.order_id || null;
+
+  // Get supplier name
+  let clientName = null;
+  if (effectiveSupplierId) {
+    const [supRows] = await conn.execute(
+      `SELECT supplier_name FROM pur_suppliers WHERE id = :supplierId LIMIT 1`,
+      { supplierId: effectiveSupplierId }
+    );
+    if (supRows?.length) clientName = supRows[0].supplier_name;
+  }
+
+  const [scDetails] = await conn.execute(
+    `SELECT item_id, description, qty, unit_price, line_total
+       FROM inv_service_confirmation_details
+      WHERE confirmation_id = :scId`,
+    { scId }
+  );
+  const details = Array.isArray(scDetails) ? scDetails : [];
+  const totalAmount = details.reduce(
+    (sum, d) => sum + Number(d.line_total || Number(d.qty || 0) * Number(d.unit_price || 0)),
+    0
+  ) || Number(scHdr.total_amount || 0);
+
+  const prefix = "SVB";
+  let billNo;
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    try {
+      const [rows] = await conn.execute(
+        `SELECT bill_no FROM pur_service_bills
+          WHERE company_id = :companyId AND bill_no LIKE :pattern
+          ORDER BY CAST(SUBSTRING(bill_no, 5) AS UNSIGNED) DESC LIMIT 1 FOR UPDATE`,
+        { companyId, pattern: `${prefix}-%` }
+      );
+      let nextNum = 1;
+      if (rows?.[0]?.bill_no) {
+        const m = String(rows[0].bill_no).match(/(\d+)$/);
+        if (m) nextNum = Number(m[1]) + 1;
+      }
+      billNo = `${prefix}-${String(nextNum).padStart(6, "0")}`;
+
+      const [res] = await conn.execute(
+        `INSERT INTO pur_service_bills
+          (company_id, branch_id, supplier_id, order_id, service_confirmation_id, bill_no,
+           bill_date, due_date, service_date, status, payment_status,
+           client_name, subtotal, total_amount, currency_id, exchange_rate,
+           notes, created_by)
+         VALUES
+          (:companyId, :branchId, :supplierId, :orderId, :scId, :billNo,
+           :billDate, :dueDate, :serviceDate, 'POSTED', 'UNPAID',
+           :clientName, :subtotal, :totalAmount, 4, 1,
+           :notes, :createdBy)`,
+        {
+          companyId,
+          branchId: branchId || 1,
+          supplierId: effectiveSupplierId,
+          orderId: effectiveOrderId,
+          scId,
+          billNo,
+          billDate: scDate || scHdr.sc_date || new Date().toISOString().slice(0, 10),
+          dueDate: scDate || scHdr.sc_date || new Date().toISOString().slice(0, 10),
+          serviceDate: scDate || scHdr.sc_date || new Date().toISOString().slice(0, 10),
+          clientName: clientName || "Contractor",
+          subtotal: totalAmount,
+          totalAmount,
+          notes: `Auto-generated from Service Confirmation #${scHdr.sc_no || scId}`,
+          createdBy: userId || null,
+        }
+      );
+
+      const billId = Number(res.insertId || 0);
+      for (const d of details) {
+        const lineTotal = Number(d.line_total || Number(d.qty || 0) * Number(d.unit_price || 0));
+        await conn.execute(
+          `INSERT INTO pur_service_bill_details
+            (bill_id, item_id, description, qty, rate, amount)
+           VALUES
+            (:billId, :itemId, :description, :qty, :rate, :amount)`,
+          {
+            billId,
+            itemId: Number(d.item_id || 0) || null,
+            description: d.description || "Service Deliverable",
+            qty: Number(d.qty || 1),
+            rate: Number(d.unit_price || 0),
+            amount: lineTotal,
+          }
+        );
+      }
+      return { id: billId, bill_no: billNo };
+    } catch (err) {
+      if (err.code === "ER_DUP_ENTRY" && attempt < 5) continue;
+      throw err;
+    }
+  }
 }
 
 // Utility Function: Generate the next sequential document number for a specific table
@@ -472,6 +618,9 @@ export const listServiceConfirmations = async (req, res, next) => {
              c.sc_date,
              c.status,
              c.total_amount,
+             c.auto_create_bill,
+             pb.id AS bill_id,
+             pb.bill_no,
              s.supplier_name,
              c.created_at,
              u.username AS created_by_name
@@ -479,6 +628,7 @@ export const listServiceConfirmations = async (req, res, next) => {
       LEFT JOIN pur_suppliers s ON s.id = c.supplier_id
       LEFT JOIN adm_users u ON u.id = c.created_by
       LEFT JOIN pur_service_orders so ON so.id = c.order_id
+      LEFT JOIN pur_bills pb ON pb.service_confirmation_id = c.id
          WHERE c.company_id = :companyId
         AND (:branchIdsStr = '' OR FIND_IN_SET(c.branch_id, :branchIdsStr))
       ORDER BY c.sc_date DESC, c.id DESC
@@ -507,10 +657,13 @@ export const getServiceConfirmationById = async (req, res, next) => {
     const rows = await query(
       `
       SELECT c.*,
+          pb.id AS bill_id,
+          pb.bill_no,
           c.created_at,
           u.username AS created_by_name
          FROM inv_service_confirmations c
         LEFT JOIN adm_users u ON u.id = c.created_by
+        LEFT JOIN pur_bills pb ON pb.service_confirmation_id = c.id
          WHERE c.id = :id AND c.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(c.branch_id, :branchIdsStr))
       LIMIT 1
       `,
@@ -681,10 +834,28 @@ export const createServiceConfirmation = async (req, res, next) => {
         { orderId }
       );
     }
+    let autoBill = null;
+    if (body.auto_create_bill) {
+      autoBill = await createPurchaseBillFromServiceConfirmationTx(conn, {
+        companyId,
+        branchId,
+        scId: confirmationId,
+        orderId,
+        supplierId,
+        scDate,
+        userId: createdBy,
+      });
+    }
     await conn.commit();
     res
       .status(201)
-      .json({ id: confirmationId, sc_no: scNo, total_amount: totalAmount });
+      .json({
+        id: confirmationId,
+        sc_no: scNo,
+        total_amount: totalAmount,
+        bill_id: autoBill?.id || null,
+        bill_no: autoBill?.bill_no || null,
+      });
   } catch (err) {
     try {
       await conn.rollback();
@@ -1456,8 +1627,25 @@ export const updateServiceConfirmation = async (req, res, next) => {
         },
       );
     }
+    let autoBill = null;
+    if (body.auto_create_bill) {
+      autoBill = await createPurchaseBillFromServiceConfirmationTx(conn, {
+        companyId,
+        branchId,
+        scId: id,
+        orderId,
+        supplierId,
+        scDate,
+        userId: req.user?.sub ? Number(req.user.sub) : null,
+      });
+    }
     await conn.commit();
-    res.json({ ok: true, total_amount: totalAmount });
+    res.json({
+      ok: true,
+      total_amount: totalAmount,
+      bill_id: autoBill?.id || null,
+      bill_no: autoBill?.bill_no || null,
+    });
   } catch (err) {
     try {
       await conn.rollback();

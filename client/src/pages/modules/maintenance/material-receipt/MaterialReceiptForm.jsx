@@ -5,6 +5,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "react-toastify";
 import { api } from "api/client";
 import { usePermission } from "@/auth/PermissionContext.jsx";
@@ -216,7 +217,9 @@ export default function MaterialReceiptForm() {
               </h1>
               <p className="text-sm mt-1">Receive materials issued from Inventory</p>
             </div>
-            <button onClick={() => window.history.back()} className="btn-success">Back to List</button>
+            <Link to="/maintenance/material-receipts" className="btn btn-secondary flex items-center gap-1.5">
+              <ArrowLeft size={16} /> Back to List
+            </Link>
           </div>
         </div>
         <div className="card-body">
@@ -303,12 +306,12 @@ export default function MaterialReceiptForm() {
                     {items.map((item, idx) => (
                       <tr key={item.id}>
                         <td>
-                          <input type="text" className="input w-full bg-slate-50" value={item.itemName}
+                          <input type="text" className="input w-full bg-white dark:bg-slate-900" value={item.itemName}
                             readOnly placeholder="Auto-populated" />
                         </td>
                         <td>{item.uom}</td>
                         <td>
-                          <input type="number" className="input w-full bg-slate-50" value={item.transferQty} readOnly />
+                          <input type="number" className="input w-full bg-white dark:bg-slate-900" value={item.transferQty} readOnly />
                         </td>
                         <td>
                           <input type="number" className="input w-full" value={item.receiptQty}

@@ -7,7 +7,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "../../../../api/client";
-import { Upload, FileText, X } from "lucide-react";
+import { Upload, FileText, X, ArrowLeft } from "lucide-react";
 import { usePermission } from "@/auth/PermissionContext.jsx";
 
 const STATUSES = ["ACTIVE", "PENDING", "EXPIRED", "CANCELLED"];
@@ -146,9 +146,9 @@ export default function MaintenanceContractForm() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <button onClick={() => window.history.back()} className="btn-secondary">
-          ← Back
-        </button>
+        <Link to="/maintenance/contracts" className="btn btn-secondary flex items-center gap-1.5">
+          <ArrowLeft size={16} /> Back
+        </Link>
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
             {isEdit ? "Edit" : "New"} Maintenance Contract
@@ -268,7 +268,7 @@ export default function MaintenanceContractForm() {
               <label className="label">Contract Document</label>
               <div className="space-y-2">
                 {form.contract_file_url ? (
-                  <div className="flex items-center gap-2 p-2 bg-slate-50 rounded border">
+                  <div className="flex items-center gap-2 p-2 bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700">
                     <FileText size={16} className="text-brand shrink-0" />
                     <a
                       href={form.contract_file_url}

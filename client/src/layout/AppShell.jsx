@@ -26,30 +26,85 @@ import {
 } from "../auth/authStorage.js";
 import { usePermission } from "../auth/PermissionContext.jsx";
 import { useTheme } from "../theme/ThemeContext.jsx";
+import { resolveBackgroundForTheme } from "../utils/appBackground.js";
 import ThemeToggle from "../components/ThemeToggle.jsx";
-import DashboardPage from "../pages/dashboard/DashboardPage.jsx";
-import HomePage from "../pages/home/HomePage.jsx";
-import AdministrationHome from "../pages/modules/administration/AdministrationHome.jsx";
-import SalesHome from "../pages/modules/sales/SalesHome.jsx";
-import InventoryHome from "../pages/modules/inventory/InventoryHome.jsx";
-import PurchaseHome from "../pages/modules/purchase/PurchaseHome.jsx";
-import FinanceRoutes from "../pages/modules/finance/FinanceRoutes.jsx";
-import HumanResourcesHome from "../pages/modules/human-resources/HumanResourcesHome.jsx";
-import MaintenanceHome from "../pages/modules/maintenance/MaintenanceHome.jsx";
-import ProjectManagementHome from "../pages/modules/project-management/ProjectManagementHome.jsx";
-import ProductionHome from "../pages/modules/production/ProductionHome.jsx";
-import PosHome from "../pages/modules/pos/PosHome.jsx";
-import BusinessIntelligenceHome from "../pages/modules/business-intelligence/BusinessIntelligenceHome.jsx";
-import ServiceManagementHome from "../pages/modules/service-management/ServiceManagementHome.jsx";
-import TransportLayout from "../pages/modules/transport/TransportLayout.jsx";
-import ExecutiveOverviewRoutes from "../pages/modules/executive-overview/ExecutiveOverviewRoutes.jsx";
-import SystemConfigurationHome from "../pages/modules/system-configuration/SystemConfigurationHome.jsx";
-import NotificationsPage from "../pages/NotificationsPage.jsx";
-import SocialFeedPage from "../pages/social/SocialFeedPage.jsx";
-import RoleSetup from "../pages/admin/RoleSetup.jsx";
-import UserPermissions from "../pages/admin/UserPermissions.jsx";
-import SocialFeedNotification from "../components/CompanyFeed/SocialFeedNotification.jsx";
-import DashboardPermissions from "../pages/admin/DashboardPermissions.jsx";
+import ListPageOverview from "../components/ListPageOverview.jsx";
+const DashboardPage = React.lazy(
+  () => import("../pages/dashboard/DashboardPage.jsx"),
+);
+const HomePage = React.lazy(() => import("../pages/home/HomePage.jsx"));
+const AdministrationHome = React.lazy(
+  () => import("../pages/modules/administration/AdministrationHome.jsx"),
+);
+const SalesHome = React.lazy(
+  () => import("../pages/modules/sales/SalesHome.jsx"),
+);
+const InventoryHome = React.lazy(
+  () => import("../pages/modules/inventory/InventoryHome.jsx"),
+);
+const PurchaseHome = React.lazy(
+  () => import("../pages/modules/purchase/PurchaseHome.jsx"),
+);
+const FinanceRoutes = React.lazy(
+  () => import("../pages/modules/finance/FinanceRoutes.jsx"),
+);
+const HumanResourcesHome = React.lazy(
+  () => import("../pages/modules/human-resources/HumanResourcesHome.jsx"),
+);
+const MaintenanceHome = React.lazy(
+  () => import("../pages/modules/maintenance/MaintenanceHome.jsx"),
+);
+const EnvironmentalHealthSafetyHome = React.lazy(
+  () =>
+    import("../pages/modules/environmental-health-safety/EnvironmentalHealthSafetyHome.jsx"),
+);
+const FacilitiesHome = React.lazy(
+  () => import("../pages/modules/facilities/FacilitiesHome.jsx"),
+);
+const AssetManagementHome = React.lazy(
+  () => import("../pages/modules/asset-management/AssetManagementHome.jsx"),
+);
+const ProjectManagementHome = React.lazy(
+  () => import("../pages/modules/project-management/ProjectManagementHome.jsx"),
+);
+const ProductionHome = React.lazy(
+  () => import("../pages/modules/production/ProductionHome.jsx"),
+);
+const PosHome = React.lazy(() => import("../pages/modules/pos/PosHome.jsx"));
+const BusinessIntelligenceHome = React.lazy(
+  () =>
+    import("../pages/modules/business-intelligence/BusinessIntelligenceHome.jsx"),
+);
+const ServiceManagementHome = React.lazy(
+  () => import("../pages/modules/service-management/ServiceManagementHome.jsx"),
+);
+const TransportLayout = React.lazy(
+  () => import("../pages/modules/transport/TransportLayout.jsx"),
+);
+const ExecutiveOverviewRoutes = React.lazy(
+  () =>
+    import("../pages/modules/executive-overview/ExecutiveOverviewRoutes.jsx"),
+);
+const SystemConfigurationHome = React.lazy(
+  () =>
+    import("../pages/modules/system-configuration/SystemConfigurationHome.jsx"),
+);
+const NotificationsPage = React.lazy(
+  () => import("../pages/NotificationsPage.jsx"),
+);
+const SocialFeedPage = React.lazy(
+  () => import("../pages/social/SocialFeedPage.jsx"),
+);
+const RoleSetup = React.lazy(() => import("../pages/admin/RoleSetup.jsx"));
+const UserPermissions = React.lazy(
+  () => import("../pages/admin/UserPermissions.jsx"),
+);
+const SocialFeedNotification = React.lazy(
+  () => import("../components/CompanyFeed/SocialFeedNotification.jsx"),
+);
+const DashboardPermissions = React.lazy(
+  () => import("../pages/admin/DashboardPermissions.jsx"),
+);
 import addNotification from "../utils/addNotification.js";
 
 import logoDark from "../assets/resources/OMNISUITE_WHITE_LOGO.png";
@@ -78,6 +133,11 @@ import {
   Presentation,
   Truck,
   Home,
+  Building2,
+  Calculator,
+  ShieldAlert,
+  X,
+  WifiOff,
 } from "lucide-react";
 import FloatingChat from "../components/chat/FloatingChat.jsx";
 import BanksAiFloating from "../components/ai/BanksAiFloating.jsx";
@@ -86,34 +146,81 @@ import useSocket from "../hooks/useSocket.js";
 
 const AppRoutes = React.memo(function AppRoutes({ user }) {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/administration/*" element={<AdministrationHome />} />
-      <Route path="/sales/*" element={<SalesHome />} />
-      <Route path="/inventory/*" element={<InventoryHome />} />
-      <Route path="/purchase/*" element={<PurchaseHome />} />
-      <Route path="/finance/*" element={<FinanceRoutes />} />
-      <Route path="/human-resources/*" element={<HumanResourcesHome />} />
-      <Route path="/maintenance/*" element={<MaintenanceHome />} />
-      <Route path="/project-management/*" element={<ProjectManagementHome />} />
-      <Route path="/production/*" element={<ProductionHome />} />
-      <Route path="/pos/*" element={<PosHome />} />
-      <Route path="/business-intelligence/*" element={<BusinessIntelligenceHome />} />
-      <Route path="/service-management/*" element={<ServiceManagementHome />} />
-      <Route path="/transport/*" element={<TransportLayout />} />
-      <Route path="/executive-overview/*" element={<ExecutiveOverviewRoutes />} />
-      <Route path="/administration/access/dashboard-permissions" element={<DashboardPermissions />} />
-      <Route path="/notifications" element={<NotificationsPage />} />
-      <Route path="/social-feed" element={<SocialFeedPage />} />
-      <Route path="/social-feed/:id" element={<SocialFeedPage />} />
-      <Route path="/admin/roles" element={<RoleSetup />} />
-      <Route path="/admin/user-permissions" element={<UserPermissions />} />
-      <Route 
-        path="/system-configuration/*" 
-        element={(user?.id === 1 || user?.id === 2) ? <SystemConfigurationHome /> : <Navigate to="/" replace />} 
-      />
-    </Routes>
+    <React.Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-[50vh] p-8">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+            <span className="text-xs text-slate-400">Loading module...</span>
+          </div>
+        </div>
+      }
+    >
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/administration/*" element={<AdministrationHome />} />
+        <Route path="/sales/*" element={<SalesHome />} />
+        <Route path="/inventory/*" element={<InventoryHome />} />
+        <Route path="/purchase/*" element={<PurchaseHome />} />
+        <Route path="/finance/*" element={<FinanceRoutes />} />
+        <Route path="/human-resources/*" element={<HumanResourcesHome />} />
+        <Route path="/maintenance/*" element={<MaintenanceHome />} />
+        <Route path="/facilities/*" element={<FacilitiesHome />} />
+        <Route
+          path="/environmental-health-safety/*"
+          element={<EnvironmentalHealthSafetyHome />}
+        />
+        <Route
+          path="/ehs/*"
+          element={<Navigate to="/environmental-health-safety" replace />}
+        />
+        <Route
+          path="/hse/*"
+          element={<Navigate to="/environmental-health-safety" replace />}
+        />
+        <Route path="/assets/*" element={<AssetManagementHome />} />
+        <Route path="/asset-management/*" element={<AssetManagementHome />} />
+        <Route
+          path="/project-management/*"
+          element={<ProjectManagementHome />}
+        />
+        <Route path="/production/*" element={<ProductionHome />} />
+        <Route path="/pos/*" element={<PosHome />} />
+        <Route
+          path="/business-intelligence/*"
+          element={<BusinessIntelligenceHome />}
+        />
+        <Route
+          path="/service-management/*"
+          element={<ServiceManagementHome />}
+        />
+        <Route path="/transport/*" element={<TransportLayout />} />
+        <Route
+          path="/executive-overview/*"
+          element={<ExecutiveOverviewRoutes />}
+        />
+        <Route
+          path="/administration/access/dashboard-permissions"
+          element={<DashboardPermissions />}
+        />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/social-feed" element={<SocialFeedPage />} />
+        <Route path="/social-feed/:id" element={<SocialFeedPage />} />
+        <Route path="/admin/roles" element={<RoleSetup />} />
+        <Route path="/admin/user-permissions" element={<UserPermissions />} />
+        <Route
+          path="/system-configuration/*"
+          element={
+            user?.id === 1 || user?.id === 2 ? (
+              <SystemConfigurationHome />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+      </Routes>
+    </React.Suspense>
   );
 });
 
@@ -126,13 +233,28 @@ const modules = [
   },
   {
     key: "administration",
-    label: "Administration",
+    label: "System Admin",
     path: "/administration",
     icon: <Settings />,
   },
-  { key: "sales", label: "Sales", path: "/sales", icon: <Banknote /> },
-  { key: "inventory", label: "Inventory", path: "/inventory", icon: <Archive /> },
-  { key: "purchase", label: "Purchase", path: "/purchase", icon: <ShoppingCart /> },
+  {
+    key: "sales",
+    label: "Sales Management",
+    path: "/sales",
+    icon: <Banknote />,
+  },
+  {
+    key: "inventory",
+    label: "Inventory Management",
+    path: "/inventory",
+    icon: <Archive />,
+  },
+  {
+    key: "purchase",
+    label: "Procurement",
+    path: "/purchase",
+    icon: <ShoppingCart />,
+  },
   { key: "finance", label: "Finance", path: "/finance", icon: <Landmark /> },
   {
     key: "human-resources",
@@ -147,12 +269,35 @@ const modules = [
     icon: <Wrench />,
   },
   {
+    key: "facilities",
+    label: "Facilities Management",
+    path: "/facilities",
+    icon: <Building2 />,
+  },
+  {
+    key: "environmental-health-safety",
+    label: "Health & Safety (EHS)",
+    path: "/environmental-health-safety",
+    icon: <ShieldAlert />,
+  },
+  {
+    key: "assets",
+    label: "Asset Management",
+    path: "/assets",
+    icon: <Calculator />,
+  },
+  {
     key: "project-management",
     label: "Project Management",
     path: "/project-management",
     icon: <Blocks />,
   },
-  { key: "production", label: "Production", path: "/production", icon: <Factory /> },
+  {
+    key: "production",
+    label: "Manufacturing",
+    path: "/production",
+    icon: <Factory />,
+  },
   { key: "pos", label: "POS", path: "/pos", icon: <ShoppingBasket /> },
   {
     key: "business-intelligence",
@@ -162,7 +307,7 @@ const modules = [
   },
   {
     key: "service-management",
-    label: "Service Management",
+    label: "Field Service Management",
     path: "/service-management",
     icon: <Headset />,
   },
@@ -174,11 +319,37 @@ const modules = [
   },
   {
     key: "transport",
-    label: "Transport",
+    label: "Transport & Logistics",
     path: "/transport",
     icon: <Truck />,
   },
 ];
+
+
+const MODULE_HOME_PATHS = new Set([
+  "/",
+  "/dashboard",
+  "/asset-management",
+  ...modules.map((m) => m.path.replace(/\/+$/, "")),
+]);
+
+function isModuleHomeOrSection(pathname, search = "") {
+  if (!pathname) return false;
+  const normalized = pathname.replace(/\/+$/, "") || "/";
+  if (MODULE_HOME_PATHS.has(normalized)) {
+    return true;
+  }
+  const segments = normalized.split("/").filter(Boolean);
+  if (
+    segments.length === 2 &&
+    (segments[1] === "dashboard" || segments[1] === "dashboards")
+  ) {
+    if (MODULE_HOME_PATHS.has(`/${segments[0]}`)) {
+      return true;
+    }
+  }
+  return false;
+}
 
 const BACKGROUND_GET_CONFIG = { __background: true };
 
@@ -231,7 +402,7 @@ function scheduleDeferredTask(task, delayMs = 200) {
  * AppShell component
  * Acts as the primary shell around all authenticated routes.
  * Initializes real-time sockets, manages offline queue state, and handles user session inactivity.
- * 
+ *
  * @returns {JSX.Element} The rendered application shell.
  */
 export default function AppShell() {
@@ -245,8 +416,17 @@ export default function AppShell() {
     ensurePagePerms,
     basePathFrom,
     canAccessFeatureKey,
+    appBackground,
   } = usePermission();
   const { theme } = useTheme();
+  const isDark =
+    theme === "dark" ||
+    (typeof document !== "undefined" &&
+      document.documentElement.classList.contains("dark"));
+  const resolvedBg = useMemo(
+    () => resolveBackgroundForTheme(appBackground, isDark),
+    [appBackground, isDark],
+  );
   const { pending, failed, completed, items, lastEvent } = useOfflineQueue();
   const navigate = useNavigate();
   const location = useLocation();
@@ -254,6 +434,7 @@ export default function AppShell() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [savedToast, setSavedToast] = useState(false);
   const lastChatToneAtRef = useRef(0);
+  const listPageContentRef = useRef(null);
   useEffect(() => {
     if (lastEvent === "queued") {
       setSavedToast(true);
@@ -282,7 +463,15 @@ export default function AppShell() {
         if (mounted && res?.data) {
           const l = res.data;
           console.log("License Data:", l);
-          if (["ACTIVE", "EXPIRED", "INACTIVE", "SUSPENDED", "CANCELLED"].includes(l.status)) {
+          if (
+            [
+              "ACTIVE",
+              "EXPIRED",
+              "INACTIVE",
+              "SUSPENDED",
+              "CANCELLED",
+            ].includes(l.status)
+          ) {
             const exp = new Date(l.expiry_date);
             const graceDays = l.grace_days || 0;
             const finalExp = new Date(
@@ -294,13 +483,27 @@ export default function AppShell() {
               Math.ceil((finalExp - now) / (1000 * 60 * 60 * 24)),
             );
 
-            const alertDays = l.alert_days !== undefined && l.alert_days !== null ? l.alert_days : 30;
-            console.log("License Expiry:", { daysRemaining, alertDays, finalExp, now, status: l.status });
-            
-            const shouldAlert = l.status !== "ACTIVE" || daysRemaining <= alertDays || isNaN(daysRemaining);
+            const alertDays =
+              l.alert_days !== undefined && l.alert_days !== null
+                ? l.alert_days
+                : 30;
+            console.log("License Expiry:", {
+              daysRemaining,
+              alertDays,
+              finalExp,
+              now,
+              status: l.status,
+            });
+
+            const shouldAlert =
+              l.status !== "ACTIVE" ||
+              daysRemaining <= alertDays ||
+              isNaN(daysRemaining);
 
             if (shouldAlert) {
-              const formattedDate = new Date(l.expiry_date).toLocaleDateString();
+              const formattedDate = new Date(
+                l.expiry_date,
+              ).toLocaleDateString();
               let title = "";
               let text = "";
 
@@ -314,15 +517,19 @@ export default function AppShell() {
                 title = "License Cancelled";
                 text = "Your license is cancelled. Please renew.";
               } else {
-                title = daysRemaining === 0 ? "License Expired" : "License Expiring Soon";
-                text = daysRemaining === 0 
-                  ? `Your license expired on ${formattedDate} (including ${graceDays} days grace).`
-                  : `Your license expires on ${formattedDate} + ${graceDays} days grace period.`;
+                title =
+                  daysRemaining === 0
+                    ? "License Expired"
+                    : "License Expiring Soon";
+                text =
+                  daysRemaining === 0
+                    ? `Your license expired on ${formattedDate} (including ${graceDays} days grace).`
+                    : `Your license expires on ${formattedDate} + ${graceDays} days grace period.`;
               }
-              
+
               // Temporarily ignore the dismissal check to guarantee it shows during our testing
               const isDismissed = false; // sessionStorage.getItem("licenseAlertDismissed") === "true";
-              const canDismiss = (l.status === "ACTIVE" && daysRemaining > 0);
+              const canDismiss = l.status === "ACTIVE" && daysRemaining > 0;
               const canRenew = canAccessFeatureKey("system", "license-renewal");
 
               if (!isDismissed || !canDismiss) {
@@ -341,11 +548,11 @@ export default function AppShell() {
                   width: "20em",
                   padding: "0.5em",
                   customClass: {
-                    container: 'z-[999999]',
-                    title: 'text-sm m-0 p-0',
-                    htmlContainer: 'text-xs m-1 p-0',
-                    actions: 'm-0 p-0 scale-75',
-                    icon: 'border-0 m-0 mr-2'
+                    container: "z-[999999]",
+                    title: "text-sm m-0 p-0",
+                    htmlContainer: "text-xs m-1 p-0",
+                    actions: "m-0 p-0 scale-75",
+                    icon: "border-0 m-0 mr-2",
                   },
                   timerProgressBar: true,
                   showCloseButton: canDismiss,
@@ -378,15 +585,32 @@ export default function AppShell() {
   useEffect(() => {
     function onOnline() {
       setOnline(true);
+      touchLastActivity();
     }
     function onOffline() {
-      setOnline(false);
+      // Validate with network probe before assuming offline to prevent sleep/screen-lock glitches
+      fetch("/api/health", { method: "HEAD", cache: "no-store" })
+        .then(() => setOnline(true))
+        .catch(() => {
+          if (typeof navigator !== "undefined" && navigator.onLine === false) {
+            setOnline(false);
+          }
+        });
+    }
+    function onWakeOrFocus() {
+      touchLastActivity();
+      setOnline(true);
+      api.get("/auth/me", BACKGROUND_GET_CONFIG).catch(() => {});
     }
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
+    window.addEventListener("focus", onWakeOrFocus);
+    document.addEventListener("visibilitychange", onWakeOrFocus);
     return () => {
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
+      window.removeEventListener("focus", onWakeOrFocus);
+      document.removeEventListener("visibilitychange", onWakeOrFocus);
     };
   }, []);
   useEffect(() => {
@@ -501,12 +725,7 @@ export default function AppShell() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
-  const [sidebarOpen, setSidebarOpen] = useState(() => {
-    if (typeof window !== "undefined") {
-      return window.matchMedia("(min-width: 768px)").matches;
-    }
-    return false;
-  });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const sidebarTouchStart = useRef(null);
   const handleSidebarTouchStart = (e) => {
     sidebarTouchStart.current = {
@@ -536,9 +755,14 @@ export default function AppShell() {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef(null);
   const [contextModalOpen, setContextModalOpen] = useState(false);
+    // Automatically close the side menu bar when a page is opened
+  // (Excludes module homes and module home sections)
   useEffect(() => {
-    if (window.innerWidth < 768) setSidebarOpen(false);
-  }, [location.pathname]);
+    if (isModuleHomeOrSection(location.pathname, location.search)) {
+      return;
+    }
+    setSidebarOpen(false);
+  }, [location.pathname, location.search]);
   const [lowStockPrompted, setLowStockPrompted] = useState(false);
   const [lowStockCount, setLowStockCount] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -632,15 +856,19 @@ export default function AppShell() {
         setPushPromptVisible(false);
         return;
       }
+      if (window.Notification.permission === "denied") {
+        setPushPromptVisible(false);
+        return;
+      }
       if (window.Notification.permission !== "granted") {
         try {
           const perm = await window.Notification.requestPermission();
           if (perm !== "granted") {
-            setPushPromptVisible(true);
+            setPushPromptVisible(false);
             return;
           }
         } catch {
-          setPushPromptVisible(true);
+          setPushPromptVisible(false);
           return;
         }
       }
@@ -693,7 +921,9 @@ export default function AppShell() {
   }
 
   const [branchOptions, setBranchOptions] = useState([]);
-  const [selectedBranchId, setSelectedBranchId] = useState(() => scope?.branchId || null);
+  const [selectedBranchId, setSelectedBranchId] = useState(
+    () => scope?.branchId || null,
+  );
   const [companies, setCompanies] = useState([]);
 
   useEffect(() => {
@@ -791,12 +1021,7 @@ export default function AppShell() {
         if (!("PushManager" in window)) return;
         if (!("Notification" in window)) return;
         if (window.Notification.permission !== "granted") {
-          try {
-            const perm = await window.Notification.requestPermission();
-            if (perm !== "granted") return;
-          } catch {
-            return;
-          }
+          return;
         }
         const reg = await navigator.serviceWorker.ready;
         let publicKey = "";
@@ -954,12 +1179,12 @@ export default function AppShell() {
         throttleTimer = null;
       }, 5000); // Throttle activity updates to once every 5 seconds
     };
-    
+
     window.addEventListener("mousemove", handleActivity, { passive: true });
     window.addEventListener("keydown", handleActivity, { passive: true });
     window.addEventListener("click", handleActivity, { passive: true });
     window.addEventListener("scroll", handleActivity, { passive: true });
-    
+
     return () => {
       window.removeEventListener("mousemove", handleActivity);
       window.removeEventListener("keydown", handleActivity);
@@ -981,6 +1206,16 @@ export default function AppShell() {
     }, 30000);
     return () => clearInterval(inactivityTimer);
   }, [token, logout]);
+
+  // Persistent Keep-Alive Heartbeat: keep connection alive and prevent disconnection when computer is inactive
+  useEffect(() => {
+    if (!token) return;
+    const keepAliveTimer = setInterval(() => {
+      touchLastActivity();
+      api.get("/auth/me", BACKGROUND_GET_CONFIG).catch(() => {});
+    }, 90000); // Heartbeat every 90 seconds
+    return () => clearInterval(keepAliveTimer);
+  }, [token]);
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
@@ -1009,15 +1244,7 @@ export default function AppShell() {
     return () =>
       navigator.serviceWorker.removeEventListener("message", onSwMessage);
   }, []);
-  useEffect(() => {
-    if (typeof window !== "undefined" && "Notification" in window) {
-      if (window.Notification.permission === "default") {
-        try {
-          window.Notification.requestPermission().catch(() => {});
-        } catch {}
-      }
-    }
-  }, []);
+
   useEffect(() => {
     const roles = Array.isArray(user?.roles)
       ? user.roles
@@ -1076,7 +1303,9 @@ export default function AppShell() {
       found = branchOptions.find((b) => Number(b.id) === targetId);
     }
     if (!found) {
-      found = branchOptions.find((b) => b.name === profile.branchName) || (branchOptions.length ? branchOptions[0] : null);
+      found =
+        branchOptions.find((b) => b.name === profile.branchName) ||
+        (branchOptions.length ? branchOptions[0] : null);
     }
     if (found) {
       const comp = found.company_name || `Company #${found.company_id}`;
@@ -1124,16 +1353,6 @@ export default function AppShell() {
     if (path === "/" || path === "/dashboard") return true;
     return modules.some((m) => m.path === path);
   }, [location.pathname]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (window.matchMedia("(min-width: 768px)").matches) {
-        setSidebarOpen(isRootPage);
-      } else {
-        setSidebarOpen(false);
-      }
-    }
-  }, [location.pathname, isRootPage]);
 
   useEffect(() => {
     function onDocClick(e) {
@@ -1233,10 +1452,30 @@ export default function AppShell() {
         } catch {}
       }
       const allow = {
-        view: pageAllow.view !== null ? pageAllow.view : (fk ? canPerformAction(fk, "view") : true),
-        create: pageAllow.create !== null ? pageAllow.create : (fk ? canPerformAction(fk, "create") : true),
-        edit: pageAllow.edit !== null ? pageAllow.edit : (fk ? canPerformAction(fk, "edit") : true),
-        delete: pageAllow.delete !== null ? pageAllow.delete : (fk ? canPerformAction(fk, "delete") : true),
+        view:
+          pageAllow.view !== null
+            ? pageAllow.view
+            : fk
+              ? canPerformAction(fk, "view")
+              : true,
+        create:
+          pageAllow.create !== null
+            ? pageAllow.create
+            : fk
+              ? canPerformAction(fk, "create")
+              : true,
+        edit:
+          pageAllow.edit !== null
+            ? pageAllow.edit
+            : fk
+              ? canPerformAction(fk, "edit")
+              : true,
+        delete:
+          pageAllow.delete !== null
+            ? pageAllow.delete
+            : fk
+              ? canPerformAction(fk, "delete")
+              : true,
       };
       const nodes = Array.from(
         document.querySelectorAll(
@@ -1272,14 +1511,20 @@ export default function AppShell() {
       for (const el of nodes) {
         try {
           if (
-            (el.getAttribute && (el.getAttribute("data-rbac-exempt") === "" || el.getAttribute("data-rbac-exempt") === "true")) ||
-            (el.closest && (
-              el.closest("[data-rbac-exempt='true']") ||
-              el.closest("[data-rbac-exempt]") ||
-              el.closest("form") ||
-              el.closest(".form-section") ||
-              el.closest("[data-form]")
-            ))
+            (el.getAttribute &&
+              (el.getAttribute("data-rbac-exempt") === "" ||
+                el.getAttribute("data-rbac-exempt") === "true")) ||
+            (el.closest &&
+              (el.closest("[data-rbac-exempt='true']") ||
+                el.closest("[data-rbac-exempt]") ||
+                el.closest("header") ||
+                el.closest("aside") ||
+                el.closest("nav") ||
+                el.closest(".app-header") ||
+                el.closest(".app-sidebar") ||
+                el.closest("form") ||
+                el.closest(".form-section") ||
+                el.closest("[data-form]")))
           ) {
             continue;
           }
@@ -1365,11 +1610,11 @@ export default function AppShell() {
   }, [location.pathname, canPerformAction, globalOverrides]);
 
   return (
-    <div className="min-h-screen  bg-slate-50 (#f8fafc)  text-slate-900 dark:bg-slate-900 dark:text-slate-100 flex flex-col">
+    <div className="min-h-screen text-slate-900 dark:text-slate-100 flex flex-col bg-slate-50 dark:bg-slate-900">
       {!sidebarOpen && (
         <button
           type="button"
-          aria-label="Open menu"
+          aria-label="Toggle navigation menu"
           className="lg:hidden fixed left-3 top-3 z-[90] inline-flex items-center justify-center w-12 h-12 rounded-full shadow-erp bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700"
           onClick={() => setSidebarOpen(true)}
           data-rbac-exempt="true"
@@ -1380,13 +1625,17 @@ export default function AppShell() {
       {/* Floating Social Feed Notification - Always Visible */}
       <SocialFeedNotification />
 
-      <header className="flex justify-between items-center px-6 py-1 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm z-50 sticky top-0">
+      <header
+        data-rbac-exempt="true"
+        className="h-14 flex justify-between items-center px-4 sm:px-6 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md shadow-apple-xs z-50 sticky top-0"
+      >
         <div className="flex items-center gap-3 flex-nowrap">
           <button
             type="button"
-            aria-label="Open menu"
+            aria-label="Toggle navigation menu"
+            data-rbac-exempt="true"
             onClick={() => setSidebarOpen((v) => !v)}
-            className="inline-flex items-center justify-center w-9 h-9 rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors"
+            className="inline-flex items-center justify-center w-10 h-10 rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors active:scale-95"
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -1525,8 +1774,23 @@ export default function AppShell() {
                         setProfileOpen(false);
                         await logout({ redirect: true });
                       }}
-                      className="btn-secondary text-red-500"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-xs border border-red-200 hover:bg-red-50 dark:hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-400"
+                      style={{ backgroundColor: "#ffffff", color: "#dc2626" }}
                     >
+                      <svg
+                        className="w-4 h-4"
+                        style={{ color: "#dc2626" }}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                        />
+                      </svg>
                       Logout
                     </button>
                   </div>
@@ -1542,15 +1806,17 @@ export default function AppShell() {
         </div>
       )}
       {!online && (
-        <div className="px-6 py-2 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 border-b border-yellow-300 dark:border-yellow-800 text-sm">
-          Offline mode enabled. Pages and assets are cached. Actions queue for
-          sync.
+        <div className="px-6 py-2 bg-amber-50 dark:bg-amber-950/70 text-amber-900 dark:text-amber-200 border-b border-amber-200 dark:border-amber-800 text-sm flex items-center justify-between">
+          <span>
+            Reconnecting to network. Your changes are saved and will sync
+            automatically.
+          </span>
         </div>
       )}
       {queueOpen && (
         <div className="px-6 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
           <div className="text-sm">
-            Pending {pending} â€¢ Failed {failed} â€¢ Completed {completed}
+            Pending {pending} • Failed {failed} • Completed {completed}
           </div>
           <div className="mt-3">
             <div className="grid grid-cols-1 gap-2">
@@ -1594,11 +1860,11 @@ export default function AppShell() {
               <h2 className="text-lg font-bold">Switch Role & Branch</h2>
               <button
                 type="button"
-                className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 transition-colors"
                 onClick={() => setContextModalOpen(false)}
                 aria-label="Close"
               >
-                âœ•
+                <X className="w-5 h-5" />
               </button>
             </div>
             <div className="mt-4 space-y-4">
@@ -1762,13 +2028,38 @@ export default function AppShell() {
                       tabIndex={-1}
                     >
                       {showPwCurrent ? (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                          />
                         </svg>
                       ) : (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                          />
                         </svg>
                       )}
                     </button>
@@ -1793,13 +2084,38 @@ export default function AppShell() {
                       tabIndex={-1}
                     >
                       {showPwNew ? (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                          />
                         </svg>
                       ) : (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                          />
                         </svg>
                       )}
                     </button>
@@ -1824,13 +2140,38 @@ export default function AppShell() {
                       tabIndex={-1}
                     >
                       {showPwConfirm ? (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                          />
                         </svg>
                       ) : (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                          />
                         </svg>
                       )}
                     </button>
@@ -1894,42 +2235,47 @@ export default function AppShell() {
 
       <div
         className={
-          "flex-1 " +
+          "flex-1 relative z-10 " +
           (sidebarOpen ? "grid md:grid-cols-[280px_1fr]" : "grid grid-cols-1")
         }
       >
         {sidebarOpen && (
           <button
             type="button"
-            aria-label="Close menu"
+            aria-label="Close navigation menu"
+            data-rbac-exempt="true"
             onClick={() => setSidebarOpen(false)}
             className="fixed inset-0 z-50 bg-black/40 md:hidden transition-opacity duration-300 animate-in fade-in"
           />
         )}
 
         <aside
+          data-rbac-exempt="true"
           onTouchStart={handleSidebarTouchStart}
           onTouchEnd={handleSidebarTouchEnd}
           className={
-            "md:sticky md:top-[45px] md:h-[calc(100vh-45px)] border-b md:border-b-0 md:border-r border-slate-800 dark:border-slate-800 p-5 bg-brand-950 dark:bg-slate-950 shadow-lg overflow-y-auto no-scrollbar z-[60] transition-all duration-300 ease-in-out " +
+            "md:sticky md:top-[56px] md:h-[calc(100vh-56px)] border-b md:border-b-0 md:border-r border-slate-800 dark:border-slate-800 p-5 bg-brand-950 dark:bg-slate-950 shadow-lg overflow-y-auto no-scrollbar z-[60] transition-all duration-300 ease-in-out " +
             (sidebarOpen
-              ? "fixed inset-y-0 left-0 w-[280px] top-[45px] translate-x-0 md:static md:translate-x-0"
-              : "fixed inset-y-0 left-0 w-[280px] top-[45px] -translate-x-full md:static md:translate-x-0 md:hidden")
+              ? "fixed inset-y-0 left-0 w-[280px] top-[56px] translate-x-0 md:static md:translate-x-0"
+              : "fixed inset-y-0 left-0 w-[280px] top-[56px] -translate-x-full md:static md:translate-x-0 md:hidden")
           }
         >
           <nav className="space-y-1 pb-6">
             <NavLink
               to="/"
               end
+              onClick={() => {
+                if (window.innerWidth < 768) setSidebarOpen(false);
+              }}
               className={({ isActive }) =>
-                `flex items-center px-3 py-2.5 rounded-lg text-base font-medium transition-all duration-200 group ` +
+                `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group border-l-4 ` +
                 (isActive
-                  ? "bg-brand-800 text-white shadow-lg border-l-4 border-secondary"
-                  : "text-brand-200 hover:bg-brand-800 hover:text-white border-l-4 border-transparent")
+                  ? "bg-brand-900 text-white shadow-apple-xs dark:bg-white/15 dark:text-white border-[#FBBE23]"
+                  : "text-slate-300 dark:text-slate-400 hover:bg-white/10 hover:text-white border-transparent")
               }
             >
               <span
-                className="w-6 text-lg leading-none opacity-80 group-hover:opacity-100 transition-opacity"
+                className="w-5 h-5 flex items-center justify-center shrink-0 [&>svg]:w-[18px] [&>svg]:h-[18px] opacity-80 group-hover:opacity-100 transition-opacity"
                 aria-hidden="true"
               >
                 <Home />
@@ -1948,27 +2294,75 @@ export default function AppShell() {
                 <NavLink
                   key={m.key}
                   to={m.path}
+                  onClick={() => {
+                    if (window.innerWidth < 768) setSidebarOpen(false);
+                  }}
                   className={({ isActive }) =>
-                    `flex items-center px-3 py-2.5 rounded-lg text-base font-medium transition-all duration-200 group ` +
+                    `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group border-l-4 ` +
                     (isActive
-                      ? "bg-brand-800 text-white shadow-lg border-l-4 border-secondary"
-                      : "text-brand-200 hover:bg-brand-800 hover:text-white border-l-4 border-transparent")
+                      ? "bg-brand-900 text-white shadow-apple-xs dark:bg-white/15 dark:text-white border-[#FBBE23]"
+                      : "text-slate-300 dark:text-slate-400 hover:bg-white/10 hover:text-white border-transparent")
                   }
                 >
                   <span
-                    className="w-6 text-lg leading-none opacity-80 group-hover:opacity-100 transition-opacity"
+                    className="w-5 h-5 flex items-center justify-center shrink-0 [&>svg]:w-[18px] [&>svg]:h-[18px] opacity-80 group-hover:opacity-100 transition-opacity"
                     aria-hidden="true"
                   >
                     {m.icon}
                   </span>
-                  <span className="ml-3">{m.label}</span>
+                  <span>{m.label}</span>
                 </NavLink>
               ))}
           </nav>
         </aside>
 
-        <main className=" bg-slate-50 (#f8fafc)  dark:bg-slate-900 overflow-x-hidden min-w-0">
-          <div className="w-full max-w-full 2xl:max-w-[1600px] mx-auto p-2 md:p-2 lg:p-3">
+        <main
+          className={`flex-1 overflow-x-hidden min-w-0 relative min-h-[calc(100vh-56px)] pb-20 md:pb-6 ${
+            resolvedBg.isSolid
+              ? resolvedBg.isSolidDark
+                ? "bg-[#0b0f19]"
+                : "bg-white"
+              : "bg-slate-100 dark:bg-[#0b0f19]"
+          }`}
+        >
+          {/* Main Application Background Image Layer (strictly inside main application area) */}
+          {resolvedBg.isSolid ? (
+            <div
+              aria-hidden="true"
+              className="fixed top-[56px] bottom-0 right-0 pointer-events-none z-0 transition-colors duration-300 ease-in-out"
+              style={{
+                left: sidebarOpen ? "280px" : "0px",
+                backgroundColor: resolvedBg.color,
+              }}
+            />
+          ) : resolvedBg.url ? (
+            <div
+              aria-hidden="true"
+              className="fixed top-[56px] bottom-0 right-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat transition-all duration-300 ease-in-out"
+              style={{
+                left: sidebarOpen ? "280px" : "0px",
+                backgroundImage: `url(${resolvedBg.url})`,
+                opacity: Math.max(
+                  0,
+                  Math.min(1, Number(resolvedBg.opacity ?? 40) / 100),
+                ),
+                filter:
+                  [
+                    resolvedBg.blur ? `blur(${resolvedBg.blur}px)` : "",
+                    resolvedBg.isCustom && isDark
+                      ? "brightness(0.38) contrast(1.15)"
+                      : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ") || undefined,
+              }}
+            />
+          ) : null}
+
+          <div
+            ref={listPageContentRef}
+            className="relative z-10 w-full max-w-full 2xl:max-w-[1600px] mx-auto p-2 md:p-2 lg:p-3"
+          >
             {pushPromptVisible ? (
               <div className="mb-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 flex items-center justify-between">
                 <div className="text-sm">
@@ -1987,27 +2381,9 @@ export default function AppShell() {
                 </div>
               </div>
             ) : null}
-            {!online && !isRootPage && !location.pathname.startsWith("/pos") ? (
-              <div className="min-h-[60vh] flex items-center justify-center">
-                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6 max-w-lg w-full text-center">
-                  <div className="text-4xl mb-2">ðŸ“¡</div>
-                  <div className="text-lg font-semibold mb-1">Offline</div>
-                  <div className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                    This module requires a network connection. Return to Home or
-                    reconnect to continue.
-                  </div>
-                  <div className="flex items-center justify-center gap-2">
-                    <Link to="/" className="btn">
-                      Home
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <React.Suspense fallback={<div>Loading...</div>}>
-                <AppRoutes user={user} />
-              </React.Suspense>
-            )}
+            <React.Suspense fallback={<div>Loading...</div>}>
+              <AppRoutes user={user} />
+            </React.Suspense>
           </div>
         </main>
       </div>
@@ -2018,9 +2394,98 @@ export default function AppShell() {
           title="New Verification"
         />
       ) : null}
-      <PaymentPackageModal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)} companyId={user?.company_id || user?.companyIds?.[0]} />
+      <PaymentPackageModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        companyId={user?.company_id || user?.companyIds?.[0]}
+      />
       <FloatingChat />
       <BanksAiFloating />
+
+      {/* Apple-style Mobile Bottom Navigation Tab Bar (HIG compliant, >=44pt targets, tactile press) */}
+      <nav
+        aria-label="Mobile Navigation"
+        data-rbac-exempt="true"
+        className="md:hidden fixed bottom-0 inset-x-0 h-16 bg-white/95 dark:bg-slate-950/95 backdrop-blur-lg border-t border-slate-200/90 dark:border-slate-800 z-40 flex items-center justify-around px-2 shadow-apple-dock pb-[env(safe-area-inset-bottom)]"
+      >
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) =>
+            `flex flex-col items-center justify-center min-w-[56px] py-1 transition-all duration-150 active:scale-95 ${
+              isActive
+                ? "text-brand-900 dark:text-brand-300 font-semibold"
+                : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+            }`
+          }
+        >
+          <Home className="w-5 h-5 mb-0.5" />
+          <span className="text-[11px] leading-tight">Home</span>
+        </NavLink>
+
+        {canViewModule("inventory") && (
+          <NavLink
+            to="/inventory"
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center min-w-[56px] py-1 transition-all duration-150 active:scale-95 ${
+                isActive
+                  ? "text-brand-900 dark:text-brand-300 font-semibold"
+                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              }`
+            }
+          >
+            <Archive className="w-5 h-5 mb-0.5" />
+            <span className="text-[11px] leading-tight">Inventory</span>
+          </NavLink>
+        )}
+
+        {canViewModule("sales") && (
+          <NavLink
+            to="/sales"
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center min-w-[56px] py-1 transition-all duration-150 active:scale-95 ${
+                isActive
+                  ? "text-brand-900 dark:text-brand-300 font-semibold"
+                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              }`
+            }
+          >
+            <Banknote className="w-5 h-5 mb-0.5" />
+            <span className="text-[11px] leading-tight">Sales</span>
+          </NavLink>
+        )}
+
+        {canViewModule("finance") && (
+          <NavLink
+            to="/finance"
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center min-w-[56px] py-1 transition-all duration-150 active:scale-95 ${
+                isActive
+                  ? "text-brand-900 dark:text-brand-300 font-semibold"
+                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              }`
+            }
+          >
+            <Landmark className="w-5 h-5 mb-0.5" />
+            <span className="text-[11px] leading-tight">Finance</span>
+          </NavLink>
+        )}
+
+        <button
+          type="button"
+          aria-label="Toggle all modules menu"
+          data-rbac-exempt="true"
+          onClick={() => setSidebarOpen((v) => !v)}
+          className={`flex flex-col items-center justify-center min-w-[56px] py-1 transition-all duration-150 active:scale-95 ${
+            sidebarOpen
+              ? "text-brand-900 dark:text-brand-300 font-semibold"
+              : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+          }`}
+        >
+          <Menu className="w-5 h-5 mb-0.5" />
+          <span className="text-[11px] leading-tight">Menu</span>
+        </button>
+      </nav>
     </div>
   );
 }

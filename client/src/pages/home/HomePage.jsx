@@ -12,6 +12,8 @@ import CompanyFeed from "../../components/CompanyFeed/CompanyFeed";
 import { toast } from "react-toastify";
 import { getModuleDashboards } from "../../data/modulesRegistry.js";
 import { DASHBOARD_CARDS } from "../../data/dashboardCards.js";
+import { getAssignedPagesForModule } from "../../data/modulePagesRegistry.js";
+import { ArrowRight, ChevronRight, CheckCircle, X } from "lucide-react";
 
 /**
  * HomePage component
@@ -21,6 +23,7 @@ import { DASHBOARD_CARDS } from "../../data/dashboardCards.js";
  */
 export default function HomePage() {
   const { user, token, scope } = useAuth();
+  const perm = usePermission();
   const {
     canAccessPath,
     hasRoleFeature,
@@ -28,10 +31,13 @@ export default function HomePage() {
     canReverseApproval,
     getEnabledModules,
     isModuleEnabled,
-  } = usePermission();
+    canViewModule,
+    isBasicMode,
+  } = perm;
   const navigate = useNavigate();
   const [pendingItems, setPendingItems] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [sentDocuments, setSentDocuments] = useState([]);
   const [showPostAlerts, setShowPostAlerts] = useState(false);
   const [postAlerts, setPostAlerts] = useState([]);
   const [postAlertsLoading, setPostAlertsLoading] = useState(false);
@@ -51,7 +57,7 @@ export default function HomePage() {
   const [roleFeatures, setRoleFeatures] = useState([]);
   const [allFeatures, setAllFeatures] = useState([]);
   const [activeModule, setActiveModule] = useState(null);
-  const [profileData, setProfileData] = useState(null);
+  const [profileData, setProfileData] = useState(user);
   const [userBranches, setUserBranches] = useState([]);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [showPhotoMenu, setShowPhotoMenu] = useState(false);
@@ -255,36 +261,29 @@ export default function HomePage() {
     };
   }, [pendingHeight]);
 
+  // Sync profileData with authenticated user from AuthContext
   useEffect(() => {
-    let cancelled = false;
-    async function loadPerms() {
-      try {
-        const [upRes, featRes] = await Promise.all([
-          client.get("/admin/user-permissions"),
-          client.get("/access/features"),
-        ]);
-        const up = upRes?.data || {};
-        const fr = featRes?.data || {};
-        if (!cancelled) {
-          setReportsModules(Array.isArray(up?.modules) ? up.modules : []);
-          setRoleFeatures(
-            Array.isArray(up?.role_features) ? up.role_features : [],
-          );
-          setAllFeatures(Array.isArray(fr?.features) ? fr.features : []);
-        }
-      } catch {
-        if (!cancelled) {
-          setReportsModules([]);
-          setRoleFeatures([]);
-          setAllFeatures([]);
-        }
-      }
+    if (user) {
+      setProfileData(user);
     }
-    loadPerms();
+  }, [user]);
+
+  // Lazily load features only when a user inspects reports in a module
+  useEffect(() => {
+    if (!activeModule || allFeatures.length > 0) return;
+    let cancelled = false;
+    client
+      .get("/access/features")
+      .then((res) => {
+        if (!cancelled) {
+          setAllFeatures(Array.isArray(res.data?.features) ? res.data.features : []);
+        }
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [activeModule, allFeatures.length]);
 
   useEffect(() => {
     let cancelled = false;
@@ -312,6 +311,23 @@ export default function HomePage() {
       });
 
     client
+      .get("/workflows/approvals/sent")
+      .then((res) => {
+        if (cancelled) return;
+        setSentDocuments(
+          Array.isArray(res.data?.items)
+            ? res.data.items
+            : Array.isArray(res.data?.data)
+            ? res.data.data
+            : []
+        );
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setSentDocuments([]);
+      });
+
+    client
       .get("/bi/home-overview")
       .then((res) => {
         if (cancelled) return;
@@ -329,16 +345,6 @@ export default function HomePage() {
 
   useEffect(() => {
     let cancelled = false;
-    client
-      .get("/auth/me")
-      .then((res) => {
-        if (cancelled) return;
-        setProfileData(res.data?.user || null);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setProfileData(null);
-      });
     client
       .get("/auth/user-branches")
       .then((res) => {
@@ -363,8 +369,8 @@ export default function HomePage() {
     return userBranches[0] || null;
   }, [userBranches, scope?.branchId]);
 
-  const displayCompanyName = activeBranch?.company_name || profileData?.company_name || user?.companyName || "";
-  const displayBranchName = activeBranch?.name || profileData?.branch_name || user?.branchName || "";
+  const displayCompanyName = activeBranch?.company_name || profileData?.company_name || user?.companyName || user?.company_name || "";
+  const displayBranchName = activeBranch?.name || profileData?.branch_name || user?.branchName || user?.branch_name || "";
 
   const normalizeType = (s) =>
     String(s || "")
@@ -373,6 +379,8 @@ export default function HomePage() {
       .replace(/\s+/g, "_");
   const displayType = (s) => {
     const t = normalizeType(s);
+    if (t === "PAYROLL" || t === "SALARY_PROCESSING" || t === "HR_PAYROLL") return "Payroll";
+    if (t === "FM_HELPDESK_TICKET" || t === "FM_HELPDESK" || t === "HELPDESK_TICKET") return "FM Helpdesk";
     if (t === "MATERIAL_REQUISITION") return "Material Requisition";
     if (t === "RETURN_TO_STORES") return "Return to Stores";
     if (t === "SALES_ORDER") return "Sales Order";
@@ -436,21 +444,8 @@ export default function HomePage() {
     return Array.from(m.values());
   }, [pendingItems]);
   const filteredPending = useMemo(() => {
-    const uid = Number(user?.sub || user?.id);
-    return uniquePending.filter((it) => {
-      const candidates = [
-        Number(it.approver_user_id),
-        Number(it.assigned_user_id),
-        Number(it.target_user_id),
-        Number(it.approver_id),
-        Number(it.user_id),
-      ];
-      const aid = candidates.find((x) => Number.isFinite(x) && x > 0) ?? null;
-      if (!Number.isFinite(uid) || uid <= 0) return true;
-      // Exclude documents where current user is an authorized approver
-      return aid == null || aid !== uid;
-    });
-  }, [uniquePending, user?.sub, user?.id]);
+    return uniquePending;
+  }, [uniquePending]);
   const groupedPending = useMemo(() => {
     const out = {};
     for (const it of filteredPending) {
@@ -472,9 +467,10 @@ export default function HomePage() {
     return [...head, ...tail];
   }, [groupedPending]);
   const docLabel = (it) => {
+    if (it.doc_title) return it.doc_title;
     const t = displayType(typeKey(it));
     const ref = it.doc_ref ? String(it.doc_ref) : `#${it.document_id}`;
-    return `${t} ${ref}`;
+    return `${t} — ${ref}`;
   };
 
   const openApprovalModal = async (id) => {
@@ -618,7 +614,7 @@ export default function HomePage() {
     };
     const defaultPaths = {
       sales: "/sales", purchase: "/purchase", inventory: "/inventory", finance: "/finance", hr: "/human-resources",
-      maintenance: "/maintenance", production: "/production", projects: "/project-management", pos: "/pos",
+      maintenance: "/maintenance", facilities: "/facilities", "environmental-health-safety": "/environmental-health-safety", production: "/production", projects: "/project-management", pos: "/pos",
       bi: "/reports", executive: "/reports", service: "/service-management", transport: "/transport", admin: "/administration", system: "/system-configuration"
     };
     const modAlias = {
@@ -636,8 +632,15 @@ export default function HomePage() {
       const modAllowed = isModuleEnabled(canonicalMod) || isModuleEnabled(rawModKey);
       
       cards.forEach(card => {
-        // Include card if module is enabled OR if the card is explicitly configured for Home
+        // Check if card is forbidden in its parent module
+        if (canViewDashboardElement(rawModKey, "card", card.key) === false) {
+          return;
+        }
+        // Check if card is permitted on Home
         const cardAllowedForHome = canViewDashboardElement("home", "card", card.key);
+        if (cardAllowedForHome === false) {
+          return;
+        }
         if (!modAllowed && !cardAllowedForHome) {
           return;
         }
@@ -655,6 +658,7 @@ export default function HomePage() {
         else if (card.key === "bi-top-product") val = overview?.topProduct || "Best Seller";
         else if (card.key === "sales-pending-orders") val = overview?.openQuotations || 0;
         else if (card.key === "sales-total-revenue") val = overview?.monthlyRevenue || 0;
+        else if (card.key === "sales-avg-sales-this-month" || card.key === "avg-sales-this-month" || card.key === "average-sales-this-month") val = overview?.avgSalesThisMonth || 0;
         else if (card.key === "purchase-total-value") val = overview?.totalPurchases || 0;
         else if (card.key === "purchase-pending-pos") val = overview?.activePOs || 0;
         else if (card.key === "purchase-active-suppliers") val = overview?.activeSuppliers || 0;
@@ -693,14 +697,32 @@ export default function HomePage() {
         else if (card.key === "sys-active-sessions") val = overview?.activeSessions || 1;
         
         // Currency formatting for known monetary values
-        const isMonetary = ["sales-total-revenue", "pos-today-sales", "pos-avg-order", "pos-monthly-revenue", "bi-company-revenue", "purchase-total-value", "finance-cash-balance", "finance-ar", "finance-ap", "exec-gross-profit", "exec-net-income", "exec-total-expenses", "sm-total-revenue"].includes(card.key);
+        const isMonetary = [
+          "sales-total-revenue",
+          "sales-avg-sales-this-month",
+          "avg-sales-this-month",
+          "average-sales-this-month",
+          "pos-today-sales",
+          "pos-avg-order",
+          "pos-monthly-revenue",
+          "bi-company-revenue",
+          "purchase-total-value",
+          "finance-cash-balance",
+          "finance-ar",
+          "finance-ap",
+          "exec-gross-profit",
+          "exec-net-income",
+          "exec-total-expenses",
+          "sm-total-revenue"
+        ].includes(card.key);
         const finalValue = isMonetary ? fmtCurrency(val) : String(val);
 
         metrics.push({
           key: card.key,
+          moduleKey: rawModKey,
           label: card.label,
           value: finalValue,
-          badge: overview?.badges?.[card.key]?.text || "",
+          badge: overview?.badges?.[card.key]?.text || (card.key.includes("avg-sales") ? overview?.badges?.["sales-avg-sales-this-month"]?.text : "") || "",
           icon: defaultIcons[rawModKey] || "📊",
           path: defaultPaths[rawModKey] || "/"
         });
@@ -712,11 +734,60 @@ export default function HomePage() {
 
   const visibleMetrics = React.useMemo(() => {
     const checked = allPossibleMetrics.filter((m) => {
-      return m.key ? canViewDashboardElement("home", "card", m.key) : false;
+      if (!m.key) return false;
+      if (m.moduleKey && canViewDashboardElement(m.moduleKey, "card", m.key) === false) {
+        return false;
+      }
+      return canViewDashboardElement("home", "card", m.key) === true;
     });
 
-    return checked.slice(0, 8);
+    return checked.slice(0, 4);
   }, [allPossibleMetrics, canViewDashboardElement]);
+
+  const assignedModulesWithPages = useMemo(() => {
+    if (!isBasicMode) return [];
+
+    const candidateModules = [
+      { key: "sales", label: "Sales", path: "/sales", icon: "💳", color: "from-blue-600 to-indigo-600", lightBg: "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border-blue-200/60 dark:border-blue-800/60", badge: "Commercial" },
+      { key: "inventory", label: "Inventory", path: "/inventory", icon: "🏬", color: "from-emerald-600 to-teal-600", lightBg: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200/60 dark:border-emerald-800/60", badge: "Logistics" },
+      { key: "purchase", label: "Procurement", path: "/purchase", icon: "🛒", color: "from-amber-600 to-orange-600", lightBg: "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200/60 dark:border-amber-800/60", badge: "Procurement" },
+      { key: "pos", label: "Point of Sale", path: "/pos", icon: "🏷️", color: "from-purple-600 to-fuchsia-600", lightBg: "bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border-purple-200/60 dark:border-purple-800/60", badge: "Retail" },
+      { key: "finance", label: "Finance & Accounts", path: "/finance", icon: "🏦", color: "from-emerald-700 to-green-700", lightBg: "bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-300 border-green-200/60 dark:border-green-800/60", badge: "Accounting" },
+      { key: "human-resources", label: "Human Resources", path: "/human-resources", icon: "👔", color: "from-sky-600 to-blue-600", lightBg: "bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300 border-sky-200/60 dark:border-sky-800/60", badge: "People" },
+      { key: "maintenance", label: "Maintenance", path: "/maintenance", icon: "🛠️", color: "from-orange-600 to-amber-600", lightBg: "bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300 border-orange-200/60 dark:border-orange-800/60", badge: "Assets" },
+      { key: "facilities", label: "Facilities Management", path: "/facilities", icon: "🏢", color: "from-emerald-600 to-teal-700", lightBg: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200/60 dark:border-emerald-800/60", badge: "Facilities" },
+      { key: "asset-management", label: "Asset Management", path: "/asset-management", icon: "📦", color: "from-blue-600 to-cyan-600", lightBg: "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border-blue-200/60 dark:border-blue-800/60", badge: "Assets" },
+      { key: "production", label: "Production", path: "/production", icon: "🏭", color: "from-violet-600 to-purple-600", lightBg: "bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300 border-violet-200/60 dark:border-violet-800/60", badge: "Factory" },
+      { key: "project-management", label: "Project Management", path: "/project-management", icon: "📌", color: "from-rose-600 to-red-600", lightBg: "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border-rose-200/60 dark:border-rose-800/60", badge: "Projects" },
+      { key: "environmental-health-safety", label: "Health & Safety (EHS)", path: "/environmental-health-safety", icon: "🛡️", color: "from-emerald-700 to-teal-800", lightBg: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200/60 dark:border-emerald-800/60", badge: "Safety" },
+      { key: "service-management", label: "Service Management", path: "/service-management", icon: "🎧", color: "from-cyan-600 to-teal-600", lightBg: "bg-cyan-50 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-300 border-cyan-200/60 dark:border-cyan-800/60", badge: "Support" },
+      { key: "transport", label: "Transport & Fleet", path: "/transport", icon: "🚚", color: "from-teal-600 to-emerald-600", lightBg: "bg-teal-50 text-teal-700 dark:bg-teal-950/40 dark:text-teal-300 border-teal-200/60 dark:border-teal-800/60", badge: "Fleet" },
+      { key: "business-intelligence", label: "Business Intelligence", path: "/business-intelligence", icon: "📈", color: "from-indigo-600 to-violet-600", lightBg: "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border-indigo-200/60 dark:border-indigo-800/60", badge: "Analytics" },
+      { key: "executive-overview", label: "Executive Overview", path: "/executive-overview", icon: "📊", color: "from-blue-700 to-cyan-700", lightBg: "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border-blue-200/60 dark:border-blue-800/60", badge: "Executive" },
+      { key: "administration", label: "Administration", path: "/administration", icon: "⚙️", color: "from-slate-700 to-slate-900", lightBg: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200/60 dark:border-slate-700/60", badge: "Security" },
+      { key: "system-configuration", label: "System Configuration", path: "/system-configuration", icon: "🔧", color: "from-zinc-700 to-slate-800", lightBg: "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border-zinc-200/60 dark:border-zinc-700/60", badge: "Setup" },
+    ];
+
+    const allowed = candidateModules.filter((m) => {
+      if (m.key === "system-configuration") {
+        return Number(user?.id) === 1 || Number(user?.id) === 2;
+      }
+      if (typeof canViewModule === "function") {
+        return canViewModule(m.key);
+      }
+      return isModuleEnabled(m.key);
+    });
+
+    return allowed
+      .map((mod) => {
+        const pages = getAssignedPagesForModule(mod.key, perm, 3);
+        return {
+          ...mod,
+          pages,
+        };
+      })
+      .filter((mod) => mod.pages.length > 0);
+  }, [isBasicMode, canViewModule, isModuleEnabled, perm, user?.id]);
 
   // Quick Actions section removed per request
 
@@ -739,6 +810,13 @@ export default function HomePage() {
     });
     return filtered;
   }, [notifications, user?.sub, user?.id]);
+
+  const sentSummary = useMemo(() => {
+    const total = sentDocuments.length;
+    const pending = sentDocuments.filter((d) => d.status === "PENDING" || !d.status).length;
+    const approved = sentDocuments.filter((d) => d.status === "APPROVED").length;
+    return { total, pending, approved };
+  }, [sentDocuments]);
   const postNotificationsUnread = useMemo(
     () =>
       notifications.filter(
@@ -810,7 +888,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen p-2 md:p-3 font-sans text-slate-900 bg-slate-50 dark:bg-transparent">
+    <div className="min-h-screen p-2 md:p-3 font-sans text-slate-900 bg-transparent">
       <div className="max-w-7xl mx-auto space-y-4 fullbleed-sm">
         {/* Header Section */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-brand-900 to-brand-800 p-8 shadow-erp text-white">
@@ -1080,8 +1158,10 @@ export default function HomePage() {
           })}
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {!isBasicMode ? (
+          <>
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">
             <div className="bg-white dark:bg-slate-900 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.03)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] p-6 border border-slate-100 dark:border-slate-800/80 hover:border-slate-200/80 dark:hover:border-slate-700/80 hover:shadow-[0_12px_40px_rgb(0,0,0,0.06)] dark:hover:shadow-[0_12px_40px_rgb(0,0,0,0.25)] transition-all duration-300 relative overflow-hidden ">
               <button
@@ -1308,7 +1388,7 @@ export default function HomePage() {
               <span className="text-purple-500">📑</span> Reports
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {(getEnabledModules() || reportsModules).map((mk) => {
+              {((getEnabledModules && getEnabledModules()) || reportsModules || []).map((mk) => {
                 const label = String(mk)
                   .split("-")
                   .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
@@ -1496,6 +1576,24 @@ export default function HomePage() {
               <div className="rounded-lg border border-slate-200 p-4 flex items-center justify-between">
                 <div>
                   <div className="text-sm font-bold text-slate-800">
+                    Sent Documents
+                  </div>
+                  <div className="text-xs text-slate-500">
+                    {sentDocuments.length} Sent ({sentSummary.approved} Approved, {sentSummary.pending} In Review)
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => navigate("/administration/workflows/sent")}
+                >
+                  View Details
+                </button>
+              </div>
+
+              <div className="rounded-lg border border-slate-200 p-4 flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-bold text-slate-800">
                     Pending Documents
                   </div>
                   <div className="text-xs text-slate-500">
@@ -1515,46 +1613,147 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+      </>
+    ) : (
+          /* Basic Mode: Assigned Modules & Primary Pages */
+          <div className="space-y-6">
+            {assignedModulesWithPages.length === 0 ? (
+              <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 p-8">
+                <div className="text-3xl mb-2">📂</div>
+                <h3 className="font-semibold text-slate-800 dark:text-slate-200">No assigned module pages found</h3>
+                <p className="text-xs text-slate-500 mt-1">Please contact your administrator to assign module permissions to your user role.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {assignedModulesWithPages.map((mod) => (
+                  <div
+                    key={mod.key}
+                    className="relative rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/90 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden group"
+                  >
+                    {/* Ambient Glow on Hover */}
+                    <div className={`absolute -right-12 -top-12 w-32 h-32 bg-gradient-to-br ${mod.color || "from-brand-500 to-brand-700"} opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 rounded-full blur-2xl transition-opacity duration-500 pointer-events-none`} />
+
+                    {/* Module Header */}
+                    <div className="p-5 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3 relative z-10">
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${mod.color || "from-brand-600 to-brand-800"} text-white text-2xl flex items-center justify-center shadow-md shadow-brand-900/10 shrink-0 group-hover:scale-105 group-hover:rotate-1 transition-transform`}>
+                          {mod.icon}
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="font-extrabold text-base text-slate-900 dark:text-white tracking-tight truncate group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
+                            {mod.label}
+                          </h3>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            {mod.badge && (
+                              <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${mod.lightBg}`}>
+                                {mod.badge}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => navigate(mod.path)}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-brand-600 hover:text-white dark:bg-slate-800 dark:hover:bg-brand-600 text-slate-700 dark:text-slate-200 transition-all flex items-center gap-1.5 shrink-0 shadow-2xs"
+                        title={`Open ${mod.label} Module`}
+                      >
+                        <span>Explore</span>
+                        <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+                      </button>
+                    </div>
+
+                    {/* Assigned Pages List (Up to 3) */}
+                    <div className="p-4 pb-5 space-y-2.5 flex-1 relative z-10">
+                      {mod.pages.map((page, pIdx) => (
+                        <div
+                          key={page.path || pIdx}
+                          onClick={() => navigate(page.path)}
+                          className="p-3 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/60 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800 hover:border-brand-300 dark:hover:border-brand-500/50 hover:shadow-md transition-all duration-200 cursor-pointer flex items-center justify-between group/page"
+                        >
+                          <div className="flex items-center gap-3 min-w-0 pr-2">
+                            <div className="w-9 h-9 rounded-xl bg-white dark:bg-slate-700/80 border border-slate-200/70 dark:border-slate-600/60 flex items-center justify-center text-lg shadow-2xs shrink-0 group-hover/page:scale-110 group-hover/page:border-brand-400 transition-all">
+                              {page.icon || "📄"}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium text-slate-800 dark:text-slate-100 truncate group-hover/page:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
+                                {page.title}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="shrink-0 flex items-center">
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-slate-400 group-hover/page:text-brand-600 dark:group-hover:text-brand-300 group-hover/page:bg-brand-50 dark:group-hover:bg-brand-950/60 px-2.5 py-1 rounded-md transition-all">
+                              <span>Open</span>
+                              <ChevronRight size={13} className="transform group-hover/page:translate-x-0.5 transition-transform" />
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
       {showApprovalModal && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-erp w/full max-w-lg overflow-hidden">
-            <div className="p-4 bg-brand text-white flex justify-between items-center">
-              <h2 className="text-lg font-bold">Approval</h2>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex justify-center items-start p-4 sm:p-6 md:p-8 animate-fadeIn">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden my-auto sm:my-8 transition-all flex flex-col max-h-[calc(100vh-4rem)]">
+            <div className="shrink-0 px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/30 text-brand-900 dark:text-brand-400 flex items-center justify-center font-bold flex-shrink-0 border border-brand-200/50 dark:border-brand-800/50">
+                  <CheckCircle size={20} className="text-brand-600 dark:text-brand-400" />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-base font-bold text-slate-900 dark:text-white leading-tight">Approval</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Review and take action on this workflow request</p>
+                </div>
+              </div>
               <button
+                type="button"
                 onClick={closeApprovalModal}
-                className="text-white hover:text-slate-200 text-xl font-bold"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                title="Close"
               >
-                &times;
+                <X size={18} />
               </button>
             </div>
-            <div className="p-4 space-y-3">
+            <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1 text-slate-800 dark:text-slate-100">
               {modalLoading ? (
-                <div className="text-sm">Loading...</div>
+                <div className="text-xs text-slate-500 py-4 text-center">Loading approval details...</div>
               ) : modalData ? (
                 <>
-                  <div className="text-sm text-slate-700">
-                    Document:{" "}
-                    <span className="font-semibold">
-                      {modalData.document_type} #{modalData.document_id}
-                    </span>
-                  </div>
-                  <div className="text-sm text-slate-700">
-                    Current Step:{" "}
-                    <span className="font-semibold">{modalData.step_name}</span>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1 text-slate-500">
-                      Amount
-                    </label>
-                    <span className="font-semibold text-lg text-slate-800">
-                      {modalData.amount != null
-                        ? Number(modalData.amount).toLocaleString("en-US", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })
-                        : "N/A"}
-                    </span>
+                  <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-700/80 space-y-2.5 text-xs">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500 dark:text-slate-400 font-medium">Document:</span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-100">
+                        {modalData.doc_title || (
+                          modalData.doc_ref
+                            ? `${displayType(modalData.document_type)} — ${modalData.doc_ref}`
+                            : `${displayType(modalData.document_type)} #${modalData.document_id}`
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500 dark:text-slate-400">Current Step:</span>
+                      <span className="font-semibold text-brand-600 dark:text-brand-400">
+                        {modalData.step_name}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
+                      <span className="text-slate-500 dark:text-slate-400">Amount:</span>
+                      <span className="font-medium text-sm text-slate-900 dark:text-white">
+                        {modalData.amount != null
+                          ? Number(modalData.amount).toLocaleString("en-US", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })
+                          : "0.00"}
+                      </span>
+                    </div>
                   </div>
 
                   {(() => {
@@ -1563,11 +1762,11 @@ export default function HomePage() {
                       .reverse()
                       .find(log => log.comments && log.comments.trim() !== "" && log.comments !== "Workflow started");
                     return previousCommentLog ? (
-                      <div className="mb-2">
-                        <label className="block text-sm font-medium mb-1">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
                           Previous Comment (from {previousCommentLog.actor_name || "Unknown"})
                         </label>
-                        <div className="p-3 bg-amber-50 text-amber-800 rounded border border-amber-200 text-sm">
+                        <div className="p-3 bg-amber-50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 rounded-xl border border-amber-200 dark:border-amber-800/60 text-xs leading-relaxed">
                           "{previousCommentLog.comments}"
                         </div>
                       </div>
@@ -1575,12 +1774,12 @@ export default function HomePage() {
                   })()}
 
                   <div>
-                    <label className="block text-sm font-medium mb-1">
-                      Comments
+                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
+                      Comments / Remarks
                     </label>
                     <textarea
-                      className="input w-full h-24"
-                      placeholder="Enter comments..."
+                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 h-24"
+                      placeholder="Enter comments or reason for your decision..."
                       value={modalComment}
                       onChange={(e) => setModalComment(e.target.value)}
                     />
@@ -1588,17 +1787,17 @@ export default function HomePage() {
                   {!modalData.is_last_step &&
                     Array.isArray(modalData.next_step_approvers) && (
                       <div>
-                        <label className="block text-sm font-medium mb-1">
-                          Forward To
+                        <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
+                          Forward To Approver
                         </label>
                         <select
-                          className="input w-full"
+                          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500"
                           value={modalNextUser || ""}
                           onChange={(e) =>
                             setModalNextUser(Number(e.target.value))
                           }
                         >
-                          <option value="">Select user</option>
+                          <option value="">Select user...</option>
                           {modalData.next_step_approvers.map((u) => (
                             <option key={u.id} value={u.id}>
                               {u.username}
@@ -1609,22 +1808,22 @@ export default function HomePage() {
                     )}
                 </>
               ) : (
-                <div className="text-sm text-red-600">
-                  Failed to load approval
+                <div className="text-xs text-rose-600 p-3 bg-rose-50 rounded-xl border border-rose-200">
+                  Failed to load approval details.
                 </div>
               )}
             </div>
-            <div className="p-4 border-t flex justify-end gap-2 bg-gray-50">
+            <div className="px-6 py-3.5 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2 bg-slate-50 dark:bg-slate-800/50 shrink-0">
               <button
                 type="button"
-                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                className="px-4 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 onClick={closeApprovalModal}
               >
                 Cancel
               </button>
               <button
                 type="button"
-                className="px-4 py-2 bg-brand text-white rounded hover:bg-brand-700 disabled:opacity-50"
+                className="px-4 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl shadow-sm transition-colors disabled:opacity-50"
                 onClick={() => handleModalAction("APPROVE")}
                 disabled={modalProcessing}
               >
@@ -1632,10 +1831,9 @@ export default function HomePage() {
                   ? "Final Approve"
                   : "Forward"}
               </button>
-              {/* Reverse Approval intentionally removed per requirements */}
               <button
                 type="button"
-                className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 disabled:opacity-50"
+                className="px-4 py-2 text-xs font-semibold bg-amber-600 hover:bg-amber-500 text-white rounded-xl shadow-sm transition-colors disabled:opacity-50"
                 onClick={() => handleModalAction("RETURN")}
                 disabled={modalProcessing}
               >
@@ -1643,7 +1841,7 @@ export default function HomePage() {
               </button>
               <button
                 type="button"
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+                className="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white rounded-xl shadow-sm transition-colors disabled:opacity-50"
                 onClick={() => handleModalAction("REJECT")}
                 disabled={modalProcessing}
               >

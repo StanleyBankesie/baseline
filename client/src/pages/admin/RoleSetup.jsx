@@ -7,7 +7,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../api/client.js";
 import { usePermission } from "../../auth/PermissionContext.jsx";
-import { MODULES_REGISTRY } from "../../data/modulesRegistry.js";
+import { useAuth } from "../../auth/AuthContext.jsx";
+import { MODULES_REGISTRY, getModuleSections } from "../../data/modulesRegistry.js";
 import { toast } from "react-toastify";
 
 /**
@@ -37,6 +38,92 @@ export default function RoleSetup() {
     code: "",
     is_active: true,
   });
+
+  const [companyLicensedModules, setCompanyLicensedModules] = useState(null);
+
+  const fetchCompanyLicense = async (cId) => {
+    if (!cId) return;
+    try {
+      const res = await api.get(`/licenses/company/${cId}`);
+      if (res.data?.modules) {
+        setCompanyLicensedModules(new Set(res.data.modules));
+      }
+    } catch {}
+  };
+
+  useEffect(() => {
+    const cId = selectedRole?.company_id || 1;
+    fetchCompanyLicense(cId);
+
+    const onLicenseUpdated = (e) => {
+      if (e.detail?.modules) {
+        setCompanyLicensedModules(new Set(e.detail.modules));
+      } else if (e.detail?.companyId) {
+        fetchCompanyLicense(e.detail.companyId);
+      }
+    };
+    window.addEventListener("license:updated", onLicenseUpdated);
+    return () => window.removeEventListener("license:updated", onLicenseUpdated);
+  }, [selectedRole]);
+
+  const effectiveLicensedModules = React.useMemo(() => {
+    if (companyLicensedModules && companyLicensedModules.size > 0) {
+      return companyLicensedModules;
+    }
+    return allowedModules || new Set();
+  }, [companyLicensedModules, allowedModules]);
+
+  const isModuleAllowed = (moduleKey) => {
+    if (moduleKey === "administration") return true;
+    if (!effectiveLicensedModules || effectiveLicensedModules.size === 0) return true;
+    if (effectiveLicensedModules.has("*")) return true;
+    if (effectiveLicensedModules.has(moduleKey)) return true;
+    for (const token of effectiveLicensedModules) {
+      if (token.startsWith(`page:${moduleKey}:`)) return true;
+    }
+    return false;
+  };
+
+  const getVisibleSectionsForModule = (moduleKey, moduleInfo) => {
+    const rawSections = getModuleSections(moduleKey, moduleInfo);
+
+    const licensedTokens = Array.from(effectiveLicensedModules || []).filter((x) =>
+      x.startsWith(`page:${moduleKey}:`)
+    );
+    const licensedKeys = new Set(
+      licensedTokens.map((x) => x.slice(`page:${moduleKey}:`.length).toLowerCase().trim())
+    );
+
+    return rawSections
+      .map((sec) => {
+        const visibleFeatures = (sec.features || []).filter((f) => {
+          if (f.isExclusive) return false;
+          if (licensedKeys.size > 0) {
+            return licensedKeys.has(String(f.key).toLowerCase().trim());
+          }
+          return true;
+        });
+
+        return {
+          ...sec,
+          features: visibleFeatures,
+        };
+      })
+      .filter((sec) => sec.features.length > 0);
+  };
+
+  const handleSectionToggle = (moduleKey, sectionFeatures, checked) => {
+    if (checked && !selectedModules.has(moduleKey)) {
+      handleModuleToggle(moduleKey, true);
+    }
+    const newSelectedFeatures = new Set(selectedFeatures);
+    sectionFeatures.forEach((f) => {
+      const fullKey = `${moduleKey}:${f.key}`;
+      if (checked) newSelectedFeatures.add(fullKey);
+      else newSelectedFeatures.delete(fullKey);
+    });
+    setSelectedFeatures(newSelectedFeatures);
+  };
 
   // Module hierarchy state
   const [selectedModules, setSelectedModules] = useState(new Set());
@@ -195,28 +282,23 @@ export default function RoleSetup() {
     }
   }
 
-  function handleModuleSelectAll(moduleKey, checked) {
-    const newSelectedModules = new Set(selectedModules);
+  function handleModuleSelectAll(moduleKey, checked, visibleFeatures = []) {
     const newSelectedFeatures = new Set(selectedFeatures);
-    const newSelectedDashboards = new Set(selectedDashboards);
-    const module = moduleHierarchy[moduleKey];
-    if (!module) return;
+    const newSelectedModules = new Set(selectedModules);
 
-    newSelectedModules.add(moduleKey);
-    for (const f of module.features || []) {
-      const k = `${moduleKey}:${f.key}`;
-      if (checked) newSelectedFeatures.add(k);
-      else newSelectedFeatures.delete(k);
-    }
-    for (const d of module.dashboards || []) {
-      const k = `${moduleKey}:${d.key}`;
-      if (checked) newSelectedDashboards.add(k);
-      else newSelectedDashboards.delete(k);
+    if (checked) {
+      newSelectedModules.add(moduleKey);
+      visibleFeatures.forEach((f) =>
+        newSelectedFeatures.add(`${moduleKey}:${f.key}`),
+      );
+    } else {
+      visibleFeatures.forEach((f) =>
+        newSelectedFeatures.delete(`${moduleKey}:${f.key}`),
+      );
     }
 
     setSelectedModules(newSelectedModules);
     setSelectedFeatures(newSelectedFeatures);
-    setSelectedDashboards(newSelectedDashboards);
   }
 
   function handleHomeDashboardToggle(homeKey, checked) {
@@ -500,57 +582,51 @@ export default function RoleSetup() {
             {/* Module Hierarchy */}
             <div className="space-y-6">
               {Object.entries(moduleHierarchy)
-                .filter(
-                  ([moduleKey]) =>
-                    allowedModules.has(moduleKey) ||
-                    moduleKey === "administration" ||
-                    moduleKey === "dashboard"
-                )
+                .filter(([moduleKey]) => isModuleAllowed(moduleKey))
                 .map(([moduleKey, module]) => {
                   const isModuleSelected = selectedModules.has(moduleKey);
-                  const totalCount =
-                    (module.features?.length || 0) + (module.dashboards?.length || 0);
-                  let selectedCount = 0;
-
-                  (module.features || []).forEach((f) => {
-                    if (selectedFeatures.has(`${moduleKey}:${f.key}`))
-                      selectedCount++;
-                  });
-                  (module.dashboards || []).forEach((d) => {
-                    if (selectedDashboards.has(`${moduleKey}:${d.key}`))
-                      selectedCount++;
-                  });
-
+                  const visibleSections = getVisibleSectionsForModule(moduleKey, module);
+                  const allVisibleFeatures = visibleSections.flatMap((s) => s.features);
+                  const allVisibleKeys = allVisibleFeatures.map((f) => `${moduleKey}:${f.key}`);
+                  const selectedCount = allVisibleKeys.filter((k) =>
+                    selectedFeatures.has(k)
+                  ).length;
                   const isAllSelected =
-                    totalCount > 0 && selectedCount === totalCount;
+                    allVisibleKeys.length > 0 && selectedCount === allVisibleKeys.length;
+
+                  if (!isModuleSelected && allVisibleFeatures.length === 0) {
+                    return null;
+                  }
 
                 return (
-                  <div key={moduleKey} className="border rounded-lg">
-                    <div className="px-4 py-3 bg-slate-50 border-b">
-                      <div className="flex items-center justify-between gap-4">
-                        <label className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            className="checkbox"
-                            checked={isModuleSelected}
-                            onChange={(e) =>
-                              handleModuleToggle(moduleKey, e.target.checked)
-                            }
-                          />
-                          <span className="font-semibold text-lg">
-                            {module.icon} {module.name}
-                          </span>
-                        </label>
-                        {isModuleSelected && (
-                          <label className="flex items-center gap-2 text-sm">
+                  <div key={moduleKey} className="border rounded-lg overflow-hidden shadow-sm">
+                    <div className="px-4 py-3 bg-slate-50 border-b flex items-center justify-between gap-4">
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="checkbox"
+                          checked={isModuleSelected}
+                          onChange={(e) =>
+                            handleModuleToggle(moduleKey, e.target.checked)
+                          }
+                        />
+                        <span className="font-semibold text-lg">
+                          {module.icon} {module.name}
+                        </span>
+                      </label>
+                      <div className="flex items-center gap-4 text-sm text-slate-600">
+                        <span>{allVisibleFeatures.length} licensed pages</span>
+                        {isModuleSelected && allVisibleKeys.length > 0 && (
+                          <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
                             <input
                               type="checkbox"
-                              className="checkbox checkbox-sm"
+                              className="checkbox checkbox-sm text-blue-600"
                               checked={isAllSelected}
                               onChange={(e) =>
                                 handleModuleSelectAll(
                                   moduleKey,
                                   e.target.checked,
+                                  allVisibleFeatures,
                                 )
                               }
                             />
@@ -562,73 +638,71 @@ export default function RoleSetup() {
 
                     {isModuleSelected && (
                       <div className="p-4 space-y-4">
-                        {/* Features */}
-                        <div>
-                          <h4 className="font-medium mb-3">Features:</h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                            {module.features.map((feature) => {
-                              const featureKey = `${moduleKey}:${feature.key}`;
-                              const isSelected =
-                                selectedFeatures.has(featureKey);
+                        {visibleSections.map((section, sIdx) => {
+                          const secKeys = section.features.map((f) => `${moduleKey}:${f.key}`);
+                          const secSelectedCount = secKeys.filter((k) => selectedFeatures.has(k)).length;
+                          const isSecAllSelected = secKeys.length > 0 && secSelectedCount === secKeys.length;
 
-                              return (
-                                <label
-                                  key={feature.key}
-                                  className="flex items-center gap-2"
-                                >
+                          return (
+                            <div
+                              key={section.title || sIdx}
+                              className="border rounded-lg overflow-hidden bg-slate-50/40"
+                            >
+                              <div className="px-3.5 py-2.5 bg-slate-100/70 border-b flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-base">{section.icon || "📄"}</span>
+                                  <span className="font-semibold text-sm text-slate-800">
+                                    {section.title}
+                                  </span>
+                                  <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-mono font-medium">
+                                    ({secSelectedCount}/{section.features.length})
+                                  </span>
+                                </div>
+                                <label className="flex items-center gap-2 text-xs font-medium text-slate-600 cursor-pointer">
                                   <input
                                     type="checkbox"
-                                    className="checkbox checkbox-sm"
-                                    checked={isSelected}
+                                    className="checkbox checkbox-xs text-blue-600 rounded"
+                                    checked={isSecAllSelected}
                                     onChange={(e) =>
-                                      handleFeatureToggle(
-                                        featureKey,
-                                        e.target.checked,
-                                      )
+                                      handleSectionToggle(moduleKey, section.features, e.target.checked)
                                     }
                                   />
-                                  <span className="text-sm">
-                                    {feature.label}
-                                  </span>
+                                  Select Section
                                 </label>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        {/* Dashboards */}
-                        <div>
-                          <h4 className="font-medium mb-3">Dashboards:</h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                            {module.dashboards.map((dashboard) => {
-                              const dashboardKey = `${moduleKey}:${dashboard.key}`;
-                              const isSelected =
-                                selectedDashboards.has(dashboardKey);
-
-                              return (
-                                <label
-                                  key={dashboard.key}
-                                  className="flex items-center gap-2"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    className="checkbox checkbox-sm"
-                                    checked={isSelected}
-                                    onChange={(e) =>
-                                      handleDashboardToggle(
-                                        dashboardKey,
-                                        e.target.checked,
-                                      )
-                                    }
-                                  />
-                                  <span className="text-sm">
-                                    {dashboard.label}
-                                  </span>
-                                </label>
-                              );
-                            })}
-                          </div>
-                        </div>
+                              </div>
+                              <div className="p-3">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                                  {section.features.map((feature) => {
+                                    const fullKey = `${moduleKey}:${feature.key}`;
+                                    const isChecked = selectedFeatures.has(fullKey);
+                                    return (
+                                      <label
+                                        key={feature.key}
+                                        className={`flex items-center gap-2 p-2 border rounded-md cursor-pointer text-xs transition ${
+                                          isChecked
+                                            ? "bg-blue-50/70 border-blue-200"
+                                            : "border-slate-200 hover:bg-slate-50"
+                                        }`}
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          className="checkbox checkbox-xs text-blue-600 rounded"
+                                          checked={isChecked}
+                                          onChange={(e) =>
+                                            handleFeatureToggle(fullKey, e.target.checked)
+                                          }
+                                        />
+                                        <span className="font-medium text-slate-800">
+                                          {feature.label || feature.key}
+                                        </span>
+                                      </label>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

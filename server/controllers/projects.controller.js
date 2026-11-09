@@ -23,7 +23,7 @@ async function ensureProjectTables(companyId, branchId) {
   await query(`CREATE TABLE IF NOT EXISTS pm_resources (
     id INT AUTO_INCREMENT PRIMARY KEY,
     company_id INT NOT NULL, branch_id INT NOT NULL,
-    project_id INT NOT NULL,
+    project_id INT NULL,
     task_id INT NULL,
     resource_type VARCHAR(50) DEFAULT 'EQUIPMENT', 
     pm_equipment_id INT NULL, 
@@ -36,8 +36,12 @@ async function ensureProjectTables(companyId, branchId) {
     start_date DATE,
     end_date DATE,
     remarks TEXT,
+    is_active TINYINT(1) DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+
+  await query(`ALTER TABLE pm_resources MODIFY project_id INT NULL`).catch(() => {});
+  await query(`ALTER TABLE pm_resources ADD COLUMN IF NOT EXISTS is_active TINYINT(1) DEFAULT 1`).catch(() => {});
 
   await query(`CREATE TABLE IF NOT EXISTS pm_projects (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -129,7 +133,8 @@ export const listProjects = async (req, res, next) => {
   try {
     const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
     await ensureProjectTables(companyId, branchId);
-    const activeFilter = req.query.active !== 'all' ? " AND (p.is_active IS NULL OR p.is_active = 'Y' OR p.is_active = '1' OR p.is_active = 1)" : "";
+    const isAll = req.query.active === 'all' || req.query.all === '1' || req.query.all === 'true' || req.query.status === 'ALL';
+    const activeFilter = isAll ? "" : " AND (p.is_active IS NULL OR p.is_active = 'Y' OR p.is_active = '1' OR p.is_active = 1)";
     const items = await query(`SELECT p.*,
           u.username AS created_by_name,
           COALESCE(e.expense_total,0) AS expense_total
@@ -177,15 +182,40 @@ export const createProject = async (req, res, next) => {
       throw httpError(400, "VALIDATION_ERROR", "Code and Name are required");
 
     const result = await query(`INSERT INTO pm_projects 
-      (company_id, branch_id, project_code, project_name, client_name, manager_id, manager_name, budget, project_priority, project_status, start_date, end_date, remarks, is_active)
-      VALUES (:companyId, :branchId, :project_code, :project_name, :client_name, :manager_id, :manager_name, :budget, :project_priority, :project_status, :start_date, :end_date, :remarks, :is_active)`,
+      (company_id, branch_id, project_code, project_name, project_type, client_id, client_name, contract_ref_no, contract_sum, revised_contract_sum, site_address, site_city, site_gps_lat, site_gps_lng, manager_id, manager_name, site_engineer_id, site_engineer_name, qs_id, qs_name, supervisor_id, supervisor_name, commercial_manager_id, commercial_manager_name, retention_percent, retention_cap, advance_payment_amount, advance_recovery_percent, defects_liability_months, practical_completion_date, final_completion_date, wbs_code, budget, project_priority, project_status, start_date, end_date, remarks, is_active)
+      VALUES (:companyId, :branchId, :project_code, :project_name, :project_type, :client_id, :client_name, :contract_ref_no, :contract_sum, :revised_contract_sum, :site_address, :site_city, :site_gps_lat, :site_gps_lng, :manager_id, :manager_name, :site_engineer_id, :site_engineer_name, :qs_id, :qs_name, :supervisor_id, :supervisor_name, :commercial_manager_id, :commercial_manager_name, :retention_percent, :retention_cap, :advance_payment_amount, :advance_recovery_percent, :defects_liability_months, :practical_completion_date, :final_completion_date, :wbs_code, :budget, :project_priority, :project_status, :start_date, :end_date, :remarks, :is_active)`,
       {
         companyId, branchId,
         project_code: b.project_code,
         project_name: b.project_name,
+        project_type: b.project_type || 'GENERAL_CONSTRUCTION',
+        client_id: toNumber(b.client_id),
         client_name: b.client_name || null,
+        contract_ref_no: b.contract_ref_no || null,
+        contract_sum: Number(b.contract_sum || b.budget || 0),
+        revised_contract_sum: Number(b.revised_contract_sum || b.contract_sum || b.budget || 0),
+        site_address: b.site_address || null,
+        site_city: b.site_city || null,
+        site_gps_lat: b.site_gps_lat ? Number(b.site_gps_lat) : null,
+        site_gps_lng: b.site_gps_lng ? Number(b.site_gps_lng) : null,
         manager_id: toNumber(b.manager_id),
         manager_name: b.manager_name || null,
+        site_engineer_id: toNumber(b.site_engineer_id),
+        site_engineer_name: b.site_engineer_name || null,
+        qs_id: toNumber(b.qs_id),
+        qs_name: b.qs_name || null,
+        supervisor_id: toNumber(b.supervisor_id),
+        supervisor_name: b.supervisor_name || null,
+        commercial_manager_id: toNumber(b.commercial_manager_id),
+        commercial_manager_name: b.commercial_manager_name || null,
+        retention_percent: Number(b.retention_percent || 5.0),
+        retention_cap: Number(b.retention_cap || 0),
+        advance_payment_amount: Number(b.advance_payment_amount || 0),
+        advance_recovery_percent: Number(b.advance_recovery_percent || 10.0),
+        defects_liability_months: Number(b.defects_liability_months || 12),
+        practical_completion_date: b.practical_completion_date || null,
+        final_completion_date: b.final_completion_date || null,
+        wbs_code: b.wbs_code || null,
         budget: Number(b.budget || 0),
         project_priority: b.project_priority || 'MEDIUM',
         project_status: b.project_status || "PLANNING",
@@ -210,19 +240,54 @@ export const updateProject = async (req, res, next) => {
     await ensureProjectTables(companyId, branchId);
 
     await query(`UPDATE pm_projects SET
-      project_name = :project_name, client_name = :client_name, manager_id = :manager_id,
-      manager_name = :manager_name, budget = :budget, project_priority = :project_priority,
+      project_name = :project_name, project_type = :project_type, client_id = :client_id, client_name = :client_name,
+      contract_ref_no = :contract_ref_no, contract_sum = :contract_sum, revised_contract_sum = :revised_contract_sum,
+      site_address = :site_address, site_city = :site_city, site_gps_lat = :site_gps_lat, site_gps_lng = :site_gps_lng,
+      manager_id = :manager_id, manager_name = :manager_name,
+      site_engineer_id = :site_engineer_id, site_engineer_name = :site_engineer_name,
+      qs_id = :qs_id, qs_name = :qs_name, supervisor_id = :supervisor_id, supervisor_name = :supervisor_name,
+      commercial_manager_id = :commercial_manager_id, commercial_manager_name = :commercial_manager_name,
+      retention_percent = :retention_percent, retention_cap = :retention_cap,
+      advance_payment_amount = :advance_payment_amount, advance_recovery_percent = :advance_recovery_percent,
+      defects_liability_months = :defects_liability_months, practical_completion_date = :practical_completion_date,
+      final_completion_date = :final_completion_date, wbs_code = :wbs_code,
+      budget = :budget, project_priority = :project_priority,
       project_status = :project_status, start_date = :start_date, end_date = :end_date,
       actual_start_date = :actual_start_date, actual_end_date = :actual_end_date,
       completion_percent = :completion_percent, remarks = :remarks,
       is_active = :is_active
-      WHERE id = :id AND company_id = :companyId AND branch_id = :branchId`,
+      WHERE id = :id AND company_id = :companyId`,
       {
-        id, companyId, branchId,
+        id, companyId,
         project_name: b.project_name,
+        project_type: b.project_type || 'GENERAL_CONSTRUCTION',
+        client_id: toNumber(b.client_id),
         client_name: b.client_name || null,
+        contract_ref_no: b.contract_ref_no || null,
+        contract_sum: Number(b.contract_sum || b.budget || 0),
+        revised_contract_sum: Number(b.revised_contract_sum || b.contract_sum || b.budget || 0),
+        site_address: b.site_address || null,
+        site_city: b.site_city || null,
+        site_gps_lat: b.site_gps_lat ? Number(b.site_gps_lat) : null,
+        site_gps_lng: b.site_gps_lng ? Number(b.site_gps_lng) : null,
         manager_id: toNumber(b.manager_id),
         manager_name: b.manager_name || null,
+        site_engineer_id: toNumber(b.site_engineer_id),
+        site_engineer_name: b.site_engineer_name || null,
+        qs_id: toNumber(b.qs_id),
+        qs_name: b.qs_name || null,
+        supervisor_id: toNumber(b.supervisor_id),
+        supervisor_name: b.supervisor_name || null,
+        commercial_manager_id: toNumber(b.commercial_manager_id),
+        commercial_manager_name: b.commercial_manager_name || null,
+        retention_percent: Number(b.retention_percent || 5.0),
+        retention_cap: Number(b.retention_cap || 0),
+        advance_payment_amount: Number(b.advance_payment_amount || 0),
+        advance_recovery_percent: Number(b.advance_recovery_percent || 10.0),
+        defects_liability_months: Number(b.defects_liability_months || 12),
+        practical_completion_date: b.practical_completion_date || null,
+        final_completion_date: b.final_completion_date || null,
+        wbs_code: b.wbs_code || null,
         budget: Number(b.budget || 0),
         project_priority: b.project_priority || 'MEDIUM',
         project_status: b.project_status || "PLANNING",
@@ -1964,6 +2029,114 @@ export const getProjectExpenseReport = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+export const getProjectExpenseIncomeReport = async (req, res, next) => {
+  try {
+    const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
+    const projectId = req.query.project_id ? toNumber(req.query.project_id) : null;
+    const fromDate = req.query.from ? String(req.query.from) : null;
+    const toDate = req.query.to ? String(req.query.to) : null;
+
+    // 1. Fetch projects in scope
+    const projects = await query(
+      `SELECT p.id, p.project_code, p.project_name, p.client_name, p.project_status, p.budget, p.start_date, p.end_date
+       FROM pm_projects p
+       WHERE p.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(p.branch_id, :branchIdsStr))
+         AND (:projectId IS NULL OR p.id = :projectId)
+       ORDER BY p.project_name`,
+      { companyId, branchIdsStr, projectId }
+    );
+
+    // 2. Fetch income records (Receipt Vouchers 'RV', 'RECV')
+    const incomeItems = await query(
+      `SELECT v.id, v.voucher_no, v.voucher_date,
+          COALESCE((SELECT l.description FROM fin_voucher_lines l WHERE l.voucher_id = v.id AND l.company_id = v.company_id AND NULLIF(TRIM(l.description), '') IS NOT NULL ORDER BY l.line_no ASC LIMIT 1), v.narration) AS description,
+          vt.name AS voucher_type_name, c.code AS currency_code, v.total_credit AS amount, v.status,
+          v.project_id, p.project_code, p.project_name
+       FROM fin_vouchers v
+       JOIN fin_voucher_types vt ON vt.id = v.voucher_type_id AND vt.company_id = v.company_id
+       LEFT JOIN fin_currencies c ON c.id = v.currency_id AND c.company_id = v.company_id
+       LEFT JOIN pm_projects p ON p.id = v.project_id
+       WHERE v.company_id = :companyId AND vt.code IN ('RV', 'RECV')
+         AND v.project_id IS NOT NULL
+         AND (:projectId IS NULL OR v.project_id = :projectId)
+         AND (:fromDate IS NULL OR v.voucher_date >= :fromDate)
+         AND (:toDate IS NULL OR v.voucher_date <= :toDate)
+         AND (:branchIdsStr = '' OR FIND_IN_SET(v.branch_id, :branchIdsStr))
+       ORDER BY v.voucher_date DESC, v.id DESC`,
+      { companyId, branchId, branchIdsStr, projectId, fromDate, toDate }
+    );
+
+    // 3. Fetch expense records (Payment Vouchers 'PV', 'PAYV')
+    const expenseItems = await query(
+      `SELECT v.id, v.voucher_no, v.voucher_date,
+          COALESCE((SELECT l.description FROM fin_voucher_lines l WHERE l.voucher_id = v.id AND l.company_id = v.company_id AND NULLIF(TRIM(l.description), '') IS NOT NULL ORDER BY l.line_no ASC LIMIT 1), v.narration) AS description,
+          vt.name AS voucher_type_name, c.code AS currency_code, v.total_debit AS amount, v.status,
+          v.project_id, p.project_code, p.project_name
+       FROM fin_vouchers v
+       JOIN fin_voucher_types vt ON vt.id = v.voucher_type_id AND vt.company_id = v.company_id
+       LEFT JOIN fin_currencies c ON c.id = v.currency_id AND c.company_id = v.company_id
+       LEFT JOIN pm_projects p ON p.id = v.project_id
+       WHERE v.company_id = :companyId AND vt.code IN ('PV', 'PAYV')
+         AND v.project_id IS NOT NULL
+         AND (:projectId IS NULL OR v.project_id = :projectId)
+         AND (:fromDate IS NULL OR v.voucher_date >= :fromDate)
+         AND (:toDate IS NULL OR v.voucher_date <= :toDate)
+         AND (:branchIdsStr = '' OR FIND_IN_SET(v.branch_id, :branchIdsStr))
+       ORDER BY v.voucher_date DESC, v.id DESC`,
+      { companyId, branchId, branchIdsStr, projectId, fromDate, toDate }
+    );
+
+    // 4. Per-project P&L aggregation (Surplus / Deficit)
+    const projectSummary = projects.map((p) => {
+      const pIncome = incomeItems.filter((i) => Number(i.project_id) === Number(p.id));
+      const pExpense = expenseItems.filter((e) => Number(e.project_id) === Number(p.id));
+      const totalIncome = pIncome.reduce((s, x) => s + Number(x.amount || 0), 0);
+      const totalExpense = pExpense.reduce((s, x) => s + Number(x.amount || 0), 0);
+      const netBalance = totalIncome - totalExpense;
+      const margin = totalIncome > 0 ? (netBalance / totalIncome) * 100 : (netBalance === 0 ? 0 : -100);
+
+      return {
+        id: p.id,
+        project_code: p.project_code,
+        project_name: p.project_name,
+        client_name: p.client_name,
+        project_status: p.project_status,
+        budget: Number(p.budget || 0),
+        total_income: totalIncome,
+        total_expense: totalExpense,
+        net_balance: netBalance,
+        status: netBalance > 0 ? "SURPLUS" : (netBalance < 0 ? "DEFICIT" : "BALANCED"),
+        margin_percent: margin,
+        income_count: pIncome.length,
+        expense_count: pExpense.length,
+      };
+    });
+
+    const totalIncome = incomeItems.reduce((s, x) => s + Number(x.amount || 0), 0);
+    const totalExpense = expenseItems.reduce((s, x) => s + Number(x.amount || 0), 0);
+    const netBalance = totalIncome - totalExpense;
+
+    const overallSummary = {
+      total_income: totalIncome,
+      total_expense: totalExpense,
+      net_balance: netBalance,
+      status: netBalance > 0 ? "SURPLUS" : (netBalance < 0 ? "DEFICIT" : "BALANCED"),
+      margin_percent: totalIncome > 0 ? (netBalance / totalIncome) * 100 : 0,
+      total_projects: projects.length,
+      income_vouchers_count: incomeItems.length,
+      expense_vouchers_count: expenseItems.length,
+    };
+
+    res.json({
+      projects,
+      projectSummary,
+      overallSummary,
+      incomeItems,
+      expenseItems,
+    });
+  } catch (err) { next(err); }
+};
+
 export const getTaskExecutionAnalyticsReport = async (req, res, next) => {
   try {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
@@ -2019,6 +2192,8 @@ export const getTaskExecutionAnalyticsReport = async (req, res, next) => {
 
     const normalizedItems = (items || []).map((t) => {
       totalTasks++;
+      t.task_title = t.task_title || t.task_name || `Task #${t.id}`;
+      t.task_name = t.task_name || t.task_title || `Task #${t.id}`;
 
       const pct = Number(t.completion_percent || 0);
       let effectiveStatus = (t.status || "PENDING").toUpperCase();
@@ -2146,18 +2321,25 @@ export const getTaskExecutionAnalyticsReport = async (req, res, next) => {
 
 export const listPmEquipments = async (req, res, next) => {
   try {
-    const { companyId, branchId } = req.scope || {};
+    const companyId = req.scope?.companyId || req.user?.companyId || req.user?.company_id || 1;
+    const branchId = req.scope?.branchId || req.user?.branchId || req.user?.branch_id || null;
     await ensureProjectTables(companyId, branchId);
     
-    const rows = await query(
-      `SELECT e.*, me.asset_name as maint_equipment_name
-       FROM pm_equipments e
-       LEFT JOIN maint_assets me ON e.maint_equipment_id = me.id
-       WHERE e.company_id = ? AND e.branch_id = ?
-       ORDER BY e.name ASC`,
-      [companyId, branchId]
-    );
-    res.json(rows);
+    let sql = `
+      SELECT e.*, me.asset_name as maint_equipment_name
+      FROM pm_equipments e
+      LEFT JOIN maint_assets me ON e.maint_equipment_id = me.id
+      WHERE (e.company_id = ? OR ? IS NULL)
+    `;
+    const params = [companyId, companyId];
+    if (branchId) {
+      sql += " AND (e.branch_id = ? OR e.branch_id IS NULL OR e.branch_id = 0)";
+      params.push(branchId);
+    }
+    sql += " ORDER BY e.name ASC";
+
+    const rows = await query(sql, params);
+    res.json(Array.isArray(rows) ? rows : []);
   } catch (err) {
     next(err);
   }
@@ -2223,7 +2405,8 @@ export const deletePmEquipment = async (req, res, next) => {
 
 export const listPmResources = async (req, res, next) => {
   try {
-    const { companyId, branchId } = req.scope || {};
+    const companyId = req.scope?.companyId || req.user?.companyId || req.user?.company_id || 1;
+    const branchId = req.scope?.branchId || req.user?.branchId || req.user?.branch_id || null;
     const { project_id, task_id } = req.query;
     await ensureProjectTables(companyId, branchId);
 
@@ -2232,15 +2415,15 @@ export const listPmResources = async (req, res, next) => {
              p.project_name, p.project_code,
              t.task_title,
              e.name as pm_equipment_name,
-             he.employee_name as hr_employee_name
+             TRIM(CONCAT_WS(' ', he.first_name, NULLIF(he.middle_name, ''), he.last_name)) as hr_employee_name
       FROM pm_resources r
       LEFT JOIN pm_projects p ON r.project_id = p.id
       LEFT JOIN pm_tasks t ON r.task_id = t.id
       LEFT JOIN pm_equipments e ON r.pm_equipment_id = e.id
       LEFT JOIN hr_employees he ON r.hr_employee_id = he.id
-      WHERE r.company_id = ? AND r.branch_id = ?
+      WHERE (r.company_id = ? OR ? IS NULL)
     `;
-    const params = [companyId, branchId];
+    const params = [companyId, companyId];
     
     if (project_id) {
       sql += " AND r.project_id = ?";
@@ -2254,7 +2437,7 @@ export const listPmResources = async (req, res, next) => {
     sql += " ORDER BY r.created_at DESC";
 
     const rows = await query(sql, params);
-    res.json(rows);
+    res.json(Array.isArray(rows) ? rows : []);
   } catch (err) {
     next(err);
   }
@@ -2262,33 +2445,46 @@ export const listPmResources = async (req, res, next) => {
 
 export const createPmResource = async (req, res, next) => {
   try {
-    const { companyId, branchId } = req.scope || {};
+    const companyId = req.scope?.companyId || req.user?.companyId || req.user?.company_id || 1;
+    const branchId = req.scope?.branchId || req.user?.branchId || req.user?.branch_id || 1;
     await ensureProjectTables(companyId, branchId);
     
-    const { 
-      project_id, task_id, resource_type, pm_equipment_id, hr_employee_id, 
-      resource_name, allocated_qty, status, accountable_user_id, accountable_user_name,
-      start_date, end_date, remarks 
-    } = req.body;
+    // Support single resource allocation or batch of multiple resource types linked to project
+    const rawItems = Array.isArray(req.body.items) ? req.body.items : [req.body];
+    if (!rawItems.length) return res.status(400).json({ message: "No resource data provided" });
 
-    if (!project_id) return httpError(res, 400, "Project is required");
-    if (!resource_name) return httpError(res, 400, "Resource name is required");
+    const createdIds = [];
+    for (const item of rawItems) {
+      const {
+        project_id, task_id, resource_type, pm_equipment_id, hr_employee_id,
+        resource_name, allocated_qty, status, accountable_user_id, accountable_user_name,
+        start_date, end_date, remarks, is_active
+      } = item;
 
-    const result = await query(
-      `INSERT INTO pm_resources (
-        company_id, branch_id, project_id, task_id, resource_type,
-        pm_equipment_id, hr_employee_id, resource_name, allocated_qty,
-        status, accountable_user_id, accountable_user_name, start_date, end_date, remarks
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        companyId, branchId, project_id, task_id || null, resource_type || 'EQUIPMENT',
-        pm_equipment_id || null, hr_employee_id || null, resource_name, 
-        allocated_qty || 1, status || 'ALLOCATED', accountable_user_id || null, accountable_user_name || null,
-        start_date || null, end_date || null, remarks || null
-      ]
-    );
+      if (!resource_name || !String(resource_name).trim()) continue;
 
-    res.status(201).json({ id: result.insertId, message: "Resource allocated successfully" });
+      const result = await query(
+        `INSERT INTO pm_resources (
+          company_id, branch_id, project_id, task_id, resource_type,
+          pm_equipment_id, hr_employee_id, resource_name, allocated_qty,
+          status, accountable_user_id, accountable_user_name, start_date, end_date, remarks, is_active
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          companyId, branchId, project_id ? Number(project_id) : null, task_id ? Number(task_id) : null, resource_type || 'EQUIPMENT',
+          pm_equipment_id ? Number(pm_equipment_id) : null, hr_employee_id ? Number(hr_employee_id) : null, String(resource_name).trim(), 
+          Number(allocated_qty) || 1, status || 'ALLOCATED', accountable_user_id ? Number(accountable_user_id) : null, accountable_user_name || null,
+          start_date || null, end_date || null, remarks || null,
+          is_active !== undefined ? (is_active ? 1 : 0) : 1
+        ]
+      );
+      createdIds.push(result.insertId);
+    }
+
+    if (!createdIds.length) {
+      return res.status(400).json({ message: "Resource name is required for all allocated items" });
+    }
+
+    res.status(201).json({ id: createdIds[0], ids: createdIds, message: "Resource(s) allocated successfully" });
   } catch (err) {
     next(err);
   }
@@ -2296,26 +2492,41 @@ export const createPmResource = async (req, res, next) => {
 
 export const updatePmResource = async (req, res, next) => {
   try {
-    const { companyId, branchId } = req.scope || {};
+    const companyId = req.scope?.companyId || req.user?.companyId || req.user?.company_id || 1;
     const { id } = req.params;
     
     const { 
-      task_id, resource_type, pm_equipment_id, hr_employee_id, 
+      project_id, task_id, resource_type, pm_equipment_id, hr_employee_id, 
       resource_name, allocated_qty, status, accountable_user_id, accountable_user_name,
-      start_date, end_date, remarks 
+      start_date, end_date, remarks, is_active
     } = req.body;
+
+    const current = await query(`SELECT * FROM pm_resources WHERE id = ? AND company_id = ?`, [id, companyId]);
+    if (!current.length) return res.status(404).json({ message: "Resource not found" });
+
+    // Business rule: User must unallocate resource type from project before they can set to inactive
+    const targetIsActive = is_active !== undefined ? (is_active === 0 || is_active === false || is_active === '0' || is_active === 'inactive' ? 0 : 1) : (current[0].is_active !== null ? current[0].is_active : 1);
+    const targetProjectId = project_id !== undefined ? (project_id ? Number(project_id) : null) : current[0].project_id;
+
+    if (targetIsActive === 0 && targetProjectId) {
+      return res.status(400).json({
+        message: "Cannot set resource to inactive while allocated to a project. Please unallocate the resource from the project first."
+      });
+    }
 
     await query(
       `UPDATE pm_resources SET
+        project_id = ?,
         task_id = ?, resource_type = ?, pm_equipment_id = ?, hr_employee_id = ?,
         resource_name = ?, allocated_qty = ?, status = ?, accountable_user_id = ?, 
-        accountable_user_name = ?, start_date = ?, end_date = ?, remarks = ?
-       WHERE id = ? AND company_id = ? AND branch_id = ?`,
+        accountable_user_name = ?, start_date = ?, end_date = ?, remarks = ?, is_active = ?
+       WHERE id = ? AND company_id = ?`,
       [
-        task_id || null, resource_type || 'EQUIPMENT', pm_equipment_id || null, hr_employee_id || null,
-        resource_name, allocated_qty || 1, status || 'ALLOCATED', accountable_user_id || null,
-        accountable_user_name || null, start_date || null, end_date || null, remarks || null,
-        id, companyId, branchId
+        targetProjectId,
+        task_id ? Number(task_id) : null, resource_type || 'EQUIPMENT', pm_equipment_id ? Number(pm_equipment_id) : null, hr_employee_id ? Number(hr_employee_id) : null,
+        resource_name, Number(allocated_qty) || 1, status || 'ALLOCATED', accountable_user_id ? Number(accountable_user_id) : null,
+        accountable_user_name || null, start_date || null, end_date || null, remarks || null, targetIsActive,
+        id, companyId
       ]
     );
 
@@ -2325,11 +2536,40 @@ export const updatePmResource = async (req, res, next) => {
   }
 };
 
+export const togglePmResourceStatus = async (req, res, next) => {
+  try {
+    const companyId = req.scope?.companyId || req.user?.companyId || req.user?.company_id || 1;
+    const { id } = req.params;
+    const { is_active } = req.body;
+
+    const current = await query(`SELECT * FROM pm_resources WHERE id = ? AND company_id = ?`, [id, companyId]);
+    if (!current.length) return res.status(404).json({ message: "Resource not found" });
+
+    const newActiveState = (is_active === 0 || is_active === false || is_active === '0' || is_active === 'inactive') ? 0 : 1;
+
+    // Enforce business rule: must unallocate from project before inactivating
+    if (newActiveState === 0 && current[0].project_id) {
+      return res.status(400).json({
+        message: "Cannot set resource to inactive while allocated to a project. Please unallocate the resource from the project first."
+      });
+    }
+
+    await query(`UPDATE pm_resources SET is_active = ? WHERE id = ? AND company_id = ?`, [newActiveState, id, companyId]);
+    res.json({ 
+      success: true, 
+      is_active: newActiveState, 
+      message: `Resource status changed to ${newActiveState === 1 ? 'Active' : 'Inactive'}` 
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const deletePmResource = async (req, res, next) => {
   try {
-    const { companyId, branchId } = req.scope || {};
+    const companyId = req.scope?.companyId || req.user?.companyId || req.user?.company_id || 1;
     const { id } = req.params;
-    await query(`DELETE FROM pm_resources WHERE id = ? AND company_id = ? AND branch_id = ?`, [id, companyId, branchId]);
+    await query(`DELETE FROM pm_resources WHERE id = ? AND company_id = ?`, [id, companyId]);
     res.json({ success: true, message: "Resource allocation deleted" });
   } catch (err) {
     next(err);

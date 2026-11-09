@@ -7,7 +7,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "../../../../api/client";
-import { FileText, MapPin, Calendar, Users, ClipboardList, Save, X } from "lucide-react";
+import { FileText, MapPin, Calendar, Users, ClipboardList, Save, X, ArrowLeft } from "lucide-react";
 import { usePermission } from "@/auth/PermissionContext.jsx";
 
 const ORDER_TYPES = [
@@ -142,8 +142,8 @@ export default function MaintenanceJobOrderForm() {
       {/* Sticky Header */}
       <div className="sticky top-0 z-30 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 -mx-6 -mt-6 mb-6 flex flex-wrap items-center justify-between gap-4 shadow-sm">
         <div className="flex items-center gap-4">
-          <Link to="/maintenance/job-orders" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-            <X size={20} className="text-slate-500" />
+          <Link to="/maintenance/job-orders" className="btn btn-secondary flex items-center gap-1.5">
+            <ArrowLeft size={16} /> Back
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
@@ -192,7 +192,7 @@ export default function MaintenanceJobOrderForm() {
 
         {/* Card 1: General Details */}
         <div className="card overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm">
-          <div className="bg-slate-50 dark:bg-slate-800/50 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2">
+          <div className="bg-white dark:bg-slate-900 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2">
             <FileText size={18} className="text-brand-500" />
             <h2 className="font-semibold text-slate-800 dark:text-slate-200">General Details</h2>
           </div>
@@ -257,7 +257,7 @@ export default function MaintenanceJobOrderForm() {
 
         {/* Card 2: Scheduling & Location */}
         <div className="card overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm">
-          <div className="bg-slate-50 dark:bg-slate-800/50 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2">
+          <div className="bg-white dark:bg-slate-900 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2">
             <Calendar size={18} className="text-brand-500" />
             <h2 className="font-semibold text-slate-800 dark:text-slate-200">Scheduling & Location</h2>
           </div>
@@ -290,7 +290,7 @@ export default function MaintenanceJobOrderForm() {
 
         {/* Card 3: Assignment */}
         <div className="card overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm">
-          <div className="bg-slate-50 dark:bg-slate-800/50 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2">
+          <div className="bg-white dark:bg-slate-900 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2">
             <Users size={18} className="text-brand-500" />
             <h2 className="font-semibold text-slate-800 dark:text-slate-200">Assignment & Resource</h2>
           </div>
@@ -346,7 +346,7 @@ export default function MaintenanceJobOrderForm() {
 
         {/* Card 4: Scope & Notes */}
         <div className="card overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm">
-          <div className="bg-slate-50 dark:bg-slate-800/50 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2">
+          <div className="bg-white dark:bg-slate-900 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2">
             <ClipboardList size={18} className="text-brand-500" />
             <h2 className="font-semibold text-slate-800 dark:text-slate-200">Scope & Notes</h2>
           </div>

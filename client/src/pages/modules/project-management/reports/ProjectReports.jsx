@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Activity, DollarSign, Clock, Briefcase, TrendingUp, TrendingDown, Loader2 } from "lucide-react";
+import { ArrowLeft, Activity, DollarSign, Clock, Briefcase, TrendingUp, TrendingDown, Loader2, Scale } from "lucide-react";
 import { api } from "../../../../api/client.js";
 
 const StatCard = ({ icon, label, value, color }) => (
@@ -76,7 +76,7 @@ export default function ProjectReports() {
       ) : null}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Link to="/project-management/reports/task-management-and-execution" className="group bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-brand-200 dark:hover:border-brand-900 transition-all duration-300 flex items-start gap-4">
+        <Link to="/project-management/reports/task-management" className="group bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-brand-200 dark:hover:border-brand-900 transition-all duration-300 flex items-start gap-4">
           <div className="p-3 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-purple-600 shadow-sm group-hover:scale-105 transition-transform">
             <Activity size={20} />
           </div>
@@ -112,6 +112,15 @@ export default function ProjectReports() {
           <div className="flex-1">
             <h3 className="font-bold text-slate-900 dark:text-white group-hover:text-rose-600 transition-colors">Project Expense Report</h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Payment vouchers linked to each project</p>
+          </div>
+        </Link>
+        <Link to="/project-management/reports/project-expense-income" className="group bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-900 transition-all duration-300 flex items-start gap-4">
+          <div className="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 shadow-sm group-hover:scale-105 transition-transform">
+            <Scale size={20} />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors">Project Expense and Income Report</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Profit & loss statement showing surplus and deficit per project with receipt and payment voucher details</p>
           </div>
         </Link>
       </div>

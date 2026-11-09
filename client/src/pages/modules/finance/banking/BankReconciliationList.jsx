@@ -377,16 +377,13 @@ export default function BankReconciliationList() {
                 </label>
                 <input
                   type="text"
-                  className="input input-bordered w-full bg-slate-50 font-mono text-slate-600"
+                  className="input input-bordered w-full bg-white dark:bg-slate-900 font-mono text-slate-600"
                   value={openingBalance.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                   })}
                   readOnly
                 />
-                <p className="text-[10px] text-slate-400 mt-1">
-                  Carried forward from the last completed reconciliation.
-                </p>
-              </div>
+                </div>
 
               <div className="grid grid-cols-2 gap-3">
                 {/* Statement From */}

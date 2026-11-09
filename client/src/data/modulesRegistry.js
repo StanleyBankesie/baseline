@@ -7,6 +7,8 @@
  * server/data/featuresRegistry.js
  */
 
+import { MODULE_SECTIONS, getModuleSections as getSectionsHelper, getCanonicalFeatureKey } from "./userAssignedSections.js";
+
 export const MODULES_REGISTRY = {
   administration: {
     name: "Administration",
@@ -72,15 +74,14 @@ export const MODULES_REGISTRY = {
       { key: "sales-upload", label: "Sales Upload", type: "feature", isExclusive: true },
       { key: "prospect-customers", label: "Prospective Customers", type: "feature" },
       { key: "prospect-conversion", label: "Prospect Conversion", type: "feature" },
+      { key: "setup", label: "Sales Setup", type: "feature" },
     ],
     dashboards: [
-
-
-
-          { key: "sales-total-revenue", label: "Total Revenue This Month", type: "dashboard" },
+      { key: "sales-total-revenue", label: "Total Revenue This Month", type: "dashboard" },
+      { key: "sales-avg-sales-this-month", label: "Average Sales This Month", type: "dashboard" },
       { key: "sales-pending-orders", label: "Pending Orders", type: "dashboard" },
       { key: "sales-active-customers", label: "Active Customers", type: "dashboard" },
-]
+    ]
   },
 
   purchase: {
@@ -94,10 +95,13 @@ export const MODULES_REGISTRY = {
       { key: "quotation-analysis", label: "Quotation Analysis", type: "feature" },
       { key: "purchase-orders-local", label: "Local Purchase Orders", type: "feature" },
       { key: "purchase-orders-import", label: "Import Purchase Orders", type: "feature" },
+      { key: "service-requests", label: "Service Requests (Procurement)", type: "feature" },
+      { key: "service-confirmations", label: "Service Confirmations", type: "feature" },
       { key: "shipping-advice", label: "Shipping Advice", type: "feature" },
       { key: "port-clearances", label: "Port Clearances", type: "feature" },
       { key: "purchase-bills-local", label: "Local Purchase Bills", type: "feature" },
       { key: "purchase-bills-import", label: "Import Purchase Bills", type: "feature" },
+      { key: "service-bills", label: "Service Bills", type: "feature" },
       { key: "purchase-upload", label: "Purchase Upload", type: "feature", isExclusive: true },
       { key: "suppliers", label: "Suppliers", type: "feature" },
       { key: "purchase-returns", label: "Purchase Returns", type: "feature" },
@@ -148,6 +152,7 @@ export const MODULES_REGISTRY = {
       { key: "grn-local", label: "Material Receipt (GRN) - Local", type: "feature" },
       { key: "grn-import", label: "Material Receipt (GRN) - Import", type: "feature" },
       { key: "items", label: "Item Management", type: "feature" },
+      { key: "item-classification", label: "Item Classification", type: "feature" },
 
       { key: "unit-conversions", label: "Unit Conversion", type: "feature" },
       { key: "warehouses", label: "Warehouse Management", type: "feature" },
@@ -218,6 +223,7 @@ export const MODULES_REGISTRY = {
       { key: "supplieroutstandingreport", label: " Supplier Outstanding Report", type: "feature" },
       { key: "trialbalancereport", label: " Trial Balance Report", type: "feature" },
       { key: "voucherregisterreport", label: " Voucher Register Report", type: "feature" },
+      { key: "budgetvsactualreport", label: " Budget vs Actual Report", type: "feature" },
     ],
     dashboards: [
 
@@ -282,12 +288,49 @@ export const MODULES_REGISTRY = {
       { key: "material-receipts", label: "Material Receipts", type: "feature" },
     ],
     dashboards: [
-
-
-          { key: "maint-open-work-orders", label: "Open Work Orders", type: "dashboard" },
+      { key: "maint-open-work-orders", label: "Open Work Orders", type: "dashboard" },
       { key: "maint-assets-in-maint", label: "Assets in Maintenance", type: "dashboard" },
       { key: "maint-total-assets", label: "Total Assets", type: "dashboard" },
-]
+    ]
+  },
+
+  facilities: {
+    name: "Facilities Management",
+    icon: "🏢",
+    features: [
+      { key: "dashboard", label: "Facilities Command Center", type: "feature" },
+      { key: "properties", label: "Properties & Estates", type: "feature" },
+      { key: "contracts", label: "FM Service Contracts", type: "feature" },
+      { key: "field-service", label: "Field Technician Workspace", type: "feature" },
+      { key: "checklists", label: "Inspection Checklists", type: "feature" },
+      { key: "soft-services", label: "Soft Facilities Services", type: "feature" },
+      { key: "reports", label: "Facilities Reports", type: "feature" },
+    ],
+    dashboards: [
+      { key: "fac-sla-compliance", label: "SLA Compliance Rate", type: "dashboard" },
+      { key: "fac-open-tickets", label: "Open Helpdesk Tickets", type: "dashboard" },
+      { key: "fac-active-contracts", label: "Active FM Contracts", type: "dashboard" },
+    ]
+  },
+
+  assets: {
+    name: "Asset Management",
+    icon: "🏛️",
+    features: [
+      { key: "register", label: "Fixed Asset Register", type: "feature" },
+      { key: "categories", label: "Asset Categories & Policies", type: "feature" },
+      { key: "setup", label: "Master Setup & Tagging Rules", type: "feature" },
+      { key: "depreciation", label: "Asset Depreciation Engine", type: "feature" },
+      { key: "revaluations", label: "Asset Value Adjustments", type: "feature" },
+      { key: "transfers", label: "Asset Transfers", type: "feature" },
+      { key: "disposals", label: "Asset Disposals & Retirements", type: "feature" },
+      { key: "schedule-report", label: "Fixed Asset Schedule", type: "feature" },
+    ],
+    dashboards: [
+      { key: "ast-total-cost", label: "Total Historical Cost", type: "dashboard" },
+      { key: "ast-total-nbv", label: "Portfolio Net Book Value", type: "dashboard" },
+      { key: "ast-active-count", label: "Active Capitalized Assets", type: "dashboard" },
+    ]
   },
 
   production: {
@@ -334,11 +377,42 @@ export const MODULES_REGISTRY = {
       { key: "project-status-report", label: "Project Status Report", type: "feature" },
       { key: "project-income-report", label: "Project Income Report", type: "feature" },
       { key: "project-expense-report", label: "Project Expense Report", type: "feature" },
+      { key: "project-expense-income-report", label: "Project Expense and Income Report", type: "feature" },
+      { key: "tenders", label: "Tenders & Bidding", type: "feature" },
+      { key: "boqs", label: "Bill of Quantities (BOQ)", type: "feature" },
+      { key: "cost-control", label: "Cost Control & EVM", type: "feature" },
+      { key: "schedule", label: "Planning & CPM Schedule", type: "feature" },
+      { key: "daily-reports", label: "Daily Site Diary (DSR)", type: "feature" },
+      { key: "subcontracts", label: "Subcontractors & IPCs", type: "feature" },
+      { key: "client-valuations", label: "Client Valuations (IPAs)", type: "feature" },
+      { key: "variations", label: "Variations & Change Orders", type: "feature" },
+      { key: "quality-control", label: "Quality Control (QA/QC)", type: "feature" },
+      { key: "documents", label: "Drawings & Documents", type: "feature" },
+      { key: "rfis", label: "RFIs (Requests for Information)", type: "feature" },
+      { key: "equipment-logs", label: "Plant & Equipment Logs", type: "feature" },
     ],
     dashboards: [
 
 
     ]
+  },
+
+  "environmental-health-safety": {
+    name: "Environmental, Health & Safety",
+    icon: "🛡️",
+    features: [
+      { key: "safety", label: "Safety Management (HSE)", type: "feature" },
+      { key: "incidents", label: "Incident Register & Near Misses", type: "feature" },
+      { key: "toolbox-talks", label: "Toolbox Talks & Briefings", type: "feature" },
+      { key: "hsa-compliance", label: "Health, Safety & Compliance", type: "feature" },
+      { key: "compliance", label: "Statutory Obligations & Hazards", type: "feature" },
+      { key: "sustainability", label: "Sustainability & Environmental", type: "feature" },
+    ],
+    dashboards: [
+      { key: "ehs-incident-rate", label: "Incident Frequency Rate", type: "dashboard" },
+      { key: "ehs-active-permits", label: "Active Permits to Work", type: "dashboard" },
+      { key: "ehs-compliance-score", label: "Statutory Compliance Score", type: "dashboard" },
+    ],
   },
 
   pos: {
@@ -352,12 +426,13 @@ export const MODULES_REGISTRY = {
       { key: "post-to-finance", label: "Post to Finance", type: "feature" },
       { key: "returns", label: "POS Returns", type: "feature" },
       { key: "register", label: "POS Register", type: "feature" },
-
-
-
-      { key: "customer-history", label: "Customer Accounts", type: "feature" },
       { key: "on-hold", label: "On-Hold Sales", type: "feature", path: "/pos/holds" },
+      { key: "direct-purchase", label: "Direct Purchase", type: "feature", path: "/pos/direct-purchase" },
+      { key: "items", label: "Store Inventory", type: "feature", path: "/pos/store-inventory" },
+      { key: "customer-history", label: "Customer Accounts", type: "feature" },
       { key: "reconciliation", label: "Sync Reconciliation", type: "feature" },
+      { key: "reports", label: "POS Reports", type: "feature", path: "/pos/reports" },
+      { key: "dashboard", label: "POS Dashboard", type: "feature", path: "/pos/dashboard" },
       { key: "setup", label: "POS Setup", type: "feature" },
     ],
     dashboards: [
@@ -366,22 +441,6 @@ export const MODULES_REGISTRY = {
       { key: "pos-total-transactions", label: "Total Transactions", type: "dashboard" },
       { key: "pos-avg-order", label: "Average Order Value", type: "dashboard" },
 ]
-  },
-
-  "business-intelligence": {
-    name: "Business Intelligence",
-    icon: "📈",
-    features: [
-
-      { key: "reports", label: "Custom Reports", type: "feature" },
-      { key: "data-sources", label: "Data Sources", type: "feature" },
-      { key: "analytics", label: "Analytics", type: "feature" },
-      { key: "bi-reports", label: "BI Reports", type: "feature" },
-    ],
-    dashboards: [
-
-
-    ]
   },
 
   "executive-overview": {
@@ -397,8 +456,8 @@ export const MODULES_REGISTRY = {
   },
 
   "service-management": {
-    name: "Service Management",
-    icon: "🔧",
+    name: "Field Service Management",
+    icon: "🛠️",
     features: [
       { key: "customer-service-requests", label: "Customer Service Requests", type: "feature" },
       { key: "supplier-service-requests", label: "Supplier Service Requests", type: "feature" },
@@ -600,3 +659,9 @@ export function getModuleDashboards(moduleKey) {
     path: `/${moduleKey}/${dashboard.key}`,
   }));
 }
+
+export function getModuleSections(moduleKey) {
+  return getSectionsHelper(moduleKey, MODULES_REGISTRY[moduleKey]);
+}
+
+export { getCanonicalFeatureKey, MODULE_SECTIONS };

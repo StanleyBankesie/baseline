@@ -36,10 +36,12 @@ import PendingGrnToBillImportReportPage from "./reports/PendingGrnToBillImportRe
 import ImportOrderListReportPage from "./reports/ImportOrderListReportPage.jsx";
 import PendingShipmentDetailsReportPage from "./reports/PendingShipmentDetailsReportPage.jsx";
 import PurchaseRegisterReportPage from "./reports/PurchaseRegisterReportPage.jsx";
-import ServiceBillsList from "../service-management/service-bills/ServiceBillsList.jsx";
-import ServiceBillForm from "../service-management/service-bills/ServiceBillForm.jsx";
-import ServiceConfirmationsList from "../service-management/service-confirmations/ServiceConfirmationsList.jsx";
-import ServiceConfirmationForm from "../service-management/service-confirmations/ServiceConfirmationForm.jsx";
+import ServiceBillsList from "./service-bills/ServiceBillsList.jsx";
+import ServiceBillForm from "./service-bills/ServiceBillForm.jsx";
+import ServiceConfirmationsList from "./service-confirmations/ServiceConfirmationsList.jsx";
+import ServiceConfirmationForm from "./service-confirmations/ServiceConfirmationForm.jsx";
+import ServiceRequestsList from "./service-requests/ServiceRequestsList.jsx";
+import ServiceRequestForm from "./service-requests/ServiceRequestForm.jsx";
 import DirectPurchase from "./direct-purchase/DirectPurchase.jsx";
 import DirectPurchaseList from "./direct-purchase/DirectPurchaseList.jsx";
 import GeneralRequisitionList from "./general-requisitions/GeneralRequisitionList.jsx";
@@ -143,6 +145,26 @@ export const purchaseSections = [
         description: "Manage import POs",
         icon: "🚢",
       },
+      {
+        name: "Service Requests",
+        path: "/purchase/service-requests",
+        actions: [
+          { label: "View", path: "/purchase/service-requests", type: "outline" },
+          { label: "New", path: "/purchase/service-requests/new", type: "primary" }
+        ],
+        description: "Procurement of services & contractor work requests",
+        icon: "🛠️",
+      },
+      {
+        name: "Service Confirmations",
+        path: "/purchase/service-confirmations",
+        actions: [
+          { label: "View", path: "/purchase/service-confirmations", type: "outline" },
+          { label: "New", path: "/purchase/service-confirmations/new", type: "primary" }
+        ],
+        description: "Confirm vendor service fulfillment and auto-generate purchase bills",
+        icon: "📋",
+      },
     ],
   },
   {
@@ -192,6 +214,16 @@ export const purchaseSections = [
         ],
         description: "Create and manage import purchase bills",
         icon: "🧾",
+      },
+      {
+        name: "Service Bills",
+        path: "/purchase/service-bills",
+        actions: [
+          { label: "View", path: "/purchase/service-bills", type: "outline" },
+          { label: "New", path: "/purchase/service-bills/new", type: "primary" }
+        ],
+        description: "Create, view and manage vendor service bills for contractor payments",
+        icon: "💳",
       },
       {
         name: "Purchase Upload",
@@ -641,6 +673,30 @@ export default function PurchaseHome() {
         <Route
           path="service-bills/:id"
           element={<ServiceBillForm />}
+        />
+        <Route
+          path="service-requests"
+          element={<ServiceRequestsList />}
+        />
+        <Route
+          path="service-requests/new"
+          element={<ServiceRequestForm />}
+        />
+        <Route
+          path="service-requests/:id"
+          element={<ServiceRequestForm />}
+        />
+        <Route
+          path="service-confirmations"
+          element={<ServiceConfirmationsList />}
+        />
+        <Route
+          path="service-confirmations/new"
+          element={<ServiceConfirmationForm />}
+        />
+        <Route
+          path="service-confirmations/:id"
+          element={<ServiceConfirmationForm />}
         />
         <Route
           path="service-confirmation"

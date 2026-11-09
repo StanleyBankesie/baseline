@@ -50,7 +50,7 @@ export default function Sidebar() {
   let menuItems = [
     {
       key: "sales",
-      label: "Sales",
+      label: "Sales Management",
       icon: "💰",
       path: "/sales",
       children: [
@@ -91,7 +91,7 @@ export default function Sidebar() {
     },
     {
       key: "inventory",
-      label: "Inventory",
+      label: "Inventory Management",
       icon: "📦",
       path: "/inventory",
       children: [
@@ -120,7 +120,7 @@ export default function Sidebar() {
     },
     {
       key: "purchase",
-      label: "Purchase",
+      label: "Procurement",
       icon: "🛒",
       path: "/purchase",
       children: [
@@ -201,7 +201,7 @@ export default function Sidebar() {
     },
     {
       key: "administration",
-      label: "Administration",
+      label: "System Admin",
       icon: "⚙️",
       path: "/administration",
       children: [
@@ -245,9 +245,9 @@ export default function Sidebar() {
     },
     {
       key: "service-management",
-      label: "Service Management",
-      icon: "🔧",
-      path: "/service",
+      label: "Field Service Management",
+      icon: "🛠️",
+      path: "/service-management",
       children: [
         {
           key: "customer-service-requests",
@@ -260,14 +260,24 @@ export default function Sidebar() {
           path: "/service-management/supplier-service-requests",
         },
         {
-          key: "maintenance-schedule",
-          label: "Maintenance Schedule",
-          path: "/service/maintenance",
+          key: "service-orders",
+          label: "Service Orders",
+          path: "/service-management/service-orders",
         },
         {
-          key: "technician-management",
-          label: "Technicians",
-          path: "/service/technicians",
+          key: "service-executions",
+          label: "Service Execution",
+          path: "/service-management/service-executions",
+        },
+        {
+          key: "service-invoices",
+          label: "Service Invoices",
+          path: "/service-management/service-invoices",
+        },
+        {
+          key: "service-reports",
+          label: "Service Reports",
+          path: "/service-management/reports",
         },
       ],
     },
@@ -293,7 +303,7 @@ export default function Sidebar() {
     },
     {
       key: "production",
-      label: "Production",
+      label: "Manufacturing",
       icon: "🏭",
       path: "/production",
       children: [
@@ -311,30 +321,181 @@ export default function Sidebar() {
     },
     {
       key: "maintenance",
-      label: "Maintenance",
-      icon: "🔨",
+      label: "Maintenance & Equipment",
+      icon: "🔧",
       path: "/maintenance",
       children: [
         {
           key: "maintenance-requests",
           label: "Maintenance Requests",
-          path: "/maintenance/requests",
+          path: "/maintenance/maintenance-requests",
         },
         {
-          key: "preventive-maintenance",
+          key: "job-orders",
+          label: "Job Orders",
+          path: "/maintenance/job-orders",
+        },
+        {
+          key: "job-executions",
+          label: "Job Execution",
+          path: "/maintenance/job-executions",
+        },
+        {
+          key: "field-service",
+          label: "Field Technician Workspace",
+          path: "/maintenance/field-service",
+        },
+        {
+          key: "pm-schedules",
           label: "Preventive Maintenance",
-          path: "/maintenance/preventive",
+          path: "/maintenance/pm-schedules",
         },
         {
-          key: "asset-management",
-          label: "Asset Management",
-          path: "/maintenance/assets",
+          key: "rosters",
+          label: "Technician Rosters",
+          path: "/maintenance/rosters",
+        },
+        {
+          key: "material-requisitions",
+          label: "Spare Parts Requisition",
+          path: "/maintenance/material-requisitions",
+        },
+        {
+          key: "maintenance-reports",
+          label: "Maintenance Reports",
+          path: "/maintenance/reports",
+        },
+      ],
+    },
+    {
+      key: "facilities",
+      label: "Facilities Management",
+      icon: "🏢",
+      path: "/facilities",
+      children: [
+        {
+          key: "facilities-dashboard",
+          label: "Command Center",
+          path: "/facilities/dashboard",
+        },
+        {
+          key: "properties",
+          label: "Properties & Estates",
+          path: "/facilities/properties",
+        },
+        {
+          key: "facilities-equipment",
+          label: "Equipment & Assets",
+          path: "/facilities/equipment",
+        },
+        {
+          key: "facilities-setup",
+          label: "Operations Setup",
+          path: "/facilities/setup",
+        },
+        {
+          key: "fm-contracts",
+          label: "FM Service Contracts",
+          path: "/facilities/contracts",
+        },
+        {
+          key: "facilities-servicebilling",
+          label: "Service Billing",
+          path: "/facilities/servicebilling",
+        },
+        {
+          key: "checklists",
+          label: "Inspection Checklists",
+          path: "/facilities/checklists",
+        },
+        {
+          key: "soft-services",
+          label: "Soft Services & Site Ops",
+          path: "/facilities/soft-services",
+        },
+        {
+          key: "hsa-compliance",
+          label: "Health, Safety & Compliance",
+          path: "/facilities/hsa-compliance",
+        },
+        {
+          key: "utilities-energy",
+          label: "Utilities & Energy",
+          path: "/facilities/utilities-energy",
+        },
+        {
+          key: "budgeting-finance",
+          label: "Budgeting & Financials",
+          path: "/facilities/budgeting-finance",
+        },
+        {
+          key: "space-occupancy",
+          label: "Space & Occupancy",
+          path: "/facilities/space-occupancy",
+        },
+        {
+          key: "sustainability",
+          label: "Sustainability & Environment",
+          path: "/facilities/sustainability",
+        },
+        {
+          key: "facilities-reports",
+          label: "Facilities Reports",
+          path: "/facilities/reports",
+        },
+      ],
+    },
+    {
+      key: "assets",
+      label: "Asset Management",
+      icon: "🏛️",
+      path: "/assets",
+      children: [
+        {
+          key: "asset-register",
+          label: "Fixed Asset Register",
+          path: "/assets/register",
+        },
+        {
+          key: "asset-categories",
+          label: "Asset Categories",
+          path: "/assets/categories",
+        },
+        {
+          key: "asset-setup",
+          label: "Master Setup & Tagging",
+          path: "/assets/setup",
+        },
+        {
+          key: "depreciation",
+          label: "Asset Depreciation",
+          path: "/assets/depreciation",
+        },
+        {
+          key: "asset-revaluations",
+          label: "Asset Value Adjustments",
+          path: "/assets/revaluations",
+        },
+        {
+          key: "asset-transfers",
+          label: "Asset Transfers",
+          path: "/assets/transfers",
+        },
+        {
+          key: "asset-disposals",
+          label: "Asset Disposals",
+          path: "/assets/disposals",
+        },
+        {
+          key: "asset-schedule-report",
+          label: "Fixed Asset Schedule",
+          path: "/assets/reports/schedule",
         },
       ],
     },
     {
       key: "transport",
-      label: "Transport",
+      label: "Transport & Logistics",
       icon: "🚛",
       path: "/transport",
       children: [

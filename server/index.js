@@ -19,11 +19,14 @@ import backupRoutes from "./routes/backup.routes.js";
 import salesRoutes from "./routes/sales.route.js";
 import purchaseRoutes from "./routes/purchase.routes.js";
 import purchaseBillsRoutes from "./routes/purchase.bills.routes.js";
-import inventoryRoutes from "./routes/inventory.routes.js";
+import inventoryRoutes, { ensureWarehousesTable } from "./routes/inventory.routes.js";
 import financeRoutes from "./routes/finance.routes.js";
 import hrRoutes from "./routes/hr.routes.js";
 import maintenanceRoutes from "./routes/maintenance.routes.js";
+import facilitiesRoutes from "./routes/facilities.routes.js";
+import assetManagementRoutes from "./routes/asset-management.routes.js";
 import projectsRoutes from "./routes/projects.routes.js";
+import constructionRoutes from "./routes/construction.routes.js";
 import productionRoutes from "./routes/production.routes.js";
 import posRoutes from "./routes/pos.routes.js";
 import biRoutes from "./routes/bi.routes.js";
@@ -56,8 +59,6 @@ import emailTestRoutes from "./routes/email-test.routes.js";
 import visitorsRoutes from "./routes/visitors.routes.js";
 import licenseRoutes from "./routes/license.routes.js";
 import paymentPackageRoutes from "./routes/paymentPackages.js";
-import portalRoutes from "./routes/portal.routes.js";
-import customerPortalRoutes from "./routes/customerPortal.routes.js";
 import { requireLicense } from "./middleware/license.middleware.js";
 import { initializeSocket } from "./utils/socket.js";
 import {
@@ -67,15 +68,27 @@ import {
   ensureUserPermissionCacheAndTriggers,
   ensureUserBranchMapping,
   ensurePagesTable,
+  ensureBranchColumns,
+  ensureUserColumns,
+  ensureWorkflowTables,
+  ensureSalesOrderColumns,
+  ensureErrorLogsTable,
   hasColumn,
   verifiedTables,
   ensurePMQuotationTables,
   ensurePMInvoiceTables,
   ensureSocialFeedTables,
   ensureTransportTables,
+  ensureTaxTables,
 } from "./utils/dbUtils.js";
+import { ensureCompanyColumns } from "./controllers/companies.controller.js";
+import { ensureAuthTables } from "./services/token.service.js";
 import { seedDefaultTemplates } from "./services/seed-defaults.js";
 import { ensureIndexes } from "./utils/ensureIndexes.js";
+import { ensureConstructionTables } from "./utils/constructionTables.js";
+import { ensureFinanceBudgetTables } from "./utils/financeBudgetTables.js";
+import { ensureFacilitiesManagementTables } from "./utils/facilitiesManagementTables.js";
+import { ensureAssetManagementTables } from "./utils/assetManagementTables.js";
 import { initCronJobs } from "./utils/cronJobs.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -84,8 +97,6 @@ const __dirname = path.dirname(__filename);
 /* ---------------- ENV ---------------- */
 import { loadServerEnv } from "./utils/loadServerEnv.js";
 loadServerEnv(import.meta.url);
-
-
 
 const serveFrontendFlag = (() => {
   const v1 = String(process.env.SERVE_FRONTEND || "").toLowerCase();
@@ -98,71 +109,98 @@ const serveFrontendFlag = (() => {
 const app = express();
 app.set("trust proxy", 1);
 
-// Hook res.writeHead at the request level to completely strip connection headers,
-// bypassing any custom subclassing by Passenger.
+/* ---------------- CORS CONFIGURATION ---------------- */
+const allowedOrigins = (() => {
+  const raw = String(process.env.CORS_ALLOWED_ORIGINS || "").trim();
+  const origins = raw
+    ? raw
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+
+  const defaults = [
+    "https://thana.omnisuite-erp.com",
+    "https://thanaserver.omnisuite-erp.com",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:4002",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:4002",
+  ];
+  for (const d of defaults) {
+    if (!origins.includes(d)) origins.push(d);
+  }
+  return origins;
+})();
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  if (
+    origin.endsWith(".omnisuite-erp.com") ||
+    origin.includes("omnisuite-erp.com") ||
+    origin.includes("localhost") ||
+    origin.includes("127.0.0.1") ||
+    origin.includes("192.168.") ||
+    origin.includes("10.") ||
+    origin.includes("172.") ||
+    origin.startsWith("exp://") ||
+    origin.startsWith("http://") ||
+    origin.startsWith("https://")
+  ) {
+    return true;
+  }
+  return false;
+};
+
+const corsOptions = {
+  origin: (origin, cb) => {
+    if (isAllowedOrigin(origin)) {
+      return cb(null, true);
+    }
+    return cb(null, false);
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "x-company-id",
+    "x-branch-id",
+    "x-user-id",
+    "x-skip-offline-queue",
+    "x-access-token",
+    "Accept",
+    "Origin",
+    "X-Requested-With",
+  ],
+  optionsSuccessStatus: 200,
+};
+
+// Universal CORS & Preflight handler at the top of the stack
 app.use((req, res, next) => {
-  const origWriteHead = res.writeHead;
-  res.writeHead = function (statusCode, statusMessage, headers) {
-    this.removeHeader("Connection");
-    this.removeHeader("connection");
-    this.removeHeader("Keep-Alive");
-    this.removeHeader("keep-alive");
-
-    let headersObj = headers;
-    let statusMsg = statusMessage;
-
-    if (typeof statusMessage === "object") {
-      headersObj = statusMessage;
-      statusMsg = undefined;
-    }
-
-    if (headersObj) {
-      if (Array.isArray(headersObj)) {
-        for (let i = 0; i < headersObj.length; i++) {
-          const key = headersObj[i][0];
-          if (
-            key &&
-            (key.toLowerCase() === "connection" ||
-              key.toLowerCase() === "keep-alive")
-          ) {
-            headersObj.splice(i, 1);
-            i--;
-          }
-        }
-      } else if (typeof headersObj === "object") {
-        for (const k of Object.keys(headersObj)) {
-          const lower = k.toLowerCase();
-          if (lower === "connection" || lower === "keep-alive") {
-            delete headersObj[k];
-          }
-        }
-      }
-    }
-
-    const strip = (obj) => {
-      if (!obj) return;
-      for (const k of Object.getOwnPropertyNames(obj)) {
-        const lower = k.toLowerCase();
-        if (lower === "connection" || lower === "keep-alive") {
-          delete obj[k];
-        }
-      }
-    };
-    strip(this._headers);
-    const sym = Object.getOwnPropertySymbols(this).find(
-      (s) =>
-        s.toString().includes("Headers") || s.toString().includes("headers"),
+  const origin = req.headers.origin;
+  if (origin && isAllowedOrigin(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
     );
-    if (sym) strip(this[sym]);
-
-    if (statusMsg) {
-      return origWriteHead.call(this, statusCode, statusMsg, headersObj);
-    } else {
-      return origWriteHead.call(this, statusCode, headersObj);
-    }
-  };
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization, x-company-id, x-branch-id, x-user-id, x-skip-offline-queue, x-access-token, Accept, Origin, X-Requested-With",
+    );
+  }
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
   next();
 });
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 app.use(
   helmet({
@@ -250,10 +288,6 @@ app.use((req, res, next) => {
     "Content-Security-Policy",
     `default-src 'self'; script-src ${scriptSrc}; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' data: https://cdn.jsdelivr.net; connect-src ${connectSrc};`,
   );
-  res.setHeader(
-    "X-Robots-Tag",
-    "noindex, nofollow, noarchive, nosnippet, noimageindex",
-  );
   next();
 });
 
@@ -333,61 +367,7 @@ const boolEnv = (v) => {
   return s === "1" || s === "true" || s === "yes" || s === "on";
 };
 
-/* ---------------- CORS ---------------- */
-const allowedOrigins = (() => {
-  const raw = String(process.env.CORS_ALLOWED_ORIGINS || "").trim();
-  const origins = raw
-    ? raw
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean)
-    : [];
-
-  // Always allow the production frontend domain by default
-  if (!origins.includes("https://kaf.omnisuite-erp.com")) {
-    origins.push("https://kaf.omnisuite-erp.com");
-  }
-  if (!origins.includes("https://demo.omnisuite-erp.com")) {
-    origins.push("https://demo.omnisuite-erp.com");
-  }
-  return origins;
-})();
-
-const corsOptions = {
-  origin: (origin, cb) => {
-    if (!origin) return cb(null, true);
-    if (allowedOrigins.includes(origin)) return cb(null, true);
-    // Allow local development networks, Expo Go, and physical mobile phone requests
-    if (
-      origin.includes("localhost") ||
-      origin.includes("127.0.0.1") ||
-      origin.includes("192.168.") ||
-      origin.includes("10.") ||
-      origin.includes("172.") ||
-      origin.startsWith("exp://") ||
-      origin.startsWith("http://") ||
-      origin.startsWith("https://")
-    ) {
-      return cb(null, true);
-    }
-    return cb(null, false);
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: [
-    "Content-Type",
-    "Authorization",
-    "x-company-id",
-    "x-branch-id",
-    "x-user-id",
-    "x-skip-offline-queue",
-    "x-access-token",
-  ],
-  optionsSuccessStatus: 204,
-};
-
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+/* ---------------- BODY PARSERS & INPUT SANITIZATION ---------------- */
 const bodyLimit = process.env.MAX_BODY_LIMIT || "10mb";
 app.use(express.json({ limit: bodyLimit }));
 app.use(express.urlencoded({ extended: true, limit: bodyLimit }));
@@ -867,6 +847,42 @@ app.get("/api/ping", (_req, res) => res.json({ ok: true }));
     } catch (e) {
       console.warn("Error checking for constraints: ", e.message);
     }
+
+    // Construction Management Tables & Schema
+    try {
+      await ensureConstructionTables();
+    } catch (e) {
+      console.warn("Could not ensure construction tables:", e.message);
+    }
+
+    // Finance Budget Management Tables & Schema
+    try {
+      await ensureFinanceBudgetTables();
+    } catch (e) {
+      console.warn("Could not ensure finance budget tables:", e.message);
+    }
+
+    // Facilities Management Tables & Schema
+    try {
+      await ensureFacilitiesManagementTables();
+    } catch (e) {
+      console.warn("Could not ensure facilities management tables:", e.message);
+    }
+
+    // Facilities Management Expansion (Hard Services, Helpdesk, Onboarding, Inspections, Security, Workforce, Compliance, SLA)
+    try {
+      const { migrateFMExpansionMaster } = await import("./scripts/migrate_fm_expansion_master.js");
+      await migrateFMExpansionMaster();
+    } catch (e) {
+      console.warn("Could not run FM expansion migration:", e.message);
+    }
+
+    // Asset Management Tables & Schema (Fixed Assets & Depreciation)
+    try {
+      await ensureAssetManagementTables();
+    } catch (e) {
+      console.warn("Could not ensure asset management tables:", e.message);
+    }
   } catch (err) {
     logDbError("Error during database initialization", err);
   }
@@ -897,12 +913,20 @@ const _staticOpts = {
     } else if (filePath.endsWith(".css")) {
       res.setHeader("Content-Type", "text/css; charset=utf-8");
       res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    } else if (filePath.endsWith(".jfif") || filePath.endsWith(".jpg") || filePath.endsWith(".jpeg")) {
+      res.setHeader("Content-Type", "image/jpeg");
+      res.setHeader("Cache-Control", "public, max-age=86400");
     }
   },
 };
 const _frontendCandidates = [
   path.join(__dirname, "../client/dist"),
   path.join(process.cwd(), "client/dist"),
+  path.join(__dirname, "../client/public"),
+  path.join(process.cwd(), "client/public"),
+  path.join(__dirname, "dist"),
+  path.join(process.cwd(), "dist"),
+  path.join(__dirname, "../dist"),
   path.join(__dirname, "public"),
   path.join(process.cwd(), "public"),
   path.join(__dirname, "../public"),
@@ -916,12 +940,10 @@ const _activeFrontendPaths = [];
 for (const candidate of _frontendCandidates) {
   if (fs.existsSync(candidate)) {
     _activeFrontendPaths.push(candidate);
-    if (serveFrontendFlag) {
-      app.use(express.static(candidate, _staticOpts));
-      const assetsSubdir = path.join(candidate, "assets");
-      if (fs.existsSync(assetsSubdir)) {
-        app.use("/assets", express.static(assetsSubdir, _staticOpts));
-      }
+    app.use(express.static(candidate, _staticOpts));
+    const assetsSubdir = path.join(candidate, "assets");
+    if (fs.existsSync(assetsSubdir)) {
+      app.use("/assets", express.static(assetsSubdir, _staticOpts));
     }
     if (
       !_earlyFrontendPath &&
@@ -945,19 +967,60 @@ if (_earlyFrontendPath) {
   );
 }
 
-app.use(
-  "/uploads",
-  express.static(
-    path.join(path.dirname(fileURLToPath(import.meta.url)), "uploads"),
-  ),
+// Clean handlers for common root asset requests to avoid crash logging or 404 loops
+app.get(
+  ["/sw.js", "/manifest.webmanifest", "/favicon.ico", "/robots.txt"],
+  (req, res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    const fileName = req.path.replace(/^\//, "");
+    for (const candidate of _activeFrontendPaths) {
+      const filePath = path.join(candidate, fileName);
+      if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+        if (fileName.endsWith(".js")) {
+          res.setHeader(
+            "Content-Type",
+            "application/javascript; charset=utf-8",
+          );
+        } else if (fileName.endsWith(".webmanifest")) {
+          res.setHeader(
+            "Content-Type",
+            "application/manifest+json; charset=utf-8",
+          );
+        }
+        return res.sendFile(filePath);
+      }
+    }
+    return res.status(204).end();
+  },
 );
-// Expose uploads also under /api/uploads so dev proxies can access files
-app.use(
-  "/api/uploads",
-  express.static(
-    path.join(path.dirname(fileURLToPath(import.meta.url)), "uploads"),
-  ),
-);
+
+const serverBaseDir = path.dirname(fileURLToPath(import.meta.url));
+const serverUploadsDir = path.join(serverBaseDir, "uploads");
+const rootUploadsDir = path.join(serverBaseDir, "../uploads");
+
+for (const dir of [serverUploadsDir, rootUploadsDir]) {
+  try {
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  } catch {}
+}
+
+const staticUploadsOptions = {
+  setHeaders: (res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "*");
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+  },
+};
+
+// Serve from server/uploads first, then fallback to root /uploads
+app.use("/uploads", express.static(serverUploadsDir, staticUploadsOptions));
+app.use("/uploads", express.static(rootUploadsDir, staticUploadsOptions));
+
+// Expose uploads also under /api/uploads so dev proxies and API callers can access files
+app.use("/api/uploads", express.static(serverUploadsDir, staticUploadsOptions));
+app.use("/api/uploads", express.static(rootUploadsDir, staticUploadsOptions));
 // SECURITY: Debug endpoints require authentication
 app.get("/api/debug-crash-log", requireAuthMiddleware, (req, res) => {
   // SECURITY: Only allow admin users (ID 1) to access crash reports
@@ -994,7 +1057,6 @@ app.use("/api/", healthRoutes);
 app.use("/", healthRoutes);
 
 app.use("/api", requireLicense);
-app.use("/", requireLicense);
 
 const apiPaths = [
   { path: "/licenses", router: licenseRoutes },
@@ -1011,7 +1073,11 @@ const apiPaths = [
   { path: "/finance", router: financeRoutes },
   { path: "/hr", router: hrRoutes },
   { path: "/maintenance", router: maintenanceRoutes },
+  { path: "/facilities", router: facilitiesRoutes },
+  { path: "/assets", router: assetManagementRoutes },
+  { path: "/asset-management", router: assetManagementRoutes },
   { path: "/projects", router: projectsRoutes },
+  { path: "/construction", router: constructionRoutes },
   { path: "/production", router: productionRoutes },
   { path: "/pos", router: posRoutes },
   { path: "/bi", router: biRoutes },
@@ -1027,41 +1093,39 @@ const apiPaths = [
   { path: "/ai", router: aiRoutes },
   { path: "/email-test", router: emailTestRoutes },
   { path: "/visitors", router: visitorsRoutes },
-  { path: "/portal", router: portalRoutes },
-  { path: "/customer-portal", router: customerPortalRoutes },
 ];
 
-  // Debug Endpoint to view production crash reports directly from the browser
-  app.get("/api/debug-status", async (req, res) => {
-    try {
-      const fs = await import("fs");
-      const path = await import("path");
-      let crashReport = "No crash report found.";
-      const crashPath = path.join(process.cwd(), "CRASH_REPORT.txt");
-      if (fs.existsSync(crashPath)) {
-        crashReport = fs.readFileSync(crashPath, "utf8");
-        if (crashReport.length > 10000) {
-          crashReport = crashReport.slice(-10000);
-        }
+// Debug Endpoint to view production crash reports directly from the browser
+app.get("/api/debug-status", async (req, res) => {
+  try {
+    const fs = await import("fs");
+    const path = await import("path");
+    let crashReport = "No crash report found.";
+    const crashPath = path.join(process.cwd(), "CRASH_REPORT.txt");
+    if (fs.existsSync(crashPath)) {
+      crashReport = fs.readFileSync(crashPath, "utf8");
+      if (crashReport.length > 10000) {
+        crashReport = crashReport.slice(-10000);
       }
-      
-      const dbHealth = await (await import("./db/pool.js")).getDbHealth({ probe: true });
-      const dbConfig = await (await import("./db/pool.js")).getDbConfig();
-      
-      res.json({
-        ok: true,
-        dbHealth,
-        dbConfig,
-        crashReport,
-        nodeEnv: process.env.NODE_ENV,
-        cwd: process.cwd()
-      });
-    } catch (err) {
-      res.status(500).json({ error: err.message, stack: err.stack });
     }
-  });
 
+    const dbHealth = await (
+      await import("./db/pool.js")
+    ).getDbHealth({ probe: true });
+    const dbConfig = await (await import("./db/pool.js")).getDbConfig();
 
+    res.json({
+      ok: true,
+      dbHealth,
+      dbConfig,
+      crashReport,
+      nodeEnv: process.env.NODE_ENV,
+      cwd: process.cwd(),
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message, stack: err.stack });
+  }
+});
 
 apiPaths.forEach(({ path, router }) => {
   app.use(`/api${path}`, router);
@@ -1128,18 +1192,39 @@ if (_spaFrontendPath && serveFrontendFlag) {
       // Try to find the file in any of our active static candidate directories
       const relativePath = req.path.replace(/^\//, "");
       for (const candidate of _activeFrontendPaths) {
-        const fullFilePath = path.join(candidate, relativePath);
-        if (fs.existsSync(fullFilePath) && fs.statSync(fullFilePath).isFile()) {
-          if (fullFilePath.endsWith(".js") || fullFilePath.endsWith(".mjs")) {
-            res.setHeader(
-              "Content-Type",
-              "application/javascript; charset=utf-8",
-            );
-          } else if (fullFilePath.endsWith(".css")) {
-            res.setHeader("Content-Type", "text/css; charset=utf-8");
+        const pathsToTry = [
+          path.join(candidate, relativePath),
+          path.join(candidate, "assets", path.basename(relativePath)),
+        ];
+        for (const fullFilePath of pathsToTry) {
+          if (
+            fs.existsSync(fullFilePath) &&
+            fs.statSync(fullFilePath).isFile()
+          ) {
+            res.setHeader("Access-Control-Allow-Origin", "*");
+            if (fullFilePath.endsWith(".js") || fullFilePath.endsWith(".mjs")) {
+              res.setHeader(
+                "Content-Type",
+                "application/javascript; charset=utf-8",
+              );
+            } else if (fullFilePath.endsWith(".css")) {
+              res.setHeader("Content-Type", "text/css; charset=utf-8");
+            }
+            return res.sendFile(fullFilePath);
           }
-          return res.sendFile(fullFilePath);
         }
+      }
+      if (req.path.endsWith(".css")) {
+        return res
+          .status(404)
+          .type("text/css")
+          .send("/* 404 - CSS file not found */");
+      }
+      if (req.path.endsWith(".js") || req.path.endsWith(".mjs")) {
+        return res
+          .status(404)
+          .type("application/javascript")
+          .send("/* 404 - JS file not found */");
       }
       return res.status(404).type("text/plain").send("Static file not found");
     }
@@ -1196,19 +1281,14 @@ server.on("clientError", (err, socket) => {
   } catch {}
 });
 
-// Timeouts to avoid long-hanging connections in managed hosting
+// Timeouts to avoid ERR_CONNECTION_CLOSED in managed hosting and reverse proxies (Nginx / Passenger / Cloudflare)
 try {
-  const keepAliveMs = process.env.KEEP_ALIVE_TIMEOUT_MS
-    ? Number(process.env.KEEP_ALIVE_TIMEOUT_MS)
-    : 0;
-  const headersMs = Number(process.env.HEADERS_TIMEOUT_MS || 65000);
+  const keepAliveMs = Number(process.env.KEEP_ALIVE_TIMEOUT_MS) || 65000;
+  const headersMs = Number(process.env.HEADERS_TIMEOUT_MS) || 66000;
   const requestMs = process.env.REQUEST_TIMEOUT_MS
     ? Number(process.env.REQUEST_TIMEOUT_MS)
     : undefined;
 
-  // This is CRITICAL for Plesk HTTP/2 + Nginx + Passenger environments.
-  // Setting this to 0 forces Node to send Connection: close,
-  // preventing Nginx from passing keep-alive to HTTP/2 clients which causes ERR_HTTP2_PROTOCOL_ERROR.
   server.keepAliveTimeout = keepAliveMs;
   server.headersTimeout = headersMs;
 
@@ -1264,6 +1344,10 @@ if (process.env.NODE_ENV !== "test") {
         } else {
           console.log("[Prewarm] Running background schema setup...");
           const steps = [
+            ["company columns", () => ensureCompanyColumns()],
+            ["branch columns", () => ensureBranchColumns()],
+            ["user columns", () => ensureUserColumns()],
+            ["auth tables", () => ensureAuthTables()],
             ["pages table", () => ensurePagesTable()],
             ["user permissions table", () => ensureUserPermissionsTable()],
             [
@@ -1276,10 +1360,15 @@ if (process.env.NODE_ENV !== "test") {
               () => ensureExceptionalPermissionsTable(),
             ],
             ["system logs", () => ensureSystemLogsTable()],
+            ["error logs table", () => ensureErrorLogsTable()],
+            ["workflow tables", () => ensureWorkflowTables()],
+            ["sales order columns", () => ensureSalesOrderColumns()],
             ["pm quotations", () => ensurePMQuotationTables()],
             ["pm invoices", () => ensurePMInvoiceTables()],
             ["social feed tables", () => ensureSocialFeedTables()],
             ["transport tables", () => ensureTransportTables()],
+            ["tax tables", () => ensureTaxTables()],
+            ["warehouses table", () => ensureWarehousesTable()],
           ];
           for (const [name, fn] of steps) {
             try {
@@ -1386,10 +1475,16 @@ if (process.env.NODE_ENV !== "test") {
               ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             `);
             if (!(await hasColumn("adm_notification_prefs", "sms_enabled"))) {
-              await query("ALTER TABLE adm_notification_prefs ADD COLUMN sms_enabled TINYINT(1) NOT NULL DEFAULT 0");
+              await query(
+                "ALTER TABLE adm_notification_prefs ADD COLUMN sms_enabled TINYINT(1) NOT NULL DEFAULT 0",
+              );
             }
-            if (!(await hasColumn("adm_notification_prefs", "whatsapp_enabled"))) {
-              await query("ALTER TABLE adm_notification_prefs ADD COLUMN whatsapp_enabled TINYINT(1) NOT NULL DEFAULT 0");
+            if (
+              !(await hasColumn("adm_notification_prefs", "whatsapp_enabled"))
+            ) {
+              await query(
+                "ALTER TABLE adm_notification_prefs ADD COLUMN whatsapp_enabled TINYINT(1) NOT NULL DEFAULT 0",
+              );
             }
             verifiedTables.add("adm_notification_prefs");
           }
@@ -1438,7 +1533,7 @@ if (process.env.NODE_ENV !== "test") {
               )
               .join("");
             const html = `<p>${count} items are at or below reorder levels.</p><table border="1" cellpadding="6" cellspacing="0"><thead><tr><th>Code</th><th>Name</th><th>Qty</th><th>Reorder</th></tr></thead><tbody>${htmlRows}</tbody></table><p><a href="/inventory/alerts/low-stock">Open Alerts</a></p>`;
-            
+
             // Email Channel
             if (
               Number(u?.email_enabled) === 1 &&

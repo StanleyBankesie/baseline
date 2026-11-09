@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, Navigate } from "react-router-dom";
 import { usePermission } from "../../../auth/PermissionContext";
 import ModuleDashboard from "../../../components/ModuleDashboard";
 import ModuleLayout from "../../../components/ModuleLayout.jsx";
@@ -243,6 +243,16 @@ const SalesModuleHome = () => {
       actions: [{ label: "View", path: "/sales/reports/invoice-summary", type: "outline" }],
     },
     {
+      rbac_key: "average-sales-this-month",
+      icon: "📊",
+      value: "GH₵0.00",
+      label: "Average Sales This Month",
+      change: "",
+      changeType: "neutral",
+      path: "/sales/reports/invoice-summary",
+      actions: [{ label: "View", path: "/sales/reports/invoice-summary", type: "outline" }],
+    },
+    {
       rbac_key: "open-quotations",
       icon: "🔵",
       value: "0",
@@ -302,6 +312,7 @@ const SalesModuleHome = () => {
         const data = res?.data?.data || res?.data || {};
         if (mounted) {
           const totalThisMonth = Number(data.salesThisMonth || 0);
+          const avgSalesThisMonth = Number(data.avgSalesThisMonth || 0);
           const openQuotes = Number(data.openQuotations || 0);
           const pendingDelivs = Number(data.pendingDeliveries || 0);
           const overdueInvs = Number(data.overdueInvoices || 0);
@@ -309,20 +320,31 @@ const SalesModuleHome = () => {
           const growth = String(data.salesGrowth || "0%");
 
           setStats((prev) => {
-            const next = [...prev];
-            next[0] = {
-              ...next[0],
-              value: `GH₵${totalThisMonth.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-            };
-            next[1] = { ...next[1], value: String(openQuotes) };
-            next[2] = { ...next[2], value: String(pendingDelivs) };
-            next[3] = { ...next[3], value: String(overdueInvs) };
-            next[4] = {
-              ...next[4],
-              value: `GH₵${totalRev.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-            };
-            next[5] = { ...next[5], value: growth };
-            return next;
+            return prev.map((s) => {
+              if (s.rbac_key === "sales-this-month") {
+                return {
+                  ...s,
+                  value: `GH₵${totalThisMonth.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                };
+              }
+              if (s.rbac_key === "average-sales-this-month" || s.rbac_key === "sales-avg-sales-this-month") {
+                return {
+                  ...s,
+                  value: `GH₵${avgSalesThisMonth.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                };
+              }
+              if (s.rbac_key === "open-quotations") return { ...s, value: String(openQuotes) };
+              if (s.rbac_key === "pending-deliveries") return { ...s, value: String(pendingDelivs) };
+              if (s.rbac_key === "overdue-invoices") return { ...s, value: String(overdueInvs) };
+              if (s.rbac_key === "total-revenue") {
+                return {
+                  ...s,
+                  value: `GH₵${totalRev.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                };
+              }
+              if (s.rbac_key === "sales-growth") return { ...s, value: growth };
+              return s;
+            });
           });
         }
       } catch (err) {
@@ -337,6 +359,7 @@ const SalesModuleHome = () => {
 
   return (
     <ModuleDashboard
+      moduleKey="sales"
       useSectionNavigation={true}
       title="Sales Module"
       description="Customer orders, quotations, invoicing, and sales analytics"
@@ -515,53 +538,30 @@ export const salesModuleSections = [
         {
           title: "Price Setup",
           path: "/sales/price-setup",
-        
           description: "Manage standard and customer pricing",
           icon: "💰",
           actions: [
-          { label: "View", path: "/sales/quotations",
-        actions: [
-          { label: "View", path: "/sales/quotations", type: "outline" },
-          { label: "New", path: "/sales/quotations/new", type: "primary" }
-        ], type: "outline" },
-          { label: "New", path: "/sales/quotations/new",
-        actions: [
-          { label: "View", path: "/sales/quotations/new", type: "outline" },
-          { label: "New", path: "/sales/quotations/new/new", type: "primary" }
-        ], type: "primary" }
-        ],
+            { label: "View", path: "/sales/price-setup", type: "outline" }
+          ],
         },
         {
           title: "Promotional Campaigns",
           path: "/sales/discount-schemes",
-        
           description: "Discount campaigns, purchase reward schemes, and promotions",
           icon: "🏷️",
           actions: [
-          { label: "View", path: "/sales/discount-schemes",
-        actions: [
-          { label: "View", path: "/sales/discount-schemes", type: "outline" },
-          { label: "New", path: "/sales/discount-schemes/new", type: "primary" }
-        ], type: "outline" },
-          { label: "New", path: "/sales/discount-schemes/new",
-        actions: [
-          { label: "View", path: "/sales/discount-schemes/new", type: "outline" },
-          { label: "New", path: "/sales/discount-schemes/new/new", type: "primary" }
-        ], type: "primary" }
-        ],
+            { label: "View", path: "/sales/discount-schemes", type: "outline" },
+            { label: "New", path: "/sales/discount-schemes/discount/new", type: "primary" }
+          ],
         },
         {
           title: "Sales Setup",
           path: "/sales/setup",
-        
           description: "Configure sales return reasons and return workflows",
           icon: "⚙️",
           actions: [
-          { label: "View", path: "/sales/setup",
-        actions: [
-          { label: "View", path: "/sales/setup", type: "outline" }
-        ], type: "outline" }
-        ],
+            { label: "View", path: "/sales/setup", type: "outline" }
+          ],
         },
       ],
     },
@@ -831,10 +831,19 @@ export default function SalesHome() {
         <Route path="/delivery/new" element={<DeliveryForm />} />
         <Route path="/delivery/:id" element={<DeliveryForm />} />
         <Route path="/price-setup" element={<PriceSetup />} />
+        <Route path="/price-setup/*" element={<PriceSetup />} />
         <Route path="/discount-schemes" element={<CampaignHub />} />
         <Route path="/discount-schemes/list" element={<DiscountSchemeList />} />
+        <Route path="/discount-schemes/discount" element={<DiscountSchemeList />} />
+        <Route path="/discount-schemes/discount/new" element={<CampaignForm />} />
+        <Route path="/discount-schemes/discount/edit/:id" element={<CampaignForm />} />
+        <Route path="/discount-schemes/discount/:id" element={<CampaignForm />} />
         <Route path="/discount-schemes/new" element={<CampaignForm />} />
         <Route path="/discount-schemes/edit/:id" element={<CampaignForm />} />
+        <Route path="/discount-schemes/purchase-reward" element={<PurchaseRewardCampaignList />} />
+        <Route path="/discount-schemes/purchase-reward/new" element={<PurchaseRewardCampaignForm />} />
+        <Route path="/discount-schemes/purchase-reward/edit/:id" element={<PurchaseRewardCampaignForm />} />
+        <Route path="/discount-schemes/purchase-reward/:id" element={<PurchaseRewardCampaignForm />} />
         <Route path="/discount-schemes/purchase-rewards" element={<PurchaseRewardCampaignList />} />
         <Route path="/discount-schemes/purchase-rewards/new" element={<PurchaseRewardCampaignForm />} />
         <Route path="/discount-schemes/purchase-rewards/edit/:id" element={<PurchaseRewardCampaignForm />} />
@@ -1038,6 +1047,8 @@ export default function SalesHome() {
         <Route path="/returns" element={<SalesReturnList />} />
         <Route path="/returns/new" element={<SalesReturnForm />} />
         <Route path="/returns/:id" element={<SalesReturnForm />} />
+        <Route path="/sales-entry" element={<Navigate to="/pos/sales-entry" replace />} />
+        <Route path="/sales-entry/*" element={<Navigate to="/pos/sales-entry" replace />} />
       </Routes>
     </ModuleLayout>
   );

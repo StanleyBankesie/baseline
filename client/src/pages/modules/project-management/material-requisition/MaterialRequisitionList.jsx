@@ -5,7 +5,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { Plus, ArrowLeft, Package, Search } from "lucide-react";
 import { api } from "../../../../api/client";
 import { toast } from "react-toastify";
 import { filterAndSort } from "@/utils/searchUtils.js";
@@ -66,26 +66,35 @@ export default function MaterialRequisitionList() {
 
   return (
     <div className="space-y-4">
-      <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold">Material Requisitions</h1>
-              <p className="text-sm mt-1">Project material requests with approval workflow</p>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={() => window.history.back()} className="btn btn-secondary">Back</button>
-              <Link to="/project-management/material-requisitions/new" className="btn-success flex items-center gap-2"><Plus size={16} />New Requisition</Link>
-            </div>
+      {/* Canonical Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Link to="/project-management" className="btn btn-secondary inline-flex items-center gap-1.5">
+            <ArrowLeft size={16} /> Back
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Package size={24} className="text-brand-900 dark:text-brand-400" /> Material Requisitions
+            </h1>
+            <p className="text-slate-500 text-sm mt-0.5">
+              Project material requests with stock reservation and approval workflow
+            </p>
           </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Link to="/project-management/material-requisitions/new" className="btn btn-primary inline-flex items-center gap-2">
+            <Plus size={16} /> New Requisition
+          </Link>
         </div>
       </div>
 
       <div className="card">
         <div className="card-body">
           <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="flex-1">
-              <input type="text" placeholder="Search requisitions..." className="input"
+            <div className="relative max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <input type="text" placeholder="Search requisitions..." className="input pl-9 pr-3 py-1.5 text-sm h-auto w-full"
                 value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
             </div>
           </div>
@@ -118,8 +127,8 @@ export default function MaterialRequisitionList() {
                     <td className="text-sm">{r.project_name || "—"}</td>
                     <td className="text-sm">{r.warehouse_name || "—"}</td>
                     <td className="text-sm">{r.department_name || "—"}</td>
-                    <td><span className="text-[10px] font-semibold uppercase text-slate-600">{r.priority}</span></td>
-                    <td><span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${getStatusBadge(r.status)}`}>{r.status}</span></td>
+                    <td><span className="text-xs font-semibold uppercase text-slate-600">{r.priority}</span></td>
+                    <td><span className={`px-2 py-0.5 rounded text-xs font-semibold ${getStatusBadge(r.status)}`}>{r.status}</span></td>
                     <td className="text-center">
                       <div className="flex items-center justify-center gap-2">
                         <button type="button" onClick={() => { setActiveDocId(r.id); setShowAttach(true); }}

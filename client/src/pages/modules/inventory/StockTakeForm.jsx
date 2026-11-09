@@ -541,8 +541,7 @@ export default function StockTakeForm() {
                     onChange={(e) => setCreateForm({ ...createForm, stock_take_date: e.target.value })}
                     required
                   />
-                  <p className="text-xs text-slate-500 mt-1">Scheduled date of physical count execution.</p>
-                </div>
+                  </div>
 
                 <div>
                   <label className="label font-semibold text-slate-700 dark:text-slate-300">

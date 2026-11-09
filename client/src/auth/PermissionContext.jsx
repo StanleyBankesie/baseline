@@ -9,7 +9,7 @@ import React, {
 import { useAuth } from "../auth/AuthContext.jsx";
 import { api } from "../api/client.js";
 import { MODULES_REGISTRY } from "../data/modulesRegistry.js";
-import { DASHBOARD_CARDS } from "../data/dashboardCards.js";
+import { DASHBOARD_CARDS, getCardModule, getAllCardAliases } from "../data/dashboardCards.js";
 
 /**
  * PermissionContext - Centralized permission management
@@ -74,12 +74,30 @@ export const usePermission = () => {
 
 export const PermissionProvider = ({ children }) => {
   const { user, token, initialized } = useAuth();
-  const [modules, setModules] = useState(new Set());
-  const [permissions, setPermissions] = useState([]);
-  const [roleFeatures, setRoleFeatures] = useState(new Set());
-  const [exceptionalPerms, setExceptionalPerms] = useState(new Set());
-  const [licensedModules, setLicensedModules] = useState(new Set());
-  const [loading, setLoading] = useState(true);
+  const [modules, setModules] = useState(() => {
+    const s = readPermissionSnapshot();
+    return s?.modules ? new Set(s.modules.map((m) => String(m || "").trim()).filter(Boolean)) : new Set();
+  });
+  const [permissions, setPermissions] = useState(() => {
+    const s = readPermissionSnapshot();
+    return Array.isArray(s?.permissions) ? s.permissions : [];
+  });
+  const [roleFeatures, setRoleFeatures] = useState(() => {
+    const s = readPermissionSnapshot();
+    return s?.roleFeatures ? new Set(s.roleFeatures.map((f) => String(f || "").trim()).filter(Boolean)) : new Set();
+  });
+  const [exceptionalPerms, setExceptionalPerms] = useState(() => {
+    const s = readPermissionSnapshot();
+    return s?.exceptionalPerms ? new Set(s.exceptionalPerms.map((c) => String(c || "").toUpperCase().trim()).filter(Boolean)) : new Set();
+  });
+  const [licensedModules, setLicensedModules] = useState(() => {
+    const s = readPermissionSnapshot();
+    return s?.licensedModules ? new Set(s.licensedModules.map((m) => String(m || "").trim()).filter(Boolean)) : new Set();
+  });
+  const [loading, setLoading] = useState(() => {
+    const s = readPermissionSnapshot();
+    return !s;
+  });
   const [error, setError] = useState(null);
   const [sessionOverrides, setSessionOverrides] = useState(() => new Map());
   const [pagePermsByPath, setPagePermsByPath] = useState(() => new Map());
@@ -132,12 +150,82 @@ export const PermissionProvider = ({ children }) => {
     } catch {}
   }, [globalOverrides]);
 
+  const [appMode, setAppMode] = useState(() => {
+    try {
+      if (typeof localStorage !== "undefined") {
+        return localStorage.getItem("omnisuite.app_mode") || "STANDARD";
+      }
+    } catch {}
+    return "STANDARD";
+  });
+
+  const [appBackground, setAppBackground] = useState(() => {
+    try {
+      if (typeof localStorage !== "undefined") {
+        const cached = localStorage.getItem("omnisuite.app_background");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && typeof parsed === "object") return parsed;
+        }
+      }
+    } catch {}
+    return {
+      url: "/backgrounds/abstract-silk-waves.jpg",
+      preset: "silk-waves",
+      opacity: 40,
+      blur: 0,
+    };
+  });
+
+  const [moduleSectionViewEnabled, setModuleSectionViewEnabled] = useState(() => {
+    try {
+      if (typeof localStorage !== "undefined") {
+        const val = localStorage.getItem("omnisuite.module_section_view");
+        if (val !== null) return val === "true";
+      }
+    } catch {}
+    return false;
+  });
+
+  useEffect(() => {
+    const handleAppModeChange = (e) => {
+      const nextMode = e.detail?.mode;
+      if (nextMode) {
+        setAppMode(nextMode);
+      }
+    };
+    const handleSectionViewChange = (e) => {
+      const nextVal = e.detail?.enabled;
+      if (typeof nextVal === "boolean") {
+        setModuleSectionViewEnabled(nextVal);
+      }
+    };
+    window.addEventListener("app-mode-changed", handleAppModeChange);
+    window.addEventListener("module-section-view-changed", handleSectionViewChange);
+    return () => {
+      window.removeEventListener("app-mode-changed", handleAppModeChange);
+      window.removeEventListener("module-section-view-changed", handleSectionViewChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleAppBgChange = (e) => {
+      const nextBg = e.detail?.background;
+      if (nextBg) {
+        setAppBackground((prev) => ({ ...prev, ...nextBg }));
+      }
+    };
+    window.addEventListener("app-background-changed", handleAppBgChange);
+    return () => window.removeEventListener("app-background-changed", handleAppBgChange);
+  }, []);
+
   /**
    * Load user permissions from backend
    */
   const loadPermissions = async (background = false) => {
     try {
-      if (!background) setLoading(true);
+      const snap = readPermissionSnapshot();
+      if (!background && !snap) setLoading(true);
       setError(null);
 
       if (!initialized || !token) {
@@ -146,8 +234,47 @@ export const PermissionProvider = ({ children }) => {
         setRoleFeatures(new Set());
         setExceptionalPerms(new Set());
         setLicensedModules(new Set());
+        setLoading(false);
         return;
       }
+
+      // Background sync application mode & module section view
+      api.get("/admin/settings/app-mode", BACKGROUND_GET_CONFIG)
+        .then((res) => {
+          const mode = res.data?.mode || "STANDARD";
+          setAppMode(mode);
+          const secView = res.data?.module_section_view === true;
+          setModuleSectionViewEnabled(secView);
+          try {
+            if (typeof localStorage !== "undefined") {
+              localStorage.setItem("omnisuite.app_mode", mode);
+              localStorage.setItem("omnisuite.module_section_view", String(secView));
+            }
+          } catch {}
+        })
+        .catch(() => {});
+
+      // Background sync application background
+      api.get("/admin/settings/app-background", BACKGROUND_GET_CONFIG)
+        .then((res) => {
+          if (res.data?.success) {
+            const bgData = {
+              url: res.data.background_url || "",
+              preset: res.data.background_preset || "silk-waves",
+              opacity: Number.isFinite(res.data.background_opacity) ? res.data.background_opacity : 40,
+              blur: res.data.background_blur ?? 0,
+              hasCustom: res.data.has_custom || false,
+              customUrl: res.data.custom_url || null,
+            };
+            setAppBackground(bgData);
+            try {
+              if (typeof localStorage !== "undefined") {
+                localStorage.setItem("omnisuite.app_background", JSON.stringify(bgData));
+              }
+            } catch {}
+          }
+        })
+        .catch(() => {});
 
       const userId = Number(user?.id || user?.sub || 0);
       if (!Number.isFinite(userId) || !userId) {
@@ -416,11 +543,35 @@ export const PermissionProvider = ({ children }) => {
           : it.ticker_key
             ? "ticker"
             : "dashboard";
-        const key = String(
+        const rawKey = String(
           it.card_key || it.ticker_key || it.dashboard_key || "",
         );
-        const composite = `${mk}|${type}|${key}`;
-        m.set(composite, Number(it.can_view) === 1);
+        const normKey = rawKey
+          .toLowerCase()
+          .trim()
+          .replace(/\s+/g, "-")
+          .replace(/[^a-z0-9-]/g, "");
+        const canView = Number(it.can_view) === 1;
+
+        m.set(`${mk}|${type}|${rawKey}`, canView);
+        m.set(`${mk}|${type}|${normKey}`, canView);
+        if (normKey.startsWith(`${mk}-`)) {
+          m.set(`${mk}|${type}|${normKey.slice(mk.length + 1)}`, canView);
+        } else {
+          m.set(`${mk}|${type}|${mk}-${normKey}`, canView);
+        }
+
+        // Also index known aliases
+        const aliases = getAllCardAliases(rawKey);
+        for (const alias of aliases) {
+          m.set(`${mk}|${type}|${alias}`, canView);
+          if (alias.startsWith(`${mk}-`)) {
+            m.set(`${mk}|${type}|${alias.slice(mk.length + 1)}`, canView);
+          } else {
+            m.set(`${mk}|${type}|${mk}-${alias}`, canView);
+          }
+        }
+
         const set = byModule.get(mk) || new Set();
         set.add(type);
         byModule.set(mk, set);
@@ -700,9 +851,19 @@ export const PermissionProvider = ({ children }) => {
       }
     }
 
-    const allowKey = `${mk}:${seg}`;
+    const allowKey = seg.includes(":") ? seg : `${mk}:${seg}`;
     if (roleFeatures.has(allowKey)) return true;
     if (permByFeatureKey.has(allowKey)) return true;
+
+    // Check case-insensitive and normalized variations
+    const normAllowKey = allowKey.toLowerCase().replace(/[^a-z0-9:]/g, "");
+    for (const rf of roleFeatures) {
+      if (rf.toLowerCase().replace(/[^a-z0-9:]/g, "") === normAllowKey) return true;
+    }
+    for (const pk of permByFeatureKey.keys()) {
+      if (pk.toLowerCase().replace(/[^a-z0-9:]/g, "") === normAllowKey) return true;
+    }
+
     if (mk === "purchase") {
       if (
         (seg === "purchase-upload" || seg === "upload") &&
@@ -760,17 +921,41 @@ export const PermissionProvider = ({ children }) => {
         return true;
       }
       if (
-        seg === "items" &&
+        (seg === "items" || seg === "item-master") &&
         (roleFeatures.has("inventory:item-master") ||
-          permByFeatureKey.has("inventory:item-master"))
-      )
-        return true;
-      if (
-        seg === "item-master" &&
-        (roleFeatures.has("inventory:items") ||
+          permByFeatureKey.has("inventory:item-master") ||
+          roleFeatures.has("inventory:items") ||
           permByFeatureKey.has("inventory:items"))
       )
         return true;
+      if (
+        (seg === "item-classification" || seg === "item-groups") &&
+        (roleFeatures.has("inventory:item-classification") ||
+          permByFeatureKey.has("inventory:item-classification") ||
+          roleFeatures.has("inventory:item-groups") ||
+          permByFeatureKey.has("inventory:item-groups"))
+      )
+        return true;
+    }
+    if (mk === "pos") {
+      if (
+        (seg === "on-hold" || seg === "holds") &&
+        (roleFeatures.has("pos:on-hold") ||
+          permByFeatureKey.has("pos:on-hold") ||
+          roleFeatures.has("pos:holds") ||
+          permByFeatureKey.has("pos:holds"))
+      ) {
+        return true;
+      }
+      if (
+        seg === "direct-purchase" &&
+        (roleFeatures.has("pos:direct-purchase") ||
+          permByFeatureKey.has("pos:direct-purchase") ||
+          roleFeatures.has("purchase:direct-purchase") ||
+          permByFeatureKey.has("purchase:direct-purchase"))
+      ) {
+        return true;
+      }
     }
     if (hasExplicitRoleConfig) return false;
     return isExclusive ? false : isSuper;
@@ -785,6 +970,109 @@ export const PermissionProvider = ({ children }) => {
     return roleFeatures.has(k) || permByFeatureKey.has(k);
   };
 
+  const canViewDashboardElement = (moduleKey, type, key) => {
+    if (isSuper) return true;
+    const mk = String(moduleKey || "");
+    const t = String(type || "");
+    const rawKey = String(key || "");
+    const normKey = rawKey
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
+    if (!dashboardViewLoaded) return isSuper;
+
+    // Build all candidate variations for lookup
+    const candidates = new Set([normKey, rawKey]);
+    if (normKey.startsWith(`${mk}-`)) {
+      candidates.add(normKey.slice(mk.length + 1));
+    } else {
+      candidates.add(`${mk}-${normKey}`);
+    }
+    const aliases = getAllCardAliases(rawKey);
+    aliases.forEach((a) => {
+      candidates.add(a);
+      if (a.startsWith(`${mk}-`)) candidates.add(a.slice(mk.length + 1));
+      else candidates.add(`${mk}-${a}`);
+    });
+
+    // Special handling for Home cards
+    if (mk === "home" && t === "card") {
+      // 1. If explicitly disabled in Home: strictly false
+      for (const c of candidates) {
+        if (dashboardViewMap.get(`home|card|${c}`) === false) {
+          return false;
+        }
+      }
+
+      // 2. If explicitly disabled in its parent module: strictly false
+      const parentMod = getCardModule(normKey);
+      if (parentMod) {
+        for (const c of candidates) {
+          if (dashboardViewMap.get(`${parentMod}|card|${c}`) === false) {
+            return false;
+          }
+        }
+      }
+
+      // 3. If explicitly enabled in Home: strictly true
+      for (const c of candidates) {
+        if (dashboardViewMap.get(`home|card|${c}`) === true) {
+          return true;
+        }
+      }
+
+      // 4. Fallback for unconfigured Home
+      let hasHomeCardConfig = false;
+      for (const [k, v] of dashboardViewMap.entries()) {
+        if (k.startsWith("home|card|") && v === true) {
+          hasHomeCardConfig = true;
+          break;
+        }
+      }
+      if (hasHomeCardConfig) {
+        return false;
+      } else {
+        const defaultCards = [
+          "sales-total-revenue",
+          "sales-avg-sales-this-month",
+          "sales-pending-orders",
+          "purchase-total-value",
+        ];
+        const isDefault = defaultCards.some((dc) => candidates.has(dc));
+        if (!isDefault) return false;
+        if (parentMod) {
+          for (const c of candidates) {
+            if (dashboardViewMap.get(`${parentMod}|card|${c}`) === false) {
+              return false;
+            }
+          }
+        }
+        return true;
+      }
+    }
+
+    // For module cards/dashboards (mk !== "home"):
+    // 1. If any candidate entry exists in dashboardViewMap: respect it immediately
+    for (const c of candidates) {
+      if (dashboardViewMap.has(`${mk}|${t}|${c}`)) {
+        return dashboardViewMap.get(`${mk}|${t}|${c}`) === true;
+      }
+    }
+
+    // 2. No explicit config for this element:
+    // By default, dashboard permissions are disabled/unchecked unless explicitly granted
+    if (t === "dashboard") {
+      return false;
+    }
+
+    // Fall back to module-level RBAC for other elements
+    if (mk) {
+      return canAccessPath(`/${mk}`);
+    }
+    return isSuper;
+  };
+
   const canAccessPath = (path, action = "view") => {
     const p = String(path || "");
     if (!p) return false;
@@ -794,7 +1082,13 @@ export const PermissionProvider = ({ children }) => {
     const mk = String(parts[0] || "");
     const seg = String(parts[1] || "");
 
-    const moduleInfo = MODULES_REGISTRY[mk];
+    // If accessing a module dashboard route (e.g. /sales/dashboard or /purchase/dashboard)
+    if (mk && (seg === "dashboard" || seg === "dashboards")) {
+      return canViewDashboardElement(mk, "dashboard", "dashboard") !== false &&
+             canViewDashboardElement(mk, "dashboard", "dashboards") !== false;
+    }
+
+    const moduleInfo = MODULES_REGISTRY[mk] || {};
 
     let isExclusive = false;
     let exclusiveFeatureKey = null;
@@ -843,13 +1137,55 @@ export const PermissionProvider = ({ children }) => {
       return true;
     }
 
-    if (!moduleInfo) return true;
-    const isKnown =
-      (moduleInfo.features || []).some((f) => String(f.key) === seg) ||
-      (moduleInfo.dashboards || []).some((d) => String(d.key) === seg);
-    if (!isKnown) return true;
+    // Direct check: feature key by seg (e.g. /inventory/items)
+    if (canAccessFeatureKey(mk, seg)) return true;
 
-    return canAccessFeatureKey(mk, seg);
+    // Check composite or sub-paths, e.g. /inventory/reports/stock-balances
+    for (let i = 1; i < parts.length; i++) {
+      const sub = parts[i];
+      if (canAccessFeatureKey(mk, sub)) return true;
+      const normSub = sub.toLowerCase().replace(/[^a-z0-9]/g, "");
+      if (canAccessFeatureKey(mk, normSub)) return true;
+      if (canAccessFeatureKey(mk, `${normSub}report`)) return true;
+    }
+
+    // Match against registered features in the module registry
+    const registeredFeatures = moduleInfo.features || [];
+    const matchedFeature = registeredFeatures.find((f) => {
+      const fk = String(f.key || "").toLowerCase();
+      const normFk = fk.replace(/[^a-z0-9]/g, "");
+      for (let i = 1; i < parts.length; i++) {
+        const pNorm = String(parts[i]).toLowerCase().replace(/[^a-z0-9]/g, "");
+        if (normFk === pNorm || normFk.includes(pNorm) || pNorm.includes(normFk)) return true;
+      }
+      return false;
+    });
+
+    if (matchedFeature) {
+      return canAccessFeatureKey(mk, matchedFeature.key);
+    }
+
+    // Match registered dashboards
+    const registeredDashboards = moduleInfo.dashboards || [];
+    const matchedDashboard = registeredDashboards.find((d) => {
+      const dk = String(d.key || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      for (let i = 1; i < parts.length; i++) {
+        const pNorm = String(parts[i]).toLowerCase().replace(/[^a-z0-9]/g, "");
+        if (dk === pNorm || dk.includes(pNorm) || pNorm.includes(dk)) return true;
+      }
+      return false;
+    });
+
+    if (matchedDashboard) {
+      return canViewDashboardElement(mk, "dashboard", matchedDashboard.key);
+    }
+
+    // If role has explicit configuration and the page was NOT granted access, DENY it!
+    if (hasExplicitRoleConfig) {
+      return false;
+    }
+
+    return isSuper;
   };
 
   const canPerformAction = (featureKey, action = "view") => {
@@ -897,6 +1233,14 @@ export const PermissionProvider = ({ children }) => {
         perm = permByFeatureKey.get("inventory:item-master");
       } else if (fk === "inventory:item-master") {
         perm = permByFeatureKey.get("inventory:items");
+      } else if (fk === "pos:on-hold") {
+        perm = permByFeatureKey.get("pos:holds");
+      } else if (fk === "pos:holds") {
+        perm = permByFeatureKey.get("pos:on-hold");
+      } else if (fk === "inventory:item-classification") {
+        perm = permByFeatureKey.get("inventory:item-groups");
+      } else if (fk === "inventory:item-groups") {
+        perm = permByFeatureKey.get("inventory:item-classification");
       }
     }
     if (!perm) return false;
@@ -1308,6 +1652,13 @@ export const PermissionProvider = ({ children }) => {
   }, []);
 
   const value = {
+    appMode,
+    isBasicMode: appMode === "BASIC",
+    setAppMode,
+    moduleSectionViewEnabled,
+    setModuleSectionViewEnabled,
+    appBackground,
+    setAppBackground,
     modules,
     licensedModules,
     permissions,
@@ -1341,49 +1692,7 @@ export const PermissionProvider = ({ children }) => {
     getPagePerms,
     canPerformPageAction,
     basePathFrom,
-    canViewDashboardElement: (moduleKey, type, key) => {
-      const mk = String(moduleKey || "");
-      const t = String(type || "");
-      const rawKey = String(key || "");
-      const normKey = rawKey
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, "-")
-        .replace(/[^a-z0-9-]/g, "");
-      if (!dashboardViewLoaded) return false;
-      const comp = `${mk}|${t}|${normKey}`;
-
-      if (mk === "home" && t === "card") {
-        let hasHomeCardConfig = false;
-        for (const k of dashboardViewMap.keys()) {
-          if (k.startsWith("home|card|")) {
-            hasHomeCardConfig = true;
-            break;
-          }
-        }
-        if (hasHomeCardConfig) {
-          return dashboardViewMap.get(comp) === true;
-        } else {
-          const defaultCards = [
-            "sales-total-revenue",
-            "sales-pending-orders",
-            "sales-active-customers",
-            "purchase-total-value",
-          ];
-          return defaultCards.includes(normKey);
-        }
-      }
-
-      // If this item has an explicit permission entry, respect it
-      if (dashboardViewMap.has(comp)) {
-        return dashboardViewMap.get(comp) === true;
-      }
-      // No explicit config for this item — fall back to module-level RBAC
-      if (mk) {
-        return canAccessPath(`/${mk}`);
-      }
-      return isSuper;
-    },
+    canViewDashboardElement,
     setActionSessionOverride: (fk, action, value) => {
       const key =
         action === "can_view"

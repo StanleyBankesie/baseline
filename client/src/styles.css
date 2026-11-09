@@ -23,10 +23,19 @@
 }
 
 @layer base {
-  /* ERP Theme Base Styles */
+  /* ERP Theme Base Styles - Default font size matching Item Setup form (14px / 0.875rem) */
   body {
-    @apply antialiased font-sans;
+    @apply antialiased font-sans text-sm text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-[#0b0f19];
     font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 0.875rem; /* 14px default base font size */
+    line-height: 1.5;
+  }
+  input,
+  select,
+  textarea,
+  button {
+    font-family: inherit;
+    font-size: 0.875rem;
   }
   :root {
     --success-color: #28a745;
@@ -35,36 +44,109 @@
   }
 }
 
-@layer components {
-  /* ── ERP Button Styles ─────────────────────────────── */
-  .btn-primary {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium text-white bg-brand-900 hover:bg-brand-800 active:bg-brand-950 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed;
-    min-height: 38px;
+@layer utilities {
+  .shadow-apple-xs {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
   }
-  .btn-primary:focus-visible {
+  .shadow-apple-sm {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  }
+  .shadow-apple-md {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  }
+  .shadow-apple-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  }
+  .shadow-apple-xl {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.10), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  }
+  .shadow-apple-dock {
+    box-shadow: 0 -4px 20px -2px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.04);
+  }
+}
+
+@layer components {
+  /* ── ERP Button Styles (Apple HIG Compliant) ───────── */
+  .btn {
+    @apply inline-flex items-center justify-center font-medium transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98];
+    min-height: 40px;
+  }
+
+  .btn-primary,
+  .btn.btn-primary,
+  button.btn-primary,
+  a.btn-primary,
+  button[data-action="create"],
+  .btn-create {
+    @apply inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-medium text-white transition-all duration-150 shadow-apple-xs disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98];
+    background-color: #0E3646 !important;
+    color: #ffffff !important;
+    border: none !important;
+    min-height: 42px;
+  }
+  .btn-primary:hover:not(:disabled),
+  .btn.btn-primary:hover:not(:disabled),
+  button.btn-primary:hover:not(:disabled),
+  a.btn-primary:hover:not(:disabled),
+  button[data-action="create"]:hover:not(:disabled),
+  .btn-create:hover:not(:disabled) {
+    background-color: #173d50 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(14, 54, 70, 0.25) !important;
+  }
+  .btn-primary:active:not(:disabled),
+  .btn.btn-primary:active:not(:disabled),
+  button.btn-primary:active:not(:disabled),
+  a.btn-primary:active:not(:disabled) {
+    background-color: #061a22 !important;
+    color: #ffffff !important;
+  }
+  .btn-primary:focus-visible,
+  .btn.btn-primary:focus-visible,
+  button.btn-primary:focus-visible,
+  a.btn-primary:focus-visible {
     @apply outline-none ring-2 ring-brand-900/40 ring-offset-2 ring-offset-white dark:ring-offset-slate-800;
   }
 
+  /* Any button with legacy grey #6c757d forced to Brand Deep Teal #0E3646 */
+  button[style*="6c757d"],
+  .btn[style*="6c757d"],
+  button[style*="108, 117, 125"],
+  .btn-secondary-brand,
+  .btn-slate-action {
+    background-color: #0E3646 !important;
+    color: #ffffff !important;
+    border-color: #0E3646 !important;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-xl font-medium text-white bg-rose-600 hover:bg-rose-700 active:bg-rose-800 transition-all duration-150 shadow-apple-xs disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98];
+    min-height: 40px;
+  }
+  .btn-danger:focus-visible {
+    @apply outline-none ring-2 ring-rose-500/40 ring-offset-2 ring-offset-white dark:ring-offset-slate-800;
+  }
+
   .btn-secondary {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed;
-    min-height: 38px;
+    @apply inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700 transition-all duration-150 shadow-apple-xs disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98];
+    min-height: 42px;
   }
   .btn-secondary:focus-visible {
-    @apply outline-none ring-2 ring-brand-900/30 ring-offset-2 ring-offset-white dark:ring-offset-slate-800;
+    @apply outline-none ring-2 ring-slate-400/30 ring-offset-2 ring-offset-white dark:ring-offset-slate-800;
   }
 
   .btn-outline {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium text-brand-900 dark:text-brand-400 border border-brand-900 dark:border-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
-    min-height: 38px;
+    @apply inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-medium text-brand-900 dark:text-brand-300 border border-brand-900/30 dark:border-brand-400/40 hover:bg-brand-50 dark:hover:bg-brand-950/20 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98];
+    min-height: 42px;
   }
   .btn-outline:focus-visible {
     @apply outline-none ring-2 ring-brand-500/40 ring-offset-2 ring-offset-white dark:ring-offset-slate-800;
   }
 
   .btn-success {
-    @apply inline-flex items-center justify-center font-medium text-white rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
-    padding: 0.5rem 1rem;
-    min-height: 38px;
+    @apply inline-flex items-center justify-center font-medium text-white rounded-xl shadow-apple-xs transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98];
+    padding: 0.625rem 1.25rem;
+    min-height: 42px;
     background-color: var(--success-color);
   }
   .btn-success:hover:not(:disabled) {
@@ -74,64 +156,190 @@
     background-color: var(--success-color-active);
   }
   .btn-success:focus-visible {
-    @apply outline-none ring-2 ring-brand-500/30 ring-offset-2 ring-offset-white dark:ring-offset-slate-800;
+    @apply outline-none ring-2 ring-emerald-500/30 ring-offset-2 ring-offset-white dark:ring-offset-slate-800;
+  }
+
+  /* ── System Dashboard Action Button (Brand Deep Teal / Navy #0E3646) ── */
+  .btn-dashboard,
+  .btn.btn-dashboard,
+  button[data-action="dashboard"],
+  .btn-dashboard-action {
+    @apply inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-medium text-white bg-brand-900 hover:bg-brand-800 active:bg-brand-950 transition-all duration-150 shadow-apple-xs disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98];
+    background-color: #0E3646 !important;
+    color: #ffffff !important;
+    border: none !important;
+    min-height: 42px !important;
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+  }
+  .btn-dashboard:hover:not(:disabled),
+  .btn.btn-dashboard:hover:not(:disabled),
+  button[data-action="dashboard"]:hover:not(:disabled),
+  .btn-dashboard-action:hover:not(:disabled) {
+    background-color: #173d50 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(14, 54, 70, 0.25) !important;
+  }
+  .btn-dashboard:active:not(:disabled),
+  .btn.btn-dashboard:active:not(:disabled),
+  button[data-action="dashboard"]:active:not(:disabled),
+  .btn-dashboard-action:active:not(:disabled) {
+    background-color: #061a22 !important;
+    color: #ffffff !important;
+  }
+  .btn-dashboard:focus-visible,
+  .btn.btn-dashboard:focus-visible,
+  button[data-action="dashboard"]:focus-visible,
+  .btn-dashboard-action:focus-visible {
+    @apply outline-none ring-2 ring-brand-900/40 ring-offset-2 ring-offset-white dark:ring-offset-slate-800;
   }
 
   /* ── Button size variants ──────────────────────────── */
   .btn-sm {
-    padding: 0.375rem 0.75rem;
-    min-height: 32px;
+    padding: 0.4rem 0.875rem;
+    min-height: 36px;
     font-size: 0.8125rem;
-    border-radius: 0.5rem;
+    border-radius: 0.625rem;
   }
   .btn-xs {
-    padding: 0.25rem 0.5rem;
-    min-height: 26px;
+    padding: 0.3rem 0.625rem;
+    min-height: 30px;
     font-size: 0.75rem;
-    border-radius: 0.375rem;
+    border-radius: 0.5rem;
   }
 
-  /* ── ERP Card Styles ───────────────────────────────── */
+  /* ── ERP Card Styles (Apple Grouped Surfaces) ────── */
   .card {
-    @apply rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm;
+    @apply rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-apple-xs;
   }
 
   .card-header {
-    @apply border-b border-slate-200 dark:border-slate-700 px-6 py-4 bg-white dark:bg-slate-800 rounded-t-xl;
+    @apply border-b border-slate-100 dark:border-slate-800/80 px-6 py-4 bg-white dark:bg-slate-900 rounded-t-2xl;
   }
 
   .card-body {
-    @apply px-6 py-4;
+    @apply px-6 py-5;
   }
 
-  /* ── ERP Input Styles ──────────────────────────────── */
+  /* ── ERP Input Styles (Apple Clean Controls) ──────── */
   .input {
-    @apply  px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-sm;
-    min-height: 38px;
+    @apply w-full box-border px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-600 dark:focus:border-brand-400 transition-all shadow-apple-xs text-sm;
+    min-height: 42px;
+    font-size: 0.875rem;
   }
   .input::placeholder,
   input::placeholder,
-  textarea::placeholder {
-    @apply text-slate-400 dark:text-slate-500 text-sm font-normal;
+  textarea::placeholder,
+  .login-input::placeholder,
+  ::placeholder {
+    @apply text-slate-400 dark:text-slate-500 font-normal;
+    font-size: 0.75rem !important; /* 12px Apple-clean compact placeholder */
+    line-height: 1.25rem !important;
+  }
+
+  /* Vendor placeholder fallbacks */
+  ::-webkit-input-placeholder {
+    font-size: 0.75rem !important;
+    line-height: 1.25rem !important;
+  }
+  ::-moz-placeholder {
+    font-size: 0.75rem !important;
+    line-height: 1.25rem !important;
+  }
+  :-ms-input-placeholder {
+    font-size: 0.75rem !important;
+    line-height: 1.25rem !important;
+  }
+
+  /* Ant Design placeholder */
+  .ant-select-selection-placeholder {
+    font-size: 0.75rem !important;
+  }
+
+  /* Select default/placeholder option text size and styling */
+  select:has(option[value=""]:checked),
+  select:invalid {
+    font-size: 0.75rem !important;
+    color: #94a3b8 !important; /* slate-400 */
+  }
+  select:not(:has(option[value=""]:checked)) {
+    font-size: 0.875rem !important;
+  }
+  select option[value=""] {
+    font-size: 0.75rem !important;
+    color: #94a3b8 !important;
+  }
+  select option:not([value=""]) {
+    font-size: 0.875rem !important;
+    color: #0f172a !important;
+  }
+  .dark select:has(option[value=""]:checked),
+  .dark select:invalid {
+    color: #64748b !important;
+  }
+  .dark select option:not([value=""]) {
+    color: #f1f5f9 !important;
+    background-color: #0f172a !important;
   }
   select.input {
-    min-height: 38px;
+    min-height: 42px;
+  }
+
+  /* ── Form Inputs Global Clean Surface (Apple Clean Controls) ── */
+  /* Remove any grey / slate background fill from all inputs, selects, and textareas across all form pages */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="range"]):not([type="color"]),
+  select,
+  textarea {
+    @apply bg-white dark:bg-slate-900;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="range"]):not([type="color"]).bg-slate-50,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="range"]):not([type="color"]).bg-slate-100,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="range"]):not([type="color"]).bg-gray-50,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="range"]):not([type="color"]).bg-gray-100,
+  select.bg-slate-50,
+  select.bg-slate-100,
+  select.bg-gray-50,
+  select.bg-gray-100,
+  textarea.bg-slate-50,
+  textarea.bg-slate-100,
+  textarea.bg-gray-50,
+  textarea.bg-gray-100,
+  .input.bg-slate-50,
+  .input.bg-slate-100,
+  .input.bg-gray-50,
+  .input.bg-gray-100 {
+    background-color: #ffffff !important;
+  }
+
+  .dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="range"]):not([type="color"]).bg-slate-50,
+  .dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="range"]):not([type="color"]).bg-slate-100,
+  .dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="range"]):not([type="color"]).bg-slate-800,
+  .dark select.bg-slate-50,
+  .dark select.bg-slate-100,
+  .dark select.bg-slate-800,
+  .dark textarea.bg-slate-50,
+  .dark textarea.bg-slate-100,
+  .dark textarea.bg-slate-800,
+  .dark .input.bg-slate-50,
+  .dark .input.bg-slate-100,
+  .dark .input.bg-slate-800 {
+    background-color: #0f172a !important;
   }
 
   /* Login page input variant */
   .login-input {
-    @apply w-full h-10 px-4 rounded-[10px] border border-slate-300 bg-white text-slate-900 outline-none transition-all;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 1px 2px rgba(15, 23, 42, 0.08);
+    @apply w-full h-11 px-4 rounded-xl border border-slate-200 bg-white text-slate-900 outline-none transition-all shadow-apple-xs;
   }
   .login-input::placeholder {
-    @apply text-slate-400;
+    @apply text-slate-500;
   }
   .login-input:focus {
-    @apply border-brand-500 ring-2 ring-brand-500/20;
+    @apply border-brand-500 ring-4 ring-brand-500/15;
   }
 
   .label {
-    @apply block text-sm font-medium mb-1.5 text-slate-700 dark:text-slate-300;
+    @apply block text-xs font-semibold uppercase tracking-wider mb-1.5 text-slate-700 dark:text-slate-200;
   }
 
   /* ── Focus ring for all interactive elements ────────── */
@@ -153,7 +361,7 @@
   }
 
   .table th {
-    @apply px-4 py-3 text-left text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider;
+    @apply px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300 tracking-normal;
   }
 
   .table td {
@@ -194,78 +402,88 @@
     @apply bg-slate-50 dark:bg-slate-800/50;
   }
 
-  /* Keep actions columns visually stable across list pages */
+  /* Clean, proportional table actions (Apple HIG) */
   .table th:last-child,
-  .table td:last-child,
-  .table th:has(+ th:last-child),
-  .table td:has(+ td:last-child) {
+  .table td:last-child {
     white-space: nowrap;
   }
-  .table td:last-child,
-  .table td:has(> .user-action-buttons),
-  .table td:has(> .ds-action-buttons),
-  .table td:has(> .flex > .btn),
-  .table td:has(> .flex > a),
-  .table td:has(> .btn),
-  .table td:has(> a.btn) {
-    min-width: 13.5rem;
-  }
-  /* Keep actions columns visually stable across list pages */
-  .table th:last-child,
-  .table td:last-child,
-  .table th:has(+ th:last-child),
-  .table td:has(+ td:last-child) {
-    white-space: nowrap;
-  }
-  .table td:last-child,
-  .table td:has(> .user-action-buttons),
-  .table td:has(> .ds-action-buttons),
-  .table td:has(> .flex > .btn),
-  .table td:has(> .flex > a),
-  .table td:has(> .btn),
-  .table td:has(> a.btn) {
-    min-width: 28rem;
-  }
-  /* Use grid layout to maintain button positions */
   .table td:last-child > .flex,
   .table td:last-child > div.flex,
   .table td > .user-action-buttons,
-  .table td > .ds-action-buttons,
-  .table td:has(> .flex > .btn) > .flex,
-  .table td:has(> .flex > a) > .flex {
-    display: inline-grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(4.5rem, max-content);
-    align-items: center;
-    gap: 0.5rem;
-    justify-content: start;
-  }
-  /* Fixed min-width for all direct children to prevent shifting */
-  .table td:last-child > .flex > *,
-  .table td > .user-action-buttons > *,
-  .table td > .ds-action-buttons > *,
-  .table td > .flex > a,
-  .table td > .flex > button {
-    min-width: 4.5rem;
-    text-align: center;
-  }
-  .table td:last-child > a,
-  .table td:last-child > button,
-  .table td > .user-action-buttons > a,
-  .table td > .user-action-buttons > button,
-  .table td > .ds-action-buttons > a,
-  .table td > .ds-action-buttons > button,
-  .table td > .flex > a,
-  .table td > .flex > button {
+  .table td > .ds-action-buttons {
     display: inline-flex;
-    justify-content: center;
-    min-width: 4.25rem;
+    align-items: center;
+    gap: 0.375rem;
+  }
+  .table td:last-child > .btn,
+  .table td:last-child > a.btn,
+  .table td:last-child > .flex > .btn,
+  .table td:last-child > .flex > a.btn {
+    min-width: 3.75rem;
   }
   .table td .hidden {
     display: inline-flex !important;
     visibility: hidden !important;
     pointer-events: none !important;
   }
+
+  /* ── Compact Classification Card Tables ──────────────── */
+  .classification-compact-table,
+  table.classification-compact-table {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+  }
+  .classification-compact-table th,
+  .classification-compact-table td {
+    padding: 0.35rem 0.5rem !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .classification-compact-table th {
+    font-size: 0.75rem !important;
+    letter-spacing: 0.025em !important;
+  }
+  .classification-compact-table td {
+    font-size: 0.8125rem !important;
+  }
+  .classification-compact-table th:last-child,
+  .classification-compact-table td:last-child,
+  .classification-compact-table th:has(+ th:last-child),
+  .classification-compact-table td:has(+ td:last-child),
+  .classification-compact-table td:has(> .user-action-buttons),
+  .classification-compact-table td:has(> .ds-action-buttons),
+  .classification-compact-table td:has(> .flex > .btn),
+  .classification-compact-table td:has(> .flex > a),
+  .classification-compact-table td:has(> .btn),
+  .classification-compact-table td:has(> a.btn),
+  .classification-compact-table td:has(> button),
+  .classification-compact-table td:has(> a) {
+    min-width: 0 !important;
+    max-width: none !important;
+    white-space: nowrap !important;
+  }
+  .classification-compact-table td:last-child > .flex,
+  .classification-compact-table td:last-child > div.flex {
+    display: flex !important;
+    grid-auto-columns: auto !important;
+    grid-auto-flow: row !important;
+    min-width: 0 !important;
+    justify-content: flex-end !important;
+  }
+  .classification-compact-table td:last-child > .flex > *,
+  .classification-compact-table td:last-child > button,
+  .classification-compact-table td:last-child > a,
+  .classification-compact-table td > .flex > button,
+  .classification-compact-table td > .flex > a {
+    min-width: 0 !important;
+    width: auto !important;
+    text-align: inherit !important;
+  }
+
   /* Print / PDF / attachments — icon buttons share the same shell as the legacy PDF pill */
   .list-doc-action-btn {
     @apply w-full inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium rounded-lg border border-slate-200 bg-white text-slate-700 transition-colors h-9 disabled:opacity-50 disabled:pointer-events-none gap-1;
@@ -313,25 +531,25 @@
     transform: none !important;
   }
 
-  /* ERP Status Badges */
+  /* ERP Status Badges (Apple HIG Semantic Badges) */
   .badge {
-    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors;
   }
 
   .badge-success {
-    @apply bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200;
+    @apply bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800;
   }
 
   .badge-warning {
-    @apply bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200;
+    @apply bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800;
   }
 
   .badge-error {
-    @apply bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200;
+    @apply bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800;
   }
 
   .badge-info {
-    @apply bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200;
+    @apply bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800;
   }
 
   .no-scrollbar {
@@ -1139,4 +1357,250 @@
   min-width: 26px !important;
   padding: 0 !important;
   flex-shrink: 0 !important;
+}
+
+/* ==========================================================================
+   GLOBAL FORM CONTROLS CLEAN SURFACE (APPLE HIG COMPLIANT)
+   Eliminates grey/slate/tinted background fills from all input, select, and
+   textarea controls across all form pages and modals in the entire ERP.
+   Ensures crisp white in light mode and deep slate-900 in dark mode.
+   ========================================================================== */
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="range"]):not([type="color"]),
+select,
+textarea,
+.input {
+  background-color: #ffffff !important;
+}
+
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="range"]):not([type="color"]),
+.dark select,
+.dark textarea,
+.dark .input {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+/* ==========================================================================
+   GLOBAL WEBKIT AUTOFILL & CALENDAR PICKER OVERRIDES (DARK MODE)
+   Prevents browser autofill in Chrome/Edge from turning dark inputs white
+   or obscuring typed text. Inverts WebKit calendar SVG indicators for high
+   visibility on dark backgrounds.
+   ========================================================================== */
+
+/* 1. Operating system dark mode (prefers-color-scheme: dark) */
+@media (prefers-color-scheme: dark) {
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus,
+  select:-webkit-autofill:active,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  textarea:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #0f172a inset !important;
+    box-shadow: 0 0 0 1000px #0f172a inset !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    caret-color: #f8fafc !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  ::-webkit-calendar-picker-indicator {
+    filter: invert(1) !important;
+    cursor: pointer;
+  }
+}
+
+/* 2. Application-level dark mode classes (.dark & [data-theme="dark"]) */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active,
+.dark select:-webkit-autofill,
+.dark select:-webkit-autofill:hover,
+.dark select:-webkit-autofill:focus,
+.dark select:-webkit-autofill:active,
+.dark textarea:-webkit-autofill,
+.dark textarea:-webkit-autofill:hover,
+.dark textarea:-webkit-autofill:focus,
+.dark textarea:-webkit-autofill:active,
+[data-theme="dark"] input:-webkit-autofill,
+[data-theme="dark"] input:-webkit-autofill:hover,
+[data-theme="dark"] input:-webkit-autofill:focus,
+[data-theme="dark"] input:-webkit-autofill:active,
+[data-theme="dark"] select:-webkit-autofill,
+[data-theme="dark"] select:-webkit-autofill:hover,
+[data-theme="dark"] select:-webkit-autofill:focus,
+[data-theme="dark"] select:-webkit-autofill:active,
+[data-theme="dark"] textarea:-webkit-autofill,
+[data-theme="dark"] textarea:-webkit-autofill:hover,
+[data-theme="dark"] textarea:-webkit-autofill:focus,
+[data-theme="dark"] textarea:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #0f172a inset !important;
+  box-shadow: 0 0 0 1000px #0f172a inset !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  caret-color: #f8fafc !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.dark ::-webkit-calendar-picker-indicator,
+[data-theme="dark"] ::-webkit-calendar-picker-indicator,
+.dark input[type="date"]::-webkit-calendar-picker-indicator,
+.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+.dark input[type="month"]::-webkit-calendar-picker-indicator,
+.dark input[type="time"]::-webkit-calendar-picker-indicator,
+.dark input[type="week"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) !important;
+  cursor: pointer;
+}
+
+
+/* ==========================================================================
+   GLOBAL STANDARDIZED MODAL DESIGN SYSTEM (PROJECT MANAGEMENT STANDARD)
+   Standardizes all modal dialogs across all modules to match the Project
+   Management modal aesthetic:
+   - Backdrop blur (bg-black/60 backdrop-blur-sm)
+   - 16px / rounded-2xl dialog corners with smooth shadow-2xl
+   - Clean light/dark header surface (removes dark teal #0E3646 / solid bg-brand / bg-slate-800 from modal headers)
+   - High-contrast typography, close button ergonomics, and clean footers.
+   ========================================================================== */
+
+/* 1. Modal backdrop enhancement */
+.fixed.inset-0.z-50,
+.fixed.inset-0.z-40,
+[role="dialog"] {
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+}
+
+/* 2. Modal card surfaces */
+.fixed.inset-0:not(.print-container) > div:not(.fixed),
+.fixed.inset-0:not(.print-container) > form,
+.modal-box,
+.ant-modal-content {
+  border-radius: 1rem !important; /* rounded-2xl */
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important; /* shadow-2xl */
+}
+
+/* 3. Modal headers: eliminate dark teal (#0E3646), solid brand, or dark headers in modals */
+.fixed.inset-0 .bg-brand:not(button):not(a):not(span),
+.fixed.inset-0 .card-header.bg-brand,
+.fixed.inset-0 .bg-brand-900:not(button):not(a):not(span),
+.fixed.inset-0 [style*="background-color: #0E3646"]:not(button):not(thead):not(th),
+.fixed.inset-0 [style*="background-color:#0E3646"]:not(button):not(thead):not(th),
+.fixed.inset-0 [style*="background-color: rgb(14, 54, 70)"]:not(button):not(thead):not(th),
+.fixed.inset-0 [style*="background-color:rgb(14, 54, 70)"]:not(button):not(thead):not(th) {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.dark .fixed.inset-0 .bg-brand:not(button):not(a):not(span),
+.fixed.inset-0 .card-header.bg-brand,
+.dark .fixed.inset-0 .bg-brand-900:not(button):not(a):not(span),
+.dark .fixed.inset-0 [style*="background-color: #0E3646"]:not(button):not(thead):not(th),
+.dark .fixed.inset-0 [style*="background-color:#0E3646"]:not(button):not(thead):not(th),
+.dark .fixed.inset-0 [style*="background-color: rgb(14, 54, 70)"]:not(button):not(thead):not(th),
+.dark .fixed.inset-0 [style*="background-color:rgb(14, 54, 70)"]:not(button):not(thead):not(th) {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-bottom: 1px solid #1e293b !important;
+}
+
+/* Ensure modal header headings and text remain high-contrast on light/dark backgrounds */
+.fixed.inset-0 .bg-brand:not(button):not(a):not(span) h1,
+.fixed.inset-0 .bg-brand:not(button):not(a):not(span) h2,
+.fixed.inset-0 .bg-brand:not(button):not(a):not(span) h3,
+.fixed.inset-0 .bg-brand:not(button):not(a):not(span) .font-bold,
+.fixed.inset-0 .bg-brand:not(button):not(a):not(span) .font-semibold,
+.fixed.inset-0 [style*="background-color: #0E3646"]:not(button):not(thead):not(th) h1,
+.fixed.inset-0 [style*="background-color: #0E3646"]:not(button):not(thead):not(th) h2,
+.fixed.inset-0 [style*="background-color: #0E3646"]:not(button):not(thead):not(th) h3,
+.fixed.inset-0 [style*="background-color: #0E3646"]:not(button):not(thead):not(th) .font-bold,
+.fixed.inset-0 [style*="background-color: #0E3646"]:not(button):not(thead):not(th) .font-semibold {
+  color: #0f172a !important;
+}
+
+.dark .fixed.inset-0 .bg-brand:not(button):not(a):not(span) h1,
+.dark .fixed.inset-0 .bg-brand:not(button):not(a):not(span) h2,
+.dark .fixed.inset-0 .bg-brand:not(button):not(a):not(span) h3,
+.dark .fixed.inset-0 .bg-brand:not(button):not(a):not(span) .font-bold,
+.dark .fixed.inset-0 .bg-brand:not(button):not(a):not(span) .font-semibold,
+.dark .fixed.inset-0 [style*="background-color: #0E3646"]:not(button):not(thead):not(th) h1,
+.dark .fixed.inset-0 [style*="background-color: #0E3646"]:not(button):not(thead):not(th) h2,
+.dark .fixed.inset-0 [style*="background-color: #0E3646"]:not(button):not(thead):not(th) h3,
+.dark .fixed.inset-0 [style*="background-color: #0E3646"]:not(button):not(thead):not(th) .font-bold,
+.dark .fixed.inset-0 [style*="background-color: #0E3646"]:not(button):not(thead):not(th) .font-semibold {
+  color: #f8fafc !important;
+}
+
+/* Ensure close buttons inside modal headers are cleanly visible */
+.fixed.inset-0 .bg-brand:not(button):not(a):not(span) button,
+.fixed.inset-0 [style*="background-color: #0E3646"]:not(button):not(thead):not(th) button {
+  color: #64748b !important;
+}
+.fixed.inset-0 .bg-brand:not(button):not(a):not(span) button:hover,
+.fixed.inset-0 [style*="background-color: #0E3646"]:not(button):not(thead):not(th) button:hover {
+  color: #0f172a !important;
+  background-color: #f1f5f9 !important;
+}
+.dark .fixed.inset-0 .bg-brand:not(button):not(a):not(span) button,
+.dark .fixed.inset-0 [style*="background-color: #0E3646"]:not(button):not(thead):not(th) button {
+  color: #94a3b8 !important;
+}
+.dark .fixed.inset-0 .bg-brand:not(button):not(a):not(span) button:hover,
+.dark .fixed.inset-0 [style*="background-color: #0E3646"]:not(button):not(thead):not(th) button:hover {
+  color: #ffffff !important;
+  background-color: #1e293b !important;
+}
+
+/* 4. Modal footers: clean surfaces */
+.fixed.inset-0 .bg-slate-50.rounded-b-lg,
+.fixed.inset-0 .bg-slate-50.rounded-b-xl,
+.fixed.inset-0 .bg-slate-50.rounded-b-2xl,
+.fixed.inset-0 .bg-gray-50.rounded-b-lg,
+.fixed.inset-0 .bg-gray-50.rounded-b-xl,
+.fixed.inset-0 .bg-gray-50.rounded-b-2xl {
+  background-color: #ffffff !important;
+  border-top: 1px solid #e2e8f0 !important;
+  border-radius: 0 0 1rem 1rem !important;
+}
+.dark .fixed.inset-0 .bg-slate-50.rounded-b-lg,
+.dark .fixed.inset-0 .bg-slate-50.rounded-b-xl,
+.dark .fixed.inset-0 .bg-slate-50.rounded-b-2xl,
+.dark .fixed.inset-0 .bg-gray-50.rounded-b-lg,
+.dark .fixed.inset-0 .bg-gray-50.rounded-b-xl,
+.dark .fixed.inset-0 .bg-gray-50.rounded-b-2xl {
+  background-color: #0f172a !important;
+  border-top: 1px solid #1e293b !important;
+  border-radius: 0 0 1rem 1rem !important;
+}
+
+/* 5. Ant Design Modal conformity */
+.ant-modal .ant-modal-content {
+  border-radius: 1rem !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid #e2e8f0 !important;
+}
+.dark .ant-modal .ant-modal-content {
+  background-color: #0f172a !important;
+  border-color: #1e293b !important;
+}
+.ant-modal .ant-modal-header {
+  border-bottom: 1px solid #e2e8f0 !important;
+  padding: 1rem 1.5rem !important;
+}
+.dark .ant-modal .ant-modal-header {
+  background-color: #0f172a !important;
+  border-bottom-color: #1e293b !important;
+}
+.ant-modal .ant-modal-title {
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+}
+.dark .ant-modal .ant-modal-title {
+  color: #ffffff !important;
 }

@@ -16,6 +16,32 @@ import SortableHeader from "@/components/SortableHeader.jsx";
 import { usePermission } from "@/auth/PermissionContext.jsx";
 import { useViewMode } from "@/hooks/useViewMode";
 import ViewToggle from "@/components/ViewToggle";
+import { Button, Badge } from "@/components/ui";
+import {
+  ChevronDown,
+  Upload,
+  FileSpreadsheet,
+  Download,
+  Layers,
+  X,
+  Plus,
+} from "lucide-react";
+
+function toCharYorN(val, defaultVal = "Y") {
+  if (val === undefined || val === null || String(val).trim() === "") {
+    return defaultVal;
+  }
+  if (typeof val === "boolean") {
+    return val ? "Y" : "N";
+  }
+  if (typeof val === "number") {
+    return val === 1 ? "Y" : (val === 0 ? "N" : defaultVal);
+  }
+  const s = String(val).trim().toUpperCase();
+  if (["Y", "YES", "TRUE", "1", "T"].includes(s)) return "Y";
+  if (["N", "NO", "FALSE", "0", "F"].includes(s)) return "N";
+  return defaultVal;
+}
 
 /**
  * ItemsList component
@@ -41,6 +67,7 @@ export default function ItemsList() {
   const [previewHeaders, setPreviewHeaders] = useState([]);
   const [previewRows, setPreviewRows] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [showBulkOps, setShowBulkOps] = useState(false);
 
   const handleToggleStatus = async (item, targetActive) => {
     const action = targetActive ? "enable" : "disable";
@@ -331,7 +358,7 @@ export default function ItemsList() {
         return;
       }
 
-      // Build lookup maps for category/group/currency/tax/account codes -> IDs
+      // Build lookup maps for category/group/currency/tax/account/warehouse codes -> IDs
       let categoryCodeToId = new Map();
       let categoryIdToName = new Map();
       let groupCodeToId = new Map();
@@ -340,19 +367,24 @@ export default function ItemsList() {
       let taxCodeToId = new Map();
       let accountCodeToId = new Map();
       let priceTypeNameToId = new Map();
+      let warehouseCodeToId = new Map();
+      let warehouseIdToName = new Map();
+      let warehouseIdToBranchId = new Map();
+      let warehouseCodeToBranchId = new Map();
       let itemTypeSet = new Set();
       let itemTypeCodeToCode = new Map();
       let itemTypeNameToCode = new Map();
       try {
-        const [catRes, grpRes, curRes, taxRes, accRes, typeRes, ptRes] =
+        const [catRes, grpRes, curRes, taxRes, accRes, typeRes, ptRes, whRes] =
           await Promise.all([
-            api.get("/inventory/item-categories"),
-            api.get("/inventory/item-groups"),
-            api.get("/finance/currencies"),
-            api.get("/finance/tax-codes"),
-            api.get("/finance/accounts"),
-            api.get("/inventory/item-types"),
-            api.get("/sales/price-types?active=true"),
+            api.get("/inventory/item-categories").catch(() => ({ data: { items: [] } })),
+            api.get("/inventory/item-groups").catch(() => ({ data: { items: [] } })),
+            api.get("/finance/currencies").catch(() => ({ data: { items: [] } })),
+            api.get("/finance/tax-codes").catch(() => ({ data: { items: [] } })),
+            api.get("/finance/accounts").catch(() => ({ data: { items: [] } })),
+            api.get("/inventory/item-types").catch(() => ({ data: { items: [] } })),
+            api.get("/sales/price-types?active=true").catch(() => ({ data: { items: [] } })),
+            api.get("/inventory/warehouses").catch(() => ({ data: { items: [] } })),
           ]);
         const cats = Array.isArray(catRes?.data?.items)
           ? catRes.data.items
@@ -372,6 +404,11 @@ export default function ItemsList() {
         const types = Array.isArray(typeRes?.data?.items)
           ? typeRes.data.items
           : [];
+        const whs = Array.isArray(whRes?.data?.items)
+          ? whRes.data.items
+          : Array.isArray(whRes?.data)
+            ? whRes.data
+            : [];
         cats.forEach((c) => {
           const id = Number(c.id);
           const code = String(c.category_code || "").toUpperCase();
@@ -417,6 +454,24 @@ export default function ItemsList() {
           if (id > 0) {
             if (code) accountCodeToId.set(code, id);
             if (name) accountCodeToId.set(name, id);
+          }
+        });
+        whs.forEach((w) => {
+          const id = Number(w.id);
+          const code = String(w.warehouse_code || "").toUpperCase();
+          const name = String(w.warehouse_name || "").toUpperCase();
+          const bId = w.branch_id ? Number(w.branch_id) : null;
+          if (id > 0) {
+            if (code) {
+              warehouseCodeToId.set(code, id);
+              if (bId) warehouseCodeToBranchId.set(code, bId);
+            }
+            if (name) {
+              warehouseCodeToId.set(name, id);
+              if (bId) warehouseCodeToBranchId.set(name, bId);
+            }
+            warehouseIdToName.set(id, String(w.warehouse_name || w.warehouse_code || ""));
+            if (bId) warehouseIdToBranchId.set(id, bId);
           }
         });
         const pts = Array.isArray(ptRes?.data?.items) ? ptRes.data.items : [];
@@ -594,6 +649,23 @@ export default function ItemsList() {
             "MAX STOCK",
           ]),
           REORDER_LEVEL: getVal(["REORDER_LEVEL", "REORDER LEVEL"]),
+          SAFETY_STOCK: getVal(["SAFETY_STOCK", "SAFETY STOCK", "SAFETY"]),
+          WAREHOUSE: getVal([
+            "WAREHOUSE",
+            "WAREHOUSE_NAME",
+            "WAREHOUSE NAME",
+            "WAREHOUSE_CODE",
+            "WAREHOUSE CODE",
+          ]),
+          OPENING_QUANTITY: getVal([
+            "OPENING_QUANTITY",
+            "OPENING QUANTITY",
+            "OPENING_STOCK",
+            "OPENING STOCK",
+            "QUANTITY",
+            "QTY",
+          ]),
+          STATUS: getVal(["STATUS", "ACTIVE", "IS_ACTIVE"]),
         };
         let nextItemCode = rowData.ITEM_CODE || "";
         const itemTypeRaw = String(rowData.ITEM_TYPE || "").toUpperCase();
@@ -604,6 +676,16 @@ export default function ItemsList() {
         const itemTypeValid =
           itemTypeSet.size === 0 ? true : !!itemTypeResolved;
         const barcodeExpanded = normalizeBarcode(rowData.BARCODE || "");
+        const warehouseRaw = String(rowData.WAREHOUSE || "").trim().toUpperCase();
+        const warehouseResolved = warehouseRaw
+          ? (warehouseCodeToId.get(warehouseRaw) || (Number(warehouseRaw) > 0 ? Number(warehouseRaw) : null))
+          : null;
+        const branchResolved = warehouseResolved
+          ? (warehouseIdToBranchId.get(Number(warehouseResolved)) || null)
+          : (warehouseRaw ? (warehouseCodeToBranchId.get(warehouseRaw) || null) : null);
+        const warehouseLabel = warehouseResolved
+          ? (warehouseIdToName.get(Number(warehouseResolved)) || rowData.WAREHOUSE)
+          : rowData.WAREHOUSE;
         const categoryResolved =
           (rowData.ITEM_CATEGORY &&
             categoryCodeToId.get(
@@ -661,33 +743,84 @@ export default function ItemsList() {
           ? groupIdToName.get(Number(groupResolved)) || ""
           : "";
         const errorsRow = [];
-        // Only annotate (do not block) basic issues; server will decide final result
-        const nameUpper = String(rowData.ITEM_NAME || "").toUpperCase();
+        // Validate required fields (all fields except barcode, description, safety stock, reorder level, Min Stock Level, Max Stock Level, opening quantity)
+        const nameUpper = String(rowData.ITEM_NAME || "").trim().toUpperCase();
         if (!nameUpper) errorsRow.push("Missing ITEM_NAME");
-        // Validate category, group, and item type
-        const categoryProvided =
-          String(
-            rowData.ITEM_CATEGORY ||
-              rowData.ITEM_CATEGORY_CODE ||
-              rowData.ITEM_CATEGORY_ID ||
-              "",
-          ).trim() !== "";
-        const groupProvided =
-          String(
-            rowData.ITEM_GROUP ||
-              rowData.ITEM_GROUP_CODE ||
-              rowData.ITEM_GROUP_ID ||
-              "",
-          ).trim() !== "";
-        if (categoryProvided && !categoryResolved) {
-          errorsRow.push("Unknown CATEGORY (no match in system)");
-        }
-        if (groupProvided && !groupResolved) {
-          errorsRow.push("Unknown GROUP (no match in system)");
-        }
-        if (String(itemTypeRaw || "") && !itemTypeValid) {
+
+        const itemTypeUpper = String(itemTypeRaw || "").trim().toUpperCase();
+        if (!itemTypeUpper) {
+          errorsRow.push("Missing ITEM_TYPE");
+        } else if (!itemTypeValid) {
           errorsRow.push("Unknown ITEM_TYPE (no match in system)");
         }
+
+        const categoryProvided = String(
+          rowData.ITEM_CATEGORY ||
+            rowData.ITEM_CATEGORY_CODE ||
+            rowData.ITEM_CATEGORY_ID ||
+            "",
+        ).trim() !== "";
+        if (!categoryProvided) {
+          errorsRow.push("Missing ITEM_CATEGORY");
+        } else if (!categoryResolved) {
+          errorsRow.push("Unknown CATEGORY (no match in system)");
+        }
+
+        const groupProvided = String(
+          rowData.ITEM_GROUP ||
+            rowData.ITEM_GROUP_CODE ||
+            rowData.ITEM_GROUP_ID ||
+            "",
+        ).trim() !== "";
+        if (!groupProvided) {
+          errorsRow.push("Missing ITEM_GROUP");
+        } else if (!groupResolved) {
+          errorsRow.push("Unknown GROUP (no match in system)");
+        }
+
+        if (!String(rowData.BASE_UOM || "").trim()) {
+          errorsRow.push("Missing UNIT_OF_MEASURE");
+        }
+
+        if (rowData.STANDARD_COST === "" || rowData.STANDARD_COST === null || rowData.STANDARD_COST === undefined) {
+          errorsRow.push("Missing STANDARD_COST");
+        }
+
+        if (rowData.SELLING_PRICE === "" || rowData.SELLING_PRICE === null || rowData.SELLING_PRICE === undefined) {
+          errorsRow.push("Missing SELLING_PRICE");
+        }
+
+        if (!String(rowData.CURRENCY_CODE || rowData.CURRENCY || "").trim()) {
+          errorsRow.push("Missing CURRENCY");
+        }
+
+        if (!warehouseRaw) {
+          errorsRow.push("Missing WAREHOUSE");
+        } else if (!warehouseResolved) {
+          errorsRow.push("Unknown WAREHOUSE (no match in system)");
+        }
+
+        if (!String(rowData.VAT_PURCHASE_CODE || "").trim()) {
+          errorsRow.push("Missing PURCHASE VAT CODE");
+        }
+
+        if (!String(rowData.VAT_SALES_CODE || "").trim()) {
+          errorsRow.push("Missing SALES VAT CODE");
+        }
+
+        if (!String(rowData.PURCHASE_ACCOUNT_ID || "").trim()) {
+          errorsRow.push("Missing PURCHASE_ACCOUNT_ID");
+        }
+
+        if (!String(rowData.SALES_ACCOUNT_ID || "").trim()) {
+          errorsRow.push("Missing SALES_ACCOUNT_ID");
+        }
+
+        // Auto determine is_stockable: if item type = service or non inventory item -> N, otherwise -> Y
+        const typeNorm = String(itemTypeResolved || itemTypeRaw || "").toUpperCase().replace(/[-_\s]/g, "");
+        const isServiceOrNonInv = typeNorm.includes("SERVICE") || typeNorm.includes("NONINVENTORY");
+        const autoIsStockable = isServiceOrNonInv ? "N" : "Y";
+
         if (nameUpper) seenNames.add(nameUpper);
         rows.push({
           index: i + 1,
@@ -696,6 +829,12 @@ export default function ItemsList() {
             item_code: nextItemCode,
             item_name: rowData.ITEM_NAME,
             item_type: itemTypeResolved || itemTypeRaw || "",
+            is_stockable: autoIsStockable,
+            warehouse_id: warehouseResolved,
+            branch_id: branchResolved,
+            warehouse_label: warehouseLabel || "-",
+            opening_quantity: Number(rowData.OPENING_QUANTITY) || 0,
+            safety_stock: Number(rowData.SAFETY_STOCK) || 0,
             category_id: categoryResolved,
             item_group_id: groupResolved,
             category_label: String(categoryLabel),
@@ -704,6 +843,7 @@ export default function ItemsList() {
             group_name: groupName,
             uom: rowData.BASE_UOM || "PCS",
             barcode: barcodeExpanded,
+            status: String(rowData.STATUS || "ACTIVE").toUpperCase(),
           },
           valid: errorsRow.length === 0,
           errors: errorsRow,
@@ -714,6 +854,8 @@ export default function ItemsList() {
         "Item Code",
         "Name",
         "Type",
+        "Warehouse",
+        "Opening Qty",
         "Uploaded Category",
         "Category Name",
         "Uploaded Group",
@@ -737,38 +879,78 @@ export default function ItemsList() {
       // Rebuild lookup maps here (upload runs independently of file-parse scope)
       const currencyCodeToId = new Map();
       const taxCodeToId = new Map();
+      const accountCodeToId = new Map();
       const priceTypeNameToId = new Map();
+      const whNameToId = new Map();
+      const whIdToBranchId = new Map();
+      const whNameToBranchId = new Map();
       try {
-        const [curRes, taxRes, ptRes] = await Promise.all([
+        const [curRes, taxRes, ptRes, whRes, accRes] = await Promise.all([
           api.get("/finance/currencies"),
           api.get("/finance/tax-codes"),
           api.get("/sales/price-types?active=true"),
+          api
+            .get("/inventory/warehouses?all_branches=1")
+            .catch(() => api.get("/inventory/warehouses").catch(() => ({ data: { items: [] } }))),
+          api.get("/finance/accounts").catch(() => ({ data: { items: [] } })),
         ]);
         const curs = Array.isArray(curRes?.data?.items) ? curRes.data.items : [];
         const taxes = Array.isArray(taxRes?.data?.items) ? taxRes.data.items : [];
         const pts = Array.isArray(ptRes?.data?.items) ? ptRes.data.items : [];
+        const whs = Array.isArray(whRes?.data?.items) ? whRes.data.items : Array.isArray(whRes?.data) ? whRes.data : [];
+        const accs = Array.isArray(accRes?.data?.items) ? accRes.data.items : [];
+
         curs.forEach((c) => {
           const id = Number(c.id);
-          const code = String(c.code || "").toUpperCase();
-          const name = String(c.name || "").toUpperCase();
+          const code = String(c.code || "").trim().toUpperCase();
+          const name = String(c.name || "").trim().toUpperCase();
           if (id > 0) {
             if (code) currencyCodeToId.set(code, id);
             if (name) currencyCodeToId.set(name, id);
+            currencyCodeToId.set(String(id), id);
           }
         });
         taxes.forEach((t) => {
           const id = Number(t.id);
-          const code = String(t.code || "").toUpperCase();
-          const name = String(t.name || "").toUpperCase();
+          const code = String(t.code || "").trim().toUpperCase();
+          const name = String(t.name || "").trim().toUpperCase();
           if (id > 0) {
             if (code) taxCodeToId.set(code, id);
             if (name) taxCodeToId.set(name, id);
+            taxCodeToId.set(String(id), id);
+          }
+        });
+        accs.forEach((a) => {
+          const id = Number(a.id);
+          const code = String(a.code || "").trim().toUpperCase();
+          const name = String(a.name || "").trim().toUpperCase();
+          if (id > 0) {
+            if (code) accountCodeToId.set(code, id);
+            if (name) accountCodeToId.set(name, id);
+            accountCodeToId.set(String(id), id);
           }
         });
         pts.forEach((p) => {
           const id = Number(p.id);
           const name = String(p.name || "").toUpperCase();
           if (id > 0 && name) priceTypeNameToId.set(name, id);
+        });
+        whs.forEach((w) => {
+          const id = Number(w.id);
+          const code = String(w.warehouse_code || "").toUpperCase();
+          const name = String(w.warehouse_name || "").toUpperCase();
+          const bId = Number(w.branch_id) || null;
+          if (id > 0) {
+            if (code) {
+              whNameToId.set(code, id);
+              if (bId) whNameToBranchId.set(code, bId);
+            }
+            if (name) {
+              whNameToId.set(name, id);
+              if (bId) whNameToBranchId.set(name, bId);
+            }
+            if (bId) whIdToBranchId.set(id, bId);
+          }
         });
       } catch {
         // keep empty maps; payload still carries raw code fields for server-side resolution
@@ -782,10 +964,36 @@ export default function ItemsList() {
         } catch {}
         return `ITM-${String(Date.now()).slice(-6)}-${String(fallbackSeed).padStart(2, "0")}`;
       };
-      const payloadRows = previewRows
-        .filter((r) => r && r.valid) // only valid rows
+      let rowsToProcess = previewRows.filter((r) => r && r.valid); // only valid rows
+      const payloadRows = rowsToProcess
         .map((r) => {
           const rowData = r.raw || {};
+          const warehouseRaw = String(rowData.WAREHOUSE || "").trim().toUpperCase();
+          const resolvedWhId = r.preview?.warehouse_id || (warehouseRaw ? (whNameToId.get(warehouseRaw) || (Number(warehouseRaw) > 0 ? Number(warehouseRaw) : null)) : null);
+          const resolvedBranchId = r.preview?.branch_id || (resolvedWhId ? whIdToBranchId.get(resolvedWhId) : null) || (warehouseRaw ? whNameToBranchId.get(warehouseRaw) : null) || null;
+
+          const rawCur = String(rowData.CURRENCY_ID || rowData.CURRENCY_CODE || rowData.CURRENCY || "").trim().toUpperCase();
+          const resolvedCurId = (Number(rawCur) > 0 ? Number(rawCur) : null) || currencyCodeToId.get(rawCur) || 1;
+
+          const rawVatPur = String(rowData.VAT_ON_PURCHASE_ID || rowData.VAT_PURCHASE_CODE || rowData.VAT_ON_PURCHASE || rowData.VAT_PURCHASE || "").trim().toUpperCase();
+          const resolvedVatPurId = (Number(rawVatPur) > 0 ? Number(rawVatPur) : null) || taxCodeToId.get(rawVatPur) || null;
+
+          const rawVatSal = String(rowData.VAT_ON_SALES_ID || rowData.VAT_SALES_CODE || rowData.VAT_ON_SALES || rowData.VAT_SALES || "").trim().toUpperCase();
+          const resolvedVatSalId = (Number(rawVatSal) > 0 ? Number(rawVatSal) : null) || taxCodeToId.get(rawVatSal) || null;
+
+          const rawPurAcc = String(rowData.PURCHASE_ACCOUNT_ID || rowData.PURCHASE_ACCOUNT_CODE || rowData.PURCHASE_ACCOUNT || "").trim().toUpperCase();
+          const resolvedPurAccId = (Number(rawPurAcc) > 0 ? Number(rawPurAcc) : null) || accountCodeToId.get(rawPurAcc) || null;
+
+          const rawSalAcc = String(rowData.SALES_ACCOUNT_ID || rowData.SALES_ACCOUNT_CODE || rowData.SALES_ACCOUNT || "").trim().toUpperCase();
+          const resolvedSalAccId = (Number(rawSalAcc) > 0 ? Number(rawSalAcc) : null) || accountCodeToId.get(rawSalAcc) || null;
+
+          const itemTypeStr = r.preview?.item_type || rowData.ITEM_TYPE || "";
+          const typeNorm = String(itemTypeStr).toUpperCase().replace(/[-_\s]/g, "");
+          const isServiceOrNonInv = typeNorm.includes("SERVICE") || typeNorm.includes("NONINVENTORY");
+          const resolvedIsStockable = isServiceOrNonInv ? "N" : toCharYorN(rowData.IS_STOCKABLE || r.preview?.is_stockable, "Y");
+          const resolvedIsSellable = toCharYorN(rowData.IS_SELLABLE, "Y");
+          const resolvedIsPurchasable = toCharYorN(rowData.IS_PURCHASABLE, "Y");
+
           return {
             item_code: rowData.ITEM_CODE || r.preview.item_code || "",
             item_name: rowData.ITEM_NAME || "",
@@ -802,23 +1010,34 @@ export default function ItemsList() {
             barcode: r.preview.barcode || "",
             cost_price: Number(rowData.STANDARD_COST) || 0,
             selling_price: Number(rowData.SELLING_PRICE) || 0,
+            currency_id: resolvedCurId,
             currency_code: rowData.CURRENCY_CODE || rowData.CURRENCY || "",
+            warehouse_id: resolvedWhId,
+            opening_warehouse_id: resolvedWhId,
+            warehouse_name: rowData.WAREHOUSE || "",
+            branch_id: resolvedBranchId,
+            opening_quantity: Number(rowData.OPENING_QUANTITY) || 0,
+            safety_stock: Number(rowData.SAFETY_STOCK) || 0,
             price_type: rowData.PRICE_TYPE || "",
             price_type_name: rowData.PRICE_TYPE_NAME || "",
             image_url: rowData.IMAGE_URL || rowData.IMAGE || "",
+            vat_on_purchase_id: resolvedVatPurId,
             vat_on_purchase_code:
               rowData.VAT_ON_PURCHASE || rowData.VAT_PURCHASE_CODE || "",
-            purchase_account_id:
-              Number(rowData.PURCHASE_ACCOUNT_ID || 0) || null,
-            sales_account_id: Number(rowData.SALES_ACCOUNT_ID || 0) || null,
+            vat_on_sales_id: resolvedVatSalId,
             vat_on_sales_code:
               rowData.VAT_ON_SALES || rowData.VAT_SALES_CODE || "",
+            purchase_account_id: resolvedPurAccId,
+            sales_account_id: resolvedSalAccId,
             purchase_account_code:
               rowData.PURCHASE_ACCOUNT_CODE || rowData.PURCHASE_ACCOUNT || "",
             sales_account_code:
               rowData.SALES_ACCOUNT_CODE || rowData.SALES_ACCOUNT || "",
-            is_sellable: rowData.IS_SELLABLE === "Y",
-            is_purchasable: rowData.IS_PURCHASABLE === "Y",
+            description: rowData.DESCRIPTION || "",
+            is_stockable: resolvedIsStockable,
+            is_sellable: resolvedIsSellable,
+            is_purchasable: resolvedIsPurchasable,
+            is_active: String(rowData.STATUS || "").toUpperCase() === "INACTIVE" ? false : true,
             min_stock_level: Number(rowData.MIN_STOCK_LEVEL) || 0,
             max_stock_level: Number(rowData.MAX_STOCK_LEVEL) || 0,
             reorder_level: Number(rowData.REORDER_LEVEL) || 0,
@@ -836,30 +1055,34 @@ export default function ItemsList() {
           const failed = Number(resp?.data?.failed || 0);
           shouldClosePreview = failed === 0;
           if (inserted || updated) {
-            toast.success(`Uploaded ${inserted} new, updated ${updated}`);
+            toast.success(`Uploaded ${inserted} new, updated ${updated} existing items`);
             const res = await api.get("/inventory/items?all=1");
             setItems(Array.isArray(res.data?.items) ? res.data.items : []);
           }
-          if (failed) {
-            toast.error(`Skipped ${failed} rows`);
-            const errs = Array.isArray(resp?.data?.errors)
-              ? resp.data.errors
-              : [];
-            if (errs.length) {
-              alert(
-                "Some rows failed:\n" +
-                  errs
-                    .slice(0, 10)
-                    .map(
-                      (e) =>
-                        `Row ${e.index} (${e.item_name || "-"}) - ${e.message}`,
-                    )
-                    .join("\n") +
-                  (errs.length > 10 ? "\n..." : ""),
-              );
-            }
+          if (failed === 0) {
+            setPreviewOpen(false);
+            setPreviewRows([]);
+            setPreviewHeaders([]);
+            return;
           }
-          return;
+          console.warn(`Bulk endpoint reported ${failed} skipped rows; proceeding with individual fallback...`);
+          const failedNames = new Set(
+            (resp?.data?.errors || []).map((e) =>
+              String(e.item_name || "").toUpperCase().trim(),
+            ),
+          );
+          if (failedNames.size > 0) {
+            rowsToProcess = previewRows.filter(
+              (x) =>
+                x &&
+                x.valid &&
+                failedNames.has(
+                  String(x.raw?.ITEM_NAME || x.preview?.item_name || "")
+                    .toUpperCase()
+                    .trim(),
+                ),
+            );
+          }
         } catch (bulkErr) {
           // Fallback to per-row upload when bulk endpoint is unavailable or fails
           console.error("Bulk upload failed, falling back to per-row:", bulkErr);
@@ -868,21 +1091,62 @@ export default function ItemsList() {
       let success = 0;
       let failed = 0;
       const errs = [];
-      // Build quick lookup of existing items by name for update fallback
+      // Fetch fresh items from server to guarantee up-to-date lookups
+      let currentItems = Array.isArray(items) ? items : [];
+      try {
+        const freshRes = await api.get("/inventory/items?all=1", {
+          __skipOfflineQueue: true,
+        });
+        if (Array.isArray(freshRes?.data?.items)) currentItems = freshRes.data.items;
+      } catch {}
       const nameToId = new Map(
-        (Array.isArray(items) ? items : [])
+        currentItems
           .filter((it) => it && it.id && it.item_name)
           .map((it) => [
-            String(it.item_name || "").toUpperCase(),
+            String(it.item_name || "").toUpperCase().trim(),
             Number(it.id),
           ]),
       );
-      for (const r of previewRows.filter((x) => x && x.valid)) {
+      const codeToId = new Map(
+        currentItems
+          .filter((it) => it && it.id && it.item_code)
+          .map((it) => [
+            String(it.item_code || "").toUpperCase().trim(),
+            Number(it.id),
+          ]),
+      );
+      for (const r of rowsToProcess) {
         const rowData = r.raw;
         let nextItemCode = rowData.ITEM_CODE;
         if (!nextItemCode) {
           nextItemCode = await getNextItemCode(r.index || 0);
         }
+        const warehouseRaw = String(rowData.WAREHOUSE || "").trim().toUpperCase();
+        const resolvedWhId = r.preview?.warehouse_id || (warehouseRaw ? (whNameToId.get(warehouseRaw) || (Number(warehouseRaw) > 0 ? Number(warehouseRaw) : null)) : null);
+        const resolvedBranchId = r.preview?.branch_id || (resolvedWhId ? whIdToBranchId.get(resolvedWhId) : null) || (warehouseRaw ? whNameToBranchId.get(warehouseRaw) : null) || null;
+
+        const rawCur = String(rowData.CURRENCY_ID || rowData.CURRENCY_CODE || rowData.CURRENCY || "").trim().toUpperCase();
+        const resolvedCurId = (Number(rawCur) > 0 ? Number(rawCur) : null) || currencyCodeToId.get(rawCur) || 1;
+
+        const rawVatPur = String(rowData.VAT_ON_PURCHASE_ID || rowData.VAT_PURCHASE_CODE || rowData.VAT_ON_PURCHASE || rowData.VAT_PURCHASE || "").trim().toUpperCase();
+        const resolvedVatPurId = (Number(rawVatPur) > 0 ? Number(rawVatPur) : null) || taxCodeToId.get(rawVatPur) || null;
+
+        const rawVatSal = String(rowData.VAT_ON_SALES_ID || rowData.VAT_SALES_CODE || rowData.VAT_ON_SALES || rowData.VAT_SALES || "").trim().toUpperCase();
+        const resolvedVatSalId = (Number(rawVatSal) > 0 ? Number(rawVatSal) : null) || taxCodeToId.get(rawVatSal) || null;
+
+        const rawPurAcc = String(rowData.PURCHASE_ACCOUNT_ID || rowData.PURCHASE_ACCOUNT_CODE || rowData.PURCHASE_ACCOUNT || "").trim().toUpperCase();
+        const resolvedPurAccId = (Number(rawPurAcc) > 0 ? Number(rawPurAcc) : null) || accountCodeToId.get(rawPurAcc) || null;
+
+        const rawSalAcc = String(rowData.SALES_ACCOUNT_ID || rowData.SALES_ACCOUNT_CODE || rowData.SALES_ACCOUNT || "").trim().toUpperCase();
+        const resolvedSalAccId = (Number(rawSalAcc) > 0 ? Number(rawSalAcc) : null) || accountCodeToId.get(rawSalAcc) || null;
+
+        const itemTypeStr = r.preview?.item_type || rowData.ITEM_TYPE || "";
+        const typeNorm = String(itemTypeStr).toUpperCase().replace(/[-_\s]/g, "");
+        const isServiceOrNonInv = typeNorm.includes("SERVICE") || typeNorm.includes("NONINVENTORY");
+        const resolvedIsStockable = isServiceOrNonInv ? "N" : toCharYorN(rowData.IS_STOCKABLE || r.preview?.is_stockable, "Y");
+        const resolvedIsSellable = toCharYorN(rowData.IS_SELLABLE, "Y");
+        const resolvedIsPurchasable = toCharYorN(rowData.IS_PURCHASABLE, "Y");
+
         const basePayload = {
           item_code: nextItemCode,
           item_name: rowData.ITEM_NAME,
@@ -897,28 +1161,29 @@ export default function ItemsList() {
           group_name: r.preview.group_name,
           category_code: rowData.ITEM_CATEGORY_CODE || null,
           group_code: rowData.ITEM_GROUP_CODE || null,
+          currency_id: resolvedCurId,
           currency_code: rowData.CURRENCY_CODE || rowData.CURRENCY || null,
+          warehouse_name: rowData.WAREHOUSE || null,
+          opening_warehouse_id: resolvedWhId,
+          warehouse_id: resolvedWhId,
+          branch_id: resolvedBranchId,
+          opening_quantity: Number(rowData.OPENING_QUANTITY) || 0,
+          vat_on_purchase_id: resolvedVatPurId,
           vat_on_purchase_code:
             rowData.VAT_ON_PURCHASE || rowData.VAT_PURCHASE_CODE || null,
+          vat_on_sales_id: resolvedVatSalId,
           vat_on_sales_code:
             rowData.VAT_ON_SALES || rowData.VAT_SALES_CODE || null,
+          purchase_account_id: resolvedPurAccId,
           purchase_account_code:
             rowData.PURCHASE_ACCOUNT_CODE || rowData.PURCHASE_ACCOUNT || null,
+          sales_account_id: resolvedSalAccId,
           sales_account_code:
             rowData.SALES_ACCOUNT_CODE || rowData.SALES_ACCOUNT || null,
           uom: rowData.BASE_UOM,
           barcode: r.preview.barcode || null,
           cost_price: Number(rowData.STANDARD_COST) || 0,
           selling_price: Number(rowData.SELLING_PRICE) || 0,
-          currency_id:
-            currencyCodeToId.get(
-              String(
-                rowData.CURRENCY_ID ||
-                  rowData.CURRENCY_CODE ||
-                  rowData.CURRENCY ||
-                  "",
-              ).toUpperCase(),
-            ) || null,
           price_type_id:
             priceTypeNameToId.get(
               String(
@@ -928,32 +1193,11 @@ export default function ItemsList() {
             Number(rowData.PRICE_TYPE_ID || 0) ||
             null,
           image_url: rowData.IMAGE_URL || rowData.IMAGE || null,
-          vat_on_purchase_id:
-            taxCodeToId.get(
-              String(
-                rowData.VAT_ON_PURCHASE_ID ||
-                  rowData.VAT_ON_PURCHASE ||
-                  rowData.VAT_PURCHASE ||
-                  rowData.VAT_PURCHASE_CODE ||
-                  "",
-              ).toUpperCase(),
-            ) || null,
-          vat_on_sales_id:
-            taxCodeToId.get(
-              String(
-                rowData.VAT_ON_SALES_ID ||
-                  rowData.VAT_ON_SALES ||
-                  rowData.VAT_SALES ||
-                  rowData.VAT_SALES_CODE ||
-                  "",
-              ).toUpperCase(),
-            ) || null,
-          purchase_account_id: Number(rowData.PURCHASE_ACCOUNT_ID || 0) || null,
-          sales_account_id: Number(rowData.SALES_ACCOUNT_ID || 0) || null,
           description: rowData.DESCRIPTION,
-          is_stockable: rowData.IS_STOCKABLE === "Y",
-          is_sellable: rowData.IS_SELLABLE === "Y",
-          is_purchasable: rowData.IS_PURCHASABLE === "Y",
+          is_stockable: resolvedIsStockable,
+          is_sellable: resolvedIsSellable,
+          is_purchasable: resolvedIsPurchasable,
+          is_active: String(rowData.STATUS || "").toUpperCase() === "INACTIVE" ? false : true,
           min_stock_level: Number(rowData.MIN_STOCK_LEVEL) || 0,
           max_stock_level: Number(rowData.MAX_STOCK_LEVEL) || 0,
           reorder_level: Number(rowData.REORDER_LEVEL) || 0,
@@ -975,12 +1219,14 @@ export default function ItemsList() {
           const code = err?.response?.data?.code || "";
           const status = err?.response?.status || 0;
           if (
-            status === 409 &&
-            String(code).toUpperCase() === "DUPLICATE_ITEM_NAME"
+            status === 409 ||
+            /duplicate/i.test(code) ||
+            /already exists/i.test(err?.response?.data?.message || "")
           ) {
-            // Fallback to update existing item by name
-            const key = String(payload.item_name || "").toUpperCase();
-            let itemId = nameToId.get(key);
+            // Fallback to update existing item by code or name
+            const keyCode = String(payload.item_code || "").toUpperCase();
+            const keyName = String(payload.item_name || "").toUpperCase();
+            let itemId = (keyCode ? codeToId.get(keyCode) : null) || nameToId.get(keyName);
             if (!itemId) {
               try {
                 const resAll = await api.get("/inventory/items?all=1", {
@@ -990,17 +1236,24 @@ export default function ItemsList() {
                   ? resAll.data.items
                   : [];
                 for (const it of arr) {
+                  const cd = String(it.item_code || "").toUpperCase();
                   const nm = String(it.item_name || "").toUpperCase();
-                  if (!nameToId.has(nm)) nameToId.set(nm, Number(it.id));
+                  if (cd && !codeToId.has(cd)) codeToId.set(cd, Number(it.id));
+                  if (nm && !nameToId.has(nm)) nameToId.set(nm, Number(it.id));
                 }
-                itemId = nameToId.get(key);
+                itemId = (keyCode ? codeToId.get(keyCode) : null) || nameToId.get(keyName);
               } catch {}
             }
             if (itemId) {
               try {
+                const updatePayload = { ...payload };
+                const existingCode = [...codeToId.entries()].find(([, id]) => id === itemId)?.[0];
+                if (existingCode) {
+                  updatePayload.item_code = existingCode;
+                }
                 const up = await api.put(
                   `/inventory/items/${itemId}`,
-                  payload,
+                  updatePayload,
                   { __skipOfflineQueue: true },
                 );
                 if (up?.data?.offline) {
@@ -1104,9 +1357,10 @@ export default function ItemsList() {
     let groups = [];
     let currencies = [];
     let uomList = [];
+    let warehouses = [];
 
     try {
-      const [taxRes, accRes, typeRes, catRes, grpRes, curRes, uomRes] =
+      const [taxRes, accRes, typeRes, catRes, grpRes, curRes, uomRes, whRes] =
         await Promise.all([
           api.get("/finance/tax-codes").catch(() => ({ data: { items: [] } })),
           api.get("/finance/accounts").catch(() => ({ data: { items: [] } })),
@@ -1115,6 +1369,7 @@ export default function ItemsList() {
           api.get("/inventory/item-groups").catch(() => ({ data: { items: [] } })),
           api.get("/finance/currencies").catch(() => ({ data: { items: [] } })),
           api.get("/inventory/uoms").catch(() => ({ data: { items: [] } })),
+          api.get("/inventory/warehouses").catch(() => ({ data: { items: [] } })),
         ]);
 
       taxCodes = (Array.isArray(taxRes?.data?.items) ? taxRes.data.items : [])
@@ -1139,6 +1394,9 @@ export default function ItemsList() {
         .filter(Boolean);
       uomList = (Array.isArray(uomRes?.data?.items) ? uomRes.data.items : [])
         .map((u) => String(u.uom_code || u.code || u.name || "").trim())
+        .filter(Boolean);
+      warehouses = (Array.isArray(whRes?.data?.items) ? whRes.data.items : Array.isArray(whRes?.data) ? whRes.data : [])
+        .map((w) => String(w.warehouse_name || w.warehouse_code || "").trim())
         .filter(Boolean);
     } catch {
       // ignore; fallbacks below
@@ -1181,6 +1439,9 @@ export default function ItemsList() {
     if (!taxCodes.length) {
       taxCodes = ["No Tax", "VAT", "Standard", "Exempt", "Zero Rated"];
     }
+    if (!warehouses.length) {
+      warehouses = ["Main Warehouse"];
+    }
 
     const samplePurchaseAccId = 36;
     const sampleSalesAccId = 1;
@@ -1196,6 +1457,7 @@ export default function ItemsList() {
     lookupSheet.getCell("D1").value = "CURRENCY";
     lookupSheet.getCell("E1").value = "ITEM_TYPE";
     lookupSheet.getCell("F1").value = "TAX_CODE";
+    lookupSheet.getCell("G1").value = "WAREHOUSE";
 
     categories.forEach((c, idx) => {
       lookupSheet.getCell(`A${idx + 2}`).value = c;
@@ -1215,31 +1477,39 @@ export default function ItemsList() {
     taxCodes.forEach((tc, idx) => {
       lookupSheet.getCell(`F${idx + 2}`).value = tc;
     });
+    warehouses.forEach((w, idx) => {
+      lookupSheet.getCell(`G${idx + 2}`).value = w;
+    });
 
     lookupSheet.state = "hidden";
 
-    // Column definitions with all capitalized headings:
+    // Column definitions with all capitalized headings (asterisk on all required fields):
     worksheet.columns = [
+      { header: "ITEM_CODE*", key: "ITEM_CODE", width: 18 },
       { header: "ITEM_NAME*", key: "ITEM_NAME", width: 26 },
       { header: "ITEM TYPE*", key: "ITEM_TYPE", width: 20 },
-      { header: "ITEM CATEGORY", key: "ITEM_CATEGORY", width: 22 },
-      { header: "ITEM GROUP", key: "ITEM_GROUP", width: 22 },
+      { header: "ITEM CATEGORY*", key: "ITEM_CATEGORY", width: 22 },
+      { header: "ITEM GROUP*", key: "ITEM_GROUP", width: 22 },
       { header: "UNIT OF MEASURE*", key: "BASE_UOM", width: 18 },
       { header: "BARCODE", key: "BARCODE", width: 18 },
-      { header: "STANDARD_COST", key: "STANDARD_COST", width: 16 },
-      { header: "SELLING_PRICE", key: "SELLING_PRICE", width: 16 },
-      { header: "CURRENCY", key: "CURRENCY_CODE", width: 14 },
-      { header: "PURCHAS VAT CODE", key: "VAT_PURCHASE_CODE", width: 20 },
-      { header: "SALES VAT CODE", key: "VAT_SALES_CODE", width: 20 },
-      { header: "PURCHASE_ACCOUNT_ID", key: "PURCHASE_ACCOUNT_ID", width: 22 },
-      { header: "SALES_ACCOUNT_ID", key: "SALES_ACCOUNT_ID", width: 20 },
-      { header: "DESCRIPTION", key: "DESCRIPTION", width: 26 },
-      { header: "IS_STOCKABLE", key: "IS_STOCKABLE", width: 15 },
-      { header: "IS_SELLABLE", key: "IS_SELLABLE", width: 15 },
-      { header: "IS_PURCHASABLE", key: "IS_PURCHASABLE", width: 16 },
+      { header: "STANDARD_COST*", key: "STANDARD_COST", width: 16 },
+      { header: "SELLING_PRICE*", key: "SELLING_PRICE", width: 16 },
+      { header: "CURRENCY*", key: "CURRENCY_CODE", width: 14 },
+      { header: "WAREHOUSE*", key: "WAREHOUSE", width: 22 },
+      { header: "OPENING_QUANTITY", key: "OPENING_QUANTITY", width: 18 },
+      { header: "PURCHASE VAT CODE*", key: "VAT_PURCHASE_CODE", width: 20 },
+      { header: "SALES VAT CODE*", key: "VAT_SALES_CODE", width: 20 },
+      { header: "PURCHASE_ACCOUNT_ID*", key: "PURCHASE_ACCOUNT_ID", width: 22 },
+      { header: "SALES_ACCOUNT_ID*", key: "SALES_ACCOUNT_ID", width: 20 },
       { header: "MIN_STOCK_LEVEL", key: "MIN_STOCK_LEVEL", width: 18 },
       { header: "MAX_STOCK_LEVEL", key: "MAX_STOCK_LEVEL", width: 18 },
       { header: "REORDER_LEVEL", key: "REORDER_LEVEL", width: 16 },
+      { header: "SAFETY_STOCK", key: "SAFETY_STOCK", width: 16 },
+      { header: "DESCRIPTION", key: "DESCRIPTION", width: 26 },
+      { header: "IS_STOCKABLE*", key: "IS_STOCKABLE", width: 15 },
+      { header: "IS_SELLABLE*", key: "IS_SELLABLE", width: 15 },
+      { header: "IS_PURCHASABLE*", key: "IS_PURCHASABLE", width: 16 },
+      { header: "STATUS*", key: "STATUS", width: 14 },
     ];
 
     // Style header row
@@ -1253,6 +1523,7 @@ export default function ItemsList() {
 
     // Add sample rows
     worksheet.addRow({
+      ITEM_CODE: "RM-0001",
       ITEM_NAME: "Raw Material 1",
       ITEM_TYPE: itemTypes[0] || "Raw Material",
       ITEM_CATEGORY: categories[0] || "",
@@ -1262,20 +1533,25 @@ export default function ItemsList() {
       STANDARD_COST: 100.0,
       SELLING_PRICE: 120.0,
       CURRENCY_CODE: currencies[0] || "GHS",
+      WAREHOUSE: warehouses[0] || "",
+      OPENING_QUANTITY: 50,
       VAT_PURCHASE_CODE: taxCodes[0] || "No Tax",
       VAT_SALES_CODE: taxCodes[0] || "No Tax",
       PURCHASE_ACCOUNT_ID: samplePurchaseAccId,
       SALES_ACCOUNT_ID: sampleSalesAccId,
+      MIN_STOCK_LEVEL: 10,
+      MAX_STOCK_LEVEL: 100,
+      REORDER_LEVEL: 20,
+      SAFETY_STOCK: 15,
       DESCRIPTION: "Sample raw material",
       IS_STOCKABLE: "Y",
       IS_SELLABLE: "Y",
       IS_PURCHASABLE: "Y",
-      MIN_STOCK_LEVEL: 10,
-      MAX_STOCK_LEVEL: 100,
-      REORDER_LEVEL: 20,
+      STATUS: "ACTIVE",
     });
 
     worksheet.addRow({
+      ITEM_CODE: "FG-0001",
       ITEM_NAME: "Finished Good 1",
       ITEM_TYPE: itemTypes[1] || "Finished Good",
       ITEM_CATEGORY: categories[1] || categories[0] || "",
@@ -1285,17 +1561,49 @@ export default function ItemsList() {
       STANDARD_COST: 150.0,
       SELLING_PRICE: 180.0,
       CURRENCY_CODE: currencies[0] || "GHS",
+      WAREHOUSE: warehouses[0] || "",
+      OPENING_QUANTITY: 25,
       VAT_PURCHASE_CODE: taxCodes[0] || "No Tax",
       VAT_SALES_CODE: taxCodes[0] || "No Tax",
       PURCHASE_ACCOUNT_ID: samplePurchaseAccId,
       SALES_ACCOUNT_ID: sampleSalesAccId,
+      MIN_STOCK_LEVEL: 5,
+      MAX_STOCK_LEVEL: 50,
+      REORDER_LEVEL: 10,
+      SAFETY_STOCK: 8,
       DESCRIPTION: "Sample finished product",
       IS_STOCKABLE: "Y",
       IS_SELLABLE: "Y",
       IS_PURCHASABLE: "Y",
-      MIN_STOCK_LEVEL: 5,
-      MAX_STOCK_LEVEL: 50,
-      REORDER_LEVEL: 10,
+      STATUS: "ACTIVE",
+    });
+
+    worksheet.addRow({
+      ITEM_CODE: "SRV-0001",
+      ITEM_NAME: "Consulting Service 1",
+      ITEM_TYPE: "Service",
+      ITEM_CATEGORY: categories[0] || "",
+      ITEM_GROUP: groups[0] || "",
+      BASE_UOM: uomList[0] || "PCS",
+      BARCODE: "",
+      STANDARD_COST: 50.0,
+      SELLING_PRICE: 100.0,
+      CURRENCY_CODE: currencies[0] || "GHS",
+      WAREHOUSE: warehouses[0] || "",
+      OPENING_QUANTITY: 0,
+      VAT_PURCHASE_CODE: taxCodes[0] || "No Tax",
+      VAT_SALES_CODE: taxCodes[0] || "No Tax",
+      PURCHASE_ACCOUNT_ID: samplePurchaseAccId,
+      SALES_ACCOUNT_ID: sampleSalesAccId,
+      MIN_STOCK_LEVEL: 0,
+      MAX_STOCK_LEVEL: 0,
+      REORDER_LEVEL: 0,
+      SAFETY_STOCK: 0,
+      DESCRIPTION: "Sample service item",
+      IS_STOCKABLE: "N",
+      IS_SELLABLE: "Y",
+      IS_PURCHASABLE: "Y",
+      STATUS: "ACTIVE",
     });
 
     const maxCatRow = Math.max(categories.length + 1, 2);
@@ -1304,10 +1612,11 @@ export default function ItemsList() {
     const maxCurRow = Math.max(currencies.length + 1, 2);
     const maxTypeRow = Math.max(itemTypes.length + 1, 2);
     const maxTaxRow = Math.max(taxCodes.length + 1, 2);
+    const maxWhRow = Math.max(warehouses.length + 1, 2);
 
     for (let r = 2; r <= 1000; r++) {
-      // B: Item Type
-      worksheet.getCell(`B${r}`).dataValidation = {
+      // C: Item Type
+      worksheet.getCell(`C${r}`).dataValidation = {
         type: "list",
         allowBlank: false,
         formulae: [`LookupData!$E$2:$E$${maxTypeRow}`],
@@ -1315,9 +1624,9 @@ export default function ItemsList() {
         errorTitle: "Invalid Item Type",
         error: "Please select a valid Item Type from the list.",
       };
-      // C: Item Category
+      // D: Item Category
       if (categories.length > 0) {
-        worksheet.getCell(`C${r}`).dataValidation = {
+        worksheet.getCell(`D${r}`).dataValidation = {
           type: "list",
           allowBlank: true,
           formulae: [`LookupData!$A$2:$A$${maxCatRow}`],
@@ -1326,9 +1635,9 @@ export default function ItemsList() {
           error: "Please select an Item Category from the list.",
         };
       }
-      // D: Item Group
+      // E: Item Group
       if (groups.length > 0) {
-        worksheet.getCell(`D${r}`).dataValidation = {
+        worksheet.getCell(`E${r}`).dataValidation = {
           type: "list",
           allowBlank: true,
           formulae: [`LookupData!$B$2:$B$${maxGrpRow}`],
@@ -1337,8 +1646,8 @@ export default function ItemsList() {
           error: "Please select an Item Group from the list.",
         };
       }
-      // E: Unit of Measure
-      worksheet.getCell(`E${r}`).dataValidation = {
+      // F: Unit of Measure
+      worksheet.getCell(`F${r}`).dataValidation = {
         type: "list",
         allowBlank: false,
         formulae: [`LookupData!$C$2:$C$${maxUomRow}`],
@@ -1346,8 +1655,8 @@ export default function ItemsList() {
         errorTitle: "Invalid UOM",
         error: "Please select a valid Unit of Measure from the list.",
       };
-      // I: Currency
-      worksheet.getCell(`I${r}`).dataValidation = {
+      // J: Currency
+      worksheet.getCell(`J${r}`).dataValidation = {
         type: "list",
         allowBlank: true,
         formulae: [`LookupData!$D$2:$D$${maxCurRow}`],
@@ -1355,8 +1664,19 @@ export default function ItemsList() {
         errorTitle: "Invalid Currency",
         error: "Please select a Currency from the list.",
       };
-      // J: Purchas Vat Code
-      worksheet.getCell(`J${r}`).dataValidation = {
+      // K: Warehouse
+      if (warehouses.length > 0) {
+        worksheet.getCell(`K${r}`).dataValidation = {
+          type: "list",
+          allowBlank: true,
+          formulae: [`LookupData!$G$2:$G$${maxWhRow}`],
+          showErrorMessage: true,
+          errorTitle: "Invalid Warehouse",
+          error: "Please select a Warehouse from the list.",
+        };
+      }
+      // M: Purchas Vat Code
+      worksheet.getCell(`M${r}`).dataValidation = {
         type: "list",
         allowBlank: true,
         formulae: [`LookupData!$F$2:$F$${maxTaxRow}`],
@@ -1364,8 +1684,8 @@ export default function ItemsList() {
         errorTitle: "Invalid Purchase VAT Code",
         error: "Please select a Purchase VAT Code from the list.",
       };
-      // K: Sales Vat Code
-      worksheet.getCell(`K${r}`).dataValidation = {
+      // N: Sales Vat Code
+      worksheet.getCell(`N${r}`).dataValidation = {
         type: "list",
         allowBlank: true,
         formulae: [`LookupData!$F$2:$F$${maxTaxRow}`],
@@ -1373,23 +1693,29 @@ export default function ItemsList() {
         errorTitle: "Invalid Sales VAT Code",
         error: "Please select a Sales VAT Code from the list.",
       };
-      // O: IS_STOCKABLE
-      worksheet.getCell(`O${r}`).dataValidation = {
+      // V: IS_STOCKABLE
+      worksheet.getCell(`V${r}`).dataValidation = {
         type: "list",
         allowBlank: true,
         formulae: ['"Y,N"'],
       };
-      // P: IS_SELLABLE
-      worksheet.getCell(`P${r}`).dataValidation = {
+      // W: IS_SELLABLE
+      worksheet.getCell(`W${r}`).dataValidation = {
         type: "list",
         allowBlank: true,
         formulae: ['"Y,N"'],
       };
-      // Q: IS_PURCHASABLE
-      worksheet.getCell(`Q${r}`).dataValidation = {
+      // X: IS_PURCHASABLE
+      worksheet.getCell(`X${r}`).dataValidation = {
         type: "list",
         allowBlank: true,
         formulae: ['"Y,N"'],
+      };
+      // Y: STATUS
+      worksheet.getCell(`Y${r}`).dataValidation = {
+        type: "list",
+        allowBlank: true,
+        formulae: ['"ACTIVE,INACTIVE"'],
       };
     }
 
@@ -1451,16 +1777,18 @@ export default function ItemsList() {
         <div className="card-header">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                 Items Master
               </h1>
               <p className="text-sm mt-1 text-slate-500 dark:text-slate-400">
-                Configure items, UOM, pricing and barcodes
+                Configure items, units of measure, pricing and barcodes
               </p>
             </div>
-            <div className="flex gap-2 flex-wrap w-full md:w-auto justify-start md:justify-end">
-              <Link to="/inventory?section=Stock%20Operations" className="btn-secondary">
-                Return to Menu
+            <div className="flex gap-2.5 flex-wrap w-full md:w-auto justify-start md:justify-end items-center">
+              <Link to="/inventory?section=Stock%20Operations">
+                <Button variant="secondary" size="md">
+                  Return to Menu
+                </Button>
               </Link>
               <input
                 type="file"
@@ -1469,29 +1797,126 @@ export default function ItemsList() {
                 className="hidden"
                 accept=".xlsx,.xls,.csv"
               />
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={handleBulkUpload}
-              >
-                Bulk Upload
-              </button>
-              <button
-                type="button"
-                className="btn-outline"
-                onClick={downloadTemplateCSV}
-              >
-                Download Template (Excel)
-              </button>
-              <button
-                type="button"
-                className="btn-outline"
-                onClick={exportItemsExcel}
-              >
-                Export Items (Excel)
-              </button>
-              <Link to="/inventory/items/new" className="btn-primary">
-                + New Item
+              {/* Bulk Operations Dropdown & Popover */}
+              <div className="relative">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="md"
+                  onClick={() => setShowBulkOps((prev) => !prev)}
+                  icon={<Layers className="w-4 h-4 text-slate-500" />}
+                >
+                  <span>Bulk Operations</span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                      showBulkOps ? "rotate-180" : ""
+                    }`}
+                  />
+                </Button>
+
+                {showBulkOps && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setShowBulkOps(false)}
+                    />
+                    <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl shadow-apple-xl border border-slate-200/80 dark:border-slate-800 z-50 p-5 animate-in fade-in zoom-in-95 duration-150">
+                      <div className="flex items-start justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 flex items-center justify-center font-bold text-lg shadow-apple-xs">
+                            <Layers className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+                              Bulk Operations
+                            </h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              Import, export, or download template
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setShowBulkOps(false)}
+                          className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                          aria-label="Close"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="mt-4 space-y-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowBulkOps(false);
+                            handleBulkUpload();
+                          }}
+                          className="w-full flex items-center gap-3 p-3 text-left rounded-xl border border-slate-200/80 dark:border-slate-800 hover:border-brand-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all group active:scale-[0.99]"
+                        >
+                          <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-brand-700 dark:text-brand-300 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                            <Upload className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-semibold text-slate-800 dark:text-slate-200 group-hover:text-brand-700 dark:group-hover:text-brand-300">
+                              Bulk Upload
+                            </div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                              Upload Excel or CSV file with items
+                            </div>
+                          </div>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowBulkOps(false);
+                            downloadTemplateCSV();
+                          }}
+                          className="w-full flex items-center gap-3 p-3 text-left rounded-xl border border-slate-200/80 dark:border-slate-800 hover:border-brand-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all group active:scale-[0.99]"
+                        >
+                          <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-brand-700 dark:text-brand-300 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                            <FileSpreadsheet className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-semibold text-slate-800 dark:text-slate-200 group-hover:text-brand-700 dark:group-hover:text-brand-300">
+                              Download Template (Excel)
+                            </div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                              Get pre-formatted spreadsheet with lookups
+                            </div>
+                          </div>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowBulkOps(false);
+                            exportItemsExcel();
+                          }}
+                          className="w-full flex items-center gap-3 p-3 text-left rounded-xl border border-slate-200/80 dark:border-slate-800 hover:border-brand-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all group active:scale-[0.99]"
+                        >
+                          <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-brand-700 dark:text-brand-300 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                            <Download className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-semibold text-slate-800 dark:text-slate-200 group-hover:text-brand-700 dark:group-hover:text-brand-300">
+                              Export Items (Excel)
+                            </div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                              Export all items into an Excel workbook
+                            </div>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+              <Link to="/inventory/items/new">
+                <Button variant="prominent" size="md" icon={<Plus className="w-4 h-4" />}>
+                  New Item
+                </Button>
               </Link>
             </div>
           </div>
@@ -1519,6 +1944,8 @@ export default function ItemsList() {
               >
                 <option value="">All Types</option>
                 <option value="RAW_MATERIAL">Raw Material</option>
+                <option value="PRODUCTION_ITEM">Production Item</option>
+                <option value="FIXED_ASSET">Fixed Asset</option>
                 <option value="FINISHED_GOOD">Finished Good</option>
                 <option value="SEMI_FINISHED">Semi-Finished</option>
                 <option value="CONSUMABLE">Consumable</option>
@@ -1549,22 +1976,22 @@ export default function ItemsList() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
-            <div className="p-3 bg-white rounded border">
-              <div className="text-2xl font-bold">{stats.total}</div>
-              <div className="text-sm text-slate-500">Total Items</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-5">
+            <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-apple-xs flex flex-col justify-between">
+              <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Items</div>
+              <div className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white mt-1">{stats.total}</div>
             </div>
-            <div className="p-3 bg-white rounded border">
-              <div className="text-2xl font-bold">{stats.active}</div>
-              <div className="text-sm text-slate-500">Active Items</div>
+            <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-apple-xs flex flex-col justify-between">
+              <div className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Active Items</div>
+              <div className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white mt-1">{stats.active}</div>
             </div>
-            <div className="p-3 bg-white rounded border">
-              <div className="text-2xl font-bold">{stats.lowStock}</div>
-              <div className="text-sm text-slate-500">Low Stock</div>
+            <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-apple-xs flex flex-col justify-between">
+              <div className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Low Stock</div>
+              <div className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white mt-1">{stats.lowStock}</div>
             </div>
-            <div className="p-3 bg-white rounded border">
-              <div className="text-2xl font-bold">{stats.inactive}</div>
-              <div className="text-sm text-slate-500">Inactive Items</div>
+            <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-apple-xs flex flex-col justify-between">
+              <div className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Inactive Items</div>
+              <div className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white mt-1">{stats.inactive}</div>
             </div>
           </div>
 
@@ -1709,27 +2136,27 @@ export default function ItemsList() {
                       <div className="flex items-center gap-2 whitespace-nowrap">
                         <Link
                           to={`/inventory/items/${it.id}?mode=view`}
-                          className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-full hover:bg-slate-100 hover:text-slate-900 transition-colors"
+                          className="inline-flex items-center justify-center px-3 py-1 text-xs font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 rounded-lg transition-all active:scale-95"
                         >
                           View
                         </Link>
                         <Link
                           to={`/inventory/items/${it.id}?mode=edit`}
-                          className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-full hover:bg-slate-100 hover:text-slate-900 transition-colors"
+                          className="inline-flex items-center justify-center px-3 py-1 text-xs font-medium text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-900/40 hover:bg-brand-100 dark:hover:bg-brand-900/70 rounded-lg transition-all active:scale-95"
                         >
                           Edit
                         </Link>
                         {it.is_active ? (
                           <button
                             onClick={() => handleToggleStatus(it, false)}
-                            className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-full hover:bg-red-100 hover:text-red-700 transition-colors"
+                            className="inline-flex items-center justify-center px-3 py-1 text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-lg transition-all active:scale-95"
                           >
                             Disable
                           </button>
                         ) : (
                           <button
                             onClick={() => handleToggleStatus(it, true)}
-                            className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full hover:bg-emerald-100 hover:text-emerald-800 transition-colors"
+                            className="inline-flex items-center justify-center px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 rounded-lg transition-all active:scale-95"
                           >
                             Enable
                           </button>
@@ -1744,13 +2171,13 @@ export default function ItemsList() {
                       {Number(it.selling_price || 0).toFixed(2)}
                     </td>
                     <td>
-                      <span
-                        className={`badge ${
-                          it.is_active ? "badge-success" : "badge-error"
-                        }`}
+                      <Badge
+                        variant={it.is_active ? "success" : "neutral"}
+                        size="sm"
+                        dot
                       >
-                        {it.is_active ? "ACTIVE" : "INACTIVE"}
-                      </span>
+                        {it.is_active ? "Active" : "Inactive"}
+                      </Badge>
                     </td>
                     <td>{it.created_by_name || "-"}</td>
                     <td>
@@ -1809,18 +2236,25 @@ export default function ItemsList() {
         </div>
       </div>
       {previewOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40">
-          <div className="w-[96vw] max-w-[1100px] max-h-[85vh] bg-white rounded-xl shadow-erp-lg overflow-hidden border border-slate-200">
-            <div className="px-4 py-3 bg-brand text-white flex items-center justify-between">
-              <div>
-                <div className="text-lg font-bold">Bulk Upload Preview</div>
-                <div className="text-xs opacity-90">
-                  Review parsed rows. Only valid rows will be uploaded.
+        <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/60 backdrop-blur-sm flex justify-center items-start p-4 sm:p-6 md:p-10 animate-fadeIn">
+          <div className="w-[96vw] max-w-[1100px] max-h-[85vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 my-auto sm:my-8 transition-all flex flex-col">
+            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/30 text-brand-900 dark:text-brand-400 flex items-center justify-center font-bold flex-shrink-0 border border-brand-200/50 dark:border-brand-800/50">
+                  <Upload size={20} />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                    Bulk Upload Preview
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Review parsed rows. Only valid rows will be uploaded.
+                  </p>
                 </div>
               </div>
               <button
                 type="button"
-                className="text-white hover:text-slate-100 text-xl"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 onClick={() => {
                   setPreviewOpen(false);
                   setPreviewRows([]);
@@ -1828,7 +2262,7 @@ export default function ItemsList() {
                 }}
                 aria-label="Close"
               >
-                ✕
+                <X size={18} />
               </button>
             </div>
             <div className="p-4 space-y-4">
@@ -1872,6 +2306,8 @@ export default function ItemsList() {
                           <td>{r.preview.item_code || "-"}</td>
                           <td>{r.preview.item_name || "-"}</td>
                           <td>{r.preview.item_type || "-"}</td>
+                          <td>{r.preview.warehouse_label || "-"}</td>
+                          <td>{r.preview.opening_quantity || 0}</td>
                           <td>{r.preview.category_label || "-"}</td>
                           <td>{r.preview.category_name || "-"}</td>
                           <td>{r.preview.group_label || "-"}</td>
@@ -1895,10 +2331,11 @@ export default function ItemsList() {
                   </table>
                 </div>
               </div>
-              <div className="flex justify-end gap-2">
-                <button
+              <div className="flex justify-end gap-2.5">
+                <Button
                   type="button"
-                  className="btn"
+                  variant="secondary"
+                  size="md"
                   onClick={() => {
                     setPreviewOpen(false);
                     setPreviewRows([]);
@@ -1906,15 +2343,16 @@ export default function ItemsList() {
                   }}
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
-                  className="btn-success"
+                  variant="prominent"
+                  size="md"
                   onClick={confirmUpload}
-                  disabled={uploading}
+                  loading={uploading}
                 >
                   {uploading ? "Uploading..." : "Upload Valid Rows"}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

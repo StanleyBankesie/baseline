@@ -15,6 +15,7 @@ import { useGhanaCities } from "../../../../hooks/useGhanaCities";
 import { useDispatch } from "react-redux";
 import { setRefresh } from "../../../../store/ui/refreshSlice.js";
 import PhoneInput from "../../../../components/PhoneInput.jsx";
+import { useAuth } from "../../../../auth/AuthContext.jsx";
 
 /**
  *  component
@@ -28,6 +29,7 @@ export default function CustomerForm() {
   const isEdit = Boolean(id);
   const isViewOnly = Boolean(isEdit) && searchParams.get("mode") === "view";
   const dispatch = useDispatch();
+  const { scope } = useAuth();
   const { cities: ghanaCities } = useGhanaCities();
 
   const [loading, setLoading] = useState(false);
@@ -153,7 +155,7 @@ export default function CustomerForm() {
   async function fetchSalesAccounts() {
     try {
       const response = await api.get("/finance/accounts", {
-        params: { nature: "INCOME", search: "sales", limit: 200 },
+        params: { nature: "INCOME" },
       });
       const arr = Array.isArray(response.data?.items)
         ? response.data.items
@@ -173,6 +175,7 @@ export default function CustomerForm() {
         const itm = response.data.item;
         setForm({
           ...itm,
+          sales_account_id: itm.sales_account_id ? String(itm.sales_account_id) : "",
           enforce_credit_limit: Boolean(Number(itm.enforce_credit_limit) === 1 || itm.enforce_credit_limit === true || String(itm.enforce_credit_limit) === "true"),
         });
       }
@@ -188,28 +191,25 @@ export default function CustomerForm() {
   }
 
   useEffect(() => {
-    // Set default sales account for new customers when accounts are loaded
-    if (isEdit || !salesAccounts.length) return;
-    // Only set if no sales account is selected yet
-    if (form.sales_account_id) return;
+    // Set default revenue account when accounts are loaded if not already selected
+    if (form.sales_account_id || !salesAccounts.length) return;
 
-    // Find account with exactly "Sales Account" in name, or use first account as default
+    // Find account with exactly "Sales Account" in name, or containing sales/revenue, or use first account as default
     const preferred =
       salesAccounts.find(
         (a) => String(a.name || "").toLowerCase() === "sales account",
       ) ||
       salesAccounts.find((a) => /sales/i.test(String(a.name || ""))) ||
+      salesAccounts.find((a) => /revenue|income/i.test(String(a.name || ""))) ||
       salesAccounts[0];
 
     if (preferred?.id) {
-      console.log(
-        "Setting default sales account:",
-        preferred.name,
-        preferred.id,
-      );
-      setForm((p) => ({ ...p, sales_account_id: String(preferred.id) }));
+      setForm((p) => ({
+        ...p,
+        sales_account_id: p.sales_account_id || String(preferred.id),
+      }));
     }
-  }, [isEdit, salesAccounts]); // Run when salesAccounts changes
+  }, [salesAccounts, form.sales_account_id]);
 
   async function submit(e) {
     e.preventDefault();
@@ -218,6 +218,7 @@ export default function CustomerForm() {
     setError("");
     try {
       const payload = {
+        branch_id: form.branch_id || (scope?.branchId && scope?.branchId !== "all" ? Number(scope.branchId) : undefined),
         customer_code: form.customer_code || null,
         customer_name: form.customer_name || "",
         email: form.email || null,
@@ -266,7 +267,7 @@ export default function CustomerForm() {
         replace: true,
       });
     } catch (err) {
-      setError(err?.response?.data?.message || "Error saving customer");
+      setError(err?.response?.data?.message || err?.response?.data?.error || err?.message || "Error saving customer");
     } finally {
       setLoading(false);
     }
@@ -530,14 +531,14 @@ export default function CustomerForm() {
                       <label className="label">Revenue Account</label>
                       <select
                         className="input w-60"
-                        value={form.sales_account_id || ""}
+                        value={form.sales_account_id ? String(form.sales_account_id) : ""}
                         onChange={(e) =>
                           update("sales_account_id", e.target.value)
                         }
                       >
                         <option value="">-- Select Revenue Account --</option>
                         {salesAccounts.map((a) => (
-                          <option key={a.id} value={a.id}>
+                          <option key={a.id} value={String(a.id)}>
                             {a.code ? `${a.code} - ` : ""}
                             {a.name}
                           </option>

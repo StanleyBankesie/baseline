@@ -3,7 +3,7 @@
  * @description Manages organizational structures including companies, branches, and departments.
  * Handles related configuration, logos, and dynamic schema migrations for companies.
  */
-import { query } from "../db/pool.js";
+import { pool, query } from "../db/pool.js";
 import { httpError } from "../utils/httpError.js";
 import { hasColumn, toNumber, ensureBranchColumns } from "../utils/dbUtils.js";
 import { cacheGet, cacheSet, cacheDelPattern } from "../utils/redis.js";
@@ -72,6 +72,9 @@ export const ensureCompanyColumns = async () => {
   if (!(await hasColumn(table, "logo"))) {
     await query(`ALTER TABLE ${table} ADD COLUMN logo LONGBLOB NULL`);
   }
+  if (!(await hasColumn(table, "created_by"))) {
+    await query(`ALTER TABLE ${table} ADD COLUMN created_by BIGINT UNSIGNED NULL`);
+  }
 };
 
 /**
@@ -89,15 +92,62 @@ export const mangeCompanies = async (req, res, next) => {
       throw httpError(400, "VALIDATION_ERROR", "name and code are required");
 
     await ensureCompanyColumns();
+    const userId = Number(req.user?.id || req.user?.sub) || null;
+    const hasCreatedBy = await hasColumn("adm_companies", "created_by");
+
+    const cols = ["name", "code", "is_active"];
+    const vals = [":name", ":code", ":is_active"];
+    const queryParams = {
+      name,
+      code,
+      is_active: is_active === undefined ? 1 : Number(Boolean(is_active)),
+    };
+    if (hasCreatedBy && userId) {
+      cols.push("created_by");
+      vals.push(":created_by");
+      queryParams.created_by = userId;
+    }
+
     const result = await query(
-      "INSERT INTO adm_companies (name, code, is_active) VALUES (:name, :code, :is_active)",
-      {
-        name,
-        code,
-        is_active: is_active === undefined ? 1 : Number(Boolean(is_active)),
-      },
+      `INSERT INTO adm_companies (${cols.join(", ")}) VALUES (${vals.join(", ")})`,
+      queryParams,
     );
-    res.status(201).json({ id: result.insertId });
+    const newCompanyId = result.insertId;
+
+    // Automatically create a default main branch for this new company so it can immediately be used
+    try {
+      await ensureBranchColumns();
+      const branchCode = `${code}-HO`.slice(0, 20);
+      const branchResult = await query(
+        `INSERT INTO adm_branches (company_id, name, code, is_active, is_superbranch, created_by)
+         VALUES (:company_id, :name, :code, 1, 1, :created_by)`,
+        {
+          company_id: newCompanyId,
+          name: "Head Office",
+          code: branchCode,
+          created_by: userId,
+        },
+      );
+      const newBranchId = branchResult.insertId;
+
+      const { ensureUserBranchMapping } = await import("../utils/dbUtils.js");
+      await ensureUserBranchMapping();
+
+      const usersToAssign = new Set([1]);
+      if (userId) usersToAssign.add(userId);
+
+      for (const uid of usersToAssign) {
+        await query(
+          `INSERT IGNORE INTO adm_user_branches (user_id, company_id, branch_id)
+           VALUES (:uid, :company_id, :branch_id)`,
+          { uid, company_id: newCompanyId, branch_id: newBranchId },
+        );
+      }
+    } catch (branchErr) {
+      console.error("Failed to create default branch for new company:", branchErr);
+    }
+
+    res.status(201).json({ id: newCompanyId });
   } catch (err) {
     next(err);
   }
@@ -138,7 +188,7 @@ export const updateCompanies = async (req, res, next) => {
     if (!name || !code)
       throw httpError(400, "VALIDATION_ERROR", "name and code are required");
 
-    const conn = await query.pool.getConnection();
+    const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
       const baseParams = {
@@ -219,6 +269,18 @@ export const getCompanies = async (req, res, next) => {
     try {
       await ensureCompanyColumns();
     } catch {}
+
+    const userId = Number(req.user?.id || req.user?.sub);
+    const isSuper =
+      userId === 1 ||
+      req.user?.isSuperAdmin ||
+      Number(req.user?.role_id) === 1 ||
+      Number(req.user?.roleId) === 1 ||
+      (Array.isArray(req.user?.permissions) &&
+        (req.user.permissions.includes("*") ||
+         req.user.permissions.includes("ADMIN.COMPANIES.VIEW") ||
+         req.user.permissions.includes("ADMIN.COMPANIES.MANAGE")));
+
     const companyIds = Array.isArray(req.user?.companyIds)
       ? req.user.companyIds
           .map((x) => Number(x))
@@ -227,22 +289,25 @@ export const getCompanies = async (req, res, next) => {
     const { active } = req.query || {};
     const filters = [];
     const params = {};
-    if (companyIds.length) {
+
+    if (!isSuper && companyIds.length) {
       const keys = companyIds.map((_, i) => `:cid${i}`);
-      filters.push(`id IN (${keys.join(",")})`);
+      filters.push(`(c.id IN (${keys.join(",")}) OR c.created_by = :userId)`);
       companyIds.forEach((v, i) => (params[`cid${i}`] = v));
+      params.userId = userId;
     }
     if (typeof active !== "undefined" && active !== "") {
-      filters.push("is_active = :is_active");
+      filters.push("c.is_active = :is_active");
       params.is_active = Number(Boolean(active));
     }
     const where = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
-    const items = await query(`SELECT id, name, code, is_active, created_at,
-          created_at,
-          u.username AS created_by_name
-         FROM adm_companies ${where}
-        LEFT JOIN adm_users u ON u.id = created_by
-         ORDER BY name ASC`,
+    const items = await query(
+      `SELECT c.id, c.name, c.code, c.is_active, c.created_at,
+              u.username AS created_by_name
+         FROM adm_companies c
+        LEFT JOIN adm_users u ON u.id = c.created_by
+        ${where}
+        ORDER BY c.name ASC`,
       params,
     );
     res.json({ items });
@@ -418,6 +483,18 @@ export const getCompanyLogo = async (req, res, next) => {
 export const getBranches = async (req, res, next) => {
   try {
     await ensureBranchColumns();
+
+    const userId = Number(req.user?.id || req.user?.sub);
+    const isSuper =
+      userId === 1 ||
+      req.user?.isSuperAdmin ||
+      Number(req.user?.role_id) === 1 ||
+      Number(req.user?.roleId) === 1 ||
+      (Array.isArray(req.user?.permissions) &&
+        (req.user.permissions.includes("*") ||
+         req.user.permissions.includes("ADMIN.BRANCHES.VIEW") ||
+         req.user.permissions.includes("ADMIN.BRANCHES.MANAGE")));
+
     const companyIds = Array.isArray(req.user?.companyIds)
       ? req.user.companyIds
           .map((x) => Number(x))
@@ -426,7 +503,7 @@ export const getBranches = async (req, res, next) => {
     const { active } = req.query || {};
     const filters = [];
     const params = {};
-    if (companyIds.length) {
+    if (!isSuper && companyIds.length) {
       const keys = companyIds.map((_, i) => `:cid${i}`);
       filters.push(`b.company_id IN (${keys.join(",")})`);
       companyIds.forEach((v, i) => (params[`cid${i}`] = v));
@@ -436,20 +513,21 @@ export const getBranches = async (req, res, next) => {
       params.is_active = Number(Boolean(active));
     }
     const { branchIdsStr } = req.scope || {};
-    if (branchIdsStr) {
+    if (!isSuper && branchIdsStr) {
       filters.push("(:branchIdsStr = '' OR FIND_IN_SET(b.id, :branchIdsStr))");
       params.branchIdsStr = branchIdsStr;
     }
     const where = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
 
-    const items = await query(`SELECT b.*, c.name as company_name,
-          b.created_at,
-          u.username AS created_by_name
+    const items = await query(
+      `SELECT b.*, c.name as company_name,
+              b.created_at,
+              u.username AS created_by_name
          FROM adm_branches b
          JOIN adm_companies c ON b.company_id = c.id
-         ${where}
         LEFT JOIN adm_users u ON u.id = b.created_by
-         ORDER BY c.name ASC, b.name ASC`,
+        ${where}
+        ORDER BY c.name ASC, b.name ASC`,
       params,
     );
     res.json({ items });
@@ -513,6 +591,9 @@ export const createBranch = async (req, res, next) => {
       email,
       remarks,
       stock_upload_user_id,
+      logo,
+      tax_id,
+      currency_id,
     } = req.body || {};
 
     if (!company_id)
@@ -520,33 +601,71 @@ export const createBranch = async (req, res, next) => {
     if (!name || !code)
       throw httpError(400, "VALIDATION_ERROR", "name and code are required");
 
+    const hasLogo = await hasColumn("adm_branches", "logo");
+    const hasTaxId = await hasColumn("adm_branches", "tax_id");
+    const hasCurrencyId = await hasColumn("adm_branches", "currency_id");
+    const hasStockUser = await hasColumn("adm_branches", "stock_upload_user_id");
+    const hasCreatedBy = await hasColumn("adm_branches", "created_by");
+
+    const extraCols = [];
+    const extraVals = [];
+    const queryParams = {
+      company_id,
+      name,
+      code,
+      is_active: is_active === undefined ? 1 : Number(Boolean(is_active)),
+      is_superbranch: is_superbranch ? 1 : 0,
+      parent_branch_id: parent_branch_id ? Number(parent_branch_id) : null,
+      address: address || null,
+      city: city || null,
+      state: state || null,
+      postal_code: postal_code || null,
+      country: country || null,
+      location: location || null,
+      telephone: telephone || null,
+      email: email || null,
+      remarks: remarks || null,
+    };
+
+    if (hasStockUser) {
+      extraCols.push("stock_upload_user_id");
+      extraVals.push(":stock_upload_user_id");
+      queryParams.stock_upload_user_id = stock_upload_user_id ? Number(stock_upload_user_id) : null;
+    }
+    if (hasLogo && logo !== undefined) {
+      extraCols.push("logo");
+      extraVals.push(":logo");
+      queryParams.logo = logo || null;
+    }
+    if (hasTaxId && tax_id !== undefined) {
+      extraCols.push("tax_id");
+      extraVals.push(":tax_id");
+      queryParams.tax_id = tax_id || null;
+    }
+    if (hasCurrencyId && currency_id !== undefined) {
+      extraCols.push("currency_id");
+      extraVals.push(":currency_id");
+      queryParams.currency_id = currency_id ? Number(currency_id) : null;
+    }
+    if (hasCreatedBy && req.user?.id) {
+      extraCols.push("created_by");
+      extraVals.push(":created_by");
+      queryParams.created_by = Number(req.user.id);
+    }
+
+    const colsSql = extraCols.length ? `, ${extraCols.join(", ")}` : "";
+    const valsSql = extraVals.length ? `, ${extraVals.join(", ")}` : "";
+
     const result = await query(`INSERT INTO adm_branches (
           company_id, name, code, is_active, is_superbranch, parent_branch_id,
           address, city, state, postal_code, country,
-          location, telephone, email, remarks, stock_upload_user_id
+          location, telephone, email, remarks${colsSql}
         ) VALUES (
           :company_id, :name, :code, :is_active, :is_superbranch, :parent_branch_id,
           :address, :city, :state, :postal_code, :country,
-          :location, :telephone, :email, :remarks, :stock_upload_user_id
+          :location, :telephone, :email, :remarks${valsSql}
         )`,
-      {
-        company_id,
-        name,
-        code,
-        is_active: is_active === undefined ? 1 : Number(Boolean(is_active)),
-        is_superbranch: is_superbranch ? 1 : 0,
-        parent_branch_id: parent_branch_id ? Number(parent_branch_id) : null,
-        address: address || null,
-        city: city || null,
-        state: state || null,
-        postal_code: postal_code || null,
-        country: country || null,
-        location: location || null,
-        telephone: telephone || null,
-        email: email || null,
-        remarks: remarks || null,
-        stock_upload_user_id: stock_upload_user_id ? Number(stock_upload_user_id) : null,
-      },
+      queryParams,
     );
     res.status(201).json({ id: result.insertId });
   } catch (err) {
@@ -578,12 +697,59 @@ export const updateBranch = async (req, res, next) => {
       email,
       remarks,
       stock_upload_user_id,
+      logo,
+      tax_id,
+      currency_id,
     } = req.body || {};
 
     if (!company_id)
       throw httpError(400, "VALIDATION_ERROR", "company_id is required");
     if (!name || !code)
       throw httpError(400, "VALIDATION_ERROR", "name and code are required");
+
+    const hasLogo = await hasColumn("adm_branches", "logo");
+    const hasTaxId = await hasColumn("adm_branches", "tax_id");
+    const hasCurrencyId = await hasColumn("adm_branches", "currency_id");
+    const hasStockUser = await hasColumn("adm_branches", "stock_upload_user_id");
+
+    const extraUpdates = [];
+    const queryParams = {
+      id,
+      company_id,
+      name,
+      code,
+      is_active: is_active === undefined ? 1 : Number(Boolean(is_active)),
+      is_superbranch: is_superbranch ? 1 : 0,
+      parent_branch_id: parent_branch_id ? Number(parent_branch_id) : null,
+      address: address || null,
+      city: city || null,
+      state: state || null,
+      postal_code: postal_code || null,
+      country: country || null,
+      location: location || null,
+      telephone: telephone || null,
+      email: email || null,
+      remarks: remarks || null,
+    };
+
+    if (hasStockUser && stock_upload_user_id !== undefined) {
+      extraUpdates.push("stock_upload_user_id = :stock_upload_user_id");
+      queryParams.stock_upload_user_id = stock_upload_user_id ? Number(stock_upload_user_id) : null;
+    }
+    if (hasLogo && logo !== undefined) {
+      extraUpdates.push("logo = :logo");
+      queryParams.logo = logo || null;
+    }
+    if (hasTaxId && tax_id !== undefined) {
+      extraUpdates.push("tax_id = :tax_id");
+      queryParams.tax_id = tax_id || null;
+    }
+    if (hasCurrencyId && currency_id !== undefined) {
+      extraUpdates.push("currency_id = :currency_id");
+      queryParams.currency_id = currency_id ? Number(currency_id) : null;
+    }
+
+    const extraUpdatesSql = extraUpdates.length ? `, ${extraUpdates.join(", ")}` : "";
 
     const result = await query(`UPDATE adm_branches
          SET company_id = :company_id,
@@ -600,28 +766,10 @@ export const updateBranch = async (req, res, next) => {
              location = :location,
              telephone = :telephone,
              email = :email,
-             remarks = :remarks,
-             stock_upload_user_id = :stock_upload_user_id
+             remarks = :remarks
+             ${extraUpdatesSql}
          WHERE id = :id`,
-      {
-        id,
-        company_id,
-        name,
-        code,
-        is_active: is_active === undefined ? 1 : Number(Boolean(is_active)),
-        is_superbranch: is_superbranch ? 1 : 0,
-        parent_branch_id: parent_branch_id ? Number(parent_branch_id) : null,
-        address: address || null,
-        city: city || null,
-        state: state || null,
-        postal_code: postal_code || null,
-        country: country || null,
-        location: location || null,
-        telephone: telephone || null,
-        email: email || null,
-        remarks: remarks || null,
-        stock_upload_user_id: stock_upload_user_id ? Number(stock_upload_user_id) : null,
-      },
+      queryParams,
     );
     res.json({ affectedRows: result.affectedRows });
   } catch (err) {

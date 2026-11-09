@@ -175,8 +175,7 @@ export default function RoutingForm() {
                 onChange={e => setFormData({...formData, routing_name: e.target.value})}
                 placeholder="e.g. Fanta Routes / Standard Assembly V1"
               />
-              <p className="text-[10px] text-slate-400 font-medium mt-1">Use names that differentiate between product variations</p>
-            </div>
+              </div>
           </div>
 
           <div className="pt-2 border-t border-slate-100 dark:border-slate-700">

@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import { api } from "../../../../api/client";
 import { Trash2 } from "lucide-react";
 import { usePermission } from "@/auth/PermissionContext.jsx";
+import { toast } from "react-toastify";
 
 function toISODate(v) {
   if (!v) return "";
@@ -47,12 +48,17 @@ export default function ServiceConfirmationForm() {
   const mode = searchParams.get("mode") || (isNew ? "edit" : "view");
   const preselectedOrderId = searchParams.get("order_id") || "";
   const preselectedExecutionId = searchParams.get("execution_id") || "";
+  const isPurchase = location.pathname.startsWith("/purchase");
+  const modulePath = isPurchase ? "/purchase" : "/service-management";
+  const backPath = `${modulePath}/service-confirmations`;
+  const formEntryPath = `${backPath}/new`;
 
   const [now, setNow] = useState(new Date());
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  const [supplierSearch, setSupplierSearch] = useState("");
   const [suppliers, setSuppliers] = useState([]);
   const [executions, setExecutions] = useState([]);
   const [selectedExecutionId, setSelectedExecutionId] = useState("");
@@ -86,6 +92,8 @@ export default function ServiceConfirmationForm() {
   const [warrantyProvided, setWarrantyProvided] = useState(false);
   const [followUpRequired, setFollowUpRequired] = useState(false);
   const [followUpNotes, setFollowUpNotes] = useState("");
+  const [autoCreateBill, setAutoCreateBill] = useState(true);
+  const [linkedBillNo, setLinkedBillNo] = useState("");
 
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
@@ -136,24 +144,36 @@ export default function ServiceConfirmationForm() {
         setError(e?.response?.data?.message || "Failed to load suppliers");
       });
 
-    api
-      .get("/purchase/service-orders", { params: { type: "EXTERNAL" } })
-      .then((res) => {
+    const loadRequests = async () => {
+      try {
+        let items = [];
+        if (isPurchase) {
+          const res = await api.get("/purchase/procurement-service-requests");
+          items = Array.isArray(res.data?.items) ? res.data.items : [];
+        }
+        if (!items.length) {
+          const res2 = await api.get("/purchase/service-orders", { params: { type: "EXTERNAL" } });
+          items = Array.isArray(res2.data?.items) ? res2.data.items : [];
+        }
         if (!mounted) return;
-        const arr = Array.isArray(res.data?.items) ? res.data.items : [];
-        const mapped = arr.map((x) => ({
+        const mapped = items.map((x) => ({
           id: x.id,
-          order_no: x.order_no,
+          order_no: x.request_no || x.order_no,
+          request_no: x.request_no || x.order_no,
           status: x.status || "",
-          assigned_supervisor_username: x.assigned_supervisor_username || "",
-          order_date: x.order_date || "",
+          assigned_supervisor_username: x.assigned_supervisor_username || x.created_by_name || "",
+          order_date: x.request_date || x.order_date || "",
+          supplier_id: x.supplier_id || "",
+          supplier_name: x.supplier_name || x.contractor_name || "",
+          work_location: x.work_location || "",
         }));
         setExecutions(mapped);
-      })
-      .catch(() => {
+      } catch {
         if (!mounted) return;
         setExecutions([]);
-      });
+      }
+    };
+    loadRequests();
 
     api
       .get("/inventory/items")
@@ -232,36 +252,20 @@ export default function ServiceConfirmationForm() {
             return next;
           });
         }
-        if (order.supplier_id) {
-          setFormData((prev) =>
-            prev.supplier_id
-              ? prev
-              : {
-                  ...prev,
-                  supplier_id: String(order.supplier_id),
-                  order_id: String(order.id),
-                  order_no: order.order_no || "",
-                },
-          );
-        } else if (order.contractor_name) {
-          const matched = suppliers.find(
-            (s) =>
-              String(s.supplier_name || "").toLowerCase() ===
-              String(order.contractor_name).toLowerCase(),
-          );
-          if (matched) {
-            setFormData((prev) =>
-              prev.supplier_id
-                ? prev
-                : {
-                    ...prev,
-                    supplier_id: String(matched.id),
-                    order_id: String(order.id),
-                    order_no: order.order_no || "",
-                  },
-            );
-          }
-        }
+        const matchedSupplier = order.supplier_id
+          ? String(order.supplier_id)
+          : suppliers.find(
+              (s) =>
+                String(s.supplier_name || "").toLowerCase() ===
+                String(order.contractor_name || "").toLowerCase(),
+            )?.id;
+
+        setFormData((prev) => ({
+          ...prev,
+          supplier_id: matchedSupplier ? String(matchedSupplier) : prev.supplier_id,
+          order_id: String(order.id),
+          order_no: order.order_no || prev.order_no,
+        }));
       })
       .catch(() => {
         if (!mounted) return;
@@ -338,6 +342,8 @@ export default function ServiceConfirmationForm() {
             : !!Number(c.follow_up_required),
         );
         setFollowUpNotes(c.follow_up_notes || legacyRemarks.followUpNotes);
+        setAutoCreateBill(c.auto_create_bill != null ? Boolean(c.auto_create_bill) : true);
+        setLinkedBillNo(c.bill_no || "");
         setOrderLines(
           normalizedDetails.map((d, idx) => ({
             line_no: idx + 1,
@@ -494,6 +500,13 @@ export default function ServiceConfirmationForm() {
     );
   };
 
+  const onSupplierChange = (val) => {
+    setFormData((prev) => ({
+      ...prev,
+      supplier_id: val,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     if (e && typeof e.preventDefault === "function") e.preventDefault();
     setSaving(true);
@@ -501,7 +514,7 @@ export default function ServiceConfirmationForm() {
 
     try {
       if (!selectedExecutionId) {
-        throw new Error("Select completed external service order");
+        throw new Error(isPurchase ? "Select a completed service request" : "Select completed external service order");
       }
       if (!(accept1 && accept2 && accept3 && accept4 && accept5)) {
         throw new Error("Check all acceptance items");
@@ -547,13 +560,26 @@ export default function ServiceConfirmationForm() {
         throw new Error("Date and supplier are required");
       }
 
+      let res;
       if (isNew) {
-        await api.post("/purchase/service-confirmations", payload);
+        res = await api.post("/purchase/service-confirmations", {
+          ...payload,
+          auto_create_bill: Boolean(autoCreateBill),
+        });
       } else {
-        await api.put(
+        res = await api.put(
           `/purchase/service-confirmations/${confirmationId}`,
-          payload,
+          {
+            ...payload,
+            auto_create_bill: Boolean(autoCreateBill),
+          },
         );
+      }
+
+      if (res?.data?.bill_no) {
+        toast.success(`Service Confirmation confirmed! Service Bill #${res.data.bill_no} generated in Service Bills.`);
+      } else {
+        toast.success("Service Confirmation saved successfully");
       }
 
       navigate(backPath);
@@ -628,10 +654,7 @@ export default function ServiceConfirmationForm() {
   const readonlyStaticFieldClass = isViewMode
     ? "input bg-sky-50 border-sky-200 text-slate-700"
     : "input bg-slate-50";
-  const backPath = location.pathname.startsWith("/purchase")
-    ? "/purchase/service-confirmation"
-    : "/service-management/service-confirmation";
-  const formEntryPath = `${backPath}/new`;
+  // backPath and formEntryPath declared at top of component
 
   return (
     <div className="flex flex-col" style={{ minHeight: "calc(100vh - 45px)" }}>
@@ -860,7 +883,7 @@ export default function ServiceConfirmationForm() {
                               (sum, ln) =>
                                 sum +
                                 parseFloat(ln.qty || 0) *
-                                  parseFloat(ln.unit_price || 0),
+                                parseFloat(ln.unit_price || 0),
                               0,
                             )
                             .toFixed(2)}
@@ -869,91 +892,6 @@ export default function ServiceConfirmationForm() {
                     </div>
                   </div>
 
-                  {/* Service Items - Confirmation Checklist (commented out)
-                  {orderLines.length > 0 && (
-                    <div className="card">
-                      <div className="card-body space-y-4">
-                        <div className="text-lg font-semibold">
-                          Service Items - Confirmation Checklist
-                        </div>
-                        <p className="text-sm text-slate-500">
-                          Confirm each service item from the order has been
-                          completed
-                        </p>
-                        <div className="space-y-2">
-                          {orderLines.map((ln, idx) => {
-                            const key = ln.id || ln.line_no || ln.description || idx;
-                            const isChecked = !!checkedItems[key];
-                            return (
-                              <label
-                                key={key}
-                                className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
-                                  isViewMode
-                                    ? "bg-sky-50 border-sky-200 cursor-default"
-                                    : isChecked
-                                      ? "bg-green-50 border-green-300 cursor-pointer"
-                                      : "bg-white border-slate-200 hover:border-slate-300 cursor-pointer"
-                                }`}
-                              >
-                                <input
-                                  type="checkbox"
-                                  className="mt-1 h-5 w-5 rounded border-slate-300 text-green-600 focus:ring-green-500"
-                                  checked={isChecked}
-                                  disabled={isViewMode}
-                                  onChange={(e) =>
-                                    !isViewMode &&
-                                    setCheckedItems((prev) => ({
-                                      ...prev,
-                                      [key]: e.target.checked,
-                                    }))
-                                  }
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center justify-between gap-2">
-                                    <span
-                                      className={`text-sm font-medium ${isChecked ? "text-green-700" : "text-slate-700"}`}
-                                    >
-                                      {ln.description ||
-                                        ln.item_name ||
-                                        "Service Item"}
-                                    </span>
-                                    {isChecked && (
-                                      <span className="text-green-600 text-xs font-semibold flex-shrink-0">
-                                        ✓ Completed
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="text-xs text-slate-500 mt-1">
-                                    Qty: {ln.qty || 0}
-                                    {ln.unit_price
-                                      ? ` • Rate: GH₵ ${Number(ln.unit_price).toFixed(2)}`
-                                      : ""}
-                                    {ln.line_total
-                                      ? ` • Total: GH₵ ${Number(ln.line_total).toFixed(2)}`
-                                      : ""}
-                                  </div>
-                                </div>
-                              </label>
-                            );
-                          })}
-                        </div>
-                        <div className="flex items-center justify-between pt-2 border-t border-slate-200">
-                          <span className="text-sm text-slate-500">
-                            {Object.values(checkedItems).filter(Boolean).length}{" "}
-                            of {orderLines.length} items confirmed
-                          </span>
-                          {Object.values(checkedItems).filter(Boolean)
-                            .length === orderLines.length &&
-                            orderLines.length > 0 && (
-                              <span className="text-sm font-semibold text-green-600">
-                                All items confirmed ✓
-                              </span>
-                            )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  */}
                   <div className="card">
                     <div className="card-body space-y-4">
                       <div className="text-lg font-semibold">
@@ -980,30 +918,69 @@ export default function ServiceConfirmationForm() {
                             required
                           />
                         </div>
-                        <div className="md:col-span-2">
+                        <div className="relative flex flex-col gap-1 md:col-span-2">
                           <label className="label">Supplier *</label>
-                          <select
+                          <input
+                            type="text"
                             className={readonlyClass}
-                            value={formData.supplier_id}
-                            onChange={(e) =>
-                              !isViewMode &&
-                              setFormData({
-                                ...formData,
-                                supplier_id: e.target.value,
-                              })
+                            placeholder="Search supplier..."
+                            value={
+                              suppliers.find(
+                                (s) => String(s.id) === String(formData.supplier_id)
+                              )?.supplier_name || supplierSearch
                             }
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setSupplierSearch(val);
+                              setFormData((prev) => ({ ...prev, supplier_id: "" }));
+                            }}
                             disabled={isViewMode}
                             required
-                          >
-                            <option value="">Select supplier...</option>
-                            {suppliers.map((s) => (
-                              <option key={s.id} value={String(s.id)}>
-                                {(s.supplier_code
-                                  ? `${s.supplier_code} - `
-                                  : "") + s.supplier_name}
-                              </option>
-                            ))}
-                          </select>
+                          />
+                          {!isViewMode &&
+                            supplierSearch &&
+                            (() => {
+                              const q = supplierSearch.toLowerCase();
+                              const matched = suppliers
+                                .filter(
+                                  (s) =>
+                                    String(s.supplier_name || "")
+                                      .toLowerCase()
+                                      .includes(q) ||
+                                    String(s.supplier_code || "")
+                                      .toLowerCase()
+                                      .includes(q)
+                                )
+                                .slice(0, 10);
+                              return matched.length > 0 ? (
+                                <div
+                                  className="absolute z-30 w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg shadow-lg mt-1 max-h-52 overflow-y-auto"
+                                  style={{ top: "100%" }}
+                                >
+                                  {matched.map((s) => (
+                                    <button
+                                      key={s.id}
+                                      type="button"
+                                      className="w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 border-b border-slate-100 dark:border-slate-700 last:border-b-0"
+                                      onMouseDown={(e) => e.preventDefault()}
+                                      onClick={() => {
+                                        onSupplierChange(String(s.id));
+                                        setSupplierSearch("");
+                                      }}
+                                    >
+                                      <div className="font-medium text-slate-800 dark:text-slate-200 text-sm">
+                                        {s.supplier_name}
+                                      </div>
+                                      {s.supplier_code && (
+                                        <div className="text-xs text-slate-500">
+                                          {s.supplier_code}
+                                        </div>
+                                      )}
+                                    </button>
+                                  ))}
+                                </div>
+                              ) : null;
+                            })()}
                         </div>
                         <div>
                           <label className="label">Time</label>
@@ -1020,8 +997,6 @@ export default function ServiceConfirmationForm() {
                       </div>
                     </div>
                   </div>
-
-                  {/* Select Services section removed */}
 
                   <div className="card">
                     <div className="card-body space-y-4">
@@ -1153,6 +1128,33 @@ export default function ServiceConfirmationForm() {
 
                   <div className="card">
                     <div className="card-body space-y-3">
+                      <div className="text-lg font-semibold flex items-center justify-between">
+                        <span>Billing & Invoicing</span>
+                        {linkedBillNo && (
+                          <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                            Linked Service Bill: #{linkedBillNo}
+                          </span>
+                        )}
+                      </div>
+                      <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 rounded-xl">
+                        <label className="inline-flex items-center gap-2.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(autoCreateBill)}
+                            disabled={isViewMode}
+                            onChange={(e) => setAutoCreateBill(e.target.checked)}
+                            className="rounded border-slate-300 text-brand-600 focus:ring-brand-500 h-4 w-4"
+                          />
+                          <span className="text-sm font-semibold text-slate-900 dark:text-white">
+                            Generate bill for payment
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="card">
+                    <div className="card-body space-y-3">
                       <div className="text-lg font-semibold">
                         Additional Information
                       </div>
@@ -1172,50 +1174,7 @@ export default function ServiceConfirmationForm() {
                           disabled={isViewMode}
                         />
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <label
-                          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 ${readonlySurfaceClass} ${isViewMode ? "pointer-events-none" : ""}`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={warrantyProvided}
-                            disabled={isViewMode}
-                            onChange={(e) =>
-                              !isViewMode &&
-                              setWarrantyProvided(e.target.checked)
-                            }
-                          />
-                          <span>Warranty documentation provided</span>
-                        </label>
-                        <label
-                          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 ${readonlySurfaceClass} ${isViewMode ? "pointer-events-none" : ""}`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={followUpRequired}
-                            disabled={isViewMode}
-                            onChange={(e) =>
-                              !isViewMode &&
-                              setFollowUpRequired(e.target.checked)
-                            }
-                          />
-                          <span>Follow-up visit required</span>
-                        </label>
-                      </div>
-                      {followUpRequired ? (
-                        <div>
-                          <label className="label">Follow-up Details</label>
-                          <textarea
-                            className={`${readonlyClass} w-1/2`}
-                            rows="6"
-                            value={followUpNotes}
-                            disabled={isViewMode}
-                            onChange={(e) =>
-                              !isViewMode && setFollowUpNotes(e.target.value)
-                            }
-                          />
-                        </div>
-                      ) : null}
+                      
                       <div></div>
                     </div>
                     {/* end additional-info card-body */}

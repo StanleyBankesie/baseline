@@ -5,7 +5,9 @@
  */
 import { query, pool } from "../db/pool.js";
 import { httpError } from "../utils/httpError.js";
+import { isBranchSharingEnabled } from "../utils/branchSharing.js";
 import { cacheGet, cacheSet, cacheDelPattern } from "../utils/redis.js";
+import { syncAsset } from "../services/assetSyncService.js";
 
 async function hasColumn(tableName, columnName) {
   const rows = await query(
@@ -28,19 +30,24 @@ async function ensureItemFlagColumns() {
       "ALTER TABLE inv_items ADD COLUMN service_item CHAR(1) NOT NULL DEFAULT 'N'",
     );
   }
+  if (!(await hasColumn("inv_items", "is_production_item"))) {
+    await query(
+      "ALTER TABLE inv_items ADD COLUMN is_production_item VARCHAR(5) NOT NULL DEFAULT 'N'",
+    );
+  }
   if (!(await hasColumn("inv_items", "is_stockable"))) {
     await query(
-      "ALTER TABLE inv_items ADD COLUMN is_stockable CHAR(1) NOT NULL DEFAULT 'N'",
+      "ALTER TABLE inv_items ADD COLUMN is_stockable CHAR(1) NOT NULL DEFAULT 'Y'",
     );
   }
   if (!(await hasColumn("inv_items", "is_sellable"))) {
     await query(
-      "ALTER TABLE inv_items ADD COLUMN is_sellable CHAR(1) NOT NULL DEFAULT 'N'",
+      "ALTER TABLE inv_items ADD COLUMN is_sellable CHAR(1) NOT NULL DEFAULT 'Y'",
     );
   }
   if (!(await hasColumn("inv_items", "is_purchasable"))) {
     await query(
-      "ALTER TABLE inv_items ADD COLUMN is_purchasable CHAR(1) NOT NULL DEFAULT 'N'",
+      "ALTER TABLE inv_items ADD COLUMN is_purchasable CHAR(1) NOT NULL DEFAULT 'Y'",
     );
   }
   if (!(await hasColumn("inv_items", "category_id"))) {
@@ -293,10 +300,13 @@ export const listItems = async (req, res, next) => {
     const groupCol = (await hasColumn("inv_items", "group_id"))
       ? "group_id"
       : "item_group_id";
+    const hasBranchCol = await hasColumn("inv_items", "branch_id");
+    const shareItems = await isBranchSharingEnabled(companyId, "BRANCH_SHARE_ITEMS");
     const rows = await query(`
       SELECT i.id,
              i.item_code,
              i.item_name,
+             ${hasBranchCol ? "i.branch_id," : ""}
              i.uom,
              i.item_type,
              t.type_name AS item_type_name,
@@ -340,6 +350,7 @@ export const listItems = async (req, res, next) => {
        AND sb.item_id = i.id
         LEFT JOIN adm_users u ON u.id = i.created_by
          WHERE i.company_id = :companyId
+           ${hasBranchCol && branchIdsStr && !shareItems ? "AND (:branchIdsStr = '' OR i.branch_id IS NULL OR FIND_IN_SET(i.branch_id, :branchIdsStr))" : ""}
            ${req.query.all !== "1" && req.query.all !== "true" ? "AND i.is_active = 1" : ""}
       ORDER BY i.item_name ASC
       `,
@@ -623,10 +634,12 @@ export const createItem = async (req, res, next) => {
         (await resolveAccountId(companyId, body.sales_account_name)) ||
         (await resolveAccountId(companyId, body.sales_account));
     }
-    const serviceItem = yn(body.service_item, "N");
-    const isStockable = yn(body.is_stockable, "N");
-    const isSellable = yn(body.is_sellable, "N");
-    const isPurchasable = yn(body.is_purchasable, "N");
+    const itemTypeUpper = String(itemType || "").toUpperCase().trim();
+    const serviceItem = itemTypeUpper.includes("SERVICE") ? "Y" : "N";
+    const isProductionItemVal = itemTypeUpper.includes("PRODUCTION") ? "Y" : "N";
+    const isStockable = yn(body.is_stockable, "Y");
+    const isSellable = yn(body.is_sellable, "Y");
+    const isPurchasable = yn(body.is_purchasable, "Y");
     const isActive =
       body.is_active === undefined ? 1 : Number(Boolean(body.is_active));
     if (!itemCode || !itemName)
@@ -648,12 +661,21 @@ export const createItem = async (req, res, next) => {
     if (dup.length) {
       throw httpError(409, "DUPLICATE_ITEM_NAME", "Item name already exists");
     }
+    const hasBranchCol = await hasColumn("inv_items", "branch_id");
+    const targetBranchId = body.branch_id !== undefined
+      ? (Number(body.branch_id) || null)
+      : (req.scope?.branchId ? Number(req.scope.branchId) : null);
+
+    const cols = `company_id, ${hasBranchCol ? "branch_id, " : ""}item_code, item_name, uom, item_type, barcode, cost_price, selling_price, currency_id, price_type_id, image_url, vat_on_purchase_id, vat_on_sales_id, purchase_account_id, sales_account_id, category_id, ${groupCol}, service_item, is_production_item, is_stockable, is_sellable, is_purchasable, is_active`;
+    const vals = `:companyId, ${hasBranchCol ? ":branchId, " : ""}:itemCode, :itemName, :uom, :itemType, :barcode, :costPrice, :sellingPrice, :currencyId, :priceTypeId, :imageUrl, :vatOnPurchaseId, :vatOnSalesId, :purchaseAccountId, :salesAccountId, :categoryId, :itemGroupId, :serviceItem, :isProductionItem, :isStockable, :isSellable, :isPurchasable, :isActive`;
+
     const result = await query(`
-      INSERT INTO inv_items (company_id, item_code, item_name, uom, item_type, barcode, cost_price, selling_price, currency_id, price_type_id, image_url, vat_on_purchase_id, vat_on_sales_id, purchase_account_id, sales_account_id, category_id, ${groupCol}, service_item, is_stockable, is_sellable, is_purchasable, is_active)
-      VALUES (:companyId, :itemCode, :itemName, :uom, :itemType, :barcode, :costPrice, :sellingPrice, :currencyId, :priceTypeId, :imageUrl, :vatOnPurchaseId, :vatOnSalesId, :purchaseAccountId, :salesAccountId, :categoryId, :itemGroupId, :serviceItem, :isStockable, :isSellable, :isPurchasable, :isActive)
+      INSERT INTO inv_items (${cols})
+      VALUES (${vals})
       `,
       {
         companyId,
+        branchId: targetBranchId,
         itemCode,
         itemName,
         uom,
@@ -671,6 +693,7 @@ export const createItem = async (req, res, next) => {
         categoryId,
         itemGroupId,
         serviceItem,
+        isProductionItem: isProductionItemVal,
         isStockable,
         isSellable,
         isPurchasable,
@@ -678,6 +701,18 @@ export const createItem = async (req, res, next) => {
       },
     );
     res.status(201).json({ id: result.insertId });
+
+    if (itemTypeUpper === 'FIXED_ASSET') {
+      syncAsset({
+        source: 'INVENTORY',
+        companyId,
+        branchId: targetBranchId,
+        asset_code: itemCode,
+        asset_name: itemName,
+        purchase_cost: costPrice,
+        status: isActive ? 'ACTIVE' : 'INACTIVE'
+      }).catch(e => console.error('Inventory createItem sync error:', e.message));
+    }
   } catch (err) {
     next(err);
   }
@@ -725,10 +760,12 @@ export const updateItem = async (req, res, next) => {
     const categoryId = Number(body.category_id || 0) || null;
     const itemGroupId =
       Number(body.item_group_id || body.group_id || 0) || null;
-    const serviceItem = yn(body.service_item, "N");
-    const isStockable = yn(body.is_stockable, "N");
-    const isSellable = yn(body.is_sellable, "N");
-    const isPurchasable = yn(body.is_purchasable, "N");
+    const itemTypeUpper = String(itemType || "").toUpperCase().trim();
+    const serviceItem = itemTypeUpper.includes("SERVICE") ? "Y" : "N";
+    const isProductionItemVal = itemTypeUpper.includes("PRODUCTION") ? "Y" : "N";
+    const isStockable = yn(body.is_stockable, "Y");
+    const isSellable = yn(body.is_sellable, "Y");
+    const isPurchasable = yn(body.is_purchasable, "Y");
     const isActive =
       body.is_active === undefined ? 1 : Number(Boolean(body.is_active));
     if (!itemCode || !itemName)
@@ -750,6 +787,8 @@ export const updateItem = async (req, res, next) => {
     if (exists.length) {
       throw httpError(409, "DUPLICATE_ITEM_NAME", "Item name already exists");
     }
+    const hasBranchCol = await hasColumn("inv_items", "branch_id");
+    const updateBranchClause = hasBranchCol && body.branch_id !== undefined ? ", branch_id = :branchId" : "";
     const upd = await query(`
       UPDATE inv_items
       SET item_code = :itemCode,
@@ -769,15 +808,18 @@ export const updateItem = async (req, res, next) => {
           category_id = :categoryId,
           ${groupCol} = :itemGroupId,
           service_item = :serviceItem,
+          is_production_item = :isProductionItem,
           is_stockable = :isStockable,
           is_sellable = :isSellable,
           is_purchasable = :isPurchasable,
           is_active = :isActive
+          ${updateBranchClause}
       WHERE id = :id AND company_id = :companyId
       `,
       {
         id,
         companyId,
+        branchId: body.branch_id !== undefined ? (Number(body.branch_id) || null) : null,
         itemCode,
         itemName,
         uom,
@@ -795,6 +837,7 @@ export const updateItem = async (req, res, next) => {
         categoryId,
         itemGroupId,
         serviceItem,
+        isProductionItem: isProductionItemVal,
         isStockable,
         isSellable,
         isPurchasable,
@@ -803,6 +846,18 @@ export const updateItem = async (req, res, next) => {
     );
     if (!upd.affectedRows) throw httpError(404, "NOT_FOUND", "Item not found");
     res.json({ ok: true });
+
+    if (itemTypeUpper === 'FIXED_ASSET') {
+      syncAsset({
+        source: 'INVENTORY',
+        companyId,
+        branchId: body.branch_id !== undefined ? (Number(body.branch_id) || null) : null,
+        asset_code: itemCode,
+        asset_name: itemName,
+        purchase_cost: costPrice,
+        status: isActive ? 'ACTIVE' : 'INACTIVE'
+      }).catch(e => console.error('Inventory updateItem sync error:', e.message));
+    }
   } catch (err) {
     next(err);
   }
@@ -830,16 +885,9 @@ export const linkWarehouseBranch = async (req, res, next) => {
         "VALIDATION_ERROR",
         "branch_id is required to link warehouse",
       );
-    const branchRow = await query(`
-      SELECT id, company_id,
-          created_at,
-          u.username AS created_by_name
-         FROM adm_branches
-        LEFT JOIN adm_users u ON u.id = created_by
-         WHERE id = :branchId
-      LIMIT 1
-      `,
-      { branchId, branchIdsStr: targetBranchId },
+    const branchRow = await query(
+      `SELECT id, company_id FROM adm_branches WHERE id = :targetBranchId LIMIT 1`,
+      { targetBranchId },
     );
     const branch = branchRow?.[0];
     if (!branch) throw httpError(404, "NOT_FOUND", "Target branch not found");
@@ -849,15 +897,8 @@ export const linkWarehouseBranch = async (req, res, next) => {
         "VALIDATION_ERROR",
         "Branch belongs to a different company",
       );
-    const whRow = await query(`
-      SELECT id, company_id, branch_id,
-          created_at,
-          u.username AS created_by_name
-         FROM inv_warehouses
-        LEFT JOIN adm_users u ON u.id = created_by
-         WHERE id = :id AND company_id = :companyId
-      LIMIT 1
-      `,
+    const whRow = await query(
+      `SELECT id, company_id, branch_id FROM inv_warehouses WHERE id = :id AND company_id = :companyId LIMIT 1`,
       { id, companyId },
     );
     const warehouse = whRow?.[0];
@@ -867,12 +908,9 @@ export const linkWarehouseBranch = async (req, res, next) => {
       : [];
     if (allowedBranches.length && !allowedBranches.includes(targetBranchId))
       throw httpError(403, "FORBIDDEN", "Branch access denied");
-    const upd = await query(`
-      UPDATE inv_warehouses
-      SET (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
-      WHERE id = :id AND company_id = :companyId
-      `,
-      { id, companyId, branchId, branchIdsStr: targetBranchId },
+    const upd = await query(
+      `UPDATE inv_warehouses SET branch_id = :targetBranchId WHERE id = :id AND company_id = :companyId`,
+      { id, companyId, targetBranchId },
     );
     if (!upd.affectedRows)
       throw httpError(404, "NOT_FOUND", "Warehouse not found");
@@ -908,23 +946,30 @@ export const getNextItemCode = async (req, res, next) => {
 
 export const listItemGroups = async (req, res, next) => {
   try {
-    const { companyId = null } = req.scope || {};
+    const { companyId = null, branchIdsStr = '' } = req.scope || {};
+    const hasBranchCol = await hasColumn("inv_item_groups", "branch_id");
     const rows = await query(`
       SELECT g.id,
              g.group_code,
              g.group_name,
+             g.item_type_id,
+             t.type_code AS item_type_code,
+             t.type_name AS item_type_name,
+             ${hasBranchCol ? "g.branch_id," : ""}
              g.parent_group_id,
              pg.group_name AS parent_group_name,
              g.is_active,
           g.created_at,
           u.username AS created_by_name
          FROM inv_item_groups g
+      LEFT JOIN inv_item_types t ON t.id = g.item_type_id
       LEFT JOIN inv_item_groups pg ON pg.id = g.parent_group_id
         LEFT JOIN adm_users u ON u.id = g.created_by
          WHERE g.company_id = :companyId
+           ${hasBranchCol && branchIdsStr ? "AND (:branchIdsStr = '' OR g.branch_id IS NULL OR FIND_IN_SET(g.branch_id, :branchIdsStr))" : ""}
       ORDER BY g.group_name ASC, g.id ASC
       `,
-      { companyId },
+      { companyId, branchIdsStr },
     );
     res.json({ items: rows });
   } catch (err) {
@@ -934,10 +979,11 @@ export const listItemGroups = async (req, res, next) => {
 
 export const getItemGroupById = async (req, res, next) => {
   try {
-    const { companyId = null } = req.scope || {};
+    const { companyId = null, branchIdsStr = '' } = req.scope || {};
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0)
       throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    const hasBranchCol = await hasColumn("inv_item_groups", "branch_id");
     const rows = await query(`
       SELECT g.*,
           g.created_at,
@@ -945,9 +991,10 @@ export const getItemGroupById = async (req, res, next) => {
          FROM inv_item_groups g
         LEFT JOIN adm_users u ON u.id = g.created_by
          WHERE g.id = :id AND g.company_id = :companyId
+           ${hasBranchCol && branchIdsStr ? "AND (:branchIdsStr = '' OR g.branch_id IS NULL OR FIND_IN_SET(g.branch_id, :branchIdsStr))" : ""}
       LIMIT 1
       `,
-      { id, companyId },
+      { id, companyId, branchIdsStr },
     );
     if (!rows.length) throw httpError(404, "NOT_FOUND", "Item group not found");
     res.json({ item: rows[0] });
@@ -962,6 +1009,7 @@ export const createItemGroup = async (req, res, next) => {
     const body = req.body || {};
     const groupCode = String(body.group_code || "").trim();
     const groupName = String(body.group_name || "").trim();
+    const itemTypeId = Number(body.item_type_id || 0) || null;
     const parentGroupId = Number(body.parent_group_id || 0) || null;
     const isActive = body.is_active === 0 || body.is_active === false ? 0 : 1;
     if (!groupCode || !groupName)
@@ -970,11 +1018,17 @@ export const createItemGroup = async (req, res, next) => {
         "VALIDATION_ERROR",
         "group_code and group_name are required",
       );
+    const hasBranchCol = await hasColumn("inv_item_groups", "branch_id");
+    const targetBranchId = body.branch_id !== undefined
+      ? (Number(body.branch_id) || null)
+      : (req.scope?.branchId ? Number(req.scope.branchId) : null);
+    const cols = `company_id, ${hasBranchCol ? "branch_id, " : ""}group_code, group_name, item_type_id, parent_group_id, is_active`;
+    const vals = `:companyId, ${hasBranchCol ? ":branchId, " : ""}:groupCode, :groupName, :itemTypeId, :parentGroupId, :isActive`;
     const ins = await query(`
-      INSERT INTO inv_item_groups (company_id, group_code, group_name, parent_group_id, is_active)
-      VALUES (:companyId, :groupCode, :groupName, :parentGroupId, :isActive)
+      INSERT INTO inv_item_groups (${cols})
+      VALUES (${vals})
       `,
-      { companyId, groupCode, groupName, parentGroupId, isActive },
+      { companyId, branchId: targetBranchId, groupCode, groupName, itemTypeId, parentGroupId, isActive },
     );
     res.status(201).json({ id: ins.insertId });
   } catch (err) {
@@ -991,6 +1045,7 @@ export const updateItemGroup = async (req, res, next) => {
     const body = req.body || {};
     const groupCode = String(body.group_code || "").trim();
     const groupName = String(body.group_name || "").trim();
+    const itemTypeId = Number(body.item_type_id || 0) || null;
     const parentGroupId = Number(body.parent_group_id || 0) || null;
     const isActive = body.is_active === 0 || body.is_active === false ? 0 : 1;
     if (!groupCode || !groupName)
@@ -1005,15 +1060,20 @@ export const updateItemGroup = async (req, res, next) => {
         "VALIDATION_ERROR",
         "parent_group_id cannot be the same as id",
       );
+    const hasBranchCol = await hasColumn("inv_item_groups", "branch_id");
+    const updateBranchClause = hasBranchCol && body.branch_id !== undefined ? ", branch_id = :branchId" : "";
+    const updateItemTypeClause = body.item_type_id !== undefined ? ", item_type_id = :itemTypeId" : "";
     const upd = await query(`
       UPDATE inv_item_groups
       SET group_code = :groupCode,
           group_name = :groupName,
           parent_group_id = :parentGroupId,
           is_active = :isActive
+          ${updateItemTypeClause}
+          ${updateBranchClause}
       WHERE id = :id AND company_id = :companyId
       `,
-      { id, companyId, groupCode, groupName, parentGroupId, isActive },
+      { id, companyId, branchId: body.branch_id !== undefined ? (Number(body.branch_id) || null) : null, groupCode, groupName, itemTypeId, parentGroupId, isActive },
     );
     if (!upd.affectedRows)
       throw httpError(404, "NOT_FOUND", "Item group not found");
@@ -1025,23 +1085,34 @@ export const updateItemGroup = async (req, res, next) => {
 
 export const listItemCategories = async (req, res, next) => {
   try {
-    const { companyId = null } = req.scope || {};
+    const { companyId = null, branchIdsStr = '' } = req.scope || {};
+    const hasBranchCol = await hasColumn("inv_item_categories", "branch_id");
     const rows = await query(`
       SELECT c.id,
              c.category_code,
              c.category_name,
+             c.item_group_id,
+             g.group_code AS item_group_code,
+             g.group_name AS item_group_name,
+             g.item_type_id,
+             t.type_code AS item_type_code,
+             t.type_name AS item_type_name,
+             ${hasBranchCol ? "c.branch_id," : ""}
              c.parent_category_id,
              pc.category_name AS parent_category_name,
              c.is_active,
           c.created_at,
           u.username AS created_by_name
          FROM inv_item_categories c
+      LEFT JOIN inv_item_groups g ON g.id = c.item_group_id
+      LEFT JOIN inv_item_types t ON t.id = g.item_type_id
       LEFT JOIN inv_item_categories pc ON pc.id = c.parent_category_id
         LEFT JOIN adm_users u ON u.id = c.created_by
          WHERE c.company_id = :companyId
+           ${hasBranchCol && branchIdsStr ? "AND (:branchIdsStr = '' OR c.branch_id IS NULL OR FIND_IN_SET(c.branch_id, :branchIdsStr))" : ""}
       ORDER BY c.category_name ASC, c.id ASC
       `,
-      { companyId },
+      { companyId, branchIdsStr },
     );
     res.json({ items: rows });
   } catch (err) {
@@ -1051,20 +1122,25 @@ export const listItemCategories = async (req, res, next) => {
 
 export const getItemCategoryById = async (req, res, next) => {
   try {
-    const { companyId = null } = req.scope || {};
+    const { companyId = null, branchIdsStr = '' } = req.scope || {};
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0)
       throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    const hasBranchCol = await hasColumn("inv_item_categories", "branch_id");
     const rows = await query(`
       SELECT c.*,
+             g.group_code AS item_group_code,
+             g.group_name AS item_group_name,
           c.created_at,
           u.username AS created_by_name
          FROM inv_item_categories c
+        LEFT JOIN inv_item_groups g ON g.id = c.item_group_id
         LEFT JOIN adm_users u ON u.id = c.created_by
          WHERE c.id = :id AND c.company_id = :companyId
+           ${hasBranchCol && branchIdsStr ? "AND (:branchIdsStr = '' OR c.branch_id IS NULL OR FIND_IN_SET(c.branch_id, :branchIdsStr))" : ""}
       LIMIT 1
       `,
-      { id, companyId },
+      { id, companyId, branchIdsStr },
     );
     if (!rows.length)
       throw httpError(404, "NOT_FOUND", "Item category not found");
@@ -1080,6 +1156,7 @@ export const createItemCategory = async (req, res, next) => {
     const body = req.body || {};
     const categoryCode = String(body.category_code || "").trim();
     const categoryName = String(body.category_name || "").trim();
+    const itemGroupId = Number(body.item_group_id || 0) || null;
     const parentCategoryId = Number(body.parent_category_id || 0) || null;
     const isActive = body.is_active === 0 || body.is_active === false ? 0 : 1;
     if (!categoryCode || !categoryName)
@@ -1088,11 +1165,17 @@ export const createItemCategory = async (req, res, next) => {
         "VALIDATION_ERROR",
         "category_code and category_name are required",
       );
+    const hasBranchCol = await hasColumn("inv_item_categories", "branch_id");
+    const targetBranchId = body.branch_id !== undefined
+      ? (Number(body.branch_id) || null)
+      : (req.scope?.branchId ? Number(req.scope.branchId) : null);
+    const cols = `company_id, ${hasBranchCol ? "branch_id, " : ""}category_code, category_name, item_group_id, parent_category_id, is_active`;
+    const vals = `:companyId, ${hasBranchCol ? ":branchId, " : ""}:categoryCode, :categoryName, :itemGroupId, :parentCategoryId, :isActive`;
     const ins = await query(`
-      INSERT INTO inv_item_categories (company_id, category_code, category_name, parent_category_id, is_active)
-      VALUES (:companyId, :categoryCode, :categoryName, :parentCategoryId, :isActive)
+      INSERT INTO inv_item_categories (${cols})
+      VALUES (${vals})
       `,
-      { companyId, categoryCode, categoryName, parentCategoryId, isActive },
+      { companyId, branchId: targetBranchId, categoryCode, categoryName, itemGroupId, parentCategoryId, isActive },
     );
     res.status(201).json({ id: ins.insertId });
   } catch (err) {
@@ -1109,6 +1192,7 @@ export const updateItemCategory = async (req, res, next) => {
     const body = req.body || {};
     const categoryCode = String(body.category_code || "").trim();
     const categoryName = String(body.category_name || "").trim();
+    const itemGroupId = Number(body.item_group_id || 0) || null;
     const parentCategoryId = Number(body.parent_category_id || 0) || null;
     const isActive = body.is_active === 0 || body.is_active === false ? 0 : 1;
     if (!categoryCode || !categoryName)
@@ -1123,15 +1207,19 @@ export const updateItemCategory = async (req, res, next) => {
         "VALIDATION_ERROR",
         "parent_category_id cannot be the same as id",
       );
+    const hasBranchCol = await hasColumn("inv_item_categories", "branch_id");
+    const updateBranchClause = hasBranchCol && body.branch_id !== undefined ? ", branch_id = :branchId" : "";
     const upd = await query(`
       UPDATE inv_item_categories
       SET category_code = :categoryCode,
           category_name = :categoryName,
+          item_group_id = :itemGroupId,
           parent_category_id = :parentCategoryId,
           is_active = :isActive
+          ${updateBranchClause}
       WHERE id = :id AND company_id = :companyId
       `,
-      { id, companyId, categoryCode, categoryName, parentCategoryId, isActive },
+      { id, companyId, branchId: body.branch_id !== undefined ? (Number(body.branch_id) || null) : null, categoryCode, categoryName, itemGroupId, parentCategoryId, isActive },
     );
     if (!upd.affectedRows)
       throw httpError(404, "NOT_FOUND", "Item category not found");
