@@ -12,6 +12,7 @@ function getScope(req) {
  */
 
 import { pool, query } from "../db/pool.js";
+import { getNextTaskNo } from "./facilities.tasks_materials.controller.js";
 
 // ─────────────────────────────────────────────
 // PROPERTY ONBOARDING & HANDOVER
@@ -665,12 +666,159 @@ export async function listInspectionRuns(req, res, next) {
   } catch (err) { next(err); }
 }
 
+export async function autoAssignInspector(req, res, next) {
+  try {
+    const { companyId } = getScope(req);
+    const { property_id, scheduled_date, scheduled_time } = req.query;
+
+    const targetDate = scheduled_date || new Date().toISOString().slice(0, 10);
+    const targetTime = scheduled_time || "09:00";
+
+    // 1. Check shifts
+    const [shifts] = await pool.query(
+      "SELECT id, name, code, start_time, end_time FROM fm_shifts WHERE company_id = ? AND is_active = 1",
+      [companyId]
+    );
+
+    let matchedShift = null;
+    const timeNorm = targetTime.slice(0, 5); // "HH:MM"
+    for (const sh of shifts) {
+      const sStart = (sh.start_time || "").slice(0, 5);
+      const sEnd = (sh.end_time || "").slice(0, 5);
+      if (sStart && sEnd) {
+        if (sStart <= sEnd) {
+          if (timeNorm >= sStart && timeNorm <= sEnd) {
+            matchedShift = sh;
+            break;
+          }
+        } else {
+          if (timeNorm >= sStart || timeNorm <= sEnd) {
+            matchedShift = sh;
+            break;
+          }
+        }
+      }
+    }
+
+    if (!matchedShift && shifts.length > 0) {
+      matchedShift = shifts[0];
+    }
+
+    // 2. Check workforce rosters for property and date
+    let candidate = null;
+    let matchSource = "FALLBACK";
+    let reason = "Standard operational assignment";
+
+    if (property_id) {
+      const [rosterRows] = await pool.query(`
+        SELECT r.* FROM fm_workforce_rosters r
+        WHERE r.company_id = ? AND r.property_id = ?
+          AND ? BETWEEN r.start_date AND r.end_date
+          AND (r.status IS NULL OR r.status != 'CANCELLED')
+      `, [companyId, property_id, targetDate]);
+
+      if (rosterRows.length > 0) {
+        const shiftMatch = matchedShift
+          ? rosterRows.find(r => r.shift_id === matchedShift.id || String(r.shift_name).toLowerCase() === String(matchedShift.name).toLowerCase())
+          : null;
+        const chosen = shiftMatch || rosterRows[0];
+        candidate = {
+          name: chosen.employee_name,
+          employee_id: chosen.employee_id,
+          shift_name: chosen.shift_name || (matchedShift ? matchedShift.name : null)
+        };
+        matchSource = "ROSTER";
+        reason = `Rostered on ${chosen.shift_name || 'duty'} for target property on ${targetDate}`;
+      }
+    }
+
+    // 3. Check fm_personnel
+    if (!candidate) {
+      const [personnelRows] = await pool.query(`
+        SELECT p.* FROM fm_personnel p
+        WHERE p.company_id = ? AND p.is_active = 1
+      `, [companyId]);
+
+      if (personnelRows.length > 0) {
+        const shiftPers = matchedShift
+          ? personnelRows.filter(p => p.shift_id === matchedShift.id || String(p.shift_name).toLowerCase() === String(matchedShift.name).toLowerCase())
+          : [];
+        const posPers = (shiftPers.length > 0 ? shiftPers : personnelRows).filter(p =>
+          String(p.position || p.category || "").toLowerCase().match(/inspect|tech|facility|operat|officer|maint/i)
+        );
+        const chosen = posPers[0] || shiftPers[0] || personnelRows[0];
+        candidate = {
+          name: chosen.name,
+          employee_id: chosen.employee_id,
+          position: chosen.position,
+          shift_name: chosen.shift_name || (matchedShift ? matchedShift.name : null)
+        };
+        matchSource = "SHIFT_PERSONNEL";
+        reason = `Assigned to ${chosen.shift_name || (matchedShift ? matchedShift.name : 'Active Shift')} (${chosen.position || 'Operations'})`;
+      }
+    }
+
+    // 4. Resolve candidate to users table for a valid user_id
+    let matchedUser = null;
+    if (candidate) {
+      const [uRows] = await pool.query(`
+        SELECT id, full_name, username, email FROM adm_users
+        WHERE company_id = ? AND (
+          full_name = ? OR username = ?
+        ) LIMIT 1
+      `, [companyId, candidate.name, candidate.name]);
+      if (uRows.length > 0) {
+        matchedUser = uRows[0];
+      }
+    }
+
+    if (!matchedUser) {
+      const [allUsers] = await pool.query(`
+        SELECT id, full_name, username, email FROM adm_users
+        WHERE company_id = ? AND (status IS NULL OR status = 'ACTIVE')
+        ORDER BY id ASC LIMIT 1
+      `, [companyId]);
+      if (allUsers.length > 0) {
+        matchedUser = allUsers[0];
+        if (!candidate) {
+          candidate = {
+            name: matchedUser.full_name || matchedUser.username,
+            shift_name: matchedShift ? matchedShift.name : "Morning Shift"
+          };
+          matchSource = "USER_DIRECTORY";
+          reason = `Active personnel user account (${matchedShift ? matchedShift.name : 'Standard Shift'})`;
+        }
+      }
+    }
+
+    const inspectorName = matchedUser?.full_name || matchedUser?.username || candidate?.name || "Operations Inspector";
+    const inspectorId = matchedUser?.id || null;
+
+    res.json({
+      success: true,
+      data: {
+        inspector_id: inspectorId,
+        inspector_name: inspectorName,
+        shift_id: matchedShift?.id || null,
+        shift_name: candidate?.shift_name || matchedShift?.name || "General Shift",
+        shift_start: matchedShift?.start_time || null,
+        shift_end: matchedShift?.end_time || null,
+        scheduled_time: targetTime,
+        scheduled_date: targetDate,
+        match_source: matchSource,
+        reason
+      }
+    });
+  } catch (err) { next(err); }
+}
+
 export async function createInspectionRun(req, res, next) {
   try {
     const { companyId, branchId } = getScope(req);
     const {
       template_id, template_name, property_id, building_id, space_id, asset_id,
-      inspector_name, supervisor_name, inspection_type, scheduled_date, checklist_payload
+      inspector_id, inspector_name, supervisor_name, inspection_type,
+      scheduled_date, scheduled_time, checklist_payload, priority
     } = req.body;
 
     if (!property_id || !inspector_name || !scheduled_date) {
@@ -680,17 +828,82 @@ export async function createInspectionRun(req, res, next) {
     const [countRow] = await pool.query("SELECT COUNT(*) AS cnt FROM fm_inspection_runs WHERE company_id = ?", [companyId]);
     const run_no = `INS-${new Date().getFullYear()}-${String(countRow[0].cnt + 1).padStart(4, "0")}`;
 
+    // Resolve inspector_id if not explicitly provided
+    let finalInspectorId = inspector_id || null;
+    if (!finalInspectorId && inspector_name) {
+      const [uRows] = await pool.query(
+        "SELECT id FROM adm_users WHERE company_id = ? AND (full_name = ? OR username = ?) LIMIT 1",
+        [companyId, inspector_name, inspector_name]
+      ).catch(() => [[]]);
+      if (uRows && uRows.length > 0) finalInspectorId = uRows[0].id;
+    }
+
+    // Resolve property_name
+    let finalPropName = req.body.property_name || null;
+    if (property_id && !finalPropName) {
+      const [propRows] = await pool.query("SELECT property_name FROM fm_properties WHERE id = ? LIMIT 1", [property_id]).catch(() => [[]]);
+      if (propRows && propRows.length > 0) finalPropName = propRows[0].property_name;
+    }
+
     const [result] = await pool.query(`
       INSERT INTO fm_inspection_runs
         (company_id, branch_id, run_no, template_id, template_name, property_id, building_id, space_id, asset_id,
-         inspector_name, supervisor_name, inspection_type, scheduled_date, status, checklist_payload)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'SCHEDULED', ?)
+         inspector_id, inspector_name, supervisor_name, inspection_type, scheduled_date, scheduled_time, status, checklist_payload)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'SCHEDULED', ?)
     `, [companyId, branchId || null, run_no, template_id || null, template_name || "Site Inspection",
         property_id, building_id || null, space_id || null, asset_id || null,
-        inspector_name, supervisor_name || null, inspection_type || "ROUTINE_DAILY",
-        scheduled_date, checklist_payload ? JSON.stringify(checklist_payload) : null]);
+        finalInspectorId, inspector_name, supervisor_name || null, inspection_type || "ROUTINE_DAILY",
+        scheduled_date, scheduled_time || null, checklist_payload ? JSON.stringify(checklist_payload) : null]);
 
-    res.status(201).json({ success: true, data: { id: result.insertId, run_no } });
+    // Format checklist data for fm_tasks
+    let formattedChecklist = [];
+    if (Array.isArray(checklist_payload) && checklist_payload.length > 0) {
+      formattedChecklist = checklist_payload.map((it, idx) => ({
+        id: it.id || idx + 1,
+        text: it.item_text || it.text || `Checkpoint #${idx + 1}`,
+        item_text: it.item_text || it.text || `Checkpoint #${idx + 1}`,
+        field_type: it.field_type || "PASS_FAIL",
+        min_reading: it.min_reading ?? null,
+        max_reading: it.max_reading ?? null,
+        unit_of_measure: it.unit_of_measure || null,
+        is_critical: Boolean(it.is_critical),
+        completed: false,
+      }));
+    } else {
+      formattedChecklist = [
+        { id: 1, text: "Verify overall physical condition & cleanliness", item_text: "Verify overall physical condition & cleanliness", field_type: "PASS_FAIL", completed: false },
+        { id: 2, text: "Check MEP, safety equipment & operational standards", item_text: "Check MEP, safety equipment & operational standards", field_type: "PASS_FAIL", completed: false }
+      ];
+    }
+
+    // Auto-create task in fm_tasks so it appears on the user's Task Execution page ahead of scheduled time
+    let task_no = null;
+    try {
+      task_no = await getNextTaskNo(companyId, branchId);
+      const timeStr = scheduled_time ? ` at ${scheduled_time}` : "";
+      const taskDesc = `Scheduled inspection run ${run_no} for ${finalPropName || 'Property'} on ${scheduled_date}${timeStr}. Template: ${template_name || 'Standard Inspection'}. Execute all checkpoints and record pass/fail results.`;
+      
+      await pool.query(`
+        INSERT INTO fm_tasks (
+          company_id, branch_id, task_no, property_id, property_name, service_category, work_order_no,
+          task_title, task_description, assigned_to_id, assigned_to_name, supervisor_name,
+          priority, status, start_date, end_date, checklist_data, created_by
+        ) VALUES (?, ?, ?, ?, ?, 'INSPECTION', ?, ?, ?, ?, ?, ?, ?, 'PENDING', ?, ?, ?, ?)
+      `, [
+        companyId, branchId || 1, task_no, property_id, finalPropName, run_no,
+        `Inspection: ${template_name || 'Site Inspection'} (${run_no})`,
+        taskDesc,
+        finalInspectorId, inspector_name, supervisor_name || null,
+        priority || "HIGH",
+        scheduled_date, scheduled_date,
+        JSON.stringify(formattedChecklist),
+        req.user?.id || req.user?.sub || null
+      ]);
+    } catch (taskErr) {
+      console.error("Warning: Could not auto-create linked FM task for inspection:", taskErr);
+    }
+
+    res.status(201).json({ success: true, data: { id: result.insertId, run_no, task_no } });
   } catch (err) { next(err); }
 }
 

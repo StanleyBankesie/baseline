@@ -2473,6 +2473,55 @@ export default function SoftServicesPage() {
                   </select>
                 </div>
 
+                {/* Checklist Template Selector */}
+                <div className="md:col-span-2 lg:col-span-3">
+                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <CheckSquare size={13} className="text-emerald-600 dark:text-emerald-400" />
+                      Inspection Checklist Template (Populates Scope &amp; Instructions)
+                    </span>
+                    {taskForm.checklist_template_id && (
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                        ✓ Checkpoints Auto-Populated
+                      </span>
+                    )}
+                  </label>
+                  <select
+                    value={taskForm.checklist_template_id}
+                    onChange={(e) => {
+                      const tplId = e.target.value;
+                      const selTpl = checklists.find((c) => String(c.id) === String(tplId));
+                      if (selTpl) {
+                        const items = (selTpl.items || []).map((it) => it.item_text).filter(Boolean);
+                        setTaskForm((prev) => ({
+                          ...prev,
+                          checklist_template_id: tplId,
+                          title: !prev.title || prev.title.trim() === "" ? selTpl.template_name : prev.title,
+                          is_inspection: true,
+                          scope: items.length > 0 ? items : [selTpl.template_name],
+                          desc_points: items.length > 0 ? items : [selTpl.template_name],
+                          description: items.length > 0
+                            ? items.map((it, idx) => `${idx + 1}. ${it}`).join("\n")
+                            : prev.description || selTpl.description || "",
+                        }));
+                      } else {
+                        setTaskForm((prev) => ({
+                          ...prev,
+                          checklist_template_id: "",
+                        }));
+                      }
+                    }}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 font-medium"
+                  >
+                    <option value="">-- None / Custom Manual Scope --</option>
+                    {checklists.map((tpl) => (
+                      <option key={tpl.id} value={tpl.id}>
+                        📋 {tpl.template_name} ({tpl.service_line?.replace(/_/g, " ")}) — {tpl.items?.length || tpl.item_count || 0} checks
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 {/* 7. Task Title */}
                 <div className="md:col-span-2 lg:col-span-3">
                   <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">

@@ -346,7 +346,7 @@ export async function updateFMTask(req, res, next) {
     // Sync status change to fm_soft_tasks if this task is linked
     if (status) {
       try {
-        const taskRows = await query("SELECT task_no, equipment_id FROM fm_tasks WHERE id = :id", { id });
+        const taskRows = await query("SELECT task_no, equipment_id, work_order_no, service_category FROM fm_tasks WHERE id = :id", { id });
         if (taskRows.length > 0 && taskRows[0].task_no) {
           const tNo = taskRows[0].task_no;
           const softStatus = status === "COMPLETED" ? "COMPLETED" : (status === "IN_PROGRESS" ? "IN_PROGRESS" : (status === "PENDING" ? "ASSIGNED" : status));
@@ -356,7 +356,19 @@ export async function updateFMTask(req, res, next) {
               completed_at = CASE WHEN :softStatus = 'COMPLETED' THEN COALESCE(completed_at, NOW()) ELSE completed_at END
              WHERE task_no COLLATE utf8mb4_unicode_ci = :tNo COLLATE utf8mb4_unicode_ci`,
             { softStatus, tNo }
-          );
+          ).catch(() => {});
+
+          const wNo = taskRows[0].work_order_no || "";
+          if (wNo.startsWith("INS-") || taskRows[0].service_category === "INSPECTION") {
+            const inspStatus = status === "COMPLETED" ? "COMPLETED" : (status === "IN_PROGRESS" ? "IN_PROGRESS" : "SCHEDULED");
+            await pool.query(
+              `UPDATE fm_inspection_runs SET
+                status = ?,
+                executed_date = CASE WHEN ? = 'COMPLETED' THEN COALESCE(executed_date, NOW()) ELSE executed_date END
+               WHERE company_id = ? AND run_no = ?`,
+              [inspStatus, inspStatus, companyId, wNo]
+            ).catch(() => {});
+          }
         }
 
         const eqId = equipment_id || (taskRows[0]?.equipment_id);

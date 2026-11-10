@@ -60,6 +60,12 @@ export default function AttendanceDashboard() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Link to="/human-resources" className="btn-secondary text-sm">Back to Menu</Link>
+            <Link to="/human-resources/biometric-clock" className="btn-primary text-xs flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 shadow-sm shadow-emerald-600/30 text-white font-semibold">
+              📷 Biometric Kiosk
+            </Link>
+            <Link to="/human-resources/biometric-analytics" className="btn-secondary text-xs">
+              Biometric Logs
+            </Link>
             <h2 className="text-lg font-semibold">Attendance</h2>
           </div>
           <div className="flex items-center gap-3">

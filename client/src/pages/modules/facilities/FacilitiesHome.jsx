@@ -132,7 +132,7 @@ export const facilitiesSections = [
     icon: "📋",
     items: [
       buildFeature("Inspections & Corrective Actions", "/facilities/inspections", "Schedule site inspections, record findings, track CAPA", "📋"),
-      buildFeature("Inspection Checklists", "/facilities/checklists", "PPM inspection checklists and templates", "✅"),
+      buildFeature("Inspection Checklists", "/facilities/setup?tab=checklists", "PPM inspection checklists and templates in Operational Setup", "✅"),
     ],
   },
   {
@@ -328,7 +328,7 @@ export default function FacilitiesHome() {
 
         {/* ─── Inspections & Checklists ─── */}
         <Route path="/inspections" element={<FMInspectionsPage />} />
-        <Route path="/checklists" element={<ChecklistTemplatesList />} />
+        <Route path="/checklists" element={<Navigate to="/facilities/setup?tab=checklists" replace />} />
         <Route path="/hsa-compliance" element={<Navigate to="/environmental-health-safety/hsa-compliance" replace />} />
         <Route path="/compliance" element={<Navigate to="/environmental-health-safety/compliance" replace />} />
 

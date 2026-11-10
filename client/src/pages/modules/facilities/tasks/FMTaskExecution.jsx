@@ -296,6 +296,7 @@ export default function FMTaskExecution() {
     try {
       await api.put(`/facilities/tasks/${selectedTask.id}`, {
         task_description: jsonDescription,
+        checklist_data: jsonDescription,
         completion_percent: newPercent,
         status: newStatus,
       });
@@ -518,6 +519,11 @@ export default function FMTaskExecution() {
                       <span className="px-2.5 py-0.5 rounded text-xs font-bold bg-brand/10 text-brand dark:bg-brand/20 dark:text-brand-300">
                         {selectedTask.property_name || "FM Property Task"}
                       </span>
+                      {(selectedTask.service_category === "INSPECTION" || selectedTask.work_order_no?.startsWith("INS-")) && (
+                        <span className="px-2.5 py-0.5 rounded text-xs font-bold bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300 flex items-center gap-1">
+                          <CheckCircle2 size={12} /> Inspection Checklist Run {selectedTask.work_order_no ? `(${selectedTask.work_order_no})` : ""}
+                        </span>
+                      )}
                       <span className="text-xs text-slate-400">• Priority: {selectedTask.priority}</span>
                     </div>
                     <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">

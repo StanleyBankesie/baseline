@@ -231,6 +231,7 @@ router.get("/helpdesk/tickets/:id/notes", ...auth, exp.getTicketNotes);
 router.post("/helpdesk/tickets/:id/notes", ...auth, exp.addTicketNote);
 
 // Inspection Runs & Corrective Actions
+router.get("/inspections/auto-assign", ...auth, exp.autoAssignInspector);
 router.get("/inspection-runs", ...auth, exp.listInspectionRuns);
 router.post("/inspection-runs", ...auth, exp.createInspectionRun);
 router.put("/inspection-runs/:id/complete", ...auth, exp.completeInspectionRun);

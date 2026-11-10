@@ -78,6 +78,21 @@ export default function FacilitiesSetupPage() {
   const [personnel, setPersonnel] = useState([]);
   const [hrEmployees, setHrEmployees] = useState([]);
   const [checklistTemplates, setChecklistTemplates] = useState([]);
+  const [checklistSubTab, setChecklistSubTab] = useState("templates"); // "templates" | "assigned-runs"
+  const [assignedRuns, setAssignedRuns] = useState([]);
+  const [showDispatchModal, setShowDispatchModal] = useState(false);
+  const [dispatchTemplate, setDispatchTemplate] = useState(null);
+  const [dispatchForm, setDispatchForm] = useState({
+    property_id: "",
+    title: "",
+    scheduled_date: new Date().toISOString().slice(0, 10),
+    shift: "MORNING",
+    assigned_to_name: "",
+    assigned_to_personnel_id: "",
+    supervisor_name: "",
+    priority: "MEDIUM",
+  });
+  const [dispatching, setDispatching] = useState(false);
 
   // Search & Filter
   const [searchTerm, setSearchTerm] = useState("");
@@ -255,7 +270,7 @@ export default function FacilitiesSetupPage() {
   const loadAllSetupData = async () => {
     try {
       setLoading(true);
-      const [overviewRes, hrRes, checklistRes, contractorRes, spaceRes, propRes, catRes, clientRes, saniRes, wasteRes, equipCatRes, posRes] = await Promise.all([
+      const [overviewRes, hrRes, checklistRes, contractorRes, spaceRes, propRes, catRes, clientRes, saniRes, wasteRes, equipCatRes, posRes, softRes] = await Promise.all([
         api.get("/facilities/setup/overview").catch(() => ({ data: { data: {} } })),
         api.get("/facilities/setup/hr-employees").catch(() => ({ data: { data: [] } })),
         api.get("/facilities/checklists/templates").catch(() => ({ data: { data: [] } })),
@@ -268,6 +283,7 @@ export default function FacilitiesSetupPage() {
         api.get("/facilities/setup/waste-streams").catch(() => ({ data: { data: [] } })),
         api.get("/facilities/setup/equipment-categories").catch(() => ({ data: { data: [] } })),
         api.get("/facilities/setup/positions").catch(() => ({ data: { data: [] } })),
+        api.get("/facilities/soft-tasks").catch(() => ({ data: { data: [] } })),
       ]);
 
       const data = overviewRes.data?.data || {};
@@ -277,6 +293,7 @@ export default function FacilitiesSetupPage() {
       setPositions(posRes.data?.data?.length ? posRes.data.data : data.positions || []);
       setHrEmployees(hrRes.data?.data || []);
       setChecklistTemplates(checklistRes.data?.data || []);
+      setAssignedRuns(softRes.data?.data || []);
       setContractors(contractorRes.data?.data?.items || contractorRes.data?.items || []);
       setSpaces(spaceRes.data?.data || []);
       setProperties(propRes.data?.data || []);
@@ -399,6 +416,56 @@ export default function FacilitiesSetupPage() {
       setChecklistTemplates((prev) => prev.filter((t) => t.id !== id));
     } catch (err) {
       toast.error("Failed to delete checklist template");
+    }
+  };
+
+  const handleOpenDispatch = (tpl) => {
+    setDispatchTemplate(tpl);
+    setDispatchForm({
+      property_id: properties[0]?.id || "",
+      title: `Daily Inspection: ${tpl.template_name}`,
+      scheduled_date: new Date().toISOString().slice(0, 10),
+      shift: shifts[0]?.name || "MORNING",
+      assigned_to_name: personnel[0]?.name || "",
+      assigned_to_personnel_id: personnel[0]?.id || "",
+      supervisor_name: supervisors[0]?.name || "",
+      priority: "MEDIUM",
+    });
+    setShowDispatchModal(true);
+  };
+
+  const handleDispatchTask = async (e) => {
+    e.preventDefault();
+    if (!dispatchForm.assigned_to_name.trim()) {
+      toast.warn("Please enter or select assigned personnel");
+      return;
+    }
+    setDispatching(true);
+    try {
+      const checklist_data = (dispatchTemplate?.items || []).map((it) => ({
+        item_text: it.item_text,
+        checked: false,
+      }));
+
+      await api.post("/facilities/soft-tasks", {
+        ...dispatchForm,
+        task_category: "GENERAL_FACILITIES",
+        checklist_template_id: dispatchTemplate?.id,
+        checklist_data,
+        description: `Routine inspection run using template [${dispatchTemplate?.template_name}].`,
+      });
+
+      toast.success("Inspection task dispatched successfully!");
+      setShowDispatchModal(false);
+      try {
+        const res = await api.get("/facilities/soft-tasks");
+        setAssignedRuns(res.data?.data || []);
+      } catch {}
+      setChecklistSubTab("assigned-runs");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to dispatch task");
+    } finally {
+      setDispatching(false);
     }
   };
 
@@ -1388,7 +1455,7 @@ export default function FacilitiesSetupPage() {
           onClick={() => setActiveTab("checklists")}
           className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
             activeTab === "checklists"
-              ? "border-amber-500 text-amber-600 dark:text-amber-400"
+              ? "border-emerald-600 text-emerald-600 dark:text-emerald-400"
               : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
           }`}
         >
@@ -2244,148 +2311,268 @@ export default function FacilitiesSetupPage() {
 
 
       {/* ========================================================================= */}
-      {/* TAB 4: INSPECTION CHECKLIST TEMPLATES */}
+      {/* TAB 4: INSPECTION CHECKLIST TEMPLATES & FIELD RUNS */}
       {/* ========================================================================= */}
       {activeTab === "checklists" && (
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <div className="flex flex-wrap items-center gap-2.5 flex-1">
-              <div className="relative min-w-[220px] flex-1 max-w-md">
-                <Search className="absolute left-3 top-2.5 text-slate-400" size={15} />
-                <input
-                  type="text"
-                  placeholder="Search template name, code, service line..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-800 pl-9 pr-4 py-2 rounded-xl text-xs text-slate-800 dark:text-slate-200 border-none focus:ring-1 focus:ring-amber-500"
-                />
-              </div>
-
-              <select
-                value={filterServiceLine}
-                onChange={(e) => setFilterServiceLine(e.target.value)}
-                className="bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 py-2 px-3 rounded-xl text-xs font-semibold border-none focus:ring-1 focus:ring-amber-500"
-              >
-                <option value="ALL">All Service Lines</option>
-                {CHECKLIST_SERVICE_LINES.map((sl) => (
-                  <option key={sl.value} value={sl.value}>
-                    {sl.icon} {sl.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
+          {/* Sub-tab Navigation */}
+          <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800">
             <button
-              onClick={() => handleOpenChecklistModal()}
-              className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm transition-all whitespace-nowrap"
+              onClick={() => setChecklistSubTab("templates")}
+              className={`flex items-center gap-2 pb-3 px-4 text-xs font-semibold border-b-2 transition-all ${
+                checklistSubTab === "templates"
+                  ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 font-bold"
+                  : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+              }`}
             >
-              <Plus size={15} />
-              + Create Checklist Template
+              <ClipboardList size={14} />
+              Checklist Templates Register ({checklistTemplates.length})
+            </button>
+            <button
+              onClick={() => setChecklistSubTab("assigned-runs")}
+              className={`flex items-center gap-2 pb-3 px-4 text-xs font-semibold border-b-2 transition-all ${
+                checklistSubTab === "assigned-runs"
+                  ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 font-bold"
+                  : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+              }`}
+            >
+              <Calendar size={14} />
+              Daily Assigned Runs & Field Inspections ({assignedRuns.length})
             </button>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300">
-                  <tr>
-                    <th className="px-4 py-3">Template Code</th>
-                    <th className="px-4 py-3">Template Name</th>
-                    <th className="px-4 py-3">Service Line</th>
-                    <th className="px-4 py-3">Criteria Items</th>
-                    <th className="px-4 py-3">Critical Checks</th>
-                    <th className="px-4 py-3 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
-                  {checklistTemplates
-                    .filter((tpl) => {
-                      const matchSearch =
-                        !searchTerm ||
-                        tpl.template_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        tpl.template_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        tpl.service_line?.toLowerCase().includes(searchTerm.toLowerCase());
-                      const matchLine =
-                        filterServiceLine === "ALL" || tpl.service_line === filterServiceLine;
-                      return matchSearch && matchLine;
-                    })
-                    .map((tpl) => {
-                      const items = Array.isArray(tpl.items) ? tpl.items : [];
-                      const criticalCount = items.filter((i) => i.is_critical).length;
-                      return (
-                        <tr
-                          key={tpl.id}
-                          className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors"
-                        >
-                          <td className="px-4 py-3 font-mono font-bold text-amber-600 dark:text-amber-400">
-                            {tpl.template_code || `TPL-${tpl.id}`}
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="font-bold text-slate-900 dark:text-white block">
-                              {tpl.template_name}
-                            </span>
-                            <span className="text-xs text-slate-400 line-clamp-1">
-                              {tpl.description || "Digital audit checklist"}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-semibold text-xs inline-flex items-center gap-1">
-                              {CHECKLIST_SERVICE_LINES.find((s) => s.value === tpl.service_line)?.icon || "📋"}{" "}
-                              {CHECKLIST_SERVICE_LINES.find((s) => s.value === tpl.service_line)?.label ||
-                                tpl.service_line?.replace(/_/g, " ")}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 font-semibold">
-                            {items.length} checks
-                          </td>
-                          <td className="px-4 py-3">
-                            {criticalCount > 0 ? (
-                              <span className="text-red-600 dark:text-red-400 font-bold flex items-center gap-1 text-xs">
-                                <AlertCircle size={12} /> {criticalCount} Critical
-                              </span>
-                            ) : (
-                              <span className="text-slate-400 text-xs">None</span>
-                            )}
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                onClick={() => setPreviewTemplate(tpl)}
-                                className="px-2.5 py-1 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-xs font-semibold flex items-center gap-1"
-                                title="Preview Items"
-                              >
-                                <Eye size={13} /> View
-                              </button>
-                              <button
-                                onClick={() => handleOpenChecklistModal(tpl)}
-                                className="px-2.5 py-1 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/50 rounded-lg text-xs font-semibold flex items-center gap-1"
-                                title="Edit Template"
-                              >
-                                <Edit2 size={13} /> Edit
-                              </button>
-                              <button
-                                onClick={() => handleDeleteChecklist(tpl.id)}
-                                className="p-1 text-slate-400 hover:text-red-600 rounded-lg"
-                                title="Delete Template"
-                              >
-                                <Trash2 size={13} />
-                              </button>
-                            </div>
+          {checklistSubTab === "templates" && (
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div className="flex flex-wrap items-center gap-2.5 flex-1">
+                  <div className="relative min-w-[220px] flex-1 max-w-md">
+                    <Search className="absolute left-3 top-2.5 text-slate-400" size={15} />
+                    <input
+                      type="text"
+                      placeholder="Search template name, code, service line..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full bg-slate-50 dark:bg-slate-800 pl-9 pr-4 py-2 rounded-xl text-xs text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    />
+                  </div>
+
+                  <select
+                    value={filterServiceLine}
+                    onChange={(e) => setFilterServiceLine(e.target.value)}
+                    className="bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 py-2 px-3 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  >
+                    <option value="ALL">All Service Lines</option>
+                    {CHECKLIST_SERVICE_LINES.map((sl) => (
+                      <option key={sl.value} value={sl.value}>
+                        {sl.icon} {sl.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  onClick={() => handleOpenChecklistModal()}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm transition-all whitespace-nowrap"
+                >
+                  <Plus size={15} />
+                  + Create Checklist Template
+                </button>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300">
+                      <tr>
+                        <th className="px-4 py-3">Template Code</th>
+                        <th className="px-4 py-3">Template Name</th>
+                        <th className="px-4 py-3">Service Line</th>
+                        <th className="px-4 py-3">Criteria Items</th>
+                        <th className="px-4 py-3">Critical Checks</th>
+                        <th className="px-4 py-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+                      {checklistTemplates
+                        .filter((tpl) => {
+                          const matchSearch =
+                            !searchTerm ||
+                            tpl.template_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            tpl.template_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            tpl.service_line?.toLowerCase().includes(searchTerm.toLowerCase());
+                          const matchLine =
+                            filterServiceLine === "ALL" || tpl.service_line === filterServiceLine;
+                          return matchSearch && matchLine;
+                        })
+                        .map((tpl) => {
+                          const items = Array.isArray(tpl.items) ? tpl.items : [];
+                          const criticalCount = items.filter((i) => i.is_critical).length;
+                          return (
+                            <tr
+                              key={tpl.id}
+                              className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors"
+                            >
+                              <td className="px-4 py-3 font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                                {tpl.template_code || `TPL-${tpl.id}`}
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className="font-bold text-slate-900 dark:text-white block">
+                                  {tpl.template_name}
+                                </span>
+                                <span className="text-xs text-slate-400 line-clamp-1">
+                                  {tpl.description || "Digital audit checklist"}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className="px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-semibold text-xs inline-flex items-center gap-1">
+                                  {CHECKLIST_SERVICE_LINES.find((s) => s.value === tpl.service_line)?.icon || "📋"}{" "}
+                                  {CHECKLIST_SERVICE_LINES.find((s) => s.value === tpl.service_line)?.label ||
+                                    tpl.service_line?.replace(/_/g, " ")}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 font-semibold">
+                                {items.length} checks
+                              </td>
+                              <td className="px-4 py-3">
+                                {criticalCount > 0 ? (
+                                  <span className="text-red-600 dark:text-red-400 font-bold flex items-center gap-1 text-xs">
+                                    <AlertCircle size={12} /> {criticalCount} Critical
+                                  </span>
+                                ) : (
+                                  <span className="text-slate-400 text-xs">None</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-right">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    onClick={() => handleOpenDispatch(tpl)}
+                                    className="px-2.5 py-1 text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-lg text-xs font-semibold flex items-center gap-1"
+                                    title="Dispatch Checklist Task"
+                                  >
+                                    <CheckSquare size={13} /> Dispatch Task
+                                  </button>
+                                  <button
+                                    onClick={() => setPreviewTemplate(tpl)}
+                                    className="px-2.5 py-1 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-xs font-semibold flex items-center gap-1"
+                                    title="Preview Items"
+                                  >
+                                    <Eye size={13} /> View
+                                  </button>
+                                  <button
+                                    onClick={() => handleOpenChecklistModal(tpl)}
+                                    className="px-2.5 py-1 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/50 rounded-lg text-xs font-semibold flex items-center gap-1"
+                                    title="Edit Template"
+                                  >
+                                    <Edit2 size={13} /> Edit
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteChecklist(tpl.id)}
+                                    className="p-1 text-slate-400 hover:text-red-600 rounded-lg"
+                                    title="Delete Template"
+                                  >
+                                    <Trash2 size={13} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      {checklistTemplates.length === 0 && (
+                        <tr>
+                          <td colSpan="6" className="text-center py-8 text-slate-400 text-xs">
+                            No inspection checklist templates configured yet. Click "+ Create Checklist Template" to build one.
                           </td>
                         </tr>
-                      );
-                    })}
-                  {checklistTemplates.length === 0 && (
-                    <tr>
-                      <td colSpan="6" className="text-center py-8 text-slate-400 text-xs">
-                        No inspection checklist templates configured yet. Click "+ Create Checklist Template" to build one.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+
+          {checklistSubTab === "assigned-runs" && (
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+              <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                  Active Daily Inspection & Task Runs
+                </h3>
+                <Link to="/facilities/soft-services" className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-semibold flex items-center gap-1">
+                  Open Soft Services Workspace →
+                </Link>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300">
+                    <tr>
+                      <th className="px-4 py-3">Task No / Title</th>
+                      <th className="px-3 py-3">Property</th>
+                      <th className="px-3 py-3">Assigned Personnel</th>
+                      <th className="px-3 py-3">Scheduled Date</th>
+                      <th className="px-3 py-3">Shift</th>
+                      <th className="px-3 py-3">Priority</th>
+                      <th className="px-3 py-3">Status</th>
+                      <th className="px-3 py-3">Supervisor Sign-off</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {assignedRuns.map((t) => (
+                      <tr key={t.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                        <td className="px-4 py-3">
+                          <span className="font-mono text-[10px] text-slate-400 block">{t.task_no}</span>
+                          <span className="font-bold text-slate-800 dark:text-white block">{t.title}</span>
+                        </td>
+                        <td className="px-3 py-3 text-slate-700 dark:text-slate-300">{t.property_name || "Estate Site"}</td>
+                        <td className="px-3 py-3 font-medium text-slate-800 dark:text-slate-200">{t.assigned_to_name}</td>
+                        <td className="px-3 py-3 font-mono">{t.scheduled_date ? String(t.scheduled_date).slice(0, 10) : "Today"}</td>
+                        <td className="px-3 py-3">
+                          <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-bold text-[10px]">
+                            {t.shift}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 font-semibold">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            t.priority === "URGENT" || t.priority === "HIGH"
+                              ? "bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300"
+                              : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                          }`}>
+                            {t.priority || "NORMAL"}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            t.status === "COMPLETED" || t.status === "VERIFIED"
+                              ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300"
+                              : t.status === "IN_PROGRESS"
+                              ? "bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300"
+                              : "bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300"
+                          }`}>
+                            {t.status || "PENDING"}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3">
+                          {t.supervisor_signoff ? (
+                            <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1 text-[11px]">
+                              <CheckCircle2 size={12} /> Approved
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 text-[11px]">Pending Signoff</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                    {assignedRuns.length === 0 && (
+                      <tr>
+                        <td colSpan="8" className="text-center py-8 text-slate-400 text-xs">
+                          No daily inspection runs dispatched yet. Dispatch tasks from the Checklist Templates Register.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -3334,7 +3521,7 @@ export default function FacilitiesSetupPage() {
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden my-auto sm:my-8">
             <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-850">
               <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <ClipboardList size={18} className="text-amber-600" />
+                <ClipboardList size={18} className="text-emerald-600" />
                 {editingTemplate ? "Edit Inspection Checklist Template" : "Create Inspection Checklist Template"}
               </h3>
               <button
@@ -3406,7 +3593,7 @@ export default function FacilitiesSetupPage() {
                 <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
                   <div>
                     <h4 className="font-bold text-slate-900 dark:text-white text-xs flex items-center gap-1.5">
-                      <CheckSquare size={14} className="text-amber-500" />
+                      <CheckSquare size={14} className="text-emerald-500" />
                       Inspection Criteria & Checklist Items ({checklistForm.items.length})
                     </h4>
                     <p className="text-xs text-slate-500">
@@ -3416,7 +3603,7 @@ export default function FacilitiesSetupPage() {
                   <button
                     type="button"
                     onClick={handleAddChecklistItem}
-                    className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1 shadow-sm"
+                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1 shadow-sm"
                   >
                     <Plus size={13} /> Add Check Item
                   </button>
@@ -3429,7 +3616,7 @@ export default function FacilitiesSetupPage() {
                       className="p-3 bg-white dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2.5"
                     >
                       <div className="flex items-start gap-2">
-                        <span className="w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-bold flex items-center justify-center text-xs mt-2 flex-shrink-0">
+                        <span className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold flex items-center justify-center text-xs mt-2 flex-shrink-0">
                           {idx + 1}
                         </span>
                         <div className="flex-1">
@@ -3526,9 +3713,199 @@ export default function FacilitiesSetupPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
                 >
                   {saving ? "Saving..." : editingTemplate ? "Update Template" : "Save Checklist Template"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: DISPATCH INSPECTION TASK RUN */}
+      {/* ========================================================================= */}
+      {showDispatchModal && dispatchTemplate && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-fadeIn">
+            <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <CheckSquare size={16} className="text-emerald-500" />
+                Dispatch Inspection Task to Personnel
+              </h3>
+              <button
+                onClick={() => setShowDispatchModal(false)}
+                className="text-slate-400 hover:text-slate-600 font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleDispatchTask} className="p-5 space-y-4 text-xs">
+              <div className="bg-emerald-50 dark:bg-emerald-950/50 p-3 rounded-xl border border-emerald-200 dark:border-emerald-900/50">
+                <span className="text-[10px] text-emerald-700 dark:text-emerald-300 uppercase font-bold block">
+                  Selected Checklist Template
+                </span>
+                <span className="font-bold text-slate-900 dark:text-white text-sm block mt-0.5">
+                  {dispatchTemplate.template_name}
+                </span>
+                <span className="text-slate-500 text-[11px] block">
+                  {dispatchTemplate.items?.length || 0} verification checkpoints ({dispatchTemplate.service_line?.replace(/_/g, " ")})
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Target Property</label>
+                <select
+                  value={dispatchForm.property_id}
+                  onChange={(e) => setDispatchForm({ ...dispatchForm, property_id: e.target.value })}
+                  className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200"
+                  required
+                >
+                  <option value="">-- Select Property --</option>
+                  {properties.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.property_name || p.name} {p.property_code ? `(${p.property_code})` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Task Title</label>
+                <input
+                  type="text"
+                  value={dispatchForm.title}
+                  onChange={(e) => setDispatchForm({ ...dispatchForm, title: e.target.value })}
+                  className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Assigned Personnel</label>
+                  {personnel && personnel.length > 0 ? (
+                    <select
+                      value={dispatchForm.assigned_to_name}
+                      onChange={(e) => {
+                        const sel = personnel.find((p) => p.name === e.target.value);
+                        setDispatchForm({
+                          ...dispatchForm,
+                          assigned_to_name: e.target.value,
+                          assigned_to_personnel_id: sel?.id || "",
+                        });
+                      }}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200"
+                      required
+                    >
+                      <option value="">-- Select Personnel --</option>
+                      {personnel.map((p) => (
+                        <option key={p.id} value={p.name}>
+                          {p.name} {p.position ? `(${p.position})` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      placeholder="e.g. John Doe (Tech / Cleaner)"
+                      value={dispatchForm.assigned_to_name}
+                      onChange={(e) => setDispatchForm({ ...dispatchForm, assigned_to_name: e.target.value })}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200"
+                      required
+                    />
+                  )}
+                </div>
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Supervisor Name</label>
+                  {supervisors && supervisors.length > 0 ? (
+                    <select
+                      value={dispatchForm.supervisor_name}
+                      onChange={(e) => setDispatchForm({ ...dispatchForm, supervisor_name: e.target.value })}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200"
+                    >
+                      <option value="">-- Select Supervisor --</option>
+                      {supervisors.map((s) => (
+                        <option key={s.id} value={s.name}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      placeholder="e.g. David Osei"
+                      value={dispatchForm.supervisor_name}
+                      onChange={(e) => setDispatchForm({ ...dispatchForm, supervisor_name: e.target.value })}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200"
+                    />
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Scheduled Date</label>
+                  <input
+                    type="date"
+                    value={dispatchForm.scheduled_date}
+                    onChange={(e) => setDispatchForm({ ...dispatchForm, scheduled_date: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Shift</label>
+                  <select
+                    value={dispatchForm.shift}
+                    onChange={(e) => setDispatchForm({ ...dispatchForm, shift: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200"
+                  >
+                    {shifts && shifts.length > 0 ? (
+                      shifts.map((s) => (
+                        <option key={s.id} value={s.name}>
+                          {s.name}
+                        </option>
+                      ))
+                    ) : (
+                      <>
+                        <option value="MORNING">MORNING</option>
+                        <option value="AFTERNOON">AFTERNOON</option>
+                        <option value="NIGHT">NIGHT</option>
+                      </>
+                    )}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Priority</label>
+                  <select
+                    value={dispatchForm.priority}
+                    onChange={(e) => setDispatchForm({ ...dispatchForm, priority: e.target.value })}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200"
+                  >
+                    <option value="LOW">LOW</option>
+                    <option value="MEDIUM">MEDIUM</option>
+                    <option value="HIGH">HIGH</option>
+                    <option value="URGENT">URGENT</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="pt-3 flex justify-end gap-2 border-t border-slate-200 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowDispatchModal(false)}
+                  className="px-4 py-2 border rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={dispatching}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-sm transition-all"
+                >
+                  {dispatching ? "Dispatching..." : "Dispatch Task"}
                 </button>
               </div>
             </form>
@@ -4148,7 +4525,7 @@ export default function FacilitiesSetupPage() {
             <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-850">
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <Eye size={18} className="text-amber-600" />
+                  <Eye size={18} className="text-emerald-600" />
                   {previewTemplate.template_name}
                 </h3>
                 <span className="text-xs font-mono text-slate-500">
@@ -4219,7 +4596,7 @@ export default function FacilitiesSetupPage() {
                     setPreviewTemplate(null);
                     handleOpenChecklistModal(tpl);
                   }}
-                  className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5"
                 >
                   <Edit2 size={13} /> Edit Template
                 </button>

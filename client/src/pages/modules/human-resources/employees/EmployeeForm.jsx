@@ -1407,6 +1407,7 @@ export default function EmployeeForm() {
           onClose={() => setShowFaceModal(false)}
           onCapture={handleFaceRegistered}
           mode="register"
+          employeeId={id}
           employeeName={`${form.first_name || ""} ${form.last_name || ""}`.trim() || "Employee"}
         />
       )}

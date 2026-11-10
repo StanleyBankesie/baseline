@@ -72,6 +72,10 @@ import TimesheetReport from "./attendance/TimesheetReport.jsx";
 import AttendanceDashboard from "./attendance/AttendanceDashboard.jsx";
 import BulkAttendance from "./attendance/BulkAttendance.jsx";
 import TimesheetView from "./attendance/TimesheetView.jsx";
+import BiometricClockPage from "./attendance/BiometricClockPage.jsx";
+import BiometricDevicesPage from "./attendance/BiometricDevicesPage.jsx";
+import BiometricSettingsPage from "./attendance/BiometricSettingsPage.jsx";
+import BiometricAnalyticsPage from "./attendance/BiometricAnalyticsPage.jsx";
 import MedicalPolicyList from "./medical-policies/MedicalPolicyList.jsx";
 import MedicalPolicyForm from "./medical-policies/MedicalPolicyForm.jsx";
 import HRReports from "./reports/HRReports.jsx";
@@ -248,6 +252,50 @@ export const humanResourcesSections = [
   {
     title: "Time & Attendance",
     features: [
+      {
+        name: "Biometric Face Kiosk",
+        path: "/human-resources/biometric-clock",
+        actions: [
+          {
+            label: "Launch Kiosk",
+            path: "/human-resources/biometric-clock",
+            type: "primary",
+          },
+        ],
+        description: "Laptop & external USB webcam biometric facial clock-in",
+        icon: "📷",
+      },
+      {
+        name: "Biometric Audit & Telemetry",
+        path: "/human-resources/biometric-analytics",
+        actions: [
+          {
+            label: "Analytics",
+            path: "/human-resources/biometric-analytics",
+            type: "outline",
+          },
+          {
+            label: "Devices",
+            path: "/human-resources/biometric-devices",
+            type: "outline",
+          },
+        ],
+        description: "Real-time face verification metrics and anti-spoof logs",
+        icon: "📊",
+      },
+      {
+        name: "Biometric Settings",
+        path: "/human-resources/biometric-settings",
+        actions: [
+          {
+            label: "Calibrate",
+            path: "/human-resources/biometric-settings",
+            type: "outline",
+          },
+        ],
+        description: "Sensitivity, anti-spoofing strictness and shift rules",
+        icon: "⚙️",
+      },
       {
         name: "Clock In/Out",
         path: "/human-resources/attendance",
@@ -1046,6 +1094,10 @@ export default function HumanResourcesHome() {
         <Route path="roster" element={<RosterManagement />} />
         <Route path="payroll/elements" element={<AllowanceList />} />
         {/* Time & Attendance extra routes */}
+        <Route path="biometric-clock" element={<BiometricClockPage />} />
+        <Route path="biometric-devices" element={<BiometricDevicesPage />} />
+        <Route path="biometric-settings" element={<BiometricSettingsPage />} />
+        <Route path="biometric-analytics" element={<BiometricAnalyticsPage />} />
         <Route path="attendance" element={<AttendanceDashboard />} />
         <Route path="attendance/new" element={<AttendanceForm />} />
         <Route path="attendance/list" element={<AttendanceList />} />

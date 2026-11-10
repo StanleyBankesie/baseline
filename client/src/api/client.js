@@ -57,11 +57,11 @@ let API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 if (
   typeof window !== "undefined" &&
-  (window.location.hostname.includes("thana") ||
-    window.location.hostname === "thana.omnisuite-erp.com" ||
-    window.location.hostname === "thanaserver.omnisuite-erp.com")
+  (window.location.hostname.includes("demo") ||
+    window.location.hostname === "demo.omnisuite-erp.com" ||
+    window.location.hostname === "demoserver.omnisuite-erp.com")
 ) {
-  API_BASE = "https://thanaserver.omnisuite-erp.com/api";
+  API_BASE = "https://demoserver.omnisuite-erp.com/api";
 } else if (
   typeof window !== "undefined" &&
   window.location.hostname.endsWith(".omnisuite-erp.com")
@@ -403,29 +403,45 @@ export function resolveMeaningfulErrorMessage(data, status) {
       return "An error occurred while processing your request. Please try again.";
     }
     if (/<[a-z][\s\S]*>/i.test(data)) {
-      const clean = data.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+      const clean = data
+        .replace(/<[^>]*>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
       if (clean && !/internal\s*server\s*error/i.test(clean)) {
         return clean.slice(0, 200);
       }
       return "An error occurred while processing your request. Please try again.";
     }
-    return data.trim() || "An error occurred while processing your request. Please try again.";
+    return (
+      data.trim() ||
+      "An error occurred while processing your request. Please try again."
+    );
   }
 
   if (typeof data === "object") {
-    const candidate = data.message || data.error || data.detail || data.sqlMessage;
+    const candidate =
+      data.message || data.error || data.detail || data.sqlMessage;
     if (typeof candidate === "string" && candidate.trim()) {
       if (!/internal\s*server\s*error/i.test(candidate)) {
         return candidate.trim();
       }
     }
-    if (typeof data.detail === "string" && data.detail.trim() && !/internal\s*server\s*error/i.test(data.detail)) {
+    if (
+      typeof data.detail === "string" &&
+      data.detail.trim() &&
+      !/internal\s*server\s*error/i.test(data.detail)
+    ) {
       return data.detail.trim();
     }
     if (typeof data.sqlMessage === "string" && data.sqlMessage.trim()) {
       return data.sqlMessage.trim();
     }
-    if (typeof data.error === "string" && data.error.trim() && !/internal\s*server\s*error/i.test(data.error) && data.error !== "SERVER_ERROR") {
+    if (
+      typeof data.error === "string" &&
+      data.error.trim() &&
+      !/internal\s*server\s*error/i.test(data.error) &&
+      data.error !== "SERVER_ERROR"
+    ) {
       return data.error.trim();
     }
   }
@@ -558,7 +574,8 @@ api.interceptors.response.use(
         ? {
             ...error.response,
             data:
-              typeof error.response.data === "object" && error.response.data !== null
+              typeof error.response.data === "object" &&
+              error.response.data !== null
                 ? {
                     ...error.response.data,
                     message: offlineMessage,
@@ -594,12 +611,15 @@ api.interceptors.response.use(
       ? {
           ...error.response,
           data:
-            typeof error.response.data === "object" && error.response.data !== null
+            typeof error.response.data === "object" &&
+            error.response.data !== null
               ? {
                   ...error.response.data,
                   message:
                     !error.response.data.message ||
-                    /internal\s*server\s*error/i.test(String(error.response.data.message))
+                    /internal\s*server\s*error/i.test(
+                      String(error.response.data.message),
+                    )
                       ? resolvedMessage
                       : error.response.data.message,
                 }
@@ -804,7 +824,8 @@ function delay(ms) {
 }
 
 function shouldRetryGet(error, attempt) {
-  if (typeof navigator !== "undefined" && navigator.onLine === false) return false;
+  if (typeof navigator !== "undefined" && navigator.onLine === false)
+    return false;
   if (attempt >= Math.max(GET_RETRY_LIMIT, 3)) return false; // Ensure we retry at least 3 times
   if (
     error?.response?.status === 500 ||

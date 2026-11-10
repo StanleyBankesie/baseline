@@ -57,6 +57,7 @@ import chatRoutes from "./routes/chat.routes.js";
 import aiRoutes from "./routes/ai.routes.js";
 import emailTestRoutes from "./routes/email-test.routes.js";
 import visitorsRoutes from "./routes/visitors.routes.js";
+import biometricRoutes from "./routes/biometric.routes.js";
 import licenseRoutes from "./routes/license.routes.js";
 import paymentPackageRoutes from "./routes/paymentPackages.js";
 import { requireLicense } from "./middleware/license.middleware.js";
@@ -120,8 +121,8 @@ const allowedOrigins = (() => {
     : [];
 
   const defaults = [
-    "https://thana.omnisuite-erp.com",
-    "https://thanaserver.omnisuite-erp.com",
+    "https://demo.omnisuite-erp.com",
+    "https://demoserver.omnisuite-erp.com",
     "http://localhost:5173",
     "http://localhost:5174",
     "http://localhost:4002",
@@ -1093,6 +1094,8 @@ const apiPaths = [
   { path: "/ai", router: aiRoutes },
   { path: "/email-test", router: emailTestRoutes },
   { path: "/visitors", router: visitorsRoutes },
+  { path: "/biometrics", router: biometricRoutes },
+  { path: "/hr/biometrics", router: biometricRoutes },
 ];
 
 // Debug Endpoint to view production crash reports directly from the browser

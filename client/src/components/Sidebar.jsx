@@ -406,7 +406,7 @@ export default function Sidebar() {
         {
           key: "checklists",
           label: "Inspection Checklists",
-          path: "/facilities/checklists",
+          path: "/facilities/setup?tab=checklists",
         },
         {
           key: "soft-services",
