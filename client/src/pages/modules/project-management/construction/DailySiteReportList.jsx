@@ -28,7 +28,8 @@ import {
   Clock,
   ShieldCheck,
   Building,
-  UserCheck
+  UserCheck,
+  Activity
 } from "lucide-react";
 import { api } from "../../../../api/client.js";
 import { usePermission } from "../../../../auth/PermissionContext.jsx";
@@ -558,6 +559,50 @@ export default function DailySiteReportList() {
         </div>
       </div>
 
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Approved Diaries",
+            val: approvedCount,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Total Site Diaries",
+            val: reports.length,
+            icon: <BookOpen size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+          {
+            label: "Pending Review",
+            val: pendingCount,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Total Site Headcount",
+            val: `${totalHeadcount.toLocaleString()} Workers`,
+            icon: <Users size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Reports Table Card */}
       <div className="card overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 rounded-2xl">
         <div className="p-4 bg-slate-50/70 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700/80 flex justify-between items-center">
@@ -578,8 +623,6 @@ export default function DailySiteReportList() {
               <tr className="bg-slate-50 dark:bg-slate-800/80 text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 dark:border-slate-700">
                 <th className="py-3 px-4">Report #</th>
                 <th className="py-3 px-4">Date</th>
-                <th className="py-3 px-4">Weather</th>
-                <th className="py-3 px-4">Site Condition</th>
                 <th className="py-3 px-4 text-center">Workforce</th>
                 <th className="py-3 px-4 text-center">Activities</th>
                 <th className="py-3 px-4">Site Engineer</th>
@@ -590,7 +633,7 @@ export default function DailySiteReportList() {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
               {filteredReports.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="p-12 text-center text-slate-400 italic">
+                  <td colSpan={7} className="p-12 text-center text-slate-400 italic">
                     {reports.length === 0
                       ? 'No daily reports recorded for this project yet. Click "New Daily Report" to log today\'s site diary.'
                       : 'No daily site reports match your search criteria.'}
@@ -620,20 +663,7 @@ export default function DailySiteReportList() {
                         {r.report_date ? r.report_date.split("T")[0] : "-"}
                       </td>
 
-                      {/* Weather */}
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-200">
-                          <CloudSun size={15} className="text-amber-500 shrink-0" />
-                          <span className="text-xs font-medium">
-                            {r.weather_morning || "SUNNY"} / {r.weather_afternoon || "SUNNY"}
-                          </span>
-                        </span>
-                      </td>
 
-                      {/* Site Condition */}
-                      <td className="py-3 px-4 uppercase text-xs font-semibold text-slate-500 whitespace-nowrap">
-                        {r.site_condition || "DRY"}
-                      </td>
 
                       {/* Workforce Headcount */}
                       <td className="py-3 px-4 text-center font-bold text-blue-600 dark:text-blue-400 font-mono whitespace-nowrap">

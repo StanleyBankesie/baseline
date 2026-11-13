@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Wrench, Plus, Filter, RefreshCw, ArrowLeft,
-  Server, AlertTriangle, CalendarClock, WifiOff, Search, Pencil, Eye, X,
-  History, Activity, Clock, ShieldCheck, CheckCircle2, ChevronRight, Calendar,
-  UserCheck, RotateCcw
-} from "lucide-react";
+import { Wrench, Plus, Filter, RefreshCw, ArrowLeft, Server, AlertTriangle, CalendarClock, WifiOff, Search, Pencil, Eye, X, History, Activity, Clock, ShieldCheck, CheckCircle2, ChevronRight, Calendar, UserCheck, RotateCcw, Cog } from "lucide-react";
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 

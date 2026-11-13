@@ -5,10 +5,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { 
-  Receipt, Plus, Search, Filter, ArrowLeft, 
-  CheckCircle2, Clock, AlertTriangle, Building2, Eye, Edit2, XCircle
-} from "lucide-react";
+import { Receipt, Plus, Search, Filter, ArrowLeft, CheckCircle2, Clock, AlertTriangle, Building2, Eye, Edit2, XCircle, Activity } from "lucide-react";
 import { api } from "../../../../api/client.js";
 import { usePermission } from "../../../../auth/PermissionContext.jsx";
 import { filterAndSort } from "@/utils/searchUtils.js";
@@ -85,6 +82,51 @@ export default function ServiceBillingList() {
               <ArrowLeft size={14} /> Back to Facilities
             </Link>
           </div>
+
+      {/* Metric Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        {[
+          {
+            label: "Active Tenant Utility Bills",
+            val: (bills || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Total Tenant Utility Bills",
+            val: (bills || []).length,
+            icon: <Receipt size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+          {
+            label: "Pending Tenant Utility Bills",
+            val: (bills || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "SCHEDULED").length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Completed Tenant Utility Bills",
+            val: (bills || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "HIRED" || x.status === "PAID").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
+      </div>
+
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
             <span className="p-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl">
               🧾
@@ -164,7 +206,6 @@ export default function ServiceBillingList() {
                 <th className="p-3.5">Payment Status</th>
                 <th className="p-3.5 text-right">Total Amount (₵)</th>
                 <th className="p-3.5">Workflow Status</th>
-                <th className="p-3.5">Created By</th>
                 <th className="p-3.5 pr-5 text-right">Actions</th>
               </tr>
             </thead>

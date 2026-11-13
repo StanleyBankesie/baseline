@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { 
-  FileText, Plus, Search, Calendar, ShieldCheck, 
-  Receipt, Clock, CheckCircle, AlertCircle, Building2, X, ArrowLeft,
-  Upload, Paperclip, Loader2, File, ExternalLink, Eye, Edit
-} from "lucide-react";
+import { FileText, Plus, Search, Calendar, ShieldCheck, Receipt, Clock, CheckCircle, AlertCircle, Building2, X, ArrowLeft, Upload, Paperclip, Loader2, File, ExternalLink, Eye, Edit, Activity, CheckCircle2, FileCheck } from "lucide-react";
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import ViewToggle from "../../../../components/ViewToggle.jsx";
@@ -378,7 +374,51 @@ export default function FMContractsList() {
         </div>
       ) : (
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
+                {/* Metric Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        {[
+          {
+            label: "Active FM Service Contracts",
+            val: (contracts || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Total FM Service Contracts",
+            val: (contracts || []).length,
+            icon: <FileCheck size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+          {
+            label: "Pending FM Service Contracts",
+            val: (contracts || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Completed FM Service Contracts",
+            val: (contracts || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="overflow-x-auto">
             <table className="table w-full">
               <thead className="bg-slate-50 dark:bg-slate-900/50 text-slate-500 text-xs border-b border-slate-200 dark:border-slate-700 uppercase tracking-wider">
                 <tr>

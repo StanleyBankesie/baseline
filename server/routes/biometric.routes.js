@@ -39,6 +39,26 @@ router.post(
   biometricController.biometricClockInOut
 );
 
+// Acceptable Work Locations & Geofences
+router.get(
+  "/locations",
+  requireAuth,
+  requireCompanyScope,
+  biometricController.listLocations
+);
+router.post(
+  "/locations",
+  requireAuth,
+  requireCompanyScope,
+  biometricController.saveLocation
+);
+router.delete(
+  "/locations/:id",
+  requireAuth,
+  requireCompanyScope,
+  biometricController.deleteLocation
+);
+
 // Biometric Devices
 router.get(
   "/devices",

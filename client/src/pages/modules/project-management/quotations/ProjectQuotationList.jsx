@@ -833,74 +833,47 @@ export default function ProjectQuotationList() {
       </div>
 
       {/* Meaningful Metrics Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="card p-4 flex items-center gap-3">
-          <div className="p-2.5 rounded-xl text-blue-600 bg-blue-50 dark:bg-blue-900/30">
-            <FileText size={20} />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Approved / Accepted",
+            val: quotationMetrics.approvedCount,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Total Quotations",
+            val: quotationMetrics.totalCount,
+            icon: <FileText size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+          {
+            label: "Draft / Pending",
+            val: quotationMetrics.draftCount + quotationMetrics.pendingCount,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Rejected / Expired",
+            val: (quotations || []).filter((q) => q.status === "REJECTED" || q.status === "EXPIRED" || q.status === "CANCELLED").length,
+            icon: <X size={20} className="stroke-[2.5]" />,
+            color: "bg-rose-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider truncate">
-              Total Quotations
-            </p>
-            <p className="text-xl font-bold text-slate-900 dark:text-white">
-              {quotationMetrics.totalCount}
-            </p>
-            <p className="text-xs text-slate-500 truncate">
-              {filteredQuotations.length} in current view
-            </p>
-          </div>
-        </div>
-
-        <div className="card p-4 flex items-center gap-3">
-          <div className="p-2.5 rounded-xl text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30">
-            <DollarSign size={20} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider truncate">
-              Pipeline Value
-            </p>
-            <p className="text-xl font-bold text-slate-900 dark:text-white truncate">
-              GHS {quotationMetrics.totalPipelineValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-            <p className="text-xs text-slate-500 truncate">
-              Total quoted amount
-            </p>
-          </div>
-        </div>
-
-        <div className="card p-4 flex items-center gap-3">
-          <div className="p-2.5 rounded-xl text-teal-600 bg-teal-50 dark:bg-teal-900/30">
-            <CheckCircle2 size={20} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider truncate">
-              Approved / Accepted
-            </p>
-            <p className="text-xl font-bold text-teal-600 dark:text-teal-400">
-              {quotationMetrics.approvedCount}
-            </p>
-            <p className="text-xs text-slate-500 truncate">
-              GHS {quotationMetrics.approvedValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} approved
-            </p>
-          </div>
-        </div>
-
-        <div className="card p-4 flex items-center gap-3">
-          <div className="p-2.5 rounded-xl text-amber-600 bg-amber-50 dark:bg-amber-900/30">
-            <Clock size={20} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider truncate">
-              Draft / Pending
-            </p>
-            <p className="text-xl font-bold text-amber-600 dark:text-amber-400">
-              {quotationMetrics.draftCount} <span className="text-xs font-normal text-slate-400">Draft</span> / {quotationMetrics.pendingCount} <span className="text-xs font-normal text-slate-400">Pending</span>
-            </p>
-            <p className="text-xs text-slate-500 truncate">
-              Avg: GHS {quotationMetrics.avgValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-          </div>
-        </div>
+        ))}
       </div>
 
       {error && (

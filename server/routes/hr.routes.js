@@ -764,6 +764,39 @@ router.post(
   hrController.backfillTier3,
 );
 
+// Salary Exemptions & Holds
+router.get(
+  "/payroll/exemptions",
+  requireAuth,
+  requireCompanyScope,
+  hrController.listSalaryExemptions,
+);
+router.post(
+  "/payroll/exemptions",
+  requireAuth,
+  requireCompanyScope,
+  hrController.createSalaryExemption,
+);
+router.put(
+  "/payroll/exemptions/:id",
+  requireAuth,
+  requireCompanyScope,
+  hrController.updateSalaryExemption,
+);
+router.put(
+  "/payroll/exemptions/:id/release",
+  requireAuth,
+  requireCompanyScope,
+  hrController.releaseSalaryExemption,
+);
+router.delete(
+  "/payroll/exemptions/:id",
+  requireAuth,
+  requireCompanyScope,
+  hrController.deleteSalaryExemption,
+);
+
+
 // Loan Types (Setup)
 router.get(
   "/loan-types",
@@ -1061,9 +1094,27 @@ router.post(
   hrController.acknowledgePolicy,
 );
 
-// Exit & Clearance
+// Exit & Offboarding
 router.get("/exits", requireAuth, requireCompanyScope, hrController.listExits);
 router.post("/exits", requireAuth, requireCompanyScope, hrController.saveExit);
+router.put(
+  "/exits/:id/approve",
+  requireAuth,
+  requireCompanyScope,
+  hrController.approveExit,
+);
+router.put(
+  "/exits/:id/reject",
+  requireAuth,
+  requireCompanyScope,
+  hrController.rejectExit,
+);
+router.delete(
+  "/exits/:id",
+  requireAuth,
+  requireCompanyScope,
+  hrController.deleteExit,
+);
 router.get(
   "/clearance",
   requireAuth,

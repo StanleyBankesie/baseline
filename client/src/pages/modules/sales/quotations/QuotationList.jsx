@@ -18,7 +18,7 @@ import {
   ListPdfIconButton,
   ListAttachmentIconButton,
 } from "@/components/list/ListDocActionIconButtons.jsx";
-import { X, Send } from "lucide-react";
+import { X, Send, CheckCircle2, FileText, Clock, DollarSign } from "lucide-react";
 import { useViewMode } from "@/hooks/useViewMode";
 import ViewToggle from "@/components/ViewToggle";
 
@@ -791,6 +791,53 @@ export default function QuotationList() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Accepted Quotations",
+            val: quotations.filter((q) => q.status === "ACCEPTED" || q.status === "APPROVED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500",
+          },
+          {
+            label: "Total Quotations",
+            val: quotations.length,
+            icon: <FileText size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700",
+          },
+          {
+            label: "Pending / Sent",
+            val: quotations.filter((q) => q.status === "PENDING" || q.status === "SENT" || q.status === "DRAFT").length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500",
+          },
+          {
+            label: "Approved Quotations",
+            val: quotations.filter((q) => q.status === "APPROVED" || q.status === "ACCEPTED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600",
+          },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm"
+          >
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
       </div>
 
       {error && (

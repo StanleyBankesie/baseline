@@ -47,7 +47,7 @@ router.get(
 );
 
 router.get(
-  ["/projects/:id", "/:id"],
+  ["/projects/:id(\\d+)", "/:id(\\d+)"],
   requireAuth,
   requireCompanyScope,
   requireBranchScope,
@@ -65,12 +65,48 @@ router.post(
 );
 
 router.put(
-  "/projects/:id",
+  ["/projects/:id(\\d+)", "/:id(\\d+)"],
   requireAuth,
   requireCompanyScope,
   requireBranchScope,
   requirePermission("PM.PROJECT.MANAGE"),
   projectsController.updateProject
+);
+
+router.get(
+  "/generate-code",
+  requireAuth,
+  requireCompanyScope,
+  projectsController.getGeneratedProjectCode
+);
+
+// ===== PROJECT TYPES =====
+router.get(
+  "/project-types",
+  requireAuth,
+  requireCompanyScope,
+  projectsController.listProjectTypes
+);
+router.post(
+  "/project-types",
+  requireAuth,
+  requireCompanyScope,
+  requirePermission("PM.PROJECT.MANAGE"),
+  projectsController.createProjectType
+);
+router.put(
+  "/project-types/:id",
+  requireAuth,
+  requireCompanyScope,
+  requirePermission("PM.PROJECT.MANAGE"),
+  projectsController.updateProjectType
+);
+router.delete(
+  "/project-types/:id",
+  requireAuth,
+  requireCompanyScope,
+  requirePermission("PM.PROJECT.MANAGE"),
+  projectsController.deleteProjectType
 );
 
 // ===== PROJECT MANAGERS =====
@@ -209,7 +245,7 @@ router.delete(
 );
 
 router.delete(
-  "/projects/:id",
+  ["/projects/:id(\\d+)", "/:id(\\d+)"],
   requireAuth,
   requireCompanyScope,
   requireBranchScope,

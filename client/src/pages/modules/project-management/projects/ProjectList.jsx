@@ -9,7 +9,7 @@ import {
   Plus,
   Activity,
   Briefcase,
-  DollarSign,
+  CheckCircle2,
   Clock,
   Printer,
   Paperclip,
@@ -79,7 +79,6 @@ export default function ProjectList() {
     sortDir,
     toggle,
   } = useSort(filteredItems, "created_at", "desc");
-  const totalBudget = items.reduce((a, c) => a + Number(c.budget || 0), 0);
 
   async function printProject(id) {
     try {
@@ -149,37 +148,39 @@ export default function ProjectList() {
           {
             label: "Active Projects",
             val: items.filter((p) => p.project_status === "IN_PROGRESS").length,
-            icon: <Activity size={18} />,
-            color: "text-brand-700 bg-brand-50 dark:bg-brand-900/30",
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
           },
           {
             label: "Total Portfolio",
             val: items.length,
-            icon: <Briefcase size={18} />,
-            color: "text-blue-600 bg-blue-50 dark:bg-blue-900/30",
+            icon: <Briefcase size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
           },
           {
             label: "Pending Start",
             val: items.filter((p) => p.project_status === "PLANNING").length,
-            icon: <Clock size={18} />,
-            color: "text-amber-600 bg-amber-50 dark:bg-amber-900/30",
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
           },
           {
-            label: "Total Budget",
-            val: `GH₵ ${totalBudget.toLocaleString()}`,
-            icon: <DollarSign size={18} />,
-            color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30",
+            label: "Completed Projects",
+            val: items.filter((p) => p.project_status === "COMPLETED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
           },
         ].map((stat, i) => (
-          <div key={i} className="card p-4 flex items-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
-            <div className={`p-2.5 rounded-xl ${stat.color}`}>{stat.icon}</div>
+          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 {stat.label}
               </p>
-              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white">
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
                 {stat.val}
               </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
             </div>
           </div>
         ))}
@@ -256,14 +257,13 @@ export default function ProjectList() {
                   onToggle={toggle}
                   className="text-right"
                 />
-                <th className="text-center">Active</th>
                 <th className="w-px whitespace-nowrap text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {loading ? (
                 <tr>
-                  <td colSpan="8" className="text-center py-8 text-slate-400 italic">
+                  <td colSpan="7" className="text-center py-8 text-slate-400 italic">
                     Loading projects portfolio...
                   </td>
                 </tr>
@@ -330,18 +330,6 @@ export default function ProjectList() {
                       GH₵ {Number(item.budget || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </td>
 
-                    {/* Active */}
-                    <td className="text-center py-3 px-4">
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
-                          item.is_active !== "N"
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800"
-                            : "bg-slate-100 text-slate-500 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
-                        }`}
-                      >
-                        {item.is_active !== "N" ? "Active" : "Inactive"}
-                      </span>
-                    </td>
 
                     {/* Actions */}
                     <td className="w-px whitespace-nowrap py-3 px-4 text-right">
@@ -380,7 +368,7 @@ export default function ProjectList() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="text-center py-8 text-slate-400 italic">
+                  <td colSpan="7" className="text-center py-8 text-slate-400 italic">
                     No projects found.
                   </td>
                 </tr>

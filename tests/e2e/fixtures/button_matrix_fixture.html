@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Button Matrix Fixture</title>
+  <style>
+    *, ::before, ::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; padding: 24px; background: #f8fafc; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .gap-4 { gap: 16px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; font-weight: 500; min-height: 42px; border-radius: 12px; border: 1px solid transparent; cursor: pointer; }
+    .btn-primary { background-color: #0E3646 !important; color: #fff !important; min-height: 42px; padding: 10px 20px; border-radius: 12px; }
+    .btn-secondary { background-color: #fff !important; color: #334155 !important; border: 1px solid #e2e8f0 !important; min-height: 42px; padding: 10px 20px; border-radius: 12px; }
+    .btn-danger { background-color: rgb(225, 29, 72) !important; color: #fff !important; min-height: 42px; padding: 8px 16px; border-radius: 12px; }
+    .btn-sm { min-height: 36px !important; height: 36px !important; padding: 6px 14px !important; font-size: 12px !important; border-radius: 8px !important; }
+    .btn-icon { width: 42px !important; height: 42px !important; min-height: 42px !important; padding: 0 !important; border-radius: 12px !important; }
+    .btn-sm.btn-icon { width: 36px !important; height: 36px !important; min-height: 36px !important; padding: 0 !important; border-radius: 8px !important; }
+    .btn-table-action { height: 36px !important; min-height: 36px !important; border-radius: 8px !important; font-size: 12px !important; padding: 6px 12px !important; }
+  </style>
+</head>
+<body>
+  <div class="flex flex-col gap-4">
+    <button id="btn-base" class="btn">Base</button>
+    <button id="btn-primary" class="btn btn-primary">Primary</button>
+    <button id="btn-secondary" class="btn btn-secondary">Secondary</button>
+    <button id="btn-danger" class="btn btn-danger">Danger</button>
+    <button id="btn-sm" class="btn btn-sm">Compact</button>
+    <button id="btn-icon" class="btn btn-secondary btn-icon">↻</button>
+    <button id="btn-icon-sm" class="btn btn-secondary btn-sm btn-icon">↻</button>
+    <button id="btn-table" class="btn-table-action">View</button>
+  </div>
+</body>
+</html>

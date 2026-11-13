@@ -582,11 +582,11 @@ def build_process_guide():
         "Senior Estimator / Bid Proposal Manager",
         "Prepares commercial bids for client tenders. Compiles estimated costs (Direct Materials, Plant hire, Labor timesheets, Specialist Subcontractors), applies target markups, and produces formal quote proposals.",
         "Establishes the initial commercial baseline and target gross profit margin for prospective projects.",
-        "Step 3: Project Orders",
+        "Step 3: Client's Orders",
         "Input: Client tender package, drawings, material estimates ➔ Output: Commercial Project Quote Proposal."
     )
     add_page_step(
-        3, "Project Orders", "/project-management/project-orders", "ProjectOrderList.jsx & Form.jsx",
+        3, "Client's Orders", "/project-management/project-orders", "ProjectOrderList.jsx & Form.jsx",
         "Contracts Administrator / Legal Counsel",
         "When the client accepts the quote and issues a Letter of Award (LOA) or signed construction contract, this page binds the order, locking in contract value, advance payment terms, and retention percentages.",
         "Converts a bid estimate into a legally binding contractual commitment before site mobilization starts.",

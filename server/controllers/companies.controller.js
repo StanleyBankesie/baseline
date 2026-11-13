@@ -826,7 +826,10 @@ export const getDepartments = async (req, res, next) => {
       queryStr += " AND d.branch_id IS NULL";
     }
 
-    queryStr += " AND d.is_active = 1";
+    const includeInactive = req.query.all === "1" || req.query.all === "true" || req.query.include_inactive === "1" || req.query.include_inactive === "true" || req.query.active === "all";
+    if (!includeInactive) {
+      queryStr += " AND (d.is_active = 1 OR d.is_active = 'Y')";
+    }
     queryStr += " ORDER BY c.name ASC, b.name ASC, d.name ASC";
 
     const items = await query(queryStr, params);
@@ -849,6 +852,8 @@ export const updateDepartment = async (req, res, next) => {
     if (!name || !code)
       throw httpError(400, "VALIDATION_ERROR", "name and code are required");
 
+    const activeVal = (is_active === 0 || is_active === "0" || is_active === "N" || is_active === false) ? 0 : 1;
+
     const result = await query(
       "UPDATE adm_departments SET company_id = :company_id, branch_id = :branch_id, name = :name, code = :code, is_active = :is_active WHERE id = :id",
       {
@@ -857,7 +862,7 @@ export const updateDepartment = async (req, res, next) => {
         branch_id: branch_id || null,
         name,
         code,
-        is_active: is_active === undefined ? 1 : Number(Boolean(is_active)),
+        is_active: is_active === undefined ? 1 : activeVal,
       },
     );
     res.json({ affectedRows: result.affectedRows });

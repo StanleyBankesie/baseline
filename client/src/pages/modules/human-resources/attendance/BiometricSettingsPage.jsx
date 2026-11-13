@@ -90,7 +90,7 @@ export default function BiometricSettingsPage() {
           <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
             <Sparkles className="w-4 h-4 text-emerald-500" />
             <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
-              Recognition Sensitivity (SFace Engine)
+              Recognition Sensitivity (InsightFace ArcFace Engine)
             </h2>
           </div>
 

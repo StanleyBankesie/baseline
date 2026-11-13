@@ -39,6 +39,7 @@ export default function FaceCaptureModal({
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [consentGiven, setConsentGiven] = useState(true);
+  const [replaceExisting, setReplaceExisting] = useState(false);
 
   // Enumerate cameras
   useEffect(() => {
@@ -65,6 +66,7 @@ export default function FaceCaptureModal({
       setCapturedPhoto(null);
       setAnalysisResult(null);
       setCameraError("");
+      setReplaceExisting(false);
       startCamera(selectedDeviceId);
     } else {
       stopCamera();
@@ -123,7 +125,6 @@ export default function FaceCaptureModal({
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
 
-    // Optional flip if user facing
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     return canvas.toDataURL("image/jpeg", 0.92);
   };
@@ -151,6 +152,7 @@ export default function FaceCaptureModal({
           employee_id: employeeId,
           image: photoBase64,
           consent_given: consentGiven,
+          replace_existing: replaceExisting,
         });
 
         if (res.data?.success) {
@@ -170,10 +172,13 @@ export default function FaceCaptureModal({
       }
     } catch (err) {
       console.error("Biometric capture error:", err);
-      const errMsg = err.response?.data?.message || err.message || "Failed to process face biometric.";
+      const data = err.response?.data;
+      const errMsg = data?.message || err.message || "Failed to process face biometric.";
       toast.error(errMsg);
       setAnalysisResult({
         success: false,
+        duplicate: Boolean(data?.duplicate_biometric || data?.already_registered),
+        already_registered: Boolean(data?.already_registered),
         message: errMsg,
       });
     } finally {
@@ -188,11 +193,16 @@ export default function FaceCaptureModal({
   };
 
   const handleConfirmAndSave = () => {
-    if (!capturedPhoto) return;
+    if (!capturedPhoto || !analysisResult?.success) {
+      toast.error("Cannot save credentials: face analysis did not pass or contains errors.");
+      return;
+    }
     if (onCapture) {
       onCapture({
         photoBase64: capturedPhoto,
         descriptor: null,
+        success: true,
+        alreadyEnrolled: Boolean(employeeId),
       });
     }
     stopCamera();
@@ -221,6 +231,25 @@ export default function FaceCaptureModal({
       showFooter={false}
     >
       <div className="space-y-4">
+        {/* Existing Profile Warning & Replace Checkbox */}
+        {enrolledDescriptor && mode === "register" && !capturedPhoto && (
+          <div className="flex items-center justify-between p-3 bg-amber-500/10 rounded-xl border border-amber-500/30 text-xs">
+            <span className="text-amber-700 dark:text-amber-300 font-medium flex items-center gap-1.5">
+              <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+              This employee already has an active biometric profile.
+            </span>
+            <label className="flex items-center gap-1.5 cursor-pointer text-slate-800 dark:text-slate-100 font-semibold shrink-0">
+              <input
+                type="checkbox"
+                checked={replaceExisting}
+                onChange={(e) => setReplaceExisting(e.target.checked)}
+                className="rounded text-emerald-600 focus:ring-emerald-500"
+              />
+              Replace existing
+            </label>
+          </div>
+        )}
+
         {/* Camera Selector (Laptop vs External USB) */}
         {devices.length > 1 && !capturedPhoto && (
           <div className="flex items-center justify-between px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 text-xs">
@@ -284,8 +313,8 @@ export default function FaceCaptureModal({
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                   Live Camera Preview
                 </span>
-                <span className="px-2.5 py-1 bg-slate-900/80 backdrop-blur rounded-full text-[10px] text-slate-400">
-                  YuNet + SFace Engine
+                <span className="px-2.5 py-1 bg-slate-900/80 backdrop-blur rounded-full text-[10px] text-emerald-400 font-medium">
+                  InsightFace ArcFace Engine (512-D)
                 </span>
               </div>
             </>
@@ -306,7 +335,7 @@ export default function FaceCaptureModal({
             <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm flex flex-col items-center justify-center gap-3 text-slate-200">
               <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
               <span className="text-xs font-medium tracking-wide">
-                Analyzing Face Quality & Checking Liveness...
+                Analyzing Face Quality & Checking Duplicate Biometrics...
               </span>
             </div>
           )}
@@ -323,9 +352,9 @@ export default function FaceCaptureModal({
           >
             <div className="flex items-center gap-2 font-semibold">
               {analysisResult.success ? (
-                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
               ) : (
-                <AlertTriangle className="w-4 h-4 text-rose-500" />
+                <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
               )}
               <span>{analysisResult.message}</span>
             </div>
@@ -333,6 +362,50 @@ export default function FaceCaptureModal({
               <div className="mt-2 text-[11px] text-slate-400 grid grid-cols-2 gap-2 bg-slate-900/40 p-2 rounded-lg">
                 <div>Sharpness: {analysisResult.quality.blur_score} (Passed)</div>
                 <div>Illumination: {analysisResult.quality.illumination?.mean} / 255</div>
+              </div>
+            )}
+            {analysisResult.already_registered && (
+              <div className="mt-2.5 pt-2 border-t border-rose-500/20 flex items-center justify-between gap-2">
+                <span className="text-[11px] text-slate-300">
+                  Authorized to overwrite existing biometric template?
+                </span>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setReplaceExisting(true);
+                    setAnalysisResult(null);
+                    setAnalyzing(true);
+                    try {
+                      const res = await api.post("/hr/biometrics/enroll", {
+                        employee_id: employeeId,
+                        image: capturedPhoto,
+                        consent_given: consentGiven,
+                        replace_existing: true,
+                      });
+                      if (res.data?.success) {
+                        toast.success(res.data.message || "Facial biometric credentials updated successfully!");
+                        setAnalysisResult({
+                          success: true,
+                          quality: res.data.quality,
+                          message: "Enrolled & Encrypted (AES-256-GCM)",
+                        });
+                      }
+                    } catch (retryErr) {
+                      const rData = retryErr.response?.data;
+                      const rMsg = rData?.message || retryErr.message;
+                      toast.error(rMsg);
+                      setAnalysisResult({
+                        success: false,
+                        message: rMsg,
+                      });
+                    } finally {
+                      setAnalyzing(false);
+                    }
+                  }}
+                  className="px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded text-xs font-semibold shrink-0 transition shadow-sm"
+                >
+                  Re-scan / Replace Now
+                </button>
               </div>
             )}
           </div>
@@ -352,7 +425,7 @@ export default function FaceCaptureModal({
               <span className="font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-1">
                 <Lock className="w-3 h-3 text-emerald-500" /> Data Privacy & Consent Affirmation (Act 843)
               </span>
-              I confirm the employee was informed and consented to having their 128-point biometric face vector extracted, encrypted (AES-256), and stored strictly for time & attendance verification.
+              I confirm the employee was informed and consented to having their 512-point biometric face vector extracted, encrypted (AES-256), and stored strictly for time & attendance verification.
             </label>
           </div>
         )}
@@ -393,7 +466,8 @@ export default function FaceCaptureModal({
               <button
                 type="button"
                 onClick={handleConfirmAndSave}
-                className="btn-primary text-xs flex items-center gap-1.5 px-5 py-2 bg-emerald-600 hover:bg-emerald-500"
+                disabled={!analysisResult || !analysisResult.success}
+                className="btn-primary text-xs flex items-center gap-1.5 px-5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <CheckCircle2 className="w-4 h-4" /> Save Face Credentials
               </button>

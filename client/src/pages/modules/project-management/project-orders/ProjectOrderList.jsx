@@ -11,7 +11,7 @@ import { toast } from "react-toastify";
 import { filterAndSort } from "../../../../utils/searchUtils.js";
 import useSort from "../../../../hooks/useSort.js";
 import SortableHeader from "../../../../components/SortableHeader.jsx";
-import { Plus, ArrowLeft, ShoppingCart, RefreshCw } from "lucide-react";
+import { Plus, ArrowLeft, ShoppingCart, RefreshCw, Activity, Clock, CheckCircle2 } from "lucide-react";
 import { useViewMode } from "@/hooks/useViewMode";
 import ViewToggle from "@/components/ViewToggle";
 import {
@@ -79,7 +79,7 @@ export default function ProjectOrderList() {
         : [];
       setOrders(items);
     } catch (err) {
-      setError(err?.response?.data?.message || "Error fetching project orders");
+      setError(err?.response?.data?.message || "Error fetching client's orders");
     } finally {
       setLoading(false);
     }
@@ -90,24 +90,24 @@ export default function ProjectOrderList() {
   }, []);
 
   const handleDelete = async (id, orderNo) => {
-    if (!window.confirm(`Delete Project Order (${orderNo || id})? This cannot be undone.`)) return;
+    if (!window.confirm(`Delete Client's Order (${orderNo || id})? This cannot be undone.`)) return;
     try {
       await api.delete(`/projects/project-orders/${id}`);
-      toast.success("Project order deleted");
+      toast.success("Client's order deleted");
       setOrders((prev) => prev.filter((x) => x.id !== id));
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to delete project order");
+      toast.error(err?.response?.data?.message || "Failed to delete client's order");
     }
   };
 
   const handleSubmit = async (order) => {
-    if (!window.confirm(`Submit Project Order (${order.order_no}) for processing?`)) return;
+    if (!window.confirm(`Submit Client's Order (${order.order_no}) for processing?`)) return;
     try {
       await api.post(`/projects/project-orders/${order.id}/submit`);
-      toast.success("Project order submitted");
+      toast.success("Client's order submitted");
       fetchOrders();
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to submit project order");
+      toast.error(err?.response?.data?.message || "Failed to submit client's order");
     }
   };
 
@@ -220,6 +220,9 @@ export default function ProjectOrderList() {
     ).size;
   }, [filteredOrders]);
 
+  const totalOrderAmount = useMemo(() => {
+    return orders.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
+  }, [orders]);
 
   return (
     <div className="space-y-6">
@@ -232,7 +235,7 @@ export default function ProjectOrderList() {
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
               <ShoppingCart size={26} className="text-brand-900 dark:text-brand-400" />
-              Project Orders
+              Client's Orders
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
               Manage orders placed against projects
@@ -252,13 +255,57 @@ export default function ProjectOrderList() {
         </div>
       </div>
 
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Active Orders",
+            val: orders.filter((o) => o.status === "APPROVED" || o.status === "POSTED").length,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Total Orders",
+            val: orders.length,
+            icon: <ShoppingCart size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+          {
+            label: "Pending Approval",
+            val: orders.filter((o) => o.status === "PENDING_APPROVAL" || o.status === "DRAFT").length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Fulfilled / Closed",
+            val: orders.filter((o) => o.status === "COMPLETED" || o.status === "DELIVERED" || o.status === "POSTED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div className="card">
         <div className="card-body">
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="flex-1">
               <input
                 type="text"
-                placeholder="Search project orders..."
+                placeholder="Search client's orders..."
                 className="input"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -346,13 +393,13 @@ export default function ProjectOrderList() {
                   {loading ? (
                     <tr>
                       <td colSpan="10" className="text-center py-8 text-slate-400">
-                        Loading project orders...
+                        Loading client's orders...
                       </td>
                     </tr>
                   ) : filteredOrders.length === 0 ? (
                     <tr>
                       <td colSpan="10" className="text-center py-8 text-slate-400">
-                        No project orders found.
+                        No client's orders found.
                       </td>
                     </tr>
                   ) : (

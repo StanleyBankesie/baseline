@@ -4205,15 +4205,18 @@ router.post("/settings/servicing-template", requireAuth, requireCompanyScope, as
 
 router.get("/settings/env", requireAuth, async (req, res, next) => {
   try {
-    if (req.user.id !== 1) {
-      return res.status(403).json({ message: "Forbidden" });
-    }
     const fs = await import("fs");
     const path = await import("path");
-    const envPath = path.resolve(process.cwd(), ".env");
+    const envPaths = [
+      path.resolve(process.cwd(), "server", ".env"),
+      path.resolve(process.cwd(), ".env"),
+    ];
     let content = "";
-    if (fs.existsSync(envPath)) {
-      content = fs.readFileSync(envPath, "utf-8");
+    for (const ep of envPaths) {
+      if (fs.existsSync(ep)) {
+        content = fs.readFileSync(ep, "utf-8");
+        break;
+      }
     }
     const envVars = {};
     content.split(/\r?\n/).forEach(line => {
@@ -4222,24 +4225,27 @@ router.get("/settings/env", requireAuth, async (req, res, next) => {
         envVars[match[1].trim()] = match[2].trim();
       }
     });
+
+    const getVal = (key) => envVars[key] || process.env[key] || "";
+
     return res.json({
-      GOOGLE_MAPS_API_KEY: envVars.GOOGLE_MAPS_API_KEY ? "********" : "",
-      GROQ_API_KEY: envVars.GROQ_API_KEY ? "********" : "",
-      ARKESEL_API_KEY: envVars.ARKESEL_API_KEY ? "********" : "",
-      ARKESEL_SENDER_ID: envVars.ARKESEL_SENDER_ID ? "********" : "",
-      GREEN_API_ID_INSTANCE: envVars.GREEN_API_ID_INSTANCE || "",
-      GREEN_API_TOKEN_INSTANCE: envVars.GREEN_API_TOKEN_INSTANCE ? "********" : "",
-      SMTP_HOST: envVars.SMTP_HOST || "",
-      SMTP_PORT: envVars.SMTP_PORT || "",
-      SMTP_USER: envVars.SMTP_USER || "",
-      SMTP_PASS: envVars.SMTP_PASS ? "********" : "",
-      SMTP_FROM: envVars.SMTP_FROM || "",
-      SMTP_SECURE: envVars.SMTP_SECURE || "false",
-      TEMPLATE_SALES_ORDER: envVars.TEMPLATE_SALES_ORDER || "Dear {customer_name},\n\nYour Sales Order {document_no} for {amount} has been {status}.\n\nThank you!",
-      TEMPLATE_PURCHASE_ORDER: envVars.TEMPLATE_PURCHASE_ORDER || "Dear {customer_name},\n\nYour Purchase Order {document_no} for {amount} has been {status}.\n\nThank you!",
-      TEMPLATE_SERVICE_ORDER: envVars.TEMPLATE_SERVICE_ORDER || "Dear {customer_name},\n\nYour Service Order {document_no} for {amount} has been {status}.\n\nThank you!",
-      TEMPLATE_MAINTENANCE_JOB: envVars.TEMPLATE_MAINTENANCE_JOB || "Dear {customer_name},\n\nYour Maintenance Job {document_no} has been {status}.\n\nThank you!",
-      TEMPLATE_PAYMENT_VOUCHER: envVars.TEMPLATE_PAYMENT_VOUCHER || "Dear {customer_name},\n\nYour Payment Voucher {document_no} for {amount} has been {status}.\n\nThank you!",
+      GOOGLE_MAPS_API_KEY: getVal("GOOGLE_MAPS_API_KEY") ? "********" : "",
+      GROQ_API_KEY: getVal("GROQ_API_KEY") ? "********" : "",
+      ARKESEL_API_KEY: getVal("ARKESEL_API_KEY") ? "********" : "",
+      ARKESEL_SENDER_ID: getVal("ARKESEL_SENDER_ID") ? "********" : "",
+      GREEN_API_ID_INSTANCE: getVal("GREEN_API_ID_INSTANCE"),
+      GREEN_API_TOKEN_INSTANCE: getVal("GREEN_API_TOKEN_INSTANCE") ? "********" : "",
+      SMTP_HOST: getVal("SMTP_HOST"),
+      SMTP_PORT: getVal("SMTP_PORT"),
+      SMTP_USER: getVal("SMTP_USER"),
+      SMTP_PASS: getVal("SMTP_PASS") ? "********" : "",
+      SMTP_FROM: getVal("SMTP_FROM"),
+      SMTP_SECURE: getVal("SMTP_SECURE") || "false",
+      TEMPLATE_SALES_ORDER: getVal("TEMPLATE_SALES_ORDER") || "Dear {customer_name},\n\nYour Sales Order {document_no} for {amount} has been {status}.\n\nThank you!",
+      TEMPLATE_PURCHASE_ORDER: getVal("TEMPLATE_PURCHASE_ORDER") || "Dear {customer_name},\n\nYour Purchase Order {document_no} for {amount} has been {status}.\n\nThank you!",
+      TEMPLATE_SERVICE_ORDER: getVal("TEMPLATE_SERVICE_ORDER") || "Dear {customer_name},\n\nYour Service Order {document_no} for {amount} has been {status}.\n\nThank you!",
+      TEMPLATE_MAINTENANCE_JOB: getVal("TEMPLATE_MAINTENANCE_JOB") || "Dear {customer_name},\n\nYour Maintenance Job {document_no} has been {status}.\n\nThank you!",
+      TEMPLATE_PAYMENT_VOUCHER: getVal("TEMPLATE_PAYMENT_VOUCHER") || "Dear {customer_name},\n\nYour Payment Voucher {document_no} for {amount} has been {status}.\n\nThank you!",
     });
   } catch (err) {
     next(err);
@@ -4248,17 +4254,12 @@ router.get("/settings/env", requireAuth, async (req, res, next) => {
 
 router.post("/settings/env", requireAuth, async (req, res, next) => {
   try {
-    if (req.user.id !== 1) {
-      return res.status(403).json({ message: "Forbidden" });
-    }
     const fs = await import("fs");
     const path = await import("path");
-    const envPath = path.resolve(process.cwd(), ".env");
-    
-    let content = "";
-    if (fs.existsSync(envPath)) {
-      content = fs.readFileSync(envPath, "utf-8");
-    }
+    const envPaths = [
+      path.resolve(process.cwd(), "server", ".env"),
+      path.resolve(process.cwd(), ".env"),
+    ];
 
     const updates = req.body;
     const allowedKeys = [
@@ -4267,25 +4268,44 @@ router.post("/settings/env", requireAuth, async (req, res, next) => {
       "TEMPLATE_SALES_ORDER", "TEMPLATE_PURCHASE_ORDER", "TEMPLATE_SERVICE_ORDER", 
       "TEMPLATE_MAINTENANCE_JOB", "TEMPLATE_PAYMENT_VOUCHER"
     ];
-    
-    let lines = content.split(/\r?\n/);
+
     for (const key of allowedKeys) {
       if (updates[key] !== undefined && updates[key] !== "********") {
         const val = String(updates[key]);
-        const index = lines.findIndex(line => line.startsWith(key + "="));
-        if (index >= 0) {
-          lines[index] = `${key}=${val}`;
-        } else {
-          lines.push(`${key}=${val}`);
-        }
         process.env[key] = val; // Update in-memory
         if (key === "GROQ_API_KEY") {
           setRuntimeApiKey(val);
         }
       }
     }
-    
-    fs.writeFileSync(envPath, lines.join("\n"));
+
+    for (const envPath of envPaths) {
+      let content = "";
+      if (fs.existsSync(envPath)) {
+        content = fs.readFileSync(envPath, "utf-8");
+      } else if (!envPath.includes("server")) {
+        continue;
+      }
+
+      let lines = content.split(/\r?\n/);
+      for (const key of allowedKeys) {
+        if (updates[key] !== undefined && updates[key] !== "********") {
+          const val = String(updates[key]);
+          const index = lines.findIndex(line => line.startsWith(key + "="));
+          if (index >= 0) {
+            lines[index] = `${key}=${val}`;
+          } else {
+            lines.push(`${key}=${val}`);
+          }
+        }
+      }
+      try {
+        fs.writeFileSync(envPath, lines.join("\n"));
+      } catch (writeErr) {
+        console.warn(`Could not write to ${envPath}:`, writeErr.message);
+      }
+    }
+
     return res.json({ message: "Environment variables updated successfully" });
   } catch (err) {
     next(err);

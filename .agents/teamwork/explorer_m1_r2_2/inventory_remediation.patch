@@ -1,0 +1,99 @@
+diff --git a/client/src/pages/modules/inventory/DailyStockTakeList.jsx b/client/src/pages/modules/inventory/DailyStockTakeList.jsx
+--- a/client/src/pages/modules/inventory/DailyStockTakeList.jsx
++++ b/client/src/pages/modules/inventory/DailyStockTakeList.jsx
+@@ -282,25 +282,25 @@ export default function DailyStockTakeList() {
+         {[
+           {
+             label: "Active Stock Takes",
+-            val: (stockTakes || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
++            val: (items || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
+             icon: <Activity size={20} className="stroke-[2.5]" />,
+             color: "bg-sky-600 dark:bg-sky-500 text-white",
+           },
+           {
+             label: "Total Stock Takes",
+-            val: (stockTakes || []).length,
++            val: (items || []).length,
+             icon: <ClipboardList size={20} className="stroke-[2.5]" />,
+             color: "bg-brand-900 dark:bg-brand-700 text-white",
+           },
+           {
+             label: "Pending Stock Takes",
+-            val: (stockTakes || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
++            val: (items || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
+             icon: <Clock size={20} className="stroke-[2.5]" />,
+             color: "bg-amber-500 text-white",
+           },
+           {
+             label: "Completed Stock Takes",
+-            val: (stockTakes || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
++            val: (items || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
+             icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+             color: "bg-emerald-600 text-white",
+           },
+diff --git a/client/src/pages/modules/inventory/PhysicalStockTakeList.jsx b/client/src/pages/modules/inventory/PhysicalStockTakeList.jsx
+--- a/client/src/pages/modules/inventory/PhysicalStockTakeList.jsx
++++ b/client/src/pages/modules/inventory/PhysicalStockTakeList.jsx
+@@ -280,25 +280,25 @@ export default function PhysicalStockTakeList() {
+         {[
+           {
+             label: "Active Physical Audits",
+-            val: (audits || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
++            val: (items || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
+             icon: <Activity size={20} className="stroke-[2.5]" />,
+             color: "bg-sky-600 dark:bg-sky-500 text-white",
+           },
+           {
+             label: "Total Physical Audits",
+-            val: (audits || []).length,
++            val: (items || []).length,
+             icon: <ClipboardCheck size={20} className="stroke-[2.5]" />,
+             color: "bg-brand-900 dark:bg-brand-700 text-white",
+           },
+           {
+             label: "Pending Physical Audits",
+-            val: (audits || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
++            val: (items || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
+             icon: <Clock size={20} className="stroke-[2.5]" />,
+             color: "bg-amber-500 text-white",
+           },
+           {
+             label: "Completed Physical Audits",
+-            val: (audits || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
++            val: (items || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
+             icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+             color: "bg-emerald-600 text-white",
+           },
+diff --git a/client/src/pages/modules/inventory/StockVerificationList.jsx b/client/src/pages/modules/inventory/StockVerificationList.jsx
+--- a/client/src/pages/modules/inventory/StockVerificationList.jsx
++++ b/client/src/pages/modules/inventory/StockVerificationList.jsx
+@@ -225,25 +225,25 @@ export default function StockVerificationList() {
+         {[
+           {
+             label: "Active Verifications",
+-            val: (items || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
++            val: (verifications || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
+             icon: <Activity size={20} className="stroke-[2.5]" />,
+             color: "bg-sky-600 dark:bg-sky-500 text-white",
+           },
+           {
+             label: "Total Verifications",
+-            val: (items || []).length,
++            val: (verifications || []).length,
+             icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+             color: "bg-brand-900 dark:bg-brand-700 text-white",
+           },
+           {
+             label: "Pending Verifications",
+-            val: (items || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
++            val: (verifications || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
+             icon: <Clock size={20} className="stroke-[2.5]" />,
+             color: "bg-amber-500 text-white",
+           },
+           {
+             label: "Completed Verifications",
+-            val: (items || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
++            val: (verifications || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
+             icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+             color: "bg-emerald-600 text-white",
+           },

@@ -10,6 +10,7 @@ import BiIsolationSection from "../../../components/BiIsolationSection.jsx";
 import PosDayControlSection from "../../../components/PosDayControlSection.jsx";
 import AppModeControlSection from "../../../components/AppModeControlSection.jsx";
 import AppBackgroundControlSection from "../../../components/AppBackgroundControlSection.jsx";
+import BiometricLocationSecuritySection from "../../../components/BiometricLocationSecuritySection.jsx";
 
 export default function GeneralSettingsPage() {
   const navigate = useNavigate();
@@ -147,7 +148,7 @@ export default function GeneralSettingsPage() {
           TEMPLATE_PAYMENT_VOUCHER: res.data.TEMPLATE_PAYMENT_VOUCHER || "",
         });
       } catch (err) {
-        toast.error("Failed to load environment variables.");
+        console.warn("Could not load environment variables:", err?.response?.data?.message || err.message);
       } finally {
         if (mounted) setEnvLoading(false);
       }
@@ -701,7 +702,7 @@ export default function GeneralSettingsPage() {
 
       <div className="space-y-6">
         {/* Banks AI Dual-Provider Configuration (Groq + OpenRouter 0x Alpha) */}
-        <div className="card border-brand-200 dark:border-brand-800 shadow-sm bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-900/80">
+        <div className="card border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900">
           <div className="card-body space-y-5">
             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-3">
@@ -742,7 +743,7 @@ export default function GeneralSettingsPage() {
             </div>
 
             {/* Ask Banks Global Visibility Switch */}
-            <div className="flex items-center justify-between p-4 rounded-xl bg-brand-50/60 dark:bg-brand-950/30 border border-brand-200 dark:border-brand-800/60">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
               <div className="space-y-0.5">
                 <div className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                   <Sparkles size={16} className="text-primary" />
@@ -806,7 +807,7 @@ export default function GeneralSettingsPage() {
               </div>
 
               {/* OpenRouter 0x Alpha Key Card */}
-              <div className="p-4 rounded-xl border border-purple-200 dark:border-purple-900/50 bg-purple-50/20 dark:bg-purple-950/10 space-y-3">
+              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-purple-900 dark:text-purple-300 uppercase tracking-wider">
                     2. OpenRouter API Key (0x Alpha / Failover)
@@ -873,7 +874,7 @@ export default function GeneralSettingsPage() {
                 </select>
               </div>
 
-              <div className="text-[11px] text-slate-500 dark:text-slate-400 space-y-1 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-lg border border-slate-200/60 dark:border-slate-800">
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 space-y-1 bg-white dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800">
                 <div className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
                   <ShieldCheck size={13} className="text-emerald-500" />
                   <span>Smart Auto-Failover Active</span>
@@ -902,14 +903,14 @@ export default function GeneralSettingsPage() {
                     <span className="text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700">
                       Total Messages: <strong>{chatHistoryStats.totalMessages ?? 0}</strong>
                     </span>
-                    <span className="text-[11px] font-medium bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300 px-2.5 py-1 rounded-full border border-brand-200 dark:border-brand-800">
+                    <span className="text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700">
                       Retention: <strong>{Number(retentionDays) > 0 ? `${retentionDays} Days` : "Indefinite"}</strong>
                     </span>
                   </div>
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-slate-50 dark:bg-slate-800/30 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
                 <div className="md:col-span-5 space-y-1">
                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
                     Auto-Delete History After (Days)
@@ -1105,7 +1106,7 @@ export default function GeneralSettingsPage() {
             </div>
 
             {/* Opacity Control Slider & Presets */}
-            <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/60 space-y-2.5">
+            <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700/60 space-y-2.5">
               <div className="flex items-center justify-between text-sm">
                 <span className="font-semibold text-slate-700 dark:text-slate-200">
                   Background Opacity: <span className="text-brand-600 dark:text-brand-400 font-bold">{loginBackgroundOpacity}%</span>
@@ -1182,7 +1183,7 @@ export default function GeneralSettingsPage() {
                   </span>
                 </div>
               ) : (
-                <div className="w-28 sm:w-32 h-36 sm:h-40 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center text-xs text-slate-500 font-medium shrink-0 bg-slate-50/50 dark:bg-slate-800/50">
+                <div className="w-28 sm:w-32 h-36 sm:h-40 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center text-xs text-slate-500 font-medium shrink-0 bg-white dark:bg-slate-900">
                   <span>Default hero</span>
                   <span className="text-[10px] text-slate-400 mt-1">4:5 ratio</span>
                 </div>
@@ -1294,6 +1295,8 @@ export default function GeneralSettingsPage() {
         <BiIsolationSection />
 
         <PosDayControlSection />
+
+        <BiometricLocationSecuritySection />
 
         <div className="card">
           <div className="card-body space-y-3">

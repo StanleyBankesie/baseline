@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Filter Toolbar Fixture</title>
+  <style>
+    *, ::before, ::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; padding: 24px; background: #f8fafc; }
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .gap-3 { gap: 12px; }
+    .input, .select { height: 42px; min-height: 42px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 14px; }
+    .btn-icon { width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;" class="flex items-center justify-between gap-3">
+    <input class="input" style="flex: 1;" placeholder="Search records..." />
+    <select class="select"><option>All Projects</option></select>
+    <select class="select"><option>All Statuses</option></select>
+    <button class="btn-icon" title="Refresh">↻</button>
+  </div>
+</body>
+</html>

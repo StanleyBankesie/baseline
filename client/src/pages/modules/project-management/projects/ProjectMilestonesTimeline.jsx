@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '../../../../api/client.js';
 import { toast } from 'react-toastify';
-import { Loader2, Calendar, Layout, ListTree, User, Clock, CheckCircle, MapPin, ArrowLeft } from 'lucide-react';
+import { Loader2, Calendar, Layout, ListTree, User, Clock, CheckCircle, MapPin, ArrowLeft, FolderKanban } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 export default function ProjectMilestonesTimeline() {
+  const [searchParams] = useSearchParams();
+  const initialProjectId = searchParams.get('project_id') || searchParams.get('projectId') || '';
   const [projects, setProjects] = useState([]);
-  const [selectedProjectId, setSelectedProjectId] = useState('');
+  const [selectedProjectId, setSelectedProjectId] = useState(initialProjectId);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchingTasks, setFetchingTasks] = useState(false);
@@ -20,9 +22,6 @@ export default function ProjectMilestonesTimeline() {
         const res = await api.get('/projects/projects', { params: { active: 'all' } }).catch(() => api.get('/projects?active=all'));
         const list = res.data?.items || res.data?.projects || res.data?.data || (Array.isArray(res.data) ? res.data : []);
         setProjects(list);
-        if (list.length > 0) {
-          setSelectedProjectId(prev => prev || list[0].id);
-        }
       } catch (e) {
         toast.error('Failed to load projects');
       } finally {
@@ -34,7 +33,10 @@ export default function ProjectMilestonesTimeline() {
 
   useEffect(() => {
     async function loadTasks() {
-      if (!selectedProjectId) return;
+      if (!selectedProjectId) {
+        setTasks([]);
+        return;
+      }
       try {
         setFetchingTasks(true);
         const res = await api.get('/projects/tasks', { params: { project_id: selectedProjectId } });
@@ -96,6 +98,12 @@ export default function ProjectMilestonesTimeline() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
+          <Link
+            to={selectedProjectId ? `/project-management/tasks/assignment?project_id=${selectedProjectId}` : '/project-management/tasks/assignment'}
+            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs font-semibold shadow-sm"
+          >
+            <FolderKanban size={15} /> Assign Tasks (Kanban)
+          </Link>
           <Link to="/project-management/tasks/new" className="btn btn-primary inline-flex items-center gap-2 text-sm font-semibold shadow-sm">
             + New Task / Milestone
           </Link>
@@ -293,14 +301,6 @@ export default function ProjectMilestonesTimeline() {
                   </div>
 
                   <div className="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500"><User size={14} /></div>
-                      <div>
-                        <p className="text-xs text-slate-500">Assigned To</p>
-                        <p className="font-medium text-sm text-slate-800 dark:text-slate-200">{selectedTask.assigned_to_name || 'Unassigned'}</p>
-                      </div>
-                    </div>
-
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500"><Calendar size={14} /></div>
                       <div>

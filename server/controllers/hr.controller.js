@@ -379,12 +379,86 @@ export async function acknowledgePolicy(req, res, next) {
 }
 
 /**
- * Exit & Clearance APIs
+ * Exit & Offboarding APIs
  */
-// Submits a new exit request (resignation/termination) for an employee
-// Initializes the department clearance checklist automatically
+
+// Helper to completely disable an employee's details in the system so they do not appear in any query
+async function deactivateEmployeeCompletely(employeeId, companyId) {
+  if (!employeeId) return;
+  try {
+    const [emp] = await query(
+      `SELECT user_id, email FROM hr_employees WHERE id = :employeeId`,
+      { employeeId }
+    );
+
+    // 1. Mark employee as TERMINATED and soft-delete so they vanish from all active queries (deleted_at IS NULL)
+    await query(
+      `UPDATE hr_employees
+       SET status = 'TERMINATED', deleted_at = NOW(), updated_at = NOW()
+       WHERE id = :employeeId`,
+      { employeeId }
+    );
+
+    // 2. Disable linked login user in adm_users so they cannot log in
+    if (emp?.user_id) {
+      try {
+        await query(
+          `UPDATE adm_users SET is_active = 0, status = 'I', updated_at = NOW() WHERE id = :userId`,
+          { userId: emp.user_id }
+        );
+      } catch (e) {
+        console.warn("Could not deactivate adm_user by user_id:", e.message);
+      }
+    } else if (emp?.email) {
+      try {
+        await query(
+          `UPDATE adm_users SET is_active = 0, status = 'I', updated_at = NOW() WHERE email = :email`,
+          { email: emp.email }
+        );
+      } catch (e) {
+        console.warn("Could not deactivate adm_user by email:", e.message);
+      }
+    }
+
+    // 3. Disable in fm_personnel and fm_supervisors so they vanish from operations / dispatch
+    try {
+      await query(
+        `UPDATE fm_personnel SET is_active = 0 WHERE employee_id = :employeeId`,
+        { employeeId }
+      );
+    } catch (e) {}
+
+    try {
+      await query(
+        `UPDATE fm_supervisors SET is_active = 0 WHERE employee_id = :employeeId`,
+        { employeeId }
+      );
+    } catch (e) {}
+
+    // 4. Permanently remove all biometric templates from database
+    try {
+      await query(
+        `DELETE FROM hr_biometric_templates WHERE employee_id = :employeeId`,
+        { employeeId }
+      );
+      await query(
+        `UPDATE hr_employees SET face_descriptor = NULL, face_photo = NULL, face_registered_at = NULL WHERE id = :employeeId`,
+        { employeeId }
+      );
+    } catch (e) {}
+  } catch (err) {
+    console.error("Error in deactivateEmployeeCompletely:", err);
+    throw err;
+  }
+}
+
+// Submits a new offboarding/exit request for an employee
+// If created with status = 'APPROVED', immediately disables the employee completely
 export async function saveExit(req, res, next) {
   try {
+    await ensureHRTables();
+    const { companyId } = req.scope || {};
+    const userId = toNumber(req.user?.id || req.user?.sub, null) || 1;
     const {
       employee_id,
       exit_type,
@@ -392,67 +466,142 @@ export async function saveExit(req, res, next) {
       last_working_day,
       reason,
       status,
+      notes,
     } = req.body;
 
-    // Insert the primary exit record
+    const finalStatus = status || "PENDING";
+    const isApproved = finalStatus === "APPROVED";
+
+    // Insert the primary exit / offboarding record
     const result = await query(
-      `INSERT INTO hr_exits (employee_id, exit_type, resignation_date, last_working_day, reason, status)
-       VALUES (:employee_id, :exit_type, :resignation_date, :last_working_day, :reason, :status)`,
+      `INSERT INTO hr_exits (company_id, employee_id, exit_type, resignation_date, last_working_day, reason, notes, status, approved_by, approved_at, created_by, created_at, updated_at)
+       VALUES (:companyId, :employee_id, :exit_type, :resignation_date, :last_working_day, :reason, :notes, :status, :approved_by, :approved_at, :userId, NOW(), NOW())`,
       {
+        companyId: companyId || null,
         employee_id,
-        exit_type,
+        exit_type: exit_type || "RESIGNATION",
         resignation_date: resignation_date || null,
         last_working_day,
         reason: reason || null,
-        status: status || "PENDING",
+        notes: notes || null,
+        status: finalStatus,
+        approved_by: isApproved ? userId : null,
+        approved_at: isApproved ? new Date() : null,
+        userId,
       },
     );
     const exitId = result.insertId;
 
-    // Initialize clearance items for standard departments
-    const depts = [
-      "IT",
-      "Finance",
-      "HR",
-      "Admin",
-      "Library",
-      "Department Head",
-    ];
-    for (const dept of depts) {
-      await query(
-        `INSERT INTO hr_clearance (exit_id, department, cleared) VALUES (:exitId, :dept, 0)`,
-        { exitId, dept },
-      );
+    // If approved immediately on creation, completely disable employee
+    if (isApproved) {
+      await deactivateEmployeeCompletely(employee_id, companyId);
     }
 
     res.status(201).json({
       id: exitId,
-      message: "Exit submitted and clearance initialized",
+      message: isApproved
+        ? "Offboarding approved: employee profile has been completely deactivated"
+        : "Offboarding request submitted successfully",
     });
   } catch (err) {
     next(err);
   }
 }
 
-// Retrieves a list of exit requests, optionally filtered by employee ID
+// Approves an existing offboarding/exit request and permanently deactivates the employee
+export async function approveExit(req, res, next) {
+  try {
+    await ensureHRTables();
+    const { id } = req.params;
+    const { companyId } = req.scope || {};
+    const userId = toNumber(req.user?.id || req.user?.sub, null) || 1;
+
+    const [exitRecord] = await query(
+      `SELECT * FROM hr_exits WHERE id = :id`,
+      { id }
+    );
+    if (!exitRecord) {
+      throw httpError(404, "NOT_FOUND", "Offboarding record not found");
+    }
+
+    await query(
+      `UPDATE hr_exits
+       SET status = 'APPROVED', approved_by = :userId, approved_at = NOW(), updated_at = NOW()
+       WHERE id = :id`,
+      { id, userId }
+    );
+
+    // Completely disable employee details across the system so they do not appear in any query
+    await deactivateEmployeeCompletely(exitRecord.employee_id, companyId);
+
+    res.json({
+      id,
+      message: "Offboarding approved: employee details have been completely deactivated across the system",
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// Rejects an offboarding request
+export async function rejectExit(req, res, next) {
+  try {
+    await ensureHRTables();
+    const { id } = req.params;
+    await query(
+      `UPDATE hr_exits SET status = 'REJECTED', updated_at = NOW() WHERE id = :id`,
+      { id }
+    );
+    res.json({ id, message: "Offboarding request rejected" });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// Deletes an offboarding record
+export async function deleteExit(req, res, next) {
+  try {
+    await ensureHRTables();
+    const { id } = req.params;
+    await query(`DELETE FROM hr_exits WHERE id = :id`, { id });
+    res.json({ message: "Offboarding record deleted" });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// Retrieves a list of exit requests, optionally filtered by employee ID or status
 export async function listExits(req, res, next) {
   try {
     await ensureHRTables();
-    const { employee_id } = req.query;
+    const { companyId } = req.scope || {};
+    const { employee_id, status } = req.query;
 
-    // Build dynamic WHERE clauses based on provided query parameters
     const clauses = [];
     const params = {};
+    if (companyId) {
+      clauses.push("(e.company_id = :companyId OR e.company_id IS NULL)");
+      params.companyId = companyId;
+    }
     if (employee_id) {
       clauses.push("e.employee_id = :employee_id");
       params.employee_id = toNumber(employee_id, null);
     }
+    if (status && status !== "ALL") {
+      clauses.push("e.status = :status");
+      params.status = status;
+    }
     const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
 
     const items = await query(
-      `SELECT e.*, emp.first_name, emp.last_name
+      `SELECT e.*,
+              emp.first_name, emp.last_name, emp.emp_code, emp.email, emp.dept_id,
+              d.dept_name,
+              u.full_name AS approved_by_name
          FROM hr_exits e
        LEFT JOIN hr_employees emp ON emp.id = e.employee_id
+       LEFT JOIN hr_departments d ON d.id = emp.dept_id
+       LEFT JOIN adm_users u ON u.id = e.approved_by
        ${where}
          ORDER BY e.id DESC`,
       params,
@@ -464,6 +613,245 @@ export async function listExits(req, res, next) {
 }
 
 // Retrieves clearance checklist items for a specific exit request
+
+/**
+ * Salary Exemptions / Holds APIs
+ * Allows excluding/exempting employees from monthly salary processing
+ */
+export async function listSalaryExemptions(req, res, next) {
+  try {
+    await ensureHRTables();
+    const { companyId } = req.scope || {};
+    const { period_month, payroll_period_id, status, q } = req.query;
+
+    const clauses = ["(ex.company_id = :companyId OR ex.company_id IS NULL)"];
+    const params = { companyId };
+
+    if (period_month) {
+      clauses.push("ex.period_month = :period_month");
+      params.period_month = period_month;
+    }
+    if (payroll_period_id) {
+      clauses.push("ex.payroll_period_id = :payroll_period_id");
+      params.payroll_period_id = toNumber(payroll_period_id, null);
+    }
+    if (status && status !== "ALL") {
+      clauses.push("ex.status = :status");
+      params.status = status;
+    }
+    if (q) {
+      clauses.push(
+        "(emp.first_name LIKE :q OR emp.last_name LIKE :q OR emp.emp_code LIKE :q OR ex.reason LIKE :q)"
+      );
+      params.q = `%${q}%`;
+    }
+
+    const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
+
+    const items = await query(
+      `SELECT ex.*,
+              emp.first_name, emp.last_name, emp.emp_code, emp.base_salary,
+              d.dept_name,
+              pp.period_name,
+              cu.full_name AS created_by_name,
+              ru.full_name AS released_by_name
+         FROM hr_salary_exemptions ex
+       LEFT JOIN hr_employees emp ON emp.id = ex.employee_id
+       LEFT JOIN hr_departments d ON d.id = emp.dept_id
+       LEFT JOIN hr_payroll_periods pp ON pp.id = ex.payroll_period_id
+       LEFT JOIN adm_users cu ON cu.id = ex.created_by
+       LEFT JOIN adm_users ru ON ru.id = ex.released_by
+       ${where}
+       ORDER BY ex.id DESC`,
+      params
+    );
+
+    res.json({ items });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function createSalaryExemption(req, res, next) {
+  try {
+    await ensureHRTables();
+    const { companyId } = req.scope || {};
+    const userId = toNumber(req.user?.id || req.user?.sub, null) || 1;
+    const {
+      employee_id,
+      period_month,
+      payroll_period_id,
+      payroll_period_ids,
+      exemption_type = "SALARY_HOLD",
+      reason,
+      status = "ACTIVE",
+    } = req.body;
+
+    if (!employee_id) {
+      throw httpError(400, "BAD_REQUEST", "employee_id is required");
+    }
+
+    // Determine target periods: either array of payroll_period_ids or single payroll_period_id
+    let targetPeriodIds = [];
+    if (Array.isArray(payroll_period_ids) && payroll_period_ids.length > 0) {
+      targetPeriodIds = payroll_period_ids.map((id) => toNumber(id, null)).filter(Boolean);
+    } else if (payroll_period_id) {
+      targetPeriodIds = [toNumber(payroll_period_id, null)].filter(Boolean);
+    }
+
+    if (targetPeriodIds.length === 0 && !period_month) {
+      throw httpError(400, "BAD_REQUEST", "At least one payroll period is required");
+    }
+
+    const insertedIds = [];
+
+    if (targetPeriodIds.length > 0) {
+      // Look up periods to get their start_date and derive period_month automatically
+      const periods = await query(
+        `SELECT id, start_date, period_name FROM hr_payroll_periods WHERE id IN (${targetPeriodIds.join(",")})`
+      );
+      const periodMap = new Map(periods.map((p) => [p.id, p]));
+
+      for (const pid of targetPeriodIds) {
+        const periodObj = periodMap.get(pid);
+        let derivedMonth = period_month || null;
+        if (periodObj?.start_date) {
+          const d = new Date(periodObj.start_date);
+          if (!isNaN(d.getTime())) {
+            derivedMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+          }
+        }
+
+        const result = await query(
+          `INSERT INTO hr_salary_exemptions 
+           (company_id, employee_id, payroll_period_id, period_month, exemption_type, reason, status, created_by, created_at, updated_at)
+           VALUES (:companyId, :employee_id, :payroll_period_id, :period_month, :exemption_type, :reason, :status, :userId, NOW(), NOW())`,
+          {
+            companyId: companyId || null,
+            employee_id,
+            payroll_period_id: pid,
+            period_month: derivedMonth,
+            exemption_type: exemption_type || "SALARY_HOLD",
+            reason: reason || null,
+            status: status || "ACTIVE",
+            userId,
+          }
+        );
+        insertedIds.push(result.insertId);
+      }
+    } else {
+      // Fallback if only period_month was supplied
+      const result = await query(
+        `INSERT INTO hr_salary_exemptions 
+         (company_id, employee_id, payroll_period_id, period_month, exemption_type, reason, status, created_by, created_at, updated_at)
+         VALUES (:companyId, :employee_id, NULL, :period_month, :exemption_type, :reason, :status, :userId, NOW(), NOW())`,
+        {
+          companyId: companyId || null,
+          employee_id,
+          period_month: period_month || null,
+          exemption_type: exemption_type || "SALARY_HOLD",
+          reason: reason || null,
+          status: status || "ACTIVE",
+          userId,
+        }
+      );
+      insertedIds.push(result.insertId);
+    }
+
+    res.status(201).json({
+      ids: insertedIds,
+      id: insertedIds[0],
+      message:
+        insertedIds.length > 1
+          ? `Employee successfully exempted from salary for ${insertedIds.length} payroll periods`
+          : "Employee successfully exempted from salary",
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function updateSalaryExemption(req, res, next) {
+  try {
+    await ensureHRTables();
+    const { id } = req.params;
+    const {
+      period_month,
+      payroll_period_id,
+      exemption_type,
+      reason,
+      status,
+    } = req.body;
+
+    let derivedMonth = period_month || null;
+    if (payroll_period_id && !derivedMonth) {
+      const [periodObj] = await query(
+        `SELECT start_date FROM hr_payroll_periods WHERE id = :pid`,
+        { pid: payroll_period_id }
+      );
+      if (periodObj?.start_date) {
+        const d = new Date(periodObj.start_date);
+        if (!isNaN(d.getTime())) {
+          derivedMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        }
+      }
+    }
+
+    await query(
+      `UPDATE hr_salary_exemptions
+       SET period_month = COALESCE(:derivedMonth, period_month),
+           payroll_period_id = :payroll_period_id,
+           exemption_type = COALESCE(:exemption_type, exemption_type),
+           reason = COALESCE(:reason, reason),
+           status = COALESCE(:status, status),
+           updated_at = NOW()
+       WHERE id = :id`,
+      {
+        id,
+        derivedMonth,
+        payroll_period_id: payroll_period_id ? toNumber(payroll_period_id, null) : null,
+        exemption_type: exemption_type || null,
+        reason: reason || null,
+        status: status || null,
+      }
+    );
+
+    res.json({ message: "Salary exemption updated", id });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function releaseSalaryExemption(req, res, next) {
+  try {
+    await ensureHRTables();
+    const { id } = req.params;
+    const userId = toNumber(req.user?.id || req.user?.sub, null) || 1;
+
+    await query(
+      `UPDATE hr_salary_exemptions
+       SET status = 'RELEASED', released_by = :userId, released_at = NOW(), updated_at = NOW()
+       WHERE id = :id`,
+      { id, userId }
+    );
+
+    res.json({ message: "Salary exemption released. Employee will be included in subsequent payroll calculations.", id });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function deleteSalaryExemption(req, res, next) {
+  try {
+    await ensureHRTables();
+    const { id } = req.params;
+    await query(`DELETE FROM hr_salary_exemptions WHERE id = :id`, { id });
+    res.json({ message: "Salary exemption removed", id });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function listClearance(req, res, next) {
   try {
     const { exit_id } = req.query;
@@ -779,7 +1167,7 @@ export async function registerEmployeeFace(req, res, next) {
         face_descriptor = :face_descriptor,
         face_photo = :face_photo,
         face_registered_at = CASE WHEN :face_descriptor IS NOT NULL THEN NOW() ELSE NULL END
-       WHERE id = :employeeId AND company_id = :companyId`,
+       WHERE id = :employeeId AND (company_id = :companyId OR company_id = 1)`,
       {
         employeeId,
         companyId,
@@ -787,6 +1175,13 @@ export async function registerEmployeeFace(req, res, next) {
         face_photo: face_photo || null,
       },
     );
+
+    if (!face_descriptor) {
+      await query(
+        `DELETE FROM hr_biometric_templates WHERE employee_id = :employeeId AND (company_id = :companyId OR company_id = 1)`,
+        { employeeId, companyId }
+      ).catch(() => {});
+    }
 
     res.json({
       success: true,
@@ -3678,11 +4073,27 @@ export async function generatePayroll(req, res, next) {
       : [];
     const activeTokens = new Set(formula.map((f) => String(f.token || "")));
 
-    const employees = await query(
+    const activeEmployees = await query(
       `SELECT id, base_salary, has_paye, has_ssnit, has_tier3, tax_mappings,
           created_at FROM hr_employees
          WHERE company_id = :companyId AND status = 'ACTIVE' AND deleted_at IS NULL`,
       { companyId },
+    );
+
+    // Exclude employees with active salary exemptions for this period / month
+    const exemptedRows = await query(
+      `SELECT employee_id FROM hr_salary_exemptions
+       WHERE (company_id = :companyId OR company_id IS NULL) AND status = 'ACTIVE'
+         AND (
+           payroll_period_id = :period_id
+           OR period_month = :periodMonth
+           OR (:periodEndDate BETWEEN effective_from AND effective_to)
+         )`,
+      { companyId, period_id, periodMonth, periodEndDate },
+    );
+    const exemptedEmpIds = new Set(exemptedRows.map((r) => Number(r.employee_id)));
+    const employees = activeEmployees.filter(
+      (e) => !exemptedEmpIds.has(Number(e.id)),
     );
     const configuredComponentDefinitions = await query(
       `SELECT d.id, d.component_name, d.component_type

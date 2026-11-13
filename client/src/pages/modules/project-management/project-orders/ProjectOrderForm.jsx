@@ -416,7 +416,7 @@ export default function ProjectOrderForm() {
   };
 
   const handleCancelOrder = async () => {
-    if (!window.confirm("Cancel this project order?")) return;
+    if (!window.confirm("Cancel this client's order?")) return;
     try {
       await api.delete(`/projects/project-orders/${effectiveId}`);
       navigate("/project-management/project-orders", { state: { refresh: true } });
@@ -426,7 +426,7 @@ export default function ProjectOrderForm() {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("Delete this project order?")) return;
+    if (!window.confirm("Delete this client's order?")) return;
     try {
       await api.delete(`/projects/project-orders/${effectiveId}`);
       navigate("/project-management/project-orders", { state: { refresh: true } });
@@ -452,7 +452,7 @@ export default function ProjectOrderForm() {
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
               <ShoppingCart size={26} className="text-brand-900 dark:text-brand-400" />
-              {isNew ? "New Project Order" : `Project Order ${formData.orderNo}`}
+              {isNew ? "New Client's Order" : `Client's Order ${formData.orderNo}`}
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
               Create and manage items for a project
@@ -572,7 +572,7 @@ export default function ProjectOrderForm() {
                 <select className="input" value={formData.warehouseId}
                   onChange={handleWarehouseChange} disabled={readOnly}>
                   <option value="">Select Warehouse/store</option>
-                  {warehouses.map(w => <option key={w.id} value={w.id}>{w.warehouse_name}</option>)}
+                  {warehouses.filter(w => w.is_active === 1 || w.is_active === "1" || w.is_active === true || w.is_active === null || w.is_active === undefined).map(w => <option key={w.id} value={w.id}>{w.warehouse_name}</option>)}
                 </select>
               </div>
             </div>

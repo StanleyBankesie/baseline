@@ -173,7 +173,7 @@ export default function ProjectManagementDashboardPage() {
   return (
     <DashboardPageShell
       title="Project Management Dashboard"
-      subtitle="Portfolio health, budget control, task execution, and live activity across current projects, timesheets, and expenses."
+      subtitle="Portfolio health, budget control, task execution, and live activity across current projects and expenses."
       backTo="/project-management"
     >
       {error ? (

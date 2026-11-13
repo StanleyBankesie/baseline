@@ -9,6 +9,7 @@ import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import { useViewMode } from "@/hooks/useViewMode";
 import ViewToggle from "@/components/ViewToggle";
+import { CheckCircle2, Calendar, Clock, XCircle } from "lucide-react";
 
 /**
  *  component
@@ -68,6 +69,54 @@ export default function LeaveApplicationsList() {
           </Link>
         </div>
       </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Approved Requests",
+            val: items.filter((r) => r.status === "APPROVED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500",
+          },
+          {
+            label: "Total Applications",
+            val: items.length,
+            icon: <Calendar size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700",
+          },
+          {
+            label: "Pending Review",
+            val: items.filter((r) => r.status === "PENDING" || !r.status).length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500",
+          },
+          {
+            label: "Rejected / Cancelled",
+            val: items.filter((r) => r.status === "REJECTED" || r.status === "CANCELLED").length,
+            icon: <XCircle size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600",
+          },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm"
+          >
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div className="bg-white dark:bg-slate-800 rounded shadow-sm overflow-auto">
         <div className="flex justify-end mb-4">
           <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />

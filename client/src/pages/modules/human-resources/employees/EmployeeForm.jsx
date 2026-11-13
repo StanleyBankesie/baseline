@@ -603,8 +603,9 @@ export default function EmployeeForm() {
     }
   }
 
-  const handleFaceRegistered = async ({ descriptor, photoBase64 }) => {
-    const descStr = JSON.stringify(descriptor);
+  const handleFaceRegistered = async ({ descriptor, photoBase64, success, alreadyEnrolled }) => {
+    if (!success && !photoBase64) return;
+    const descStr = descriptor ? JSON.stringify(descriptor) : null;
     setForm((prev) => ({
       ...prev,
       face_descriptor: descStr,
@@ -613,14 +614,16 @@ export default function EmployeeForm() {
     }));
 
     if (isEdit && id) {
-      try {
-        await api.post(`/hr/employees/${id}/face`, {
-          face_descriptor: descStr,
-          face_photo: photoBase64,
-        });
-        toast.success("Facial credentials registered and saved to employee record");
-      } catch (err) {
-        toast.info("Face credentials captured (will be saved when form is submitted)");
+      if (!alreadyEnrolled) {
+        try {
+          await api.post(`/hr/employees/${id}/face`, {
+            face_descriptor: descStr,
+            face_photo: photoBase64,
+          });
+          toast.success("Facial credentials registered and saved to employee record");
+        } catch (err) {
+          toast.info("Face credentials captured (will be saved when form is submitted)");
+        }
       }
     } else {
       toast.success("Face credentials captured (will be saved with employee)");
@@ -628,16 +631,13 @@ export default function EmployeeForm() {
   };
 
   const handleClearFace = async () => {
-    if (!window.confirm("Are you sure you want to remove the registered facial credentials for this employee?")) {
+    if (!window.confirm("Are you sure you want to permanently remove and delete the registered facial credentials for this employee from the database?")) {
       return;
     }
     setClearingFace(true);
     try {
       if (isEdit && id) {
-        await api.post(`/hr/employees/${id}/face`, {
-          face_descriptor: null,
-          face_photo: null,
-        });
+        await api.delete(`/hr/biometrics/employees/${id}`);
       }
       setForm((prev) => ({
         ...prev,
@@ -645,9 +645,9 @@ export default function EmployeeForm() {
         face_photo: null,
         face_registered_at: null,
       }));
-      toast.success("Facial credentials cleared");
+      toast.success("Biometric credentials permanently removed and deleted from database.");
     } catch (err) {
-      toast.error("Failed to clear face credentials");
+      toast.error(err?.response?.data?.message || "Failed to remove face credentials from database");
     } finally {
       setClearingFace(false);
     }
@@ -1097,7 +1097,7 @@ export default function EmployeeForm() {
             </div>
 
             <div className="mt-8">
-              <section className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-lg border border-slate-200 dark:border-slate-700">
+              <section className="bg-white dark:bg-slate-900 p-6 rounded-lg border border-slate-200 dark:border-slate-700">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-700 pb-3 mb-4">
                   <div>
                     <h3 className="font-semibold text-slate-800 dark:text-slate-100 text-base">
@@ -1133,7 +1133,7 @@ export default function EmployeeForm() {
                         className={`flex flex-col justify-between p-4 rounded-lg border-2 transition-all cursor-pointer select-none ${
                           isChecked
                             ? "bg-white dark:bg-slate-800 border-brand shadow-sm ring-1 ring-brand/20"
-                            : "bg-slate-100/70 dark:bg-slate-900/40 border-slate-200 dark:border-slate-700 opacity-75 hover:opacity-100"
+                            : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 opacity-75 hover:opacity-100"
                         }`}
                       >
                         <div className="flex items-start justify-between gap-3 mb-2">
@@ -1213,7 +1213,7 @@ export default function EmployeeForm() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {/* Card 1: Facial Recognition */}
-                  <div className="bg-slate-50/80 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-700/60 p-5 flex flex-col justify-between">
+                  <div className="bg-white dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
@@ -1249,7 +1249,7 @@ export default function EmployeeForm() {
                           </div>
                           <div className="min-w-0 flex-1">
                             <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
-                              128-pt Biometric Vector Active
+                              InsightFace 512-D Biometric Active
                             </span>
                             <span className="text-[11px] text-slate-400 block mt-0.5">
                               {form.face_registered_at
@@ -1300,7 +1300,7 @@ export default function EmployeeForm() {
                   </div>
 
                   {/* Card 2: Fingerprint Recognition */}
-                  <div className="bg-slate-50/80 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-700/60 p-5 flex flex-col justify-between">
+                  <div className="bg-white dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">

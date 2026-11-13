@@ -6383,10 +6383,14 @@ router.get(
         params.branchIdsStr = branchIdsStr;
       }
 
-      if (active === "true") {
-        sql += " AND is_active = 1";
-      } else if (active === "false") {
-        sql += " AND is_active = 0";
+      const activeParam = String(active || "").trim().toLowerCase();
+      if (activeParam === "all" || req.query.all === "1" || req.query.all === "true") {
+        // Do not filter by is_active, return all
+      } else if (activeParam === "false" || activeParam === "0") {
+        sql += " AND (is_active = 0 OR is_active = '0' OR is_active = 'N')";
+      } else {
+        // Default to active only so inactive suppliers do not appear in any select list in any page
+        sql += " AND (is_active = 1 OR is_active = '1' OR is_active = 'Y' OR is_active IS NULL)";
       }
       if (contractor === "Y") {
         sql += " AND service_contractor = 'Y'";

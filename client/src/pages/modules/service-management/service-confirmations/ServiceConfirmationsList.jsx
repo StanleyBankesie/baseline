@@ -4,19 +4,7 @@ import { api } from "../../../../api/client";
 import { usePermission } from "../../../../auth/PermissionContext.jsx";
 import { useViewMode } from "@/hooks/useViewMode";
 import ViewToggle from "@/components/ViewToggle";
-import {
-  Plus,
-  Search,
-  FileCheck2,
-  CheckCircle2,
-  Clock,
-  Wrench,
-  Building2,
-  Calendar,
-  Eye,
-  Edit,
-  ArrowRight
-} from "lucide-react";
+import { Plus, Search, FileCheck2, CheckCircle2, Clock, Wrench, Building2, Calendar, Eye, Edit, ArrowRight, Activity } from "lucide-react";
 
 const CACHE_KEY = "svc-confirmations-cache";
 function readCache() {

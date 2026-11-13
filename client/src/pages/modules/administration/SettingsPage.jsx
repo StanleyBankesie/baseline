@@ -4,7 +4,8 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import BiometricLocationSecuritySection from "../../../components/BiometricLocationSecuritySection.jsx";
 import { api } from "api/client";
 import { toast } from "react-toastify";
 import {
@@ -22,6 +23,7 @@ import BranchDataSharingSection from "../../../components/BranchDataSharingSecti
 const TABS = [
   { key: "general", label: "General" },
   { key: "notifications", label: "Notifications" },
+  { key: "biometrics", label: "Biometric & Attendance" },
   { key: "templates", label: "Templates" },
   { key: "departments", label: "Departments" },
 ];
@@ -32,7 +34,27 @@ const TABS = [
  * @returns {JSX.Element} The rendered component
  */
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState("general");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || "general";
+  const [activeTab, setActiveTab] = useState(
+    TABS.some((t) => t.key === initialTab) ? initialTab : "general"
+  );
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam && TABS.some((t) => t.key === tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (key) => {
+    setActiveTab(key);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("tab", key);
+      return next;
+    });
+  };
   const [pushEnabled, setPushEnabled] = useState(() => {
     try {
       const raw = localStorage.getItem("push_enabled");
@@ -400,7 +422,7 @@ export default function SettingsPage() {
         {TABS.map((tab) => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
+            onClick={() => handleTabChange(tab.key)}
             className={`px-4 py-2 text-sm font-medium capitalize whitespace-nowrap ${activeTab === tab.key ? "border-b-2 border-brand text-brand" : "text-slate-500 hover:text-slate-700"}`}
           >
             {tab.label}
@@ -672,6 +694,12 @@ export default function SettingsPage() {
       )}
 
       {activeTab === "departments" && <DepartmentsSection />}
+
+      {activeTab === "biometrics" && (
+        <div className="space-y-4">
+          <BiometricLocationSecuritySection />
+        </div>
+      )}
     </div>
   );
 }

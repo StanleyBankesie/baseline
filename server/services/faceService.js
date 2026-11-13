@@ -1,10 +1,10 @@
 /**
- * Client service to communicate with the Python / FastAPI Facial Recognition Microservice.
+ * Client service to communicate with the Python / FastAPI InsightFace Facial Recognition Microservice.
  */
 
 const FACE_SERVICE_URL = process.env.FACE_SERVICE_URL || "http://127.0.0.1:5050";
 
-async function postJson(endpoint, data, timeoutMs = 8000) {
+async function postJson(endpoint, data, timeoutMs = 12000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -56,9 +56,9 @@ export async function checkFaceServiceHealth() {
 }
 
 /**
- * Extracts 128-D embedding, checks image quality and liveness on a single image.
+ * Extracts 512-D InsightFace ArcFace embedding, checks image quality and liveness on a single image.
  */
-export async function extractEmbedding(imageBase64, { checkLiveness = true, livenessThreshold = 0.85 } = {}) {
+export async function extractEmbedding(imageBase64, { checkLiveness = true, livenessThreshold = 0.65 } = {}) {
   return await postJson("/api/v1/extract-embedding", {
     image: imageBase64,
     check_liveness: checkLiveness,
@@ -67,24 +67,25 @@ export async function extractEmbedding(imageBase64, { checkLiveness = true, live
 }
 
 /**
- * Verifies a probe image against an enrolled 128-D vector (1:1).
+ * Verifies a probe image against an enrolled 512-D vector (1:1).
  */
-export async function verifyMatch(probeImageBase64, enrolledEmbedding, { threshold = 0.38, checkLiveness = true } = {}) {
+export async function verifyMatch(probeImageBase64, enrolledEmbedding, { threshold = 0.45, checkLiveness = true, livenessThreshold = 0.65 } = {}) {
   return await postJson("/api/v1/verify-match", {
     probe_image: probeImageBase64,
     enrolled_embedding: enrolledEmbedding,
     threshold,
     check_liveness: checkLiveness,
+    liveness_threshold: livenessThreshold,
   });
 }
 
 /**
- * Identifies a face against a list of enrolled candidate employees (1:N).
+ * Identifies a face against a list of enrolled candidate employees (1:N) using InsightFace ArcFace.
  */
 export async function identifyEmployee(
   probeImageBase64,
   candidates,
-  { additionalFrames = [], threshold = 0.38, checkLiveness = true, livenessThreshold = 0.85 } = {}
+  { additionalFrames = [], threshold = 0.45, checkLiveness = true, livenessThreshold = 0.65 } = {}
 ) {
   return await postJson(
     "/api/v1/identify",
@@ -96,12 +97,12 @@ export async function identifyEmployee(
       check_liveness: checkLiveness,
       liveness_threshold: livenessThreshold,
     },
-    12000
+    15000
   );
 }
 
 /**
- * Checks liveness across a series of frames.
+ * Evaluates liveness across multiple frames.
  */
 export async function checkLiveness(frames, { threshold = 0.85 } = {}) {
   return await postJson("/api/v1/check-liveness", {

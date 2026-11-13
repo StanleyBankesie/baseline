@@ -6,23 +6,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { 
-  BookText, 
-  Plus, 
-  Search, 
-  RotateCcw, 
-  Download, 
-  Warehouse, 
-  Calendar, 
-  ArrowUpRight, 
-  ArrowDownLeft, 
-  FileText, 
-  Layers, 
-  ChevronRight,
-  Filter,
-  ArrowRight,
-  DollarSign
-} from "lucide-react";
+import { BookText, Plus, Search, RotateCcw, Download, Warehouse, Calendar, ArrowUpRight, ArrowDownLeft, FileText, Layers, ChevronRight, Filter, ArrowRight, DollarSign, Activity, Clock, CheckCircle2, BookOpen } from "lucide-react";
 import { api } from "api/client";
 import { toast } from "react-toastify";
 import { useViewMode } from "@/hooks/useViewMode";
@@ -153,6 +137,50 @@ export default function InventoryStockJournalList() {
     <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6 animate-in fade-in duration-300">
       
       {/* Header Banner */}
+            {/* Metric Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        {[
+          {
+            label: "Active Stock Journals",
+            val: (journals || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Total Stock Journals",
+            val: (journals || []).length,
+            icon: <BookOpen size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+          {
+            label: "Pending Stock Journals",
+            val: (journals || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Completed Stock Journals",
+            val: (journals || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div className="card">
         <div className="card-header bg-brand-900 text-white dark:bg-brand-950 rounded-t-lg flex flex-wrap justify-between items-center gap-4">
           <div>

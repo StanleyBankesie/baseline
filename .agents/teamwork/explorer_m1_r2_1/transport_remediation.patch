@@ -1,0 +1,102 @@
+diff --git a/client/src/pages/modules/transport/compliance/VehicleComplianceList.jsx b/client/src/pages/modules/transport/compliance/VehicleComplianceList.jsx
+index 79f20c25a..7aa29556d 100644
+--- a/client/src/pages/modules/transport/compliance/VehicleComplianceList.jsx
++++ b/client/src/pages/modules/transport/compliance/VehicleComplianceList.jsx
+@@ -125,25 +125,25 @@ export default function VehicleComplianceList({ isTab = false }) {
+         {[
+           {
+             label: "Active Roadworthy Permits",
+-            val: (records || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
++            val: (compliances || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
+             icon: <Activity size={20} className="stroke-[2.5]" />,
+             color: "bg-sky-600 dark:bg-sky-500 text-white",
+           },
+           {
+             label: "Total Roadworthy Permits",
+-            val: (records || []).length,
++            val: (compliances || []).length,
+             icon: <ShieldCheck size={20} className="stroke-[2.5]" />,
+             color: "bg-brand-900 dark:bg-brand-700 text-white",
+           },
+           {
+             label: "Pending Roadworthy Permits",
+-            val: (records || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
++            val: (compliances || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
+             icon: <Clock size={20} className="stroke-[2.5]" />,
+             color: "bg-amber-500 text-white",
+           },
+           {
+             label: "Completed Roadworthy Permits",
+-            val: (records || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
++            val: (compliances || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
+             icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+             color: "bg-emerald-600 text-white",
+           },
+diff --git a/client/src/pages/modules/transport/servicing/VehicleServicingList.jsx b/client/src/pages/modules/transport/servicing/VehicleServicingList.jsx
+index 359fe2bd1..4ea247d87 100644
+--- a/client/src/pages/modules/transport/servicing/VehicleServicingList.jsx
++++ b/client/src/pages/modules/transport/servicing/VehicleServicingList.jsx
+@@ -69,25 +69,25 @@ export default function VehicleServicingList({ isTab = false }) {
+         {[
+           {
+             label: "Active Vehicle Service Logs",
+-            val: (services || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
++            val: (servicing || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
+             icon: <Activity size={20} className="stroke-[2.5]" />,
+             color: "bg-sky-600 dark:bg-sky-500 text-white",
+           },
+           {
+             label: "Total Vehicle Service Logs",
+-            val: (services || []).length,
++            val: (servicing || []).length,
+             icon: <Wrench size={20} className="stroke-[2.5]" />,
+             color: "bg-brand-900 dark:bg-brand-700 text-white",
+           },
+           {
+             label: "Pending Vehicle Service Logs",
+-            val: (services || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
++            val: (servicing || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
+             icon: <Clock size={20} className="stroke-[2.5]" />,
+             color: "bg-amber-500 text-white",
+           },
+           {
+             label: "Completed Vehicle Service Logs",
+-            val: (services || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
++            val: (servicing || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
+             icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+             color: "bg-emerald-600 text-white",
+           },
+diff --git a/client/src/pages/modules/transport/logbook/LogbookList.jsx b/client/src/pages/modules/transport/logbook/LogbookList.jsx
+index d4870b5fc..ab65cc46d 100644
+--- a/client/src/pages/modules/transport/logbook/LogbookList.jsx
++++ b/client/src/pages/modules/transport/logbook/LogbookList.jsx
+@@ -161,25 +161,25 @@ export default function LogbookList({ isTab = false }) {
+         {[
+           {
+             label: "Active Mileage Logbooks",
+-            val: (entries || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
++            val: (logbooks || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
+             icon: <Activity size={20} className="stroke-[2.5]" />,
+             color: "bg-sky-600 dark:bg-sky-500 text-white",
+           },
+           {
+             label: "Total Mileage Logbooks",
+-            val: (entries || []).length,
++            val: (logbooks || []).length,
+             icon: <BookOpen size={20} className="stroke-[2.5]" />,
+             color: "bg-brand-900 dark:bg-brand-700 text-white",
+           },
+           {
+             label: "Pending Mileage Logbooks",
+-            val: (entries || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
++            val: (logbooks || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
+             icon: <Clock size={20} className="stroke-[2.5]" />,
+             color: "bg-amber-500 text-white",
+           },
+           {
+             label: "Completed Mileage Logbooks",
+-            val: (entries || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
++            val: (logbooks || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
+             icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+             color: "bg-emerald-600 text-white",
+           },

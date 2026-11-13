@@ -26,7 +26,9 @@ import {
   AlertTriangle,
   Receipt,
   FileSpreadsheet,
-  FileCheck2
+  FileCheck2,
+  CheckCircle2,
+  Clock,
 } from "lucide-react";
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
@@ -469,42 +471,46 @@ export default function PaymentApplicationList() {
 
       {/* Financial Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="card p-4 space-y-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Requested</span>
-          <p className="text-xl font-medium text-slate-900 dark:text-white">
-            GH₵{" "}
-            {applications
-              .reduce((a, c) => a + Number(c.net_amount_requested || 0), 0)
-              .toLocaleString(undefined, { minimumFractionDigits: 2 })}
-          </p>
-        </div>
-        <div className="card p-4 space-y-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Certified (IPCs)</span>
-          <p className="text-xl font-medium text-brand-700 dark:text-brand-400">
-            GH₵{" "}
-            {applications
-              .reduce((a, c) => a + Number(c.certified_amount || 0), 0)
-              .toLocaleString(undefined, { minimumFractionDigits: 2 })}
-          </p>
-        </div>
-        <div className="card p-4 space-y-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Paid by Client</span>
-          <p className="text-xl font-medium text-emerald-600">
-            GH₵{" "}
-            {applications
-              .reduce((a, c) => a + Number(c.amount_paid || 0), 0)
-              .toLocaleString(undefined, { minimumFractionDigits: 2 })}
-          </p>
-        </div>
-        <div className="card p-4 space-y-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Outstanding Balance</span>
-          <p className="text-xl font-medium text-rose-600">
-            GH₵{" "}
-            {applications
-              .reduce((a, c) => a + Number(c.outstanding_balance || 0), 0)
-              .toLocaleString(undefined, { minimumFractionDigits: 2 })}
-          </p>
-        </div>
+        {[
+          {
+            label: "Total IPAs",
+            val: applications.length,
+            icon: <FileCheck2 size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Certified Applications",
+            val: applications.filter((c) => c.status === "CERTIFIED" || c.status === "APPROVED" || c.status === "PAID").length,
+            icon: <ShieldCheck size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+          {
+            label: "Pending Certification",
+            val: applications.filter((c) => c.status === "SUBMITTED" || c.status === "PENDING" || c.status === "UNDER_REVIEW").length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Draft Applications",
+            val: applications.filter((c) => c.status === "DRAFT" || !c.status).length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+        ].map((stat, i) => (
+          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Payment Applications Register */}

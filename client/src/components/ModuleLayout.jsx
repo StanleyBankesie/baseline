@@ -193,7 +193,7 @@ export function ModuleTopNavBar({ sections = [], headerActions = [], moduleKey }
   if (!sections.length && !resolvedHeaderActions.length) return null;
 
   return (
-    <div className="bg-transparent border-b border-slate-200/60 dark:border-slate-800/60 px-4 py-2 transition-colors">
+    <div className="hidden md:block bg-transparent border-b border-slate-200/60 dark:border-slate-800/60 px-4 py-2 transition-colors">
       <div className="flex items-center gap-1.5 flex-wrap">
         {/* Back to Modules */}
         <NavLink

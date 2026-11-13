@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { Plus, Loader2, DollarSign, Receipt, ArrowLeft, Search } from "lucide-react";
+import { Plus, Loader2, CheckCircle2, Receipt, ArrowLeft, Search, Activity, Clock } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import ProjectModal from "../components/ProjectModal.jsx";
 import { api } from "../../../../api/client.js";
@@ -47,8 +47,9 @@ export default function ExpenseList() {
     const q = String(supplierSearch || "").trim().toLowerCase();
     if (!q) return [];
     return suppliers.filter(s => 
-      String(s.supplier_name || "").toLowerCase().includes(q) ||
-      String(s.supplier_code || "").toLowerCase().includes(q)
+      (s.is_active === 1 || s.is_active === "1" || s.is_active === true || s.is_active === null || s.is_active === undefined) &&
+      (String(s.supplier_name || "").toLowerCase().includes(q) ||
+      String(s.supplier_code || "").toLowerCase().includes(q))
     ).slice(0, 10);
   }, [supplierSearch, suppliers]);
 
@@ -267,6 +268,50 @@ export default function ExpenseList() {
             <Plus size={16} /> Record Expense
           </button>
         </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Paid Expenses",
+            val: items.filter((e) => e.status === "PAID" || e.status === "APPROVED" || !e.status).length,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Total Expenses",
+            val: items.length,
+            icon: <Receipt size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+          {
+            label: "Projects Covered",
+            val: new Set(items.map((e) => e.project_id || e.project_name).filter(Boolean)).size,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Approved Expenses",
+            val: items.filter((e) => e.status === "APPROVED" || e.approval_status === "APPROVED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
       </div>
 
       <div className="card">

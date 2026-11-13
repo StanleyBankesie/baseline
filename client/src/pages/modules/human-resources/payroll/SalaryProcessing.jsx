@@ -8,7 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import { Guard } from "../../../../hooks/usePermissions.jsx";
-import { SkipForward, CheckCircle2, Clock, Lock, Send, X, AlertCircle } from "lucide-react";
+import { SkipForward, CheckCircle2, Clock, Lock, Send, X, AlertCircle, ShieldAlert } from "lucide-react";
 import ReverseApprovalButton from "../../../../components/ReverseApprovalButton.jsx";
 import LoanPeriodSkipsModal from "./LoanPeriodSkipsModal";
 
@@ -547,6 +547,15 @@ export default function SalaryProcessing() {
               <SkipForward className="w-4 h-4 text-brand" />
               <span>Loan Deductions</span>
             </button>
+
+            <Link
+              to="/human-resources/payroll/salary-exemptions"
+              className="btn-secondary h-10 px-4 flex items-center gap-2 border-amber-300 dark:border-amber-700/60 text-amber-700 dark:text-amber-400 bg-amber-50/50 hover:bg-amber-100/60 dark:bg-amber-950/20"
+              title="Exempt or hold employees from receiving salary this month"
+            >
+              <ShieldAlert className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <span>Salary Holds & Exemptions</span>
+            </Link>
 
             {!previewData?.is_approved && (
               <button

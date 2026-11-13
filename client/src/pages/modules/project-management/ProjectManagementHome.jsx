@@ -14,10 +14,10 @@ import ProjectForm from "./projects/ProjectForm.jsx";
 import ProjectDetailDashboard from "./projects/ProjectDetailDashboard.jsx";
 import ProjectMilestonesTimeline from "./projects/ProjectMilestonesTimeline.jsx";
 import TaskList from "./tasks/TaskList.jsx";
+import TaskAssignmentKanban from "./tasks/TaskAssignmentKanban.jsx";
 import TaskForm from "./tasks/TaskForm.jsx";
 import TaskExecution from "./tasks/TaskExecution.jsx";
 import ProjectReports from "./reports/ProjectReports.jsx";
-import TimesheetList from "./timesheets/TimesheetList.jsx";
 import ExpenseList from "./expenses/ExpenseList.jsx";
 import ProjectIncomeList from "./income/ProjectIncomeList.jsx";
 import PMSetup from "./setup/Setup.jsx";
@@ -36,7 +36,6 @@ import ProjectIncomeReport from "./reports/ProjectIncomeReport.jsx";
 import ProjectExpenseReport from "./reports/ProjectExpenseReport.jsx";
 import ProjectExpenseIncomeReport from "./reports/ProjectExpenseIncomeReport.jsx";
 import TaskExecutionReportPage from "./reports/TaskExecutionReportPage.jsx";
-import TaskManagementAndExecutionPage from "./reports/TaskManagementAndExecutionPage.jsx";
 import ProjectManagementDashboardPage from "./ProjectManagementDashboardPage.jsx";
 import ResourceManagement from "./resources/ResourceManagement.jsx";
 import ProjectQuotationList from "./quotations/ProjectQuotationList.jsx";
@@ -47,6 +46,10 @@ import ProjectInvoiceForm from "./project-invoices/ProjectInvoiceForm.jsx";
 import BOQManager from "./construction/BOQManager.jsx";
 import CostControlDashboard from "./construction/CostControlDashboard.jsx";
 import GanttScheduleView from "./construction/GanttScheduleView.jsx";
+import ProjectTimelinePage from "./construction/ProjectTimelinePage.jsx";
+import ScheduleMonitoringPage from "./construction/ScheduleMonitoringPage.jsx";
+import CriticalPathPage from "./construction/CriticalPathPage.jsx";
+import ProjectMindmapPage from "./mindmap/ProjectMindmapPage.jsx";
 import DailySiteReportList from "./construction/DailySiteReportList.jsx";
 import DailySiteReportForm from "./construction/DailySiteReportForm.jsx";
 import SubcontractorManager from "./construction/SubcontractorManager.jsx";
@@ -56,11 +59,13 @@ import VariationRegister from "./construction/VariationRegister.jsx";
 import QualityControlPage from "./construction/QualityControlPage.jsx";
 import DocumentRegisterPage from "./construction/DocumentRegisterPage.jsx";
 import EquipmentLogsPage from "./construction/EquipmentLogsPage.jsx";
+import ProjectClosurePage from "./closure/ProjectClosurePage.jsx";
 
 export const projectManagementSections = [
   {
-    title: "Portfolio",
-    badge: "Planning",
+    title: "Project Initiation",
+    badge: "Initiation",
+    description: "Project proposal, objectives, scope and approval.",
     items: [
       {
         title: "Projects",
@@ -69,138 +74,11 @@ export const projectManagementSections = [
           { label: "View", path: "/project-management/projects", type: "outline" },
           { label: "New", path: "/project-management/projects/new", type: "primary" }
         ],
-        description: "Manage end-to-end project lifecycles",
+        description: "Manage end-to-end project lifecycles, objectives, and charter",
         icon: "📁",
       },
       {
-        title: "Project Orders",
-        path: "/project-management/project-orders",
-        actions: [
-          { label: "View", path: "/project-management/project-orders", type: "outline" },
-          { label: "New", path: "/project-management/project-orders/new", type: "primary" }
-        ],
-        description: "Client project engagements and orders",
-        icon: "📜",
-      },
-      {
-        title: "Operations Setup",
-        path: "/project-management/setup",
-        actions: [
-          { label: "View", path: "/project-management/setup", type: "outline" }
-        ],
-        description: "Project categories, types, and operations setup",
-        icon: "⚙️",
-      },
-      {
-        title: "Milestones",
-        path: "/project-management/milestones",
-        actions: [
-          { label: "View", path: "/project-management/milestones", type: "outline" },
-          { label: "New", path: "/project-management/tasks/new", type: "primary" }
-        ],
-        description: "Track key project events and deadlines",
-        icon: "🎯",
-      },
-    ],
-  },
-  {
-    title: "Execution & Tasks",
-    badge: "Operations",
-    items: [
-      {
-        title: "Task Assignments",
-        path: "/project-management/tasks",
-        actions: [
-          { label: "View", path: "/project-management/tasks", type: "outline" },
-          { label: "New", path: "/project-management/tasks/new", type: "primary" }
-        ],
-        description: "Assign work items and milestones",
-        icon: "📋",
-      },
-      {
-        title: "Task Execution Dashboard",
-        path: "/project-management/tasks/execution",
-        actions: [
-          { label: "View", path: "/project-management/tasks/execution", type: "outline" },
-          { label: "New", path: "/project-management/tasks/execution/new", type: "primary" }
-        ],
-        description: "Work log, progress updates, and task timer",
-        icon: "⏱️",
-      },
-      {
-        title: "Timesheets",
-        path: "/project-management/timesheets",
-        actions: [
-          { label: "View", path: "/project-management/timesheets", type: "outline" },
-          { label: "New", path: "/project-management/timesheets/new", type: "primary" }
-        ],
-        description: "Log labor hours against project tasks",
-        icon: "⌛",
-      },
-      {
-        title: "Resource Management",
-        path: "/project-management/resources",
-        actions: [
-          { label: "View", path: "/project-management/resources", type: "outline" },
-          { label: "New", path: "/project-management/resources/new", type: "primary" }
-        ],
-        description: "Manage project team members and equipment",
-        icon: "👥",
-      },
-    ],
-  },
-  {
-    title: "Materials & Procurement",
-    badge: "Resources",
-    items: [
-      {
-        title: "Purchase Requisitions",
-        path: "/project-management/purchase-requisitions",
-        actions: [
-          { label: "View", path: "/project-management/purchase-requisitions", type: "outline" },
-          { label: "New", path: "/project-management/purchase-requisitions/new", type: "primary" }
-        ],
-        description: "Request external items for project work",
-        icon: "🛒",
-      },
-      {
-        title: "Material Requisitions",
-        path: "/project-management/material-requisitions",
-        actions: [
-          { label: "View", path: "/project-management/material-requisitions", type: "outline" },
-          { label: "New", path: "/project-management/material-requisitions/new", type: "primary" }
-        ],
-        description: "Request stock from main warehouse",
-        icon: "📦",
-      },
-      {
-        title: "Material Receipts",
-        path: "/project-management/material-receipts",
-        actions: [
-          { label: "View", path: "/project-management/material-receipts", type: "outline" },
-          { label: "New", path: "/project-management/material-receipts/new", type: "primary" }
-        ],
-        description: "Receive requested items on site",
-        icon: "📥",
-      },
-      {
-        title: "Material Utilization",
-        path: "/project-management/material-utilizations",
-        actions: [
-          { label: "View", path: "/project-management/material-utilizations", type: "outline" },
-          { label: "New", path: "/project-management/material-utilizations/new", type: "primary" }
-        ],
-        description: "Track site material consumption against tasks",
-        icon: "🔨",
-      },
-    ],
-  },
-  {
-    title: "Financials & Expenses",
-    badge: "Costing",
-    items: [
-      {
-        title: "Project Quotations",
+        title: "Project Proposals & Quotations",
         path: "/project-management/quotations",
         actions: [
           { label: "View", path: "/project-management/quotations", type: "outline" },
@@ -210,168 +88,171 @@ export const projectManagementSections = [
         icon: "📝",
       },
       {
-        title: "Project Invoices",
-        path: "/project-management/project-invoices",
+        title: "Client's Orders",
+        path: "/project-management/project-orders",
         actions: [
-          { label: "View", path: "/project-management/project-invoices", type: "outline" },
-          { label: "New", path: "/project-management/project-invoices/new", type: "primary" }
+          { label: "View", path: "/project-management/project-orders", type: "outline" },
+          { label: "New", path: "/project-management/project-orders/new", type: "primary" }
         ],
-        description: "Bill clients for completed project work",
-        icon: "🧾",
+        description: "Client project engagements, agreements, and confirmed orders",
+        icon: "📜",
       },
       {
-        title: "Project Direct Expenses",
-        path: "/project-management/expenses",
+        title: "Operations Setup",
+        path: "/project-management/setup",
         actions: [
-          { label: "View", path: "/project-management/expenses", type: "outline" },
-          { label: "New", path: "/project-management/expenses/new", type: "primary" }
+          { label: "View", path: "/project-management/setup", type: "outline" }
         ],
-        description: "Record site petty cash and out-of-pocket costs",
-        icon: "💸",
-      },
-      {
-        title: "Project Income",
-        path: "/project-management/income",
-        actions: [
-          { label: "View", path: "/project-management/income", type: "outline" },
-          { label: "New", path: "/project-management/income/new", type: "primary" }
-        ],
-        description: "Project milestone billings and income tracking",
-        icon: "💵",
+        description: "Project categories, types, workflow stages, and operational setup",
+        icon: "⚙️",
       },
     ],
   },
   {
-    title: "Reports & Analytics",
-    badge: "BI",
+    title: "Project Planning",
+    badge: "Planning",
+    description: "Budget, timelines, milestones, resources and task breakdown.",
     items: [
-
       {
-        title: "Project Status Report",
-        path: "/project-management/reports/project-status",
+        title: "Project Mindmap",
+        path: "/project-management/mindmap",
         actions: [
-          { label: "View", path: "/project-management/reports/project-status", type: "outline" }
+          { label: "View", path: "/project-management/mindmap", type: "outline" },
         ],
-        description: "Schedule, budget vs actual variance analysis",
+        description: "Brainstorm, structure scope, and collate thoughts visually before moving into execution",
+        icon: "🧠",
+      },
+      {
+        title: "Project Timeline",
+        path: "/project-management/timeline",
+        actions: [
+          { label: "View", path: "/project-management/timeline", type: "outline" },
+        ],
+        description: "Master project schedule, work breakdown, planned vs actual dates and overall duration",
+        icon: "⏱️",
+      },
+      {
+        title: "Planning & Scheduling",
+        path: "/project-management/schedule",
+        actions: [
+          { label: "View", path: "/project-management/schedule", type: "outline" },
+        ],
+        description: "Gantt chart, task calendar and task dependency relationships",
+        icon: "📅",
+      },
+      {
+        title: "Schedule Monitoring",
+        path: "/project-management/schedule-monitoring",
+        actions: [
+          { label: "View", path: "/project-management/schedule-monitoring", type: "outline" },
+        ],
+        description: "Planned vs actual progress, delayed activities, upcoming deadlines and schedule variance",
         icon: "📈",
       },
       {
-        title: "Task Management Report",
-        path: "/project-management/reports/task-management",
+        title: "Critical Path (CPM)",
+        path: "/project-management/critical-path",
         actions: [
-          { label: "View", path: "/project-management/reports/task-management", type: "outline" }
+          { label: "View", path: "/project-management/critical-path", type: "outline" },
         ],
-        description: "Task completion metrics and assignee workloads",
-        icon: "📉",
+        description: "Critical path analysis, ES/EF/LS/LF float table and longest-path activity sequence",
+        icon: "🔴",
       },
-      {
-        title: "Task Execution Log",
-        path: "/project-management/reports/task-execution",
-        actions: [
-          { label: "View", path: "/project-management/reports/task-execution", type: "outline" }
-        ],
-        description: "Detailed timesheet and daily work log summary",
-        icon: "📝",
-      },
-      {
-        title: "Project Income Report",
-        path: "/project-management/reports/project-income",
-        actions: [
-          { label: "View", path: "/project-management/reports/project-income", type: "outline" }
-        ],
-        description: "Receipt vouchers linked to projects",
-        icon: "💰",
-      },
-      {
-        title: "Project Expense Report",
-        path: "/project-management/reports/project-expense",
-        actions: [
-          { label: "View", path: "/project-management/reports/project-expense", type: "outline" }
-        ],
-        description: "Payment vouchers linked to projects",
-        icon: "💳",
-      },
-      {
-        title: "Project Expense and Income Report",
-        path: "/project-management/reports/project-expense-income",
-        actions: [
-          { label: "View", path: "/project-management/reports/project-expense-income", type: "outline" }
-        ],
-        description: "Profit and loss report showing deficit and surplus per project",
-        icon: "⚖️",
-      },
-    ],
-  },
-  {
-    title: "Construction Estimating & Cost Control",
-    badge: "Commercial",
-    items: [
       {
         title: "Bill of Quantities (BOQ)",
         path: "/project-management/boqs",
         actions: [
           { label: "View", path: "/project-management/boqs", type: "outline" },
         ],
-        description: "Hierarchical work breakdown, rate build-up, and takeoff sheets",
+        description: "Hierarchical work breakdown (WBS), rate build-up, and budget estimation",
         icon: "📐",
       },
       {
-        title: "Cost Control & EVM",
-        path: "/project-management/cost-control",
+        title: "Resource Management",
+        path: "/project-management/resources",
         actions: [
-          { label: "View", path: "/project-management/cost-control", type: "outline" },
+          { label: "View", path: "/project-management/resources", type: "outline" },
+          { label: "New", path: "/project-management/resources/new", type: "primary" }
         ],
-        description: "Earned Value Management, CPI, SPI, EAC, and cost code tracking",
-        icon: "📊",
+        description: "Allocate project team members, labor, and plant equipment",
+        icon: "👥",
       },
       {
-        title: "Variations & Change Orders",
-        path: "/project-management/variations",
+        title: "Purchase Requisitions",
+        path: "/project-management/purchase-requisitions",
         actions: [
-          { label: "View", path: "/project-management/variations", type: "outline" },
+          { label: "View", path: "/project-management/purchase-requisitions", type: "outline" },
+          { label: "New", path: "/project-management/purchase-requisitions/new", type: "primary" }
         ],
-        description: "Change orders, scope additions, and contract adjustments",
-        icon: "📝",
+        description: "Procurement planning and external material demand requisitions",
+        icon: "🛒",
+      },
+      {
+        title: "Drawings & Documents",
+        path: "/project-management/documents",
+        actions: [
+          { label: "View", path: "/project-management/documents", type: "outline" },
+        ],
+        description: "Approved drawing register, scope documents, and technical RFIs",
+        icon: "📋",
       },
     ],
   },
   {
-    title: "Valuations & Contracts",
-    badge: "Billing",
+    title: "Project Execution",
+    badge: "Execution",
+    description: "Task assignment, team collaboration and implementation.",
     items: [
       {
-        title: "Client Valuations",
-        path: "/project-management/client-valuations",
+        title: "Task Assignments & Kanban",
+        path: "/project-management/tasks/assignment",
         actions: [
-          { label: "View", path: "/project-management/client-valuations", type: "outline" },
+          { label: "Kanban", path: "/project-management/tasks/assignment", type: "primary" },
+          { label: "Table", path: "/project-management/tasks", type: "outline" }
         ],
-        description: "Physical work measurement, BOQ items, variations, and assessed value",
-        icon: "📐",
+        description: "Visual drag-and-drop task assignment and scope allocation",
+        icon: "📋",
       },
       {
-        title: "Interim Payment Applications (IPAs)",
-        path: "/project-management/payment-applications",
+        title: "Task Execution Dashboard",
+        path: "/project-management/tasks/execution",
         actions: [
-          { label: "View", path: "/project-management/payment-applications", type: "outline" },
+          { label: "View", path: "/project-management/tasks/execution", type: "outline" },
+          { label: "New", path: "/project-management/tasks/execution/new", type: "primary" }
         ],
-        description: "Formal payment applications, certifications, deductions, and payment tracking",
-        icon: "📑",
+        description: "Work log, progress updates, task timer, and checklists",
+        icon: "⏱️",
       },
       {
-        title: "Subcontractors & IPCs",
-        path: "/project-management/subcontracts",
+        title: "Material Requisitions",
+        path: "/project-management/material-requisitions",
         actions: [
-          { label: "View", path: "/project-management/subcontracts", type: "outline" },
+          { label: "View", path: "/project-management/material-requisitions", type: "outline" },
+          { label: "New", path: "/project-management/material-requisitions/new", type: "primary" }
         ],
-        description: "Trade agreements, interim payment certificates, and retention",
-        icon: "🤝",
+        description: "Request stock from main warehouse for site implementation",
+        icon: "📦",
       },
-    ],
-  },
-  {
-    title: "Site Operations & Plant",
-    badge: "Field",
-    items: [
+      {
+        title: "Material Receipts",
+        path: "/project-management/material-receipts",
+        actions: [
+          { label: "View", path: "/project-management/material-receipts", type: "outline" },
+          { label: "New", path: "/project-management/material-receipts/new", type: "primary" }
+        ],
+        description: "Receive and inspect requested items on site",
+        icon: "📥",
+      },
+      {
+        title: "Material Utilization",
+        path: "/project-management/material-utilizations",
+        actions: [
+          { label: "View", path: "/project-management/material-utilizations", type: "outline" },
+          { label: "New", path: "/project-management/material-utilizations/new", type: "primary" }
+        ],
+        description: "Track on-site material consumption against specific work tasks",
+        icon: "🔨",
+      },
       {
         title: "Daily Site Diary (DSR)",
         path: "/project-management/daily-reports",
@@ -391,20 +272,87 @@ export const projectManagementSections = [
         description: "Machine operating hours, idle/breakdown downtime, and fuel costing",
         icon: "🚜",
       },
+      {
+        title: "Subcontractors & Trade Works",
+        path: "/project-management/subcontracts",
+        actions: [
+          { label: "View", path: "/project-management/subcontracts", type: "outline" },
+        ],
+        description: "Trade agreements, specialist trade execution, and subcontractor coordination",
+        icon: "🤝",
+      },
     ],
   },
   {
-    title: "Planning & QA/QC",
-    badge: "Compliance",
+    title: "Monitoring and Control",
+    badge: "Control",
+    description: "Progress tracking, expenditure monitoring, risks and delays.",
     items: [
       {
-        title: "Schedule & Critical Path",
-        path: "/project-management/schedule",
+        title: "Cost Control & EVM",
+        path: "/project-management/cost-control",
         actions: [
-          { label: "View", path: "/project-management/schedule", type: "outline" },
+          { label: "View", path: "/project-management/cost-control", type: "outline" },
         ],
-        description: "CPM network analysis, float calculations, and EOT claims",
-        icon: "📅",
+        description: "Earned Value Management, CPI, SPI, EAC, and cost code tracking",
+        icon: "📊",
+      },
+      {
+        title: "Project Direct Expenses",
+        path: "/project-management/expenses",
+        actions: [
+          { label: "View", path: "/project-management/expenses", type: "outline" },
+          { label: "New", path: "/project-management/expenses/new", type: "primary" }
+        ],
+        description: "Record site petty cash and out-of-pocket costs",
+        icon: "💸",
+      },
+      {
+        title: "Project Income & Billing",
+        path: "/project-management/income",
+        actions: [
+          { label: "View", path: "/project-management/income", type: "outline" },
+          { label: "New", path: "/project-management/income/new", type: "primary" }
+        ],
+        description: "Project milestone billings, receipt vouchers, and revenue collection",
+        icon: "💵",
+      },
+      {
+        title: "Project Invoices",
+        path: "/project-management/project-invoices",
+        actions: [
+          { label: "View", path: "/project-management/project-invoices", type: "outline" },
+          { label: "New", path: "/project-management/project-invoices/new", type: "primary" }
+        ],
+        description: "Bill clients for completed project work",
+        icon: "🧾",
+      },
+      {
+        title: "Variations & Change Orders",
+        path: "/project-management/variations",
+        actions: [
+          { label: "View", path: "/project-management/variations", type: "outline" },
+        ],
+        description: "Change orders, scope additions, delay claims, and contract adjustments",
+        icon: "📝",
+      },
+      {
+        title: "Client Valuations",
+        path: "/project-management/client-valuations",
+        actions: [
+          { label: "View", path: "/project-management/client-valuations", type: "outline" },
+        ],
+        description: "Physical work measurement, BOQ items, variations, and assessed value",
+        icon: "📐",
+      },
+      {
+        title: "Payment Applications (IPAs)",
+        path: "/project-management/payment-applications",
+        actions: [
+          { label: "View", path: "/project-management/payment-applications", type: "outline" },
+        ],
+        description: "Formal payment applications, certifications, deductions, and payment tracking",
+        icon: "📑",
       },
       {
         title: "Quality Control (QA/QC)",
@@ -412,17 +360,104 @@ export const projectManagementSections = [
         actions: [
           { label: "View", path: "/project-management/quality-control", type: "outline" },
         ],
-        description: "Inspection requests (IR), NCRs, punch lists, and material tests",
+        description: "Inspection requests (IR), Non-Conformance Reports (NCR), defect tracking, and tests",
         icon: "🛡️",
       },
-            {
-        title: "Drawings & RFIs",
-        path: "/project-management/documents",
+      {
+        title: "Project Status & Progress Report",
+        path: "/project-management/reports/project-status",
         actions: [
-          { label: "View", path: "/project-management/documents", type: "outline" },
+          { label: "View", path: "/project-management/reports/project-status", type: "outline" }
         ],
-        description: "Approved drawing register and requests for information",
-        icon: "📋",
+        description: "Schedule, budget vs actual variance analysis, risk indicators, and milestone health",
+        icon: "📈",
+      },
+      {
+        title: "Task Execution & Delay Log",
+        path: "/project-management/reports/task-execution",
+        actions: [
+          { label: "View", path: "/project-management/reports/task-execution", type: "outline" }
+        ],
+        description: "Task completion tracking, reasons for delay, and team workload summary",
+        icon: "📝",
+      },
+      {
+        title: "Project Profit & Loss (P&L)",
+        path: "/project-management/reports/project-expense-income",
+        actions: [
+          { label: "View", path: "/project-management/reports/project-expense-income", type: "outline" }
+        ],
+        description: "Expenditure monitoring, deficit, and surplus analysis per project",
+        icon: "⚖️",
+      },
+    ],
+  },
+  {
+    title: "Project Closure",
+    badge: "Closure",
+    description: "Project handover, final account settlement, snag resolution and closeout.",
+    items: [
+      {
+        title: "Project Handover & Closeout",
+        path: "/project-management/closure",
+        actions: [
+          { label: "View", path: "/project-management/closure", type: "outline" },
+          { label: "New", path: "/project-management/closure", type: "primary" },
+        ],
+        description: "Handover certificates, taking-over records, and project closeout dossier",
+        icon: "🏁",
+      },
+      {
+        title: "Snag & Punch List Resolution",
+        path: "/project-management/quality-control",
+        actions: [
+          { label: "View", path: "/project-management/quality-control", type: "outline" },
+        ],
+        description: "Defect rectification, punch list completion, and practical completion sign-off",
+        icon: "🛡️",
+      },
+      {
+        title: "Final Account & Retention Release",
+        path: "/project-management/client-valuations",
+        actions: [
+          { label: "View", path: "/project-management/client-valuations", type: "outline" },
+        ],
+        description: "Final valuation reconciliation, retention money release, and subcontractor final accounts",
+        icon: "💰",
+      },
+    ],
+  },
+  {
+    title: "Reports & Analytics",
+    badge: "BI",
+    description: "Operational reports, timesheet analysis, and voucher archives",
+    items: [
+      {
+        title: "Task Management Report",
+        path: "/project-management/reports/task-management",
+        actions: [
+          { label: "View", path: "/project-management/reports/task-management", type: "outline" }
+        ],
+        description: "Task completion metrics and assignee workloads",
+        icon: "📉",
+      },
+      {
+        title: "Project Income Report",
+        path: "/project-management/reports/project-income",
+        actions: [
+          { label: "View", path: "/project-management/reports/project-income", type: "outline" }
+        ],
+        description: "Receipt vouchers linked to projects",
+        icon: "💰",
+      },
+      {
+        title: "Project Expense Report",
+        path: "/project-management/reports/project-expense",
+        actions: [
+          { label: "View", path: "/project-management/reports/project-expense", type: "outline" }
+        ],
+        description: "Payment vouchers linked to projects",
+        icon: "💳",
       },
     ],
   },
@@ -471,10 +506,9 @@ function ProjectManagementLanding() {
       label: "Total Logged Hours",
       change: "Loading…",
       changeType: "neutral",
-      path: "/project-management/timesheets",
+      path: "/project-management/tasks/execution",
       actions: [
-        { label: "View", path: "/project-management/timesheets", type: "outline" },
-        { label: "New", path: "/project-management/timesheets/new", type: "primary" },
+        { label: "View", path: "/project-management/tasks/execution", type: "outline" },
       ],
     },
   ]);
@@ -601,6 +635,7 @@ export default function ProjectManagementHome() {
         />
 
         <Route path="/tasks" element={<TaskList />} />
+        <Route path="/tasks/assignment" element={<TaskAssignmentKanban />} />
         <Route path="/tasks/execution" element={<TaskExecution />} />
         <Route path="/tasks/new" element={<TaskForm />} />
         <Route path="/tasks/:id" element={<TaskForm />} />
@@ -701,8 +736,6 @@ export default function ProjectManagementHome() {
         <Route path="/milestones/new" element={<TaskForm />} />
         <Route path="/resources" element={<ResourceManagement />} />
         <Route path="/resources/new" element={<ResourceManagement />} />
-        <Route path="/timesheets" element={<TimesheetList />} />
-        <Route path="/timesheets/new" element={<TimesheetList />} />
         <Route path="/income" element={<ProjectIncomeList />} />
 
         <Route
@@ -724,7 +757,12 @@ export default function ProjectManagementHome() {
         {/* Construction Management Module Routes */}
         <Route path="/boqs" element={<BOQManager />} />
         <Route path="/cost-control" element={<CostControlDashboard />} />
+        <Route path="/timeline" element={<ProjectTimelinePage />} />
         <Route path="/schedule" element={<GanttScheduleView />} />
+        <Route path="/schedule-monitoring" element={<ScheduleMonitoringPage />} />
+        <Route path="/critical-path" element={<CriticalPathPage />} />
+        <Route path="/mindmap" element={<ProjectMindmapPage />} />
+        <Route path="/execution-mindmap" element={<ProjectMindmapPage />} />
         <Route path="/daily-reports" element={<DailySiteReportList />} />
         <Route path="/daily-reports/new" element={<DailySiteReportForm />} />
         <Route path="/daily-reports/:id" element={<DailySiteReportForm />} />
@@ -739,6 +777,7 @@ export default function ProjectManagementHome() {
         <Route path="/documents" element={<DocumentRegisterPage />} />
         <Route path="/rfis" element={<DocumentRegisterPage />} />
         <Route path="/equipment-logs" element={<EquipmentLogsPage />} />
+        <Route path="/closure" element={<ProjectClosurePage />} />
       </Routes>
     </ModuleLayout>
     </div>
@@ -827,16 +866,6 @@ export const projectManagementFeatures = [
   },
   {
     module_key: "project-management",
-    label: "Timesheets",
-    path: "/project-management/timesheets",
-        actions: [
-          { label: "View", path: "/project-management/timesheets", type: "outline" },
-          { label: "New", path: "/project-management/timesheets/new", type: "primary" }
-        ],
-    type: "feature",
-  },
-  {
-    module_key: "project-management",
     label: "Project Income",
     path: "/project-management/income",
         actions: [
@@ -867,7 +896,7 @@ export const projectManagementFeatures = [
   },
   {
     module_key: "project-management",
-    label: "Project Orders",
+    label: "Client's Orders",
     path: "/project-management/project-orders",
         actions: [
           { label: "View", path: "/project-management/project-orders", type: "outline" },
@@ -976,9 +1005,37 @@ export const projectManagementFeatures = [
   },
   {
     module_key: "project-management",
-    label: "Planning & CPM Schedule",
+    label: "Project Mindmap",
+    path: "/project-management/mindmap",
+    actions: [{ label: "View", path: "/project-management/mindmap", type: "outline" }],
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Project Timeline",
+    path: "/project-management/timeline",
+    actions: [{ label: "View", path: "/project-management/timeline", type: "outline" }],
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Planning & Scheduling",
     path: "/project-management/schedule",
     actions: [{ label: "View", path: "/project-management/schedule", type: "outline" }],
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Schedule Monitoring",
+    path: "/project-management/schedule-monitoring",
+    actions: [{ label: "View", path: "/project-management/schedule-monitoring", type: "outline" }],
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Critical Path (CPM)",
+    path: "/project-management/critical-path",
+    actions: [{ label: "View", path: "/project-management/critical-path", type: "outline" }],
     type: "feature",
   },
   {
@@ -1038,6 +1095,16 @@ export const projectManagementFeatures = [
     label: "Plant & Equipment Logs",
     path: "/project-management/equipment-logs",
     actions: [{ label: "View", path: "/project-management/equipment-logs", type: "outline" }],
+    type: "feature",
+  },
+  {
+    module_key: "project-management",
+    label: "Project Handover & Closeout",
+    path: "/project-management/closure",
+    actions: [
+      { label: "View", path: "/project-management/closure", type: "outline" },
+      { label: "New", path: "/project-management/closure", type: "primary" },
+    ],
     type: "feature",
   },
 ];

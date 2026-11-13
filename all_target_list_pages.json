@@ -1,0 +1,992 @@
+[
+  {
+    "file": "client\\src\\pages\\modules\\finance\\banking\\BankReconciliationList.jsx",
+    "module": "finance",
+    "name": "BankReconciliationList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\banking\\PdcPostingsList.jsx",
+    "module": "finance",
+    "name": "PdcPostingsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\JournalVoucherList.jsx",
+    "module": "finance",
+    "name": "JournalVoucherList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\reports\\GraphicalChartOfAccountsPage.jsx",
+    "module": "finance",
+    "name": "GraphicalChartOfAccountsPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\setup\\AccountGroupsPage.jsx",
+    "module": "finance",
+    "name": "AccountGroupsPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\setup\\AccountsPage.jsx",
+    "module": "finance",
+    "name": "AccountsPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\setup\\BudgetPage.jsx",
+    "module": "finance",
+    "name": "BudgetPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\setup\\CostCentersPage.jsx",
+    "module": "finance",
+    "name": "CostCentersPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\setup\\CurrenciesPage.jsx",
+    "module": "finance",
+    "name": "CurrenciesPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\setup\\FinanceSetupPage.jsx",
+    "module": "finance",
+    "name": "FinanceSetupPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\setup\\FiscalYearsPage.jsx",
+    "module": "finance",
+    "name": "FiscalYearsPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\setup\\OpeningBalancesPage.jsx",
+    "module": "finance",
+    "name": "OpeningBalancesPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\setup\\TaxCodesPage.jsx",
+    "module": "finance",
+    "name": "TaxCodesPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\vouchers\\ContraVoucherList.jsx",
+    "module": "finance",
+    "name": "ContraVoucherList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\vouchers\\CreditNoteList.jsx",
+    "module": "finance",
+    "name": "CreditNoteList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\vouchers\\DebitNoteList.jsx",
+    "module": "finance",
+    "name": "DebitNoteList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\vouchers\\JournalVoucherList.jsx",
+    "module": "finance",
+    "name": "JournalVoucherList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\vouchers\\PaymentVoucherList.jsx",
+    "module": "finance",
+    "name": "PaymentVoucherList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\vouchers\\PurchaseVoucherList.jsx",
+    "module": "finance",
+    "name": "PurchaseVoucherList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\vouchers\\ReceiptVoucherList.jsx",
+    "module": "finance",
+    "name": "ReceiptVoucherList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\vouchers\\SalesVoucherList.jsx",
+    "module": "finance",
+    "name": "SalesVoucherList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\vouchers\\VoucherImportPage.jsx",
+    "module": "finance",
+    "name": "VoucherImportPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\vouchers\\VoucherListPage.jsx",
+    "module": "finance",
+    "name": "VoucherListPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\DailyStockTakeList.jsx",
+    "module": "inventory",
+    "name": "DailyStockTakeList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\GRNImportList.jsx",
+    "module": "inventory",
+    "name": "GRNImportList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\GRNLocalList.jsx",
+    "module": "inventory",
+    "name": "GRNLocalList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\IssueToRequirementList.jsx",
+    "module": "inventory",
+    "name": "IssueToRequirementList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\ItemBatchesList.jsx",
+    "module": "inventory",
+    "name": "ItemBatchesList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\ItemGroupsList.jsx",
+    "module": "inventory",
+    "name": "ItemGroupsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\ItemsList.jsx",
+    "module": "inventory",
+    "name": "ItemsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\LowStockNotificationsPage.jsx",
+    "module": "inventory",
+    "name": "LowStockNotificationsPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\MaterialRequisitionList.jsx",
+    "module": "inventory",
+    "name": "MaterialRequisitionList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\PhysicalStockTakeList.jsx",
+    "module": "inventory",
+    "name": "PhysicalStockTakeList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\purchase-returns\\PurchaseReturnList.jsx",
+    "module": "inventory",
+    "name": "PurchaseReturnList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\reports\\InventoryHealthMonitorPage.jsx",
+    "module": "inventory",
+    "name": "InventoryHealthMonitorPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\reports\\PeriodicalStockStatementPage.jsx",
+    "module": "inventory",
+    "name": "PeriodicalStockStatementPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\reports\\PeriodicalStockSummaryPage.jsx",
+    "module": "inventory",
+    "name": "PeriodicalStockSummaryPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\ReturnToStoresList.jsx",
+    "module": "inventory",
+    "name": "ReturnToStoresList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\ServiceConfirmationsList.jsx",
+    "module": "inventory",
+    "name": "ServiceConfirmationsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\StockAdjustmentList.jsx",
+    "module": "inventory",
+    "name": "StockAdjustmentList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\StockBalancesPage.jsx",
+    "module": "inventory",
+    "name": "StockBalancesPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\StockJournalList.jsx",
+    "module": "inventory",
+    "name": "StockJournalList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\StockReorderPage.jsx",
+    "module": "inventory",
+    "name": "StockReorderPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\StockTakeList.jsx",
+    "module": "inventory",
+    "name": "StockTakeList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\StockTransferList.jsx",
+    "module": "inventory",
+    "name": "StockTransferList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\StockUpdationList.jsx",
+    "module": "inventory",
+    "name": "StockUpdationList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\StockUploadPage.jsx",
+    "module": "inventory",
+    "name": "StockUploadPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\StockVerificationList.jsx",
+    "module": "inventory",
+    "name": "StockVerificationList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\TransferAcceptanceList.jsx",
+    "module": "inventory",
+    "name": "TransferAcceptanceList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\UnitConversionsList.jsx",
+    "module": "inventory",
+    "name": "UnitConversionsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\WarehousesList.jsx",
+    "module": "inventory",
+    "name": "WarehousesList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\direct-purchase\\DirectPurchaseList.jsx",
+    "module": "purchase",
+    "name": "DirectPurchaseList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\general-requisitions\\GeneralRequisitionList.jsx",
+    "module": "purchase",
+    "name": "GeneralRequisitionList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\port-clearances\\PortClearancesList.jsx",
+    "module": "purchase",
+    "name": "PortClearancesList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\purchase-bills\\PurchaseBillsList.jsx",
+    "module": "purchase",
+    "name": "PurchaseBillsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\purchase-orders-import\\PurchaseOrdersImportList.jsx",
+    "module": "purchase",
+    "name": "PurchaseOrdersImportList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\purchase-orders-local\\PurchaseOrdersLocalList.jsx",
+    "module": "purchase",
+    "name": "PurchaseOrdersLocalList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\PurchaseUploadPage.jsx",
+    "module": "purchase",
+    "name": "PurchaseUploadPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\rfq\\RequestForQuotationList.jsx",
+    "module": "purchase",
+    "name": "RequestForQuotationList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\service-bills\\ServiceBillsList.jsx",
+    "module": "purchase",
+    "name": "ServiceBillsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\service-confirmations\\ServiceConfirmationsList.jsx",
+    "module": "purchase",
+    "name": "ServiceConfirmationsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\service-requests\\ServiceRequestsList.jsx",
+    "module": "purchase",
+    "name": "ServiceRequestsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\setup\\PurchaseSetupPage.jsx",
+    "module": "purchase",
+    "name": "PurchaseSetupPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\shipping-advice\\ShippingAdviceList.jsx",
+    "module": "purchase",
+    "name": "ShippingAdviceList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\supplier-quotations\\SupplierQuotationsList.jsx",
+    "module": "purchase",
+    "name": "SupplierQuotationsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\suppliers\\SuppliersList.jsx",
+    "module": "purchase",
+    "name": "SuppliersList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\allowances\\AllowanceList.jsx",
+    "module": "human-resources",
+    "name": "AllowanceList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\attendance\\AttendanceList.jsx",
+    "module": "human-resources",
+    "name": "AttendanceList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\attendance\\BiometricAnalyticsPage.jsx",
+    "module": "human-resources",
+    "name": "BiometricAnalyticsPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\attendance\\BiometricClockPage.jsx",
+    "module": "human-resources",
+    "name": "BiometricClockPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\attendance\\BiometricDevicesPage.jsx",
+    "module": "human-resources",
+    "name": "BiometricDevicesPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\attendance\\BiometricSettingsPage.jsx",
+    "module": "human-resources",
+    "name": "BiometricSettingsPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\compliance\\PolicyList.jsx",
+    "module": "human-resources",
+    "name": "PolicyList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\employees\\EmployeeList.jsx",
+    "module": "human-resources",
+    "name": "EmployeeList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\leave\\LeaveApplicationsList.jsx",
+    "module": "human-resources",
+    "name": "LeaveApplicationsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\leave\\LeaveRequestManager.jsx",
+    "module": "human-resources",
+    "name": "LeaveRequestManager.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\leave-setup\\LeaveSetupList.jsx",
+    "module": "human-resources",
+    "name": "LeaveSetupList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\loans\\LoanDisbursementPage.jsx",
+    "module": "human-resources",
+    "name": "LoanDisbursementPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\loans\\LoanList.jsx",
+    "module": "human-resources",
+    "name": "LoanList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\loans\\LoanRequestList.jsx",
+    "module": "human-resources",
+    "name": "LoanRequestList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\medical-policies\\MedicalPolicyList.jsx",
+    "module": "human-resources",
+    "name": "MedicalPolicyList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\organogram\\OrganogramPage.jsx",
+    "module": "human-resources",
+    "name": "OrganogramPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\payroll\\SalaryExemptionsPage.jsx",
+    "module": "human-resources",
+    "name": "SalaryExemptionsPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\payroll\\SalaryPostingPage.jsx",
+    "module": "human-resources",
+    "name": "SalaryPostingPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\payslips\\PayslipList.jsx",
+    "module": "human-resources",
+    "name": "PayslipList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\promotions\\PromotionList.jsx",
+    "module": "human-resources",
+    "name": "PromotionList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\recruitment\\CandidatesList.jsx",
+    "module": "human-resources",
+    "name": "CandidatesList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\recruitment\\InterviewsList.jsx",
+    "module": "human-resources",
+    "name": "InterviewsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\recruitment\\OffersList.jsx",
+    "module": "human-resources",
+    "name": "OffersList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\recruitment\\RequisitionList.jsx",
+    "module": "human-resources",
+    "name": "RequisitionList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\salary-config\\BaseSalariesPage.jsx",
+    "module": "human-resources",
+    "name": "BaseSalariesPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\salary-config\\SalaryConfigList.jsx",
+    "module": "human-resources",
+    "name": "SalaryConfigList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\salary-config\\SalaryStructurePage.jsx",
+    "module": "human-resources",
+    "name": "SalaryStructurePage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\shifts\\ShiftList.jsx",
+    "module": "human-resources",
+    "name": "ShiftList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\tax-config\\TaxConfigList.jsx",
+    "module": "human-resources",
+    "name": "TaxConfigList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\tax-reliefs\\TaxReliefList.jsx",
+    "module": "human-resources",
+    "name": "TaxReliefList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\training\\TrainingList.jsx",
+    "module": "human-resources",
+    "name": "TrainingList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\assets\\AssetList.jsx",
+    "module": "maintenance",
+    "name": "AssetList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\assets\\DowntimeLogList.jsx",
+    "module": "maintenance",
+    "name": "DowntimeLogList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\budgeting-finance\\FacilitiesBudgetingFinancePage.jsx",
+    "module": "maintenance",
+    "name": "FacilitiesBudgetingFinancePage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\checklists\\ChecklistTemplatesList.jsx",
+    "module": "maintenance",
+    "name": "ChecklistTemplatesList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\contractors-vendors\\ContractorVendorManagementPage.jsx",
+    "module": "maintenance",
+    "name": "ContractorVendorManagementPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\contracts\\MaintenanceContractList.jsx",
+    "module": "maintenance",
+    "name": "MaintenanceContractList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\equipment\\EquipmentList.jsx",
+    "module": "maintenance",
+    "name": "EquipmentList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\fm-contracts\\FMContractsList.jsx",
+    "module": "maintenance",
+    "name": "FMContractsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\hsa-compliance\\HealthSafetyCompliancePage.jsx",
+    "module": "maintenance",
+    "name": "HealthSafetyCompliancePage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\job-execution\\JobExecutionList.jsx",
+    "module": "maintenance",
+    "name": "JobExecutionList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\job-orders\\MaintenanceJobOrdersList.jsx",
+    "module": "maintenance",
+    "name": "MaintenanceJobOrdersList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\maintenance-bills\\MaintenanceBillList.jsx",
+    "module": "maintenance",
+    "name": "MaintenanceBillList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\maintenance-requests\\MaintenanceRequestsList.jsx",
+    "module": "maintenance",
+    "name": "MaintenanceRequestsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\material-receipt\\MaterialReceiptList.jsx",
+    "module": "maintenance",
+    "name": "MaterialReceiptList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\material-requisitions\\MaintenanceMaterialRequisitionList.jsx",
+    "module": "maintenance",
+    "name": "MaintenanceMaterialRequisitionList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\pm-schedules\\PmScheduleList.jsx",
+    "module": "maintenance",
+    "name": "PmScheduleList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\properties\\PropertiesList.jsx",
+    "module": "maintenance",
+    "name": "PropertiesList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\rfq\\MaintenanceRFQList.jsx",
+    "module": "maintenance",
+    "name": "MaintenanceRFQList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\rosters\\MaintenanceRosterList.jsx",
+    "module": "maintenance",
+    "name": "MaintenanceRosterList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\schedules\\MaintenanceScheduleList.jsx",
+    "module": "maintenance",
+    "name": "MaintenanceScheduleList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\setup\\MaintenanceSetupPage.jsx",
+    "module": "maintenance",
+    "name": "MaintenanceSetupPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\soft-services\\SoftServicesPage.jsx",
+    "module": "maintenance",
+    "name": "SoftServicesPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\space-occupancy\\SpaceOccupancyPage.jsx",
+    "module": "maintenance",
+    "name": "SpaceOccupancyPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\supplier-quotations\\SupplierQuotationsList.jsx",
+    "module": "maintenance",
+    "name": "SupplierQuotationsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\sustainability\\SustainabilityManagementPage.jsx",
+    "module": "maintenance",
+    "name": "SustainabilityManagementPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\utilities-energy\\UtilitiesEnergyPage.jsx",
+    "module": "maintenance",
+    "name": "UtilitiesEnergyPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\bom\\BomList.jsx",
+    "module": "production",
+    "name": "BomList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\execution\\FinishedGoodsTransferList.jsx",
+    "module": "production",
+    "name": "FinishedGoodsTransferList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\execution\\JobCardList.jsx",
+    "module": "production",
+    "name": "JobCardList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\execution\\MaterialReceiptList.jsx",
+    "module": "production",
+    "name": "MaterialReceiptList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\execution\\MaterialRequisitionList.jsx",
+    "module": "production",
+    "name": "MaterialRequisitionList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\execution\\MaterialUtilizationList.jsx",
+    "module": "production",
+    "name": "MaterialUtilizationList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\execution\\ProductionOutputPage.jsx",
+    "module": "production",
+    "name": "ProductionOutputPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\execution\\ProductionTransferList.jsx",
+    "module": "production",
+    "name": "ProductionTransferList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\execution\\QualityControlList.jsx",
+    "module": "production",
+    "name": "QualityControlList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\inventory\\ProductionStockPage.jsx",
+    "module": "production",
+    "name": "ProductionStockPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\inventory\\StockJournalList.jsx",
+    "module": "production",
+    "name": "StockJournalList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\planning\\DailyPlanList.jsx",
+    "module": "production",
+    "name": "DailyPlanList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\planning\\MaterialRequirementPage.jsx",
+    "module": "production",
+    "name": "MaterialRequirementPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\reports\\ProductionCostingPage.jsx",
+    "module": "production",
+    "name": "ProductionCostingPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\routings\\RoutingList.jsx",
+    "module": "production",
+    "name": "RoutingList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\BomOutputTypeList.jsx",
+    "module": "production",
+    "name": "BomOutputTypeList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\DepartmentList.jsx",
+    "module": "production",
+    "name": "DepartmentList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\MachineList.jsx",
+    "module": "production",
+    "name": "MachineList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\OperatorList.jsx",
+    "module": "production",
+    "name": "OperatorList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\OverheadList.jsx",
+    "module": "production",
+    "name": "OverheadList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\ProcessList.jsx",
+    "module": "production",
+    "name": "ProcessList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\ProductionItemList.jsx",
+    "module": "production",
+    "name": "ProductionItemList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\ProductionWarehouseList.jsx",
+    "module": "production",
+    "name": "ProductionWarehouseList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\QcChecklistList.jsx",
+    "module": "production",
+    "name": "QcChecklistList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\ShiftList.jsx",
+    "module": "production",
+    "name": "ShiftList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\work-orders\\WorkOrderList.jsx",
+    "module": "production",
+    "name": "WorkOrderList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\service-management\\service-bills\\ServiceBillsList.jsx",
+    "module": "service-management",
+    "name": "ServiceBillsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\service-management\\service-confirmations\\ServiceConfirmationsList.jsx",
+    "module": "service-management",
+    "name": "ServiceConfirmationsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\service-management\\service-execution\\ServiceExecutionsList.jsx",
+    "module": "service-management",
+    "name": "ServiceExecutionsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\service-management\\service-invoices\\ServiceInvoiceList.jsx",
+    "module": "service-management",
+    "name": "ServiceInvoiceList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\service-management\\service-orders\\ServiceOrdersList.jsx",
+    "module": "service-management",
+    "name": "ServiceOrdersList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\service-management\\service-requests\\CustomerServiceRequestsList.jsx",
+    "module": "service-management",
+    "name": "CustomerServiceRequestsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\service-management\\service-requests\\SupplierServiceRequestsList.jsx",
+    "module": "service-management",
+    "name": "SupplierServiceRequestsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\service-management\\setup\\ServiceParametersPage.jsx",
+    "module": "service-management",
+    "name": "ServiceParametersPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\service-management\\visitors-log\\VisitorsLogList.jsx",
+    "module": "service-management",
+    "name": "VisitorsLogList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\billing\\BillingList.jsx",
+    "module": "transport",
+    "name": "BillingList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\breakdowns\\BreakdownsList.jsx",
+    "module": "transport",
+    "name": "BreakdownsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\compliance\\VehicleComplianceList.jsx",
+    "module": "transport",
+    "name": "VehicleComplianceList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\drivers\\DriversList.jsx",
+    "module": "transport",
+    "name": "DriversList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\expenses\\ExpenseLogList.jsx",
+    "module": "transport",
+    "name": "ExpenseLogList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\expenses\\TransportExpenseList.jsx",
+    "module": "transport",
+    "name": "TransportExpenseList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\fuel\\FuelLogsList.jsx",
+    "module": "transport",
+    "name": "FuelLogsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\fuel-bills\\FuelBillsList.jsx",
+    "module": "transport",
+    "name": "FuelBillsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\fuel-expenses\\FuelExpenseList.jsx",
+    "module": "transport",
+    "name": "FuelExpenseList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\income\\TransportIncomeList.jsx",
+    "module": "transport",
+    "name": "TransportIncomeList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\inspections\\InspectionsList.jsx",
+    "module": "transport",
+    "name": "InspectionsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\logbook\\LogbookList.jsx",
+    "module": "transport",
+    "name": "LogbookList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\maintenance\\MaintenanceList.jsx",
+    "module": "transport",
+    "name": "MaintenanceList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\routes\\RoutesList.jsx",
+    "module": "transport",
+    "name": "RoutesList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\servicing\\VehicleServicingList.jsx",
+    "module": "transport",
+    "name": "VehicleServicingList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\transportation-bills\\TransportationBillsList.jsx",
+    "module": "transport",
+    "name": "TransportationBillsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\trips\\TripManagementPage.jsx",
+    "module": "transport",
+    "name": "TripManagementPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\trips\\TripReturnList.jsx",
+    "module": "transport",
+    "name": "TripReturnList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\trips\\TripsList.jsx",
+    "module": "transport",
+    "name": "TripsList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\trips\\TripTrackingList.jsx",
+    "module": "transport",
+    "name": "TripTrackingList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\trips\\TripTrackingPage.jsx",
+    "module": "transport",
+    "name": "TripTrackingPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\vehicles\\VehiclesList.jsx",
+    "module": "transport",
+    "name": "VehiclesList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\compliance\\FMCompliancePage.jsx",
+    "module": "facilities",
+    "name": "FMCompliancePage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\FacilitiesSetupPage.jsx",
+    "module": "facilities",
+    "name": "FacilitiesSetupPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\hard-services\\HardServicesPage.jsx",
+    "module": "facilities",
+    "name": "HardServicesPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\helpdesk\\FMHelpdeskPage.jsx",
+    "module": "facilities",
+    "name": "FMHelpdeskPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\inspections\\FMInspectionsPage.jsx",
+    "module": "facilities",
+    "name": "FMInspectionsPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\material-receipt\\FMMaterialReceiptList.jsx",
+    "module": "facilities",
+    "name": "FMMaterialReceiptList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\material-requisition\\FMMaterialRequisitionList.jsx",
+    "module": "facilities",
+    "name": "FMMaterialRequisitionList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\material-utilization\\FMMaterialUtilizationList.jsx",
+    "module": "facilities",
+    "name": "FMMaterialUtilizationList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\onboarding\\PropertyOnboardingPage.jsx",
+    "module": "facilities",
+    "name": "PropertyOnboardingPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\purchase-requisitions\\FMPurchaseRequisitionList.jsx",
+    "module": "facilities",
+    "name": "FMPurchaseRequisitionList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\security\\SecurityAccessPage.jsx",
+    "module": "facilities",
+    "name": "SecurityAccessPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\servicebilling\\ServiceBillingList.jsx",
+    "module": "facilities",
+    "name": "ServiceBillingList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\sla\\SLAPoliciesPage.jsx",
+    "module": "facilities",
+    "name": "SLAPoliciesPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\space-occupancy\\RoomBookingsPage.jsx",
+    "module": "facilities",
+    "name": "RoomBookingsPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\space-occupancy\\SpacesDirectoryPage.jsx",
+    "module": "facilities",
+    "name": "SpacesDirectoryPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\space-occupancy\\TenantOccupancyPage.jsx",
+    "module": "facilities",
+    "name": "TenantOccupancyPage.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\tasks\\FMTaskList.jsx",
+    "module": "facilities",
+    "name": "FMTaskList.jsx"
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\workforce\\FMWorkforceRosterPage.jsx",
+    "module": "facilities",
+    "name": "FMWorkforceRosterPage.jsx"
+  }
+]

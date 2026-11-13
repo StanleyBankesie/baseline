@@ -107,6 +107,8 @@ async function ensureProjectTables(companyId, branchId) {
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
 
   try { await query(`ALTER TABLE pm_projects ADD COLUMN is_active ENUM('Y','N') DEFAULT 'Y' AFTER remarks`); } catch (e) {}
+  try { await query(`ALTER TABLE pm_projects ADD COLUMN attachments LONGTEXT NULL AFTER remarks`); } catch (e) {}
+  try { await query(`ALTER TABLE pm_projects ADD COLUMN contract_file_url VARCHAR(500) NULL AFTER contract_ref_no`); } catch (e) {}
 
   await query(`CREATE TABLE IF NOT EXISTS pm_project_managers (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -155,7 +157,7 @@ export const getProjectById = async (req, res, next) => {
   try {
     const { companyId, branchId = null } = req.scope || {};
     const id = toNumber(req.params.id);
-    if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    if (!id) return next();
     await ensureProjectTables(companyId, branchId);
 
     const items = await query(`SELECT p.*,
@@ -166,10 +168,63 @@ export const getProjectById = async (req, res, next) => {
       { id, companyId, branchId },
     );
     if (!items.length) throw httpError(404, "NOT_FOUND", "Project not found");
-    res.json({ item: items[0] });
+    const item = items[0];
+    if (item.attachments && typeof item.attachments === "string") {
+      try { item.attachments = JSON.parse(item.attachments); } catch(e) {}
+    }
+    res.json({ item });
   } catch (err) {
     next(err);
   }
+};
+
+export async function generateProjectCode(projectName, startDate, companyId) {
+  let prefix = "PRJ";
+  if (projectName && projectName.trim()) {
+    const words = projectName.trim().split(/\s+/).filter(Boolean);
+    if (words.length >= 3) {
+      prefix = (words[0][0] + words[1][0] + words[2][0]).replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+    } else if (words.length === 2) {
+      prefix = (words[0][0] + words[1][0]).replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+    } else if (words.length === 1) {
+      prefix = words[0].slice(0, 3).replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+    }
+  }
+  if (!prefix) prefix = "PRJ";
+
+  const d = startDate ? new Date(startDate) : new Date();
+  const validDate = isNaN(d.getTime()) ? new Date() : d;
+  const month = String(validDate.getMonth() + 1).padStart(2, "0");
+  const year = String(validDate.getFullYear());
+
+  const basePattern = `${prefix}/${month}/${year}/`;
+  const existing = await query(
+    `SELECT project_code FROM pm_projects 
+     WHERE (company_id = :companyId OR :companyId IS NULL) 
+       AND project_code LIKE :pattern`,
+    { companyId: companyId || null, pattern: `${basePattern}%` }
+  );
+
+  let maxNum = 0;
+  if (existing && existing.length > 0) {
+    for (const row of existing) {
+      const parts = String(row.project_code || "").split("/");
+      const last = parseInt(parts[parts.length - 1], 10);
+      if (!isNaN(last) && last > maxNum) {
+        maxNum = last;
+      }
+    }
+  }
+  const nextSeq = String(maxNum + 1).padStart(3, "0");
+  return `${basePattern}${nextSeq}`;
+}
+
+export const getGeneratedProjectCode = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const code = await generateProjectCode(req.query.name, req.query.start_date, companyId);
+    res.json({ code });
+  } catch (err) { next(err); }
 };
 
 export const createProject = async (req, res, next) => {
@@ -177,21 +232,29 @@ export const createProject = async (req, res, next) => {
     const { companyId, branchId = null } = req.scope || {};
     await ensureProjectTables(companyId, branchId);
     const b = req.body || {};
+    const attachmentsVal = Array.isArray(b.attachments) ? JSON.stringify(b.attachments) : (b.attachments || null);
+    const contractFileUrl = b.contract_file_url || (Array.isArray(b.attachments) && b.attachments.length > 0 ? b.attachments[0].url : null);
 
-    if (!b.project_code || !b.project_name)
-      throw httpError(400, "VALIDATION_ERROR", "Code and Name are required");
+    if (!b.project_name || !String(b.project_name).trim())
+      throw httpError(400, "VALIDATION_ERROR", "Project Title is required");
+
+    let finalProjectCode = (b.project_code || "").trim();
+    if (!finalProjectCode) {
+      finalProjectCode = await generateProjectCode(b.project_name, b.start_date, companyId);
+    }
 
     const result = await query(`INSERT INTO pm_projects 
-      (company_id, branch_id, project_code, project_name, project_type, client_id, client_name, contract_ref_no, contract_sum, revised_contract_sum, site_address, site_city, site_gps_lat, site_gps_lng, manager_id, manager_name, site_engineer_id, site_engineer_name, qs_id, qs_name, supervisor_id, supervisor_name, commercial_manager_id, commercial_manager_name, retention_percent, retention_cap, advance_payment_amount, advance_recovery_percent, defects_liability_months, practical_completion_date, final_completion_date, wbs_code, budget, project_priority, project_status, start_date, end_date, remarks, is_active)
-      VALUES (:companyId, :branchId, :project_code, :project_name, :project_type, :client_id, :client_name, :contract_ref_no, :contract_sum, :revised_contract_sum, :site_address, :site_city, :site_gps_lat, :site_gps_lng, :manager_id, :manager_name, :site_engineer_id, :site_engineer_name, :qs_id, :qs_name, :supervisor_id, :supervisor_name, :commercial_manager_id, :commercial_manager_name, :retention_percent, :retention_cap, :advance_payment_amount, :advance_recovery_percent, :defects_liability_months, :practical_completion_date, :final_completion_date, :wbs_code, :budget, :project_priority, :project_status, :start_date, :end_date, :remarks, :is_active)`,
+      (company_id, branch_id, project_code, project_name, project_type, client_id, client_name, contract_ref_no, contract_file_url, contract_sum, revised_contract_sum, site_address, site_city, site_gps_lat, site_gps_lng, manager_id, manager_name, site_engineer_id, site_engineer_name, qs_id, qs_name, supervisor_id, supervisor_name, commercial_manager_id, commercial_manager_name, retention_percent, retention_cap, advance_payment_amount, advance_recovery_percent, defects_liability_months, practical_completion_date, final_completion_date, wbs_code, budget, project_priority, project_status, start_date, end_date, remarks, attachments, is_active)
+      VALUES (:companyId, :branchId, :project_code, :project_name, :project_type, :client_id, :client_name, :contract_ref_no, :contract_file_url, :contract_sum, :revised_contract_sum, :site_address, :site_city, :site_gps_lat, :site_gps_lng, :manager_id, :manager_name, :site_engineer_id, :site_engineer_name, :qs_id, :qs_name, :supervisor_id, :supervisor_name, :commercial_manager_id, :commercial_manager_name, :retention_percent, :retention_cap, :advance_payment_amount, :advance_recovery_percent, :defects_liability_months, :practical_completion_date, :final_completion_date, :wbs_code, :budget, :project_priority, :project_status, :start_date, :end_date, :remarks, :attachments, :is_active)`,
       {
         companyId, branchId,
-        project_code: b.project_code,
+        project_code: finalProjectCode,
         project_name: b.project_name,
         project_type: b.project_type || 'GENERAL_CONSTRUCTION',
         client_id: toNumber(b.client_id),
         client_name: b.client_name || null,
         contract_ref_no: b.contract_ref_no || null,
+        contract_file_url: contractFileUrl,
         contract_sum: Number(b.contract_sum || b.budget || 0),
         revised_contract_sum: Number(b.revised_contract_sum || b.contract_sum || b.budget || 0),
         site_address: b.site_address || null,
@@ -218,15 +281,52 @@ export const createProject = async (req, res, next) => {
         wbs_code: b.wbs_code || null,
         budget: Number(b.budget || 0),
         project_priority: b.project_priority || 'MEDIUM',
-        project_status: b.project_status || "PLANNING",
+        project_status: b.project_status || "IN_PROGRESS",
         start_date: b.start_date || null,
         end_date: b.end_date || null,
         remarks: b.remarks || null,
-        is_active: 'Y',
+        attachments: attachmentsVal,
+        is_active: b.is_active !== undefined ? (b.is_active === 'N' || b.is_active === false || b.is_active === 0 ? 'N' : 'Y') : 'Y',
       },
     );
 
-    res.status(201).json({ id: result.insertId });
+    const projectId = result.insertId;
+    if (Array.isArray(b.milestones) && b.milestones.length > 0) {
+      for (const m of b.milestones) {
+        if (m && m.title && m.title.trim()) {
+          await query(
+            `INSERT INTO pm_milestones (company_id, branch_id, project_id, title, due_date, status, remarks)
+             VALUES (:companyId, :branchId, :projectId, :title, :due_date, :status, :remarks)`,
+            {
+              companyId: companyId || 1,
+              branchId: branchId || 1,
+              projectId,
+              title: m.title.trim(),
+              due_date: m.due_date || null,
+              status: m.status || 'PENDING',
+              remarks: m.remarks || null,
+            }
+          ).catch(() => {});
+          await query(
+            `INSERT INTO pm_tasks (company_id, branch_id, project_id, task_title, task_description, priority, status, start_date, end_date)
+             VALUES (:companyId, :branchId, :projectId, :title, :description, :priority, :status, :start_date, :end_date)`,
+            {
+              companyId: companyId || 1,
+              branchId: branchId || 1,
+              projectId,
+              title: m.title.trim(),
+              description: m.remarks || null,
+              priority: m.priority || 'MEDIUM',
+              status: m.status || 'PENDING',
+              start_date: m.start_date || b.start_date || null,
+              end_date: m.due_date || null,
+            }
+          ).catch(() => {});
+        }
+      }
+    }
+
+    res.status(201).json({ id: projectId });
   } catch (err) {
     next(err);
   }
@@ -236,12 +336,15 @@ export const updateProject = async (req, res, next) => {
   try {
     const { companyId, branchId = null } = req.scope || {};
     const id = toNumber(req.params.id);
+    if (!id) return next();
     const b = req.body || {};
     await ensureProjectTables(companyId, branchId);
+    const attachmentsVal = Array.isArray(b.attachments) ? JSON.stringify(b.attachments) : (b.attachments || null);
+    const contractFileUrl = b.contract_file_url || (Array.isArray(b.attachments) && b.attachments.length > 0 ? b.attachments[0].url : null);
 
     await query(`UPDATE pm_projects SET
       project_name = :project_name, project_type = :project_type, client_id = :client_id, client_name = :client_name,
-      contract_ref_no = :contract_ref_no, contract_sum = :contract_sum, revised_contract_sum = :revised_contract_sum,
+      contract_ref_no = :contract_ref_no, contract_file_url = :contract_file_url, contract_sum = :contract_sum, revised_contract_sum = :revised_contract_sum,
       site_address = :site_address, site_city = :site_city, site_gps_lat = :site_gps_lat, site_gps_lng = :site_gps_lng,
       manager_id = :manager_id, manager_name = :manager_name,
       site_engineer_id = :site_engineer_id, site_engineer_name = :site_engineer_name,
@@ -254,7 +357,7 @@ export const updateProject = async (req, res, next) => {
       budget = :budget, project_priority = :project_priority,
       project_status = :project_status, start_date = :start_date, end_date = :end_date,
       actual_start_date = :actual_start_date, actual_end_date = :actual_end_date,
-      completion_percent = :completion_percent, remarks = :remarks,
+      completion_percent = :completion_percent, remarks = :remarks, attachments = :attachments,
       is_active = :is_active
       WHERE id = :id AND company_id = :companyId`,
       {
@@ -264,6 +367,7 @@ export const updateProject = async (req, res, next) => {
         client_id: toNumber(b.client_id),
         client_name: b.client_name || null,
         contract_ref_no: b.contract_ref_no || null,
+        contract_file_url: contractFileUrl,
         contract_sum: Number(b.contract_sum || b.budget || 0),
         revised_contract_sum: Number(b.revised_contract_sum || b.contract_sum || b.budget || 0),
         site_address: b.site_address || null,
@@ -297,6 +401,7 @@ export const updateProject = async (req, res, next) => {
         actual_end_date: b.actual_end_date || null,
         completion_percent: Number(b.completion_percent || 0),
         remarks: b.remarks || null,
+        attachments: attachmentsVal,
         is_active: b.is_active !== undefined ? (b.is_active ? 'Y' : 'N') : 'Y',
       }
     );
@@ -310,7 +415,7 @@ export const updateProject = async (req, res, next) => {
 export const listTasks = async (req, res, next) => {
   try {
     const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
-    const projectId = toNumber(req.query.projectId);
+    const projectId = toNumber(req.query.projectId ?? req.query.project_id);
     await ensureProjectTables(companyId, branchId);
     
     let sql = `SELECT t.*, 
@@ -514,7 +619,7 @@ export const deleteProject = async (req, res, next) => {
   try {
     const { companyId, branchId = null } = req.scope || {};
     const id = toNumber(req.params.id);
-    if (!id) throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+    if (!id) return next();
     await query(`DELETE FROM pm_projects WHERE id = :id AND company_id = :companyId AND branch_id = :branchId`, { id, companyId, branchId });
     res.json({ ok: true });
   } catch (err) { next(err); }
@@ -523,14 +628,14 @@ export const deleteProject = async (req, res, next) => {
 // ===== PROJECT MANAGERS =====
 export const listProjectManagers = async (req, res, next) => {
   try {
-    const { companyId, branchId = null } = req.scope || {};
+    const { companyId } = req.scope || {};
     const rows = await query(
-      `SELECT pm.id, pm.user_id, pm.is_active, u.username, u.email
-       FROM pm_project_managers pm
-       JOIN adm_users u ON u.id = pm.user_id
-       WHERE pm.company_id = :companyId AND pm.branch_id = :branchId
-       ORDER BY u.username ASC`,
-      { companyId, branchId },
+      `SELECT id, id AS user_id, username, full_name, email, is_active
+       FROM adm_users
+       WHERE (company_id = :companyId OR :companyId IS NULL)
+         AND (is_active = 1 OR is_active = 'Y')
+       ORDER BY COALESCE(full_name, username) ASC`,
+      { companyId: companyId || null },
     );
     res.json({ items: rows || [] });
   } catch (err) { next(err); }
@@ -2336,6 +2441,11 @@ export const listPmEquipments = async (req, res, next) => {
       sql += " AND (e.branch_id = ? OR e.branch_id IS NULL OR e.branch_id = 0)";
       params.push(branchId);
     }
+    const activeParam = String(req.query.active || req.query.status || "").trim().toLowerCase();
+    const showAll = ["all", "any"].includes(activeParam) || req.query.all === "1" || req.query.all === "true";
+    if (!showAll) {
+      sql += " AND (UPPER(e.status) = 'ACTIVE' OR e.status IS NULL)";
+    }
     sql += " ORDER BY e.name ASC";
 
     const rows = await query(sql, params);
@@ -2577,3 +2687,113 @@ export const deletePmResource = async (req, res, next) => {
 };
 
 
+
+// ============================================================================
+// Project Types Management (pm_project_types)
+// ============================================================================
+export async function ensureProjectTypeTable(companyId) {
+  if (process.env.SKIP_DYNAMIC_SCHEMA_SYNC === 'true') return;
+  await query(`CREATE TABLE IF NOT EXISTS pm_project_types (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    company_id INT NOT NULL,
+    type_code VARCHAR(100) NOT NULL,
+    type_name VARCHAR(200) NOT NULL,
+    description TEXT,
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`).catch(() => {});
+
+  const countRes = await query('SELECT COUNT(*) as count FROM pm_project_types WHERE company_id = ?', [companyId || 1]).catch(() => [{ count: 0 }]);
+  if ((countRes?.[0]?.count || 0) === 0) {
+    const defaults = [
+      ['GENERAL_CONSTRUCTION', 'General Construction', 'Standard building and construction works'],
+      ['RESIDENTIAL', 'Residential Construction', 'Private homes, housing estates, apartments'],
+      ['COMMERCIAL_BUILDING', 'Commercial Buildings', 'Office complexes, retail malls, business facilities'],
+      ['INDUSTRIAL', 'Industrial Construction', 'Factories, warehouses, processing plants'],
+      ['ROADS_HIGHWAYS', 'Roads & Highways', 'Pavement, civil transport corridors, asphalt works'],
+      ['BRIDGES', 'Bridges & Civil Infrastructure', 'Overpasses, bridges, structural public civil works'],
+      ['DRAINAGE_WATER', 'Drainage & Water Infrastructure', 'Storm drains, water treatment, utilities pipelines'],
+      ['RENOVATION', 'Renovation & Refurbishment', 'Interior fit-outs, structural retrofitting, rehabilitations'],
+      ['MEP_INSTALLATION', 'MEP Installations', 'Mechanical, electrical, plumbing and HVAC engineering'],
+      ['SPECIALIST_CONTRACTING', 'Specialist Contracting', 'Geotechnical, piling, facade, specialized engineering'],
+      ['PROPERTY_DEVELOPMENT', 'Property Development', 'Turnkey real estate development and joint ventures'],
+      ['INFORMATION_TECHNOLOGY', 'Information Technology', 'Enterprise IT, networking, software deployments'],
+      ['OPERATIONS', 'Operations', 'Operational rollout, facility enhancements'],
+      ['RESEARCH', 'Research & Development', 'Prototyping, feasibility studies, research initiatives'],
+      ['OTHER', 'Other', 'Miscellaneous and customized project types']
+    ];
+    for (const [code, name, desc] of defaults) {
+      await query(
+        'INSERT INTO pm_project_types (company_id, type_code, type_name, description, is_active) VALUES (?, ?, ?, ?, 1)',
+        [companyId || 1, code, name, desc]
+      ).catch(() => {});
+    }
+  }
+}
+
+export const listProjectTypes = async (req, res, next) => {
+  try {
+    const companyId = req.scope?.companyId || req.user?.companyId || req.user?.company_id || 1;
+    await ensureProjectTypeTable(companyId);
+    const showAll = req.query.active === 'all' || req.query.all === '1' || req.query.all === 'true';
+    let sql = 'SELECT * FROM pm_project_types WHERE (company_id = ? OR company_id = 1)';
+    if (!showAll) {
+      sql += ' AND is_active = 1';
+    }
+    sql += ' ORDER BY id ASC';
+    const items = await query(sql, [companyId]);
+    res.json({ items: Array.isArray(items) ? items : [] });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createProjectType = async (req, res, next) => {
+  try {
+    const companyId = req.scope?.companyId || req.user?.companyId || req.user?.company_id || 1;
+    await ensureProjectTypeTable(companyId);
+    const { type_code, type_name, description, is_active } = req.body || {};
+    if (!type_name) {
+      return res.status(400).json({ message: 'Project Type Name is required' });
+    }
+    const code = (type_code || type_name.toUpperCase().replace(/[^A-Z0-9]/g, '_')).trim();
+    const result = await query(
+      'INSERT INTO pm_project_types (company_id, type_code, type_name, description, is_active) VALUES (?, ?, ?, ?, ?)',
+      [companyId, code, type_name.trim(), description || null, is_active === 0 || is_active === false ? 0 : 1]
+    );
+    res.json({ success: true, message: 'Project type created', item: { id: result.insertId, type_code: code, type_name } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateProjectType = async (req, res, next) => {
+  try {
+    const companyId = req.scope?.companyId || req.user?.companyId || req.user?.company_id || 1;
+    const { id } = req.params;
+    const { type_code, type_name, description, is_active } = req.body || {};
+    const code = (type_code || (type_name ? type_name.toUpperCase().replace(/[^A-Z0-9]/g, '_') : '')).trim();
+    await query(
+      'UPDATE pm_project_types SET type_code = COALESCE(?, type_code), type_name = COALESCE(?, type_name), description = ?, is_active = COALESCE(?, is_active) WHERE id = ? AND (company_id = ? OR company_id = 1)',
+      [code || null, type_name ? type_name.trim() : null, description != null ? description : null, is_active, id, companyId]
+    );
+    res.json({ success: true, message: 'Project type updated' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteProjectType = async (req, res, next) => {
+  try {
+    const companyId = req.scope?.companyId || req.user?.companyId || req.user?.company_id || 1;
+    const { id } = req.params;
+    await query(
+      'UPDATE pm_project_types SET is_active = 0 WHERE id = ? AND (company_id = ? OR company_id = 1)',
+      [id, companyId]
+    );
+    res.json({ success: true, message: 'Project type deactivated' });
+  } catch (err) {
+    next(err);
+  }
+};

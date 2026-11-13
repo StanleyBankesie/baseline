@@ -831,11 +831,19 @@ export async function createInspectionRun(req, res, next) {
     // Resolve inspector_id if not explicitly provided
     let finalInspectorId = inspector_id || null;
     if (!finalInspectorId && inspector_name) {
-      const [uRows] = await pool.query(
-        "SELECT id FROM adm_users WHERE company_id = ? AND (full_name = ? OR username = ?) LIMIT 1",
-        [companyId, inspector_name, inspector_name]
+      const [pRows] = await pool.query(
+        "SELECT user_id FROM fm_personnel WHERE company_id = ? AND name = ? AND user_id IS NOT NULL LIMIT 1",
+        [companyId, inspector_name]
       ).catch(() => [[]]);
-      if (uRows && uRows.length > 0) finalInspectorId = uRows[0].id;
+      if (pRows && pRows.length > 0 && pRows[0].user_id) {
+        finalInspectorId = pRows[0].user_id;
+      } else {
+        const [uRows] = await pool.query(
+          "SELECT id FROM adm_users WHERE company_id = ? AND (full_name = ? OR username = ?) LIMIT 1",
+          [companyId, inspector_name, inspector_name]
+        ).catch(() => [[]]);
+        if (uRows && uRows.length > 0) finalInspectorId = uRows[0].id;
+      }
     }
 
     // Resolve property_name

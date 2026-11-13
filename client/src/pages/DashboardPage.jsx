@@ -31,7 +31,7 @@ export default function DashboardPage() {
         setError("");
 
         // Fetch BI summary, Task Execution, and Transport Analytics concurrently
-        const [biRes, taskRes, transRes] = await Promise.allSettled([
+        const [biRes, taskRes, transRes, modRes] = await Promise.allSettled([
           api.get("/bi/dashboards"),
           api.get("/projects/reports/task-execution"),
           api.get("/transport/reports/analytics"),
@@ -325,6 +325,5 @@ export default function DashboardPage() {
           </div>
         ) : null}
       </div>
-    </div>
   );
 }

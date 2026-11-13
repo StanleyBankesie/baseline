@@ -221,11 +221,13 @@
     @apply px-6 py-5;
   }
 
-  /* ── ERP Input Styles (Apple Clean Controls) ──────── */
-  .input {
-    @apply w-full box-border px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-600 dark:focus:border-brand-400 transition-all shadow-apple-xs text-sm;
+  /* ── ERP Input Styles (Apple Clean Controls with Smokey Grey Shadow) ──────── */
+  .input,
+  .select {
+    @apply w-full box-border px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-600 dark:focus:border-brand-400 transition-all text-sm;
     min-height: 42px;
     font-size: 0.875rem;
+    box-shadow: 0 2px 4px -1px rgba(71, 85, 105, 0.16), 0 1px 2px -1px rgba(71, 85, 105, 0.10);
   }
   .input::placeholder,
   input::placeholder,
@@ -1365,19 +1367,57 @@
    textarea controls across all form pages and modals in the entire ERP.
    Ensures crisp white in light mode and deep slate-900 in dark mode.
    ========================================================================== */
+/* Universal form fields: background and smokey grey shadow */
 input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="range"]):not([type="color"]),
 select,
 textarea,
-.input {
+.input,
+.select {
   background-color: #ffffff !important;
+  box-shadow: 0 2px 5px -1px rgba(71, 85, 105, 0.16), 0 1px 3px -1px rgba(71, 85, 105, 0.10) !important;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="range"]):not([type="color"]):hover,
+select:hover,
+textarea:hover,
+.input:hover,
+.select:hover {
+  box-shadow: 0 3px 7px -1px rgba(71, 85, 105, 0.22), 0 2px 4px -1px rgba(71, 85, 105, 0.12) !important;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="range"]):not([type="color"]):focus,
+select:focus,
+textarea:focus,
+.input:focus,
+.select:focus {
+  box-shadow: 0 0 0 3px rgba(14, 54, 70, 0.12), 0 3px 8px -1px rgba(71, 85, 105, 0.24) !important;
 }
 
 .dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="range"]):not([type="color"]),
 .dark select,
 .dark textarea,
-.dark .input {
+.dark .input,
+.dark .select {
   background-color: #0f172a !important;
   color: #f8fafc !important;
+  box-shadow: 0 2px 5px -1px rgba(0, 0, 0, 0.45), 0 1px 3px -1px rgba(0, 0, 0, 0.35) !important;
+}
+
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="range"]):not([type="color"]):hover,
+.dark select:hover,
+.dark textarea:hover,
+.dark .input:hover,
+.dark .select:hover {
+  box-shadow: 0 3px 7px -1px rgba(0, 0, 0, 0.55), 0 2px 4px -1px rgba(0, 0, 0, 0.40) !important;
+}
+
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="range"]):not([type="color"]):focus,
+.dark select:focus,
+.dark textarea:focus,
+.dark .input:focus,
+.dark .select:focus {
+  box-shadow: 0 0 0 3px rgba(59, 134, 168, 0.25), 0 3px 8px -1px rgba(0, 0, 0, 0.60) !important;
 }
 
 /* ==========================================================================

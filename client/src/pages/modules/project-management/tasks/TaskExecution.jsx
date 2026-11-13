@@ -31,7 +31,10 @@ import {
   X,
   ChevronRight,
   MousePointerClick,
-  ArrowLeft
+  ArrowLeft,
+  MessageSquare,
+  ChevronDown,
+  Brain
 } from "lucide-react";
 import CarOdometerGauge from "@/components/CarOdometerGauge.jsx";
 import ProjectModal from "../components/ProjectModal.jsx";
@@ -81,6 +84,9 @@ export default function TaskExecution() {
   const [checklistItems, setChecklistItems] = useState([]);
   const [delayReasons, setDelayReasons] = useState([""]);
   const [taskCompletionPercent, setTaskCompletionPercent] = useState(0);
+  const [taskNotes, setTaskNotes] = useState(""); // General task notes (optional)
+  const [savingNotes, setSavingNotes] = useState(false);
+  const [expandedNoteIdx, setExpandedNoteIdx] = useState(null); // Which checklist item note is open
 
   const fetchTasks = async () => {
     try {
@@ -184,6 +190,7 @@ export default function TaskExecution() {
                   id: item.id || idx + 1,
                   text: item.text || item.label || "",
                   completed: Boolean(item.completed),
+                  note: item.note || "",
                 };
               }
               return { id: idx + 1, text: String(item), completed: false };
@@ -194,7 +201,7 @@ export default function TaskExecution() {
             .split("\n")
             .map((s) => s.trim())
             .filter(Boolean)
-            .map((s, idx) => ({ id: idx + 1, text: s, completed: false }));
+            .map((s, idx) => ({ id: idx + 1, text: s, completed: false, note: "" }));
         }
       } catch {
         parsedChecklist = [{ id: 1, text: selectedTask.task_description, completed: false }];
@@ -231,6 +238,10 @@ export default function TaskExecution() {
     }
     if (parsedDelays.length === 0) parsedDelays = [""];
     setDelayReasons(parsedDelays);
+
+    // Parse task notes (general notes field, optional)
+    setTaskNotes(selectedTask.notes || selectedTask.task_notes || "");
+    setExpandedNoteIdx(null);
   }, [selectedTask]);
 
   // Toggle item completion in checklist for selected task
@@ -239,7 +250,7 @@ export default function TaskExecution() {
 
     const updatedChecklist = checklistItems.map((item, i) =>
       i === index ? { ...item, completed: !item.completed } : item
-    );
+    ); // note field is preserved via spread
 
     setChecklistItems(updatedChecklist);
 
@@ -276,6 +287,56 @@ export default function TaskExecution() {
       toast.success(`Checklist updated (${completedCount}/${totalCount} items completed - ${newPercent}%)`);
     } catch {
       toast.error("Failed to save checklist update");
+    }
+  };
+
+  // Update note for a specific checklist item (auto-saves after typing stops via blur)
+  const handleNoteChange = (index, value) => {
+    const updated = checklistItems.map((item, i) =>
+      i === index ? { ...item, note: value } : item
+    );
+    setChecklistItems(updated);
+  };
+
+  const handleSaveChecklistNote = async (index) => {
+    if (!selectedTask) return;
+    const updated = checklistItems.map((item, i) =>
+      i === index ? { ...item } : item
+    );
+    const jsonDescription = JSON.stringify(updated);
+    try {
+      await api.put(`/projects/tasks/${selectedTask.id}`, {
+        task_description: jsonDescription,
+      });
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === selectedTask.id ? { ...t, task_description: jsonDescription } : t
+        )
+      );
+      toast.success("Checklist note saved");
+    } catch {
+      toast.error("Failed to save note");
+    }
+  };
+
+  // Save general task notes
+  const handleSaveNotes = async () => {
+    if (!selectedTask) return;
+    setSavingNotes(true);
+    try {
+      await api.put(`/projects/tasks/${selectedTask.id}`, {
+        notes: taskNotes,
+      });
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === selectedTask.id ? { ...t, notes: taskNotes } : t
+        )
+      );
+      toast.success("Task notes saved");
+    } catch {
+      toast.error("Failed to save notes");
+    } finally {
+      setSavingNotes(false);
     }
   };
 
@@ -382,6 +443,14 @@ export default function TaskExecution() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <Link
+            to={selectedTask ? `/project-management/mindmap?taskId=${selectedTask.id}&projectId=${selectedTask.project_id || ''}` : "/project-management/mindmap"}
+            className="btn btn-secondary inline-flex items-center gap-1.5"
+            title="Collate thoughts and map execution strategy before working"
+          >
+            <Brain size={16} className="text-purple-600 dark:text-purple-400" />
+            Execution Mindmap
+          </Link>
           <Link to="/project-management/tasks" className="btn btn-primary inline-flex items-center gap-1.5">
             Task Management
           </Link>
@@ -620,6 +689,42 @@ export default function TaskExecution() {
                       No scope checklist items specified for this task.
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* ── Task Notes (Optional) — appears before Reason for Delay ── */}
+              <div className="card p-4 sm:p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                      <MessageSquare className="w-5 h-5 text-sky-500" /> Task Notes
+                      <span className="text-xs font-normal text-slate-400">(Optional)</span>
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      General observations, instructions or progress notes for this task. Visible in Milestone &amp; Task views.
+                    </p>
+                  </div>
+                </div>
+                <textarea
+                  rows={3}
+                  className="input w-full text-xs sm:text-sm resize-none rounded-xl"
+                  placeholder="Add any general notes, observations or progress updates for this task (optional)..."
+                  value={taskNotes}
+                  onChange={(e) => setTaskNotes(e.target.value)}
+                />
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleSaveNotes}
+                    disabled={savingNotes}
+                    className="btn btn-secondary text-xs px-4 py-2 inline-flex items-center gap-1.5 shadow-sm"
+                  >
+                    {savingNotes ? (
+                      <><Loader2 size={13} className="animate-spin" /> Saving...</>
+                    ) : (
+                      <><Save size={13} /> Save Notes</>
+                    )}
+                  </button>
                 </div>
               </div>
 

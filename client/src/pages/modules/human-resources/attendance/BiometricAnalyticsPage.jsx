@@ -168,18 +168,7 @@ export default function BiometricAnalyticsPage() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
-          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs mb-2">
-            <span>Recognition Pipeline</span>
-            <Activity className="w-4 h-4 text-emerald-500" />
-          </div>
-          <div className="text-2xl font-bold text-slate-900 dark:text-white font-mono text-lg pt-1">
-            YuNet + SFace
-          </div>
-          <div className="mt-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-            Avg Inference &lt; 350ms
-          </div>
-        </div>
+
       </div>
 
       {/* Filter and Search Bar */}

@@ -547,7 +547,7 @@ const ModuleDashboard = ({
 
   return (
     <div className="space-y-6 animate-fade-in bg-transparent text-slate-900 dark:text-slate-100">
-      <div className="sticky top-0 z-40 bg-transparent transition-colors">
+      <div className="hidden md:block sticky top-0 z-40 bg-transparent transition-colors">
         <ModuleTopNavBar sections={allSections} headerActions={resolvedHeaderActions} moduleKey={moduleKey} />
       </div>
 
@@ -914,9 +914,15 @@ const ModuleDashboard = ({
                         )}
                       </div>
 
-                      <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors tracking-tight line-clamp-1 mb-1.5">
+                      <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors tracking-tight line-clamp-1 mb-1">
                         {sectionTitle}
                       </h3>
+
+                      {section.description && (
+                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-3">
+                          {section.description}
+                        </p>
+                      )}
 
                       {/* Preview of pages in this section */}
                       <div className="text-xs text-slate-500 dark:text-slate-400 space-y-1 mb-4">
@@ -1005,14 +1011,21 @@ const ModuleDashboard = ({
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-600 to-brand-800 text-white text-lg flex items-center justify-center shadow-xs shrink-0">
                         {safeRenderIcon(sectionIcon, "w-5 h-5")}
                       </div>
-                      <div className="flex items-center gap-2.5 min-w-0 flex-wrap">
-                        <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight truncate">
-                          {sectionTitle}
-                        </h2>
-                        {section.badge && (
-                          <span className="bg-brand-50 text-brand-700 dark:bg-brand-950/40 dark:text-brand-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border border-brand-200/60 dark:border-brand-800/60 shrink-0">
-                            {section.badge}
-                          </span>
+                      <div className="flex flex-col min-w-0">
+                        <div className="flex items-center gap-2.5 min-w-0 flex-wrap">
+                          <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight truncate">
+                            {sectionTitle}
+                          </h2>
+                          {section.badge && (
+                            <span className="bg-brand-50 text-brand-700 dark:bg-brand-950/40 dark:text-brand-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border border-brand-200/60 dark:border-brand-800/60 shrink-0">
+                              {section.badge}
+                            </span>
+                          )}
+                        </div>
+                        {section.description && (
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                            {section.description}
+                          </p>
                         )}
                       </div>
                     </div>

@@ -21,7 +21,7 @@ import {
   ListPdfIconButton,
   ListAttachmentIconButton,
 } from "@/components/list/ListDocActionIconButtons.jsx";
-import { Send, ArrowLeft, FileText, Plus, RefreshCw, Search } from "lucide-react";
+import { Send, ArrowLeft, FileText, Plus, RefreshCw, Search, Activity, Clock, CheckCircle2 } from "lucide-react";
 import ProjectModal from "../components/ProjectModal.jsx";
 
 /**
@@ -552,6 +552,10 @@ export default function ProjectInvoiceList() {
 
   const { sorted: filteredInvoices, sortKey, sortDir, toggle } = useSort(filteredBase, "created_at", "desc");
 
+  const totalInvoiceAmount = useMemo(() => {
+    return invoices.reduce((sum, i) => sum + Number(i.total_amount || 0), 0);
+  }, [invoices]);
+
   return (
     <div className="space-y-6">
       {/* Canonical ERP Header */}
@@ -581,6 +585,50 @@ export default function ProjectInvoiceList() {
             <Plus size={16} /> New Invoice
           </Link>
         </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Paid Invoices",
+            val: invoices.filter((i) => i.status === "PAID" || i.status === "APPROVED" || i.status === "POSTED").length,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Total Invoices",
+            val: invoices.length,
+            icon: <FileText size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+          {
+            label: "Pending Invoices",
+            val: invoices.filter((i) => i.status === "PENDING_APPROVAL" || i.status === "DRAFT" || i.status === "UNPAID" || i.status === "PENDING").length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Paid / Settled",
+            val: invoices.filter((i) => i.status === "PAID" || i.payment_status === "PAID").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
       </div>
 
       <div className="card">

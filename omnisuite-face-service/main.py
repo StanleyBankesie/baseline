@@ -1,6 +1,6 @@
 """
 OmniSuite ERP Biometric Facial Recognition Microservice.
-FastAPI Application providing Face Detection (YuNet), Feature Extraction (SFace),
+Enterprise FastAPI Application powered by InsightFace (SCRFD Detector + ArcFace Recognizer),
 Anti-Spoofing & Liveness (MiniFASNet), and Image Quality Assessment.
 """
 
@@ -8,6 +8,7 @@ import os
 import sys
 import base64
 import time
+import warnings
 from typing import List, Optional
 import cv2
 import numpy as np
@@ -15,22 +16,21 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from detector import YuNetDetector
-from recognizer import SFaceRecognizer
+from detector import InsightFaceDetector
+from recognizer import InsightFaceRecognizer
 from quality import QualityAssessor
 from liveness import MiniFASNetLiveness
 
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WEIGHTS_DIR = os.path.join(BASE_DIR, "weights")
-
-YUNET_PATH = os.path.join(WEIGHTS_DIR, "face_detection_yunet_2023mar.onnx")
-SFACE_PATH = os.path.join(WEIGHTS_DIR, "face_recognition_sface_2021dec.onnx")
 LIVENESS_PATH = os.path.join(WEIGHTS_DIR, "MiniFASNetV2.onnx")
 
 app = FastAPI(
-    title="OmniSuite ERP Biometric Facial Recognition Service",
-    version="1.0.0",
-    description="Independent facial recognition, liveness, and quality service."
+    title="OmniSuite ERP InsightFace Biometric Facial Recognition Service",
+    version="2.0.0",
+    description="Enterprise InsightFace facial recognition, anti-spoofing, and quality assessment service."
 )
 
 app.add_middleware(
@@ -42,23 +42,26 @@ app.add_middleware(
 )
 
 # Global models initialized on startup
-detector: Optional[YuNetDetector] = None
-recognizer: Optional[SFaceRecognizer] = None
+detector: Optional[InsightFaceDetector] = None
+recognizer: Optional[InsightFaceRecognizer] = None
 quality_assessor: Optional[QualityAssessor] = None
 liveness_model: Optional[MiniFASNetLiveness] = None
 
 @app.on_event("startup")
 def load_models():
     global detector, recognizer, quality_assessor, liveness_model
-    print("[INFO] Initializing YuNet Detector...")
-    detector = YuNetDetector(YUNET_PATH)
-    print("[INFO] Initializing SFace Recognizer...")
-    recognizer = SFaceRecognizer(SFACE_PATH)
-    print("[INFO] Initializing Quality Assessor...")
+    print("[INFO] Initializing InsightFace Detector (SCRFD)...")
+    detector = InsightFaceDetector(root_dir=WEIGHTS_DIR)
+    print("[INFO] Initializing InsightFace Recognizer (ArcFace 512-D)...")
+    recognizer = InsightFaceRecognizer(cosine_threshold=0.45)
+    print("[INFO] Initializing Image Quality Assessor...")
     quality_assessor = QualityAssessor()
-    print("[INFO] Initializing MiniFASNet Liveness...")
-    liveness_model = MiniFASNetLiveness(LIVENESS_PATH)
-    print("[SUCCESS] All Biometric Models Initialized Successfully.")
+    if os.path.exists(LIVENESS_PATH):
+        print("[INFO] Initializing MiniFASNet Liveness & Anti-Spoofing...")
+        liveness_model = MiniFASNetLiveness(LIVENESS_PATH)
+    else:
+        print("[WARN] MiniFASNet model not found at", LIVENESS_PATH)
+    print("[SUCCESS] All InsightFace Biometric Models Initialized Successfully.")
 
 def decode_base64_image(b64_str: str) -> np.ndarray:
     """Decodes base64 string (with or without data:image/... prefix) to OpenCV BGR ndarray."""
@@ -77,17 +80,33 @@ def decode_base64_image(b64_str: str) -> np.ndarray:
             detail=f"Invalid image format: {str(e)}"
         )
 
+def to_native_types(obj):
+    if isinstance(obj, dict):
+        return {k: to_native_types(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [to_native_types(x) for x in obj]
+    elif isinstance(obj, (np.bool_, np.bool)):
+        return bool(obj)
+    elif isinstance(obj, (np.integer, np.int64, np.int32)):
+        return int(obj)
+    elif isinstance(obj, (np.floating, np.float32, np.float64)):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    return obj
+
 # Pydantic Schemas
 class ExtractRequest(BaseModel):
     image: str = Field(..., description="Base64 encoded JPEG or PNG image")
     check_liveness: bool = True
-    liveness_threshold: Optional[float] = 0.85
+    liveness_threshold: Optional[float] = 0.65
 
 class VerifyRequest(BaseModel):
     probe_image: str = Field(..., description="Captured face image base64")
-    enrolled_embedding: List[float] = Field(..., description="128-D vector")
-    threshold: Optional[float] = 0.38
+    enrolled_embedding: List[float] = Field(..., description="512-D vector")
+    threshold: Optional[float] = 0.45
     check_liveness: bool = True
+    liveness_threshold: Optional[float] = 0.65
 
 class Candidate(BaseModel):
     id: Optional[int] = None
@@ -100,25 +119,27 @@ class IdentifyRequest(BaseModel):
     probe_image: str = Field(..., description="Primary captured image")
     additional_frames: Optional[List[str]] = Field(default=[], description="Optional 2-4 consecutive frames for multi-frame liveness")
     candidates: List[Candidate] = Field(..., description="Company-scoped employee templates")
-    threshold: Optional[float] = 0.38
+    threshold: Optional[float] = 0.45
     check_liveness: bool = True
-    liveness_threshold: Optional[float] = 0.85
+    liveness_threshold: Optional[float] = 0.65
 
 class LivenessRequest(BaseModel):
     frames: List[str] = Field(..., description="List of 1 to 5 base64 frames")
-    threshold: Optional[float] = 0.85
+    threshold: Optional[float] = 0.65
 
 @app.get("/health")
 def health_check():
     return {
         "status": "healthy",
         "service": "omnisuite-face-service",
+        "engine": "InsightFace ArcFace 512-D",
         "models": {
             "detector": detector is not None,
             "recognizer": recognizer is not None,
             "liveness": liveness_model is not None,
             "quality": quality_assessor is not None
         },
+        "vector_dimension": 512,
         "timestamp": time.time()
     }
 
@@ -143,11 +164,11 @@ def extract_embedding_endpoint(payload: ExtractRequest):
 
     liveness_result = None
     if payload.check_liveness and liveness_model:
-        liveness_result = liveness_model.evaluate_frame(img, bbox)
+        liveness_result = liveness_model.evaluate_frame(img, bbox, threshold=payload.liveness_threshold)
 
     embedding = recognizer.extract_embedding(img, raw_face)
 
-    return {
+    return to_native_types({
         "success": True,
         "face_detected": True,
         "multiple_faces": len(faces) > 1,
@@ -159,7 +180,7 @@ def extract_embedding_endpoint(payload: ExtractRequest):
         "bbox": bbox,
         "landmarks": landmarks,
         "embedding": [float(x) for x in embedding]
-    }
+    })
 
 @app.post("/api/v1/verify-match")
 def verify_match_endpoint(payload: VerifyRequest):
@@ -179,7 +200,7 @@ def verify_match_endpoint(payload: VerifyRequest):
     quality = quality_assessor.evaluate(img, primary_face)
     liveness_result = None
     if payload.check_liveness and liveness_model:
-        liveness_result = liveness_model.evaluate_frame(img, bbox)
+        liveness_result = liveness_model.evaluate_frame(img, bbox, threshold=payload.liveness_threshold)
         if not liveness_result["passed"]:
             return {
                 "success": False,
@@ -197,7 +218,7 @@ def verify_match_endpoint(payload: VerifyRequest):
     threshold = payload.threshold or recognizer.cosine_threshold
     matched = similarity >= threshold
 
-    return {
+    return to_native_types({
         "success": True,
         "matched": matched,
         "similarity": round(float(similarity), 4),
@@ -206,12 +227,12 @@ def verify_match_endpoint(payload: VerifyRequest):
         "quality": quality,
         "liveness_passed": liveness_result["passed"] if liveness_result else True,
         "liveness": liveness_result
-    }
+    })
 
 @app.post("/api/v1/identify")
 def identify_endpoint(payload: IdentifyRequest):
     """
-    1:N identification: Compares face against authorized employees for the tenant.
+    1:N identification: Compares face against authorized employees for the tenant using InsightFace.
     """
     start_t = time.time()
     img = decode_base64_image(payload.probe_image)
@@ -256,28 +277,30 @@ def identify_endpoint(payload: IdentifyRequest):
                 pass
 
         if len(frames_to_check) > 1:
-            liveness_summary = liveness_model.evaluate_multi_frame(frames_to_check)
+            liveness_summary = liveness_model.evaluate_multi_frame(frames_to_check, threshold=payload.liveness_threshold)
         else:
-            single_res = liveness_model.evaluate_frame(img, bbox)
+            single_res = liveness_model.evaluate_frame(img, bbox, threshold=payload.liveness_threshold)
             liveness_summary = {
                 "liveness_passed": single_res["passed"],
                 "confidence": single_res["real_score"],
+                "threshold": single_res["threshold"],
                 "micro_motion": True,
-                "reasons": ["Single frame evaluated"],
+                "reasons": [] if single_res["passed"] else [f"Anti-spoof confidence ({single_res['real_score']:.2f}) below threshold ({single_res['threshold']:.2f})"],
                 "frame_results": [single_res]
             }
 
         if not liveness_summary["liveness_passed"]:
+            fail_reason = liveness_summary.get("reasons", ["Live face presentation required"])[0] if liveness_summary.get("reasons") else "Live face presentation required"
             return {
                 "success": False,
                 "identified": False,
                 "liveness_passed": False,
                 "liveness": liveness_summary,
                 "quality": quality,
-                "message": "Anti-spoofing check failed. Please present a live face."
+                "message": f"Anti-spoofing check failed: {fail_reason}. Please present a live face to the camera."
             }
 
-    # Extract embedding
+    # Extract 512-D embedding
     probe_emb = recognizer.extract_embedding(img, raw_face)
 
     # 1:N Matching against candidates
@@ -287,7 +310,7 @@ def identify_endpoint(payload: IdentifyRequest):
 
     elapsed_ms = round((time.time() - start_t) * 1000, 1)
 
-    return {
+    return to_native_types({
         "success": True,
         "identified": match_result["matched"],
         "best_match": match_result["best_match"],
@@ -299,7 +322,7 @@ def identify_endpoint(payload: IdentifyRequest):
         "liveness_passed": liveness_summary["liveness_passed"] if liveness_summary else True,
         "liveness": liveness_summary,
         "latency_ms": elapsed_ms
-    }
+    })
 
 @app.post("/api/v1/check-liveness")
 def check_liveness_endpoint(payload: LivenessRequest):
@@ -324,7 +347,7 @@ def check_liveness_endpoint(payload: LivenessRequest):
             "message": "No face found in submitted frames."
         }
 
-    res = liveness_model.evaluate_multi_frame(frames_data)
+    res = liveness_model.evaluate_multi_frame(frames_data, threshold=payload.threshold)
     return res
 
 if __name__ == "__main__":

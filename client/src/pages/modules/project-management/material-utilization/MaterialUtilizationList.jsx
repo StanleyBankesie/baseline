@@ -5,7 +5,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, ArrowLeft, RefreshCw, Wrench, Search } from "lucide-react";
+import { Plus, ArrowLeft, RefreshCw, Wrench, Search, Activity, Clock, CheckCircle2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { api } from "../../../../api/client";
 import { filterAndSort } from "@/utils/searchUtils.js";
@@ -88,6 +88,50 @@ export default function MaterialUtilizationList() {
         </div>
       </div>
 
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Confirmed / Posted",
+            val: items.filter((u) => u.status === "CONFIRMED" || u.status === "POSTED" || u.status === "APPROVED").length,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Total Utilizations",
+            val: items.length,
+            icon: <Wrench size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+          {
+            label: "Draft / Pending",
+            val: items.filter((u) => u.status === "DRAFT" || u.status === "PENDING" || !u.status).length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Projects Consuming",
+            val: new Set(items.map((u) => u.project_id || u.project_name).filter(Boolean)).size,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div className="card overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="relative w-full md:w-80">
@@ -115,7 +159,6 @@ export default function MaterialUtilizationList() {
                   <SortableHeader label="Date" sortKey="utilization_date" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <th>Project</th>
                   <th>Task Summary</th>
-                  <th>Storage/Warehouse</th>
                   <th>Status</th>
                   <SortableHeader label="Created By" sortKey="created_by_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <SortableHeader label="Created Date" sortKey="created_at" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
@@ -131,7 +174,6 @@ export default function MaterialUtilizationList() {
                     <td className="text-sm whitespace-nowrap">{r.utilization_date ? new Date(r.utilization_date).toLocaleDateString() : "—"}</td>
                     <td className="text-sm">{r.project_name || "—"}</td>
                     <td className="text-sm max-w-[200px] truncate">{r.task_summary || "—"}</td>
-                    <td className="text-sm">{r.warehouse_name || "—"}</td>
                     <td className="text-sm">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         r.status === "POSTED" ? "bg-green-100 text-green-700" :

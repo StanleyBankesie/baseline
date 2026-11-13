@@ -5,7 +5,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { Plus, CheckCircle2, FileText, Clock, Building2 } from "lucide-react";
 import { api } from "../../../../api/client";
 import { toast } from "react-toastify";
 import { filterAndSort } from "@/utils/searchUtils.js";
@@ -81,6 +81,53 @@ export default function FMMaterialRequisitionList() {
         </div>
       </div>
 
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Approved Requisitions",
+            val: items.filter((r) => r.status === "APPROVED" || r.status === "CONFIRMED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500",
+          },
+          {
+            label: "Total Requisitions",
+            val: items.length,
+            icon: <FileText size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700",
+          },
+          {
+            label: "Pending Approval",
+            val: items.filter((r) => r.status === "PENDING" || r.status === "DRAFT" || !r.status).length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500",
+          },
+          {
+            label: "Requesting Properties",
+            val: new Set(items.map((r) => r.property_name || r.property_id).filter(Boolean)).size,
+            icon: <Building2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600",
+          },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm"
+          >
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div className="card">
         <div className="card-body">
           <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -102,7 +149,6 @@ export default function FMMaterialRequisitionList() {
                   <SortableHeader label="Date" sortKey="requisition_date" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <th>Property</th>
                   <th>Warehouse</th>
-                  <th>Department</th>
                   <th>Priority</th>
                   <SortableHeader label="Status" sortKey="status" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <th className="text-center">Actions</th>
@@ -117,7 +163,6 @@ export default function FMMaterialRequisitionList() {
                     <td className="text-sm whitespace-nowrap">{r.requisition_date ? new Date(r.requisition_date).toLocaleDateString() : "—"}</td>
                     <td className="text-sm">{r.property_name || "—"}</td>
                     <td className="text-sm">{r.warehouse_name || "—"}</td>
-                    <td className="text-sm">{r.department_name || "—"}</td>
                     <td><span className="text-xs font-semibold uppercase text-slate-600">{r.priority}</span></td>
                     <td><span className={`px-2 py-0.5 rounded text-xs font-semibold ${getStatusBadge(r.status)}`}>{r.status}</span></td>
                     <td className="text-center">

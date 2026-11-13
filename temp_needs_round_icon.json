@@ -1,0 +1,852 @@
+[
+  {
+    "file": "client\\src\\pages\\modules\\finance\\banking\\BankReconciliationList.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\banking\\PdcPostingsList.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\JournalVoucherList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\reports\\GraphicalChartOfAccountsPage.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\setup\\AccountGroupsPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\setup\\AccountsPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\setup\\BudgetPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\setup\\CostCentersPage.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\setup\\CurrenciesPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\setup\\FinanceSetupPage.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\setup\\FiscalYearsPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\finance\\vouchers\\VoucherImportPage.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\DailyStockTakeList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\GRNImportList.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\GRNLocalList.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\IssueToRequirementList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\ItemBatchesList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\ItemGroupsList.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\LowStockNotificationsPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\MaterialRequisitionList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\PhysicalStockTakeList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\reports\\InventoryHealthMonitorPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\reports\\PeriodicalStockStatementPage.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\reports\\PeriodicalStockSummaryPage.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\ServiceConfirmationsList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\StockAdjustmentList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\StockBalancesPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\StockJournalList.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\StockReorderPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\StockTakeList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\StockTransferList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\StockUpdationList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\StockUploadPage.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\StockVerificationList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\TransferAcceptanceList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\UnitConversionsList.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\inventory\\WarehousesList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\direct-purchase\\DirectPurchaseList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\port-clearances\\PortClearancesList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\purchase-bills\\PurchaseBillsList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\PurchaseUploadPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\rfq\\RequestForQuotationList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\service-bills\\ServiceBillsList.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\service-confirmations\\ServiceConfirmationsList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\service-requests\\ServiceRequestsList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\setup\\PurchaseSetupPage.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\shipping-advice\\ShippingAdviceList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\purchase\\supplier-quotations\\SupplierQuotationsList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\allowances\\AllowanceList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\attendance\\AttendanceList.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\attendance\\BiometricAnalyticsPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\attendance\\BiometricDevicesPage.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\attendance\\BiometricSettingsPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\compliance\\PolicyList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\leave\\LeaveRequestManager.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\leave-setup\\LeaveSetupList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\loans\\LoanDisbursementPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\loans\\LoanList.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\loans\\LoanRequestList.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\medical-policies\\MedicalPolicyList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\payroll\\SalaryPostingPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\payslips\\PayslipList.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\promotions\\PromotionList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\recruitment\\CandidatesList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\recruitment\\InterviewsList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\recruitment\\OffersList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\recruitment\\RequisitionList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\salary-config\\BaseSalariesPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\salary-config\\SalaryConfigList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\salary-config\\SalaryStructurePage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\shifts\\ShiftList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\human-resources\\training\\TrainingList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\assets\\AssetList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\assets\\DowntimeLogList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\budgeting-finance\\FacilitiesBudgetingFinancePage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\checklists\\ChecklistTemplatesList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\contractors-vendors\\ContractorVendorManagementPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\contracts\\MaintenanceContractList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\equipment\\EquipmentList.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\fm-contracts\\FMContractsList.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\hsa-compliance\\HealthSafetyCompliancePage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\job-execution\\JobExecutionList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\job-orders\\MaintenanceJobOrdersList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\maintenance-bills\\MaintenanceBillList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\maintenance-requests\\MaintenanceRequestsList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\material-receipt\\MaterialReceiptList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\material-requisitions\\MaintenanceMaterialRequisitionList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\pm-schedules\\PmScheduleList.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\rfq\\MaintenanceRFQList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\schedules\\MaintenanceScheduleList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\setup\\MaintenanceSetupPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\soft-services\\SoftServicesPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\space-occupancy\\SpaceOccupancyPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\supplier-quotations\\SupplierQuotationsList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\sustainability\\SustainabilityManagementPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\maintenance\\utilities-energy\\UtilitiesEnergyPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\bom\\BomList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\execution\\FinishedGoodsTransferList.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\execution\\JobCardList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\execution\\MaterialReceiptList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\execution\\MaterialRequisitionList.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\execution\\MaterialUtilizationList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\execution\\ProductionOutputPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\execution\\ProductionTransferList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\execution\\QualityControlList.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\inventory\\ProductionStockPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\inventory\\StockJournalList.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\planning\\DailyPlanList.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\planning\\MaterialRequirementPage.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\reports\\ProductionCostingPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\routings\\RoutingList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\BomOutputTypeList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\DepartmentList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\MachineList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\OperatorList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\OverheadList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\ProcessList.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\ProductionItemList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\ProductionWarehouseList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\QcChecklistList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\setup\\ShiftList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\production\\work-orders\\WorkOrderList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\service-management\\service-bills\\ServiceBillsList.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\service-management\\service-confirmations\\ServiceConfirmationsList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\service-management\\service-execution\\ServiceExecutionsList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\service-management\\service-orders\\ServiceOrdersList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\service-management\\service-requests\\CustomerServiceRequestsList.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\service-management\\setup\\ServiceParametersPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\service-management\\visitors-log\\VisitorsLogList.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\breakdowns\\BreakdownsList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\compliance\\VehicleComplianceList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\components\\FleetListPanel.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\drivers\\DriversList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\expenses\\ExpenseLogList.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\expenses\\TransportExpenseList.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\fuel\\FuelLogsList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\fuel-bills\\FuelBillsList.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\fuel-expenses\\FuelExpenseList.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\income\\TransportIncomeList.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\inspections\\InspectionsList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\logbook\\LogbookList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\maintenance\\MaintenanceList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\routes\\RoutesList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\servicing\\VehicleServicingList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\transportation-bills\\TransportationBillsList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\trips\\TripManagementPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\trips\\TripReturnList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\trips\\TripsList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\trips\\TripTrackingList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\trips\\TripTrackingPage.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\transport\\vehicles\\VehiclesList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\compliance\\FMCompliancePage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\hard-services\\HardServicesPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\inspections\\FMInspectionsPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\onboarding\\PropertyOnboardingPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\security\\SecurityAccessPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\servicebilling\\ServiceBillingList.jsx",
+    "type": "no_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\sla\\SLAPoliciesPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\space-occupancy\\RoomBookingsPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\space-occupancy\\SpacesDirectoryPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\space-occupancy\\TenantOccupancyPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\facilities\\workforce\\FMWorkforceRosterPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\project-management\\construction\\BOQManager.jsx",
+    "type": "old_cards",
+    "hasCurrency": true
+  },
+  {
+    "file": "client\\src\\pages\\modules\\project-management\\reports\\TaskManagementAndExecutionPage.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\sales\\customer-credit\\CustomerCreditList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\sales\\discount-schemes\\DiscountSchemeList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\sales\\discount-schemes\\PurchaseRewardCampaignList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\sales\\potential-customers\\PotentialCustomerList.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\sales\\SalesUploadPage.jsx",
+    "type": "old_cards",
+    "hasCurrency": false
+  },
+  {
+    "file": "client\\src\\pages\\modules\\sales\\setup\\SalesSetupPage.jsx",
+    "type": "no_cards",
+    "hasCurrency": false
+  }
+]

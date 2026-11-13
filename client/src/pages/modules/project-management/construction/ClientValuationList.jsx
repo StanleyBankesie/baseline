@@ -28,6 +28,9 @@ import {
   FileText,
   Paperclip,
   Check,
+  Briefcase,
+  CheckCircle2,
+  Clock,
   DollarSign
 } from "lucide-react";
 import { api } from "../../../../api/client.js";
@@ -659,43 +662,46 @@ export default function ClientValuationList() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="card p-4 space-y-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            {activeProject ? "Contract Sum" : "Active Projects"}
-          </span>
-          <p className="text-xl font-medium text-slate-900 dark:text-white">
-            {activeProject
-              ? `GH₵ ${Number(activeProject.revised_contract_sum || activeProject.contract_sum || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`
-              : `${projects.length} Projects`}
-          </p>
-        </div>
-        <div className="card p-4 space-y-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Gross Assessed to Date</span>
-          <p className="text-xl font-medium text-brand-700 dark:text-brand-400">
-            GH₵{" "}
-            {valuations
-              .reduce((a, c) => a + Number(c.gross_assessed_value ?? c.gross_claimed ?? 0), 0)
-              .toLocaleString(undefined, { minimumFractionDigits: 2 })}
-          </p>
-        </div>
-        <div className="card p-4 space-y-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Retention Withheld</span>
-          <p className="text-xl font-medium text-rose-600">
-            GH₵{" "}
-            {valuations
-              .reduce((a, c) => a + Number(c.retention_deducted || 0), 0)
-              .toLocaleString(undefined, { minimumFractionDigits: 2 })}
-          </p>
-        </div>
-        <div className="card p-4 space-y-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Net Assessed (Due)</span>
-          <p className="text-xl font-medium text-emerald-600">
-            GH₵{" "}
-            {valuations
-              .reduce((a, c) => a + Number(c.current_assessed_amount ?? c.net_amount_due ?? 0), 0)
-              .toLocaleString(undefined, { minimumFractionDigits: 2 })}
-          </p>
-        </div>
+        {[
+          {
+            label: "Total Valuations",
+            val: valuations.length,
+            icon: <FileText size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Certified Valuations",
+            val: valuations.filter((v) => v.status === "CERTIFIED" || v.status === "APPROVED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+          {
+            label: "Pending Certification",
+            val: valuations.filter((v) => v.status === "SUBMITTED" || v.status === "PENDING" || v.status === "UNDER_REVIEW").length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Draft Valuations",
+            val: valuations.filter((v) => v.status === "DRAFT" || !v.status).length,
+            icon: <Briefcase size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+        ].map((stat, i) => (
+          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Valuations Register Table */}

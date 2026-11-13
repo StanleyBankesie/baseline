@@ -344,7 +344,7 @@ export default function DailySiteReportForm() {
                     >
                       <option value="">-- Select Subcontractor / Direct --</option>
                       <option value="Direct">Direct (Internal Workforce)</option>
-                      {subcontractors.map(s => {
+                      {subcontractors.filter(s => s.is_active === 1 || s.is_active === "1" || s.is_active === true || s.is_active === null || s.is_active === undefined).map(s => {
                         const sName = s.supplier_name || s.name;
                         return (
                           <option key={s.id || sName} value={sName}>

@@ -169,10 +169,7 @@ export default function CloudinaryDocumentUploader({
         <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
           {label}
         </label>
-        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800 text-xs font-semibold">
-          <Cloud size={12} className="text-sky-500 animate-pulse" />
-          <span>Cloudinary Storage</span>
-        </div>
+        
       </div>
 
       {/* Upload Drop Zone / Button */}

@@ -316,7 +316,7 @@ export default function MaterialRequisitionForm() {
                 <select className="input" value={formData.warehouseId}
                   onChange={e => setFormData({ ...formData, warehouseId: e.target.value })}>
                   <option value="">Select Warehouse</option>
-                  {warehouses.map(w => <option key={w.id} value={w.id}>{w.warehouse_name || w.name}</option>)}
+                  {warehouses.filter(w => w.is_active === 1 || w.is_active === "1" || w.is_active === true || w.is_active === null || w.is_active === undefined).map(w => <option key={w.id} value={w.id}>{w.warehouse_name || w.name}</option>)}
                 </select>
               </div>
               <div>
@@ -324,7 +324,7 @@ export default function MaterialRequisitionForm() {
                 <select className="input" value={formData.departmentId}
                   onChange={e => setFormData({ ...formData, departmentId: e.target.value })}>
                   <option value="">Select Department</option>
-                  {departments.map(d => <option key={d.id} value={d.id}>{d.department_name || d.name}</option>)}
+                  {departments.filter(d => d.is_active === 1 || d.is_active === "1" || d.is_active === "Y" || d.is_active === true || d.is_active === null || d.is_active === undefined).map(d => <option key={d.id} value={d.id}>{d.department_name || d.name}</option>)}
                 </select>
               </div>
               <div>

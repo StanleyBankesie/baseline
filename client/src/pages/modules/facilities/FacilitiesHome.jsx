@@ -27,6 +27,7 @@ import FMPropertyCostReport from "../maintenance/reports/FMPropertyCostReport.js
 import FMContractsReport from "../maintenance/reports/FMContractsReport.jsx";
 import FMSoftServicesReport from "../maintenance/reports/FMSoftServicesReport.jsx";
 import FMInspectionChecklistReport from "../maintenance/reports/FMInspectionChecklistReport.jsx";
+import FMDailyAssignedRunsReport from "./reports/FMDailyAssignedRunsReport.jsx";
 import UtilitiesEnergyPage from "../maintenance/utilities-energy/UtilitiesEnergyPage.jsx";
 import ContractorVendorManagementPage from "../maintenance/contractors-vendors/ContractorVendorManagementPage.jsx";
 import FacilitiesBudgetingFinancePage from "../maintenance/budgeting-finance/FacilitiesBudgetingFinancePage.jsx";
@@ -131,8 +132,8 @@ export const facilitiesSections = [
     title: "Inspections & Checklists",
     icon: "📋",
     items: [
-      buildFeature("Inspections & Corrective Actions", "/facilities/inspections", "Schedule site inspections, record findings, track CAPA", "📋"),
-      buildFeature("Inspection Checklists", "/facilities/setup?tab=checklists", "PPM inspection checklists and templates in Operational Setup", "✅"),
+      buildFeature("Inspection Runs", "/facilities/inspections", "Schedule site inspections, record findings, and audit compliance", "📋"),
+      buildFeature("Daily Assigned Runs & Field Inspections", "/facilities/reports/daily-assigned-runs", "Operational audit of scheduled daily inspection runs, field execution, and supervisor sign-offs", "📊"),
     ],
   },
   {
@@ -149,8 +150,6 @@ export const facilitiesSections = [
       buildFeature("Security & Access Management", "/facilities/security", "Visitor log, key register, access zone management", "🔐"),
       buildFeature("Workforce Roster & Deployment", "/facilities/workforce", "Employee site assignments, shift roster, attendance tracking", "👥"),
       buildFeature("Room & Space Bookings", "/facilities/space-occupancy/bookings", "Meeting rooms, conference halls, and facility reservations", "📅"),
-      buildFeature("Tenant Occupancy Register", "/facilities/space-occupancy/tenants", "Tenant leases, headcounts, unit allocations, and charges", "🏢"),
-      buildFeature("Space & Unit Directory", "/facilities/setup?tab=spaces", "Floor zones, room dimensions, capacity & unit directory in Operational Setup", "📐"),
     ],
   },
   {
@@ -341,10 +340,10 @@ export default function FacilitiesHome() {
         <Route path="/workforce" element={<FMWorkforceRosterPage />} />
         <Route path="/space-occupancy" element={<SpaceOccupancyPage />} />
         <Route path="/space-occupancy/bookings" element={<RoomBookingsPage />} />
-        <Route path="/space-occupancy/tenants" element={<TenantOccupancyPage />} />
+        <Route path="/space-occupancy/tenants" element={<Navigate to="/facilities/setup?tab=tenants" replace />} />
         <Route path="/space-occupancy/spaces" element={<Navigate to="/facilities/setup?tab=spaces" replace />} />
         <Route path="/space-bookings" element={<RoomBookingsPage />} />
-        <Route path="/tenant-occupancy" element={<TenantOccupancyPage />} />
+        <Route path="/tenant-occupancy" element={<Navigate to="/facilities/setup?tab=tenants" replace />} />
         <Route path="/spaces" element={<Navigate to="/facilities/setup?tab=spaces" replace />} />
 
         {/* ─── Vendors, Finance ─── */}
@@ -357,6 +356,7 @@ export default function FacilitiesHome() {
         <Route path="/reports/contract-profitability" element={<FMContractsReport />} />
         <Route path="/reports/soft-services" element={<FMSoftServicesReport />} />
         <Route path="/reports/checklist-inspections" element={<FMInspectionChecklistReport />} />
+        <Route path="/reports/daily-assigned-runs" element={<FMDailyAssignedRunsReport />} />
         <Route path="/reports" element={<FMSLAComplianceReport />} />
       </Routes>
     </ModuleLayout>

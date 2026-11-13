@@ -185,11 +185,35 @@ export default function BiometricClockPage() {
 
       const additionalFrames = [frame2, frame3].filter(Boolean);
 
+      // Attempt to retrieve high-accuracy GPS coordinates for location geofencing
+      let geo = null;
+      if (typeof navigator !== "undefined" && navigator.geolocation) {
+        try {
+          const pos = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              timeout: 3000,
+              enableHighAccuracy: true,
+              maximumAge: 30000,
+            });
+          });
+          geo = {
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+            gps_accuracy: pos.coords.accuracy,
+          };
+        } catch (geoErr) {
+          // GPS optional or permission denied
+        }
+      }
+
       // Call Express API
       const res = await api.post("/hr/biometrics/clock", {
         probe_image: frame1,
         additional_frames: additionalFrames,
         mode: mode,
+        latitude: geo?.latitude,
+        longitude: geo?.longitude,
+        gps_accuracy: geo?.gps_accuracy,
       });
 
       if (res.data?.success) {
@@ -277,7 +301,7 @@ export default function BiometricClockPage() {
                   serviceStatus.online ? "bg-emerald-400 animate-pulse" : "bg-rose-400"
                 }`}
               />
-              {serviceStatus.online ? "YuNet + SFace Ready" : "Face Service Offline"}
+              {serviceStatus.online ? "InsightFace ArcFace Ready" : "Face Service Offline"}
             </span>
           </div>
         </div>
@@ -542,7 +566,7 @@ export default function BiometricClockPage() {
             </div>
             <div className="flex items-center justify-between text-[11px] border-b border-slate-800 pb-1.5">
               <span>Face Embedding:</span>
-              <span className="text-slate-200 font-mono">OpenCV SFace 128-D</span>
+              <span className="text-slate-200 font-mono">InsightFace ArcFace 512-D</span>
             </div>
             <div className="flex items-center justify-between text-[11px] border-b border-slate-800 pb-1.5">
               <span>Template Storage:</span>

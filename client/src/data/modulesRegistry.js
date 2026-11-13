@@ -364,13 +364,12 @@ export const MODULES_REGISTRY = {
       { key: "material-requisitions", label: "Material Requisition", type: "feature" },
       { key: "material-utilizations", label: "Material Utilization", type: "feature" },
       { key: "material-receipts", label: "Materials Receipt", type: "feature" },
-      { key: "project-orders", label: "Project Orders", type: "feature" },
+      { key: "project-orders", label: "Client's Orders", type: "feature" },
       { key: "quotations", label: "Project Quotations", type: "feature" },
       { key: "project-invoices", label: "Project Invoices", type: "feature" },
       { key: "purchase-requisitions", label: "Purchase Requisition", type: "feature" },
       { key: "milestones", label: "Milestones", type: "feature" },
       { key: "resources", label: "Resource Management", type: "feature" },
-      { key: "timesheets", label: "Timesheets", type: "feature" },
       { key: "income", label: "Project Income", type: "feature" },
       { key: "expenses", label: "Project Expenses", type: "feature" },
       { key: "project-reports", label: "Project Reports", type: "feature" },
@@ -390,6 +389,7 @@ export const MODULES_REGISTRY = {
       { key: "documents", label: "Drawings & Documents", type: "feature" },
       { key: "rfis", label: "RFIs (Requests for Information)", type: "feature" },
       { key: "equipment-logs", label: "Plant & Equipment Logs", type: "feature" },
+      { key: "closure", label: "Project Handover & Closeout", type: "feature" },
     ],
     dashboards: [
 

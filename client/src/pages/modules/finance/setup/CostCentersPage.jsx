@@ -6,17 +6,7 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../../../../api/client";
 import { Link } from "react-router-dom";
-import { 
-  Building2, 
-  ArrowLeft, 
-  Plus, 
-  RefreshCw, 
-  Edit3, 
-  X, 
-  Save, 
-  CheckCircle2, 
-  XCircle 
-} from "lucide-react";
+import { Building2, ArrowLeft, Plus, RefreshCw, Edit3, X, Save, CheckCircle2, XCircle, Activity, Clock, Target } from "lucide-react";
 
 export default function CostCentersPage() {
   const [items, setItems] = useState([]);
@@ -272,7 +262,51 @@ export default function CostCentersPage() {
 
       {/* Main Table */}
       <div className="card shadow-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden">
-        <div className="overflow-x-auto">
+              {/* Metric Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        {[
+          {
+            label: "Active Cost Centers",
+            val: (items || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Total Cost Centers",
+            val: (items || []).length,
+            icon: <Target size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+          {
+            label: "Pending Cost Centers",
+            val: (items || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Completed Cost Centers",
+            val: (items || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="overflow-x-auto">
           <table className="table w-full table-fixed">
             <colgroup>
               <col style={{ width: "16.666%" }} />

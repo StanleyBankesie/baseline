@@ -5,18 +5,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  ClipboardCheck,
-  Plus,
-  Search,
-  Download,
-  CheckCircle2,
-  AlertTriangle,
-  RefreshCw,
-  Eye,
-  Play,
-  FileSpreadsheet,
-} from "lucide-react";
+import { ClipboardCheck, Plus, Search, Download, CheckCircle2, AlertTriangle, RefreshCw, Eye, Play, FileSpreadsheet, Activity, Clock } from "lucide-react";
 import { api } from "api/client";
 import FloatingCreateButton from "@/components/FloatingCreateButton.jsx";
 import { filterAndSort } from "@/utils/searchUtils.js";
@@ -286,6 +275,50 @@ export default function PhysicalStockTakeList() {
       </div>
 
       {/* Main List Card with Filters & Search */}
+            {/* Metric Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        {[
+          {
+            label: "Active Physical Audits",
+            val: (audits || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Total Physical Audits",
+            val: (audits || []).length,
+            icon: <ClipboardCheck size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+          {
+            label: "Pending Physical Audits",
+            val: (audits || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Completed Physical Audits",
+            val: (audits || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div className="card shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 rounded-lg p-5">
         {error ? <div className="p-3 mb-4 rounded bg-red-100 border border-red-300 text-red-700 text-sm">{error}</div> : null}
 

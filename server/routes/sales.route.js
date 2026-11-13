@@ -2507,9 +2507,12 @@ router.get(
       const activeParam = String(req.query.active || "")
         .trim()
         .toLowerCase();
-      // If active=false is explicitly requested, show all. Otherwise show only active.
-      const onlyActive =
-        activeParam === "true" || activeParam === "1" || activeParam === "";
+      // If active=false, active=0, active=all, or all=1 is explicitly requested, show all/inactive. Otherwise show only active.
+      const showAllOrInactive =
+        ["all", "false", "0"].includes(activeParam) ||
+        req.query.all === "1" ||
+        req.query.all === "true";
+      const onlyActive = !showAllOrInactive;
       
       const serviceCustomerParam = String(req.query.service_customer || "").trim().toUpperCase();
 
@@ -10014,9 +10017,12 @@ router.get(
       const activeParam = String(req.query.active || "")
         .trim()
         .toLowerCase();
-      // If active=false is explicitly requested, show all. Otherwise show only active.
-      const onlyActive =
-        activeParam === "true" || activeParam === "1" || activeParam === "";
+      // If active=false, active=0, active=all, or all=1 is explicitly requested, show all/inactive. Otherwise show only active.
+      const showAllOrInactive =
+        ["all", "false", "0"].includes(activeParam) ||
+        req.query.all === "1" ||
+        req.query.all === "true";
+      const onlyActive = !showAllOrInactive;
       const params = { companyId };
       const where = ["c.company_id = :companyId"];
       if (onlyActive) where.push("c.is_active = 1");

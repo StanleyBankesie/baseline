@@ -547,43 +547,50 @@ export default function ResourceManagement() {
       </div>
 
       {/* Summary KPI Cards - Inactive resources excluded from project allocation */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-brand-50 dark:bg-brand-900/30 flex items-center justify-center text-brand-600 dark:text-brand-400">
-            <Box size={20} />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Active Allocated",
+            val: stats.total,
+            icon: <Box size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500",
+          },
+          {
+            label: "In Use Resources",
+            val: stats.inUse,
+            icon: <Wrench size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600",
+          },
+          {
+            label: "Allocated / Ready",
+            val: stats.allocated,
+            icon: <Users size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500",
+          },
+          {
+            label: "Released Resources",
+            val: stats.released,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700",
+          },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm"
+          >
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
           </div>
-          <div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Active Allocated</p>
-            <p className="text-xl font-extrabold text-slate-900 dark:text-white">{stats.total}</p>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-            <Wrench size={20} />
-          </div>
-          <div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">In Use</p>
-            <p className="text-xl font-extrabold text-slate-900 dark:text-white">{stats.inUse}</p>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
-            <Users size={20} />
-          </div>
-          <div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Allocated / Ready</p>
-            <p className="text-xl font-extrabold text-slate-900 dark:text-white">{stats.allocated}</p>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300">
-            <CheckCircle2 size={20} />
-          </div>
-          <div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Released</p>
-            <p className="text-xl font-extrabold text-slate-900 dark:text-white">{stats.released}</p>
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* Filter and Search Bar */}

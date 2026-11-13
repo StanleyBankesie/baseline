@@ -213,9 +213,9 @@ export default function UtilitiesEnergyPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -231,7 +231,7 @@ export default function UtilitiesEnergyPage() {
               Utilities and Energy Management
             </h1>
             <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">
-              Monitoring electricity, water, fuel and generator consumption; analysing bills; identifying waste; managing energy efficiency and tracking utility costs by building or site.
+              Monitor electricity, water, generator runtime, fuel logs, and utility bills.
             </p>
           </div>
         </div>
@@ -267,7 +267,7 @@ export default function UtilitiesEnergyPage() {
               }}
               className="btn btn-primary inline-flex items-center gap-1.5 text-xs py-2 px-3.5 shadow-sm active:scale-95"
             >
-              <Plus size={15} /> Log Generator Runtime & Fuel
+              <Plus size={15} /> Log Generator Run
             </button>
           )}
 
@@ -296,7 +296,7 @@ export default function UtilitiesEnergyPage() {
           }`}
         >
           <Zap size={14} />
-          Consumption Meters & Readings
+          Meters &amp; Readings
         </button>
 
         <button
@@ -308,7 +308,7 @@ export default function UtilitiesEnergyPage() {
           }`}
         >
           <Fuel size={14} />
-          Generator & Fuel Operations
+          Generator &amp; Fuel
         </button>
 
         <button
@@ -320,7 +320,7 @@ export default function UtilitiesEnergyPage() {
           }`}
         >
           <BarChart3 size={14} />
-          Utility Bills & Building Cost Breakdown
+          Utility Bills
         </button>
       </div>
 
@@ -399,7 +399,7 @@ export default function UtilitiesEnergyPage() {
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
           <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-              Generator Runtime, Fuel Consumed & kWh Produced
+              Generator Runtime &amp; Fuel Log
             </h3>
           </div>
           <div className="overflow-x-auto">
@@ -448,7 +448,7 @@ export default function UtilitiesEnergyPage() {
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
           <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-              Utility Bills & Property Cost Allocations
+              Utility Bills &amp; Cost Allocations
             </h3>
           </div>
           <div className="overflow-x-auto">

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../../../api/client";
 import { usePermission } from "../../../../auth/PermissionContext";
-import { Plus, Check, Clock, AlertTriangle, ArrowRight, X } from "lucide-react";
+import { Plus, Check, Clock, AlertTriangle, ArrowRight, X, CheckCircle2, ShoppingCart, DollarSign } from "lucide-react";
 import { filterAndSort } from "../../../../utils/searchUtils.js";
 import { toast } from "react-toastify";
 import { useViewMode } from "@/hooks/useViewMode";
@@ -251,6 +251,53 @@ export default function FMPurchaseRequisitionList() {
         </div>
       </div>
 
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Approved PRs",
+            val: items.filter((r) => r.status === "APPROVED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500",
+          },
+          {
+            label: "Total Requisitions",
+            val: items.length,
+            icon: <ShoppingCart size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700",
+          },
+          {
+            label: "Pending Approval",
+            val: items.filter((r) => r.status === "PENDING_APPROVAL" || r.status === "SUBMITTED" || r.status === "DRAFT").length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500",
+          },
+          {
+            label: "Fulfilled / Ordered",
+            val: items.filter((r) => r.status === "ORDERED" || r.status === "FULFILLED" || r.status === "COMPLETED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600",
+          },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm"
+          >
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div className="card">
         <div className="card-body">
           <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -280,7 +327,6 @@ export default function FMPurchaseRequisitionList() {
                   <th>Equipment / Asset</th>
                   <th className="cursor-pointer select-none text-right" onClick={() => toggleSort("total_estimated_cost")}>Est. Cost</th>
                   <th className="text-center">Status</th>
-                  <th>Created By</th>
                   <th className="text-center">Actions</th>
                 </tr>
               </thead>
@@ -298,7 +344,6 @@ export default function FMPurchaseRequisitionList() {
                       <td className="text-sm">{r.equipment_name || "-"}</td>
                       <td className="text-right font-medium">{Number(r.total_estimated_cost || 0).toFixed(2)}</td>
                       <td className="text-center"><StatusBadge status={r.status} /></td>
-                      <td className="text-sm text-slate-500">{r.created_by_name || "-"}</td>
                       <td className="text-center">
                         <div className="flex items-center justify-center gap-1.5 flex-wrap">
                           <button

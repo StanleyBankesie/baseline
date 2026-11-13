@@ -137,15 +137,24 @@ class QualityAssessor:
         if not pose_ok:
             reasons.append("Face is turned. Please look directly at the camera.")
 
-        passed = size_ok and blur_ok and light_ok and pose_ok
+        passed = bool(size_ok and blur_ok and light_ok and pose_ok)
 
         return {
             "passed": passed,
             "reasons": reasons,
-            "blur_score": round(blur_score, 1),
-            "blur_ok": blur_ok,
-            "illumination": illumination,
-            "pose": pose,
-            "face_size": {"width": w, "height": h},
-            "size_ok": size_ok
+            "blur_score": float(round(blur_score, 1)),
+            "blur_ok": bool(blur_ok),
+            "illumination": {
+                "mean": float(illumination.get("mean", 0.0)),
+                "contrast": float(illumination.get("contrast", 0.0)),
+                "is_good": bool(illumination.get("is_good", False)),
+            },
+            "pose": {
+                "yaw": float(pose.get("yaw", 0.0)),
+                "pitch": float(pose.get("pitch", 0.0)),
+                "roll": float(pose.get("roll", 0.0)),
+                "is_frontal": bool(pose.get("is_frontal", False)),
+            },
+            "face_size": {"width": int(w), "height": int(h)},
+            "size_ok": bool(size_ok)
         }

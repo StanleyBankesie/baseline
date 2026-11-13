@@ -12,7 +12,7 @@ async function hasColumn(tableName, columnName) {
     { tableName, columnName },
   );
   return Number(rows?.[0]?.c || 0) > 0;
-} catch {
+} catch (e) {
     return false;
   }
 }

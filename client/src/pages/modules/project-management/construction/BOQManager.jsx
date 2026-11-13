@@ -384,6 +384,26 @@ export default function BOQManager() {
     return totals;
   }, [boqItems]);
 
+  const categoryCounts = useMemo(() => {
+    const counts = {
+      MATERIALS: 0,
+      LABOUR: 0,
+      EQUIPMENT: 0,
+      SUBCONTRACTING: 0,
+      TRANSPORTATION: 0,
+      OTHER: 0,
+    };
+    boqItems.forEach(i => {
+      const cat = i.cost_category || "MATERIALS";
+      if (counts[cat] !== undefined) {
+        counts[cat] += 1;
+      } else {
+        counts.OTHER += 1;
+      }
+    });
+    return counts;
+  }, [boqItems]);
+
   // Sync selectedTaxCode when boqTaxCodes loads or selectedTaxCodeId changes
   useEffect(() => {
     if (selectedTaxCodeId && boqTaxCodes.length > 0 && selectedTaxCodeId !== "CUSTOM") {
@@ -1608,8 +1628,8 @@ export default function BOQManager() {
               <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center gap-1">
                 <Package size={12} /> Materials
               </span>
-              <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
-                {currency} {categoryTotals.MATERIALS.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 font-mono">
+                {categoryCounts.MATERIALS} {categoryCounts.MATERIALS === 1 ? "item" : "items"}
               </p>
             </div>
 
@@ -1617,8 +1637,8 @@ export default function BOQManager() {
               <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1">
                 <Users size={12} /> Labour
               </span>
-              <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
-                {currency} {categoryTotals.LABOUR.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 font-mono">
+                {categoryCounts.LABOUR} {categoryCounts.LABOUR === 1 ? "item" : "items"}
               </p>
             </div>
 
@@ -1626,8 +1646,8 @@ export default function BOQManager() {
               <span className="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 flex items-center gap-1">
                 <Wrench size={12} /> Equipment
               </span>
-              <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
-                {currency} {categoryTotals.EQUIPMENT.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 font-mono">
+                {categoryCounts.EQUIPMENT} {categoryCounts.EQUIPMENT === 1 ? "item" : "items"}
               </p>
             </div>
 
@@ -1635,8 +1655,8 @@ export default function BOQManager() {
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                 <HardHat size={12} /> Subcontracts
               </span>
-              <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
-                {currency} {categoryTotals.SUBCONTRACTING.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 font-mono">
+                {categoryCounts.SUBCONTRACTING} {categoryCounts.SUBCONTRACTING === 1 ? "item" : "items"}
               </p>
             </div>
 
@@ -1644,17 +1664,17 @@ export default function BOQManager() {
               <span className="text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 flex items-center gap-1">
                 <Truck size={12} /> Transport
               </span>
-              <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
-                {currency} {categoryTotals.TRANSPORTATION.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 font-mono">
+                {categoryCounts.TRANSPORTATION} {categoryCounts.TRANSPORTATION === 1 ? "item" : "items"}
               </p>
             </div>
 
             <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-1">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
-                <DollarSign size={12} /> Other / Overheads
+                <Layers size={12} /> Other / Overheads
               </span>
-              <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
-                {currency} {categoryTotals.OTHER.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 font-mono">
+                {categoryCounts.OTHER} {categoryCounts.OTHER === 1 ? "item" : "items"}
               </p>
             </div>
           </div>

@@ -29,7 +29,14 @@ import {
   Wrench,
   Briefcase,
   X,
-  Loader2
+  Loader2,
+  SlidersHorizontal,
+  ChevronRight,
+  Sliders,
+  Check,
+  Calendar,
+  Hash,
+  ChevronDown
 } from "lucide-react";
 import { api } from "../../../api/client.js";
 import { toast } from "react-toastify";
@@ -62,12 +69,57 @@ export default function FacilitiesSetupPage() {
   const [searchParams] = useSearchParams();
   const urlTab = searchParams.get("tab");
   const [activeTab, setActiveTab] = useState(urlTab || "personnel");
+  const [activeDomain, setActiveDomain] = useState("all");
+
+  const DOMAIN_MAP = {
+    personnel: "workforce",
+    supervisors: "workforce",
+    shifts: "workforce",
+    positions: "workforce",
+    spaces: "spaces",
+    sanitation: "spaces",
+    "waste-streams": "spaces",
+    checklists: "governance",
+    categories: "governance",
+    "asset-categories": "governance",
+    clients: "tenants",
+    tenants: "tenants",
+    contractors: "tenants",
+  };
 
   useEffect(() => {
     if (urlTab) {
       setActiveTab(urlTab);
+      if (DOMAIN_MAP[urlTab]) {
+        setActiveDomain(DOMAIN_MAP[urlTab]);
+      }
     }
   }, [urlTab]);
+
+  // Handle Escape key to close any active modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setShowClientModal(false);
+        setShowTenantModal(false);
+        setShowPersonnelModal(false);
+        setShowSupervisorModal(false);
+        setShowShiftModal(false);
+        setShowPositionModal(false);
+        setShowContractorModal(false);
+        setShowSpaceModal(false);
+        setShowCategoryModal(false);
+        setShowEquipCategoryModal(false);
+        setShowSanitationModal(false);
+        setShowWasteStreamModal(false);
+        setShowChecklistModal(false);
+        setShowDispatchModal(false);
+        setPreviewTemplate(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -226,6 +278,40 @@ export default function FacilitiesSetupPage() {
     payment_terms: "",
     customer_type: "LOCAL",
     is_active: 1,
+    // Tenant Occupancy details
+    property_id: "",
+    occupied_rooms_or_units: "",
+    allocated_space_sqm: "",
+    headcount: "",
+    lease_start_date: "",
+    lease_end_date: "",
+    monthly_service_charge: "",
+    occupancy_status: "ACTIVE_OCCUPIED",
+  });
+
+  // Tenant Occupancy Register State
+  const [tenants, setTenants] = useState([]);
+  const [showTenantModal, setShowTenantModal] = useState(false);
+  const [editingTenant, setEditingTenant] = useState(null);
+  const [viewingTenant, setViewingTenant] = useState(null);
+  const [tenantFilterProperty, setTenantFilterProperty] = useState("");
+  const [tenantFilterStatus, setTenantFilterStatus] = useState("ALL");
+  const [tenantSearchTerm, setTenantSearchTerm] = useState("");
+  const [tenantSubmitting, setTenantSubmitting] = useState(false);
+  const [tenantForm, setTenantForm] = useState({
+    property_id: "",
+    client_id: "",
+    tenant_name: "",
+    contact_person: "",
+    contact_email: "",
+    contact_phone: "",
+    allocated_space_sqm: "",
+    occupied_rooms_or_units: "",
+    headcount: "",
+    lease_start_date: "",
+    lease_end_date: "",
+    monthly_service_charge: "",
+    occupancy_status: "ACTIVE_OCCUPIED",
   });
 
   // Sanitation Checkpoints State
@@ -270,7 +356,7 @@ export default function FacilitiesSetupPage() {
   const loadAllSetupData = async () => {
     try {
       setLoading(true);
-      const [overviewRes, hrRes, checklistRes, contractorRes, spaceRes, propRes, catRes, clientRes, saniRes, wasteRes, equipCatRes, posRes, softRes] = await Promise.all([
+      const [overviewRes, hrRes, checklistRes, contractorRes, spaceRes, propRes, catRes, clientRes, saniRes, wasteRes, equipCatRes, posRes, softRes, tenantsRes] = await Promise.all([
         api.get("/facilities/setup/overview").catch(() => ({ data: { data: {} } })),
         api.get("/facilities/setup/hr-employees").catch(() => ({ data: { data: [] } })),
         api.get("/facilities/checklists/templates").catch(() => ({ data: { data: [] } })),
@@ -284,6 +370,7 @@ export default function FacilitiesSetupPage() {
         api.get("/facilities/setup/equipment-categories").catch(() => ({ data: { data: [] } })),
         api.get("/facilities/setup/positions").catch(() => ({ data: { data: [] } })),
         api.get("/facilities/soft-tasks").catch(() => ({ data: { data: [] } })),
+        api.get("/facilities/space/tenants").catch(() => ({ data: { data: [] } })),
       ]);
 
       const data = overviewRes.data?.data || {};
@@ -305,6 +392,8 @@ export default function FacilitiesSetupPage() {
         ? clientRes.data
         : clientRes.data?.data || clientRes.data?.items || [];
       setClients(cList);
+      const tList = Array.isArray(tenantsRes.data?.data) ? tenantsRes.data.data : Array.isArray(tenantsRes.data) ? tenantsRes.data : [];
+      setTenants(tList);
     } catch (err) {
       toast.error("Failed to load operations setup data");
     } finally {
@@ -1038,6 +1127,11 @@ export default function FacilitiesSetupPage() {
   const handleOpenClientModal = async (c = null) => {
     if (c) {
       setEditingClient(c);
+      const clientTenant = (tenants || []).find(
+        (t) =>
+          Number(t.client_id) === Number(c.id) ||
+          (t.tenant_name && c.customer_name && t.tenant_name.trim().toLowerCase() === c.customer_name.trim().toLowerCase())
+      );
       setClientForm({
         customer_name: c.customer_name || "",
         customer_code: c.customer_code || "",
@@ -1051,6 +1145,14 @@ export default function FacilitiesSetupPage() {
         payment_terms: c.payment_terms || "",
         customer_type: c.customer_type || "LOCAL",
         is_active: c.is_active !== undefined ? (c.is_active ? 1 : 0) : 1,
+        property_id: clientTenant?.property_id || "",
+        occupied_rooms_or_units: clientTenant?.occupied_rooms_or_units || "",
+        allocated_space_sqm: clientTenant?.allocated_space_sqm || "",
+        headcount: clientTenant?.headcount || "",
+        lease_start_date: clientTenant?.lease_start_date ? String(clientTenant.lease_start_date).slice(0, 10) : "",
+        lease_end_date: clientTenant?.lease_end_date ? String(clientTenant.lease_end_date).slice(0, 10) : "",
+        monthly_service_charge: clientTenant?.monthly_service_charge || "",
+        occupancy_status: clientTenant?.occupancy_status || "ACTIVE_OCCUPIED",
       });
     } else {
       setEditingClient(null);
@@ -1072,6 +1174,14 @@ export default function FacilitiesSetupPage() {
         payment_terms: "",
         customer_type: "LOCAL",
         is_active: 1,
+        property_id: "",
+        occupied_rooms_or_units: "",
+        allocated_space_sqm: "",
+        headcount: "",
+        lease_start_date: "",
+        lease_end_date: "",
+        monthly_service_charge: "",
+        occupancy_status: "ACTIVE_OCCUPIED",
       });
     }
     setShowClientModal(true);
@@ -1089,13 +1199,49 @@ export default function FacilitiesSetupPage() {
         ...clientForm,
         service_customer: "Y",
       };
+      let customerId = editingClient?.id;
       if (editingClient) {
         await api.put(`/sales/customers/${editingClient.id}`, payload);
         toast.success("Client updated successfully");
       } else {
-        await api.post("/sales/customers", payload);
+        const createRes = await api.post("/sales/customers", payload);
+        customerId = createRes.data?.id || createRes.data?.data?.id;
         toast.success("Client registered successfully");
       }
+
+      // Upsert / Synchronize tenant occupancy record if site/unit is provided
+      if (clientForm.property_id || clientForm.occupied_rooms_or_units) {
+        try {
+          const tenantPayload = {
+            property_id: clientForm.property_id,
+            client_id: customerId,
+            tenant_name: clientForm.customer_name,
+            contact_person: clientForm.contact_person,
+            contact_email: clientForm.email,
+            contact_phone: clientForm.phone,
+            allocated_space_sqm: clientForm.allocated_space_sqm,
+            occupied_rooms_or_units: clientForm.occupied_rooms_or_units,
+            headcount: clientForm.headcount,
+            lease_start_date: clientForm.lease_start_date,
+            lease_end_date: clientForm.lease_end_date,
+            monthly_service_charge: clientForm.monthly_service_charge,
+            occupancy_status: clientForm.occupancy_status || "ACTIVE_OCCUPIED",
+          };
+          const existingTenant = (tenants || []).find(
+            (t) =>
+              (customerId && Number(t.client_id) === Number(customerId)) ||
+              (t.tenant_name && clientForm.customer_name && t.tenant_name.trim().toLowerCase() === clientForm.customer_name.trim().toLowerCase())
+          );
+          if (existingTenant?.id) {
+            await api.put(`/facilities/space/tenants/${existingTenant.id}`, tenantPayload);
+          } else {
+            await api.post("/facilities/space/tenants", tenantPayload);
+          }
+        } catch (tErr) {
+          console.warn("Tenant occupancy sync notice:", tErr);
+        }
+      }
+
       setShowClientModal(false);
       loadAllSetupData();
     } catch (err) {
@@ -1104,6 +1250,142 @@ export default function FacilitiesSetupPage() {
       setSaving(false);
     }
   };
+
+  // --- TENANT OCCUPANCY REGISTER HANDLERS ---
+  const tenantStatusBadge = (status) => {
+    const map = {
+      ACTIVE_OCCUPIED: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
+      VACATED:         "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300",
+      NOTICE_GIVEN:    "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
+      RENEWAL_PENDING: "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300",
+    };
+    return map[status] || "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300";
+  };
+
+  const handleOpenTenantModal = (t = null) => {
+    if (t) {
+      setEditingTenant(t);
+      setTenantForm({
+        property_id: t.property_id || "",
+        client_id: t.client_id || "",
+        tenant_name: t.tenant_name || "",
+        contact_person: t.contact_person || "",
+        contact_email: t.contact_email || "",
+        contact_phone: t.contact_phone || "",
+        allocated_space_sqm: t.allocated_space_sqm || "",
+        occupied_rooms_or_units: t.occupied_rooms_or_units || "",
+        headcount: t.headcount || "",
+        lease_start_date: t.lease_start_date ? String(t.lease_start_date).slice(0, 10) : "",
+        lease_end_date: t.lease_end_date ? String(t.lease_end_date).slice(0, 10) : "",
+        monthly_service_charge: t.monthly_service_charge || "",
+        occupancy_status: t.occupancy_status || "ACTIVE_OCCUPIED",
+      });
+    } else {
+      setEditingTenant(null);
+      setTenantForm({
+        property_id: "",
+        client_id: "",
+        tenant_name: "",
+        contact_person: "",
+        contact_email: "",
+        contact_phone: "",
+        allocated_space_sqm: "",
+        occupied_rooms_or_units: "",
+        headcount: "",
+        lease_start_date: "",
+        lease_end_date: "",
+        monthly_service_charge: "",
+        occupancy_status: "ACTIVE_OCCUPIED",
+      });
+    }
+    setShowTenantModal(true);
+  };
+
+  const handleSelectTenantClient = (clientId) => {
+    if (!clientId) {
+      setTenantForm((f) => ({ ...f, client_id: "" }));
+      return;
+    }
+    const selected = clients.find((c) => String(c.id) === String(clientId));
+    if (selected) {
+      const prior = tenants.find((t) => Number(t.client_id) === Number(selected.id));
+      setTenantForm((f) => ({
+        ...f,
+        client_id: selected.id,
+        tenant_name: selected.customer_name || f.tenant_name,
+        contact_person: selected.contact_person || (prior?.contact_person || f.contact_person),
+        contact_phone: selected.phone || selected.mobile || (prior?.contact_phone || f.contact_phone),
+        contact_email: selected.email || (prior?.contact_email || f.contact_email),
+        property_id: f.property_id || prior?.property_id || "",
+        occupied_rooms_or_units: f.occupied_rooms_or_units || prior?.occupied_rooms_or_units || "",
+        allocated_space_sqm: f.allocated_space_sqm || prior?.allocated_space_sqm || "",
+        headcount: f.headcount || prior?.headcount || "",
+        lease_start_date: f.lease_start_date || (prior?.lease_start_date ? String(prior.lease_start_date).slice(0, 10) : ""),
+        lease_end_date: f.lease_end_date || (prior?.lease_end_date ? String(prior.lease_end_date).slice(0, 10) : ""),
+        monthly_service_charge: f.monthly_service_charge || prior?.monthly_service_charge || "",
+      }));
+    }
+  };
+
+  const handleSaveTenantRecord = async (e) => {
+    e.preventDefault();
+    if (!tenantForm.property_id) {
+      toast.warn("Please select a target property.");
+      return;
+    }
+    if (!tenantForm.tenant_name?.trim()) {
+      toast.warn("Please enter tenant/company name.");
+      return;
+    }
+    setTenantSubmitting(true);
+    try {
+      if (editingTenant) {
+        await api.put(`/facilities/space/tenants/${editingTenant.id}`, tenantForm);
+        toast.success("Tenant occupancy record updated successfully!");
+      } else {
+        await api.post("/facilities/space/tenants", tenantForm);
+        toast.success("Tenant registered in occupancy registry successfully!");
+      }
+      setShowTenantModal(false);
+      setEditingTenant(null);
+      const res = await api.get("/facilities/space/tenants");
+      setTenants(Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to save tenant record");
+    } finally {
+      setTenantSubmitting(false);
+    }
+  };
+
+  const handleDeleteTenantRecord = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this tenant occupancy record?")) return;
+    try {
+      await api.delete(`/facilities/space/tenants/${id}`);
+      toast.success("Tenant occupancy record deleted successfully");
+      const res = await api.get("/facilities/space/tenants");
+      setTenants(Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to delete tenant record");
+    }
+  };
+
+  const filteredTenants = tenants.filter((t) => {
+    if (tenantFilterProperty && String(t.property_id) !== String(tenantFilterProperty)) return false;
+    if (tenantFilterStatus !== "ALL" && (t.occupancy_status || "ACTIVE_OCCUPIED") !== tenantFilterStatus) return false;
+    if (tenantSearchTerm) {
+      const q = tenantSearchTerm.toLowerCase();
+      const match =
+        (t.tenant_name && t.tenant_name.toLowerCase().includes(q)) ||
+        (t.contact_person && t.contact_person.toLowerCase().includes(q)) ||
+        (t.contact_email && t.contact_email.toLowerCase().includes(q)) ||
+        (t.contact_phone && t.contact_phone.toLowerCase().includes(q)) ||
+        (t.occupied_rooms_or_units && t.occupied_rooms_or_units.toLowerCase().includes(q)) ||
+        (t.property_name && t.property_name.toLowerCase().includes(q)) ||
+        (t.client_name && t.client_name.toLowerCase().includes(q));
+      if (!match) return false;
+    }
+    return true;
+  });
 
   const handleDeleteClient = async (id) => {
     if (!window.confirm("Are you sure you want to delete this client?")) return;
@@ -1335,176 +1617,242 @@ export default function FacilitiesSetupPage() {
     );
   });
 
+  const operationalDomains = [
+    {
+      id: "all",
+      label: "All Sections",
+      icon: SlidersHorizontal,
+      tabIds: ["personnel", "supervisors", "shifts", "positions", "spaces", "sanitation", "waste-streams", "checklists", "categories", "asset-categories", "clients", "tenants", "contractors"],
+    },
+    {
+      id: "workforce",
+      label: "Workforce & Operations",
+      icon: Users,
+      tabIds: ["personnel", "supervisors", "shifts", "positions"],
+    },
+    {
+      id: "spaces",
+      label: "Spaces & Hygiene",
+      icon: Building2,
+      tabIds: ["spaces", "sanitation", "waste-streams"],
+    },
+    {
+      id: "governance",
+      label: "Governance & Checklists",
+      icon: ClipboardList,
+      tabIds: ["checklists", "categories", "asset-categories"],
+    },
+    {
+      id: "tenants",
+      label: "Tenants & Partners",
+      icon: Briefcase,
+      tabIds: ["clients", "tenants", "contractors"],
+    },
+  ];
+
+  const operationalTabs = [
+    { id: "clients", label: "Clients", icon: Building2, count: clients.length, domain: "tenants", hint: "Client organizations & properties" },
+    { id: "tenants", label: "Tenant Occupancy", icon: Users, count: tenants.length, domain: "tenants", hint: "Lease registers & unit allocations" },
+    { id: "contractors", label: "Contractors & Vendors", icon: Briefcase, count: contractors.length, domain: "tenants", hint: "Third-party service vendors" },
+    { id: "personnel", label: "Service Personnel", icon: Users, count: personnel.length, domain: "workforce", hint: "On-ground technicians & janitorial crew" },
+    { id: "supervisors", label: "Supervisors", icon: UserCheck, count: supervisors.length, domain: "workforce", hint: "Designated duty & shift supervisors" },
+    { id: "shifts", label: "Shifts & Schedules", icon: Clock, count: shifts.length, domain: "workforce", hint: "Working shift windows & rosters" },
+    { id: "positions", label: "Positions & Roles", icon: Briefcase, count: positions.length, domain: "workforce", hint: "Job classifications & wages" },
+    { id: "spaces", label: "Space & Unit Directory", icon: DoorOpen, count: spaces.length, domain: "spaces", hint: "Floors, rooms, zones & unit dimensions" },
+    { id: "sanitation", label: "Sanitation Checkpoints", icon: Sparkles, count: sanitationCheckpoints.length, domain: "spaces", hint: "Hygiene zones & touchpoint standards" },
+    { id: "waste-streams", label: "Waste Streams", icon: Trash2, count: wasteStreams.length, domain: "spaces", hint: "Hazard streams & disposal methods" },
+    { id: "checklists", label: "Inspection Checklists", icon: ClipboardList, count: checklistTemplates.length, domain: "governance", hint: "Audit checklists & routine runs" },
+    { id: "categories", label: "Service Categories", icon: Layers, count: serviceCategories.length, domain: "governance", hint: "Disciplines & service offerings" },
+    { id: "asset-categories", label: "Equipment Categories", icon: Wrench, count: equipmentCategories.length, domain: "governance", hint: "Machinery, HVAC & asset types" },
+  ];
+
+  const currentTabInfo = operationalTabs.find((t) => t.id === activeTab) || operationalTabs[0];
+
+  const getAddAction = () => {
+    switch (activeTab) {
+      case "clients": return { label: "Add Client", onClick: () => handleOpenClientModal() };
+      case "tenants": return { label: "Register Tenant", onClick: () => handleOpenTenantModal() };
+      case "contractors": return { label: "Add Contractor", onClick: () => handleOpenContractorModal() };
+      case "personnel": return { label: "Add Personnel", onClick: () => handleOpenPersonnelModal() };
+      case "supervisors": return { label: "Add Supervisor", onClick: () => handleOpenSupervisorModal() };
+      case "shifts": return { label: "Create Shift", onClick: () => handleOpenShiftModal() };
+      case "positions": return { label: "Add Position", onClick: () => handleOpenPositionModal() };
+      case "spaces": return { label: "Add Space / Unit", onClick: () => handleOpenSpaceModal() };
+      case "sanitation": return { label: "Add Checkpoint", onClick: () => handleOpenSanitationModal() };
+      case "waste-streams": return { label: "Add Waste Stream", onClick: () => handleOpenWasteStreamModal() };
+      case "checklists": return { label: "Create Checklist", onClick: () => handleOpenChecklistModal() };
+      case "categories": return { label: "Add Category", onClick: () => handleOpenCategoryModal() };
+      case "asset-categories": return { label: "Add Equipment Category", onClick: () => handleOpenEquipCategoryModal() };
+      default: return null;
+    }
+  };
+
+  const currentAction = getAddAction();
+
+  const visibleTabs = activeDomain === "all"
+    ? operationalTabs
+    : operationalTabs.filter((t) => t.domain === activeDomain);
+
   return (
-    <div className="p-4 sm:p-6 max-w-[1440px] mx-auto space-y-6 animate-fadeIn">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Link
-              to="/facilities"
-              className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 text-xs flex items-center gap-1"
-            >
-              <ArrowLeft size={14} /> Back to Facilities
-            </Link>
+    <div className="p-4 sm:p-6 max-w-[1440px] mx-auto space-y-5 animate-fadeIn">
+      {/* Breadcrumb Navigation */}
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
+        <Link to="/facilities" className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors flex items-center gap-1">
+          <ArrowLeft size={13} />
+          <span>Facilities</span>
+        </Link>
+        <ChevronRight size={12} className="text-slate-400" />
+        <span className="text-slate-800 dark:text-slate-200 font-semibold">Operational Setup</span>
+      </nav>
+
+      {/* Signature Command Header (Liquid Glass) */}
+      <div className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-5 shadow-sm space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-brand-900/10 dark:bg-brand-500/10 text-brand-900 dark:text-brand-300 ring-1 ring-brand-900/15 dark:ring-white/10">
+                <SlidersHorizontal size={20} />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Facilities Operations Setup
+                </h1>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Configure workforce rosters, space registers, compliance checklists, and tenancy catalogs.
+                </p>
+              </div>
+            </div>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
-            <span className="p-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl">
-              ⚙️
-            </span>
-            Facilities Operations Setup
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Configure operational shifts, designated supervisors, and service crew linked directly to HR employees.
-            Changes automatically propagate into Soft Facilities Services and inspection checklists.
-          </p>
+
+          {/* Primary Actions Strip */}
+          <div className="flex items-center gap-2.5 self-start lg:self-auto">
+            <button
+              onClick={loadAllSetupData}
+              disabled={loading}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-xs active:scale-95 transition-all"
+              title="Refresh Data"
+            >
+              <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
+              <span>Refresh</span>
+            </button>
+
+            {currentAction && (
+              <button
+                onClick={currentAction.onClick}
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-brand-900 hover:bg-brand-800 text-white dark:bg-emerald-600 dark:hover:bg-emerald-500 shadow-sm active:scale-95 transition-all"
+              >
+                <Plus size={14} />
+                <span>{currentAction.label}</span>
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={loadAllSetupData}
-            disabled={loading}
-            className="p-2 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"
-            title="Refresh Data"
-          >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-          </button>
+        {/* Live KPI Micro-strip */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 pt-3 border-t border-slate-100 dark:border-slate-800/80">
+          <div className="p-2.5 rounded-xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/40">
+            <span className="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 block">Personnel</span>
+            <span className="text-sm font-bold text-slate-900 dark:text-white font-mono">{personnel.length} crew</span>
+          </div>
+          <div className="p-2.5 rounded-xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/40">
+            <span className="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 block">Supervisors</span>
+            <span className="text-sm font-bold text-slate-900 dark:text-white font-mono">{supervisors.length} leads</span>
+          </div>
+          <div className="p-2.5 rounded-xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/40">
+            <span className="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 block">Shifts</span>
+            <span className="text-sm font-bold text-slate-900 dark:text-white font-mono">{shifts.length} active</span>
+          </div>
+          <div className="p-2.5 rounded-xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/40">
+            <span className="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 block">Spaces / Units</span>
+            <span className="text-sm font-bold text-slate-900 dark:text-white font-mono">{spaces.length} units</span>
+          </div>
+          <div className="p-2.5 rounded-xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/40">
+            <span className="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 block">Checklists</span>
+            <span className="text-sm font-bold text-slate-900 dark:text-white font-mono">{checklistTemplates.length} templates</span>
+          </div>
+          <div className="p-2.5 rounded-xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/40">
+            <span className="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 block">Clients & Tenancy</span>
+            <span className="text-sm font-bold text-slate-900 dark:text-white font-mono">{clients.length + tenants.length} entries</span>
+          </div>
         </div>
       </div>
 
-      {/* Tabs Navigation */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 overflow-x-auto">
-        <button
-          onClick={() => setActiveTab("clients")}
-          className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === "clients"
-              ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
-              : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-          }`}
-        >
-          <Building2 size={15} /> Clients ({clients.length})
-        </button>
+      {/* Modern Two-Tier Navigation */}
+      <div className="space-y-2.5">
+        {/* Tier 1: Operational Domains Segmented Selector */}
+        <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 dark:bg-slate-800/70 rounded-2xl backdrop-blur-md overflow-x-auto border border-slate-200/60 dark:border-slate-700/60">
+          {operationalDomains.map((dom) => {
+            const DomIcon = dom.icon;
+            const isSelected = activeDomain === dom.id;
+            return (
+              <button
+                key={dom.id}
+                onClick={() => {
+                  setActiveDomain(dom.id);
+                  if (dom.id !== "all" && !dom.tabIds.includes(activeTab)) {
+                    setActiveTab(dom.tabIds[0]);
+                  }
+                }}
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-xl whitespace-nowrap transition-all ${
+                  isSelected
+                    ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-semibold"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                <DomIcon size={13} className={isSelected ? "text-brand-900 dark:text-brand-400" : "text-slate-400"} />
+                <span>{dom.label}</span>
+              </button>
+            );
+          })}
+        </div>
 
-        <button
-          onClick={() => setActiveTab("categories")}
-          className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === "categories"
-              ? "border-teal-500 text-teal-600 dark:text-teal-400"
-              : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-          }`}
-        >
-          <Layers size={15} /> Service Categories ({serviceCategories.length})
-        </button>
+        {/* Tier 2: Specific Tabs Pill Bar */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          {visibleTabs.map((tab) => {
+            const TabIcon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  if (DOMAIN_MAP[tab.id]) {
+                    setActiveDomain(DOMAIN_MAP[tab.id]);
+                  }
+                }}
+                className={`inline-flex items-center gap-2 px-3.5 py-2 text-xs rounded-xl whitespace-nowrap transition-all ${
+                  isActive
+                    ? "bg-brand-900 text-white dark:bg-brand-700 dark:text-white shadow-sm font-semibold"
+                    : "bg-white/80 dark:bg-slate-900/60 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200/70 dark:border-slate-800/70"
+                }`}
+              >
+                <TabIcon size={14} className={isActive ? "text-white" : "text-slate-400"} />
+                <span>{tab.label}</span>
+                <span
+                  className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono tabular-nums ${
+                    isActive
+                      ? "bg-white/20 text-white"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
-        <button
-          onClick={() => setActiveTab("asset-categories")}
-          className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === "asset-categories"
-              ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
-              : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-          }`}
-        >
-          <Wrench size={15} /> Asset / Equipment Categories ({equipmentCategories.length})
-        </button>
-
-        <button
-          onClick={() => setActiveTab("personnel")}
-          className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === "personnel"
-              ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
-              : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-          }`}
-        >
-          <Users size={15} /> Service Personnel ({personnel.length})
-        </button>
-
-        <button
-          onClick={() => setActiveTab("positions")}
-          className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === "positions"
-              ? "border-blue-600 text-blue-600 dark:text-blue-400"
-              : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-          }`}
-        >
-          <Briefcase size={15} /> Positions &amp; Job Roles ({positions.length})
-        </button>
-
-        <button
-          onClick={() => setActiveTab("supervisors")}
-          className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === "supervisors"
-              ? "border-purple-500 text-purple-600 dark:text-purple-400"
-              : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-          }`}
-        >
-          <UserCheck size={15} /> Supervisors ({supervisors.length})
-        </button>
-
-        <button
-          onClick={() => setActiveTab("shifts")}
-          className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === "shifts"
-              ? "border-blue-500 text-blue-600 dark:text-blue-400"
-              : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-          }`}
-        >
-          <Clock size={15} /> Shifts & Schedules ({shifts.length})
-        </button>
-
-        <button
-          onClick={() => setActiveTab("checklists")}
-          className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === "checklists"
-              ? "border-emerald-600 text-emerald-600 dark:text-emerald-400"
-              : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-          }`}
-        >
-          <ClipboardList size={15} /> Inspection Checklists ({checklistTemplates.length})
-        </button>
-
-        <button
-          onClick={() => setActiveTab("contractors")}
-          className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === "contractors"
-              ? "border-cyan-500 text-cyan-600 dark:text-cyan-400"
-              : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-          }`}
-        >
-          <Building2 size={15} /> Contractors & Vendors ({contractors.length})
-        </button>
-
-        <button
-          onClick={() => setActiveTab("spaces")}
-          className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === "spaces"
-              ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
-              : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-          }`}
-        >
-          <DoorOpen size={15} /> Space &amp; Unit Directory ({spaces.length})
-        </button>
-
-        <button
-          onClick={() => setActiveTab("sanitation")}
-          className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === "sanitation"
-              ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
-              : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-          }`}
-        >
-          <Sparkles size={15} /> Sanitation Checkpoints ({sanitationCheckpoints.length})
-        </button>
-
-        <button
-          onClick={() => setActiveTab("waste-streams")}
-          className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === "waste-streams"
-              ? "border-rose-500 text-rose-600 dark:text-rose-400"
-              : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-          }`}
-        >
-          <Trash2 size={15} /> Waste Streams & Types ({wasteStreams.length})
-        </button>
+      {/* Contextual Active Section Title & Purpose */}
+      <div className="flex items-center justify-between px-1 pt-1">
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+            {currentTabInfo.label}
+          </h2>
+          <span className="text-xs text-slate-400 dark:text-slate-500">
+            • {currentTabInfo.hint}
+          </span>
+        </div>
       </div>
 
       {/* ========================================================================= */}
@@ -1544,6 +1892,7 @@ export default function FacilitiesSetupPage() {
                   <tr>
                     <th className="px-4 py-3">Client Code</th>
                     <th className="px-4 py-3">Client / Organization Name</th>
+                    <th className="px-4 py-3">Property &amp; Units</th>
                     <th className="px-4 py-3">Type</th>
                     <th className="px-4 py-3">Contact Person</th>
                     <th className="px-4 py-3">Phone & Email</th>
@@ -1553,17 +1902,39 @@ export default function FacilitiesSetupPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {filteredClients.map((c) => (
-                    <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="px-4 py-3">
-                        <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                          {c.customer_code || `#${c.id}`}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 font-bold text-slate-900 dark:text-white">
-                        {c.customer_name}
-                      </td>
-                      <td className="px-4 py-3 text-slate-500">
+                  {filteredClients.map((c) => {
+                    const clientTenant = (tenants || []).find(
+                      (t) =>
+                        Number(t.client_id) === Number(c.id) ||
+                        (t.tenant_name && c.customer_name && t.tenant_name.trim().toLowerCase() === c.customer_name.trim().toLowerCase())
+                    );
+                    return (
+                      <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                        <td className="px-4 py-3">
+                          <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                            {c.customer_code || `#${c.id}`}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 font-bold text-slate-900 dark:text-white">
+                          {c.customer_name}
+                        </td>
+                        <td className="px-4 py-3">
+                          {clientTenant ? (
+                            <div>
+                              <span className="font-semibold text-slate-800 dark:text-slate-200 block">
+                                {clientTenant.property_name || "Assigned Property"}
+                              </span>
+                              {clientTenant.occupied_rooms_or_units && (
+                                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 block font-medium">
+                                  {clientTenant.occupied_rooms_or_units}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 italic text-[11px]">No site assigned</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-slate-500">
                         <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                           {c.customer_type || "LOCAL"}
                         </span>
@@ -1608,11 +1979,223 @@ export default function FacilitiesSetupPage() {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                   {filteredClients.length === 0 && (
                     <tr>
                       <td colSpan="8" className="text-center py-12 text-slate-400 text-xs italic">
                         No service clients configured. Click &apos;+ Add Client&apos; above to register clients for FM service agreements.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB: TENANT OCCUPANCY REGISTER */}
+      {/* ========================================================================= */}
+      {activeTab === "tenants" && (
+        <div className="space-y-4">
+          {/* Summary KPI Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <span className="text-slate-400 text-xs font-medium block">Total Tenants</span>
+              <span className="text-xl font-bold text-slate-900 dark:text-white mt-1 block">
+                {tenants.length}
+              </span>
+            </div>
+            <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <span className="text-slate-400 text-xs font-medium block">Active Occupied</span>
+              <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 block">
+                {tenants.filter((t) => !t.occupancy_status || t.occupancy_status === "ACTIVE_OCCUPIED").length}
+              </span>
+            </div>
+            <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <span className="text-slate-400 text-xs font-medium block">Total Leased Area</span>
+              <span className="text-xl font-bold text-slate-900 dark:text-white mt-1 block">
+                {tenants.reduce((sum, t) => sum + (parseFloat(t.allocated_space_sqm) || 0), 0).toLocaleString()} m²
+              </span>
+            </div>
+            <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <span className="text-slate-400 text-xs font-medium block">Monthly Billable Revenue</span>
+              <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 block">
+                ${tenants.reduce((sum, t) => sum + (parseFloat(t.monthly_service_charge) || 0), 0).toLocaleString()}
+              </span>
+            </div>
+          </div>
+
+          {/* Action Bar & Filters */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="flex flex-wrap items-center gap-2.5 flex-1">
+              <div className="relative min-w-[220px] flex-1 max-w-md">
+                <Search className="absolute left-3 top-2.5 text-slate-400" size={15} />
+                <input
+                  type="text"
+                  placeholder="Search tenant name, units, email, contact person..."
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
+                  value={tenantSearchTerm}
+                  onChange={(e) => setTenantSearchTerm(e.target.value)}
+                />
+              </div>
+
+              {/* Property filter */}
+              <select
+                value={tenantFilterProperty}
+                onChange={(e) => setTenantFilterProperty(e.target.value)}
+                className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-700 dark:text-slate-300 focus:outline-none font-normal"
+              >
+                <option value="">All Properties</option>
+                {properties.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.property_name} {p.property_code ? `(${p.property_code})` : ""}
+                  </option>
+                ))}
+              </select>
+
+              {/* Status filter */}
+              <select
+                value={tenantFilterStatus}
+                onChange={(e) => setTenantFilterStatus(e.target.value)}
+                className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-700 dark:text-slate-300 focus:outline-none font-normal"
+              >
+                <option value="ALL">All Statuses</option>
+                <option value="ACTIVE_OCCUPIED">Active Occupied</option>
+                <option value="NOTICE_GIVEN">Notice Given</option>
+                <option value="RENEWAL_PENDING">Renewal Pending</option>
+                <option value="VACATED">Vacated</option>
+              </select>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("clients")}
+                className="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                title="Go to Client Setup"
+              >
+                <Building2 size={13} className="text-emerald-600" /> Client Setup ↗
+              </button>
+            </div>
+
+            <button
+              onClick={() => handleOpenTenantModal()}
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all whitespace-nowrap"
+            >
+              <Plus size={15} /> Register Tenant
+            </button>
+          </div>
+
+          {/* Tenants Table */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300">
+                  <tr>
+                    <th className="px-4 py-3">Tenant / Company Name</th>
+                    <th className="px-4 py-3">Target Property</th>
+                    <th className="px-4 py-3">Occupied Units</th>
+                    <th className="px-4 py-3 text-right">Area (m²)</th>
+                    <th className="px-4 py-3 text-center">Headcount</th>
+                    <th className="px-4 py-3 text-right">Monthly Charge</th>
+                    <th className="px-4 py-3">Contact</th>
+                    <th className="px-4 py-3">Lease Dates</th>
+                    <th className="px-4 py-3 text-center">Status</th>
+                    <th className="px-4 py-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {filteredTenants.map((t) => (
+                    <tr key={t.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="font-bold text-slate-900 dark:text-white">
+                          {t.tenant_name}
+                        </div>
+                        {(t.client_id || t.client_name) && (
+                          <div className="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100/70 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                            <Building2 size={10} /> Client: {t.client_name || `#${t.client_id}`}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-slate-700 dark:text-slate-300">
+                        <div className="font-medium">{t.property_name || "-"}</div>
+                        {t.property_code && (
+                          <span className="text-[11px] font-mono text-slate-400">
+                            {t.property_code}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300 font-medium">
+                        {t.occupied_rooms_or_units || "-"}
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono text-slate-700 dark:text-slate-300">
+                        {t.allocated_space_sqm ? `${Number(t.allocated_space_sqm).toLocaleString()} m²` : "-"}
+                      </td>
+                      <td className="px-4 py-3 text-center text-slate-600 dark:text-slate-400">
+                        {t.headcount ? `${t.headcount} ppl` : "-"}
+                      </td>
+                      <td className="px-4 py-3 text-right font-semibold text-emerald-600 dark:text-emerald-400 font-mono">
+                        {t.monthly_service_charge ? `${Number(t.monthly_service_charge).toLocaleString()}` : "-"}
+                      </td>
+                      <td className="px-4 py-3 text-slate-500">
+                        <div className="font-medium text-slate-700 dark:text-slate-300">
+                          {t.contact_person || "-"}
+                        </div>
+                        {t.contact_phone && (
+                          <div className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                            <Phone size={10} /> {t.contact_phone}
+                          </div>
+                        )}
+                        {t.contact_email && (
+                          <div className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                            <Mail size={10} /> {t.contact_email}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-[11px] text-slate-500">
+                        <div>From: {t.lease_start_date ? String(t.lease_start_date).slice(0, 10) : "-"}</div>
+                        <div>To: {t.lease_end_date ? String(t.lease_end_date).slice(0, 10) : "-"}</div>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${tenantStatusBadge(t.occupancy_status)}`}>
+                          {(t.occupancy_status || "ACTIVE_OCCUPIED").replace(/_/g, " ")}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setViewingTenant(t)}
+                            className="p-1.5 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 rounded-lg transition-colors"
+                            title="View Lease Details"
+                          >
+                            <Eye size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenTenantModal(t)}
+                            className="p-1.5 text-slate-500 hover:text-emerald-600 rounded-lg transition-colors"
+                            title="Edit Tenant"
+                          >
+                            <Edit2 size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteTenantRecord(t.id)}
+                            className="p-1.5 text-slate-500 hover:text-red-600 rounded-lg transition-colors"
+                            title="Delete Tenant"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredTenants.length === 0 && (
+                    <tr>
+                      <td colSpan="10" className="text-center py-12 text-slate-400 text-xs italic">
+                        No tenant occupancy records found. Click &apos;+ Register Tenant&apos; above to record a new lease or site occupancy.
                       </td>
                     </tr>
                   )}
@@ -4482,6 +5065,136 @@ export default function FacilitiesSetupPage() {
                     onChange={(e) => setClientForm((p) => ({ ...p, country: e.target.value }))}
                   />
                 </div>
+              </div>
+
+              {/* Tenant Occupancy & Lease Allocation (Synchronized with Tenant Occupancy Register) */}
+              <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50/40 dark:bg-emerald-950/20 space-y-3 mt-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-bold text-xs text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <Building2 size={14} className="text-emerald-600" />
+                    Tenant Occupancy &amp; Lease Allocation (Optional)
+                  </h4>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Syncs with Tenant Occupancy Register
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                      Assigned Property Site
+                    </label>
+                    <select
+                      value={clientForm.property_id}
+                      onChange={(e) => setClientForm((p) => ({ ...p, property_id: e.target.value }))}
+                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs text-slate-800 dark:text-slate-200 font-normal focus:outline-none"
+                    >
+                      <option value="">-- None / Select Property --</option>
+                      {properties.map((prop) => (
+                        <option key={prop.id} value={prop.id}>
+                          {prop.property_name} {prop.property_code ? `(${prop.property_code})` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                      Occupied Units / Suite
+                    </label>
+                    <input
+                      type="text"
+                      value={clientForm.occupied_rooms_or_units}
+                      onChange={(e) => setClientForm((p) => ({ ...p, occupied_rooms_or_units: e.target.value }))}
+                      placeholder="e.g. Suite 402, 4th Floor"
+                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs text-slate-800 dark:text-slate-200 font-normal focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                      Allocated Area (m²)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={clientForm.allocated_space_sqm}
+                      onChange={(e) => setClientForm((p) => ({ ...p, allocated_space_sqm: e.target.value }))}
+                      placeholder="e.g. 120"
+                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs text-slate-800 dark:text-slate-200 font-normal focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                      Headcount (People)
+                    </label>
+                    <input
+                      type="number"
+                      value={clientForm.headcount}
+                      onChange={(e) => setClientForm((p) => ({ ...p, headcount: e.target.value }))}
+                      placeholder="e.g. 8"
+                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs text-slate-800 dark:text-slate-200 font-normal focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                      Lease Start Date
+                    </label>
+                    <input
+                      type="date"
+                      value={clientForm.lease_start_date}
+                      onChange={(e) => setClientForm((p) => ({ ...p, lease_start_date: e.target.value }))}
+                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs text-slate-800 dark:text-slate-200 font-normal focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                      Lease End Date
+                    </label>
+                    <input
+                      type="date"
+                      value={clientForm.lease_end_date}
+                      onChange={(e) => setClientForm((p) => ({ ...p, lease_end_date: e.target.value }))}
+                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs text-slate-800 dark:text-slate-200 font-normal focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                      Monthly Charge ($)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={clientForm.monthly_service_charge}
+                      onChange={(e) => setClientForm((p) => ({ ...p, monthly_service_charge: e.target.value }))}
+                      placeholder="e.g. 1500"
+                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs text-slate-800 dark:text-slate-200 font-normal focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                      Occupancy Status
+                    </label>
+                    <select
+                      value={clientForm.occupancy_status}
+                      onChange={(e) => setClientForm((p) => ({ ...p, occupancy_status: e.target.value }))}
+                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs text-slate-800 dark:text-slate-200 font-normal focus:outline-none"
+                    >
+                      <option value="ACTIVE_OCCUPIED">Active Occupied</option>
+                      <option value="NOTICE_GIVEN">Notice Given</option>
+                      <option value="RENEWAL_PENDING">Renewal Pending</option>
+                      <option value="VACATED">Vacated</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div>
 
                 <div className="flex items-center gap-2 mt-4">
                   <label className="flex items-center gap-2 cursor-pointer">
@@ -4957,6 +5670,353 @@ export default function FacilitiesSetupPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Register / Edit Tenant Occupancy */}
+      {showTenantModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex justify-center items-start p-4 sm:p-6 md:p-10 animate-fadeIn">
+          <div className="bg-white dark:bg-slate-850 rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden my-auto sm:my-8 transition-all">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-850/95 backdrop-blur-md">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Users size={18} className="text-emerald-600" />
+                {editingTenant ? "Edit Tenant Occupancy" : "Register New Tenant"}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowTenantModal(false)}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handleSaveTenantRecord} className="p-6 space-y-4 text-xs">
+              {/* Link Client from Client Setup */}
+              <div className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50/50 dark:bg-emerald-950/20">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-1.5">
+                  <label className="font-semibold text-slate-800 dark:text-slate-200 text-xs flex items-center gap-1.5">
+                    <Building2 size={14} className="text-emerald-600" /> Link Client from Client Setup (Optional)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => { setShowTenantModal(false); setActiveTab("clients"); }}
+                    className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 text-left"
+                  >
+                    + Open Client Setup Tab ↗
+                  </button>
+                </div>
+                <select
+                  value={tenantForm.client_id}
+                  onChange={(e) => handleSelectTenantClient(e.target.value)}
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none font-normal"
+                >
+                  <option value="">-- Choose from Registered Clients (Auto-fills details) --</option>
+                  {clients.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.customer_name} {c.customer_code ? `(${c.customer_code})` : ""}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                  Selecting a client automatically fills company name, phone, email, contact person, and known property details.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                    Target Property *
+                  </label>
+                  <select
+                    value={tenantForm.property_id}
+                    onChange={(e) => setTenantForm((f) => ({ ...f, property_id: e.target.value }))}
+                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none font-normal"
+                    required
+                  >
+                    <option value="">-- Select Property Site --</option>
+                    {properties.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.property_name} {p.property_code ? `(${p.property_code})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                    Tenant / Company Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={tenantForm.tenant_name}
+                    onChange={(e) => setTenantForm((f) => ({ ...f, tenant_name: e.target.value }))}
+                    placeholder="e.g. Acme Global Logistics Ltd"
+                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none font-normal"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                    Contact Person
+                  </label>
+                  <input
+                    type="text"
+                    value={tenantForm.contact_person}
+                    onChange={(e) => setTenantForm((f) => ({ ...f, contact_person: e.target.value }))}
+                    placeholder="e.g. Isaac Osei"
+                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none font-normal"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                    Contact Phone
+                  </label>
+                  <input
+                    type="text"
+                    value={tenantForm.contact_phone}
+                    onChange={(e) => setTenantForm((f) => ({ ...f, contact_phone: e.target.value }))}
+                    placeholder="e.g. +233 24 123 4567"
+                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none font-normal"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                    Contact Email
+                  </label>
+                  <input
+                    type="email"
+                    value={tenantForm.contact_email}
+                    onChange={(e) => setTenantForm((f) => ({ ...f, contact_email: e.target.value }))}
+                    placeholder="tenant@company.com"
+                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none font-normal"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                    Occupied Units / Suite
+                  </label>
+                  <input
+                    type="text"
+                    value={tenantForm.occupied_rooms_or_units}
+                    onChange={(e) => setTenantForm((f) => ({ ...f, occupied_rooms_or_units: e.target.value }))}
+                    placeholder="e.g. Suite 402, 4th Floor"
+                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none font-normal"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                    Allocated Area (m²)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={tenantForm.allocated_space_sqm}
+                    onChange={(e) => setTenantForm((f) => ({ ...f, allocated_space_sqm: e.target.value }))}
+                    placeholder="e.g. 150"
+                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none font-normal"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                    Headcount
+                  </label>
+                  <input
+                    type="number"
+                    value={tenantForm.headcount}
+                    onChange={(e) => setTenantForm((f) => ({ ...f, headcount: e.target.value }))}
+                    placeholder="e.g. 12"
+                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none font-normal"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                    Lease Start Date
+                  </label>
+                  <input
+                    type="date"
+                    value={tenantForm.lease_start_date}
+                    onChange={(e) => setTenantForm((f) => ({ ...f, lease_start_date: e.target.value }))}
+                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none font-normal"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                    Lease End Date
+                  </label>
+                  <input
+                    type="date"
+                    value={tenantForm.lease_end_date}
+                    onChange={(e) => setTenantForm((f) => ({ ...f, lease_end_date: e.target.value }))}
+                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none font-normal"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                    Monthly Charge ($)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={tenantForm.monthly_service_charge}
+                    onChange={(e) => setTenantForm((f) => ({ ...f, monthly_service_charge: e.target.value }))}
+                    placeholder="e.g. 1500"
+                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none font-normal"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1">
+                    Occupancy Status
+                  </label>
+                  <select
+                    value={tenantForm.occupancy_status}
+                    onChange={(e) => setTenantForm((f) => ({ ...f, occupancy_status: e.target.value }))}
+                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none font-normal"
+                  >
+                    <option value="ACTIVE_OCCUPIED">Active Occupied</option>
+                    <option value="NOTICE_GIVEN">Notice Given</option>
+                    <option value="RENEWAL_PENDING">Renewal Pending</option>
+                    <option value="VACATED">Vacated</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => setShowTenantModal(false)}
+                  className="px-4 py-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={tenantSubmitting}
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all"
+                >
+                  {tenantSubmitting ? "Saving..." : editingTenant ? "Update Tenant" : "Register Tenant"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: View Tenant Lease Details */}
+      {viewingTenant && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex justify-center items-start p-4 sm:p-6 md:p-10 animate-fadeIn">
+          <div className="bg-white dark:bg-slate-850 rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden my-auto sm:my-8 transition-all">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-850/95 backdrop-blur-md">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Users size={18} className="text-emerald-600" />
+                Tenant Lease Details
+              </h3>
+              <button
+                type="button"
+                onClick={() => setViewingTenant(null)}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-6 space-y-4 text-xs">
+              <div>
+                <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-semibold">Tenant / Company</span>
+                <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">{viewingTenant.tenant_name}</p>
+                {(viewingTenant.client_id || viewingTenant.client_name) && (
+                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                    Linked Client: {viewingTenant.client_name || `#${viewingTenant.client_id}`}
+                  </p>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <div>
+                  <span className="text-slate-400 block">Property Site</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">{viewingTenant.property_name || "-"}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block">Occupied Units</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">{viewingTenant.occupied_rooms_or_units || "-"}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block">Allocated Area</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">
+                    {viewingTenant.allocated_space_sqm ? `${viewingTenant.allocated_space_sqm} m²` : "-"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block">Headcount</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">
+                    {viewingTenant.headcount ? `${viewingTenant.headcount} people` : "-"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block">Monthly Charge</span>
+                  <span className="font-semibold text-emerald-600 font-mono">
+                    {viewingTenant.monthly_service_charge ? `$${Number(viewingTenant.monthly_service_charge).toLocaleString()}` : "-"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block">Status</span>
+                  <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${tenantStatusBadge(viewingTenant.occupancy_status)}`}>
+                    {(viewingTenant.occupancy_status || "ACTIVE_OCCUPIED").replace(/_/g, " ")}
+                  </span>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-slate-400 block mb-1">Contact Information</span>
+                <p className="font-medium text-slate-800 dark:text-slate-200">{viewingTenant.contact_person || "None specified"}</p>
+                {viewingTenant.contact_phone && <p className="text-slate-500 mt-0.5">📞 {viewingTenant.contact_phone}</p>}
+                {viewingTenant.contact_email && <p className="text-slate-500 mt-0.5">✉️ {viewingTenant.contact_email}</p>}
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-2 text-[11px]">
+                <div>
+                  <span className="text-slate-400 block">Lease Start</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">
+                    {viewingTenant.lease_start_date ? String(viewingTenant.lease_start_date).slice(0, 10) : "-"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block">Lease End</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">
+                    {viewingTenant.lease_end_date ? String(viewingTenant.lease_end_date).slice(0, 10) : "-"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const toEdit = viewingTenant;
+                    setViewingTenant(null);
+                    handleOpenTenantModal(toEdit);
+                  }}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold"
+                >
+                  Edit Tenant
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewingTenant(null)}
+                  className="px-4 py-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-semibold"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

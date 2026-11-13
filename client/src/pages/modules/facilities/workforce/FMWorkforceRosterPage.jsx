@@ -7,12 +7,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import {
-  Users, Plus, ArrowLeft, Filter, RefreshCw, Search,
-  Clock, UserCog, CalendarDays, Eye, Edit, Trash2,
-  Download, Printer, FileSpreadsheet, Sparkles, CheckCircle2,
-  Building, Check, X, ShieldAlert, Briefcase
-} from "lucide-react";
+import { Users, Plus, ArrowLeft, Filter, RefreshCw, Search, Clock, UserCog, Calendar, CalendarDays, Eye, Edit, Trash2, Download, Printer, FileSpreadsheet, Sparkles, CheckCircle2, Building, Check, X, ShieldAlert, Briefcase, Activity } from "lucide-react";
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import * as XLSX from "xlsx";
@@ -101,8 +96,8 @@ const getInitialRosterForm = () => ({
   employee_name: "",
   role_required: "Facilities Technician",
   shift_name: "Day Shift",
-  start_date: getTodayIso(),
-  end_date: getNextWeekIso(13), // 2 weeks default
+  start_date: "",
+  end_date: "",
   days_of_week: ["MON", "TUE", "WED", "THU", "FRI"],
   hours_per_shift: 8,
   hourly_rate: 25,
@@ -154,9 +149,6 @@ export default function FMWorkforceRosterPage() {
       const res = await api.get("/facilities/properties");
       const list = Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : [];
       setProperties(list);
-      if (list.length > 0) {
-        setRosterForm((f) => ({ ...f, property_id: f.property_id || list[0].id }));
-      }
     } catch (err) {
       console.error("fetchProperties error:", err);
     }
@@ -285,6 +277,14 @@ export default function FMWorkforceRosterPage() {
     }
     if (!rosterForm.employee_name.trim()) {
       toast.warn("Please specify an employee name.");
+      return;
+    }
+    if (!rosterForm.start_date) {
+      toast.warn("Please select a schedule start date.");
+      return;
+    }
+    if (!rosterForm.end_date) {
+      toast.warn("Please select a schedule end date.");
       return;
     }
     if ((rosterForm.days_of_week || []).length === 0) {
@@ -731,8 +731,8 @@ export default function FMWorkforceRosterPage() {
               : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
           }`}
         >
-          <Sparkles size={14} />
-          Auto-Generate Roster &amp; Calendar Grid
+          <Calendar size={14} />
+          schedule roster
         </button>
       </div>
 
@@ -791,7 +791,51 @@ export default function FMWorkforceRosterPage() {
 
           {/* Assignments Table */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
+                  {/* Metric Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        {[
+          {
+            label: "Active Duty Rosters",
+            val: (rosters || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Total Duty Rosters",
+            val: (rosters || []).length,
+            icon: <Users size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+          {
+            label: "Pending Duty Rosters",
+            val: (rosters || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Completed Duty Rosters",
+            val: (rosters || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300">
                   <tr>
@@ -907,8 +951,8 @@ export default function FMWorkforceRosterPage() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <div>
                 <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-emerald-500" />
-                  Auto-Roster Generator Parameters
+                  <Calendar className="w-4 h-4 text-emerald-500" />
+                  Schedule Roster Parameters
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   Select a property and schedule period. The system automatically computes working shifts and off-days based on employee work schedule definitions.

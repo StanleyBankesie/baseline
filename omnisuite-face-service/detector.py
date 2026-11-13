@@ -1,74 +1,73 @@
 """
-YuNet Face Detection and Landmark Alignment Module.
-Uses OpenCV's cv2.FaceDetectorYN with the official pretrained ONNX model.
+InsightFace Face Detection and Landmark Alignment Module.
+Uses InsightFace SCRFD detector with landmark alignment.
+Replaces legacy OpenCV YuNet implementation.
 """
 
 import os
-import cv2
+import warnings
 import numpy as np
+from insightface.app import FaceAnalysis
 
-class YuNetDetector:
-    def __init__(self, model_path: str, score_threshold: float = 0.75, nms_threshold: float = 0.3, top_k: int = 5000):
-        if not os.path.exists(model_path):
-            raise FileNotFoundError(f"YuNet model not found at: {model_path}")
+# Suppress scikit-image / insightface estimate deprecation notice
+warnings.filterwarnings("ignore", category=FutureWarning)
 
-        self.model_path = model_path
+class InsightFaceDetector:
+    def __init__(self, root_dir: str, det_size=(640, 640), score_threshold: float = 0.5):
+        self.root_dir = root_dir
         self.score_threshold = score_threshold
-        self.nms_threshold = nms_threshold
-        self.top_k = top_k
-        self._input_size = (320, 320)
-        
-        self.detector = cv2.FaceDetectorYN.create(
-            model=model_path,
-            config="",
-            input_size=self._input_size,
-            score_threshold=score_threshold,
-            nms_threshold=nms_threshold,
-            top_k=top_k,
-            backend_id=cv2.dnn.DNN_BACKEND_OPENCV,
-            target_id=cv2.dnn.DNN_TARGET_CPU
+        self.det_size = det_size
+
+        self.app = FaceAnalysis(
+            name="buffalo_sc",
+            root=root_dir,
+            providers=["CPUExecutionProvider"]
         )
+        self.app.prepare(ctx_id=-1, det_size=det_size)
 
     def detect(self, image_bgr: np.ndarray):
         """
-        Detects faces in BGR image.
+        Detects faces in BGR image using InsightFace SCRFD.
         Returns:
             list of dicts: [
                 {
                     "bbox": [x, y, w, h],
-                    "landmarks": [(x1,y1), (x2,y2), (x3,y3), (x4,y4), (x5,y5)], # right_eye, left_eye, nose, right_mouth, left_mouth
+                    "landmarks": [(x1,y1), (x2,y2), (x3,y3), (x4,y4), (x5,y5)],
                     "score": float,
-                    "raw_face": ndarray(1, 15)
+                    "raw_face": face_object
                 }
             ]
         """
-        h, w = image_bgr.shape[:2]
-        if (w, h) != self._input_size:
-            self._input_size = (w, h)
-            self.detector.setInputSize((w, h))
+        if image_bgr is None or image_bgr.size == 0:
+            return []
 
-        _, faces = self.detector.detect(image_bgr)
-        if faces is None or len(faces) == 0:
+        faces = self.app.get(image_bgr)
+        if not faces:
             return []
 
         results = []
         for face in faces:
-            bbox = [int(face[0]), int(face[1]), int(face[2]), int(face[3])]
-            landmarks = [
-                (float(face[4]), float(face[5])),   # Right eye
-                (float(face[6]), float(face[7])),   # Left eye
-                (float(face[8]), float(face[9])),   # Nose tip
-                (float(face[10]), float(face[11])), # Right mouth corner
-                (float(face[12]), float(face[13]))  # Left mouth corner
-            ]
-            score = float(face[14])
+            det_score = float(getattr(face, "det_score", 0.9))
+            if det_score < self.score_threshold:
+                continue
+
+            # face.bbox is [x1, y1, x2, y2]
+            x1, y1, x2, y2 = [int(round(v)) for v in face.bbox]
+            w = max(0, x2 - x1)
+            h = max(0, y2 - y1)
+            bbox = [x1, y1, w, h]
+
+            landmarks = []
+            if hasattr(face, "kps") and face.kps is not None:
+                landmarks = [(float(pt[0]), float(pt[1])) for pt in face.kps]
+
             results.append({
                 "bbox": bbox,
                 "landmarks": landmarks,
-                "score": score,
+                "score": round(det_score, 4),
                 "raw_face": face
             })
-            
-        # Sort by bounding box area descending (largest face first)
+
+        # Sort largest face first
         results.sort(key=lambda item: item["bbox"][2] * item["bbox"][3], reverse=True)
         return results

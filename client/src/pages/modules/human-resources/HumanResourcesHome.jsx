@@ -49,6 +49,7 @@ import PayrollDashboard from "./payroll/PayrollDashboard.jsx";
 import SalaryProcessing from "./payroll/SalaryProcessing.jsx";
 import SalaryPostingPage from "./payroll/SalaryPostingPage.jsx";
 import ManualPayrollComponents from "./payroll/ManualPayrollComponents.jsx";
+import SalaryExemptionsPage from "./payroll/SalaryExemptionsPage.jsx";
 import LeaveRequestForm from "./leave/LeaveRequestForm.jsx"; // Keeping file loosely to not break anything
 import LeaveApprovals from "./leave/LeaveApprovals.jsx";
 import LeaveCalendar from "./leave/LeaveCalendar.jsx";
@@ -284,19 +285,6 @@ export const humanResourcesSections = [
         icon: "📊",
       },
       {
-        name: "Biometric Settings",
-        path: "/human-resources/biometric-settings",
-        actions: [
-          {
-            label: "Calibrate",
-            path: "/human-resources/biometric-settings",
-            type: "outline",
-          },
-        ],
-        description: "Sensitivity, anti-spoofing strictness and shift rules",
-        icon: "⚙️",
-      },
-      {
         name: "Clock In/Out",
         path: "/human-resources/attendance",
         actions: [
@@ -508,6 +496,24 @@ export const humanResourcesSections = [
         description:
           "Enter employee-specific monthly allowances and deductions",
         icon: "🧮",
+      },
+      {
+        name: "Salary Exemptions & Holds",
+        path: "/human-resources/payroll/salary-exemptions",
+        actions: [
+          {
+            label: "Manage Holds",
+            path: "/human-resources/payroll/salary-exemptions",
+            type: "outline",
+          },
+          {
+            label: "Exempt Employee",
+            path: "/human-resources/payroll/salary-exemptions",
+            type: "primary",
+          },
+        ],
+        description: "Exclude or hold employees from monthly salary processing and payslips",
+        icon: "🚫",
       },
       {
         name: "Salary Configurations",
@@ -823,21 +829,21 @@ export const humanResourcesSections = [
         icon: "📜",
       },
       {
-        name: "Offboarding & Clearance",
+        name: "Employee Offboarding",
         path: "/human-resources/exit/clearance",
         actions: [
           {
-            label: "View",
+            label: "View Records",
             path: "/human-resources/exit/clearance",
             type: "outline",
           },
           {
-            label: "New",
-            path: "/human-resources/exit/clearance/new",
+            label: "New Offboarding",
+            path: "/human-resources/exit/clearance",
             type: "primary",
           },
         ],
-        description: "Manage exit requests and asset return",
+        description: "Process employee exits and permanently deactivate system profiles",
         icon: "🚪",
       },
     ],
@@ -1047,6 +1053,7 @@ export default function HumanResourcesHome() {
           element={<ManualPayrollComponents />}
         />
         <Route path="payroll/salary-posting" element={<SalaryPostingPage />} />
+        <Route path="payroll/salary-exemptions" element={<SalaryExemptionsPage />} />
         <Route path="leave" element={<LeaveManagementDashboard />} />
         <Route path="leave/request" element={<LeaveApplication />} />
         <Route path="leave/apply" element={<LeaveApplication />} />
@@ -1078,6 +1085,7 @@ export default function HumanResourcesHome() {
         <Route path="policies/:id" element={<PolicyForm />} />
         <Route path="exit/request" element={<ExitRequest />} />
         <Route path="exit/clearance" element={<ClearanceTracking />} />
+        <Route path="exit/offboarding" element={<ClearanceTracking />} />
         <Route path="leave-setup" element={<LeaveSetupList />} />
         <Route path="leave/types" element={<LeaveSetupList />} />
 
@@ -1096,7 +1104,7 @@ export default function HumanResourcesHome() {
         {/* Time & Attendance extra routes */}
         <Route path="biometric-clock" element={<BiometricClockPage />} />
         <Route path="biometric-devices" element={<BiometricDevicesPage />} />
-        <Route path="biometric-settings" element={<BiometricSettingsPage />} />
+        <Route path="biometric-settings" element={<Navigate to="/administration/settings?tab=biometrics" replace />} />
         <Route path="biometric-analytics" element={<BiometricAnalyticsPage />} />
         <Route path="attendance" element={<AttendanceDashboard />} />
         <Route path="attendance/new" element={<AttendanceForm />} />

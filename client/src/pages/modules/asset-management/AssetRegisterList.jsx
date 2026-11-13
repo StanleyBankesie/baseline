@@ -204,7 +204,6 @@ export default function AssetRegisterList() {
                   <th>Category</th>
                   <th>Capitalized Date</th>
                   <th className="text-right">Gross Cost</th>
-                  <th className="text-right">Accum. Dep.</th>
                   <th className="text-right">Net Book Value (NBV)</th>
                   <th className="text-center">Status</th>
                   <th className="text-right">Actions</th>
@@ -246,9 +245,6 @@ export default function AssetRegisterList() {
                     </td>
                     <td className="text-right font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
                       {formatCurrency(asset.purchase_cost)}
-                    </td>
-                    <td className="text-right text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                      {formatCurrency(asset.accumulated_depreciation)}
                     </td>
                     <td className="text-right font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
                       {formatCurrency(asset.current_nbv)}

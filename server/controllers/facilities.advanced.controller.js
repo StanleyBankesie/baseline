@@ -968,8 +968,10 @@ export async function listTenants(req, res) {
   try {
     const { companyId } = getScope(req);
     const rows = await query(
-      `SELECT t.*, p.property_name FROM fm_tenant_records t 
+      `SELECT t.*, p.property_name, c.customer_name as client_name, c.customer_code as client_code
+       FROM fm_tenant_records t 
        LEFT JOIN fm_properties p ON p.id = t.property_id 
+       LEFT JOIN sal_customers c ON c.id = t.client_id
        WHERE t.company_id = ? ORDER BY t.tenant_name ASC`,
       [companyId]
     );
@@ -979,36 +981,92 @@ export async function listTenants(req, res) {
   }
 }
 
-
-
 export async function createTenant(req, res) {
   try {
     const { companyId } = getScope(req);
     const b = req.body;
 
-    await query(
+    const result = await query(
       `INSERT INTO fm_tenant_records (
-        company_id, property_id, tenant_name, contact_person, contact_email, contact_phone,
+        company_id, property_id, client_id, tenant_name, contact_person, contact_email, contact_phone,
         allocated_space_sqm, occupied_rooms_or_units, headcount, lease_start_date, lease_end_date,
         monthly_service_charge, occupancy_status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         companyId,
-        b.property_id || 1,
+        b.property_id || null,
+        b.client_id || null,
         b.tenant_name,
         b.contact_person || "",
         b.contact_email || "",
         b.contact_phone || "",
-        parseFloat(b.allocated_space_sqm) || 100,
-        b.occupied_rooms_or_units || "Office Suite 101",
-        parseInt(b.headcount) || 5,
-        b.lease_start_date || new Date().toISOString().slice(0, 10),
-        b.lease_end_date || new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString().slice(0, 10),
+        parseFloat(b.allocated_space_sqm) || 0,
+        b.occupied_rooms_or_units || "",
+        parseInt(b.headcount) || 1,
+        b.lease_start_date || null,
+        b.lease_end_date || null,
         parseFloat(b.monthly_service_charge) || 0,
         b.occupancy_status || "ACTIVE_OCCUPIED",
       ]
     );
-    res.status(201).json({ success: true, message: "Tenant record registered" });
+    res.status(201).json({ success: true, message: "Tenant record registered", id: result.insertId });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+export async function updateTenant(req, res) {
+  try {
+    const { companyId } = getScope(req);
+    const { id } = req.params;
+    const b = req.body;
+
+    await query(
+      `UPDATE fm_tenant_records SET
+        property_id = ?,
+        client_id = ?,
+        tenant_name = ?,
+        contact_person = ?,
+        contact_email = ?,
+        contact_phone = ?,
+        allocated_space_sqm = ?,
+        occupied_rooms_or_units = ?,
+        headcount = ?,
+        lease_start_date = ?,
+        lease_end_date = ?,
+        monthly_service_charge = ?,
+        occupancy_status = ?
+       WHERE id = ? AND company_id = ?`,
+      [
+        b.property_id || null,
+        b.client_id || null,
+        b.tenant_name,
+        b.contact_person || "",
+        b.contact_email || "",
+        b.contact_phone || "",
+        parseFloat(b.allocated_space_sqm) || 0,
+        b.occupied_rooms_or_units || "",
+        parseInt(b.headcount) || 1,
+        b.lease_start_date || null,
+        b.lease_end_date || null,
+        parseFloat(b.monthly_service_charge) || 0,
+        b.occupancy_status || "ACTIVE_OCCUPIED",
+        id,
+        companyId
+      ]
+    );
+    res.json({ success: true, message: "Tenant record updated" });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+export async function deleteTenant(req, res) {
+  try {
+    const { companyId } = getScope(req);
+    const { id } = req.params;
+    await query("DELETE FROM fm_tenant_records WHERE id = ? AND company_id = ?", [id, companyId]);
+    res.json({ success: true, message: "Tenant record deleted" });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -1085,11 +1143,19 @@ export async function getSetupOverview(req, res) {
       [companyId]
     );
     const supervisors = await query(
-      "SELECT * FROM fm_supervisors WHERE company_id = ? AND is_active = 1 ORDER BY name ASC",
+      `SELECT s.*, u.username as user_username, u.full_name as user_full_name, u.email as user_email
+       FROM fm_supervisors s
+       LEFT JOIN adm_users u ON s.user_id = u.id
+       WHERE s.company_id = ? AND s.is_active = 1
+       ORDER BY s.name ASC`,
       [companyId]
     );
     const personnel = await query(
-      "SELECT * FROM fm_personnel WHERE company_id = ? AND is_active = 1 ORDER BY name ASC",
+      `SELECT p.*, u.username as user_username, u.full_name as user_full_name, u.email as user_email
+       FROM fm_personnel p
+       LEFT JOIN adm_users u ON p.user_id = u.id
+       WHERE p.company_id = ? AND p.is_active = 1
+       ORDER BY p.name ASC`,
       [companyId]
     );
     const categories = await query(
@@ -1191,7 +1257,11 @@ export async function listSupervisors(req, res) {
   try {
     const { companyId } = getScope(req);
     const supervisors = await query(
-      "SELECT * FROM fm_supervisors WHERE company_id = ? ORDER BY is_active DESC, name ASC",
+      `SELECT s.*, u.username as user_username, u.full_name as user_full_name, u.email as user_email
+       FROM fm_supervisors s
+       LEFT JOIN adm_users u ON s.user_id = u.id
+       WHERE s.company_id = ?
+       ORDER BY s.is_active DESC, s.name ASC`,
       [companyId]
     );
     res.json({ success: true, data: supervisors });
@@ -1203,15 +1273,15 @@ export async function listSupervisors(req, res) {
 export async function createSupervisor(req, res) {
   try {
     const { companyId, branchId } = getScope(req);
-    const { employee_id, name, employee_code, phone, email, shift_id, shift_name, department, notes, is_active } = req.body;
+    const { employee_id, user_id, name, employee_code, phone, email, shift_id, shift_name, department, notes, is_active } = req.body;
     if (!name) {
       return res.status(400).json({ success: false, message: "Supervisor name is required" });
     }
 
     const result = await query(
-      `INSERT INTO fm_supervisors (company_id, branch_id, employee_id, name, employee_code, phone, email, shift_id, shift_name, department, notes, is_active)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [companyId, branchId, employee_id || null, name, employee_code || null, phone || null, email || null, shift_id || null, shift_name || null, department || null, notes || null, is_active !== false ? 1 : 0]
+      `INSERT INTO fm_supervisors (company_id, branch_id, employee_id, user_id, name, employee_code, phone, email, shift_id, shift_name, department, notes, is_active)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [companyId, branchId, employee_id || null, user_id || null, name, employee_code || null, phone || null, email || null, shift_id || null, shift_name || null, department || null, notes || null, is_active !== false ? 1 : 0]
     );
     res.status(201).json({ success: true, message: "Supervisor created successfully", id: result.insertId });
   } catch (err) {
@@ -1223,12 +1293,12 @@ export async function updateSupervisor(req, res) {
   try {
     const { id } = req.params;
     const { companyId } = getScope(req);
-    const { employee_id, name, employee_code, phone, email, shift_id, shift_name, department, notes, is_active } = req.body;
+    const { employee_id, user_id, name, employee_code, phone, email, shift_id, shift_name, department, notes, is_active } = req.body;
 
     await query(
-      `UPDATE fm_supervisors SET employee_id = ?, name = ?, employee_code = ?, phone = ?, email = ?, shift_id = ?, shift_name = ?, department = ?, notes = ?, is_active = ?
+      `UPDATE fm_supervisors SET employee_id = ?, user_id = ?, name = ?, employee_code = ?, phone = ?, email = ?, shift_id = ?, shift_name = ?, department = ?, notes = ?, is_active = ?
        WHERE id = ? AND company_id = ?`,
-      [employee_id || null, name, employee_code || null, phone || null, email || null, shift_id || null, shift_name || null, department || null, notes || null, is_active ? 1 : 0, id, companyId]
+      [employee_id || null, user_id || null, name, employee_code || null, phone || null, email || null, shift_id || null, shift_name || null, department || null, notes || null, is_active ? 1 : 0, id, companyId]
     );
     res.json({ success: true, message: "Supervisor updated successfully" });
   } catch (err) {
@@ -1251,7 +1321,11 @@ export async function listPersonnel(req, res) {
   try {
     const { companyId } = getScope(req);
     const personnel = await query(
-      "SELECT * FROM fm_personnel WHERE company_id = ? ORDER BY is_active DESC, name ASC",
+      `SELECT p.*, u.username as user_username, u.full_name as user_full_name, u.email as user_email
+       FROM fm_personnel p
+       LEFT JOIN adm_users u ON p.user_id = u.id
+       WHERE p.company_id = ?
+       ORDER BY p.is_active DESC, p.name ASC`,
       [companyId]
     );
     res.json({ success: true, data: personnel });
@@ -1263,15 +1337,19 @@ export async function listPersonnel(req, res) {
 export async function createPersonnel(req, res) {
   try {
     const { companyId, branchId } = getScope(req);
-    const { employee_id, name, employee_code, category, position, phone, email, shift_id, shift_name, supervisor_id, supervisor_name, notes, is_active } = req.body;
+    const { employee_id, user_id, name, employee_code, category, position, phone, email, shift_id, shift_name, supervisor_id, supervisor_name, notes, is_active } = req.body;
     if (!name) {
       return res.status(400).json({ success: false, message: "Personnel name is required" });
     }
 
+    const catVal = Array.isArray(category)
+      ? category.filter(Boolean).join(",")
+      : (category ? String(category).trim() : null);
+
     const result = await query(
-      `INSERT INTO fm_personnel (company_id, branch_id, employee_id, name, employee_code, category, position, phone, email, shift_id, shift_name, supervisor_id, supervisor_name, notes, is_active)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [companyId, branchId, employee_id || null, name, employee_code || null, category || "JANITORIAL", position || null, phone || null, email || null, shift_id || null, shift_name || null, supervisor_id || null, supervisor_name || null, notes || null, is_active !== false ? 1 : 0]
+      `INSERT INTO fm_personnel (company_id, branch_id, employee_id, user_id, name, employee_code, category, position, phone, email, shift_id, shift_name, supervisor_id, supervisor_name, notes, is_active)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [companyId, branchId, employee_id || null, user_id || null, name, employee_code || null, catVal || null, position || null, phone || null, email || null, shift_id || null, shift_name || null, supervisor_id || null, supervisor_name || null, notes || null, is_active !== false ? 1 : 0]
     );
     res.status(201).json({ success: true, message: "Personnel created successfully", id: result.insertId });
   } catch (err) {
@@ -1283,12 +1361,16 @@ export async function updatePersonnel(req, res) {
   try {
     const { id } = req.params;
     const { companyId } = getScope(req);
-    const { employee_id, name, employee_code, category, position, phone, email, shift_id, shift_name, supervisor_id, supervisor_name, notes, is_active } = req.body;
+    const { employee_id, user_id, name, employee_code, category, position, phone, email, shift_id, shift_name, supervisor_id, supervisor_name, notes, is_active } = req.body;
+
+    const catVal = Array.isArray(category)
+      ? category.filter(Boolean).join(",")
+      : (category ? String(category).trim() : null);
 
     await query(
-      `UPDATE fm_personnel SET employee_id = ?, name = ?, employee_code = ?, category = ?, position = ?, phone = ?, email = ?, shift_id = ?, shift_name = ?, supervisor_id = ?, supervisor_name = ?, notes = ?, is_active = ?
+      `UPDATE fm_personnel SET employee_id = ?, user_id = ?, name = ?, employee_code = ?, category = ?, position = ?, phone = ?, email = ?, shift_id = ?, shift_name = ?, supervisor_id = ?, supervisor_name = ?, notes = ?, is_active = ?
        WHERE id = ? AND company_id = ?`,
-      [employee_id || null, name, employee_code || null, category || "JANITORIAL", position || null, phone || null, email || null, shift_id || null, shift_name || null, supervisor_id || null, supervisor_name || null, notes || null, is_active ? 1 : 0, id, companyId]
+      [employee_id || null, user_id || null, name, employee_code || null, catVal || null, position || null, phone || null, email || null, shift_id || null, shift_name || null, supervisor_id || null, supervisor_name || null, notes || null, is_active ? 1 : 0, id, companyId]
     );
     res.json({ success: true, message: "Personnel updated successfully" });
   } catch (err) {
@@ -1369,10 +1451,12 @@ export async function getHREmployeesList(req, res) {
   try {
     const { companyId } = getScope(req);
     const employees = await query(
-      `SELECT id, emp_code, first_name, last_name, email, phone, dept_id, status
-       FROM hr_employees
-       WHERE (company_id = ? OR company_id IS NULL) AND deleted_at IS NULL
-       ORDER BY first_name ASC, last_name ASC`,
+      `SELECT e.id, e.emp_code, e.first_name, e.last_name, e.email, e.phone, e.dept_id, e.status, e.user_id,
+              u.username, u.full_name as user_full_name
+       FROM hr_employees e
+       LEFT JOIN adm_users u ON e.user_id = u.id
+       WHERE (e.company_id = ? OR e.company_id IS NULL) AND e.deleted_at IS NULL
+       ORDER BY e.first_name ASC, e.last_name ASC`,
       [companyId]
     );
     res.json({ success: true, data: employees });

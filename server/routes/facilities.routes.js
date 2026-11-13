@@ -138,6 +138,8 @@ router.get("/space/tenants", ...auth, adv.listTenants);
 router.get("/space/tenant-occupancy", ...auth, adv.listTenants);
 router.post("/space/tenants", ...auth, adv.createTenant);
 router.post("/space/tenant-occupancy", ...auth, adv.createTenant);
+router.put("/space/tenants/:id", ...auth, adv.updateTenant);
+router.delete("/space/tenants/:id", ...auth, adv.deleteTenant);
 
 // ===== 10. SUSTAINABILITY AND ENVIRONMENTAL MANAGEMENT =====
 router.get("/sustainability/metrics", ...auth, adv.listSustainabilityMetrics);

@@ -38303,3 +38303,1693 @@ status: 400
 Technical details:
 (no stack)
 --------------------------------------------------------------------------------
+
+[2026-11-11T13:33:37.817Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/departments (status 404)
+Context:
+requestId: mwc5tldw-s28yadjc
+durationMs: 21
+method: GET
+url: /api/hr/setup/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T13:33:37.927Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/positions (status 404)
+Context:
+requestId: mwc5tlhd-gqa7287b
+durationMs: 6
+method: GET
+url: /api/hr/setup/positions
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T13:33:42.882Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/taxes (status 404)
+Context:
+requestId: mwc5tpb2-6f7auu0n
+durationMs: 4
+method: GET
+url: /api/hr/taxes
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T13:34:50.418Z] HTTP_500
+Summary: Facial recognition microservice is offline or unreachable at http://127.0.0.1:5050
+Request: POST /api/hr/biometrics/enroll (status 500)
+Context:
+status: 500
+code: null
+method: POST
+url: /api/hr/biometrics/enroll
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"employee_id":"3","image":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCALQBQADASIAAhEBAxEB/8QAHQAAAgMBAQEBAQAAAAAAAAAAAQIAAwQFBgcICf/EAEYQAAIBAgUCBAQFAgUDAwMBCQABAgMRBBIhMUEFUQYTImEyQnGBBxRSkaEIYhUjscHwM3KCQ9HxCRYk4SVTY6JEc5Kywv/EABoBAAMBAQEBAAAAAAAAAAAAAAABAgMEBQb/xAApEQACAgICAgMBAAMBAQADAAAAAQIREiEDMQRBE1FhIhQycQUjM0JS/9oADAMBAAIRAxEAPwD7vh8M7nRo0GnsJRjqrHQhHkwUzVppieQpfKX06VtLFkdEX0ocsSTfZnKVlEk9rEjS1ua8l9WrhyxZrlSoVlMKSWw0qd+S/wAt9v4GyT7sE2S4oy06Stbknk6WzGnJ7MaKS+IUrN4SrRldFPe7G8mzuanBcC5ZdyVJg5U9FSXDJazL5Qe7JFN7j2+xOVlFtbjpMv8AKTJ5SQE2ivy2FUuC6MMxaopO1ylZDM0aL7alqoy0fY0qC+VDCbbKUkjM6MkPCLS+poUM+o8YiTaF2YvJuy5UUo3RoyLt/AyiO2PaKY0pbqwPJ9jZHTi5PLzS2sRdDyZl8t92Wqm0tbmpUspLXYWiLbMqpvsyxUjUop8DQpa6g3YJGbyXfYbyL7mtwVhcn1ECr0Z1TajbgKp+m5oUbbofIidMpqihUkuA+V/yxc07DRQYk5UZ1BstjEt8ud7ZWPCi/oVYsrKPJvqkOqWmprVJdkRwsO9VZWTZilSZI05cG125FcM25DSBOih0Hq5MVwa9zXl9xnFWGNuzJ5T7jfl49y+z9g5ZdwDIxuDvpcaNGTWhsVNWBKPBWVBdGPypX2uSVPS7NWT6gyIluyG7M0INuy2JLCqT2NUoK2wtkTtFZGR0fL0T3JGnJGlpvXUXX3J37GlRny3YHRe5qyX3Dk02+4JNOxWjA6XZBVO3JrVFPdE8tRVlqxtjySMThruJ5Puv2NnlO9mg+Wru8WGVGbnZi8iUt9RlT7m2VPsVShJEt32VaM7ppi+Vprc0qI2XS/cRVGV0YNaq5PIt8KaNSpt6kUdWm7Ca2UpUqMioq3q1GULPTVGjJEjgS6ZORmnSUhfK9zX5Uv0/wL5euo+hWjPGm…","consent_given":true}
+query: {}
+Technical details:
+Error: Facial recognition microservice is offline or unreachable at http://127.0.0.1:5050
+    at postJson (file:///C:/Users/stanl/demo/server/services/faceService.js:38:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Module.extractEmbedding (file:///C:/Users/stanl/demo/server/services/faceService.js:62:10)
+    at async enrollFace (file:///C:/Users/stanl/demo/server/controllers/biometric.controller.js:116:24)
+--------------------------------------------------------------------------------
+
+[2026-11-11T13:51:13.991Z] HTTP_500
+Summary: Facial recognition microservice is offline or unreachable at http://127.0.0.1:5050
+Request: POST /api/hr/biometrics/enroll (status 500)
+Context:
+status: 500
+code: null
+method: POST
+url: /api/hr/biometrics/enroll
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"employee_id":"3","image":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCALQBQADASIAAhEBAxEB/8QAHQAAAgMBAQEBAQAAAAAAAAAAAgMAAQQFBgcICf/EAEoQAAEDAwMCBAQEAwYDCAEBCQEAAhEDBCESMUEFUQYTImEHMnGBFEKRoQgVUiNicrHB8DOC0QkWFyRDU+HxY5IYJic0RHOissL/xAAaAQADAQEBAQAAAAAAAAAAAAAAAQIDBAUG/8QAKREAAgICAgMAAwACAwADAAAAAAECEQMhEjEEQVETImEycQUUQiMzUv/aAAwDAQACEQMRAD8A/RdK2f3hbKVE4DclEyl6oW6kzTnlc+NtM68ktbAZRxpIMpraUFad9kYE50+lV/k7MFKkZxSJRij3WpjRGUTKTOMI5OPRKbuxGiWwja0zhP0DYhWKRbjup7NVsSaPO7lBRO5OVoa3lNDGkSFSdKhuWqMfkNJyjqUZhs7LTob7Km0wE7ZBm8n6qeUexW3SDhRtMN3KpS+iZmp2+pF5RG61BvbChjlJzdjTM5pE9lYpRxK1CnqRNpkPiUJtC57ozupOAkCFGMctRGrBlD5UHlS7sfISKEprbY98J7GSE1oVcmkS2jKaX9SvyBG5WogKBs8KH+wuSEU6UYR/hmcBP0BP8pv979E0qDm10ZRTITBTcVoZS53TRSCKFd9iG0pEGVBRcDhatBRBkBPlQNsV5E7I2MKaGpjaYIlTzHyEaD2UFAdlqALNocmNbmY3RyFyMzaQnC0CmcZRmhOU5tMxlJu+ykJFGcq/wzXcFPacowxrjCLaHyMopgJzaJA2TzbwUxlOBBUt2RZlNEgZRCgdMgYK1+Xq5RMb3wly0OzL+F94UbQLVsI7qtGVCkNysQ23JEwqFAzk4W3R6ZQtZLsFUxcjL+GZkjcqhbcuW40SeFRpmEeqGnXRhdQ0eoIW0g8rcWuG4VGkHbKWkF2YzbQqfRMSthZHKgZO4SE2ZG0SOVfkHVqWk0YV6fqmnuwcjGaJQPpey3Fg5VeWDhNqyFJHM/DtEu0pYtwZwum+nCzmm8n5N1LYcjGLeBlR1I8YWt1NzOFDQ1ITaKTt0c59ueMqC3Pdb/K+iDT9EW32FJGI0Slmg4/RdAt+qgaOylKnYOWjCKB0zlB5S3kQpGNkOTEpJHP8r…","consent_given":true}
+query: {}
+Technical details:
+Error: Facial recognition microservice is offline or unreachable at http://127.0.0.1:5050
+    at postJson (file:///C:/Users/stanl/demo/server/services/faceService.js:38:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Module.extractEmbedding (file:///C:/Users/stanl/demo/server/services/faceService.js:62:10)
+    at async enrollFace (file:///C:/Users/stanl/demo/server/controllers/biometric.controller.js:116:24)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:38:51.038Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/enroll (status 400)
+Context:
+requestId: mwc85fxi-xnxwi563
+durationMs: 1207
+method: POST
+url: /api/hr/biometrics/enroll
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:40:46.102Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/departments (status 404)
+Context:
+requestId: mwc87xmz-nv4haqo0
+durationMs: 11
+method: GET
+url: /api/hr/setup/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:40:46.232Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/positions (status 404)
+Context:
+requestId: mwc87xqd-jtzc5xgr
+durationMs: 19
+method: GET
+url: /api/hr/setup/positions
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:40:46.247Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/taxes (status 404)
+Context:
+requestId: mwc87xqy-eazf0md0
+durationMs: 13
+method: GET
+url: /api/hr/taxes
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:41:27.430Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/departments (status 404)
+Context:
+requestId: mwc88tj5-ps3431kj
+durationMs: 5
+method: GET
+url: /api/hr/setup/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:41:27.575Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/positions (status 404)
+Context:
+requestId: mwc88tmr-ypdwzu5e
+durationMs: 20
+method: GET
+url: /api/hr/setup/positions
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:41:27.614Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/taxes (status 404)
+Context:
+requestId: mwc88tny-fbl0i1e9
+durationMs: 16
+method: GET
+url: /api/hr/taxes
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:42:04.292Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/departments (status 404)
+Context:
+requestId: mwc89lyw-06jhgvtt
+durationMs: 12
+method: GET
+url: /api/hr/setup/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:42:04.302Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/positions (status 404)
+Context:
+requestId: mwc89lzd-c0ykupk7
+durationMs: 5
+method: GET
+url: /api/hr/setup/positions
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:42:04.320Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/taxes (status 404)
+Context:
+requestId: mwc89lzu-3g9r3yfx
+durationMs: 6
+method: GET
+url: /api/hr/taxes
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:43:10.826Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/departments (status 404)
+Context:
+requestId: mwc8b1az-3pw1g9mr
+durationMs: 15
+method: GET
+url: /api/hr/setup/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:43:10.948Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/positions (status 404)
+Context:
+requestId: mwc8b1em-p813tlpu
+durationMs: 6
+method: GET
+url: /api/hr/setup/positions
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:43:10.971Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/taxes (status 404)
+Context:
+requestId: mwc8b1fc-vz7et3ma
+durationMs: 3
+method: GET
+url: /api/hr/taxes
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:43:18.885Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/departments (status 404)
+Context:
+requestId: mwc8b7it-v8i1trot
+durationMs: 16
+method: GET
+url: /api/hr/setup/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:43:18.900Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/positions (status 404)
+Context:
+requestId: mwc8b7jj-rbwp0yfe
+durationMs: 5
+method: GET
+url: /api/hr/setup/positions
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:43:18.915Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/taxes (status 404)
+Context:
+requestId: mwc8b7jy-jfciknob
+durationMs: 5
+method: GET
+url: /api/hr/taxes
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:45:23.681Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/departments (status 404)
+Context:
+requestId: mwc8dvtk-ydt3s50g
+durationMs: 8
+method: GET
+url: /api/hr/setup/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:45:23.780Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/positions (status 404)
+Context:
+requestId: mwc8dvwe-z44ip1oo
+durationMs: 6
+method: GET
+url: /api/hr/setup/positions
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:45:23.804Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/taxes (status 404)
+Context:
+requestId: mwc8dvx3-n86xtg61
+durationMs: 5
+method: GET
+url: /api/hr/taxes
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:47:47.618Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/enroll (status 400)
+Context:
+requestId: mwc8gyhd-kky2ipsa
+durationMs: 529
+method: POST
+url: /api/hr/biometrics/enroll
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:49:00.736Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/enroll (status 400)
+Context:
+requestId: mwc8iinz-jkwakw9l
+durationMs: 832
+method: POST
+url: /api/hr/biometrics/enroll
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:51:08.124Z] HTTP_409
+Summary: Request failed with status 409
+Request: POST /api/hr/biometrics/enroll (status 409)
+Context:
+requestId: mwc8l8mb-vdj97kj5
+durationMs: 1273
+method: POST
+url: /api/hr/biometrics/enroll
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 409
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:53:00.480Z] HTTP_409
+Summary: Request failed with status 409
+Request: POST /api/hr/biometrics/enroll (status 409)
+Context:
+requestId: mwc8nnhi-bse432s6
+durationMs: 1050
+method: POST
+url: /api/hr/biometrics/enroll
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 409
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:54:34.850Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/adm/branches (status 404)
+Context:
+requestId: mwc8pp3t-efdm0yu7
+durationMs: 9
+method: GET
+url: /api/adm/branches
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:58:26.817Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:59:13.983Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/adm/branches (status 404)
+Context:
+requestId: mwc8vohl-jfh4jc7r
+durationMs: 6
+method: GET
+url: /api/adm/branches
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:59:14.132Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mwc8volj-e9y8u5hz
+durationMs: 13
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T14:59:14.188Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mwc8von9-safx7riy
+durationMs: 6
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T15:01:02.340Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/departments (status 404)
+Context:
+requestId: mwc8y036-4mvonmqs
+durationMs: 18
+method: GET
+url: /api/hr/setup/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T15:01:02.432Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/positions (status 404)
+Context:
+requestId: mwc8y061-rllpq8wx
+durationMs: 7
+method: GET
+url: /api/hr/setup/positions
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T15:01:02.448Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/taxes (status 404)
+Context:
+requestId: mwc8y06l-pxq3q3jh
+durationMs: 3
+method: GET
+url: /api/hr/taxes
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T15:01:42.711Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/enroll (status 400)
+Context:
+requestId: mwc8yuna-easu93jx
+durationMs: 785
+method: POST
+url: /api/hr/biometrics/enroll
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T15:02:20.654Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/enroll (status 400)
+Context:
+requestId: mwc8zntu-5m9ogxxf
+durationMs: 908
+method: POST
+url: /api/hr/biometrics/enroll
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T15:02:35.074Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/enroll (status 400)
+Context:
+requestId: mwc8zz8q-8vvj1mxm
+durationMs: 536
+method: POST
+url: /api/hr/biometrics/enroll
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T15:43:58.409Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-11T15:55:57.714Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/projects/tasks?project_id=2 (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/projects/tasks?project_id=2
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"project_id":"2"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getProjectById (file:///C:/Users/stanl/demo/server/controllers/projects.controller.js:158:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:388:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-11T15:56:09.289Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/projects/tasks?project_id=1 (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/projects/tasks?project_id=1
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"project_id":"1"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getProjectById (file:///C:/Users/stanl/demo/server/controllers/projects.controller.js:158:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:388:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-11T15:59:55.405Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/projects/project-managers (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/projects/project-managers
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getProjectById (file:///C:/Users/stanl/demo/server/controllers/projects.controller.js:158:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:388:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-11T15:59:56.778Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/projects/equipments (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/projects/equipments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getProjectById (file:///C:/Users/stanl/demo/server/controllers/projects.controller.js:158:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:388:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:00:32.914Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/projects/project-managers (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/projects/project-managers
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getProjectById (file:///C:/Users/stanl/demo/server/controllers/projects.controller.js:158:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:388:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:00:33.070Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/projects/equipments (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/projects/equipments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getProjectById (file:///C:/Users/stanl/demo/server/controllers/projects.controller.js:158:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:388:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:06:04.698Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/departments (status 404)
+Context:
+requestId: mwcb9n67-31ll6gl0
+durationMs: 11
+method: GET
+url: /api/hr/setup/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:06:04.861Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/positions (status 404)
+Context:
+requestId: mwcb9n70-r2awmb1a
+durationMs: 145
+method: GET
+url: /api/hr/setup/positions
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:06:09.276Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/taxes (status 404)
+Context:
+requestId: mwcb9qoz-ut85ojk5
+durationMs: 25
+method: GET
+url: /api/hr/taxes
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:10:42.391Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcbfjnm-xufintkc
+durationMs: 2324
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:11:00.839Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcbfytc-rcpfjevp
+durationMs: 1127
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:11:09.626Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcbg5p3-juhm4cgn
+durationMs: 995
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:11:19.639Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcbgcmd-t5az05kd
+durationMs: 2034
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:11:25.423Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcbghgj-vcrdennx
+durationMs: 1548
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:13:05.070Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcbimwu-shep1h7f
+durationMs: 815
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:13:19.952Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcbiybb-egqi3ppy
+durationMs: 921
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:13:29.148Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcbj4va-uw2ygmzv
+durationMs: 1622
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:13:38.259Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcbjc5m-ht6zwmeu
+durationMs: 1289
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:13:46.551Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcbjj14-qha7gs1x
+durationMs: 671
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:13:52.082Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcbjnaq-pcrj9qrt
+durationMs: 672
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:14:00.565Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcbjtlk-ru4363en
+durationMs: 989
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:14:09.226Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcbk040-m2nrk5bk
+durationMs: 1210
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:14:24.219Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcbkbu6-be85xdqx
+durationMs: 1005
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:14:35.796Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcbkk9p-7lj3i679
+durationMs: 1655
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:14:45.937Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcbkrym-t9nc4gzg
+durationMs: 1827
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:15:07.922Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:28:50.540Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcc2vy1-vddgvtol
+durationMs: 1459
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:28:58.723Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcc333m-lrwfw3q1
+durationMs: 369
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:29:07.176Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcc393v-lru76u0c
+durationMs: 1037
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:29:11.540Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcc3cdm-v2ei2rah
+durationMs: 1161
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:30:31.756Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcc51nz-kltxxrrr
+durationMs: 1948
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T16:30:44.188Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/hr/biometrics/clock (status 400)
+Context:
+requestId: mwcc5bbi-qhzn0bfo
+durationMs: 1870
+method: POST
+url: /api/hr/biometrics/clock
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-11T21:16:58.350Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-12T22:26:32.604Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-13T01:06:17.147Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/departments (status 404)
+Context:
+requestId: mwea07f9-bqw66y62
+durationMs: 37
+method: GET
+url: /api/hr/setup/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-13T01:06:17.289Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/setup/positions (status 404)
+Context:
+requestId: mwea07jn-o61g073l
+durationMs: 22
+method: GET
+url: /api/hr/setup/positions
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-13T01:06:23.311Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/hr/taxes (status 404)
+Context:
+requestId: mwea0c7d-9rw174w3
+durationMs: 6
+method: GET
+url: /api/hr/taxes
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-13T01:09:09.642Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/maintenance/requests (status 404)
+Context:
+requestId: mwea3wek-k7rmeuxc
+durationMs: 189
+method: GET
+url: /api/maintenance/requests
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-13T01:09:10.174Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/maintenance/work-orders (status 404)
+Context:
+requestId: mwea3wn4-nydciwvv
+durationMs: 414
+method: GET
+url: /api/maintenance/work-orders
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-13T01:09:10.303Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/maintenance/pm-schedules (status 404)
+Context:
+requestId: mwea3wyq-4l9rzi7k
+durationMs: 125
+method: GET
+url: /api/maintenance/pm-schedules
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-13T02:04:22.527Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/admin/companies/current (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/admin/companies/current
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getCompanyById (file:///C:/Users/stanl/demo/server/controllers/companies.controller.js:322:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (file:///C:/Users/stanl/demo/server/middleware/auth.js:89:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-13T02:14:09.847Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/admin/companies/current (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/admin/companies/current
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getCompanyById (file:///C:/Users/stanl/demo/server/controllers/companies.controller.js:322:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (file:///C:/Users/stanl/demo/server/middleware/auth.js:89:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-13T02:45:06.241Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/admin/companies/current (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/admin/companies/current
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getCompanyById (file:///C:/Users/stanl/demo/server/controllers/companies.controller.js:322:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (file:///C:/Users/stanl/demo/server/middleware/auth.js:89:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-13T04:34:01.965Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/admin/companies/current (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/admin/companies/current
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getCompanyById (file:///C:/Users/stanl/demo/server/controllers/companies.controller.js:322:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (file:///C:/Users/stanl/demo/server/middleware/auth.js:89:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-13T08:02:16.571Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/admin/companies/current (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/admin/companies/current
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getCompanyById (file:///C:/Users/stanl/demo/server/controllers/companies.controller.js:322:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (file:///C:/Users/stanl/demo/server/middleware/auth.js:89:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------

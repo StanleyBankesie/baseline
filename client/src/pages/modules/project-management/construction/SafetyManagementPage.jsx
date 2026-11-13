@@ -263,6 +263,53 @@ export default function SafetyManagementPage() {
         </div>
       </div>
 
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Recorded Incidents",
+            val: totalIncidents,
+            icon: <AlertTriangle size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500",
+          },
+          {
+            label: "Lost Time Injuries (LTI)",
+            val: lostTimeIncidents,
+            icon: <HeartPulse size={20} className="stroke-[2.5]" />,
+            color: lostTimeIncidents > 0 ? "bg-rose-600" : "bg-emerald-600",
+          },
+          {
+            label: "Total Days Lost",
+            val: `${totalDaysLost} Days`,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700",
+          },
+          {
+            label: "Operatives Briefed",
+            val: totalAttendees,
+            icon: <Users size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600",
+          },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm"
+          >
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Primary HSE Modules Navigation (Exact Style Matching Reference) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-4">
         {/* Card 1: Incident & Near Miss Register */}

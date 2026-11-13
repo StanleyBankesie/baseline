@@ -15,6 +15,7 @@ import ViewToggle from "@/components/ViewToggle";
 import { resolveImageUrl } from "@/utils/imageUrl.js";
 import DocumentAttachmentsModal from "@/components/attachments/DocumentAttachmentsModal.jsx";
 import { ListAttachmentIconButton } from "@/components/list/ListDocActionIconButtons.jsx";
+import { UserCheck, Users, Clock, Building2 } from "lucide-react";
 
 function normalizeBool(val) {
   if (!val) return false;
@@ -300,6 +301,53 @@ export default function EmployeeList() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Active Employees",
+            val: employees.filter((e) => e.is_active && e.status !== "TERMINATED" && e.status !== "INACTIVE").length,
+            icon: <UserCheck size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500",
+          },
+          {
+            label: "Total Staff Roster",
+            val: employees.length,
+            icon: <Users size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700",
+          },
+          {
+            label: "On Leave / Inactive",
+            val: employees.filter((e) => !e.is_active || e.status === "ON_LEAVE" || e.status === "INACTIVE").length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500",
+          },
+          {
+            label: "Active Departments",
+            val: new Set(employees.map((e) => e.dept_name || e.department).filter(Boolean)).size,
+            icon: <Building2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600",
+          },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm"
+          >
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
       </div>
 
       {error && (

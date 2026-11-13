@@ -4,6 +4,8 @@ import { ensureBiometricTables } from "../services/biometricDb.js";
 import { encryptEmbedding, decryptEmbedding } from "../services/biometricEncryption.js";
 import * as faceService from "../services/faceService.js";
 import { syncAttendanceToTimesheet } from "./hr.controller.js";
+import { sendMail, isMailerConfigured } from "../utils/mailer.js";
+import { sendSMS, isSMSConfigured } from "../utils/sms.js";
 import crypto from "crypto";
 
 /**
@@ -16,15 +18,152 @@ async function getCompanySettings(companyId) {
   );
   if (rows.length > 0) return rows[0];
   return {
-    match_threshold: 0.380,
-    liveness_threshold: 0.850,
+    match_threshold: 0.450,
+    liveness_threshold: 0.650,
     min_face_size: 100,
     allow_multi_frame: 1,
-    require_liveness: 1,
+    require_liveness: 0,
     clock_in_grace_minutes: 15,
     auto_detect_in_out: 1,
     prevent_duplicate_window_mins: 5,
+    enforce_geofence: 1,
+    geofence_policy: "FLAG_AND_NOTIFY", // STRICT_REJECT or FLAG_AND_NOTIFY
+    default_geofence_radius: 150,
+    alert_email_enabled: 1,
+    alert_sms_enabled: 0,
+    alert_recipients: "admin@omnisuite.com",
   };
+}
+
+/**
+ * Calculates Great Circle Haversine distance in meters between two lat/lng pairs.
+ */
+function calculateHaversineDistanceMeters(lat1, lon1, lat2, lon2) {
+  if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) return null;
+  const R = 6371e3; // Earth radius in meters
+  const phi1 = (Number(lat1) * Math.PI) / 180;
+  const phi2 = (Number(lat2) * Math.PI) / 180;
+  const deltaPhi = ((Number(lat2) - Number(lat1)) * Math.PI) / 180;
+  const deltaLambda = ((Number(lon2) - Number(lon1)) * Math.PI) / 180;
+
+  const a =
+    Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+    Math.cos(phi1) * Math.cos(phi2) * Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return Math.round(R * c);
+}
+
+/**
+ * Retrieves acceptable work locations authorized for an employee.
+ */
+async function getAuthorizedLocations(companyId, employeeId, branchId) {
+  // 1. Direct multi-location assignments
+  let locations = await query(
+    `SELECT l.* FROM hr_employee_locations el
+     JOIN hr_locations l ON l.id = el.location_id
+     WHERE el.employee_id = :employeeId AND l.is_active = 1`,
+    { employeeId }
+  );
+
+  // 2. Primary assigned location in hr_employees
+  if (locations.length === 0) {
+    locations = await query(
+      `SELECT l.* FROM hr_employees e
+       JOIN hr_locations l ON l.id = e.location_id
+       WHERE e.id = :employeeId AND l.is_active = 1`,
+      { employeeId }
+    );
+  }
+
+  // 3. Fallback to all company active locations with configured coordinates
+  if (locations.length === 0) {
+    locations = await query(
+      `SELECT * FROM hr_locations 
+       WHERE (company_id = :companyId OR company_id IS NULL OR company_id = 1) 
+         AND is_active = 1 AND latitude IS NOT NULL AND longitude IS NOT NULL`,
+      { companyId }
+    );
+  }
+
+  return locations;
+}
+
+/**
+ * Helper to dispatch Out-of-Location Security Alerts via Email and SMS.
+ */
+async function dispatchOutOfLocationAlert({
+  companyId,
+  employee,
+  locationResult,
+  settings,
+  deviceInfo,
+}) {
+  try {
+    const rawRecipients = settings.alert_recipients || "";
+    const recipientsList = rawRecipients
+      .split(/[,;\n]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    if (recipientsList.length === 0) return;
+
+    const emails = recipientsList.filter((r) => r.includes("@"));
+    const phones = recipientsList.filter((r) => !r.includes("@") && /\d/.test(r));
+
+    const alertMessage = `[OMNISUITE SECURITY ALERT] Out-of-Location Clock-in: Employee ${employee.name} (${employee.emp_code || "ID: " + employee.employee_id}) clocked in outside authorized geofence. Distance: ${locationResult.distanceMeters || "Unknown"}m (Allowed: ${locationResult.allowedRadius || 150}m). Time: ${new Date().toLocaleString()}. Decision: ${locationResult.policyAction}.`;
+
+    // Send SMS
+    if (settings.alert_sms_enabled && phones.length > 0 && isSMSConfigured()) {
+      for (const phone of phones) {
+        try {
+          await sendSMS({ to: phone, message: alertMessage });
+        } catch (smsErr) {
+          console.warn("[dispatchOutOfLocationAlert] SMS error:", smsErr.message);
+        }
+      }
+    }
+
+    // Send Email
+    if (settings.alert_email_enabled && emails.length > 0 && isMailerConfigured()) {
+      const emailHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+          <div style="background-color: #e11d48; color: white; padding: 16px; font-size: 18px; font-weight: bold;">
+            🚨 OmniSuite Security Alert: Out-of-Location Attendance
+          </div>
+          <div style="padding: 20px; line-height: 1.6; color: #334155;">
+            <p>An attendance clock-in was recorded outside the authorized geofenced perimeter:</p>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+              <tr><td style="padding: 6px 0; font-weight: bold; width: 140px;">Employee:</td><td>${employee.name} (${employee.emp_code || ""})</td></tr>
+              <tr><td style="padding: 6px 0; font-weight: bold;">Nearest Site:</td><td>${locationResult.nearestLocation?.location_name || "Authorized Perimeter"}</td></tr>
+              <tr><td style="padding: 6px 0; font-weight: bold;">Distance:</td><td style="color: #e11d48; font-weight: bold;">${locationResult.distanceMeters} meters away</td></tr>
+              <tr><td style="padding: 6px 0; font-weight: bold;">Allowed Radius:</td><td>${locationResult.allowedRadius} meters</td></tr>
+              <tr><td style="padding: 6px 0; font-weight: bold;">User Coordinates:</td><td>Lat: ${locationResult.probeLat}, Lng: ${locationResult.probeLng}</td></tr>
+              <tr><td style="padding: 6px 0; font-weight: bold;">Policy Enforced:</td><td>${locationResult.policyAction}</td></tr>
+              <tr><td style="padding: 6px 0; font-weight: bold;">Timestamp:</td><td>${new Date().toLocaleString()}</td></tr>
+            </table>
+          </div>
+          <div style="background-color: #f8fafc; padding: 12px; font-size: 12px; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0;">
+            OmniSuite Biometric Geofence Security System
+          </div>
+        </div>
+      `;
+
+      for (const email of emails) {
+        try {
+          await sendMail({
+            to: email,
+            subject: `[SECURITY ALERT] Out-of-Location Clock-in: ${employee.name}`,
+            html: emailHtml,
+          });
+        } catch (mailErr) {
+          console.warn("[dispatchOutOfLocationAlert] Mail error:", mailErr.message);
+        }
+      }
+    }
+  } catch (err) {
+    console.error("[dispatchOutOfLocationAlert] Error:", err.message);
+  }
 }
 
 /**
@@ -40,6 +179,10 @@ async function logBiometricEvent({
   livenessScore = null,
   qualityScore = null,
   result,
+  latitude = null,
+  longitude = null,
+  distanceM = null,
+  locationVerified = null,
   latencyMs = null,
   ipAddress = null,
   remarks = null,
@@ -47,9 +190,9 @@ async function logBiometricEvent({
   try {
     await query(
       `INSERT INTO hr_biometric_logs 
-        (company_id, branch_id, employee_id, device_id, event_type, match_score, liveness_score, quality_score, result, latency_ms, ip_address, remarks)
+        (company_id, branch_id, employee_id, device_id, event_type, match_score, liveness_score, quality_score, result, latitude, longitude, distance_m, location_verified, latency_ms, ip_address, remarks)
        VALUES 
-        (:companyId, :branchId, :employeeId, :deviceId, :eventType, :matchScore, :livenessScore, :qualityScore, :result, :latencyMs, :ipAddress, :remarks)`,
+        (:companyId, :branchId, :employeeId, :deviceId, :eventType, :matchScore, :livenessScore, :qualityScore, :result, :latitude, :longitude, :distanceM, :locationVerified, :latencyMs, :ipAddress, :remarks)`,
       {
         companyId,
         branchId,
@@ -60,6 +203,10 @@ async function logBiometricEvent({
         livenessScore,
         qualityScore,
         result,
+        latitude,
+        longitude,
+        distanceM,
+        locationVerified,
         latencyMs,
         ipAddress,
         remarks,
@@ -87,7 +234,7 @@ export async function getServiceStatus(req, res, next) {
 }
 
 /**
- * Enrolls employee face biometric template.
+ * Enrolls employee face biometric template using InsightFace ArcFace 512-D.
  */
 export async function enrollFace(req, res, next) {
   const startTime = Date.now();
@@ -99,12 +246,12 @@ export async function enrollFace(req, res, next) {
     if (!employee_id) throw httpError(400, "BAD_REQUEST", "employee_id is required");
     if (!image) throw httpError(400, "BAD_REQUEST", "Facial image capture is required");
     if (!consent_given) {
-      throw httpError(400, "CONSENT_REQUIRED", "Biometric processing consent must be affirmed (Ghana Data Protection Act, Act 843)");
+      throw httpError(400, "CONSENT_REQUIRED", "Biometric processing consent must be affirmed under Ghana Data Protection Act (Act 843)");
     }
 
-    // Verify employee exists and belongs to company
+    // Verify employee exists
     const empRows = await query(
-      `SELECT id, first_name, last_name, branch_id FROM hr_employees WHERE id = :employee_id AND company_id = :companyId AND deleted_at IS NULL`,
+      `SELECT id, first_name, last_name, branch_id, location_id FROM hr_employees WHERE id = :employee_id AND (company_id = :companyId OR company_id IS NULL OR company_id = 1) AND deleted_at IS NULL`,
       { employee_id, companyId }
     );
     if (!empRows.length) throw httpError(404, "NOT_FOUND", "Employee not found");
@@ -112,7 +259,7 @@ export async function enrollFace(req, res, next) {
 
     const settings = await getCompanySettings(companyId);
 
-    // Call Python microservice to extract 128-D vector, check quality and liveness
+    // Call Python microservice to extract 512-D InsightFace vector
     const extraction = await faceService.extractEmbedding(image, {
       checkLiveness: Boolean(settings.require_liveness),
       livenessThreshold: Number(settings.liveness_threshold),
@@ -165,16 +312,104 @@ export async function enrollFace(req, res, next) {
       });
       return res.status(400).json({
         success: false,
-        message: "Liveness verification failed. Real, live face required for biometric enrollment.",
+        message: "Liveness verification failed. Live human face required for biometric enrollment.",
       });
     }
 
-    // Encrypt embedding with AES-256-GCM
+    // ========================================================
+    // DUPLICATE ENROLLMENT PREVENTION CONTROLS
+    // ========================================================
+    const { replace_existing = false } = req.body;
+
+    // Check 1: Prevent duplicate registration for the same employee
+    const existingActive = await query(
+      `SELECT id, created_at FROM hr_biometric_templates 
+       WHERE (company_id = :companyId OR company_id = 1) 
+         AND employee_id = :employeeId 
+         AND is_active = 1 LIMIT 1`,
+      { companyId, employeeId: employee.id }
+    );
+
+    if (existingActive.length > 0 && !replace_existing) {
+      const enrolledDate = existingActive[0].created_at
+        ? new Date(existingActive[0].created_at).toLocaleDateString("en-GB")
+        : new Date().toLocaleDateString("en-GB");
+      return res.status(409).json({
+        success: false,
+        already_registered: true,
+        message: `${employee.first_name} ${employee.last_name} is already registered in the biometric system (Enrolled on ${enrolledDate}). The system will not register the same user more than once. Use 'Re-scan / Replace' if you wish to overwrite credentials.`,
+      });
+    }
+
+    // Check 2: Cross-employee biometric uniqueness (1:N search against all active employees in company)
+    const otherTemplates = await query(
+      `SELECT t.id, t.employee_id, t.encrypted_embedding, t.iv, t.auth_tag,
+              e.first_name, e.last_name, e.emp_code
+       FROM hr_biometric_templates t
+       JOIN hr_employees e ON e.id = t.employee_id
+       WHERE (t.company_id = :companyId OR t.company_id = 1)
+         AND t.is_active = 1
+         AND t.employee_id != :currentEmpId
+         AND e.deleted_at IS NULL`,
+      { companyId, currentEmpId: employee.id }
+    );
+
+    const matchThreshold = Number(settings.match_threshold || 0.45);
+    let matchedDuplicate = null;
+
+    for (const tpl of otherTemplates) {
+      try {
+        const otherVec = decryptEmbedding(tpl.encrypted_embedding, tpl.iv, tpl.auth_tag);
+        let dot = 0, normProbe = 0, normOther = 0;
+        for (let i = 0; i < extraction.embedding.length; i++) {
+          dot += extraction.embedding[i] * otherVec[i];
+          normProbe += extraction.embedding[i] * extraction.embedding[i];
+          normOther += otherVec[i] * otherVec[i];
+        }
+        const similarity = (normProbe > 0 && normOther > 0)
+          ? dot / (Math.sqrt(normProbe) * Math.sqrt(normOther))
+          : 0;
+
+        if (similarity >= matchThreshold) {
+          matchedDuplicate = {
+            employee_id: tpl.employee_id,
+            name: `${tpl.first_name} ${tpl.last_name}`,
+            emp_code: tpl.emp_code,
+            similarity: Math.round(similarity * 100),
+          };
+          break;
+        }
+      } catch (err) {
+        console.warn("[enrollFace] Duplicate check decryption error:", err.message);
+      }
+    }
+
+    if (matchedDuplicate) {
+      await logBiometricEvent({
+        companyId,
+        branchId: employee.branch_id,
+        employeeId: employee.id,
+        eventType: "REGISTRATION",
+        matchScore: matchedDuplicate.similarity / 100,
+        result: "FAILED_MATCH",
+        latencyMs: Date.now() - startTime,
+        remarks: `DUPLICATE_REGISTRATION_BLOCKED: Face matches ${matchedDuplicate.name} (${matchedDuplicate.emp_code}) with ${matchedDuplicate.similarity}% similarity`,
+      });
+
+      return res.status(409).json({
+        success: false,
+        duplicate_biometric: true,
+        message: `Security Alert: Biometric duplicate detected. This facial identity matches already enrolled employee "${matchedDuplicate.name}" (${matchedDuplicate.emp_code || 'ID: ' + matchedDuplicate.employee_id}) with ${matchedDuplicate.similarity}% match. The system will not register the same user more than once.`,
+        matched_employee: matchedDuplicate,
+      });
+    }
+
+    // Encrypt 512-D embedding with AES-256-GCM
     const { encryptedEmbedding, iv, authTag } = encryptEmbedding(extraction.embedding);
 
-    // Deactivate previous active templates for this employee
+    // If replacing existing or re-registering, delete previous templates from database
     await query(
-      `UPDATE hr_biometric_templates SET is_active = 0 WHERE company_id = :companyId AND employee_id = :employeeId`,
+      `DELETE FROM hr_biometric_templates WHERE (company_id = :companyId OR company_id = 1) AND employee_id = :employeeId`,
       { companyId, employeeId: employee.id }
     );
 
@@ -183,14 +418,14 @@ export async function enrollFace(req, res, next) {
       `INSERT INTO hr_biometric_templates 
         (company_id, employee_id, template_version, encrypted_embedding, iv, auth_tag, photo_thumbnail, consent_given, consent_timestamp, is_active, created_by)
        VALUES 
-        (:companyId, :employeeId, 'SFACE_V1', :encryptedEmbedding, :iv, :authTag, :thumbnail, 1, NOW(), 1, :userId)`,
+        (:companyId, :employeeId, 'INSIGHTFACE_V1', :encryptedEmbedding, :iv, :authTag, :thumbnail, 1, NOW(), 1, :userId)`,
       {
         companyId,
         employeeId: employee.id,
         encryptedEmbedding,
         iv,
         authTag,
-        thumbnail: image.slice(0, 150000), // Store thumbnail
+        thumbnail: image.slice(0, 150000),
         userId,
       }
     );
@@ -201,10 +436,9 @@ export async function enrollFace(req, res, next) {
         face_descriptor = :descriptorStr,
         face_photo = :thumbnail,
         face_registered_at = NOW()
-       WHERE id = :employeeId AND company_id = :companyId`,
+       WHERE id = :employeeId`,
       {
         employeeId: employee.id,
-        companyId,
         descriptorStr: JSON.stringify(extraction.embedding),
         thumbnail: image.slice(0, 150000),
       }
@@ -219,7 +453,7 @@ export async function enrollFace(req, res, next) {
       livenessScore: extraction.liveness?.real_score,
       result: "SUCCESS",
       latencyMs: Date.now() - startTime,
-      remarks: "Facial biometric enrolled and encrypted successfully",
+      remarks: "InsightFace 512-D biometric enrolled and encrypted successfully",
     });
 
     res.json({
@@ -234,7 +468,7 @@ export async function enrollFace(req, res, next) {
 }
 
 /**
- * Remove employee biometric template (Right to Erasure).
+ * Remove employee biometric template (Hard Delete from Database).
  */
 export async function removeEmployeeBiometrics(req, res, next) {
   try {
@@ -242,24 +476,35 @@ export async function removeEmployeeBiometrics(req, res, next) {
     const { companyId = 1 } = req.scope || {};
     const { id } = req.params;
 
+    // Hard delete all biometric templates from database
     await query(
-      `UPDATE hr_biometric_templates SET is_active = 0 WHERE company_id = :companyId AND employee_id = :id`,
+      `DELETE FROM hr_biometric_templates WHERE (company_id = :companyId OR company_id = 1) AND employee_id = :id`,
       { companyId, id }
     );
 
+    // Hard delete / reset biometric fields in hr_employees
     await query(
-      `UPDATE hr_employees SET face_descriptor = NULL, face_photo = NULL, face_registered_at = NULL WHERE id = :id AND company_id = :companyId`,
-      { id, companyId }
+      `UPDATE hr_employees SET face_descriptor = NULL, face_photo = NULL, face_registered_at = NULL WHERE id = :id`,
+      { id }
     );
 
-    res.json({ success: true, message: "Biometric profile erased successfully." });
+    await logBiometricEvent({
+      companyId,
+      employeeId: id,
+      eventType: "REGISTRATION",
+      result: "SUCCESS",
+      remarks: "Biometric template permanently deleted from database (hard delete)",
+    });
+
+    res.json({ success: true, message: "Biometric profile permanently removed and deleted from database." });
   } catch (err) {
     next(err);
   }
 }
 
 /**
- * Core Biometric Facial Attendance (1:N or 1:1 Kiosk Clock-in / Clock-out).
+ * Core Biometric Facial Attendance (1:N or 1:1 Kiosk Clock-in / Clock-out)
+ * with InsightFace 512-D and GPS Geofencing (3 Independent Decisions).
  */
 export async function biometricClockInOut(req, res, next) {
   const startTime = Date.now();
@@ -269,7 +514,7 @@ export async function biometricClockInOut(req, res, next) {
     let branchId = req.scope?.branchId || null;
     let deviceId = null;
 
-    // Check if request is authenticated via device API key or kiosk code
+    // Check device credentials
     const deviceKey = req.headers["x-device-key"] || req.body.device_key;
     const deviceCode = req.headers["x-device-code"] || req.body.device_code;
 
@@ -282,35 +527,35 @@ export async function biometricClockInOut(req, res, next) {
         companyId = devRows[0].company_id;
         branchId = devRows[0].branch_id || branchId;
         deviceId = devRows[0].id;
-        // Update heartbeat
         await query(`UPDATE hr_biometric_devices SET last_heartbeat = NOW() WHERE id = :id`, { id: deviceId }).catch(() => {});
       }
     }
 
-    if (!companyId) {
-      companyId = 1; // Fallback to default company if unassigned
-    }
+    if (!companyId) companyId = 1;
 
     const {
       probe_image,
       additional_frames = [],
       mode = "AUTO", // AUTO, CLOCK_IN, CLOCK_OUT
-      target_employee_id = null, // Optional for 1:1 verification
+      target_employee_id = null,
+      latitude = null,
+      longitude = null,
+      gps_accuracy = null,
     } = req.body;
 
     if (!probe_image) throw httpError(400, "BAD_REQUEST", "probe_image is required");
 
     const settings = await getCompanySettings(companyId);
 
-    // Retrieve active templates for the company
+    // Retrieve active templates
     let sql = `
       SELECT t.id, t.employee_id, t.encrypted_embedding, t.iv, t.auth_tag,
-             e.emp_code, e.first_name, e.last_name, e.branch_id, e.status, e.picture_url,
+             e.emp_code, e.first_name, e.last_name, e.branch_id, e.location_id, e.status, e.picture_url,
              COALESCE(d.dept_name, '') as department_name
       FROM hr_biometric_templates t
       JOIN hr_employees e ON e.id = t.employee_id
       LEFT JOIN hr_departments d ON d.id = e.dept_id
-      WHERE t.company_id = :companyId AND t.is_active = 1 AND e.status = 'ACTIVE' AND e.deleted_at IS NULL
+      WHERE (t.company_id = :companyId OR t.company_id = 1) AND t.is_active = 1 AND e.status = 'ACTIVE' AND e.deleted_at IS NULL
     `;
     const params = { companyId };
 
@@ -339,6 +584,7 @@ export async function biometricClockInOut(req, res, next) {
           name: `${row.first_name} ${row.last_name}`,
           emp_code: row.emp_code,
           branch_id: row.branch_id,
+          location_id: row.location_id,
           department_name: row.department_name,
           embedding: decryptedVec,
         });
@@ -351,12 +597,14 @@ export async function biometricClockInOut(req, res, next) {
       throw httpError(500, "DECRYPTION_ERROR", "Could not decrypt employee biometric templates");
     }
 
-    // Identify via Python Microservice
+    // ==========================================
+    // DECISION 1: BIOMETRIC IDENTITY VERIFICATION
+    // ==========================================
     const recognition = await faceService.identifyEmployee(probe_image, candidates, {
       additionalFrames: settings.allow_multi_frame ? additional_frames : [],
-      threshold: Number(settings.match_threshold),
+      threshold: Number(settings.match_threshold || 0.45),
       checkLiveness: Boolean(settings.require_liveness),
-      livenessThreshold: Number(settings.liveness_threshold),
+      livenessThreshold: Number(settings.liveness_threshold || 0.65),
     });
 
     const elapsed = Date.now() - startTime;
@@ -370,12 +618,15 @@ export async function biometricClockInOut(req, res, next) {
         result: recognition.liveness && !recognition.liveness.liveness_passed ? "FAILED_LIVENESS" : (recognition.quality && !recognition.quality.passed ? "FAILED_QUALITY" : "ERROR"),
         livenessScore: recognition.liveness?.confidence || null,
         qualityScore: recognition.quality?.blur_score || null,
+        latitude,
+        longitude,
         latencyMs: elapsed,
         remarks: recognition.message,
       });
 
       return res.status(400).json({
         success: false,
+        identity_verified: false,
         message: recognition.message || "Facial recognition verification failed.",
         details: recognition,
       });
@@ -390,12 +641,15 @@ export async function biometricClockInOut(req, res, next) {
         result: "FAILED_MATCH",
         matchScore: recognition.similarity || 0,
         livenessScore: recognition.liveness?.confidence || null,
+        latitude,
+        longitude,
         latencyMs: elapsed,
         remarks: `No match above threshold (${recognition.similarity || 0} < ${settings.match_threshold})`,
       });
 
       return res.status(404).json({
         success: false,
+        identity_verified: false,
         message: "Face recognized does not match any registered employee template.",
         similarity: recognition.similarity,
         threshold: settings.match_threshold,
@@ -407,11 +661,144 @@ export async function biometricClockInOut(req, res, next) {
     const todayStr = new Date().toISOString().slice(0, 10);
     const nowTime = new Date();
 
-    // Check duplicate clock-in prevention window
+    // ==========================================
+    // DECISION 2: LOCATION VERIFICATION & GEOFENCING
+    // ==========================================
+    let locationStatus = "NOT_APPLICABLE";
+    let locationVerified = 1;
+    let locationDistanceMeters = null;
+    let matchedLocation = null;
+    let locationViolationReason = null;
+
+    if (settings.enforce_geofence) {
+      if (latitude != null && longitude != null) {
+        const authorizedLocations = await getAuthorizedLocations(companyId, employeeId, matchedCandidate.branch_id);
+
+        if (authorizedLocations.length > 0) {
+          let minDistance = Infinity;
+          let closestLocation = null;
+
+          for (const loc of authorizedLocations) {
+            if (loc.latitude != null && loc.longitude != null) {
+              const dist = calculateHaversineDistanceMeters(latitude, longitude, loc.latitude, loc.longitude);
+              if (dist !== null && dist < minDistance) {
+                minDistance = dist;
+                closestLocation = loc;
+              }
+            }
+          }
+
+          if (closestLocation) {
+            const allowedRadius = Number(closestLocation.geofence_radius || settings.default_geofence_radius || 150);
+            locationDistanceMeters = minDistance;
+            matchedLocation = closestLocation;
+
+            if (minDistance <= allowedRadius) {
+              locationStatus = "IN_LOCATION";
+              locationVerified = 1;
+            } else {
+              locationStatus = "OUT_OF_LOCATION";
+              locationVerified = 0;
+              locationViolationReason = `${minDistance}m from ${closestLocation.location_name} (Max allowed: ${allowedRadius}m)`;
+            }
+          } else {
+            // Authorized locations have no lat/lng configured
+            locationStatus = "NOT_APPLICABLE";
+            locationVerified = 1;
+          }
+        } else {
+          locationStatus = "NOT_APPLICABLE";
+          locationVerified = 1;
+        }
+      } else {
+        locationStatus = "NO_GPS";
+        locationVerified = 0;
+        locationViolationReason = "GPS coordinates not received from device";
+      }
+    }
+
+    // ==========================================
+    // DECISION 3: ATTENDANCE APPROVAL & ACTION
+    // ==========================================
+    let approvalStatus = "APPROVED";
+    const geofencePolicy = settings.geofence_policy || "FLAG_AND_NOTIFY";
+
+    if (settings.enforce_geofence && locationStatus === "OUT_OF_LOCATION") {
+      if (geofencePolicy === "STRICT_REJECT") {
+        approvalStatus = "REJECTED";
+
+        await logBiometricEvent({
+          companyId,
+          branchId: matchedCandidate.branch_id,
+          employeeId,
+          deviceId,
+          eventType: mode === "CLOCK_OUT" ? "CLOCK_OUT" : "CLOCK_IN",
+          matchScore: recognition.similarity,
+          livenessScore: recognition.liveness?.confidence,
+          result: "OUT_OF_LOCATION",
+          latitude,
+          longitude,
+          distanceM: locationDistanceMeters,
+          locationVerified: 0,
+          latencyMs: elapsed,
+          remarks: `STRICT_REJECT: ${locationViolationReason}`,
+        });
+
+        // Trigger Security Alert in background without blocking response
+        dispatchOutOfLocationAlert({
+          companyId,
+          employee: matchedCandidate,
+          locationResult: {
+            distanceMeters: locationDistanceMeters,
+            allowedRadius: matchedLocation?.geofence_radius || settings.default_geofence_radius || 150,
+            nearestLocation: matchedLocation,
+            probeLat: latitude,
+            probeLng: longitude,
+            policyAction: "Clock-in Rejected (Strict Geofence Policy)",
+          },
+          settings,
+        }).catch((e) => console.warn("[dispatchOutOfLocationAlert] background alert error:", e.message));
+
+        return res.status(403).json({
+          success: false,
+          identity_verified: true,
+          location_verified: false,
+          approval_status: "REJECTED",
+          message: `Attendance rejected: You are out of authorized work location (${locationViolationReason}).`,
+          employee: {
+            id: employeeId,
+            name: matchedCandidate.name,
+            emp_code: matchedCandidate.emp_code,
+          },
+          distance_meters: locationDistanceMeters,
+          nearest_location: matchedLocation?.location_name,
+        });
+      } else {
+        // FLAG_AND_NOTIFY
+        approvalStatus = "PENDING_REVIEW";
+
+        // Trigger Alert in background without blocking response
+        dispatchOutOfLocationAlert({
+          companyId,
+          employee: matchedCandidate,
+          locationResult: {
+            distanceMeters: locationDistanceMeters,
+            allowedRadius: matchedLocation?.geofence_radius || settings.default_geofence_radius || 150,
+            nearestLocation: matchedLocation,
+            probeLat: latitude,
+            probeLng: longitude,
+            policyAction: "Clock-in Accepted with Warning & Flagged for Review",
+          },
+          settings,
+        }).catch((e) => console.warn("[dispatchOutOfLocationAlert] background alert error:", e.message));
+      }
+    }
+
+    // Check duplicate prevention window (applies to prior clock-in/out scans, not registration)
     const dupWindowMins = Number(settings.prevent_duplicate_window_mins || 5);
     const recentLogs = await query(
       `SELECT id, created_at, event_type FROM hr_biometric_logs 
-       WHERE employee_id = :employeeId AND result = 'SUCCESS' AND created_at >= DATE_SUB(NOW(), INTERVAL :dupWindowMins MINUTE)
+       WHERE employee_id = :employeeId AND result = 'SUCCESS' AND event_type IN ('CLOCK_IN', 'CLOCK_OUT') AND created_at >= DATE_SUB(NOW(), INTERVAL :dupWindowMins MINUTE)
        ORDER BY id DESC LIMIT 1`,
       { employeeId, dupWindowMins }
     );
@@ -425,34 +812,29 @@ export async function biometricClockInOut(req, res, next) {
       });
     }
 
-    // Lookup employee schedule and shift
+    // Lookup shift
     const scheduleRows = await query(
       `SELECT ws.*, s.start_time, s.end_time, s.break_minutes, s.name as shift_name
        FROM hr_work_schedules ws
        JOIN hr_shifts s ON s.id = ws.shift_id
-       WHERE ws.employee_id = :employeeId AND ws.company_id = :companyId AND ws.is_active = 1
+       WHERE ws.employee_id = :employeeId AND (ws.company_id = :companyId OR ws.company_id = 1) AND ws.is_active = 1
        LIMIT 1`,
       { employeeId, companyId }
     );
-
     const shift = scheduleRows.length > 0 ? scheduleRows[0] : null;
 
-    // Check existing attendance for today
+    // Existing attendance
     const attRows = await query(
       `SELECT * FROM hr_attendance WHERE employee_id = :employeeId AND attendance_date = :todayStr LIMIT 1`,
       { employeeId, todayStr }
     );
-
     const existingAtt = attRows.length > 0 ? attRows[0] : null;
 
     let determinedAction = mode;
     if (mode === "AUTO") {
       if (!existingAtt || !existingAtt.clock_in) {
         determinedAction = "CLOCK_IN";
-      } else if (existingAtt.clock_in && !existingAtt.clock_out) {
-        determinedAction = "CLOCK_OUT";
       } else {
-        // Both already present: allow updating clock_out
         determinedAction = "CLOCK_OUT";
       }
     }
@@ -460,7 +842,6 @@ export async function biometricClockInOut(req, res, next) {
     let attStatus = "PRESENT";
     let lateMinutes = 0;
 
-    // Evaluate Lateness on clock-in
     if (determinedAction === "CLOCK_IN" && shift && shift.start_time) {
       const [shH, shM] = String(shift.start_time).split(":").map(Number);
       const shiftStart = new Date(nowTime);
@@ -475,6 +856,10 @@ export async function biometricClockInOut(req, res, next) {
       }
     }
 
+    let remarkText = `InsightFace ArcFace 512-D Biometric Attendance (${(recognition.similarity * 100).toFixed(1)}% match)`;
+    if (lateMinutes > 0) remarkText += ` | Late by ${lateMinutes} mins`;
+    if (locationStatus === "OUT_OF_LOCATION") remarkText += ` | Out of location: ${locationViolationReason}`;
+
     let attendanceId = null;
 
     if (determinedAction === "CLOCK_IN") {
@@ -487,28 +872,52 @@ export async function biometricClockInOut(req, res, next) {
             face_verified = 1,
             face_confidence = :confidence,
             biometric_type = 'FACIAL_RECOGNITION',
+            latitude = :latitude,
+            longitude = :longitude,
+            gps_accuracy = :gpsAccuracy,
+            location_id = :locationId,
+            location_verified = :locationVerified,
+            location_distance_meters = :distanceMeters,
+            location_status = :locationStatus,
+            approval_status = :approvalStatus,
             remarks = COALESCE(remarks, :remark)
            WHERE id = :id`,
           {
             id: attendanceId,
             status: attStatus,
             confidence: Math.round((recognition.similarity || 0.95) * 100),
-            remark: lateMinutes > 0 ? `Clocked in late by ${lateMinutes} mins (Facial Recognition)` : "Clocked in via Biometric Facial Recognition",
+            latitude,
+            longitude,
+            gpsAccuracy: gps_accuracy,
+            locationId: matchedLocation?.id || null,
+            locationVerified,
+            distanceMeters: locationDistanceMeters,
+            locationStatus,
+            approvalStatus,
+            remark: remarkText,
           }
         );
       } else {
         const ins = await query(
           `INSERT INTO hr_attendance 
-            (company_id, employee_id, attendance_date, clock_in, status, face_verified, face_confidence, biometric_type, remarks)
+            (company_id, employee_id, attendance_date, clock_in, status, face_verified, face_confidence, biometric_type, latitude, longitude, gps_accuracy, location_id, location_verified, location_distance_meters, location_status, approval_status, remarks)
            VALUES 
-            (:companyId, :employeeId, :todayStr, NOW(), :status, 1, :confidence, 'FACIAL_RECOGNITION', :remark)`,
+            (:companyId, :employeeId, :todayStr, NOW(), :status, 1, :confidence, 'FACIAL_RECOGNITION', :latitude, :longitude, :gpsAccuracy, :locationId, :locationVerified, :distanceMeters, :locationStatus, :approvalStatus, :remark)`,
           {
             companyId,
             employeeId,
             todayStr,
             status: attStatus,
             confidence: Math.round((recognition.similarity || 0.95) * 100),
-            remark: lateMinutes > 0 ? `Late arrival: ${lateMinutes} mins (Facial Recognition)` : "Clocked in via Biometric Facial Recognition",
+            latitude,
+            longitude,
+            gpsAccuracy: gps_accuracy,
+            locationId: matchedLocation?.id || null,
+            locationVerified,
+            distanceMeters: locationDistanceMeters,
+            locationStatus,
+            approvalStatus,
+            remark: remarkText,
           }
         );
         attendanceId = ins.insertId;
@@ -523,31 +932,41 @@ export async function biometricClockInOut(req, res, next) {
             face_verified = 1,
             face_confidence = :confidence,
             biometric_type = 'FACIAL_RECOGNITION',
-            remarks = CONCAT(COALESCE(remarks, ''), '; Clocked out via Face Biometrics')
+            latitude = COALESCE(:latitude, latitude),
+            longitude = COALESCE(:longitude, longitude),
+            location_status = :locationStatus,
+            remarks = CONCAT(COALESCE(remarks, ''), '; Clocked out via InsightFace Biometrics')
            WHERE id = :id`,
           {
             id: attendanceId,
             confidence: Math.round((recognition.similarity || 0.95) * 100),
+            latitude,
+            longitude,
+            locationStatus,
           }
         );
       } else {
         const ins = await query(
           `INSERT INTO hr_attendance 
-            (company_id, employee_id, attendance_date, clock_out, status, face_verified, face_confidence, biometric_type, remarks)
+            (company_id, employee_id, attendance_date, clock_out, status, face_verified, face_confidence, biometric_type, latitude, longitude, location_status, approval_status, remarks)
            VALUES 
-            (:companyId, :employeeId, :todayStr, NOW(), 'PRESENT', 1, :confidence, 'FACIAL_RECOGNITION', 'Clocked out via Biometric Facial Recognition')`,
+            (:companyId, :employeeId, :todayStr, NOW(), 'PRESENT', 1, :confidence, 'FACIAL_RECOGNITION', :latitude, :longitude, :locationStatus, :approvalStatus, 'Clocked out via InsightFace Biometrics')`,
           {
             companyId,
             employeeId,
             todayStr,
             confidence: Math.round((recognition.similarity || 0.95) * 100),
+            latitude,
+            longitude,
+            locationStatus,
+            approvalStatus,
           }
         );
         attendanceId = ins.insertId;
       }
     }
 
-    // Synchronize to timesheets
+    // Sync to timesheets
     const updatedAttRows = await query(`SELECT * FROM hr_attendance WHERE id = :id`, { id: attendanceId });
     if (updatedAttRows.length > 0) {
       await syncAttendanceToTimesheet({
@@ -558,22 +977,26 @@ export async function biometricClockInOut(req, res, next) {
         clockOut: updatedAttRows[0].clock_out,
         status: updatedAttRows[0].status,
         remarks: updatedAttRows[0].remarks,
-      });
+      }).catch(() => {});
     }
 
-    // Log successful biometric event
+    // Log success / flag event
     await logBiometricEvent({
       companyId,
-      branchId,
+      branchId: matchedCandidate.branch_id,
       employeeId,
       deviceId,
       eventType: determinedAction,
       matchScore: recognition.similarity,
       livenessScore: recognition.liveness?.confidence,
       qualityScore: recognition.quality?.blur_score,
-      result: "SUCCESS",
+      result: locationStatus === "OUT_OF_LOCATION" ? "OUT_OF_LOCATION" : "SUCCESS",
+      latitude,
+      longitude,
+      distanceM: locationDistanceMeters,
+      locationVerified,
       latencyMs: elapsed,
-      remarks: `${determinedAction} recorded successfully (Similarity: ${(recognition.similarity * 100).toFixed(1)}%)`,
+      remarks: `${determinedAction} recorded (InsightFace 512-D: ${(recognition.similarity * 100).toFixed(1)}% match; Location: ${locationStatus})`,
     });
 
     res.json({
@@ -585,13 +1008,34 @@ export async function biometricClockInOut(req, res, next) {
         emp_code: matchedCandidate.emp_code,
         department: matchedCandidate.department_name,
       },
-      status: attStatus,
-      late_minutes: lateMinutes,
+      decisions: {
+        identity: {
+          verified: true,
+          engine: "InsightFace ArcFace 512-D",
+          similarity: recognition.similarity,
+          threshold: settings.match_threshold,
+          liveness: recognition.liveness?.confidence,
+        },
+        location: {
+          status: locationStatus,
+          verified: locationVerified === 1,
+          distance_meters: locationDistanceMeters,
+          nearest_location: matchedLocation?.location_name || null,
+          allowed_radius: matchedLocation?.geofence_radius || settings.default_geofence_radius,
+          violation: locationViolationReason,
+        },
+        attendance: {
+          status: attStatus,
+          approval: approvalStatus,
+          late_minutes: lateMinutes,
+        },
+      },
       clock_time: nowTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
       date: todayStr,
-      similarity: recognition.similarity,
-      liveness_score: recognition.liveness?.confidence,
-      message: `${determinedAction === "CLOCK_IN" ? "Clock-in successful" : "Clock-out successful"}! Have a great day, ${matchedCandidate.name}.`,
+      message:
+        locationStatus === "OUT_OF_LOCATION"
+          ? `${determinedAction === "CLOCK_IN" ? "Clock-in recorded" : "Clock-out recorded"} with location warning (${locationViolationReason}). Flagged for review.`
+          : `${determinedAction === "CLOCK_IN" ? "Clock-in successful" : "Clock-out successful"}! Have a great day, ${matchedCandidate.name}.`,
     });
   } catch (err) {
     next(err);
@@ -606,10 +1050,11 @@ export async function listDevices(req, res, next) {
     await ensureBiometricTables();
     const { companyId = 1 } = req.scope || {};
     const rows = await query(
-      `SELECT d.*, b.name as branch_name 
+      `SELECT d.*, b.name as branch_name, l.location_name 
        FROM hr_biometric_devices d
        LEFT JOIN adm_branches b ON b.id = d.branch_id
-       WHERE d.company_id = :companyId ORDER BY d.id DESC`,
+       LEFT JOIN hr_locations l ON l.id = d.location_id
+       WHERE (d.company_id = :companyId OR d.company_id = 1) ORDER BY d.id DESC`,
       { companyId }
     );
     res.json({ items: rows });
@@ -622,7 +1067,7 @@ export async function createDevice(req, res, next) {
   try {
     await ensureBiometricTables();
     const { companyId = 1, userId = null } = req.scope || {};
-    const { device_name, device_type = "KIOSK", branch_id = null } = req.body;
+    const { device_name, device_type = "KIOSK", branch_id = null, location_id = null } = req.body;
 
     if (!device_name) throw httpError(400, "BAD_REQUEST", "device_name is required");
 
@@ -630,11 +1075,12 @@ export async function createDevice(req, res, next) {
     const api_key = "kiosk_" + crypto.randomBytes(24).toString("hex");
 
     const result = await query(
-      `INSERT INTO hr_biometric_devices (company_id, branch_id, device_name, device_code, api_key, device_type, created_by)
-       VALUES (:companyId, :branchId, :deviceName, :deviceCode, :apiKey, :deviceType, :userId)`,
+      `INSERT INTO hr_biometric_devices (company_id, branch_id, location_id, device_name, device_code, api_key, device_type, created_by)
+       VALUES (:companyId, :branchId, :locationId, :deviceName, :deviceCode, :apiKey, :deviceType, :userId)`,
       {
         companyId,
         branchId: branch_id || null,
+        locationId: location_id || null,
         deviceName: device_name,
         deviceCode: device_code,
         apiKey: api_key,
@@ -660,7 +1106,7 @@ export async function deleteDevice(req, res, next) {
     await ensureBiometricTables();
     const { companyId = 1 } = req.scope || {};
     const { id } = req.params;
-    await query(`DELETE FROM hr_biometric_devices WHERE id = :id AND company_id = :companyId`, { id, companyId });
+    await query(`DELETE FROM hr_biometric_devices WHERE id = :id AND (company_id = :companyId OR company_id = 1)`, { id, companyId });
     res.json({ success: true, message: "Device removed." });
   } catch (err) {
     next(err);
@@ -686,21 +1132,27 @@ export async function updateSettings(req, res, next) {
     await ensureBiometricTables();
     const { companyId = 1 } = req.scope || {};
     const {
-      match_threshold = 0.380,
-      liveness_threshold = 0.850,
+      match_threshold = 0.450,
+      liveness_threshold = 0.650,
       min_face_size = 100,
       allow_multi_frame = 1,
-      require_liveness = 1,
+      require_liveness = 0,
       clock_in_grace_minutes = 15,
       auto_detect_in_out = 1,
       prevent_duplicate_window_mins = 5,
+      enforce_geofence = 1,
+      geofence_policy = "FLAG_AND_NOTIFY",
+      default_geofence_radius = 150,
+      alert_email_enabled = 1,
+      alert_sms_enabled = 0,
+      alert_recipients = "admin@omnisuite.com",
     } = req.body;
 
     await query(
       `INSERT INTO hr_biometric_settings
-        (company_id, match_threshold, liveness_threshold, min_face_size, allow_multi_frame, require_liveness, clock_in_grace_minutes, auto_detect_in_out, prevent_duplicate_window_mins)
+        (company_id, match_threshold, liveness_threshold, min_face_size, allow_multi_frame, require_liveness, clock_in_grace_minutes, auto_detect_in_out, prevent_duplicate_window_mins, enforce_geofence, geofence_policy, default_geofence_radius, alert_email_enabled, alert_sms_enabled, alert_recipients)
        VALUES
-        (:companyId, :match_threshold, :liveness_threshold, :min_face_size, :allow_multi_frame, :require_liveness, :clock_in_grace_minutes, :auto_detect_in_out, :prevent_duplicate_window_mins)
+        (:companyId, :match_threshold, :liveness_threshold, :min_face_size, :allow_multi_frame, :require_liveness, :clock_in_grace_minutes, :auto_detect_in_out, :prevent_duplicate_window_mins, :enforce_geofence, :geofence_policy, :default_geofence_radius, :alert_email_enabled, :alert_sms_enabled, :alert_recipients)
        ON DUPLICATE KEY UPDATE
         match_threshold = VALUES(match_threshold),
         liveness_threshold = VALUES(liveness_threshold),
@@ -709,7 +1161,13 @@ export async function updateSettings(req, res, next) {
         require_liveness = VALUES(require_liveness),
         clock_in_grace_minutes = VALUES(clock_in_grace_minutes),
         auto_detect_in_out = VALUES(auto_detect_in_out),
-        prevent_duplicate_window_mins = VALUES(prevent_duplicate_window_mins)`,
+        prevent_duplicate_window_mins = VALUES(prevent_duplicate_window_mins),
+        enforce_geofence = VALUES(enforce_geofence),
+        geofence_policy = VALUES(geofence_policy),
+        default_geofence_radius = VALUES(default_geofence_radius),
+        alert_email_enabled = VALUES(alert_email_enabled),
+        alert_sms_enabled = VALUES(alert_sms_enabled),
+        alert_recipients = VALUES(alert_recipients)`,
       {
         companyId,
         match_threshold,
@@ -720,10 +1178,128 @@ export async function updateSettings(req, res, next) {
         clock_in_grace_minutes,
         auto_detect_in_out: auto_detect_in_out ? 1 : 0,
         prevent_duplicate_window_mins,
+        enforce_geofence: enforce_geofence ? 1 : 0,
+        geofence_policy,
+        default_geofence_radius,
+        alert_email_enabled: alert_email_enabled ? 1 : 0,
+        alert_sms_enabled: alert_sms_enabled ? 1 : 0,
+        alert_recipients,
       }
     );
 
-    res.json({ success: true, message: "Biometric settings updated successfully." });
+    res.json({ success: true, message: "Biometric & location security settings saved successfully." });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Acceptable Work Locations API (Used in General Setup Page)
+ */
+export async function listLocations(req, res, next) {
+  try {
+    await ensureBiometricTables();
+    const companyId = req.scope?.companyId || 1;
+    const items = await query(
+      `SELECT l.*, b.name as branch_name 
+       FROM hr_locations l
+       LEFT JOIN adm_branches b ON b.id = l.branch_id
+       WHERE (l.company_id = :companyId OR l.company_id IS NULL OR l.company_id = 1)
+       ORDER BY l.location_name ASC`,
+      { companyId }
+    );
+    res.json({ items });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function saveLocation(req, res, next) {
+  try {
+    await ensureBiometricTables();
+    const { companyId = 1, userId = null } = req.scope || {};
+    const {
+      id,
+      location_name,
+      code = null,
+      address = null,
+      latitude = null,
+      longitude = null,
+      geofence_radius = 150,
+      facility_type = "OFFICE",
+      branch_id = null,
+      is_active = 1,
+    } = req.body;
+
+    if (!location_name) throw httpError(400, "BAD_REQUEST", "location_name is required");
+
+    if (id) {
+      await query(
+        `UPDATE hr_locations SET 
+          location_name = :location_name,
+          code = :code,
+          address = :address,
+          latitude = :latitude,
+          longitude = :longitude,
+          geofence_radius = :geofence_radius,
+          facility_type = :facility_type,
+          branch_id = :branch_id,
+          is_active = :is_active,
+          updated_by = :userId
+         WHERE id = :id AND (company_id = :companyId OR company_id IS NULL OR company_id = 1)`,
+        {
+          id,
+          companyId,
+          location_name,
+          code,
+          address,
+          latitude: latitude !== "" && latitude != null ? Number(latitude) : null,
+          longitude: longitude !== "" && longitude != null ? Number(longitude) : null,
+          geofence_radius: Number(geofence_radius) || 150,
+          facility_type,
+          branch_id: branch_id || null,
+          is_active: is_active === false || is_active === 0 ? 0 : 1,
+          userId,
+        }
+      );
+    } else {
+      await query(
+        `INSERT INTO hr_locations 
+          (company_id, branch_id, location_name, code, address, latitude, longitude, geofence_radius, facility_type, is_active, created_by)
+         VALUES 
+          (:companyId, :branch_id, :location_name, :code, :address, :latitude, :longitude, :geofence_radius, :facility_type, :is_active, :userId)`,
+        {
+          companyId,
+          branch_id: branch_id || null,
+          location_name,
+          code,
+          address,
+          latitude: latitude !== "" && latitude != null ? Number(latitude) : null,
+          longitude: longitude !== "" && longitude != null ? Number(longitude) : null,
+          geofence_radius: Number(geofence_radius) || 150,
+          facility_type,
+          is_active: is_active === false || is_active === 0 ? 0 : 1,
+          userId,
+        }
+      );
+    }
+
+    res.json({ success: true, message: "Authorized work location saved successfully." });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function deleteLocation(req, res, next) {
+  try {
+    await ensureBiometricTables();
+    const { companyId = 1 } = req.scope || {};
+    const { id } = req.params;
+    await query(
+      `DELETE FROM hr_locations WHERE id = :id AND (company_id = :companyId OR company_id IS NULL OR company_id = 1)`,
+      { id, companyId }
+    );
+    res.json({ success: true, message: "Location deleted." });
   } catch (err) {
     next(err);
   }
@@ -738,23 +1314,26 @@ export async function getAnalytics(req, res, next) {
     const { companyId = 1 } = req.scope || {};
 
     const [empTotal] = await query(
-      `SELECT COUNT(*) as total FROM hr_employees WHERE company_id = :companyId AND status = 'ACTIVE' AND deleted_at IS NULL`,
+      `SELECT COUNT(*) as total FROM hr_employees WHERE (company_id = :companyId OR company_id = 1) AND status = 'ACTIVE' AND deleted_at IS NULL`,
       { companyId }
     );
     const [enrolledTotal] = await query(
-      `SELECT COUNT(DISTINCT employee_id) as enrolled FROM hr_biometric_templates WHERE company_id = :companyId AND is_active = 1`,
+      `SELECT COUNT(DISTINCT employee_id) as enrolled FROM hr_biometric_templates WHERE (company_id = :companyId OR company_id = 1) AND is_active = 1`,
       { companyId }
     );
-
     const [todayFaceAtt] = await query(
       `SELECT COUNT(*) as face_count FROM hr_attendance 
-       WHERE company_id = :companyId AND attendance_date = CURDATE() AND face_verified = 1`,
+       WHERE (company_id = :companyId OR company_id = 1) AND attendance_date = CURDATE() AND face_verified = 1`,
       { companyId }
     );
-
     const [spoofsDetected] = await query(
       `SELECT COUNT(*) as spoofs FROM hr_biometric_logs 
-       WHERE company_id = :companyId AND result = 'FAILED_LIVENESS' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)`,
+       WHERE (company_id = :companyId OR company_id = 1) AND result = 'FAILED_LIVENESS' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)`,
+      { companyId }
+    );
+    const [geofenceViolations] = await query(
+      `SELECT COUNT(*) as violations FROM hr_biometric_logs 
+       WHERE (company_id = :companyId OR company_id = 1) AND result = 'OUT_OF_LOCATION' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)`,
       { companyId }
     );
 
@@ -762,7 +1341,7 @@ export async function getAnalytics(req, res, next) {
       `SELECT l.*, CONCAT(e.first_name, ' ', e.last_name) as employee_name, e.emp_code
        FROM hr_biometric_logs l
        LEFT JOIN hr_employees e ON e.id = l.employee_id
-       WHERE l.company_id = :companyId ORDER BY l.id DESC LIMIT 15`,
+       WHERE (l.company_id = :companyId OR l.company_id = 1) ORDER BY l.id DESC LIMIT 20`,
       { companyId }
     );
 
@@ -773,6 +1352,7 @@ export async function getAnalytics(req, res, next) {
         enrollment_rate: empTotal.total > 0 ? Math.round((enrolledTotal.enrolled / empTotal.total) * 100) : 0,
         today_biometric_attendances: todayFaceAtt.face_count || 0,
         spoof_attempts_blocked_30d: spoofsDetected.spoofs || 0,
+        geofence_violations_30d: geofenceViolations.violations || 0,
       },
       recent_logs: recentLogs,
     });

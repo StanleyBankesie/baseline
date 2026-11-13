@@ -38,6 +38,8 @@ import {
   Sliders,
   Building,
   Users,
+  CheckCircle2,
+  Activity,
   CheckSquare,
   Package,
   History,
@@ -1273,41 +1275,52 @@ export default function VariationRegister() {
             <>
               {/* KPI Summary Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-1">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Variations Logged</span>
-                  <p className="text-2xl font-medium text-slate-900 dark:text-white">{stats.total}</p>
-                  <p className="text-xs text-slate-500">Registered change proposals</p>
-                </div>
-
-                <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-1">
-                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Approved Change Orders</span>
-                  <p className="text-2xl font-medium text-emerald-600 dark:text-emerald-400">{stats.approvedCount}</p>
-                  <p className="text-xs text-slate-500">Formally authorized by client</p>
-                </div>
-
-                <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-1">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Proposed Value</span>
-                  <p className="text-xl font-medium text-slate-900 dark:text-white">
-                    GH₵ {stats.totalProposed.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-xs text-slate-500">Contractor claimed amount</p>
-                </div>
-
-                <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-1">
-                  <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Approved Net Value</span>
-                  <p className="text-xl font-medium text-blue-600 dark:text-blue-400">
-                    GH₵ {stats.totalApprovedVal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-xs text-slate-500">Contract sum adjustment</p>
-                </div>
-
-                <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-1">
-                  <span className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Approved Time Extension</span>
-                  <p className="text-xl font-medium text-purple-600 dark:text-purple-400">
-                    +{stats.totalDays} Days
-                  </p>
-                  <p className="text-xs text-slate-500">Cumulative schedule impact</p>
-                </div>
+                {[
+                  {
+                    label: "Approved Orders",
+                    val: stats.approvedCount,
+                    icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+                    color: "bg-sky-600 dark:bg-sky-500 text-white",
+                  },
+                  {
+                    label: "Total Variations",
+                    val: stats.total,
+                    icon: <FileEdit size={20} className="stroke-[2.5]" />,
+                    color: "bg-brand-900 dark:bg-brand-700 text-white",
+                  },
+                  {
+                    label: "Pending Review",
+                    val: stats.pendingCount,
+                    icon: <Clock size={20} className="stroke-[2.5]" />,
+                    color: "bg-amber-500 text-white",
+                  },
+                  {
+                    label: "Rejected / Cancelled",
+                    val: stats.rejectedCount,
+                    icon: <AlertTriangle size={20} className="stroke-[2.5]" />,
+                    color: "bg-rose-600 text-white",
+                  },
+                  {
+                    label: "Time Extension",
+                    val: `+${stats.totalDays} Days`,
+                    icon: <Clock size={20} className="stroke-[2.5]" />,
+                    color: "bg-indigo-600 text-white",
+                  },
+                ].map((stat, i) => (
+                  <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                        {stat.label}
+                      </p>
+                      <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                        {stat.val}
+                      </p>
+                    </div>
+                    <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+                      {stat.icon}
+                    </div>
+                  </div>
+                ))}
               </div>
 
               {/* Variations Register Table & Filter Bar */}

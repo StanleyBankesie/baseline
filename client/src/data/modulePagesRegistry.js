@@ -401,13 +401,6 @@ export const MODULE_PRIMARY_PAGES = {
       icon: "🚩",
       description: "Project milestone checkpoints",
     },
-    {
-      title: "Timesheets",
-      path: "/project-management/timesheets",
-      feature_key: "timesheets",
-      icon: "⏱️",
-      description: "Employee timesheet hours",
-    },
   ],
 
   "service-management": [

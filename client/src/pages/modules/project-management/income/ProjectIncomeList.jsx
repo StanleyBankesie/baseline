@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Loader2, DollarSign, TrendingUp, ArrowLeft, Search } from "lucide-react";
+import { Plus, Loader2, CheckCircle2, TrendingUp, ArrowLeft, Search, Activity, Clock } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import ProjectModal from "../components/ProjectModal.jsx";
 import { api } from "../../../../api/client.js";
@@ -37,8 +37,9 @@ export default function ProjectIncomeList() {
     const q = String(customerSearch || "").trim().toLowerCase();
     if (!q) return [];
     return customers.filter(c => 
-      String(c.customer_name || "").toLowerCase().includes(q) ||
-      String(c.customer_code || "").toLowerCase().includes(q)
+      (c.is_active === 1 || c.is_active === "1" || c.is_active === true || c.is_active === null || c.is_active === undefined) &&
+      (String(c.customer_name || "").toLowerCase().includes(q) ||
+      String(c.customer_code || "").toLowerCase().includes(q))
     ).slice(0, 10);
   }, [customerSearch, customers]);
 
@@ -264,6 +265,50 @@ export default function ProjectIncomeList() {
             <Plus size={16} /> Record Income
           </button>
         </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Received Incomes",
+            val: items.filter((i) => i.status === "RECEIVED" || i.status === "APPROVED" || !i.status).length,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Total Incomes",
+            val: items.length,
+            icon: <TrendingUp size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+          {
+            label: "Projects Revenue",
+            val: new Set(items.map((i) => i.project_id || i.project_name).filter(Boolean)).size,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Cleared / Received",
+            val: items.filter((i) => i.status === "CLEARED" || i.status === "RECEIVED" || i.status === "POSTED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
       </div>
 
       <div className="card">

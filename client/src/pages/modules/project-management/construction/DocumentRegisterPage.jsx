@@ -178,35 +178,7 @@ export default function DocumentRegisterPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <select
-            className="input text-sm py-1.5 h-auto min-w-[180px]"
-            value={selectedProjectId}
-            onChange={e => setSelectedProjectId(e.target.value)}
-          >
-            {projects.map(p => (
-              <option key={p.id} value={p.id}>
-                {p.project_code} - {p.project_name}
-              </option>
-            ))}
-          </select>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input
-              type="text"
-              placeholder="Search drawings & RFIs..."
-              className="input pl-9 pr-3 py-1.5 text-sm h-auto w-48"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <button
-            onClick={fetchRecords}
-            className="btn btn-secondary p-2"
-            title="Refresh"
-          >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-          </button>
+        <div>
           {activeTab === "documents" ? (
             <button
               onClick={() => {
@@ -249,6 +221,95 @@ export default function DocumentRegisterPage() {
               <Plus size={16} /> Raise RFI
             </button>
           )}
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Approved Drawings",
+            val: documents.filter((d) => d.status === "APPROVED_FOR_CONSTRUCTION").length,
+            icon: <CheckCircle size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500",
+          },
+          {
+            label: "Total Drawings",
+            val: documents.length,
+            icon: <FileCode size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700",
+          },
+          {
+            label: "Open RFIs",
+            val: rfis.filter((r) => r.status !== "CLOSED").length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500",
+          },
+          {
+            label: "Total RFIs",
+            val: rfis.length,
+            icon: <HelpCircle size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600",
+          },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm"
+          >
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Filter & Search Toolbar */}
+      <div className="card p-3 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl shadow-apple-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3 flex-1 min-w-0">
+          <div className="flex items-center gap-2 min-w-[260px] flex-1 sm:flex-initial">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider shrink-0">
+              Project:
+            </span>
+            <select
+              className="input text-sm py-2 h-10 w-full rounded-xl"
+              value={selectedProjectId}
+              onChange={e => setSelectedProjectId(e.target.value)}
+            >
+              {projects.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.project_code} - {p.project_name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="relative flex-1 min-w-[200px] max-w-md">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input
+              type="text"
+              placeholder="Search drawings & RFIs..."
+              className="input pl-10 pr-3 py-2 text-sm h-10 w-full rounded-xl"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <button
+            onClick={fetchRecords}
+            className="btn btn-secondary h-10 px-3.5 rounded-xl shrink-0 inline-flex items-center gap-1.5"
+            title="Refresh"
+          >
+            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+            <span className="hidden sm:inline text-xs font-medium">Refresh</span>
+          </button>
         </div>
       </div>
 

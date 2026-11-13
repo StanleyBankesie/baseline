@@ -180,27 +180,50 @@ export default function ToolboxTalksPage() {
       </div>
 
       {/* KPI Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="card p-4 space-y-1">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Briefings Held</span>
-          <p className="text-2xl font-medium text-slate-900 dark:text-white">{totalSessions}</p>
-          <p className="text-xs text-slate-400">Recorded safety briefings</p>
-        </div>
-        <div className="card p-4 space-y-1">
-          <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Worker Attendances</span>
-          <p className="text-2xl font-medium text-blue-600">{totalAttendees}</p>
-          <p className="text-xs text-slate-400">Total operatives briefed</p>
-        </div>
-        <div className="card p-4 space-y-1">
-          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Average Attendance</span>
-          <p className="text-2xl font-medium text-emerald-600">{avgAttendance} Operatives</p>
-          <p className="text-xs text-slate-400">Mean operatives per talk</p>
-        </div>
-        <div className="card p-4 space-y-1">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Latest Session Date</span>
-          <p className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-1">{latestDate}</p>
-          <p className="text-xs text-slate-400">Most recent site briefing</p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Total Briefings Held",
+            val: totalSessions,
+            icon: <Megaphone size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500",
+          },
+          {
+            label: "Worker Attendances",
+            val: totalAttendees,
+            icon: <Users size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700",
+          },
+          {
+            label: "Average Attendance",
+            val: `${avgAttendance} Operatives`,
+            icon: <UserCheck size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600",
+          },
+          {
+            label: "Latest Briefing",
+            val: latestDate,
+            icon: <Calendar size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500",
+          },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm"
+          >
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Filter and Search Bar */}

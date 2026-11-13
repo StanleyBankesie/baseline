@@ -471,7 +471,7 @@ export default function MaterialUtilizationForm() {
                   onChange={(e) => onWarehouseChange(e.target.value)}
                 >
                   <option value="">Select Warehouse</option>
-                  {warehouses.map((w) => (
+                  {warehouses.filter(w => w.is_active === 1 || w.is_active === "1" || w.is_active === true || w.is_active === null || w.is_active === undefined).map((w) => (
                     <option key={w.id} value={w.id}>
                       {w.warehouse_name}
                     </option>

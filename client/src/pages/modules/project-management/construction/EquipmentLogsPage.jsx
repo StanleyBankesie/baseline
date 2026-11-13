@@ -11,7 +11,7 @@ import {
   ArrowLeft,
   Clock,
   Fuel,
-  DollarSign,
+  Activity,
   AlertCircle,
   X,
   Search,
@@ -202,28 +202,46 @@ export default function EquipmentLogsPage() {
 
       {/* KPI Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="card p-4 space-y-1">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Operating Hours</span>
-          <p className="text-2xl font-medium text-slate-900 dark:text-white">{totalHoursWorked} Hours</p>
-          <p className="text-xs text-slate-400">Recorded machine runtime</p>
-        </div>
-        <div className="card p-4 space-y-1">
-          <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Total Fuel Consumed</span>
-          <p className="text-2xl font-medium text-amber-600">{totalFuel} Litres</p>
-          <p className="text-xs text-slate-400">Diesel / Petrol dispensed</p>
-        </div>
-        <div className="card p-4 space-y-1">
-          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Operating Plant Cost</span>
-          <p className="text-2xl font-medium text-emerald-600">
-            GHS {totalCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-          </p>
-          <p className="text-xs text-slate-400">Hours * hourly charge rate</p>
-        </div>
-        <div className="card p-4 space-y-1">
-          <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Total Log Entries</span>
-          <p className="text-2xl font-medium text-blue-600">{logs.length} Entries</p>
-          <p className="text-xs text-slate-400">Daily machine sheets</p>
-        </div>
+        {[
+          {
+            label: "Operating Hours",
+            val: `${totalHoursWorked} hrs`,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Total Log Entries",
+            val: logs.length,
+            icon: <Truck size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+          {
+            label: "Fuel Consumed",
+            val: `${totalFuel} Litres`,
+            icon: <Fuel size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Active Plant Units",
+            val: new Set(logs.map((l) => l.equipment_id || l.machine_id).filter(Boolean)).size || logs.length,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Logs Table */}
@@ -328,7 +346,7 @@ export default function EquipmentLogsPage() {
                 }}
               >
                 <option value="">Select Equipment...</option>
-                {equipments.map(eq => (
+                {equipments.filter(eq => String(eq.status || "ACTIVE").toUpperCase() === "ACTIVE").map(eq => (
                   <option key={eq.id} value={eq.id}>
                     {eq.name || eq.equipment_name}{eq.maint_equipment_name ? ` (${eq.maint_equipment_name})` : ""}
                   </option>

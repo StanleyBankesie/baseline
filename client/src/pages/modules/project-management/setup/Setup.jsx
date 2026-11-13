@@ -3,9 +3,9 @@
  * Provides functionality for Setup.
  */
 
-import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { Link } from "react-router-dom";
-import { Loader2, User, Trash2, Plus, X, Pencil, Building2, Warehouse, Wrench, Settings, HardHat, ArrowLeft } from "lucide-react";
+import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { Loader2, User, Ban, CheckCircle, Plus, X, Pencil, Building2, Warehouse, Wrench, Settings, HardHat, ArrowLeft, ChevronDown } from "lucide-react";
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import PhoneInput from "../../../../components/PhoneInput.jsx";
@@ -28,7 +28,7 @@ function ModalForm({ open, onClose, title, children }) {
               Operations Setup
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-              Configure managers, operational departments, temporal warehouses, and service suppliers
+              Configure operational departments, temporal warehouses, and service suppliers
             </p>
           </div>
         </div>
@@ -44,7 +44,7 @@ function ModalForm({ open, onClose, title, children }) {
 }
 
 /* ─────────────────────── Generic CRUD Section ─── */
-function CrudSection({ title, icon, emptyMsg, columns, rows, loading, onAdd, onEdit, onDelete, renderRow }) {
+function CrudSection({ title, icon, emptyMsg, columns, rows, loading, onAdd, onEdit, onToggleStatus, isRowActive, renderRow }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -67,25 +67,46 @@ function CrudSection({ title, icon, emptyMsg, columns, rows, loading, onAdd, onE
           <tbody>
             {loading ? (
               <tr><td colSpan={columns.length + 1} className="px-4 py-8 text-center text-slate-400">Loading...</td></tr>
-            ) : rows.length > 0 ? rows.map(row => (
-              <tr key={row.id} className="border-t hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                {renderRow(row)}
-                <td className="px-4 py-3 text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    {onEdit && (
-                      <button onClick={() => onEdit(row)} className="p-1.5 text-brand hover:text-brand-700 rounded hover:bg-brand-50 transition-colors">
-                        <Pencil size={14} />
-                      </button>
-                    )}
-                    {onDelete && (
-                      <button onClick={() => onDelete(row.id)} className="p-1.5 text-rose-400 hover:text-rose-600 rounded hover:bg-rose-50 transition-colors">
-                        <Trash2 size={14} />
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            )) : (
+            ) : rows.length > 0 ? rows.map(row => {
+              const active = isRowActive ? isRowActive(row) : (row.is_active === 1 || row.is_active === "Y" || row.status === "ACTIVE");
+              return (
+                <tr key={row.id} className="border-t hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                  {renderRow(row)}
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      {onEdit && (
+                        <button onClick={() => onEdit(row)} title="Edit" className="p-1.5 text-brand hover:text-brand-700 rounded hover:bg-brand-50 transition-colors">
+                          <Pencil size={14} />
+                        </button>
+                      )}
+                      {onToggleStatus && (
+                        active ? (
+                          <button
+                            type="button"
+                            onClick={() => onToggleStatus(row)}
+                            title="Disable"
+                            className="px-2.5 py-1 text-xs font-semibold rounded-lg text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800 transition-colors inline-flex items-center gap-1.5 shadow-sm"
+                          >
+                            <Ban size={13} />
+                            <span>Disable</span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => onToggleStatus(row)}
+                            title="Enable"
+                            className="px-2.5 py-1 text-xs font-semibold rounded-lg text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-800 transition-colors inline-flex items-center gap-1.5 shadow-sm"
+                          >
+                            <CheckCircle size={13} />
+                            <span>Enable</span>
+                          </button>
+                        )
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            }) : (
               <tr><td colSpan={columns.length + 1} className="px-4 py-8 text-center text-slate-400">{emptyMsg}</td></tr>
             )}
           </tbody>
@@ -102,13 +123,38 @@ function CrudSection({ title, icon, emptyMsg, columns, rows, loading, onAdd, onE
  * @returns {JSX.Element} The rendered component
  */
 export default function Setup() {
-  const [activeTab, setActiveTab] = useState("managers");
+  const [searchParams] = useSearchParams();
+  const queryTab = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState(
+    queryTab && ["departments", "warehouses", "project-types", "subcontractors", "suppliers", "clients", "equipments"].includes(queryTab)
+      ? queryTab
+      : "departments"
+  );
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab && ["departments", "warehouses", "project-types", "subcontractors", "suppliers", "clients", "equipments"].includes(tab)) {
+      setActiveTab(tab);
+      if (tab === "clients" && (searchParams.get("new") === "true" || searchParams.get("action") === "new")) {
+        setClientModal(true);
+      }
+    }
+  }, [searchParams]);
   const [loading, setLoading] = useState(false);
 
+  // ── Global References (Accounts & Currencies) ─────
+  const [accounts, setAccounts] = useState([]);
+  const [currencies, setCurrencies] = useState([]);
+  const baseCurrencyId = currencies.find((c) => Number(c.is_base) === 1 || c.is_base === true)?.id || "";
+
   // ── Project Managers ──────────────────────────────
-  const [users, setUsers] = useState([]);
-  const [managers, setManagers] = useState([]);
-  const [selectedUserId, setSelectedUserId] = useState("");
+
+  // ── Project Types ──────────────────────────────────
+  const [projectTypes, setProjectTypes] = useState([]);
+  const [ptModal, setPtModal] = useState(false);
+  const [editingPt, setEditingPt] = useState(null);
+  const [ptForm, setPtForm] = useState({ type_code: "", type_name: "", description: "", is_active: 1 });
+  const [ptSaving, setPtSaving] = useState(false);
 
   // ── Departments ───────────────────────────────────
   const [departments, setDepartments] = useState([]);
@@ -177,9 +223,7 @@ export default function Setup() {
   const [eqSaving, setEqSaving] = useState(false);
   const [maintAssets, setMaintAssets] = useState([]);
 
-  const [accounts, setAccounts] = useState([]);
-  const [currencies, setCurrencies] = useState([]);
-  const baseCurrencyId = currencies.find((c) => Number(c.is_base) === 1 || c.is_base === true)?.id || "";
+
   const [supExpenseAccountSearch, setSupExpenseAccountSearch] = useState("");
   const supExpenseAccountResults = useMemo(() => {
     if (!supExpenseAccountSearch) return [];
@@ -191,37 +235,66 @@ export default function Setup() {
   }, [supExpenseAccountSearch, accounts]);
 
   const [clientRevenueAccountSearch, setClientRevenueAccountSearch] = useState("");
+  const [clientRevenueDropdownOpen, setClientRevenueDropdownOpen] = useState(false);
+  const clientRevenueRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (clientRevenueRef.current && !clientRevenueRef.current.contains(event.target)) {
+        setClientRevenueDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const clientRevenueAccountResults = useMemo(() => {
-    if (!clientRevenueAccountSearch) return [];
-    const q = clientRevenueAccountSearch.toLowerCase();
-    return accounts
-      .filter((a) => String(a.name || "").toLowerCase().includes(q) || String(a.code || "").toLowerCase().includes(q))
-      .slice(0, 50)
-      .map((a) => ({ value: String(a.id), label: String(a.name), code: String(a.code) }));
+    let list = accounts;
+    if (clientRevenueAccountSearch && clientRevenueAccountSearch.trim()) {
+      const q = clientRevenueAccountSearch.toLowerCase().trim();
+      list = accounts.filter(
+        (a) =>
+          String(a.name || "").toLowerCase().includes(q) ||
+          String(a.code || "").toLowerCase().includes(q)
+      );
+    }
+    const sorted = [...list].sort((a, b) => {
+      const aIsIncome = a.nature === "INCOME" || /sales|revenue|income/i.test(a.name || "");
+      const bIsIncome = b.nature === "INCOME" || /sales|revenue|income/i.test(b.name || "");
+      if (aIsIncome && !bIsIncome) return -1;
+      if (!aIsIncome && bIsIncome) return 1;
+      return String(a.code || "").localeCompare(String(b.code || ""));
+    });
+
+    return sorted.slice(0, 80).map((a) => ({
+      value: String(a.id),
+      label: String(a.name),
+      code: String(a.code || ""),
+      nature: a.nature,
+      group: a.group_name
+    }));
   }, [clientRevenueAccountSearch, accounts]);
 
   /* ── Data Loaders ── */
-  const loadManagers = useCallback(async () => {
+  const loadProjectTypes = useCallback(async () => {
     try {
-      const [mRes, uRes] = await Promise.all([
-        api.get("/projects/project-managers").catch(() => ({ data: { items: [] } })),
-        api.get("/admin/users", { params: { active: 1 } }).catch(() => ({ data: { items: [] } })),
-      ]);
-      setManagers(mRes.data?.items || []);
-      setUsers(uRes.data?.data?.items || uRes.data?.items || []);
-    } catch { toast.error("Failed to load managers"); }
+      const res = await api.get("/projects/project-types?active=all");
+      setProjectTypes(res.data?.items || []);
+    } catch {
+      toast.error("Failed to load project types");
+    }
   }, []);
 
   const loadDepartments = useCallback(async () => {
     try {
-      const res = await api.get("/admin/departments");
+      const res = await api.get("/admin/departments?all=1");
       setDepartments(res.data?.items || res.data || []);
     } catch { toast.error("Failed to load departments"); }
   }, []);
 
   const loadWarehouses = useCallback(async () => {
     try {
-      const res = await api.get("/inventory/warehouses");
+      const res = await api.get("/inventory/warehouses?active=all");
       setWarehouses(res.data?.items || res.data || []);
     } catch { toast.error("Failed to load warehouses"); }
   }, []);
@@ -229,28 +302,28 @@ export default function Setup() {
   
   const loadSubcontractors = useCallback(async () => {
     try {
-      const res = await api.get("/purchase/suppliers?contractor=Y");
+      const res = await api.get("/purchase/suppliers?contractor=Y&active=all");
       setSubcontractors(res.data?.data?.items || res.data?.items || []);
     } catch { toast.error("Failed to load contractors/subcontractors"); }
   }, []);
 
   const loadSuppliers = useCallback(async () => {
     try {
-      const res = await api.get("/purchase/suppliers?contractor=Y");
+      const res = await api.get("/purchase/suppliers?contractor=Y&active=all");
       setSuppliers(res.data?.data?.items || res.data?.items || []);
     } catch { toast.error("Failed to load suppliers"); }
   }, []);
 
   const loadClients = useCallback(async () => {
     try {
-      const res = await api.get("/sales/customers?service_customer=Y");
+      const res = await api.get("/sales/customers?service_customer=Y&active=all");
       setClients(res.data?.items || []);
     } catch { toast.error("Failed to load clients"); }
   }, []);
 
   const loadEquipments = useCallback(async () => {
     try {
-      const res = await api.get("/projects/equipments");
+      const res = await api.get("/projects/equipments?all=1");
       setEquipments(res.data || []);
     } catch { toast.error("Failed to load equipments"); }
   }, []);
@@ -275,30 +348,35 @@ export default function Setup() {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([loadManagers(), loadDepartments(), loadWarehouses(), loadSubcontractors(), loadSuppliers(), loadClients(), loadEquipments(), loadMaintAssets(), loadAccountsAndCurrencies()]).finally(() => setLoading(false));
-  }, [loadManagers, loadDepartments, loadWarehouses, loadSubcontractors, loadSuppliers, loadClients, loadEquipments, loadMaintAssets, loadAccountsAndCurrencies]);
+    Promise.all([loadProjectTypes(), loadDepartments(), loadWarehouses(), loadSubcontractors(), loadSuppliers(), loadClients(), loadEquipments(), loadMaintAssets(), loadAccountsAndCurrencies()]).finally(() => setLoading(false));
+  }, [loadProjectTypes, loadDepartments, loadWarehouses, loadSubcontractors, loadSuppliers, loadClients, loadEquipments, loadMaintAssets, loadAccountsAndCurrencies]);
 
-  /* ── Project Managers ── */
-  const handleAddManager = async () => {
-    if (!selectedUserId) { toast.error("Select a user"); return; }
-    try {
-      await api.post("/projects/project-managers", { user_id: Number(selectedUserId) });
-      toast.success("Project manager added");
-      setSelectedUserId("");
-      loadManagers();
-    } catch { toast.error("Failed to add manager"); }
+  /* ── Project Types ── */
+  const openPtAdd = () => {
+    setEditingPt(null);
+    setPtForm({ type_code: "", type_name: "", description: "", is_active: 1 });
+    setPtModal(true);
   };
-
-  const handleRemoveManager = async (id) => {
-    if (!confirm("Remove this user from project managers?")) return;
-    try {
-      await api.delete(`/projects/project-managers/${id}`);
-      toast.success("Manager removed");
-      loadManagers();
-    } catch { toast.error("Failed to remove manager"); }
+  const openPtEdit = (pt) => {
+    setEditingPt(pt);
+    setPtForm({
+      type_code: pt.type_code || "",
+      type_name: pt.type_name || "",
+      description: pt.description || "",
+      is_active: pt.is_active === 0 || pt.is_active === "N" ? 0 : 1,
+    });
+    setPtModal(true);
   };
-
-  const availableUsers = users.filter(u => !managers.some(m => String(m.user_id) === String(u.id)));
+  const togglePtStatus = async (pt) => {
+    try {
+      const newActive = (pt.is_active === 1 || pt.is_active === "Y") ? 0 : 1;
+      await api.put(`/projects/project-types/${pt.id}`, { is_active: newActive });
+      toast.success(`Project type ${newActive === 1 ? "enabled" : "disabled"}`);
+      loadProjectTypes();
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Failed to update project type status");
+    }
+  };
 
   /* ── Departments ── */
   const openDeptAdd = () => { setEditingDept(null); setDeptForm({ name: "", code: "", is_active: "Y" }); setDeptModal(true); };
@@ -321,13 +399,29 @@ export default function Setup() {
     finally { setDeptSaving(false); }
   };
 
-  const deleteDept = async (id) => {
-    if (!confirm("Delete this department?")) return;
+  const isEntityActive = (item) => {
+    if (!item) return false;
+    if (item.status !== undefined && item.status !== null) {
+      return String(item.status).toUpperCase() === "ACTIVE";
+    }
+    return (
+      item.is_active === 1 ||
+      item.is_active === "1" ||
+      item.is_active === true ||
+      item.is_active === "Y"
+    );
+  };
+
+  const toggleDeptStatus = async (d) => {
+    const currentlyActive = isEntityActive(d);
+    const newActive = currentlyActive ? "N" : "Y";
     try {
-      await api.delete(`/admin/departments/${id}`);
-      toast.success("Department deleted");
+      await api.put(`/admin/departments/${d.id}`, { ...d, is_active: newActive });
+      toast.success(`Department ${currentlyActive ? "disabled" : "enabled"}`);
       loadDepartments();
-    } catch (e) { toast.error(e?.response?.data?.message || "Failed to delete department"); }
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Failed to update department status");
+    }
   };
 
   /* ── Warehouses ── */
@@ -352,13 +446,16 @@ export default function Setup() {
     finally { setWhSaving(false); }
   };
 
-  const deleteWh = async (id) => {
-    if (!confirm("Delete this warehouse?")) return;
+  const toggleWhStatus = async (w) => {
+    const currentlyActive = isEntityActive(w);
+    const newActive = currentlyActive ? 0 : 1;
     try {
-      await api.delete(`/inventory/warehouses/${id}`);
-      toast.success("Warehouse deleted");
+      await api.put(`/inventory/warehouses/${w.id}`, { ...w, is_active: newActive });
+      toast.success(`Warehouse ${currentlyActive ? "disabled" : "enabled"}`);
       loadWarehouses();
-    } catch (e) { toast.error(e?.response?.data?.message || "Failed to delete warehouse"); }
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Failed to update warehouse status");
+    }
   };
 
   
@@ -409,13 +506,17 @@ export default function Setup() {
     finally { setSubSaving(false); }
   };
 
-  const deleteSub = async (id) => {
-    if (!confirm("Delete this contractor/subcontractor?")) return;
+  const toggleSubStatus = async (s) => {
+    const currentlyActive = isEntityActive(s);
+    const newActive = currentlyActive ? 0 : 1;
     try {
-      await api.delete(`/purchase/suppliers/${id}`);
-      toast.success("Contractor / Subcontractor deleted");
+      const payload = { ...s, is_active: newActive, service_contractor: "Y" };
+      await api.put(`/purchase/suppliers/${s.id}`, payload);
+      toast.success(`Contractor / Subcontractor ${currentlyActive ? "disabled" : "enabled"}`);
       loadSubcontractors();
-    } catch (e) { toast.error(e?.response?.data?.message || "Failed to delete contractor/subcontractor"); }
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Failed to update contractor/subcontractor status");
+    }
   };
 
   /* ── Suppliers ── */
@@ -466,13 +567,21 @@ export default function Setup() {
     finally { setSupSaving(false); }
   };
 
-  const deleteSup = async (id) => {
-    if (!confirm("Delete this supplier?")) return;
+  const toggleSupStatus = async (s) => {
+    const currentlyActive = isEntityActive(s);
+    const newActive = currentlyActive ? 0 : 1;
     try {
-      await api.delete(`/purchase/suppliers/${id}`);
-      toast.success("Supplier deleted");
+      const payload = {
+        ...s,
+        is_active: newActive,
+        service_contractor: s.service_contractor === "Y" || s.service_contractor === true ? "Y" : "N"
+      };
+      await api.put(`/purchase/suppliers/${s.id}`, payload);
+      toast.success(`Supplier ${currentlyActive ? "disabled" : "enabled"}`);
       loadSuppliers();
-    } catch (e) { toast.error(e?.response?.data?.message || "Failed to delete supplier"); }
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Failed to update supplier status");
+    }
   };
 
   /* ── Clients ── */
@@ -526,19 +635,45 @@ export default function Setup() {
     finally { setClientSaving(false); }
   };
 
-  const deleteClient = async (id) => {
-    if (!confirm("Delete this client?")) return;
+  const toggleClientStatus = async (c) => {
+    const currentlyActive = isEntityActive(c);
+    const newActive = currentlyActive ? 0 : 1;
     try {
-      await api.delete(`/sales/customers/${id}`);
-      toast.success("Client deleted");
+      const payload = {
+        ...c,
+        is_active: newActive,
+        service_customer: c.service_customer === "Y" || c.service_customer === true ? "Y" : "N"
+      };
+      await api.put(`/sales/customers/${c.id}`, payload);
+      toast.success(`Client ${currentlyActive ? "disabled" : "enabled"}`);
       loadClients();
-    } catch (e) { toast.error(e?.response?.data?.message || "Failed to delete client"); }
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Failed to update client status");
+    }
+  };
+
+  const toggleEqStatus = async (eq) => {
+    const currentlyActive = isEntityActive(eq);
+    const newStatus = currentlyActive ? "INACTIVE" : "ACTIVE";
+    try {
+      const payload = {
+        name: eq.name,
+        description: eq.description || null,
+        status: newStatus,
+        maint_equipment_id: eq.maint_equipment_id || null
+      };
+      await api.put(`/projects/equipments/${eq.id}`, payload);
+      toast.success(`Equipment ${currentlyActive ? "disabled" : "enabled"}`);
+      loadEquipments();
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Failed to update equipment status");
+    }
   };
 
   const TABS = [
-    { id: "managers",    label: "Project Managers" },
     { id: "departments", label: "Departments" },
     { id: "warehouses",     label: "Temp. Storage / Warehouses" },
+    { id: "project-types",  label: "Project Types" },
     { id: "subcontractors", label: "Contractor / Subcontractor" },
     { id: "suppliers",   label: "Suppliers" },
     { id: "clients",     label: "Clients" },
@@ -552,7 +687,7 @@ export default function Setup() {
         <button onClick={() => window.history.back()} className="btn-secondary text-sm">Back</button>
         <div>
           <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Operations Setup</h2>
-          <p className="text-xs text-slate-500">Configure managers, departments, and storage</p>
+          <p className="text-xs text-slate-500">Configure departments, temporary storage, and suppliers</p>
         </div>
       </div>
 
@@ -570,58 +705,145 @@ export default function Setup() {
         ))}
       </div>
 
-      {/* ── Project Managers Tab ── */}
-      {activeTab === "managers" && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
-              <h3 className="font-semibold mb-4 text-slate-800 dark:text-slate-100">Add Project Manager</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Select User</label>
-                  <select className="input" value={selectedUserId} onChange={e => setSelectedUserId(e.target.value)}>
-                    <option value="">-- Choose User --</option>
-                    {availableUsers.map(u => <option key={u.id} value={u.id}>{u.username}</option>)}
-                  </select>
-                </div>
-                <button type="button" onClick={handleAddManager} className="btn btn-primary inline-flex items-center gap-2 w-full justify-center text-sm">
-                  <Plus size={16} /> Add Manager
-                </button>
+      
+
+      {/* ── Project Types Tab ── */}
+      {activeTab === "project-types" && (
+        <>
+          <CrudSection
+            title="Project Types"
+            icon={<Settings size={18} className="text-slate-600" />}
+            emptyMsg="No project types configured. Add one to get started."
+            columns={["Code", "Project Type Name", "Description", "Status"]}
+            rows={projectTypes}
+            loading={loading}
+            onAdd={openPtAdd}
+            onEdit={openPtEdit}
+            onToggleStatus={togglePtStatus}
+            isRowActive={(pt) => pt.is_active === 1 || pt.is_active === "Y"}
+            renderRow={(pt) => (
+              <>
+                <td className="px-4 py-3 font-mono font-bold text-xs text-brand-600 dark:text-brand-400">
+                  {pt.type_code}
+                </td>
+                <td className="px-4 py-3 font-semibold text-sm text-slate-800 dark:text-slate-100">
+                  {pt.type_name}
+                </td>
+                <td className="px-4 py-3 text-xs text-slate-500 max-w-xs truncate">
+                  {pt.description || "—"}
+                </td>
+                <td className="px-4 py-3">
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase ${
+                      pt.is_active === 1 || pt.is_active === "Y"
+                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                        : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+                    }`}
+                  >
+                    {pt.is_active === 1 || pt.is_active === "Y" ? "Active" : "Inactive"}
+                  </span>
+                </td>
+              </>
+            )}
+          />
+
+          <ModalForm
+            open={ptModal}
+            onClose={() => setPtModal(false)}
+            title={editingPt ? "Edit Project Type" : "New Project Type"}
+          >
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  Project Type Name *
+                </label>
+                <input
+                  type="text"
+                  className="input w-full"
+                  placeholder="e.g. Commercial Buildings, Solar Infrastructure"
+                  value={ptForm.type_name}
+                  onChange={(e) => {
+                    const name = e.target.value;
+                    const autoCode = !editingPt && (!ptForm.type_code || ptForm.type_code === ptForm.type_name.toUpperCase().replace(/[^A-Z0-9]/g, '_'))
+                      ? name.toUpperCase().replace(/[^A-Z0-9]/g, '_')
+                      : ptForm.type_code;
+                    setPtForm((p) => ({ ...p, type_name: name, type_code: autoCode }));
+                  }}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  Type Code (Unique Identifier)
+                </label>
+                <input
+                  type="text"
+                  className="input w-full font-mono text-xs uppercase"
+                  placeholder="e.g. COMMERCIAL_BUILDING"
+                  value={ptForm.type_code}
+                  onChange={(e) => setPtForm((p) => ({ ...p, type_code: e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '') }))}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  Description
+                </label>
+                <textarea
+                  className="input w-full text-xs"
+                  rows={3}
+                  placeholder="Brief description of work scope for this project type..."
+                  value={ptForm.description}
+                  onChange={(e) => setPtForm((p) => ({ ...p, description: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  Status
+                </label>
+                <select
+                  className="input w-full"
+                  value={ptForm.is_active}
+                  onChange={(e) => setPtForm((p) => ({ ...p, is_active: Number(e.target.value) }))}
+                >
+                  <option value={1}>Active</option>
+                  <option value={0}>Inactive</option>
+                </select>
               </div>
             </div>
-          </div>
-          <div className="lg:col-span-2">
-            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden border border-slate-200 dark:border-slate-800">
-              <table className="min-w-full">
-                <thead className="bg-slate-50 dark:bg-slate-900/50">
-                  <tr className="text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
-                    <th className="px-4 py-3">Username</th>
-                    <th className="px-4 py-3">Email</th>
-                    <th className="px-4 py-3 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {managers.map(m => (
-                    <tr key={m.id} className="border-t hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                      <td className="px-4 py-3 font-medium flex items-center gap-2">
-                        <User size={14} className="text-slate-400" />{m.username}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-slate-500">{m.email || "—"}</td>
-                      <td className="px-4 py-3 text-right">
-                        <button onClick={() => handleRemoveManager(m.id)} className="p-1.5 text-rose-400 hover:text-rose-600 rounded hover:bg-rose-50 transition-colors">
-                          <Trash2 size={14} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {managers.length === 0 && !loading && (
-                    <tr><td colSpan={3} className="px-4 py-8 text-center text-slate-400">No project managers configured</td></tr>
-                  )}
-                </tbody>
-              </table>
+            <div className="flex justify-end gap-2 pt-3">
+              <button className="btn-outline" onClick={() => setPtModal(false)}>
+                Cancel
+              </button>
+              <button
+                className="btn-primary flex items-center gap-2"
+                disabled={ptSaving}
+                onClick={async () => {
+                  if (!ptForm.type_name.trim()) {
+                    toast.error("Project type name is required");
+                    return;
+                  }
+                  setPtSaving(true);
+                  try {
+                    if (editingPt) {
+                      await api.put(`/projects/project-types/${editingPt.id}`, ptForm);
+                      toast.success("Project type updated");
+                    } else {
+                      await api.post("/projects/project-types", ptForm);
+                      toast.success("Project type created");
+                    }
+                    setPtModal(false);
+                    loadProjectTypes();
+                  } catch (e) {
+                    toast.error(e?.response?.data?.message || "Failed to save project type");
+                  } finally {
+                    setPtSaving(false);
+                  }
+                }}
+              >
+                {ptSaving ? <Loader2 size={14} className="animate-spin" /> : null} Save
+              </button>
             </div>
-          </div>
-        </div>
+          </ModalForm>
+        </>
       )}
 
       {/* ── Departments Tab ── */}
@@ -636,6 +858,8 @@ export default function Setup() {
             loading={loading}
             onAdd={openDeptAdd}
             onEdit={openDeptEdit}
+            onToggleStatus={toggleDeptStatus}
+            isRowActive={isEntityActive}
             renderRow={d => (
               <>
                 <td className="px-4 py-3 font-medium text-sm">{d.name}</td>
@@ -687,6 +911,8 @@ export default function Setup() {
             loading={loading}
             onAdd={openWhAdd}
             onEdit={openWhEdit}
+            onToggleStatus={toggleWhStatus}
+            isRowActive={isEntityActive}
             renderRow={w => (
               <>
                 <td className="px-4 py-3 font-medium text-sm">{w.warehouse_name}</td>
@@ -743,7 +969,8 @@ export default function Setup() {
             loading={loading}
             onAdd={openSubAdd}
             onEdit={openSubEdit}
-            onDelete={deleteSub}
+            onToggleStatus={toggleSubStatus}
+            isRowActive={isEntityActive}
             renderRow={(s) => (
               <>
                 <td className="px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-100">{s.supplier_name}</td>
@@ -897,7 +1124,8 @@ export default function Setup() {
             loading={loading}
             onAdd={openSupAdd}
             onEdit={openSupEdit}
-            onDelete={deleteSup}
+            onToggleStatus={toggleSupStatus}
+            isRowActive={isEntityActive}
             renderRow={(s) => (
               <>
                 <td className="px-4 py-3 text-sm font-medium text-slate-700">{s.supplier_name}</td>
@@ -1045,6 +1273,8 @@ export default function Setup() {
             loading={loading}
             onAdd={openClientAdd}
             onEdit={openClientEdit}
+            onToggleStatus={toggleClientStatus}
+            isRowActive={isEntityActive}
             renderRow={(c) => (
               <>
                 <td className="px-4 py-3 text-sm font-medium text-slate-700">{c.customer_name}</td>
@@ -1064,12 +1294,24 @@ export default function Setup() {
           <ModalForm open={clientModal} onClose={() => setClientModal(false)} title={editingClient ? "Edit Client" : "New Client"}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="sm:col-span-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Client Name *</label>
-                <input type="text" className="input w-full" placeholder="Client Name" value={clientForm.customer_name} onChange={e => setClientForm(p => ({ ...p, customer_name: e.target.value }))} />
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Client Name <span className="text-red-500">*</span></label>
+                <input
+                  type="text"
+                  required
+                  className="input w-full"
+                  placeholder="Client Name"
+                  value={clientForm.customer_name}
+                  onChange={e => setClientForm(p => ({ ...p, customer_name: e.target.value }))}
+                />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Client Type</label>
-                <select className="select w-full" value={clientForm.customer_type} onChange={e => setClientForm(p => ({ ...p, customer_type: e.target.value }))}>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Client Type <span className="text-red-500">*</span></label>
+                <select
+                  required
+                  className="select w-full"
+                  value={clientForm.customer_type}
+                  onChange={e => setClientForm(p => ({ ...p, customer_type: e.target.value }))}
+                >
                   <option value="LOCAL">LOCAL</option>
                   <option value="FOREIGN">FOREIGN</option>
                   <option value="Individual">Individual</option>
@@ -1078,80 +1320,155 @@ export default function Setup() {
               </div>
               <div>
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Contact Person</label>
-                <input type="text" className="input w-full" placeholder="John Doe" value={clientForm.contact_person} onChange={e => setClientForm(p => ({ ...p, contact_person: e.target.value }))} />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Email</label>
-                <input type="email" className="input w-full" placeholder="contact@example.com" value={clientForm.email} onChange={e => setClientForm(p => ({ ...p, email: e.target.value }))} />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Phone</label>
-                <PhoneInput value={clientForm.phone} onChange={v => setClientForm(p => ({ ...p, phone: v }))} />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Address</label>
-                <input type="text" className="input w-full" placeholder="123 Street Name" value={clientForm.address} onChange={e => setClientForm(p => ({ ...p, address: e.target.value }))} />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">City</label>
-                <input type="text" className="input w-full" placeholder="City" value={clientForm.city} onChange={e => setClientForm(p => ({ ...p, city: e.target.value }))} />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">State/Region</label>
-                <input type="text" className="input w-full" placeholder="State" value={clientForm.state} onChange={e => setClientForm(p => ({ ...p, state: e.target.value }))} />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Country</label>
-                <input type="text" className="input w-full" placeholder="Country" value={clientForm.country} onChange={e => setClientForm(p => ({ ...p, country: e.target.value }))} />
-              </div>
-              <div className="relative">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Revenue Account</label>
                 <input
                   type="text"
                   className="input w-full"
-                  placeholder="Search account..."
-                  value={clientRevenueAccountSearch || ""}
-                  onChange={(e) => {
-                    setClientRevenueAccountSearch(e.target.value);
-                    if (!e.target.value) {
-                      setClientForm((p) => ({ ...p, sales_account_id: "" }));
-                    }
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && clientRevenueAccountResults.length) {
-                      const selected = clientRevenueAccountResults[0];
-                      const acc = accounts.find((a) => String(a.id) === selected.value);
-                      if (acc) {
-                        setClientRevenueAccountSearch(acc.name || "");
-                        setClientForm((p) => ({ ...p, sales_account_id: String(acc.id) }));
-                      }
-                    }
-                  }}
+                  placeholder="John Doe (Optional)"
+                  value={clientForm.contact_person}
+                  onChange={e => setClientForm(p => ({ ...p, contact_person: e.target.value }))}
                 />
-                {clientRevenueAccountSearch && clientRevenueAccountResults.length > 0 && (
-                  <div className="absolute z-50 mt-1 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-md max-h-48 overflow-auto">
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Email</label>
+                <input
+                  type="email"
+                  className="input w-full"
+                  placeholder="contact@example.com (Optional)"
+                  value={clientForm.email}
+                  onChange={e => setClientForm(p => ({ ...p, email: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Phone <span className="text-red-500">*</span></label>
+                <PhoneInput
+                  required
+                  value={clientForm.phone}
+                  onChange={v => setClientForm(p => ({ ...p, phone: v }))}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Address</label>
+                <input
+                  type="text"
+                  className="input w-full"
+                  placeholder="123 Street Name (Optional)"
+                  value={clientForm.address}
+                  onChange={e => setClientForm(p => ({ ...p, address: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">City <span className="text-red-500">*</span></label>
+                <input
+                  type="text"
+                  required
+                  className="input w-full"
+                  placeholder="City"
+                  value={clientForm.city}
+                  onChange={e => setClientForm(p => ({ ...p, city: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">State/Region <span className="text-red-500">*</span></label>
+                <input
+                  type="text"
+                  required
+                  className="input w-full"
+                  placeholder="State/Region"
+                  value={clientForm.state}
+                  onChange={e => setClientForm(p => ({ ...p, state: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Country <span className="text-red-500">*</span></label>
+                <input
+                  type="text"
+                  required
+                  className="input w-full"
+                  placeholder="Country"
+                  value={clientForm.country}
+                  onChange={e => setClientForm(p => ({ ...p, country: e.target.value }))}
+                />
+              </div>
+
+              {/* Revenue Account populating from fin_accounts */}
+              <div className="relative" ref={clientRevenueRef}>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  Revenue Account <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    required
+                    className="input w-full pr-8"
+                    placeholder="Search or select revenue account..."
+                    value={clientRevenueAccountSearch || ""}
+                    onFocus={() => setClientRevenueDropdownOpen(true)}
+                    onChange={(e) => {
+                      setClientRevenueAccountSearch(e.target.value);
+                      setClientRevenueDropdownOpen(true);
+                      if (!e.target.value) {
+                        setClientForm((p) => ({ ...p, sales_account_id: "" }));
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && clientRevenueAccountResults.length) {
+                        const selected = clientRevenueAccountResults[0];
+                        const acc = accounts.find((a) => String(a.id) === selected.value);
+                        if (acc) {
+                          setClientRevenueAccountSearch(`${acc.name}${acc.code ? ` (${acc.code})` : ""}`);
+                          setClientForm((p) => ({ ...p, sales_account_id: String(acc.id) }));
+                          setClientRevenueDropdownOpen(false);
+                        }
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => setClientRevenueDropdownOpen(!clientRevenueDropdownOpen)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  >
+                    <ChevronDown size={16} className={`transition-transform duration-200 ${clientRevenueDropdownOpen ? "rotate-180" : ""}`} />
+                  </button>
+                </div>
+                {clientRevenueDropdownOpen && clientRevenueAccountResults.length > 0 && (
+                  <div className="absolute z-50 mt-1 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-h-52 overflow-auto py-1">
                     {clientRevenueAccountResults.map((o) => (
                       <button
                         type="button"
                         key={o.value}
-                        className="block w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm"
+                        className={`block w-full text-left px-3.5 py-2 text-xs transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 ${
+                          String(clientForm.sales_account_id) === o.value
+                            ? "bg-brand-50 text-brand-900 dark:bg-brand-950/40 dark:text-brand-300 font-bold"
+                            : "text-slate-700 dark:text-slate-300"
+                        }`}
                         onClick={() => {
-                          const acc = accounts.find((a) => String(a.id) === o.value);
-                          if (acc) {
-                            setClientRevenueAccountSearch(acc.name || "");
-                            setClientForm((p) => ({ ...p, sales_account_id: String(acc.id) }));
-                          }
+                          const display = `${o.label}${o.code ? ` (${o.code})` : ""}`;
+                          setClientRevenueAccountSearch(display);
+                          setClientForm((p) => ({ ...p, sales_account_id: o.value }));
+                          setClientRevenueDropdownOpen(false);
                         }}
                       >
-                        {o.label} {o.code ? `(${o.code})` : ""}
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{o.label}</span>
+                          <span className="text-[11px] font-mono text-slate-400">{o.code}</span>
+                        </div>
                       </button>
                     ))}
                   </div>
                 )}
               </div>
+
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Default Currency</label>
-                <select className="select w-full" value={clientForm.currency_id} onChange={e => setClientForm(p => ({ ...p, currency_id: e.target.value }))}>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  Default Currency <span className="text-red-500">*</span>
+                </label>
+                <select
+                  required
+                  className="select w-full"
+                  value={clientForm.currency_id}
+                  onChange={e => setClientForm(p => ({ ...p, currency_id: e.target.value }))}
+                >
                   <option value="">-- Select Currency --</option>
                   {currencies.map(c => <option key={c.id} value={c.id}>{c.code} - {c.name}</option>)}
                 </select>
@@ -1168,7 +1485,7 @@ export default function Setup() {
                 </label>
               </div>
             </div>
-            <div className="flex justify-end gap-2 pt-4">
+            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800 mt-2">
               <button className="btn-outline" onClick={() => setClientModal(false)}>Cancel</button>
               <button className="btn-primary flex items-center gap-2" disabled={clientSaving} onClick={saveClient}>
                 {clientSaving ? <Loader2 size={14} className="animate-spin" /> : null} Save
@@ -1190,14 +1507,8 @@ export default function Setup() {
             loading={loading}
             onAdd={() => { setEditingEq(null); setEqForm({ name: "", description: "", status: "ACTIVE", maint_equipment_id: "" }); setEqModal(true); }}
             onEdit={(e) => { setEditingEq(e); setEqForm({ name: e.name || "", description: e.description || "", status: e.status || "ACTIVE", maint_equipment_id: e.maint_equipment_id || "" }); setEqModal(true); }}
-            onDelete={async (id) => {
-              if (!confirm("Delete this equipment?")) return;
-              try {
-                await api.delete(`/projects/equipments/${id}`);
-                toast.success("Equipment deleted");
-                loadEquipments();
-              } catch (e) { toast.error(e?.response?.data?.message || "Failed to delete equipment"); }
-            }}
+            onToggleStatus={toggleEqStatus}
+            isRowActive={isEntityActive}
             renderRow={e => (
               <>
                 <td className="px-4 py-3 font-medium text-sm">{e.name}</td>

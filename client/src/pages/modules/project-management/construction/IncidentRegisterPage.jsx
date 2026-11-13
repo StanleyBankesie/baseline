@@ -235,29 +235,50 @@ export default function IncidentRegisterPage() {
       </div>
 
       {/* KPI Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="card p-4 space-y-1">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Recorded Incidents</span>
-          <p className="text-2xl font-medium text-slate-900 dark:text-white">{totalIncidents}</p>
-          <p className="text-xs text-slate-400">Total reported site incidents</p>
-        </div>
-        <div className="card p-4 space-y-1">
-          <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Near Miss Events</span>
-          <p className="text-2xl font-medium text-amber-600">{nearMissCount}</p>
-          <p className="text-xs text-slate-400">Hazard proactive detections</p>
-        </div>
-        <div className="card p-4 space-y-1">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Lost Time Injuries (LTI)</span>
-          <p className={`text-2xl font-medium ${lostTimeCount > 0 ? "text-rose-600" : "text-emerald-600"}`}>
-            {lostTimeCount}
-          </p>
-          <p className="text-xs text-slate-400">Target zero goal</p>
-        </div>
-        <div className="card p-4 space-y-1">
-          <span className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Total Days Lost</span>
-          <p className="text-2xl font-medium text-rose-600">{totalDaysLost} Man-Days</p>
-          <p className="text-xs text-slate-400">Workforce impact</p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Recorded Incidents",
+            val: totalIncidents,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500",
+          },
+          {
+            label: "Near Miss Events",
+            val: nearMissCount,
+            icon: <AlertTriangle size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500",
+          },
+          {
+            label: "Lost Time Injuries (LTI)",
+            val: lostTimeCount,
+            icon: <AlertCircle size={20} className="stroke-[2.5]" />,
+            color: lostTimeCount > 0 ? "bg-rose-600" : "bg-emerald-600",
+          },
+          {
+            label: "Total Days Lost",
+            val: `${totalDaysLost} Days`,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700",
+          },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm"
+          >
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Filter and Search Bar */}
