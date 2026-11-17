@@ -253,7 +253,12 @@ export function verifyAccessToken(token) {
 export function signAccessToken(payload) {
   const tokenPayload = { ...payload };
   delete tokenPayload.profile_picture_url;
-  delete tokenPayload.permissions; // PREVENT NGINX 400 BAD REQUEST HEADER TOO LARGE
+  // If user has wildcard permissions, retain it; otherwise omit large array to prevent NGINX 400
+  if (Array.isArray(tokenPayload.permissions) && tokenPayload.permissions.includes("*")) {
+    tokenPayload.permissions = ["*"];
+  } else {
+    delete tokenPayload.permissions;
+  }
   return jwt.sign(
     {
       ...tokenPayload,
@@ -316,12 +321,12 @@ export async function ensureAuthTables() {
     ).catch(() => {});
   }
 
-  const [trigRows] = await query(
-    `SELECT TRIGGER_NAME FROM information_schema.triggers
-      WHERE TRIGGER_SCHEMA = DATABASE() AND TRIGGER_NAME = 'trg_adm_users_pw_status'`,
-  );
-  if (!trigRows?.length) {
-    try {
+  try {
+    const trigRows = await query(
+      `SELECT TRIGGER_NAME FROM information_schema.triggers
+        WHERE TRIGGER_SCHEMA = DATABASE() AND TRIGGER_NAME = 'trg_adm_users_pw_status'`,
+    ).catch(() => []);
+    if (!trigRows || trigRows.length === 0) {
       await query(
         `CREATE TRIGGER trg_adm_users_pw_status
          BEFORE UPDATE ON adm_users
@@ -331,21 +336,29 @@ export async function ensureAuthTables() {
              SET NEW.status = 'Y';
            END IF;
          END`,
-      );
-    } catch (e) {
-      if (e?.code !== "ER_TRG_ALREADY_EXISTS") throw e;
+      ).catch((e) => {
+        if (e?.code !== "ER_TRG_ALREADY_EXISTS") {
+          console.warn("[ensureAuthTables] Notice: Trigger creation skipped:", e?.message);
+        }
+      });
     }
+  } catch (e) {
+    console.warn("[ensureAuthTables] Trigger check error:", e?.message);
   }
 
-  await query(
-    `CREATE EVENT IF NOT EXISTS evt_adm_users_expire
-     ON SCHEDULE EVERY 1 DAY
-     STARTS CURRENT_DATE + INTERVAL 1 DAY
-     DO
-       UPDATE adm_users
-       SET status = 'N', is_active = 0
-       WHERE DATE(valid_to) = CURDATE() AND is_active = 1 AND id != 1`,
-  );
+  try {
+    await query(
+      `CREATE EVENT IF NOT EXISTS evt_adm_users_expire
+       ON SCHEDULE EVERY 1 DAY
+       STARTS CURRENT_DATE + INTERVAL 1 DAY
+       DO
+         UPDATE adm_users
+         SET status = 'N', is_active = 0
+         WHERE DATE(valid_to) = CURDATE() AND is_active = 1 AND id != 1`,
+    ).catch((e) => {
+      console.warn("[ensureAuthTables] Notice: Event scheduler skipped (lacks EVENT privilege):", e?.message);
+    });
+  } catch {}
 }
 
 // Major Logic: Fetches all granted permissions across assigned roles and legacy settings
@@ -374,7 +387,7 @@ export async function getUserPermissions(userId) {
   const [permRows, legacyRows, exclusiveRows] = await Promise.all([
     query(
       `
-      SELECT DISTINCT feature_key as code
+      SELECT DISTINCT feature_key as code, module_key
       FROM adm_role_permissions rp
       WHERE rp.role_id = :roleId AND rp.can_view = 1
       `,
@@ -382,7 +395,7 @@ export async function getUserPermissions(userId) {
     ).catch(() => []),
     query(
       `
-      SELECT DISTINCT p.code
+      SELECT DISTINCT p.code, p.feature_key, p.module
       FROM adm_users u
       JOIN adm_user_permissions up ON up.user_id = u.id
       JOIN adm_pages p ON p.id = up.page_id
@@ -400,11 +413,27 @@ export async function getUserPermissions(userId) {
     ).catch(() => []),
   ]);
 
-  const allPerms = [
-    ...permRows.map((row) => row.code),
-    ...legacyRows.map((row) => row.code),
-    ...exclusiveRows.map((row) => row.code),
-  ];
+  const allPerms = [];
+  for (const row of permRows) {
+    if (row.code) {
+      allPerms.push(row.code);
+      if (row.module_key && !String(row.code).includes(":")) {
+        allPerms.push(`${row.module_key}:${row.code}`);
+      }
+    }
+  }
+  for (const row of legacyRows) {
+    if (row.code) allPerms.push(row.code);
+    if (row.feature_key) {
+      allPerms.push(row.feature_key);
+      if (row.module && !String(row.feature_key).includes(":")) {
+        allPerms.push(`${row.module}:${row.feature_key}`);
+      }
+    }
+  }
+  for (const row of exclusiveRows) {
+    if (row.code) allPerms.push(row.code);
+  }
 
   return Array.from(new Set(allPerms.filter(Boolean)));
 }
@@ -417,6 +446,7 @@ export async function getUserForAuth(userId) {
       u.id,
       u.company_id,
       u.branch_id,
+      u.role_id,
       u.username,
       u.email,
       u.full_name,
@@ -468,17 +498,44 @@ export async function buildAuthUserPayload(user, permissions = []) {
     allCompanyIds = [Number(user.company_id)];
   }
 
+  const roleId = Number(user.role_id || 0) || null;
+  const isSuper =
+    Number(user.id) === 1 ||
+    roleId === 1 ||
+    (Array.isArray(permissions) && permissions.includes("*"));
+
+  if (isSuper) {
+    try {
+      const allCompanies = await query(
+        `SELECT id FROM adm_companies WHERE is_active = 1`,
+      );
+      if (allCompanies && allCompanies.length > 0) {
+        allCompanyIds = [
+          ...new Set([
+            ...allCompanyIds,
+            ...allCompanies.map((c) => Number(c.id)).filter(Boolean),
+          ]),
+        ];
+      }
+    } catch {}
+  }
+
   const payload = {
     sub: Number(user.id),
     id: Number(user.id),
     username: user.username,
     email: user.email,
     full_name: user.full_name || "",
+    role_id: roleId,
+    roleId: roleId,
+    isSuperAdmin: isSuper,
     permissions: (Array.isArray(permissions) && permissions.includes("*")) ? ["*"] : (Array.isArray(permissions) ? permissions : []),
     companyIds: allCompanyIds,
     branchIds: allBranchIds,
     companyId: Number(user.company_id) || (allCompanyIds[0] ?? null),
     branchId: Number(user.branch_id) || (allBranchIds[0] ?? null),
+    company_id: Number(user.company_id) || (allCompanyIds[0] ?? null),
+    branch_id: Number(user.branch_id) || (allBranchIds[0] ?? null),
     companyName: user.company_name || "",
     branchName: user.branch_name || "",
     profile_picture_url: profilePictureToDataUrl(user.profile_picture),

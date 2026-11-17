@@ -272,26 +272,26 @@ export default function ComplianceSettingsTab() {
               <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Supplier Details</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Contact Person</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Contact Person</label>
                   <input type="text" className="input input-bordered w-full" value={supForm.contact_person} onChange={e => setSupForm(p => ({ ...p, contact_person: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Supplier Type</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Supplier Type</label>
                   <select className="select select-bordered w-full" value={supForm.supplier_type} onChange={e => setSupForm(p => ({ ...p, supplier_type: e.target.value }))}>
                     <option value="LOCAL">LOCAL</option>
                     <option value="FOREIGN">FOREIGN</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Email</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Email</label>
                   <input type="email" className="input input-bordered w-full" value={supForm.email} onChange={e => setSupForm(p => ({ ...p, email: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Phone</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Phone</label>
                   <input type="text" className="input input-bordered w-full" value={supForm.phone} onChange={e => setSupForm(p => ({ ...p, phone: e.target.value }))} />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Address</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Address</label>
                   <input type="text" className="input input-bordered w-full" value={supForm.address} onChange={e => setSupForm(p => ({ ...p, address: e.target.value }))} />
                 </div>
               </div>

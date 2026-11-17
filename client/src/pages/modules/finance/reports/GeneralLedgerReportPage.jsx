@@ -49,6 +49,8 @@ export default function GeneralLedgerReportPage() {
   const [accounts, setAccounts] = useState([]);
   const [groups, setGroups] = useState([]);
   const [groupId, setGroupId] = useState("");
+  const [projects, setProjects] = useState([]);
+  const [selectedProjectId, setSelectedProjectId] = useState("");
   const [accountQuery, setAccountQuery] = useState("");
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
   const [opening, setOpening] = useState(0);
@@ -135,6 +137,22 @@ export default function GeneralLedgerReportPage() {
     }
   }
 
+  async function loadProjects() {
+    try {
+      const res = await api.get("/projects");
+      const list = Array.isArray(res.data?.data)
+        ? res.data.data
+        : Array.isArray(res.data?.items)
+        ? res.data.items
+        : Array.isArray(res.data)
+        ? res.data
+        : [];
+      setProjects(list);
+    } catch {
+      setProjects([]);
+    }
+  }
+
   async function run() {
     try {
       setLoading(true);
@@ -144,6 +162,7 @@ export default function GeneralLedgerReportPage() {
       };
       if (accountId) params.accountId = accountId;
       if (groupId) params.groupId = groupId;
+      if (selectedProjectId) params.projectId = selectedProjectId;
       const res = await api.get("/finance/reports/general-ledger", { params });
       setOpening(Number(res.data?.opening_balance || 0));
       setAccountMeta(res.data?.account || null);
@@ -161,7 +180,7 @@ export default function GeneralLedgerReportPage() {
   }
 
   useEffect(() => {
-    Promise.all([loadAccounts(), loadGroups()]);
+    Promise.all([loadAccounts(), loadGroups(), loadProjects()]);
   }, []);
 
   useEffect(() => {
@@ -174,7 +193,7 @@ export default function GeneralLedgerReportPage() {
   useEffect(() => {
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, to, accountId, groupId, pollingCounter]);
+  }, [from, to, accountId, groupId, selectedProjectId, pollingCounter]);
 
   // If selected account falls outside selected group, clear selection.
   useEffect(() => {
@@ -361,6 +380,21 @@ export default function GeneralLedgerReportPage() {
               </div>
             </div>
             <div className="w-48 min-w-[160px]">
+              <label className="label">Project (Optional)</label>
+              <select
+                className="input w-full"
+                value={selectedProjectId}
+                onChange={(e) => setSelectedProjectId(e.target.value)}
+              >
+                <option value="">All Projects</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.project_code ? `${p.project_code} - ` : ""}{p.project_name || p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="w-48 min-w-[160px]">
               <label className="label">Account Group</label>
               <select
                 className="input w-full"
@@ -444,9 +478,11 @@ export default function GeneralLedgerReportPage() {
                   const headerInfo = await fetchReportHeader(api);
                   const selectedAcc = accounts.find((a) => String(a.id) === String(accountId));
                   const accTitle = selectedAcc ? `Account: ${selectedAcc.code} - ${selectedAcc.name}` : "All Accounts";
+                  const selProj = selectedProjectId ? projects.find(p => String(p.id) === String(selectedProjectId)) : null;
+                  const projStr = selProj ? ` | Project: ${selProj.project_name}` : "";
                   const headerRows = buildExcelHeaderRows(headerInfo, {
                     title: `GENERAL LEDGER REPORT (${accTitle})`,
-                    period: `${from || "Beginning"} to ${to || "Today"}`,
+                    period: `${from || "Beginning"} to ${to || "Today"}${projStr}`,
                   });
                   const ws = XLSX.utils.json_to_sheet([...headerRows, ...rows]);
                   autosizeWorksheetColumns(ws);
@@ -472,9 +508,11 @@ export default function GeneralLedgerReportPage() {
                   const selectedAcc = accounts.find((a) => String(a.id) === String(accountId));
                   const accTitle = selectedAcc ? `Account: ${selectedAcc.code} - ${selectedAcc.name}` : "All Accounts";
 
+                  const selProj = selectedProjectId ? projects.find(p => String(p.id) === String(selectedProjectId)) : null;
+                  const projStr = selProj ? `   |   Project: ${selProj.project_name}` : "";
                   let y = applyPdfHeader(doc, headerInfo, {
                     title: "GENERAL LEDGER REPORT",
-                    subtitle: `${accTitle}   |   Period: ${from || "Beginning"} to ${to || "Today"}`,
+                    subtitle: `${accTitle}   |   Period: ${from || "Beginning"} to ${to || "Today"}${projStr}`,
                     kpis: [
                       { label: "OPENING BALANCE", value: `${headerInfo.currPrefix}${Number(opening || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, color: [59, 130, 246] },
                       { label: "TOTAL TRANSACTIONS", value: `${rows.length}`, color: [16, 185, 129] },

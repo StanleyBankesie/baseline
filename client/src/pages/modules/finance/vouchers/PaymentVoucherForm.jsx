@@ -3111,7 +3111,7 @@ export default function PaymentVoucherForm() {
                 )}
                 {(isPAYV || isRV || isCV || isSV || isPV) && (
                   <div className="md:col-span-3">
-                    <label className="label font-bold text-brand">
+                    <label className="label font-semibold text-brand">
                       Narration *
                     </label>
                     <input
@@ -3734,7 +3734,7 @@ export default function PaymentVoucherForm() {
                 </div>
                 {!(isPAYV || isRV || isCV) && (
                   <div className="md:col-span-3">
-                    <label className="label font-bold text-brand">
+                    <label className="label font-semibold text-brand">
                       Description *
                     </label>
                     <input

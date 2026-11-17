@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useUoms } from "@/hooks/useUoms";
 import { filterByPrefix } from "@/utils/searchUtils.js";
 
@@ -21,7 +21,12 @@ export default function IssueToRequirementForm() {
   const { hasExceptional } = usePermission();
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isNew = !id || id === "new";
+  const preselectedReqId =
+    searchParams.get("requisition_id") ||
+    searchParams.get("requisitionId") ||
+    searchParams.get("req_id");
 
   const toDateOnly = (v) => {
     if (!v) return "";
@@ -139,6 +144,12 @@ export default function IssueToRequirementForm() {
   };
 
   useEffect(() => {
+    if (isNew && preselectedReqId) {
+      populateFromRequisition(preselectedReqId);
+    }
+  }, [isNew, preselectedReqId]);
+
+  useEffect(() => {
     let mounted = true;
 
     const fetchData = async () => {
@@ -168,19 +179,19 @@ export default function IssueToRequirementForm() {
           const invReqs = Array.isArray(reqRes.data?.items)
             ? reqRes.data.items.filter((r) => {
                 const s = String(r.status || "").toUpperCase();
-                return s !== "CANCELLED" && s !== "REJECTED";
+                return s === "APPROVED" || s === "POSTED";
               }).map((r) => ({ ...r, _source: "inventory" }))
             : [];
           const maintReqs = Array.isArray(maintReqRes.data?.items)
             ? maintReqRes.data.items.filter((r) => {
                 const s = String(r.status || "").toUpperCase();
-                return s !== "CANCELLED" && s !== "REJECTED";
+                return s === "APPROVED" || s === "POSTED";
               }).map((r) => ({ ...r, _source: "maintenance", id: `maint_${r.id}` }))
             : [];
           const pmReqs = Array.isArray(pmReqRes.data?.items)
             ? pmReqRes.data.items.filter((r) => {
                 const s = String(r.status || "").toUpperCase();
-                return s !== "CANCELLED" && s !== "REJECTED";
+                return s === "APPROVED" || s === "POSTED";
               }).map((r) => ({ ...r, _source: "project", id: `pm_${r.id}` }))
             : [];
           const prodItems = Array.isArray(prodReqRes.data?.items)
@@ -191,7 +202,7 @@ export default function IssueToRequirementForm() {
           const prodReqs = prodItems
             .filter((r) => {
               const s = String(r.status || "").toUpperCase();
-              return s !== "CANCELLED" && s !== "REJECTED";
+              return s === "APPROVED" || s === "POSTED";
             })
             .map((r) => ({
               ...r,
@@ -453,20 +464,24 @@ export default function IssueToRequirementForm() {
 
   return (
     <div className="space-y-6">
-      <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg">
-          <div className="flex justify-between items-center text-white">
+      <div className="card overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 rounded-2xl">
+        <div className="card-header bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-6 rounded-t-2xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold dark:text-brand-300">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
                 {isNew
                   ? "New Issue to Requirement Area"
                   : "Edit Issue to Requirement Area"}
               </h1>
-              <p className="text-sm mt-1">
+              <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-0.5">
                 Issue materials to departments / requirement areas
               </p>
             </div>
-            <button onClick={() => window.history.back()} className="btn-success">
+            <button
+              type="button"
+              onClick={() => window.history.back()}
+              className="btn btn-secondary text-sm shadow-sm"
+            >
               Back to List
             </button>
           </div>
@@ -478,15 +493,17 @@ export default function IssueToRequirementForm() {
             {error ? <div className="text-sm text-red-600">{error}</div> : null}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="label">Issue No</label>
-                <input
-                  type="text"
-                  className="input bg-white dark:bg-slate-900"
-                  value={formData.issueNo}
-                  disabled
-                />
-              </div>
+              {!isNew && (
+                <div>
+                  <label className="label">Issue No</label>
+                  <input
+                    type="text"
+                    className="input bg-white dark:bg-slate-900"
+                    value={formData.issueNo}
+                    disabled
+                  />
+                </div>
+              )}
               <div>
                 <label className="label">Issue Date *</label>
                 <input

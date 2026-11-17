@@ -138,6 +138,46 @@ export async function ensureConstructionTables() {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
 
+    // 3b. Project Cost Categories (Configurable for Costing & Budgeting)
+    await query(`
+      CREATE TABLE IF NOT EXISTS pm_cost_categories (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        company_id BIGINT UNSIGNED NOT NULL DEFAULT 1,
+        category_code VARCHAR(50) NOT NULL,
+        category_name VARCHAR(150) NOT NULL,
+        description VARCHAR(255) NULL,
+        cost_type ENUM('DIRECT', 'INDIRECT', 'OVERHEAD', 'SUBCONTRACTOR', 'EQUIPMENT', 'OTHER') NOT NULL DEFAULT 'DIRECT',
+        color_code VARCHAR(50) NOT NULL DEFAULT 'blue',
+        default_overhead_percent DECIMAL(5,2) DEFAULT 0.00,
+        default_profit_percent DECIMAL(5,2) DEFAULT 0.00,
+        is_active ENUM('Y','N') NOT NULL DEFAULT 'Y',
+        sort_order INT NOT NULL DEFAULT 0,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY uq_pm_cost_cat (company_id, category_code),
+        KEY idx_pm_cost_cat_active (company_id, is_active)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+
+    // Seed default project cost categories if empty
+    try {
+      const existingCats = await query(`SELECT id FROM pm_cost_categories LIMIT 1`);
+      if (!existingCats || existingCats.length === 0) {
+        await query(`
+          INSERT INTO pm_cost_categories (company_id, category_code, category_name, description, cost_type, color_code, default_overhead_percent, default_profit_percent, is_active, sort_order) VALUES
+          (1, 'LABOUR', 'Personnel & Direct Labour', 'Internal skilled workforce, engineering staff, trade artisans and site labour', 'DIRECT', 'amber', 10.00, 15.00, 'Y', 1),
+          (1, 'MATERIALS', 'Materials & Supplies', 'Raw building materials, hardware consumables, structural stock and supplies', 'DIRECT', 'blue', 10.00, 15.00, 'Y', 2),
+          (1, 'EQUIPMENT', 'Hardware, Plant & Equipment', 'Heavy machinery, tools, scaffolds, vehicles, server hardware and equipment rentals', 'EQUIPMENT', 'purple', 10.00, 15.00, 'Y', 3),
+          (1, 'SUBCONTRACTING', 'Subcontractors & Specialist Trades', 'Specialist trade contractors, outsourced work packages and vendor turnkey scopes', 'SUBCONTRACTOR', 'emerald', 8.00, 12.00, 'Y', 4),
+          (1, 'TRANSPORTATION', 'Haulage, Travel & Logistics', 'Material haulage, freight transport, equipment delivery, mileage and logistics', 'DIRECT', 'cyan', 5.00, 10.00, 'Y', 5),
+          (1, 'SOFTWARE_CLOUD', 'Software & Cloud Services', 'SaaS subscriptions, developer tooling, cloud infrastructure and software licenses', 'DIRECT', 'indigo', 5.00, 15.00, 'Y', 6),
+          (1, 'OVERHEAD', 'Administrative & Site Overheads', 'Site management, utilities, safety gear, temporary power, water and supervision', 'OVERHEAD', 'orange', 0.00, 0.00, 'Y', 7),
+          (1, 'OTHER', 'Other Direct & Sundry Costs', 'Incidental work expenses, statutory permits, tests and miscellaneous items', 'OTHER', 'slate', 5.00, 10.00, 'Y', 8);
+        `);
+      }
+    } catch {}
+
     // Seed default construction cost codes if empty
     try {
       const existingCodes = await query(`SELECT id FROM pm_cost_codes LIMIT 1`);
@@ -414,6 +454,9 @@ export async function ensureConstructionTables() {
       "ADD COLUMN baseline_end DATE NULL AFTER baseline_start",
       "ADD COLUMN cost_code_id BIGINT UNSIGNED NULL AFTER priority",
       "ADD COLUMN work_package_id BIGINT UNSIGNED NULL AFTER wbs_code",
+      "ADD COLUMN constraint_type VARCHAR(50) DEFAULT 'ASAP' AFTER duration_days",
+      "ADD COLUMN constraint_date DATE NULL AFTER constraint_type",
+      "ADD COLUMN milestone_flag TINYINT(1) DEFAULT 0 AFTER is_critical",
     ];
     for (const alt of taskAlterations) {
       try {
@@ -421,12 +464,90 @@ export async function ensureConstructionTables() {
       } catch (e) {}
     }
 
+    try {
+      await query(`ALTER TABLE pm_task_dependencies ADD COLUMN notes VARCHAR(255) NULL AFTER lag_days`);
+    } catch (e) {}
+
+    // Cost Estimating & Budget Estimation alterations
+    const boqAlterations = [
+      "ADD COLUMN estimate_number VARCHAR(50) NULL AFTER boq_reference",
+      "ADD COLUMN estimate_title VARCHAR(255) NULL AFTER boq_title",
+      "ADD COLUMN estimate_description TEXT NULL AFTER estimate_title",
+      "ADD COLUMN estimation_method VARCHAR(50) DEFAULT 'BOTTOM_UP' AFTER estimate_description",
+      "ADD COLUMN validity_date DATE NULL AFTER boq_date",
+      "ADD COLUMN department_id BIGINT UNSIGNED NULL AFTER validity_date",
+      "ADD COLUMN department_name VARCHAR(100) NULL AFTER department_id",
+      "ADD COLUMN cost_centre_id BIGINT UNSIGNED NULL AFTER department_name",
+      "ADD COLUMN cost_centre_name VARCHAR(100) NULL AFTER cost_centre_id",
+      "ADD COLUMN direct_cost_subtotal DECIMAL(18,2) DEFAULT 0.00 AFTER subtotal",
+      "ADD COLUMN indirect_cost_subtotal DECIMAL(18,2) DEFAULT 0.00 AFTER direct_cost_subtotal",
+      "ADD COLUMN escalation_percent DECIMAL(5,2) DEFAULT 0.00 AFTER contingency_amount",
+      "ADD COLUMN escalation_amount DECIMAL(18,2) DEFAULT 0.00 AFTER escalation_percent",
+      "ADD COLUMN discount_percent DECIMAL(5,2) DEFAULT 0.00 AFTER escalation_amount",
+      "ADD COLUMN discount_amount DECIMAL(18,2) DEFAULT 0.00 AFTER discount_percent",
+      "ADD COLUMN apply_profit_margin ENUM('Y','N') DEFAULT 'N' AFTER other_charges",
+      "ADD COLUMN profit_margin_percent DECIMAL(5,2) DEFAULT 0.00 AFTER apply_profit_margin",
+      "ADD COLUMN profit_margin_amount DECIMAL(18,2) DEFAULT 0.00 AFTER profit_margin_percent",
+      "ADD COLUMN proposed_budget DECIMAL(18,2) DEFAULT 0.00 AFTER total_amount",
+      "ADD COLUMN approved_budget DECIMAL(18,2) DEFAULT 0.00 AFTER proposed_budget",
+      "ADD COLUMN is_baselined ENUM('Y','N') DEFAULT 'N' AFTER approved_budget",
+      "ADD COLUMN baseline_locked_at DATETIME NULL AFTER is_baselined",
+      "ADD COLUMN baseline_locked_by BIGINT UNSIGNED NULL AFTER baseline_locked_at",
+      "ADD COLUMN notes_and_assumptions TEXT NULL AFTER remarks",
+      "ADD COLUMN indirect_costs_json LONGTEXT NULL AFTER notes_and_assumptions",
+      "ADD COLUMN allocations_json LONGTEXT NULL AFTER indirect_costs_json",
+    ];
+    for (const alt of boqAlterations) {
+      try {
+        await query(`ALTER TABLE pm_boqs ${alt}`);
+      } catch (e) {}
+    }
+
+    const boqItemAlterations = [
+      "ADD COLUMN task_id BIGINT UNSIGNED NULL AFTER wbs_code",
+      "ADD COLUMN cost_category_id BIGINT UNSIGNED NULL AFTER cost_category",
+      "ADD COLUMN cost_centre_id BIGINT UNSIGNED NULL AFTER cost_category_id",
+      "ADD COLUMN department_id BIGINT UNSIGNED NULL AFTER cost_centre_id",
+      "ADD COLUMN base_cost DECIMAL(18,2) DEFAULT 0.00 AFTER unit_rate",
+      "ADD COLUMN discount_percent DECIMAL(5,2) DEFAULT 0.00 AFTER base_cost",
+      "ADD COLUMN discount_amount DECIMAL(18,2) DEFAULT 0.00 AFTER discount_percent",
+      "ADD COLUMN tax_type VARCHAR(50) DEFAULT 'NONE' AFTER discount_amount",
+      "ADD COLUMN total_cost DECIMAL(18,2) DEFAULT 0.00 AFTER amount",
+      "ADD COLUMN estimation_details_json LONGTEXT NULL AFTER remarks",
+      "ADD COLUMN item_order INT DEFAULT 0 AFTER estimation_details_json",
+    ];
+    for (const alt of boqItemAlterations) {
+      try {
+        await query(`ALTER TABLE pm_boq_items ${alt}`);
+      } catch (e) {}
+    }
+
+    await query(`
+      CREATE TABLE IF NOT EXISTS pm_budget_allocations (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        company_id BIGINT UNSIGNED NOT NULL DEFAULT 1,
+        project_id INT NOT NULL,
+        boq_id BIGINT UNSIGNED NULL,
+        allocation_type VARCHAR(50) NOT NULL DEFAULT 'WBS',
+        target_id VARCHAR(100) NOT NULL,
+        target_name VARCHAR(200) NOT NULL,
+        allocated_amount DECIMAL(18,2) NOT NULL DEFAULT 0.00,
+        percentage DECIMAL(5,2) DEFAULT 0.00,
+        notes TEXT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_pba_proj (project_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+
     await query(`
       CREATE TABLE IF NOT EXISTS pm_schedule_baselines (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         company_id BIGINT UNSIGNED NOT NULL,
         project_id INT NOT NULL,
         baseline_name VARCHAR(150) NOT NULL,
+        description TEXT NULL,
         version_no INT DEFAULT 1,
         snapshot_json LONGTEXT NOT NULL,
         approved_by BIGINT UNSIGNED NULL,
@@ -436,6 +557,10 @@ export async function ensureConstructionTables() {
         KEY idx_pm_baseline_proj (project_id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
+
+    try {
+      await query(`ALTER TABLE pm_schedule_baselines ADD COLUMN description TEXT NULL AFTER baseline_name`);
+    } catch (e) {}
 
     await query(`
       CREATE TABLE IF NOT EXISTS pm_eot_requests (
@@ -890,6 +1015,76 @@ export async function ensureConstructionTables() {
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (id),
         KEY idx_pm_snag_proj (project_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+
+    await query(`
+      CREATE TABLE IF NOT EXISTS pm_project_issues (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        company_id BIGINT UNSIGNED NOT NULL,
+        branch_id BIGINT UNSIGNED NULL,
+        project_id BIGINT UNSIGNED NOT NULL,
+        reference_no VARCHAR(50) NOT NULL,
+        issue_title VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        category VARCHAR(100) NULL,
+        severity VARCHAR(50) NULL,
+        priority VARCHAR(50) NULL,
+        impact VARCHAR(200) NULL,
+        wbs_code VARCHAR(100) NULL,
+        milestone VARCHAR(200) NULL,
+        task_name VARCHAR(200) NULL,
+        location VARCHAR(200) NULL,
+        department VARCHAR(200) NULL,
+        date_identified DATE NULL,
+        identified_by VARCHAR(200) NULL,
+        responsible_department VARCHAR(200) NULL,
+        assigned_to VARCHAR(200) NULL,
+        contractor_vendor VARCHAR(200) NULL,
+        assigned_date DATE NULL,
+        target_resolution_date DATE NULL,
+        required_corrective_action TEXT NULL,
+        proposed_solution TEXT NULL,
+        actual_action_taken TEXT NULL,
+        resolution_start_date DATE NULL,
+        completion_date DATE NULL,
+        additional_cost DECIMAL(18,2) DEFAULT 0.00,
+        supporting_documents TEXT NULL,
+        before_after_evidence TEXT NULL,
+        resolution_remarks TEXT NULL,
+        verification_required TINYINT(1) DEFAULT 0,
+        reviewer VARCHAR(200) NULL,
+        review_date DATE NULL,
+        verification_result VARCHAR(50) NULL,
+        review_comments TEXT NULL,
+        rejection_reason TEXT NULL,
+        approved_by VARCHAR(200) NULL,
+        closure_date DATE NULL,
+        status VARCHAR(50) NOT NULL DEFAULT 'OPEN',
+        created_by BIGINT UNSIGNED NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY uq_pm_project_issue_ref (company_id, reference_no),
+        KEY idx_pm_project_issue_project (project_id),
+        KEY idx_pm_project_issue_status (status)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    await query("ALTER TABLE pm_project_issues ADD COLUMN IF NOT EXISTS milestone VARCHAR(200) NULL AFTER wbs_code").catch(() => {});
+
+    await query(`
+      CREATE TABLE IF NOT EXISTS pm_project_issue_history (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        company_id BIGINT UNSIGNED NOT NULL,
+        issue_id BIGINT UNSIGNED NOT NULL,
+        action VARCHAR(50) NOT NULL,
+        old_status VARCHAR(50) NULL,
+        new_status VARCHAR(50) NULL,
+        comments TEXT NULL,
+        changed_by BIGINT UNSIGNED NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_pm_issue_history_issue (company_id, issue_id, id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
 

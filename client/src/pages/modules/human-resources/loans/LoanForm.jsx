@@ -316,7 +316,7 @@ export default function LoanForm() {
             <div>
               <label className="label">Remaining Balance Due</label>
               <input
-                className="input bg-slate-50 dark:bg-slate-900 font-mono font-bold text-amber-600 dark:text-amber-400"
+                className="input bg-slate-50 dark:bg-slate-900 font-mono font-semibold text-amber-600 dark:text-amber-400"
                 type="number"
                 value={form.amount_due}
                 readOnly={!hasExceptional("DOCUMENT.EDIT_DATE")}

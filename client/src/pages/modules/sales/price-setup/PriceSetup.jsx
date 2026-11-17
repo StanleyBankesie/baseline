@@ -1480,7 +1480,7 @@ export default function PriceSetup() {
                   <select
                     value={bulkOperator}
                     onChange={(e) => setBulkOperator(e.target.value)}
-                    className="w-16 font-bold"
+                    className="w-16 font-semibold"
                   >
                     <option value="+">+</option>
                     <option value="-">-</option>

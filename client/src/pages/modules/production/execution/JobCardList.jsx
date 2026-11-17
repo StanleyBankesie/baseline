@@ -232,9 +232,9 @@ export default function JobCardList() {
             </div>
             <div className="p-8 space-y-6">
               <div className="space-y-3">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight">Select Production Plan</label>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-tight">Select Production Plan</label>
                 <select 
-                  className="input py-3 w-full font-bold text-xs"
+                  className="input py-3 w-full font-semibold text-xs"
                   value={selectedPlanId}
                   onChange={e => setSelectedPlanId(e.target.value)}
                 >

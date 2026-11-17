@@ -39993,3 +39993,3855 @@ Error: Invalid id
     at requireAuth (file:///C:/Users/stanl/demo/server/middleware/auth.js:89:16)
     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
 --------------------------------------------------------------------------------
+
+[2026-11-14T07:32:14.886Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwg38eqh-vqqv07vw
+durationMs: 12
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-14T07:33:13.257Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwg39ns3-2x97g634
+durationMs: 6
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-14T07:56:19.371Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwg43db9-sb9v3222
+durationMs: 5
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-14T07:57:02.301Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwg44aft-3mepw35p
+durationMs: 4
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-14T08:20:54.435Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/admin/companies/current (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/admin/companies/current
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getCompanyById (file:///C:/Users/stanl/demo/server/controllers/companies.controller.js:322:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (file:///C:/Users/stanl/demo/server/middleware/auth.js:89:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-14T10:46:21.891Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwga61mj-ljq174s5
+durationMs: 8
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-14T10:46:41.870Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwga6h0w-t3nbdruk
+durationMs: 30
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-14T11:15:15.455Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-14T11:57:27.109Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwgcpgnw-o72a6u1d
+durationMs: 35
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-14T15:57:47.386Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-14T16:15:05.831Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-14T17:06:14.683Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/admin/companies/current (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/admin/companies/current
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getCompanyById (file:///C:/Users/stanl/demo/server/controllers/companies.controller.js:322:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (file:///C:/Users/stanl/demo/server/middleware/auth.js:89:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-14T19:53:53.961Z] HTTP_500
+Summary: parseBoolFlag is not defined
+Request: POST /api/workflows (status 500)
+Context:
+status: 500
+code: null
+method: POST
+url: /api/workflows
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"workflow_name":"Daily Project Report","module_key":"PROJECT_MANAGEMENT","document_type":"Daily Project Report","document_route":"/project-management/daily-reports","email_notify":true,"sms_notify":true,"whatsapp_notify":true,"is_active":true,"steps":[{"step_order":1,"step_name":"approval stage","approver_user_ids":[1],"approval_limit":null,"is_mandatory":true}]}
+query: {}
+Technical details:
+ReferenceError: parseBoolFlag is not defined
+    at createWorkflow (file:///C:/Users/stanl/demo/server/controllers/workflow.controller.js:1071:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-14T20:05:59.877Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-14T20:05:59.891Z] CLIENT_ERROR
+Summary: write ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: write ECONNRESET
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writevGeneric (node:internal/stream_base_commons:142:3)
+    at Socket._writeGeneric (node:net:969:11)
+    at Socket._writev (node:net:978:8)
+    at doWrite (node:internal/streams/writable:596:12)
+    at clearBuffer (node:internal/streams/writable:775:5)
+    at Writable.uncork (node:internal/streams/writable:531:7)
+    at ServerResponse.end (node:_http_outgoing:1145:19)
+    at respond (C:\Users\stanl\demo\server\node_modules\engine.io\build\transports\polling.js:234:22)
+    at Polling.doWrite (C:\Users\stanl\demo\server\node_modules\engine.io\build\transports\polling.js:243:13)
+--------------------------------------------------------------------------------
+
+[2026-11-14T20:15:49.476Z] HTTP_403
+Summary: You are not authorized to approve this step (Assigned to someone else)
+Request: POST /api/workflows/294/action (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: POST
+url: /api/workflows/294/action
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"action":"APPROVE","comments":"","target_user_id":null}
+query: {}
+Technical details:
+Error: You are not authorized to approve this step (Assigned to someone else)
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at performAction (file:///C:/Users/stanl/demo/server/controllers/workflow.controller.js:1767:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-14T20:30:55.819Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/facilities/sustainability/initiatives (status 404)
+Context:
+requestId: mwgv1su8-ofg4rqg7
+durationMs: 10
+method: GET
+url: /api/facilities/sustainability/initiatives
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-14T21:26:14.809Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-14T21:48:33.874Z] HTTP_500
+Summary: Unknown column 'wp.wbs_code' in 'order clause'
+Request: GET /api/construction/work-packages?project_id=2 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/construction/work-packages?project_id=2
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"project_id":"2"}
+Technical details:
+Error: Unknown column 'wp.wbs_code' in 'order clause'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:684:20)
+    at async listWorkPackages (file:///C:/Users/stanl/demo/server/controllers/construction.controller.js:188:19)
+--------------------------------------------------------------------------------
+
+[2026-11-14T21:48:34.401Z] HTTP_500
+Summary: Unknown column 'wp.wbs_code' in 'order clause'
+Request: GET /api/construction/work-packages?project_id=2 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/construction/work-packages?project_id=2
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"project_id":"2"}
+Technical details:
+Error: Unknown column 'wp.wbs_code' in 'order clause'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:684:20)
+    at async listWorkPackages (file:///C:/Users/stanl/demo/server/controllers/construction.controller.js:188:19)
+--------------------------------------------------------------------------------
+
+[2026-11-14T21:48:34.977Z] HTTP_500
+Summary: Unknown column 'wp.wbs_code' in 'order clause'
+Request: GET /api/construction/work-packages?project_id=2 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/construction/work-packages?project_id=2
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"project_id":"2"}
+Technical details:
+Error: Unknown column 'wp.wbs_code' in 'order clause'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:684:20)
+    at async listWorkPackages (file:///C:/Users/stanl/demo/server/controllers/construction.controller.js:188:19)
+--------------------------------------------------------------------------------
+
+[2026-11-14T21:48:35.792Z] HTTP_500
+Summary: Unknown column 'wp.wbs_code' in 'order clause'
+Request: GET /api/construction/work-packages?project_id=2 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/construction/work-packages?project_id=2
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"project_id":"2"}
+Technical details:
+Error: Unknown column 'wp.wbs_code' in 'order clause'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:684:20)
+    at async listWorkPackages (file:///C:/Users/stanl/demo/server/controllers/construction.controller.js:188:19)
+--------------------------------------------------------------------------------
+
+[2026-11-14T21:58:20.486Z] HTTP_400
+Summary: Warehouse is required to confirm utilization
+Request: POST /api/projects/material-utilizations/5/confirm (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/projects/material-utilizations/5/confirm
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Warehouse is required to confirm utilization
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at confirmPMMaterialUtilization (file:///C:/Users/stanl/demo/server/controllers/projects.controller.js:3084:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-14T21:58:24.129Z] HTTP_400
+Summary: Warehouse is required to confirm utilization
+Request: POST /api/projects/material-utilizations/5/confirm (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/projects/material-utilizations/5/confirm
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Warehouse is required to confirm utilization
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at confirmPMMaterialUtilization (file:///C:/Users/stanl/demo/server/controllers/projects.controller.js:3084:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-14T22:50:32.852Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/admin/companies/current (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/admin/companies/current
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getCompanyById (file:///C:/Users/stanl/demo/server/controllers/companies.controller.js:322:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (file:///C:/Users/stanl/demo/server/middleware/auth.js:89:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-15T02:28:16.046Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/admin/companies/current (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/admin/companies/current
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getCompanyById (file:///C:/Users/stanl/demo/server/controllers/companies.controller.js:322:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (file:///C:/Users/stanl/demo/server/middleware/auth.js:89:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-15T03:09:05.792Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-15T12:28:34.765Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/finance/vouchers/next-no?voucherTypeCode=PAYV (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/finance/vouchers/next-no?voucherTypeCode=PAYV
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {"voucherTypeCode":"PAYV"}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:280:26
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireBranchScope (file:///C:/Users/stanl/demo/server/middleware/auth.js:388:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-15T15:06:28.647Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwhywejm-ux8igyer
+durationMs: 4
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T15:25:14.035Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwhzkiw1-yfi0507u
+durationMs: 17
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T15:41:08.613Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwi04zgj-gskk756g
+durationMs: 2
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T15:54:26.235Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwi0m2vi-ovatleer
+durationMs: 44
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T15:55:09.401Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwi0n06d-n3d15r0a
+durationMs: 52
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T16:04:57.007Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwi0zlm4-ns8sf6ik
+durationMs: 3
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T16:06:55.924Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/admin/companies/current (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/admin/companies/current
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getCompanyById (file:///C:/Users/stanl/demo/server/controllers/companies.controller.js:322:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (file:///C:/Users/stanl/demo/server/middleware/auth.js:89:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-15T16:25:36.028Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/admin/companies/current (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/admin/companies/current
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getCompanyById (file:///C:/Users/stanl/demo/server/controllers/companies.controller.js:322:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (file:///C:/Users/stanl/demo/server/middleware/auth.js:89:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-15T16:30:50.595Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/admin/companies/current (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/admin/companies/current
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getCompanyById (file:///C:/Users/stanl/demo/server/controllers/companies.controller.js:322:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (file:///C:/Users/stanl/demo/server/middleware/auth.js:89:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-15T17:11:36.791Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwi3dbus-frv20056
+durationMs: 19
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T17:47:48.493Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwi4nvk3-5to1y9b0
+durationMs: 9
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T20:11:32.148Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwi9spm0-ghxkweju
+durationMs: 12
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T21:30:04.417Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwiclpml-9c0hu2pp
+durationMs: 4
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T21:40:34.073Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwicz7h2-cqad8b0k
+durationMs: 3
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T21:41:36.713Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwid0jsh-t38p4s9q
+durationMs: 24
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T21:45:38.666Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwid5qav-xbxcy503
+durationMs: 259
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T21:47:04.590Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwid7ksm-bnmvv83y
+durationMs: 8
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T21:48:46.918Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwid9rr1-89tb58gd
+durationMs: 9
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T21:54:01.914Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/construction/projects (status 404)
+Context:
+requestId: mwidgiru-9se0d1lf
+durationMs: 48
+method: GET
+url: /api/construction/projects
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T21:54:02.021Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/departments (status 404)
+Context:
+requestId: mwidgiw0-1ks1sriy
+durationMs: 3
+method: GET
+url: /api/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T21:55:48.353Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwidisxj-vlb75p1t
+durationMs: 10
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T21:56:58.502Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwidkb1z-ziegoatr
+durationMs: 15
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:05:02.184Z] HTTP_500
+Summary: Unknown column 'u_creator.name' in 'field list'
+Request: GET /api/finance/budgets?fiscal_year_id=2 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/budgets?fiscal_year_id=2
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"fiscal_year_id":"2"}
+Technical details:
+Error: Unknown column 'u_creator.name' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:575:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:717:24)
+    at async listBudgets (file:///C:/Users/stanl/demo/server/controllers/finance.budget.controller.js:82:21)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:05:02.569Z] HTTP_500
+Summary: Unknown column 'u_creator.name' in 'field list'
+Request: GET /api/finance/budgets?fiscal_year_id=2 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/budgets?fiscal_year_id=2
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"fiscal_year_id":"2"}
+Technical details:
+Error: Unknown column 'u_creator.name' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:575:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:717:24)
+    at async listBudgets (file:///C:/Users/stanl/demo/server/controllers/finance.budget.controller.js:82:21)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:05:03.218Z] HTTP_500
+Summary: Unknown column 'u_creator.name' in 'field list'
+Request: GET /api/finance/budgets?fiscal_year_id=2 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/budgets?fiscal_year_id=2
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"fiscal_year_id":"2"}
+Technical details:
+Error: Unknown column 'u_creator.name' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:575:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:717:24)
+    at async listBudgets (file:///C:/Users/stanl/demo/server/controllers/finance.budget.controller.js:82:21)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:05:04.091Z] HTTP_500
+Summary: Unknown column 'u_creator.name' in 'field list'
+Request: GET /api/finance/budgets?fiscal_year_id=2 (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/budgets?fiscal_year_id=2
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {"fiscal_year_id":"2"}
+Technical details:
+Error: Unknown column 'u_creator.name' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:575:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:717:24)
+    at async listBudgets (file:///C:/Users/stanl/demo/server/controllers/finance.budget.controller.js:82:21)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:05:51.842Z] HTTP_500
+Summary: Unknown column 'u_creator.name' in 'field list'
+Request: GET /api/finance/budgets (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/budgets
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'u_creator.name' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:575:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:717:24)
+    at async listBudgets (file:///C:/Users/stanl/demo/server/controllers/finance.budget.controller.js:82:21)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:05:52.772Z] HTTP_500
+Summary: Unknown column 'u_creator.name' in 'field list'
+Request: GET /api/finance/budgets (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/budgets
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'u_creator.name' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:575:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:717:24)
+    at async listBudgets (file:///C:/Users/stanl/demo/server/controllers/finance.budget.controller.js:82:21)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:05:53.947Z] HTTP_500
+Summary: Unknown column 'u_creator.name' in 'field list'
+Request: GET /api/finance/budgets (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/budgets
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'u_creator.name' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:575:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:717:24)
+    at async listBudgets (file:///C:/Users/stanl/demo/server/controllers/finance.budget.controller.js:82:21)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:05:54.890Z] HTTP_500
+Summary: Unknown column 'u_creator.name' in 'field list'
+Request: GET /api/finance/budgets (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/budgets
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'u_creator.name' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:575:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:717:24)
+    at async listBudgets (file:///C:/Users/stanl/demo/server/controllers/finance.budget.controller.js:82:21)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:17:57.220Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/departments (status 404)
+Context:
+requestId: mwiebaal-tdj4uzq8
+durationMs: 7
+method: GET
+url: /api/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:18:18.942Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/departments (status 404)
+Context:
+requestId: mwiebr24-h9wga8h6
+durationMs: 2
+method: GET
+url: /api/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:19:34.739Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/departments (status 404)
+Context:
+requestId: mwieddjh-avaw9rdg
+durationMs: 6
+method: GET
+url: /api/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:19:37.436Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/departments (status 404)
+Context:
+requestId: mwiedfmh-knjxiz07
+durationMs: 3
+method: GET
+url: /api/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:20:15.461Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/departments (status 404)
+Context:
+requestId: mwiee8yq-du23udms
+durationMs: 3
+method: GET
+url: /api/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:23:06.263Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/departments (status 404)
+Context:
+requestId: mwiehwr6-7p9l0yfn
+durationMs: 5
+method: GET
+url: /api/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:23:09.806Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/departments (status 404)
+Context:
+requestId: mwiehzh6-2fjsvmmr
+durationMs: 20
+method: GET
+url: /api/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:23:20.785Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/departments (status 404)
+Context:
+requestId: mwiei7yc-dx3yp5r1
+durationMs: 13
+method: GET
+url: /api/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:23:21.124Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/departments (status 404)
+Context:
+requestId: mwiei867-tejzh61m
+durationMs: 69
+method: GET
+url: /api/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:23:33.052Z] HTTP_500
+Summary: Unknown column 'u_creator.name' in 'field list'
+Request: GET /api/finance/budgets (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/budgets
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'u_creator.name' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:575:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:717:24)
+    at async listBudgets (file:///C:/Users/stanl/demo/server/controllers/finance.budget.controller.js:82:21)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:40:42.280Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/admin/companies/current (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/admin/companies/current
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getCompanyById (file:///C:/Users/stanl/demo/server/controllers/companies.controller.js:322:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (file:///C:/Users/stanl/demo/server/middleware/auth.js:89:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:40:53.929Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:41:08.958Z] HTTP_401
+Summary: Invalid credentials
+Request: POST /api/login (status 401)
+Context:
+status: 401
+code: INVALID_CREDENTIALS
+method: POST
+url: /api/login
+ip: ::1
+origin: 
+userAgent: node
+userId: null
+companyId: null
+branchId: null
+body: {"username":"admin","password":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Invalid credentials
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:413:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:42:16.486Z] HTTP_500
+Summary: Unknown column 'approved_cost_impact' in 'field list'
+Request: GET /api/projects/reports/project-status (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/projects/reports/project-status
+ip: ::1
+origin: 
+userAgent: node
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'approved_cost_impact' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:684:20)
+    at async getProjectStatusReport (file:///C:/Users/stanl/demo/server/controllers/projects.controller.js:3686:18)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:42:16.771Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 64903
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:42:16.773Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 64970
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:42:36.795Z] HTTP_500
+Summary: Unknown column 'approved_cost_impact' in 'field list'
+Request: GET /api/projects/reports/project-status (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/projects/reports/project-status
+ip: ::1
+origin: 
+userAgent: node
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'approved_cost_impact' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:684:20)
+    at async getProjectStatusReport (file:///C:/Users/stanl/demo/server/controllers/projects.controller.js:3686:18)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:42:36.956Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 65092
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:43:10.693Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:43:26.851Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 51435
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-15T22:43:26.855Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 51502
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-15T23:29:01.193Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/departments (status 404)
+Context:
+requestId: mwiguoed-zfmnk5r2
+durationMs: 3
+method: GET
+url: /api/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T23:33:06.119Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/departments (status 404)
+Context:
+requestId: mwigzxdv-bv9mhoiy
+durationMs: 4
+method: GET
+url: /api/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T23:33:17.425Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/departments (status 404)
+Context:
+requestId: mwih063z-8lz30plm
+durationMs: 2
+method: GET
+url: /api/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T23:33:39.297Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 64172
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-15T23:40:16.279Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwih95as-01gbn2o2
+durationMs: 3
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T23:40:51.817Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwih9wpy-vyd8ka4u
+durationMs: 3
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T23:41:04.075Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 57790
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-15T23:41:04.076Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 57725
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-15T23:43:34.654Z] HTTP_500
+Summary: Unknown column 'u_creator.name' in 'field list'
+Request: GET /api/finance/budgets (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/budgets
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'u_creator.name' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:575:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:717:24)
+    at async listBudgets (file:///C:/Users/stanl/demo/server/controllers/finance.budget.controller.js:82:21)
+--------------------------------------------------------------------------------
+
+[2026-11-15T23:43:35.593Z] HTTP_500
+Summary: Unknown column 'u_creator.name' in 'field list'
+Request: GET /api/finance/budgets (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/budgets
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'u_creator.name' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:575:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:717:24)
+    at async listBudgets (file:///C:/Users/stanl/demo/server/controllers/finance.budget.controller.js:82:21)
+--------------------------------------------------------------------------------
+
+[2026-11-15T23:43:36.200Z] HTTP_500
+Summary: Unknown column 'u_creator.name' in 'field list'
+Request: GET /api/finance/budgets (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/budgets
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'u_creator.name' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:575:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:717:24)
+    at async listBudgets (file:///C:/Users/stanl/demo/server/controllers/finance.budget.controller.js:82:21)
+--------------------------------------------------------------------------------
+
+[2026-11-15T23:43:37.156Z] HTTP_500
+Summary: Unknown column 'u_creator.name' in 'field list'
+Request: GET /api/finance/budgets (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: GET
+url: /api/finance/budgets
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Unknown column 'u_creator.name' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:575:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:717:24)
+    at async listBudgets (file:///C:/Users/stanl/demo/server/controllers/finance.budget.controller.js:82:21)
+--------------------------------------------------------------------------------
+
+[2026-11-15T23:47:36.482Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 58999
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-15T23:47:36.483Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 59064
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-15T23:49:35.552Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/departments (status 404)
+Context:
+requestId: mwihl4u5-3iog3f7i
+durationMs: 3
+method: GET
+url: /api/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T23:49:46.307Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/departments (status 404)
+Context:
+requestId: mwihld4x-8eogwrr0
+durationMs: 2
+method: GET
+url: /api/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-15T23:53:57.189Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/departments (status 404)
+Context:
+requestId: mwihqqpv-s3qdqdxd
+durationMs: 2
+method: GET
+url: /api/departments
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:03:11.415Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:03:44.110Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:04:03.974Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:04:20.170Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:11:01.703Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 57798
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:11:08.431Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 57861
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:19:58.207Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:20:19.610Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:20:19.620Z] CLIENT_ERROR
+Summary: write ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: write ECONNRESET
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writevGeneric (node:internal/stream_base_commons:142:3)
+    at Socket._writeGeneric (node:net:969:11)
+    at Socket._writev (node:net:978:8)
+    at doWrite (node:internal/streams/writable:596:12)
+    at clearBuffer (node:internal/streams/writable:775:5)
+    at Writable.uncork (node:internal/streams/writable:531:7)
+    at ServerResponse.end (node:_http_outgoing:1145:19)
+    at respond (C:\Users\stanl\demo\server\node_modules\engine.io\build\transports\polling.js:234:22)
+    at Polling.doWrite (C:\Users\stanl\demo\server\node_modules\engine.io\build\transports\polling.js:243:13)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:20:19.622Z] CLIENT_ERROR
+Summary: write ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: write ECONNRESET
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writevGeneric (node:internal/stream_base_commons:142:3)
+    at Socket._writeGeneric (node:net:969:11)
+    at Socket._writev (node:net:978:8)
+    at doWrite (node:internal/streams/writable:596:12)
+    at clearBuffer (node:internal/streams/writable:775:5)
+    at Writable.uncork (node:internal/streams/writable:531:7)
+    at ServerResponse.end (node:_http_outgoing:1145:19)
+    at respond (C:\Users\stanl\demo\server\node_modules\engine.io\build\transports\polling.js:234:22)
+    at Polling.doWrite (C:\Users\stanl\demo\server\node_modules\engine.io\build\transports\polling.js:243:13)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:21:20.224Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwiipyhp-bjv7pukr
+durationMs: 3
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:22:09.602Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:22:51.431Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:23:25.758Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 51184
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:26:22.567Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 51717
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:26:22.569Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 51672
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:32:47.456Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwij4org-x6vkhftl
+durationMs: 4
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:32:50.518Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwij4r4j-2w4ml2ik
+durationMs: 3
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:33:07.457Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwij5473-n2fudxzy
+durationMs: 2
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:34:04.767Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwij6cf0-v8pezz32
+durationMs: 3
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:34:56.929Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwij7gny-5qqeoxvq
+durationMs: 3
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:35:16.391Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwij7vol-srtj3v2o
+durationMs: 2
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:36:13.696Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwij93wc-op80pybz
+durationMs: 4
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-16T00:36:42.858Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwij9qef-a8ypsphe
+durationMs: 2
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-16T06:55:13.217Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwiwshtm-xr0go74p
+durationMs: 7
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-16T06:55:29.822Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/users (status 404)
+Context:
+requestId: mwiwsum9-qoqseyp9
+durationMs: 29
+method: GET
+url: /api/users
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-16T11:07:59.124Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/admin/companies/current (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/admin/companies/current
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getCompanyById (file:///C:/Users/stanl/demo/server/controllers/companies.controller.js:322:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (file:///C:/Users/stanl/demo/server/middleware/auth.js:89:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T11:18:05.805Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/admin/companies/current (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/admin/companies/current
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getCompanyById (file:///C:/Users/stanl/demo/server/controllers/companies.controller.js:322:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (file:///C:/Users/stanl/demo/server/middleware/auth.js:89:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T11:19:52.473Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/admin/companies/current (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/admin/companies/current
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getCompanyById (file:///C:/Users/stanl/demo/server/controllers/companies.controller.js:322:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (file:///C:/Users/stanl/demo/server/middleware/auth.js:89:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T11:55:40.695Z] HTTP_400
+Summary: Unknown error
+Request: POST /api/projects/risks (status 400)
+Context:
+status: 400
+code: Project, Risk Title, and Description are required
+method: POST
+url: /api/projects/risks
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: 1
+branchId: null
+body: {"project_id":2,"risk_code":"","risk_title":"Supply Chain Disruption for Precast Concrete","description":"","category_id":"9","risk_source":"Project Assessment","risk_cause":"","potential_consequences":"","affected_area":"Cost","inherent_likelihood":4,"inherent_impact":4,"existing_controls":"","residual_likelihood":2,"residual_impact":2,"treatment_strategy":"REDUCE","mitigation_plan":"","contingency_plan":"","target_mitigation_date":"2026-12-16","risk_owner":"","notes":""}
+query: {}
+Technical details:
+Error
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at createRisk (file:///C:/Users/stanl/demo/server/controllers/riskManagement.controller.js:372:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T11:57:12.441Z] HTTP_400
+Summary: Unknown error
+Request: POST /api/projects/risks (status 400)
+Context:
+status: 400
+code: Project, Risk Title, and Description are required
+method: POST
+url: /api/projects/risks
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: 1
+branchId: null
+body: {"project_id":2,"risk_code":"","risk_title":"Supply Chain Disruption for Precast Concrete","description":"","category_id":"9","risk_source":"Project Assessment","risk_cause":"Overseas shipping and supplier lead time backlog","potential_consequences":"Delay in structural precast installation impacting milestone delivery","affected_area":"Cost","inherent_likelihood":4,"inherent_impact":4,"existing_controls":"","residual_likelihood":2,"residual_impact":2,"treatment_strategy":"REDUCE","mitigation_plan":"Procure buffer precast stock and engage local backup vendor","contingency_plan":"Fast-track alternative civil works while awaiting shipments","target_mitigation_date":"2026-12-16","risk_owner":"","notes":""}
+query: {}
+Technical details:
+Error
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at createRisk (file:///C:/Users/stanl/demo/server/controllers/riskManagement.controller.js:372:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:01:03.574Z] HTTP_400
+Summary: Unknown error
+Request: POST /api/projects/risks/monitoring/scan (status 400)
+Context:
+status: 400
+code: Project ID is required to run monitoring scan
+method: POST
+url: /api/projects/risks/monitoring/scan
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: 1
+branchId: null
+body: {"projectId":null}
+query: {}
+Technical details:
+Error
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at runMonitoringScan (file:///C:/Users/stanl/demo/server/controllers/riskManagement.controller.js:1297:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:01:47.765Z] HTTP_500
+Summary: Unknown column 't.title' in 'field list'
+Request: POST /api/projects/risks/monitoring/scan (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: POST
+url: /api/projects/risks/monitoring/scan
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: 1
+branchId: null
+body: {"projectId":"2"}
+query: {}
+Technical details:
+Error: Unknown column 't.title' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:684:20)
+    at async evaluateProjectEvents (file:///C:/Users/stanl/demo/server/services/riskDetectionEngine.js:77:24)
+    at async runMonitoringScan (file:///C:/Users/stanl/demo/server/controllers/riskManagement.controller.js:1300:20)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:08:52.772Z] HTTP_500
+Summary: Unknown column 'status' in 'field list'
+Request: POST /api/projects/risks/ai/generate (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: POST
+url: /api/projects/risks/ai/generate
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: null
+body: {"projectId":"1"}
+query: {}
+Technical details:
+Error: Unknown column 'status' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:684:20)
+    at async Promise.all (index 0)
+    at async generateAiRiskSuggestions (file:///C:/Users/stanl/demo/server/services/riskDetectionEngine.js:264:99)
+    at async generateAiSuggestions (file:///C:/Users/stanl/demo/server/controllers/riskManagement.controller.js:1130:25)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:22:18.202Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:24:10.123Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:737:13)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:26:42.988Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:737:13)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:26:46.210Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:737:13)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:26:49.344Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:737:13)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:26:52.815Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:737:13)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:26:55.960Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:737:13)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:26:59.355Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:737:13)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:27:02.412Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:737:13)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:28:23.957Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:737:13)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:28:26.959Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:737:13)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:28:30.415Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:737:13)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:28:33.753Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:737:13)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:28:36.949Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:737:13)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:28:40.783Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:737:13)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:28:44.339Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:737:13)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:28:47.921Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:737:13)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at process.processImmediate (node:internal/timers:459:9)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:30:00.878Z] HTTP_400
+Summary: Current password is incorrect
+Request: POST /api/auth/change-password (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: POST
+url: /api/auth/change-password
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: null
+branchId: null
+body: {"currentPassword":"[REDACTED]","newPassword":"[REDACTED]","confirmNewPassword":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Current password is incorrect
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at changePassword (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:737:13)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at process.processImmediate (node:internal/timers:459:9)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:31:29.617Z] HTTP_500
+Summary: Unknown column 'category_name' in 'field list'
+Request: POST /api/projects/risks (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: POST
+url: /api/projects/risks
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: 1
+branchId: null
+body: {"project_id":2,"risk_code":"","risk_title":"Supply Chain Disruption for Precast Concrete","description":"Long lead-times for precast concrete components could delay structural erection.","category_id":11,"risk_source":"Project Assessment","risk_cause":"","potential_consequences":"","affected_area":"Cost","inherent_likelihood":4,"inherent_impact":4,"existing_controls":"","residual_likelihood":2,"residual_impact":2,"treatment_strategy":"REDUCE","mitigation_plan":"","contingency_plan":"","target_mitigation_date":"2026-12-16","risk_owner":"","notes":"","title":"Supply Chain Disruption for Precast Concrete","cause":"","consequences":"","source":"Project Assessment"}
+query: {}
+Technical details:
+Error: Unknown column 'category_name' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:684:20)
+    at async createRisk (file:///C:/Users/stanl/demo/server/controllers/riskManagement.controller.js:392:24)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:31:58.814Z] HTTP_500
+Summary: Unknown column 'category_name' in 'field list'
+Request: POST /api/projects/risks (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: POST
+url: /api/projects/risks
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: 1
+branchId: null
+body: {"project_id":2,"risk_code":"","risk_title":"Supply Chain Disruption for Precast Concrete","description":"Long lead-times for precast concrete components could delay structural erection.","category_id":11,"risk_source":"Project Assessment","risk_cause":"","potential_consequences":"","affected_area":"Cost","inherent_likelihood":4,"inherent_impact":4,"existing_controls":"","residual_likelihood":2,"residual_impact":2,"treatment_strategy":"REDUCE","mitigation_plan":"","contingency_plan":"","target_mitigation_date":"2026-12-16","risk_owner":"","notes":"","title":"Supply Chain Disruption for Precast Concrete","cause":"","consequences":"","source":"Project Assessment"}
+query: {}
+Technical details:
+Error: Unknown column 'category_name' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:684:20)
+    at async createRisk (file:///C:/Users/stanl/demo/server/controllers/riskManagement.controller.js:392:24)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:32:14.871Z] HTTP_500
+Summary: Unknown column 'status' in 'where clause'
+Request: POST /api/projects/risks/monitoring/scan (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: POST
+url: /api/projects/risks/monitoring/scan
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: 1
+branchId: null
+body: {"projectId":null}
+query: {}
+Technical details:
+Error: Unknown column 'status' in 'where clause'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:684:20)
+    at async runMonitoringScan (file:///C:/Users/stanl/demo/server/controllers/riskManagement.controller.js:1335:26)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:32:46.404Z] HTTP_500
+Summary: Unknown column 'e.total_amount' in 'field list'
+Request: POST /api/projects/risks/monitoring/scan (status 500)
+Context:
+status: 500
+code: ER_BAD_FIELD_ERROR
+method: POST
+url: /api/projects/risks/monitoring/scan
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: 1
+companyId: 1
+branchId: null
+body: {"projectId":"2"}
+query: {}
+Technical details:
+Error: Unknown column 'e.total_amount' in 'field list'
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:684:20)
+    at async evaluateProjectEvents (file:///C:/Users/stanl/demo/server/services/riskDetectionEngine.js:108:22)
+    at async runMonitoringScan (file:///C:/Users/stanl/demo/server/controllers/riskManagement.controller.js:1353:22)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:46:38.798Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:50:13.148Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-16T12:50:13.156Z] CLIENT_ERROR
+Summary: write ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: write ECONNRESET
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writevGeneric (node:internal/stream_base_commons:142:3)
+    at Socket._writeGeneric (node:net:969:11)
+    at Socket._writev (node:net:978:8)
+    at doWrite (node:internal/streams/writable:596:12)
+    at clearBuffer (node:internal/streams/writable:775:5)
+    at Writable.uncork (node:internal/streams/writable:531:7)
+    at ServerResponse.end (node:_http_outgoing:1145:19)
+    at respond (C:\Users\stanl\demo\server\node_modules\engine.io\build\transports\polling.js:234:22)
+    at Polling.doWrite (C:\Users\stanl\demo\server\node_modules\engine.io\build\transports\polling.js:243:13)
+--------------------------------------------------------------------------------
+
+[2026-11-16T15:26:09.954Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T15:28:20.847Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T15:29:15.326Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T15:29:36.660Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T15:33:06.497Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/finance/petty-cash/disburse (status 400)
+Context:
+requestId: mwjfai2j-qdextdb2
+durationMs: 69
+method: POST
+url: /api/finance/petty-cash/disburse
+ip: ::1
+origin: 
+userAgent: node
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-16T15:33:06.525Z] HTTP_400
+Summary: Request failed with status 400
+Request: POST /api/finance/petty-cash/disburse (status 400)
+Context:
+requestId: mwjfai4n-64a6x978
+durationMs: 22
+method: POST
+url: /api/finance/petty-cash/disburse
+ip: ::1
+origin: 
+userAgent: node
+userId: 1
+companyId: 1
+branchId: null
+status: 400
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-16T15:33:06.680Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 49215
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-16T15:33:06.683Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 49229
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-16T15:33:45.900Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 49340
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-16T15:33:45.901Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 49353
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-16T16:24:49.767Z] HTTP_400
+Summary: Invalid id
+Request: GET /api/admin/companies/current (status 400)
+Context:
+status: 400
+code: VALIDATION_ERROR
+method: GET
+url: /api/admin/companies/current
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+Error: Invalid id
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at getCompanyById (file:///C:/Users/stanl/demo/server/controllers/companies.controller.js:322:20)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at composedMiddleware (file:///C:/Users/stanl/demo/server/middleware/requirePermission.js:87:14)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (file:///C:/Users/stanl/demo/server/middleware/auth.js:89:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T16:39:11.120Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/facilities/sustainability/initiatives (status 404)
+Context:
+requestId: mwjhnh8q-3thp52xq
+durationMs: 6
+method: GET
+url: /api/facilities/sustainability/initiatives
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-16T20:36:49.562Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T22:22:47.589Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T22:48:15.735Z] HTTP_401
+Summary: Invalid credentials
+Request: POST /api/login (status 401)
+Context:
+status: 401
+code: INVALID_CREDENTIALS
+method: POST
+url: /api/login
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"admin","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: Invalid credentials
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:413:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T22:48:24.666Z] HTTP_401
+Summary: Invalid credentials
+Request: POST /api/login (status 401)
+Context:
+status: 401
+code: INVALID_CREDENTIALS
+method: POST
+url: /api/login
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"admin","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: Invalid credentials
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:413:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T22:49:07.096Z] HTTP_401
+Summary: Invalid credentials
+Request: POST /api/login (status 401)
+Context:
+status: 401
+code: INVALID_CREDENTIALS
+method: POST
+url: /api/login
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"admin","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: Invalid credentials
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:413:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T22:49:58.324Z] HTTP_401
+Summary: Invalid credentials
+Request: POST /api/login (status 401)
+Context:
+status: 401
+code: INVALID_CREDENTIALS
+method: POST
+url: /api/login
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"admin","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: Invalid credentials
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:413:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T22:50:21.215Z] HTTP_423
+Summary: Too many failed login attempts. Reset your password to continue.
+Request: POST /api/login (status 423)
+Context:
+status: 423
+code: PASSWORD_RESET_REQUIRED
+method: POST
+url: /api/login
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"admin","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: Too many failed login attempts. Reset your password to continue.
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at createPasswordResetRequiredError (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:53:10)
+    at login (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:411:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T22:50:35.017Z] HTTP_423
+Summary: Too many failed login attempts. Reset your password to continue.
+Request: POST /api/login (status 423)
+Context:
+status: 423
+code: PASSWORD_RESET_REQUIRED
+method: POST
+url: /api/login
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"admin","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: Too many failed login attempts. Reset your password to continue.
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at createPasswordResetRequiredError (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:53:10)
+    at login (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:411:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T22:51:06.580Z] HTTP_423
+Summary: Too many failed login attempts. Reset your password to continue.
+Request: POST /api/login (status 423)
+Context:
+status: 423
+code: PASSWORD_RESET_REQUIRED
+method: POST
+url: /api/login
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"admin","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: Too many failed login attempts. Reset your password to continue.
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at createPasswordResetRequiredError (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:53:10)
+    at login (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:411:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T22:58:27.748Z] HTTP_423
+Summary: Too many failed login attempts. Reset your password to continue.
+Request: POST /api/login (status 423)
+Context:
+status: 423
+code: PASSWORD_RESET_REQUIRED
+method: POST
+url: /api/login
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+body: {"username":"admin","password":"[REDACTED]","rememberMe":true}
+query: {}
+Technical details:
+Error: Too many failed login attempts. Reset your password to continue.
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at createPasswordResetRequiredError (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:53:10)
+    at login (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:411:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T23:01:16.032Z] HTTP_423
+Summary: Too many failed login attempts. Reset your password to continue.
+Request: POST /api/login (status 423)
+Context:
+status: 423
+code: PASSWORD_RESET_REQUIRED
+method: POST
+url: /api/login
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Safari/537.36 Antigravity/2.32.1
+userId: null
+companyId: null
+branchId: null
+body: {"username":"admin","password":"[REDACTED]","rememberMe":false}
+query: {}
+Technical details:
+Error: Too many failed login attempts. Reset your password to continue.
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at createPasswordResetRequiredError (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:53:10)
+    at login (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:411:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T23:08:15.999Z] HTTP_401
+Summary: Invalid credentials
+Request: POST /api/login (status 401)
+Context:
+status: 401
+code: INVALID_CREDENTIALS
+method: POST
+url: /api/login
+ip: ::1
+origin: 
+userAgent: node
+userId: null
+companyId: null
+branchId: null
+body: {"username":"admin","password":"[REDACTED]"}
+query: {}
+Technical details:
+Error: Invalid credentials
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at login (file:///C:/Users/stanl/demo/server/controllers/auth.controller.js:413:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-16T23:08:16.752Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T00:01:11.397Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T00:09:02.282Z] HTTP_404
+Summary: Request failed with status 404
+Request: POST /api/auth/login (status 404)
+Context:
+requestId: mwjxpzr7-heq5wyo5
+durationMs: 7
+method: POST
+url: /api/auth/login
+ip: ::1
+origin: 
+userAgent: node
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T00:09:02.317Z] HTTP_404
+Summary: Request failed with status 404
+Request: POST /api/auth/login (status 404)
+Context:
+requestId: mwjxpzsb-7vnn06gb
+durationMs: 2
+method: POST
+url: /api/auth/login
+ip: ::1
+origin: 
+userAgent: node
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T00:22:38.964Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T00:23:10.881Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T00:24:43.400Z] HTTP_404
+Summary: Request failed with status 404
+Request: POST /api/auth/login (status 404)
+Context:
+requestId: mwjya5wb-lfc1qmtc
+durationMs: 45
+method: POST
+url: /api/auth/login
+ip: ::1
+origin: 
+userAgent: node
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T00:24:43.427Z] HTTP_404
+Summary: Request failed with status 404
+Request: POST /api/auth/login (status 404)
+Context:
+requestId: mwjya5y5-nxkwgihc
+durationMs: 6
+method: POST
+url: /api/auth/login
+ip: ::1
+origin: 
+userAgent: node
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T00:29:44.311Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T00:30:12.877Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T00:37:59.560Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-17T00:37:59.590Z] CLIENT_ERROR
+Summary: write ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: write ECONNRESET
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writevGeneric (node:internal/stream_base_commons:142:3)
+    at Socket._writeGeneric (node:net:969:11)
+    at Socket._writev (node:net:978:8)
+    at doWrite (node:internal/streams/writable:596:12)
+    at clearBuffer (node:internal/streams/writable:775:5)
+    at Writable.uncork (node:internal/streams/writable:531:7)
+    at ServerResponse.end (node:_http_outgoing:1145:19)
+    at respond (C:\Users\stanl\demo\server\node_modules\engine.io\build\transports\polling.js:234:22)
+    at Polling.doWrite (C:\Users\stanl\demo\server\node_modules\engine.io\build\transports\polling.js:243:13)
+--------------------------------------------------------------------------------
+
+[2026-11-17T00:37:59.591Z] CLIENT_ERROR
+Summary: write ECONNRESET
+Context:
+remoteAddress: null
+remotePort: null
+Technical details:
+Error: write ECONNRESET
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writevGeneric (node:internal/stream_base_commons:142:3)
+    at Socket._writeGeneric (node:net:969:11)
+    at Socket._writev (node:net:978:8)
+    at doWrite (node:internal/streams/writable:596:12)
+    at clearBuffer (node:internal/streams/writable:775:5)
+    at Writable.uncork (node:internal/streams/writable:531:7)
+    at ServerResponse.end (node:_http_outgoing:1145:19)
+    at respond (C:\Users\stanl\demo\server\node_modules\engine.io\build\transports\polling.js:234:22)
+    at Polling.doWrite (C:\Users\stanl\demo\server\node_modules\engine.io\build\transports\polling.js:243:13)
+--------------------------------------------------------------------------------
+
+[2026-11-17T01:30:15.414Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 61993
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-17T01:49:42.462Z] HTTP_500
+Summary: Request failed with status 500
+Request: GET /api/social-feed?offset=0&limit=15 (status 500)
+Context:
+requestId: mwk1b4rp-1bono6zy
+durationMs: 15062
+method: GET
+url: /api/social-feed?offset=0&limit=15
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 16; Pixel 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Mobile Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+status: 500
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T01:53:00.089Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 62592
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-17T05:10:02.447Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 54587
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-17T05:16:10.037Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 59740
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-17T05:22:15.991Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 62488
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-17T06:19:55.796Z] HTTP_500
+Summary: Reference 'value' not supported (reference to group function)
+Request: GET /api/finance/dashboard/metrics (status 500)
+Context:
+status: 500
+code: ER_ILLEGAL_REFERENCE
+method: GET
+url: /api/finance/dashboard/metrics
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 16; Pixel 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Mobile Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Reference 'value' not supported (reference to group function)
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:684:20)
+    at async getDashboardMetrics (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:7715:22)
+--------------------------------------------------------------------------------
+
+[2026-11-17T06:19:56.216Z] HTTP_500
+Summary: Reference 'value' not supported (reference to group function)
+Request: GET /api/finance/dashboard/metrics (status 500)
+Context:
+status: 500
+code: ER_ILLEGAL_REFERENCE
+method: GET
+url: /api/finance/dashboard/metrics
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 16; Pixel 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Mobile Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Reference 'value' not supported (reference to group function)
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:684:20)
+    at async getDashboardMetrics (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:7715:22)
+--------------------------------------------------------------------------------
+
+[2026-11-17T06:19:56.846Z] HTTP_500
+Summary: Reference 'value' not supported (reference to group function)
+Request: GET /api/finance/dashboard/metrics (status 500)
+Context:
+status: 500
+code: ER_ILLEGAL_REFERENCE
+method: GET
+url: /api/finance/dashboard/metrics
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 16; Pixel 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Mobile Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Reference 'value' not supported (reference to group function)
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:684:20)
+    at async getDashboardMetrics (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:7715:22)
+--------------------------------------------------------------------------------
+
+[2026-11-17T06:19:57.725Z] HTTP_500
+Summary: Reference 'value' not supported (reference to group function)
+Request: GET /api/finance/dashboard/metrics (status 500)
+Context:
+status: 500
+code: ER_ILLEGAL_REFERENCE
+method: GET
+url: /api/finance/dashboard/metrics
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 16; Pixel 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Mobile Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Reference 'value' not supported (reference to group function)
+    at withPoolOperation.sqlText (file:///C:/Users/stanl/demo/server/db/pool.js:584:42)
+    at file:///C:/Users/stanl/demo/server/db/pool.js:447:13
+    at withQueryTimeout (file:///C:/Users/stanl/demo/server/db/pool.js:324:24)
+    at withPoolOperation (file:///C:/Users/stanl/demo/server/db/pool.js:446:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async query (file:///C:/Users/stanl/demo/server/db/pool.js:684:20)
+    at async getDashboardMetrics (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:7715:22)
+--------------------------------------------------------------------------------

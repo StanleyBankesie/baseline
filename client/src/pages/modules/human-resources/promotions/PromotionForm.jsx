@@ -233,7 +233,7 @@ export default function PromotionForm() {
             </h2>
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-bold uppercase text-slate-500 block mb-1">
+                <label className="text-xs font-semibold uppercase text-slate-500 block mb-1">
                   Department
                 </label>
                 <div className="p-2 bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">
@@ -243,7 +243,7 @@ export default function PromotionForm() {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-bold uppercase text-slate-500 block mb-1">
+                <label className="text-xs font-semibold uppercase text-slate-500 block mb-1">
                   Location
                 </label>
                 <div className="p-2 bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">
@@ -253,7 +253,7 @@ export default function PromotionForm() {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-bold uppercase text-slate-500 block mb-1">
+                <label className="text-xs font-semibold uppercase text-slate-500 block mb-1">
                   Position
                 </label>
                 <div className="p-2 bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">
@@ -263,7 +263,7 @@ export default function PromotionForm() {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-bold uppercase text-slate-500 block mb-1">
+                <label className="text-xs font-semibold uppercase text-slate-500 block mb-1">
                   Salary
                 </label>
                 <div className="p-2 bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 font-mono">

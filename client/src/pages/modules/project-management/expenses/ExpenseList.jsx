@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { Plus, Loader2, CheckCircle2, Receipt, ArrowLeft, Search, Activity, Clock } from "lucide-react";
+import { Plus, Loader2, CheckCircle2, Receipt, ArrowLeft, Search, Activity, Clock, DollarSign } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import ProjectModal from "../components/ProjectModal.jsx";
 import { api } from "../../../../api/client.js";
@@ -392,14 +392,14 @@ export default function ExpenseList() {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Project <span className="text-red-500">*</span></label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Project <span className="text-red-500">*</span></label>
             <select required className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500" value={form.project_id} onChange={e => setForm({...form, project_id: e.target.value})}>
               <option value="">Select Project...</option>
               {projects.map(p => <option key={p.id} value={p.id}>{p.project_name}</option>)}
             </select>
           </div>
           <div className="relative">
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Supplier</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Supplier</label>
             <input
               type="text"
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
@@ -442,25 +442,25 @@ export default function ExpenseList() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Date <span className="text-red-500">*</span></label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Date <span className="text-red-500">*</span></label>
             <input type="date" required className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500" value={form.expense_date} onChange={e => setForm({...form, expense_date: e.target.value})} />
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Amount (GHS) <span className="text-red-500">*</span></label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Amount (GHS) <span className="text-red-500">*</span></label>
             <input type="number" step="0.01" required className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-normal" value={form.amount} onChange={e => setForm({...form, amount: e.target.value})} />
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Cost Center</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Cost Center</label>
             <select className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500" value={form.cost_center_id} onChange={e => setForm({...form, cost_center_id: e.target.value})}>
               <option value="">Select Cost Center...</option>
               {costCenters.map(cc => <option key={cc.id} value={cc.id}>{cc.name}</option>)}
             </select>
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Payment Method</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Payment Method</label>
             <select className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500" value={form.payment_method} onChange={e => {
               const newMethod = e.target.value;
               setForm({...form, payment_method: newMethod, payment_account_id: ""});
@@ -475,7 +475,7 @@ export default function ExpenseList() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Payment Account</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Payment Account</label>
             <select className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500" value={form.payment_account_id} onChange={e => setForm({...form, payment_account_id: e.target.value})}>
               <option value="">Select Account...</option>
               {accounts.filter(a => {
@@ -489,7 +489,7 @@ export default function ExpenseList() {
           </div>
           {form.payment_method !== "Cash" ? (
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Reference / Cheque No</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Reference / Cheque No</label>
               <input type="text" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500" value={form.reference_no} onChange={e => setForm({...form, reference_no: e.target.value})} />
             </div>
           ) : (
@@ -503,7 +503,7 @@ export default function ExpenseList() {
         {form.payment_method !== "Cash" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Cheque Date</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Cheque Date</label>
               <input type="date" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500" value={form.cheque_date} onChange={e => setForm({...form, cheque_date: e.target.value})} />
             </div>
             <div className="flex items-center gap-2 pt-6">
@@ -515,7 +515,7 @@ export default function ExpenseList() {
 
         {form.is_tax_included && (
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Tax Code</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Tax Code</label>
             <select className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500" value={form.tax_code_id} onChange={e => setForm({...form, tax_code_id: e.target.value})}>
               <option value="">Select Tax Code...</option>
               {taxCodes.map(t => <option key={t.id} value={t.id}>{t.code}</option>)}
@@ -524,7 +524,7 @@ export default function ExpenseList() {
         )}
 
         <div>
-          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Description / Notes</label>
+          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Description / Notes</label>
           <textarea rows={3} placeholder="Notes, purpose of expense, or remarks..." className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500" value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
         </div>
       </ProjectModal>

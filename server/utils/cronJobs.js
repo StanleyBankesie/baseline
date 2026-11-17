@@ -5,6 +5,7 @@ import { runServicingNotifications } from "../scripts/servicingNotification.js";
 import { query } from "../db/pool.js";
 import { autoPostMidnightPosSalesToFinance } from "../services/posFinanceAutoPost.service.js";
 import { cleanupExpiredAiChatHistory } from "../services/ai/banks.history.service.js";
+import { runProjectIssueOverdueEscalations } from "../controllers/construction.controller.js";
 
 export { autoPostMidnightPosSalesToFinance };
 
@@ -183,6 +184,16 @@ export function initCronJobs() {
     }
   });
   console.log("[Cron] Scheduled automated POS sales finance posting for 11:59 PM (59 23 * * *)");
+
+  cron.schedule("0 8 * * *", async () => {
+    try {
+      const result = await runProjectIssueOverdueEscalations();
+      if (result?.escalated) console.log(`[Cron] Sent ${result.escalated} project issue overdue escalation(s).`);
+    } catch (err) {
+      console.error("[Cron] Project issue overdue escalation failed:", err);
+    }
+  });
+  console.log("[Cron] Scheduled daily project issue overdue escalation for 08:00");
 
   // Schedule automatic POS Day Closing at 12:00 AM midnight (0 0 * * *)
   cron.schedule("0 0 * * *", async () => {

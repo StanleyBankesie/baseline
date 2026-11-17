@@ -417,51 +417,51 @@ export default function ServiceParametersPage() {
           <ModalForm open={supModal} onClose={() => setSupModal(false)} title={editingSup ? "Edit Supplier" : "New Supplier"}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="sm:col-span-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Supplier Name *</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Supplier Name *</label>
                 <input type="text" className="input w-full" placeholder="Company Name" value={supForm.supplier_name} onChange={e => setSupForm(p => ({ ...p, supplier_name: e.target.value }))} />
               </div>
               {/* Supplier Code hidden as requested */}
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Supplier Type</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Supplier Type</label>
                 <select className="select w-full" value={supForm.supplier_type} onChange={e => setSupForm(p => ({ ...p, supplier_type: e.target.value }))}>
                   <option value="LOCAL">LOCAL</option>
                   <option value="FOREIGN">FOREIGN</option>
                 </select>
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Contact Person</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Contact Person</label>
                 <input type="text" className="input w-full" placeholder="John Doe" value={supForm.contact_person} onChange={e => setSupForm(p => ({ ...p, contact_person: e.target.value }))} />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Email</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Email</label>
                 <input type="email" className="input w-full" placeholder="contact@example.com" value={supForm.email} onChange={e => setSupForm(p => ({ ...p, email: e.target.value }))} />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Phone</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Phone</label>
                 <PhoneInput value={supForm.phone} onChange={v => setSupForm(p => ({ ...p, phone: v }))} />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Tax ID / TIN</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Tax ID / TIN</label>
                 <input type="text" className="input w-full" placeholder="Tax ID" value={supForm.tax_id} onChange={e => setSupForm(p => ({ ...p, tax_id: e.target.value }))} />
               </div>
               <div className="sm:col-span-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Address</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Address</label>
                 <input type="text" className="input w-full" placeholder="123 Street Name" value={supForm.address} onChange={e => setSupForm(p => ({ ...p, address: e.target.value }))} />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">City</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">City</label>
                 <input type="text" className="input w-full" placeholder="City" value={supForm.city} onChange={e => setSupForm(p => ({ ...p, city: e.target.value }))} />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">State/Region</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">State/Region</label>
                 <input type="text" className="input w-full" placeholder="State" value={supForm.state} onChange={e => setSupForm(p => ({ ...p, state: e.target.value }))} />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Country</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Country</label>
                 <input type="text" className="input w-full" placeholder="Country" value={supForm.country} onChange={e => setSupForm(p => ({ ...p, country: e.target.value }))} />
               </div>
               <div className="relative">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Expense Account</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Expense Account</label>
                 <input
                   type="text"
                   className="input w-full"
@@ -506,7 +506,7 @@ export default function ServiceParametersPage() {
                 )}
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Default Currency</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Default Currency</label>
                 <select className="select w-full" value={supForm.currency_id} onChange={e => setSupForm(p => ({ ...p, currency_id: e.target.value }))}>
                   <option value="">-- Select Currency --</option>
                   {currencies.map(c => <option key={c.id} value={c.id}>{c.code} - {c.name}</option>)}
@@ -564,11 +564,11 @@ export default function ServiceParametersPage() {
           <ModalForm open={clientModal} onClose={() => setClientModal(false)} title={editingClient ? "Edit Client" : "New Client"}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="sm:col-span-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Client Name *</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Client Name *</label>
                 <input type="text" className="input w-full" placeholder="Client Name" value={clientForm.customer_name} onChange={e => setClientForm(p => ({ ...p, customer_name: e.target.value }))} />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Client Type</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Client Type</label>
                 <select className="select w-full" value={clientForm.customer_type} onChange={e => setClientForm(p => ({ ...p, customer_type: e.target.value }))}>
                   <option value="LOCAL">LOCAL</option>
                   <option value="FOREIGN">FOREIGN</option>
@@ -577,35 +577,35 @@ export default function ServiceParametersPage() {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Contact Person</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Contact Person</label>
                 <input type="text" className="input w-full" placeholder="John Doe" value={clientForm.contact_person} onChange={e => setClientForm(p => ({ ...p, contact_person: e.target.value }))} />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Email</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Email</label>
                 <input type="email" className="input w-full" placeholder="contact@example.com" value={clientForm.email} onChange={e => setClientForm(p => ({ ...p, email: e.target.value }))} />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Phone</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Phone</label>
                 <PhoneInput value={clientForm.phone} onChange={v => setClientForm(p => ({ ...p, phone: v }))} />
               </div>
               <div className="sm:col-span-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Address</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Address</label>
                 <input type="text" className="input w-full" placeholder="123 Street Name" value={clientForm.address} onChange={e => setClientForm(p => ({ ...p, address: e.target.value }))} />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">City</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">City</label>
                 <input type="text" className="input w-full" placeholder="City" value={clientForm.city} onChange={e => setClientForm(p => ({ ...p, city: e.target.value }))} />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">State/Region</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">State/Region</label>
                 <input type="text" className="input w-full" placeholder="State" value={clientForm.state} onChange={e => setClientForm(p => ({ ...p, state: e.target.value }))} />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Country</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Country</label>
                 <input type="text" className="input w-full" placeholder="Country" value={clientForm.country} onChange={e => setClientForm(p => ({ ...p, country: e.target.value }))} />
               </div>
               <div className="relative">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Revenue Account</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Revenue Account</label>
                 <input
                   type="text"
                   className="input w-full"
@@ -650,7 +650,7 @@ export default function ServiceParametersPage() {
                 )}
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Default Currency</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Default Currency</label>
                 <select className="select w-full" value={clientForm.currency_id} onChange={e => setClientForm(p => ({ ...p, currency_id: e.target.value }))}>
                   <option value="">-- Select Currency --</option>
                   {currencies.map(c => <option key={c.id} value={c.id}>{c.code} - {c.name}</option>)}

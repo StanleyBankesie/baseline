@@ -1,11 +1,12 @@
 /**
  * @fileoverview ProjectIncomeReport component.
- * Provides functionality for ProjectIncomeReport.
+ * Provides functionality for ProjectIncomeReport with project and date range filters.
+ * Requires user to select a project before showing any report data.
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Download, RefreshCw, Search, TrendingUp, Receipt, FolderOpen } from "lucide-react";
+import { ArrowLeft, Download, RefreshCw, Search, TrendingUp, Receipt, FolderOpen, Calendar, X } from "lucide-react";
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 
@@ -18,187 +19,445 @@ const statusStyles = {
   REVERSED: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
 };
 
-/**
- *  component
- * 
- * @returns {JSX.Element} The rendered component
- */
 export default function ProjectIncomeReport() {
-  const [pollingCounter, setPollingCounter] = React.useState(0);
-  React.useEffect(() => {
-    const __pollId = setInterval(() => setPollingCounter(c => c + 1), 15000);
-    return () => clearInterval(__pollId);
-  }, [pollingCounter]);
-
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [items, setItems] = useState([]);
   const [summary, setSummary] = useState({ count: 0, total: 0 });
   const [projects, setProjects] = useState([]);
   const [selectedProjectId, setSelectedProjectId] = useState("");
-
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Load project list once on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await api.get("/projects/projects", { params: { active: "all" } });
+        if (res.data?.items && res.data.items.length > 0) {
+          setProjects(res.data.items);
+        }
+      } catch (_) {}
+    })();
+  }, []);
 
   const fetchData = async () => {
+    if (!selectedProjectId) {
+      setItems([]);
+      setSummary({ count: 0, total: 0 });
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
-      let url = `/projects/reports/project-income?`;
-      if (selectedProjectId) url += `project_id=${selectedProjectId}&`;
+      let url = `/projects/reports/project-income?project_id=${selectedProjectId}&`;
       if (dateFrom) url += `from=${dateFrom}&`;
       if (dateTo) url += `to=${dateTo}&`;
-      
+
       const res = await api.get(url);
-      setProjects(res.data?.projects || []);
+      if (res.data?.projects && res.data.projects.length > 0) {
+        setProjects((prev) => (prev.length > 0 ? prev : res.data.projects));
+      }
       setItems(res.data?.items || []);
       setSummary(res.data?.summary || { count: 0, total: 0 });
-    } catch { toast.error("Failed to load report"); }
-    finally { setLoading(false); }
+    } catch {
+      toast.error("Failed to load project income report");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { fetchData(); }, [selectedProjectId, dateFrom, dateTo]);
+  useEffect(() => {
+    if (!selectedProjectId) {
+      setItems([]);
+      setSummary({ count: 0, total: 0 });
+      setLoading(false);
+      return;
+    }
+    fetchData();
+  }, [selectedProjectId, dateFrom, dateTo]);
 
-  const handleProjectChange = (e) => {
-    setSelectedProjectId(e.target.value);
+  // Client-side search filtering
+  const filteredItems = useMemo(() => {
+    if (!searchTerm.trim()) return items;
+    const q = searchTerm.toLowerCase();
+    return items.filter(
+      (v) =>
+        (v.voucher_no || "").toLowerCase().includes(q) ||
+        (v.project_name || "").toLowerCase().includes(q) ||
+        (v.description || "").toLowerCase().includes(q) ||
+        (v.status || "").toLowerCase().includes(q)
+    );
+  }, [items, searchTerm]);
+
+  // Dynamic summary based on filtered items
+  const filteredTotal = useMemo(() => {
+    return filteredItems.reduce((acc, v) => acc + Number(v.amount || 0), 0);
+  }, [filteredItems]);
+
+  const handleResetFilters = () => {
+    setSelectedProjectId("");
+    setDateFrom("");
+    setDateTo("");
+    setSearchTerm("");
+    setItems([]);
+    setSummary({ count: 0, total: 0 });
   };
+
+  const selectedProject = useMemo(() => {
+    return projects.find((p) => String(p.id) === String(selectedProjectId));
+  }, [projects, selectedProjectId]);
 
   const exportExcel = () => {
-    const headers = ["Voucher No", "Date", "Description", "Amount", "Status"];
-    const rows = items.map(v => [
-      v.voucher_no, v.voucher_date, (v.description || ""),
-      Number(v.amount || 0).toFixed(2), v.status
-    ]);
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-    XLSX.utils.book_append_sheet(wb, ws, "Report");
-    XLSX.writeFile(wb, `project-income-${new Date().toISOString().split("T")[0]}.xlsx`);
+    if (!selectedProjectId || filteredItems.length === 0) return;
+    try {
+      const headers = ["Voucher No", "Date", "Project", "Description", "Type", "Currency", "Amount (GH₵)", "Status"];
+      const rows = filteredItems.map((v) => [
+        v.voucher_no || "",
+        v.voucher_date ? String(v.voucher_date).split("T")[0] : "",
+        v.project_name || selectedProject?.project_name || "",
+        (v.description || "").replace(/"/g, '""'),
+        v.voucher_type_name || "-",
+        v.currency_code || "GHS",
+        Number(v.amount || 0).toFixed(2),
+        v.status || "",
+      ]);
+
+      if (window.XLSX) {
+        const wb = window.XLSX.utils.book_new();
+        const ws = window.XLSX.utils.aoa_to_sheet([headers, ...rows]);
+        window.XLSX.utils.book_append_sheet(wb, ws, "Project Income");
+        window.XLSX.writeFile(wb, `project-income-${selectedProject?.project_code || "report"}-${new Date().toISOString().split("T")[0]}.xlsx`);
+      } else {
+        const csvContent =
+          "data:text/csv;charset=utf-8," +
+          [headers.join(","), ...rows.map((r) => r.map((c) => `"${c}"`).join(","))].join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `project-income-${selectedProject?.project_code || "report"}-${new Date().toISOString().split("T")[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+      toast.success("Income report exported");
+    } catch {
+      toast.error("Failed to export Excel report");
+    }
   };
 
   const exportPdf = () => {
-    const headers = ["Voucher No", "Date", "Description", "Amount", "Status"];
-    const rows = items.map(v => [
-      v.voucher_no, v.voucher_date, (v.description || ""),
-      Number(v.amount || 0).toFixed(2), v.status
-    ]);
-    const doc = new jsPDF();
-    doc.autoTable({
-      head: [headers],
-      body: rows,
-      theme: 'grid',
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [41, 128, 185] }
-    });
-    doc.save(`project-income-${new Date().toISOString().split("T")[0]}.pdf`);
+    if (!selectedProjectId || filteredItems.length === 0) return;
+    try {
+      if (window.jsPDF) {
+        const doc = new window.jsPDF("landscape");
+        const headers = ["Voucher No", "Date", "Project", "Description", "Currency", "Amount (GH₵)", "Status"];
+        const rows = filteredItems.map((v) => [
+          v.voucher_no || "",
+          v.voucher_date ? String(v.voucher_date).split("T")[0] : "",
+          v.project_name || selectedProject?.project_name || "-",
+          v.description || "-",
+          v.currency_code || "GHS",
+          Number(v.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 }),
+          v.status || "",
+        ]);
+        doc.text(`Project Income Report: ${selectedProject ? selectedProject.project_code + " - " + selectedProject.project_name : ""}`, 14, 15);
+        doc.autoTable({
+          head: [headers],
+          body: rows,
+          startY: 20,
+          theme: "grid",
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [5, 150, 105] },
+        });
+        doc.save(`project-income-${selectedProject?.project_code || "report"}-${new Date().toISOString().split("T")[0]}.pdf`);
+        toast.success("PDF exported successfully");
+      } else {
+        window.print();
+      }
+    } catch {
+      window.print();
+    }
   };
 
-  const selectedProject = projects.find(p => String(p.id) === String(selectedProjectId));
-
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
-      <div className="flex items-center justify-between">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500">
+      {/* 1. Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm">
         <div className="flex items-center gap-4">
-          <Link to="/project-management?section=Reports%20%26%20Analytics" className="btn btn-secondary p-2"><ArrowLeft size={20} /></Link>
+          <Link
+            to="/project-management?section=Reports%20%26%20Analytics"
+            className="btn btn-secondary p-2.5 rounded-xl inline-flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800"
+            title="Return to Reports"
+          >
+            <ArrowLeft size={20} />
+          </Link>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Project Income Report</h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">View all receipt vouchers linked to a project</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <Receipt size={22} />
+              </span>
+              Project Income Report
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+              Financial receipts and customer billing inflows linked to selected project
+            </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={fetchData} className="btn btn-secondary p-2" title="Refresh"><RefreshCw size={18} /></button>
-          {items.length > 0 && (
-            <div className="flex items-center gap-2">
-              <button onClick={exportExcel} className="btn btn-secondary inline-flex items-center gap-1.5 text-sm"><Download size={18} /> Excel</button>
-              <button onClick={exportPdf} className="btn btn-outline inline-flex items-center gap-1.5 text-sm text-rose-600 border-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/30"><Download size={18} /> PDF</button>
-            </div>
+        <div className="flex items-center gap-2 self-end sm:self-auto">
+          {selectedProjectId && filteredItems.length > 0 && (
+            <>
+              <button
+                onClick={exportExcel}
+                className="btn btn-secondary inline-flex items-center gap-1.5 text-xs py-2 px-3 font-semibold"
+              >
+                <Download size={15} /> Excel
+              </button>
+              <button
+                onClick={exportPdf}
+                className="btn btn-outline inline-flex items-center gap-1.5 text-xs py-2 px-3 font-semibold text-rose-600 border-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+              >
+                <Download size={15} /> PDF
+              </button>
+            </>
           )}
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/40 rounded-2xl p-5 border border-emerald-100 dark:border-emerald-900/50 shadow-sm">
-        <div className="flex flex-col md:flex-row items-center gap-4">
-          <div className="flex items-center gap-3 w-full md:flex-1">
-            <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800 shadow-sm">
-              <Search size={18} className="text-emerald-600 dark:text-emerald-400" />
+      {/* 2. Filter Bar (Project & Date Filters) */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl shadow-sm space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3 flex-1">
+            {/* Project Filter (Required) */}
+            <div className="min-w-[260px] flex-1 max-w-sm">
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 block mb-1">
+                Select Project <span className="text-rose-500">*</span>
+              </label>
+              <select
+                className={`input text-xs py-2 h-auto w-full font-medium ${
+                  !selectedProjectId
+                    ? "border-emerald-500 focus:ring-emerald-500 bg-emerald-50/30 dark:bg-emerald-950/20"
+                    : ""
+                }`}
+                value={selectedProjectId}
+                onChange={(e) => setSelectedProjectId(e.target.value)}
+              >
+                <option value="">-- Choose Project to View Income --</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.project_code} - {p.project_name}
+                  </option>
+                ))}
+              </select>
             </div>
-            <select value={selectedProjectId} onChange={handleProjectChange} className="input w-full bg-white dark:bg-slate-800 border-emerald-200 dark:border-emerald-900/50 focus:border-emerald-400 dark:focus:border-emerald-600">
-              <option value="">All Projects</option>
-              {projects.map(p => <option key={p.id} value={p.id}>{p.project_code} - {p.project_name}</option>)}
-            </select>
+
+            {/* Date From */}
+            <div>
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                Date From
+              </label>
+              <input
+                type="date"
+                disabled={!selectedProjectId}
+                className="input py-1.5 px-2.5 text-xs h-auto font-mono w-36 disabled:opacity-50 disabled:cursor-not-allowed"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+              />
+            </div>
+
+            {/* Date To */}
+            <div>
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                Date To
+              </label>
+              <input
+                type="date"
+                disabled={!selectedProjectId}
+                className="input py-1.5 px-2.5 text-xs h-auto font-mono w-36 disabled:opacity-50 disabled:cursor-not-allowed"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+              />
+            </div>
+
+            {/* Search input */}
+            <div className="min-w-[180px] flex-1 max-w-xs">
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                Search Vouchers
+              </label>
+              <div className="relative">
+                <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  disabled={!selectedProjectId}
+                  placeholder="Voucher #, description..."
+                  className="input pl-8 pr-2.5 py-1.5 text-xs h-auto w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="input bg-white dark:bg-slate-800 border-emerald-200 dark:border-emerald-900/50 focus:border-emerald-400 dark:focus:border-emerald-600" />
-            <span className="text-slate-500 font-medium">to</span>
-            <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="input bg-white dark:bg-slate-800 border-emerald-200 dark:border-emerald-900/50 focus:border-emerald-400 dark:focus:border-emerald-600" />
+
+          {/* Action buttons */}
+          <div className="flex items-center gap-2 self-end">
+            {(selectedProjectId || dateFrom || dateTo || searchTerm) && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="text-xs text-rose-500 hover:text-rose-700 underline px-2 py-1 flex items-center gap-1"
+              >
+                <X size={13} /> Clear Project
+              </button>
+            )}
+            {selectedProjectId && (
+              <button
+                onClick={fetchData}
+                className="btn btn-secondary p-2 rounded-xl"
+                title="Refresh Report"
+              >
+                <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      {selectedProjectId && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 shadow-lg text-white">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 bg-white/20 rounded-xl"><Receipt size={20} /></div>
-            </div>
-            <div className="text-3xl font-bold">{summary.count}</div>
-            <div className="text-emerald-100 text-xs uppercase tracking-wider font-semibold mt-1">Total Receipts</div>
+      {/* 3. Conditional Content */}
+      {!selectedProjectId ? (
+        /* Empty Prompt State when no project is selected */
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-12 sm:p-16 text-center shadow-sm space-y-4">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-xs">
+            <FolderOpen size={32} />
           </div>
-          <div className="bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl p-5 shadow-lg text-white">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 bg-white/20 rounded-xl"><TrendingUp size={20} /></div>
-            </div>
-            <div className="text-3xl font-bold">{Number(summary.total).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-            <div className="text-teal-100 text-xs uppercase tracking-wider font-semibold mt-1">Total Income</div>
-          </div>
-          <div className="bg-gradient-to-br from-slate-600 to-slate-700 dark:from-slate-700 dark:to-slate-800 rounded-2xl p-5 shadow-lg text-white">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 bg-white/20 rounded-xl"><FolderOpen size={20} /></div>
-            </div>
-            <div className="text-lg font-bold truncate">{selectedProject?.project_name || "-"}</div>
-            <div className="text-slate-300 text-xs uppercase tracking-wider font-semibold mt-1">Project</div>
+          <div className="max-w-md mx-auto space-y-1.5">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+              Select a Project to View Income
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              Please select a project from the dropdown above to display its receipt vouchers, total revenues, and financial records.
+            </p>
           </div>
         </div>
+      ) : (
+        <>
+          {/* KPI Summary Cards for Selected Project */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 shadow-sm text-white flex items-center justify-between">
+              <div>
+                <div className="text-emerald-100 text-xs uppercase tracking-wider font-semibold">
+                  Total Receipts Count
+                </div>
+                <div className="text-3xl font-bold mt-1">{filteredItems.length}</div>
+                <div className="text-emerald-100/80 text-[11px] mt-0.5">
+                  {selectedProject ? `${selectedProject.project_code} - ${selectedProject.project_name}` : "Selected project"}
+                </div>
+              </div>
+              <div className="p-3 bg-white/20 rounded-2xl">
+                <Receipt size={26} />
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl p-5 shadow-sm text-white flex items-center justify-between">
+              <div>
+                <div className="text-teal-100 text-xs uppercase tracking-wider font-semibold">
+                  Total Project Income (GH₵)
+                </div>
+                <div className="text-3xl font-bold mt-1">
+                  GH₵ {filteredTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+                <div className="text-teal-100/80 text-[11px] mt-0.5">
+                  Net credited project billing revenue
+                </div>
+              </div>
+              <div className="p-3 bg-white/20 rounded-2xl">
+                <TrendingUp size={26} />
+              </div>
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+              <h2 className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                <Receipt size={15} className="text-emerald-600" />
+                Receipt Vouchers Register ({filteredItems.length})
+              </h2>
+              <span className="text-xs text-slate-400 font-mono font-bold">
+                Total: GH₵ {filteredTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-semibold uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left">Voucher No</th>
+                    <th className="px-4 py-3 text-left">Date</th>
+                    <th className="px-4 py-3 text-left">Project</th>
+                    <th className="px-4 py-3 text-left">Description</th>
+                    <th className="px-4 py-3 text-left">Type</th>
+                    <th className="px-4 py-3 text-left">Currency</th>
+                    <th className="px-4 py-3 text-right">Amount</th>
+                    <th className="px-4 py-3 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {loading ? (
+                    <tr>
+                      <td colSpan="8" className="px-6 py-16 text-center text-slate-400 animate-pulse font-semibold">
+                        Loading income report records...
+                      </td>
+                    </tr>
+                  ) : filteredItems.length > 0 ? (
+                    filteredItems.map((v) => (
+                      <tr key={v.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
+                        <td className="px-4 py-3 font-mono font-bold text-emerald-700 dark:text-emerald-400">
+                          {v.voucher_no}
+                        </td>
+                        <td className="px-4 py-3 font-mono text-slate-600 dark:text-slate-400">
+                          {v.voucher_date ? new Date(v.voucher_date).toLocaleDateString() : "-"}
+                        </td>
+                        <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-200">
+                          {v.project_name || selectedProject?.project_name || "—"}
+                        </td>
+                        <td className="px-4 py-3 text-slate-600 dark:text-slate-300 max-w-xs truncate" title={v.description}>
+                          {v.description || "—"}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
+                            {v.voucher_type_name || "-"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 font-mono text-slate-500">
+                          {v.currency_code || "GHS"}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                          {Number(v.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                              statusStyles[v.status] || "bg-slate-100 text-slate-700"
+                            }`}
+                          >
+                            {v.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="8" className="px-6 py-16 text-center text-slate-400 italic">
+                        No receipt vouchers found for {selectedProject ? `"${selectedProject.project_name}"` : "this project"}.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       )}
-
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30">
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Voucher No</th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Date</th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Description</th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Type</th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Currency</th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-right">Amount</th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
-              {loading ? (
-                <tr><td colSpan="7" className="px-6 py-20 text-center animate-pulse text-slate-400 dark:text-slate-500 font-semibold">Loading...</td></tr>
-              ) : items.length > 0 ? items.map(v => (
-                <tr key={v.id} className="hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 transition-all duration-200">
-                  <td className="px-6 py-4 font-bold text-sm text-emerald-700 dark:text-emerald-400">{v.voucher_no}</td>
-                  <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{v.voucher_date ? new Date(v.voucher_date).toLocaleDateString() : "-"}</td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm font-semibold text-slate-900 dark:text-white truncate max-w-xs">{v.description || "—"}</div>
-                    <div className="text-xs text-slate-500 truncate max-w-xs">{v.project_name || "—"}</div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50 px-2.5 py-1 rounded-lg">{v.voucher_type_name || "-"}</span>
-                  </td>
-                  <td className="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">{v.currency_code || "GHS"}</td>
-                  <td className="px-6 py-4 text-right font-medium text-emerald-600 dark:text-emerald-400">{Number(v.amount || 0).toFixed(2)}</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border ${statusStyles[v.status] || "bg-slate-100 text-slate-700"}`}>{v.status}</span>
-                  </td>
-                </tr>
-              )) : (
-                <tr><td colSpan="7" className="px-6 py-20 text-center text-slate-400 dark:text-slate-500 italic">No receipt vouchers found for this project.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
     </div>
   );
 }

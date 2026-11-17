@@ -96,7 +96,7 @@ function PAYECalculator({ bands }) {
             </span>
             <input
               type="number"
-              className="input w-36 py-1.5 text-sm font-mono text-right font-bold"
+              className="input w-36 py-1.5 text-sm font-mono text-right font-semibold"
               value={salary}
               onChange={(e) => setSalary(Number(e.target.value) || 0)}
               min={0}
@@ -1015,7 +1015,7 @@ export default function TaxConfigList() {
                                       <input
                                         type="number"
                                         step="0.1"
-                                        className="w-16 py-1 text-sm text-center font-bold bg-transparent border-none outline-none appearance-none"
+                                        className="w-16 py-1 text-sm text-center font-semibold bg-transparent border-none outline-none appearance-none"
                                         value={band.rate}
                                         onChange={(e) =>
                                           updateBand(

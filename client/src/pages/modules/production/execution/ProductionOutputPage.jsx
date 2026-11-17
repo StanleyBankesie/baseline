@@ -330,12 +330,12 @@ export default function ProductionOutputPage() {
           {/* Execution & Target Warehouse Selection */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
             <div>
-              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Select Execution *</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Select Execution *</label>
               <select
                 required
                 value={formData.job_card_id}
                 onChange={(e) => handleExecutionSelect(e.target.value)}
-                className="input w-full font-bold text-xs"
+                className="input w-full font-semibold text-xs"
               >
                 <option value="">Select Completed Execution...</option>
                 {executions.map((jc) => (
@@ -352,12 +352,12 @@ export default function ProductionOutputPage() {
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Finished Goods Warehouse *</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Finished Goods Warehouse *</label>
               <select
                 required
                 value={formData.warehouse_id}
                 onChange={(e) => setFormData({ ...formData, warehouse_id: e.target.value })}
-                className="input w-full font-bold text-xs"
+                className="input w-full font-semibold text-xs"
               >
                 <option value="">Select Production Warehouse...</option>
                 {warehouses.map((w) => (
@@ -369,7 +369,7 @@ export default function ProductionOutputPage() {
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Inspection Date *</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Inspection Date *</label>
               <input
                 type="date"
                 required
@@ -394,7 +394,7 @@ export default function ProductionOutputPage() {
               {checklists.length > 0 && (
                 <div className="min-w-[220px]">
                   <select
-                    className="input w-full bg-brand-950/90 border-brand-700 text-white font-bold text-xs"
+                    className="input w-full bg-brand-950/90 border-brand-700 text-white font-semibold text-xs"
                     value={selectedChecklistId}
                     onChange={e => handleChecklistSelect(e.target.value)}
                   >
@@ -501,14 +501,14 @@ export default function ProductionOutputPage() {
           {/* Quantity Breakdown Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
             <div>
-              <label className="text-xs font-bold text-slate-400 uppercase">Planned Target ({formData.uom})</label>
+              <label className="text-xs font-semibold text-slate-400 uppercase">Planned Target ({formData.uom})</label>
               <div className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">
                 {formData.planned_qty.toLocaleString()} <span className="text-xs text-slate-400 font-medium">{formData.uom}</span>
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-emerald-600 uppercase">Good Passed Qty *</label>
+              <label className="text-xs font-semibold text-emerald-600 uppercase">Good Passed Qty *</label>
               <input
                 type="number"
                 min="0"
@@ -520,7 +520,7 @@ export default function ProductionOutputPage() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-rose-500 uppercase">Rejected Defect Qty</label>
+              <label className="text-xs font-semibold text-rose-500 uppercase">Rejected Defect Qty</label>
               <input
                 type="number"
                 min="0"
@@ -532,7 +532,7 @@ export default function ProductionOutputPage() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-400 uppercase">Total Inspected</label>
+              <label className="text-xs font-semibold text-slate-400 uppercase">Total Inspected</label>
               <div className="text-2xl font-black text-brand-600 dark:text-brand-400 mt-1">
                 {formData.produced_qty.toLocaleString()} <span className="text-xs text-slate-400 font-medium">{formData.uom}</span>
               </div>
@@ -556,18 +556,18 @@ export default function ProductionOutputPage() {
           {/* Batch / Lot & Date Tracking (MFG & EXP Date) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
             <div>
-              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Finished Goods Lot / Batch No</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Finished Goods Lot / Batch No</label>
               <input
                 type="text"
                 value={formData.batch_no}
                 onChange={(e) => setFormData({ ...formData, batch_no: e.target.value })}
-                className="input w-full font-mono text-xs font-bold"
+                className="input w-full font-mono text-xs font-semibold"
                 placeholder="e.g. LOT-123456 / BATCH-01"
               />
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Manufacture Date (MFG Date) *</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Manufacture Date (MFG Date) *</label>
               <input
                 type="date"
                 required
@@ -578,7 +578,7 @@ export default function ProductionOutputPage() {
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Expiry Date (EXP Date)</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Expiry Date (EXP Date)</label>
               <input
                 type="date"
                 value={formData.expiry_date}
@@ -590,7 +590,7 @@ export default function ProductionOutputPage() {
 
           {/* Defect Remarks */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">QC Defect Cause & Inspection Remarks</label>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">QC Defect Cause & Inspection Remarks</label>
             <textarea
               rows={2}
               value={formData.remarks}

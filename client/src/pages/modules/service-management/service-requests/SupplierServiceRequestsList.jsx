@@ -510,7 +510,7 @@ export default function SupplierServiceRequestsList() {
         <div className="card-body">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="text-[10px] font-bold uppercase text-slate-400 block mb-1">Status</label>
+              <label className="text-[10px] font-semibold uppercase text-slate-400 block mb-1">Status</label>
               <select className="input h-9 text-sm" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                 <option value="ALL">All</option>
                 <option value="DRAFT">Draft</option>
@@ -522,7 +522,7 @@ export default function SupplierServiceRequestsList() {
               </select>
             </div>
             <div className="md:col-span-2">
-              <label className="text-[10px] font-bold uppercase text-slate-400 block mb-1">Search</label>
+              <label className="text-[10px] font-semibold uppercase text-slate-400 block mb-1">Search</label>
               <input
                 className="input h-9 text-sm w-full"
                 placeholder="Search by requisition no, department, requested by"

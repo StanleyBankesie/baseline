@@ -436,7 +436,7 @@ export default function MaintenanceBillForm() {
               <h4 className="text-sm font-semibold mb-3 text-brand">Add Service Line</h4>
               <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-3">
                 <div className="md:col-span-3">
-                  <label className="text-[10px] uppercase font-bold text-slate-500 mb-1 block">Description *</label>
+                  <label className="text-[10px] uppercase font-semibold text-slate-500 mb-1 block">Description *</label>
                   <input
                     id="maintenance-bill-desc"
                     className="input text-sm w-full"
@@ -458,7 +458,7 @@ export default function MaintenanceBillForm() {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="text-[10px] uppercase font-bold text-slate-500 mb-1 block">Category</label>
+                  <label className="text-[10px] uppercase font-semibold text-slate-500 mb-1 block">Category</label>
                   <input
                     className="input text-sm w-full"
                     value={newItem.category}
@@ -466,7 +466,7 @@ export default function MaintenanceBillForm() {
                   />
                 </div>
                 <div className="md:col-span-1">
-                  <label className="text-[10px] uppercase font-bold text-slate-500 mb-1 block">Qty</label>
+                  <label className="text-[10px] uppercase font-semibold text-slate-500 mb-1 block">Qty</label>
                   <input
                     type="number"
                     className="input text-sm w-full"
@@ -475,7 +475,7 @@ export default function MaintenanceBillForm() {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="text-[10px] uppercase font-bold text-slate-500 mb-1 block">Rate / Price</label>
+                  <label className="text-[10px] uppercase font-semibold text-slate-500 mb-1 block">Rate / Price</label>
                   <input
                     type="number"
                     className="input text-sm w-full"
@@ -484,7 +484,7 @@ export default function MaintenanceBillForm() {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="text-[10px] uppercase font-bold text-slate-500 mb-1 block">Disc %</label>
+                  <label className="text-[10px] uppercase font-semibold text-slate-500 mb-1 block">Disc %</label>
                   <input
                     type="number"
                     className="input text-sm w-full"
@@ -493,7 +493,7 @@ export default function MaintenanceBillForm() {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="text-[10px] uppercase font-bold text-slate-500 mb-1 block">Tax Component</label>
+                  <label className="text-[10px] uppercase font-semibold text-slate-500 mb-1 block">Tax Component</label>
                   <div
                     data-tax-anchor="true"
                     onClick={() => setTaxModalOpen(true)}

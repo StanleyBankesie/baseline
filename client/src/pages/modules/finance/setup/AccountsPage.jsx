@@ -302,20 +302,20 @@ export default function AccountsPage({
 
       {/* Filter Toolbar */}
       <div className="card p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="relative w-full md:w-80">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              className="input w-full pl-9 text-sm"
-              placeholder="Search account code or name..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 flex-1">
+            <div className="relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                className="input w-full pl-9 text-sm"
+                placeholder="Search account code or name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
 
-          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
             <select
-              className="input text-sm"
+              className="input w-full text-sm"
               value={filterGroupId}
               onChange={(e) => setFilterGroupId(e.target.value)}
             >
@@ -328,7 +328,7 @@ export default function AccountsPage({
             </select>
 
             <select
-              className="input text-sm"
+              className="input w-full text-sm"
               value={natureFilter}
               onChange={(e) => setNatureFilter(e.target.value)}
             >
@@ -341,7 +341,7 @@ export default function AccountsPage({
             </select>
 
             <select
-              className="input text-sm"
+              className="input w-full text-sm"
               value={activeFilter}
               onChange={(e) => setActiveFilter(e.target.value)}
             >
@@ -350,14 +350,15 @@ export default function AccountsPage({
               <option value="0">Inactive Only</option>
             </select>
           </div>
-            <button
-              type="button"
-              data-account-create-filter-btn="true"
-              className="btn-success text-xs px-3.5 py-2 flex items-center gap-1.5 font-bold cursor-pointer shrink-0 ml-auto"
-              onClick={() => setShowCreateModal(true)}
-            >
-              <Plus size={15} /> Create Account
-            </button>
+
+          <button
+            type="button"
+            data-account-create-filter-btn="true"
+            className="btn-success text-xs px-3.5 py-2 flex items-center justify-center gap-1.5 font-bold cursor-pointer shrink-0"
+            onClick={() => setShowCreateModal(true)}
+          >
+            <Plus size={15} /> Create Account
+          </button>
         </div>
       </div>
 

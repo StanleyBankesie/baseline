@@ -222,7 +222,7 @@ export default function MachineList() {
             </div>
             <form onSubmit={handleSubmit} className="p-8 space-y-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight">Machine Name</label>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-tight">Machine Name</label>
                 <input 
                   type="text" 
                   required
@@ -233,10 +233,10 @@ export default function MachineList() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight">Serial Number</label>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-tight">Serial Number</label>
                 <input 
                   type="text" 
-                  className="input py-3 w-full font-bold font-mono"
+                  className="input py-3 w-full font-semibold font-mono"
                   value={currentMachine.machine_code}
                   onChange={e => setCurrentMachine({...currentMachine, machine_code: e.target.value})}
                   placeholder="e.g. SN-994021"
@@ -250,7 +250,7 @@ export default function MachineList() {
                   checked={currentMachine.is_active}
                   onChange={e => setCurrentMachine({...currentMachine, is_active: e.target.checked})}
                 />
-                <label htmlFor="mac_active" className="text-sm font-bold text-slate-700 dark:text-slate-300 cursor-pointer">Available for scheduling</label>
+                <label htmlFor="mac_active" className="text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">Available for scheduling</label>
               </div>
               <div className="pt-2 flex gap-4">
                 <button 

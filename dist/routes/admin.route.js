@@ -5,7 +5,10 @@
 // Module Dependencies
 import express from "express";
 import multer from "multer";
+import path from "path";
+import fs from "fs";
 import { setRuntimeApiKey } from "../services/ai/banks.service.js";
+import { autoPostMidnightPosSalesToFinance } from "../services/posFinanceAutoPost.service.js";
 
 // Controller Imports
 import {
@@ -29,6 +32,7 @@ import {
   requireBranchScope,
 } from "../middleware/auth.js";
 import { requirePermission } from "../middleware/requirePermission.js";
+import { verifyAccessToken } from "../services/token.service.js";
 
 // Database Utilities and Error Handling
 import { query, pool } from "../db/pool.js";
@@ -786,12 +790,12 @@ async function ensurePagesSeed() {
     { module: "Inventory", name: "Item Edit", path: "/inventory/items/:id" },
     {
       module: "Inventory",
-      name: "Item Groups",
+      name: "Item Classification",
       path: "/inventory/item-groups",
     },
     {
       module: "Inventory",
-      name: "Item Group Edit",
+      name: "Item Classification Edit",
       path: "/inventory/item-groups/:id",
     },
     {
@@ -1699,6 +1703,55 @@ const loginBackgroundUpload = multer({
     else cb(new Error("Only image files are allowed"), false);
   },
 });
+const appBgUploadDir = path.join(process.cwd(), "uploads", "backgrounds");
+try {
+  if (!fs.existsSync(appBgUploadDir)) {
+    fs.mkdirSync(appBgUploadDir, { recursive: true });
+  }
+} catch {}
+
+const appBackgroundStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    try {
+      if (!fs.existsSync(appBgUploadDir)) {
+        fs.mkdirSync(appBgUploadDir, { recursive: true });
+      }
+    } catch {}
+    cb(null, appBgUploadDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname || "") || ".jpg";
+    cb(null, `custom-bg-${Date.now()}${ext}`);
+  },
+});
+
+const appBackgroundUpload = multer({
+  storage: appBackgroundStorage,
+  limits: { fileSize: 15 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (String(file.mimetype || "").startsWith("image/")) cb(null, true);
+    else cb(new Error("Only image files are allowed"), false);
+  },
+});
+
+let _appBgColumnsEnsured = false;
+async function ensureAppBackgroundColumns() {
+  if (_appBgColumnsEnsured) return;
+  await ensureLoginBrandingTable();
+  try {
+    const cols = await query(`SHOW COLUMNS FROM adm_login_branding`);
+    const colNames = (cols || []).map((c) => c.Field);
+    if (!colNames.includes("app_bg_image")) {
+      await query(`ALTER TABLE adm_login_branding ADD COLUMN app_bg_image LONGBLOB NULL`);
+    }
+    if (!colNames.includes("app_bg_mime")) {
+      await query(`ALTER TABLE adm_login_branding ADD COLUMN app_bg_mime VARCHAR(100) NULL`);
+    }
+  } catch (err) {
+    console.error("Failed to ensure app_bg columns in adm_login_branding:", err);
+  }
+  _appBgColumnsEnsured = true;
+}
 
 let _brandingTableEnsured = false;
 async function ensureLoginBrandingTable() {
@@ -1722,6 +1775,9 @@ async function ensureLoginBrandingTable() {
     if (!colNames.includes('hero_mime')) {
       await query(`ALTER TABLE adm_login_branding ADD COLUMN hero_mime VARCHAR(100) NULL AFTER hero_image`);
     }
+    if (!colNames.includes('background_opacity')) {
+      await query(`ALTER TABLE adm_login_branding ADD COLUMN background_opacity INT NOT NULL DEFAULT 20 AFTER hero_mime`);
+    }
   } catch (err) {
     console.error("Failed to alter adm_login_branding:", err);
   }
@@ -1729,42 +1785,43 @@ async function ensureLoginBrandingTable() {
 }
 
 // Get login background metadata
-router.get("/settings/login-bg-info", async (req, res, next) => {
+router.get("/settings/login-bg-info", async (req, res) => {
   try {
-    await ensureLoginBrandingTable();
+    await ensureLoginBrandingTable().catch(() => {});
     const rows = await query(
-      `SELECT background_image IS NOT NULL AS has_background, updated_at
+      `SELECT background_image IS NOT NULL AS has_background, background_opacity, updated_at
          FROM adm_login_branding
         WHERE id = 1
         LIMIT 1`,
-    );
+    ).catch(() => []);
     const row = rows[0] || {};
     res.json({
       hasBackground: Number(row.has_background || 0) === 1,
+      opacity: typeof row.background_opacity === "number" && !isNaN(row.background_opacity) ? row.background_opacity : 20,
       updatedAt: row.updated_at || null,
     });
   } catch (err) {
-    next(err);
+    res.json({ hasBackground: false, opacity: 20, updatedAt: null });
   }
 });
 
 // Get login hero background metadata
-router.get("/settings/login-hero-bg-info", async (req, res, next) => {
+router.get("/settings/login-hero-bg-info", async (req, res) => {
   try {
-    await ensureLoginBrandingTable();
+    await ensureLoginBrandingTable().catch(() => {});
     const rows = await query(
       `SELECT hero_image IS NOT NULL AS has_background, updated_at
          FROM adm_login_branding
         WHERE id = 1
         LIMIT 1`,
-    );
+    ).catch(() => []);
     const row = rows[0] || {};
     res.json({
       hasBackground: Number(row.has_background || 0) === 1,
       updatedAt: row.updated_at || null,
     });
   } catch (err) {
-    next(err);
+    res.json({ hasBackground: false, updatedAt: null });
   }
 });
 
@@ -1792,6 +1849,20 @@ router.get("/settings/login-background", async (req, res, next) => {
 
 router.get("/settings/login-hero-background", async (req, res, next) => {
   try {
+    const bgDir = path.join(process.cwd(), "uploads", "backgrounds");
+    const candidates = [
+      path.join(bgDir, "login-hero.jpg"),
+      path.join(bgDir, "login-hero.jpeg"),
+      path.join(bgDir, "login-hero.png"),
+      path.join(bgDir, "login-hero.webp"),
+    ];
+    for (const file of candidates) {
+      if (fs.existsSync(file)) {
+        res.setHeader("Cache-Control", "public, max-age=300");
+        return res.sendFile(file);
+      }
+    }
+
     await ensureLoginBrandingTable();
     const rows = await query(
       `SELECT hero_image, hero_mime
@@ -1853,6 +1924,18 @@ router.post(
         throw httpError(400, "VALIDATION_ERROR", "Hero image is required");
       }
       await ensureLoginBrandingTable();
+
+      // Write to uploads/backgrounds disk storage for static streaming
+      try {
+        const bgDir = path.join(process.cwd(), "uploads", "backgrounds");
+        if (!fs.existsSync(bgDir)) fs.mkdirSync(bgDir, { recursive: true });
+        const ext = req.file.mimetype?.includes("png") ? "png" : "jpg";
+        const heroDiskPath = path.join(bgDir, `login-hero.${ext}`);
+        fs.writeFileSync(heroDiskPath, req.file.buffer);
+      } catch (fsErr) {
+        console.warn("Failed to write login hero image to disk:", fsErr.message);
+      }
+
       try { await query("SET SESSION max_allowed_packet = 16777216"); } catch {}
       await query(
         `INSERT INTO adm_login_branding (id, hero_image, hero_mime)
@@ -1887,12 +1970,46 @@ router.delete(
   },
 );
 
+router.post(
+  "/settings/login-background-opacity",
+  requireAuth,
+  requirePageAccess("/administration/settings", "edit"),
+  async (req, res, next) => {
+    try {
+      const { opacity } = req.body;
+      const num = Math.max(0, Math.min(100, Math.round(Number(opacity) ?? 20)));
+      await ensureLoginBrandingTable();
+      await query(
+        `INSERT INTO adm_login_branding (id, background_opacity)
+         VALUES (1, :opacity)
+         ON DUPLICATE KEY UPDATE background_opacity = VALUES(background_opacity)`,
+        { opacity: num },
+      );
+      res.json({ success: true, opacity: num });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
 router.delete(
   "/settings/login-hero-background",
   requireAuth,
   requirePageAccess("/administration/settings", "delete"),
   async (req, res, next) => {
     try {
+      const bgDir = path.join(process.cwd(), "uploads", "backgrounds");
+      const candidates = [
+        path.join(bgDir, "login-hero.jpg"),
+        path.join(bgDir, "login-hero.jpeg"),
+        path.join(bgDir, "login-hero.png"),
+        path.join(bgDir, "login-hero.webp"),
+      ];
+      for (const file of candidates) {
+        if (fs.existsSync(file)) {
+          try { fs.unlinkSync(file); } catch {}
+        }
+      }
       await ensureLoginBrandingTable();
       await query(`UPDATE adm_login_branding SET hero_image = NULL, hero_mime = NULL WHERE id = 1`);
       res.json({ success: true });
@@ -2654,15 +2771,6 @@ router.get("/user-permissions", requireAuth, async (req, res, next) => {
       return res.json({ modules: [], permissions: [] });
     }
 
-    if (userId === 1) {
-      return res.json({
-        modules: ["*"],
-        permissions: [{ module_key: "*", feature_key: "*", can_view: 1, can_create: 1, can_edit: 1, can_delete: 1 }],
-        role_features: ["*"],
-        licensed_modules: ["*"],
-      });
-    }
-
     // Get user's role and company
     const roleResult = await query(
       `SELECT role_id, company_id
@@ -2670,6 +2778,35 @@ router.get("/user-permissions", requireAuth, async (req, res, next) => {
         WHERE id = :userId`,
       { userId },
     );
+
+    const userCompanyId = Number(
+      roleResult?.[0]?.company_id || req.user?.company_id || req.user?.companyIds?.[0] || req.scope?.companyId || 1
+    );
+
+    let licensedTokens = [];
+    if (userCompanyId) {
+      const licenseQuery = await query(
+        `SELECT id FROM adm_company_licenses WHERE company_id = :companyId ORDER BY id DESC LIMIT 1`,
+        { companyId: userCompanyId }
+      );
+      if (licenseQuery && licenseQuery.length > 0) {
+        const licenseId = licenseQuery[0].id;
+        const lm = await query(
+          `SELECT module_code FROM adm_license_modules WHERE license_id = :licenseId`,
+          { licenseId }
+        );
+        licensedTokens = lm.map((x) => x.module_code);
+      }
+    }
+
+    if (userId === 1) {
+      return res.json({
+        modules: ["*"],
+        permissions: [{ module_key: "*", feature_key: "*", can_view: 1, can_create: 1, can_edit: 1, can_delete: 1 }],
+        role_features: ["*"],
+        licensed_modules: licensedTokens,
+      });
+    }
 
     let roleId = Number(roleResult?.[0]?.role_id || 0) || 0;
     if (!roleId) {
@@ -2751,16 +2888,7 @@ router.get("/user-permissions", requireAuth, async (req, res, next) => {
 
     const inferredModules = new Set(explicitModules);
 
-    const companyId = Number(roleResult?.[0]?.company_id || 0);
-    let licensedModules = null;
-    if (companyId) {
-      const licenseQuery = await query(`SELECT id FROM adm_company_licenses WHERE company_id = :companyId ORDER BY id DESC LIMIT 1`, { companyId });
-      if (licenseQuery && licenseQuery.length > 0) {
-        const licenseId = licenseQuery[0].id;
-        const lm = await query(`SELECT module_code FROM adm_license_modules WHERE license_id = :licenseId`, { licenseId });
-        licensedModules = new Set(lm.map(x => x.module_code));
-      }
-    }
+    // licensedTokens already fetched above
 
     let finalModules = Array.from(inferredModules);
     let finalPermissions = normalizedPermissions;
@@ -2780,7 +2908,7 @@ router.get("/user-permissions", requireAuth, async (req, res, next) => {
       modules: finalModules,
       permissions: finalPermissions,
       role_features: finalRoleFeatures,
-      licensed_modules: Array.from(licensedModules || []),
+      licensed_modules: licensedTokens,
     });
   } catch (err) {
     next(err);
@@ -2991,6 +3119,766 @@ router.post(
       next(err);
     }
   },
+);
+
+router.get(
+  "/settings/branch-sharing",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensureSystemSettingsTable();
+      const { companyId } = req.scope || {};
+      const rows = await query(
+        `SELECT setting_key, setting_value
+         FROM adm_system_settings
+         WHERE (company_id = :companyId OR company_id IS NULL)
+           AND setting_key IN ('BRANCH_SHARE_CUSTOMERS', 'BRANCH_SHARE_SUPPLIERS', 'BRANCH_SHARE_ITEMS', 'BRANCH_ISOLATE_REPORTS')
+         ORDER BY company_id DESC`,
+        { companyId: companyId ?? null },
+      );
+      const map = {};
+      for (const r of rows) {
+        if (map[r.setting_key] === undefined) {
+          map[r.setting_key] = r.setting_value;
+        }
+      }
+      res.json({
+        data: {
+          share_customers: map.BRANCH_SHARE_CUSTOMERS === "1" || map.BRANCH_SHARE_CUSTOMERS === "true",
+          share_suppliers: map.BRANCH_SHARE_SUPPLIERS === "1" || map.BRANCH_SHARE_SUPPLIERS === "true",
+          share_items: map.BRANCH_SHARE_ITEMS === "1" || map.BRANCH_SHARE_ITEMS === "true",
+          isolate_reports: map.BRANCH_ISOLATE_REPORTS === "1" || map.BRANCH_ISOLATE_REPORTS === "true",
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.post(
+  "/settings/branch-sharing",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensureSystemSettingsTable();
+      const { companyId } = req.scope || {};
+      const body = req.body || {};
+      const shareCustomers = body.share_customers ? "1" : "0";
+      const shareSuppliers = body.share_suppliers ? "1" : "0";
+      const shareItems = body.share_items ? "1" : "0";
+      const isolateReports = body.isolate_reports ? "1" : "0";
+
+      await query(
+        `INSERT INTO adm_system_settings (company_id, branch_id, setting_key, setting_value)
+         VALUES 
+           (:companyId, NULL, 'BRANCH_SHARE_CUSTOMERS', :shareCustomers),
+           (:companyId, NULL, 'BRANCH_SHARE_SUPPLIERS', :shareSuppliers),
+           (:companyId, NULL, 'BRANCH_SHARE_ITEMS', :shareItems),
+           (:companyId, NULL, 'BRANCH_ISOLATE_REPORTS', :isolateReports)
+         ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value), updated_at = CURRENT_TIMESTAMP`,
+        {
+          companyId: companyId ?? null,
+          shareCustomers,
+          shareSuppliers,
+          shareItems,
+          isolateReports,
+        },
+      );
+      res.json({ success: true, message: "Branch data access & isolation settings saved successfully" });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.get(
+  "/settings/executive-overview-isolation",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensureSystemSettingsTable();
+      const { companyId } = req.scope || {};
+      const rows = await query(
+        `SELECT setting_key, setting_value
+         FROM adm_system_settings
+         WHERE (company_id = :companyId OR company_id IS NULL)
+           AND setting_key = 'BRANCH_ISOLATE_EXEC_OVERVIEW'
+         ORDER BY company_id DESC`,
+        { companyId: companyId ?? null },
+      );
+      const val = rows[0]?.setting_value;
+      res.json({
+        data: {
+          isolate_branch: val === "1" || val === "true",
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.post(
+  "/settings/executive-overview-isolation",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensureSystemSettingsTable();
+      const { companyId } = req.scope || {};
+      const isolateBranch = req.body?.isolate_branch ? "1" : "0";
+      await query(
+        `INSERT INTO adm_system_settings (company_id, branch_id, setting_key, setting_value)
+         VALUES (:companyId, NULL, 'BRANCH_ISOLATE_EXEC_OVERVIEW', :isolateBranch)
+         ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value), updated_at = CURRENT_TIMESTAMP`,
+        {
+          companyId: companyId ?? null,
+          isolateBranch,
+        },
+      );
+      res.json({ success: true, message: "Executive Overview isolation settings saved successfully" });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.get(
+  "/settings/bi-isolation",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensureSystemSettingsTable();
+      const { companyId } = req.scope || {};
+      const rows = await query(
+        `SELECT setting_key, setting_value
+         FROM adm_system_settings
+         WHERE (company_id = :companyId OR company_id IS NULL)
+           AND setting_key = 'BRANCH_ISOLATE_BI'
+         ORDER BY company_id DESC`,
+        { companyId: companyId ?? null },
+      );
+      const val = rows[0]?.setting_value;
+      res.json({
+        data: {
+          isolate_branch: val === "1" || val === "true",
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.post(
+  "/settings/bi-isolation",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensureSystemSettingsTable();
+      const { companyId } = req.scope || {};
+      const isolateBranch = req.body?.isolate_branch ? "1" : "0";
+      await query(
+        `INSERT INTO adm_system_settings (company_id, branch_id, setting_key, setting_value)
+         VALUES (:companyId, NULL, 'BRANCH_ISOLATE_BI', :isolateBranch)
+         ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value), updated_at = CURRENT_TIMESTAMP`,
+        {
+          companyId: companyId ?? null,
+          isolateBranch,
+        },
+      );
+      res.json({ success: true, message: "Business Intelligence isolation settings saved successfully" });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.get(
+  "/settings/pos-day-control",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensureSystemSettingsTable();
+      const { companyId } = req.scope || {};
+      const rows = await query(
+        `SELECT setting_key, setting_value
+         FROM adm_system_settings
+         WHERE (company_id = :companyId OR company_id IS NULL)
+           AND setting_key IN ('POS_ENABLE_DAY_OPEN_CLOSE', 'POS_AUTO_FINANCE_SALES_ACCOUNT_ID')
+         ORDER BY company_id DESC`,
+        { companyId: companyId ?? null }
+      );
+      const map = {};
+      for (const r of rows) {
+        if (map[r.setting_key] === undefined) {
+          map[r.setting_key] = r.setting_value;
+        }
+      }
+
+      const enableDayOpenClose =
+        map.POS_ENABLE_DAY_OPEN_CLOSE === undefined ||
+        map.POS_ENABLE_DAY_OPEN_CLOSE === null ||
+        map.POS_ENABLE_DAY_OPEN_CLOSE === "1" ||
+        map.POS_ENABLE_DAY_OPEN_CLOSE === "true";
+
+      const salesAccountId = map.POS_AUTO_FINANCE_SALES_ACCOUNT_ID || null;
+
+      const paymentModes = await query(
+        `SELECT pm.id, pm.name, pm.type, pm.account, pm.is_active,
+                a.code AS account_code, a.name AS account_name
+         FROM pos_payment_modes pm
+         LEFT JOIN fin_accounts a ON (a.id = pm.account OR a.code = pm.account) AND a.company_id = pm.company_id
+         WHERE pm.company_id = :companyId AND pm.is_active = 1`,
+        { companyId: companyId ?? null }
+      ).catch(() => []);
+
+      const taxSettings = await query(
+        `SELECT ts.tax_account_id, a.code AS tax_account_code, a.name AS tax_account_name
+         FROM pos_tax_settings ts
+         LEFT JOIN fin_accounts a ON a.id = ts.tax_account_id AND a.company_id = ts.company_id
+         WHERE ts.company_id = :companyId LIMIT 1`,
+        { companyId: companyId ?? null }
+      ).catch(() => []);
+
+      let salesAccountInfo = null;
+      if (salesAccountId) {
+        const sRows = await query(
+          `SELECT id, code, name FROM fin_accounts WHERE company_id = :companyId AND id = :id LIMIT 1`,
+          { companyId: companyId ?? null, id: salesAccountId }
+        ).catch(() => []);
+        if (sRows.length > 0) salesAccountInfo = sRows[0];
+      }
+      if (!salesAccountInfo) {
+        const defRows = await query(
+          `SELECT id, code, name FROM fin_accounts
+           WHERE company_id = :companyId AND is_active = 1 AND (code IN ('4000', '400000') OR LOWER(name) LIKE '%sales revenue%')
+           ORDER BY CASE WHEN code = '4000' THEN 0 ELSE 1 END LIMIT 1`,
+          { companyId: companyId ?? null }
+        ).catch(() => []);
+        if (defRows.length > 0) salesAccountInfo = defRows[0];
+      }
+
+      res.json({
+        data: {
+          enable_day_open_close: enableDayOpenClose,
+          sales_account_id: salesAccountId ? String(salesAccountId) : (salesAccountInfo ? String(salesAccountInfo.id) : ""),
+          sales_account: salesAccountInfo,
+          payment_modes: paymentModes,
+          tax_account: taxSettings?.[0] || null,
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.post(
+  "/settings/pos-day-control",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensureSystemSettingsTable();
+      const { companyId } = req.scope || {};
+      const body = req.body || {};
+      const enableVal = body.enable_day_open_close === false || body.enable_day_open_close === "0" ? "0" : "1";
+      const salesAccId = body.sales_account_id ? String(body.sales_account_id) : "";
+
+      await query(
+        `INSERT INTO adm_system_settings (company_id, branch_id, setting_key, setting_value)
+         VALUES 
+           (:companyId, NULL, 'POS_ENABLE_DAY_OPEN_CLOSE', :enableVal),
+           (:companyId, NULL, 'POS_AUTO_FINANCE_SALES_ACCOUNT_ID', :salesAccId)
+         ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value), updated_at = CURRENT_TIMESTAMP`,
+        {
+          companyId: companyId ?? null,
+          enableVal,
+          salesAccId,
+        }
+      );
+      res.json({ success: true, message: "Day Open & Close settings saved successfully" });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.post(
+  "/settings/pos-day-control/test-auto-post",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      const { companyId, branchId } = req.scope || {};
+      const date = req.body?.date || new Date().toISOString().slice(0, 10);
+      const outcome = await autoPostMidnightPosSalesToFinance({
+        targetDate: date,
+        specificCompanyId: companyId,
+        specificBranchId: branchId,
+        isManualTest: true,
+      });
+      res.json({ success: true, data: outcome });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get(
+  "/settings/app-mode",
+  async (req, res, next) => {
+    try {
+      await ensureSystemSettingsTable();
+      let companyId = req.scope?.companyId ?? null;
+      if (!companyId) {
+        try {
+          const authHeader = String(req.headers.authorization || "");
+          const customHeader = String(req.headers["x-access-token"] || "");
+          const token = authHeader.startsWith("Bearer ")
+            ? authHeader.slice(7).trim()
+            : customHeader.trim();
+          if (token) {
+            const payload = verifyAccessToken(token);
+            if (payload) {
+              companyId =
+                Number(
+                  req.headers["x-company-id"] ||
+                    payload.companyId ||
+                    payload.company_id ||
+                    payload.companyIds?.[0],
+                ) || null;
+            }
+          }
+        } catch {}
+      }
+      const rows = await query(
+        `SELECT company_id, setting_key, setting_value
+         FROM adm_system_settings
+         WHERE (company_id = :companyId OR company_id IS NULL)
+           AND setting_key IN ('SYSTEM_APPLICATION_MODE', 'MODULE_HOME_SECTION_VIEW')
+         ORDER BY CASE WHEN company_id IS NOT NULL THEN 0 ELSE 1 END ASC, id DESC`,
+        { companyId: companyId ?? null }
+      );
+      let rawMode = null;
+      let sectionView = null;
+      for (const r of rows) {
+        if (r.setting_key === "SYSTEM_APPLICATION_MODE" && rawMode === null) {
+          rawMode = r.setting_value ? String(r.setting_value).toUpperCase() : "STANDARD";
+        } else if (r.setting_key === "MODULE_HOME_SECTION_VIEW" && sectionView === null) {
+          sectionView = r.setting_value === "true" || r.setting_value === "1";
+        }
+      }
+      const mode = rawMode === "BASIC" ? "BASIC" : "STANDARD";
+      res.json({ success: true, mode, module_section_view: sectionView === true });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.post(
+  "/settings/app-mode",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensureSystemSettingsTable();
+      const { companyId } = req.scope || {};
+      const requestedMode = String(req.body?.mode || "STANDARD").toUpperCase() === "BASIC" ? "BASIC" : "STANDARD";
+      const moduleSectionView = req.body?.module_section_view === true || req.body?.module_section_view === "true" || req.body?.module_section_view === 1 || req.body?.module_section_view === "1";
+
+      await query(
+        `DELETE FROM adm_system_settings 
+         WHERE setting_key = 'SYSTEM_APPLICATION_MODE' AND (company_id = :companyId OR company_id IS NULL)`,
+        { companyId: companyId ?? null }
+      );
+      if (companyId) {
+        await query(
+          `INSERT INTO adm_system_settings (company_id, branch_id, setting_key, setting_value)
+           VALUES (:companyId, NULL, 'SYSTEM_APPLICATION_MODE', :mode)`,
+          { companyId, mode: requestedMode }
+        );
+      }
+      await query(
+        `INSERT INTO adm_system_settings (company_id, branch_id, setting_key, setting_value)
+         VALUES (NULL, NULL, 'SYSTEM_APPLICATION_MODE', :mode)`,
+        { mode: requestedMode }
+      );
+
+      if (req.body?.module_section_view !== undefined) {
+        await query(
+          `DELETE FROM adm_system_settings 
+           WHERE setting_key = 'MODULE_HOME_SECTION_VIEW' AND (company_id = :companyId OR company_id IS NULL)`,
+          { companyId: companyId ?? null }
+        );
+        if (companyId) {
+          await query(
+            `INSERT INTO adm_system_settings (company_id, branch_id, setting_key, setting_value)
+             VALUES (:companyId, NULL, 'MODULE_HOME_SECTION_VIEW', :sectionView)`,
+            { companyId, sectionView: moduleSectionView ? "true" : "false" }
+          );
+        }
+        await query(
+          `INSERT INTO adm_system_settings (company_id, branch_id, setting_key, setting_value)
+           VALUES (NULL, NULL, 'MODULE_HOME_SECTION_VIEW', :sectionView)`,
+          { sectionView: moduleSectionView ? "true" : "false" }
+        );
+      }
+
+      res.json({
+        success: true,
+        message: `Application settings updated`,
+        mode: requestedMode,
+        module_section_view: moduleSectionView,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// ===== Application Background Settings =====
+router.get(
+  "/settings/app-background",
+  async (req, res, next) => {
+    try {
+      await ensureSystemSettingsTable();
+      await ensureAppBackgroundColumns().catch(() => {});
+
+      let companyId = req.scope?.companyId ?? null;
+      if (!companyId) {
+        try {
+          const authHeader = String(req.headers.authorization || "");
+          const customHeader = String(req.headers["x-access-token"] || "");
+          const token = authHeader.startsWith("Bearer ")
+            ? authHeader.slice(7).trim()
+            : customHeader.trim();
+          if (token) {
+            const payload = verifyAccessToken(token);
+            if (payload) {
+              companyId =
+                Number(
+                  req.headers["x-company-id"] ||
+                    payload.companyId ||
+                    payload.company_id ||
+                    payload.companyIds?.[0],
+                ) || null;
+            }
+          }
+        } catch {}
+      }
+
+      const rows = await query(
+        `SELECT company_id, setting_key, setting_value
+         FROM adm_system_settings
+         WHERE setting_key IN ('APP_BACKGROUND_URL', 'APP_BACKGROUND_PRESET', 'APP_BACKGROUND_OPACITY', 'APP_BACKGROUND_BLUR')
+         ORDER BY 
+           CASE 
+             WHEN :companyId IS NOT NULL AND company_id = :companyId THEN 1
+             WHEN company_id IS NULL THEN 2
+             ELSE 3 
+           END ASC,
+           id DESC`,
+        { companyId }
+      );
+
+      const map = {};
+      for (const r of rows) {
+        if (map[r.setting_key] === undefined) {
+          map[r.setting_key] = r.setting_value;
+        }
+      }
+
+      let hasCustom = false;
+      let customVersion = null;
+      try {
+        if (fs.existsSync(appBgUploadDir)) {
+          const files = fs.readdirSync(appBgUploadDir).filter((f) => f.startsWith("custom-bg-"));
+          if (files.length > 0) {
+            hasCustom = true;
+            const stat = fs.statSync(path.join(appBgUploadDir, files[0]));
+            customVersion = Math.round(stat.mtimeMs);
+          }
+        }
+      } catch {}
+      if (!hasCustom) {
+        try {
+          const customRows = await query(
+            `SELECT app_bg_image IS NOT NULL AS has_image, updated_at
+             FROM adm_login_branding
+             WHERE id = 1
+             LIMIT 1`
+          );
+          if (customRows[0]?.has_image) {
+            hasCustom = true;
+            customVersion = customRows[0]?.updated_at ? new Date(customRows[0].updated_at).getTime() : Date.now();
+          }
+        } catch {}
+      }
+
+      const defaultUrl = "/backgrounds/abstract-silk-waves.jpg";
+      const backgroundUrl = map.APP_BACKGROUND_URL !== undefined ? map.APP_BACKGROUND_URL : defaultUrl;
+      const backgroundPreset = map.APP_BACKGROUND_PRESET !== undefined ? map.APP_BACKGROUND_PRESET : "silk-waves";
+      const backgroundOpacity = map.APP_BACKGROUND_OPACITY !== undefined ? Number(map.APP_BACKGROUND_OPACITY) : 40;
+      const backgroundBlur = map.APP_BACKGROUND_BLUR !== undefined ? Number(map.APP_BACKGROUND_BLUR) : 0;
+
+      res.json({
+        success: true,
+        background_url: backgroundUrl,
+        background_preset: backgroundPreset,
+        background_opacity: Number.isFinite(backgroundOpacity) ? backgroundOpacity : 40,
+        background_blur: Number.isFinite(backgroundBlur) ? backgroundBlur : 0,
+        has_custom: hasCustom,
+        custom_url: hasCustom ? `/api/admin/settings/app-background/image?v=${customVersion || Date.now()}` : null,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.post(
+  "/settings/app-background",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensureSystemSettingsTable();
+      const companyId = req.scope?.companyId ?? null;
+      const {
+        background_url = "/backgrounds/abstract-silk-waves.jpg",
+        background_preset = "silk-waves",
+        background_opacity = 40,
+        background_blur = 0,
+      } = req.body || {};
+
+      const settings = [
+        { key: "APP_BACKGROUND_URL", value: String(background_url || "") },
+        { key: "APP_BACKGROUND_PRESET", value: String(background_preset || "silk-waves") },
+        { key: "APP_BACKGROUND_OPACITY", value: String(background_opacity ?? 40) },
+        { key: "APP_BACKGROUND_BLUR", value: String(background_blur ?? 0) },
+      ];
+
+      for (const s of settings) {
+        if (companyId != null) {
+          await query(
+            `DELETE FROM adm_system_settings 
+             WHERE setting_key = :key AND company_id = :companyId`,
+            { companyId, key: s.key }
+          );
+          await query(
+            `INSERT INTO adm_system_settings (company_id, branch_id, setting_key, setting_value)
+             VALUES (:companyId, NULL, :key, :value)`,
+            {
+              companyId,
+              key: s.key,
+              value: s.value,
+            }
+          );
+        }
+
+        // Always also update global fallback setting (company_id IS NULL)
+        await query(
+          `DELETE FROM adm_system_settings 
+           WHERE setting_key = :key AND company_id IS NULL`,
+          { key: s.key }
+        );
+        await query(
+          `INSERT INTO adm_system_settings (company_id, branch_id, setting_key, setting_value)
+           VALUES (NULL, NULL, :key, :value)`,
+          {
+            key: s.key,
+            value: s.value,
+          }
+        );
+      }
+
+      res.json({
+        success: true,
+        message: "Application background settings saved successfully",
+        background_url,
+        background_preset,
+        background_opacity,
+        background_blur,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.post(
+  "/settings/app-background/upload",
+  requireAuth,
+  requireCompanyScope,
+  appBackgroundUpload.single("image"),
+  async (req, res, next) => {
+    try {
+      if (!req.file) {
+        throw httpError(400, "VALIDATION_ERROR", "Background image file is required");
+      }
+
+      // Remove older custom background files on disk so only the current one is kept
+      try {
+        if (fs.existsSync(appBgUploadDir)) {
+          const currentFilename = path.basename(req.file.path);
+          const files = fs.readdirSync(appBgUploadDir).filter((f) => f.startsWith("custom-bg-") && f !== currentFilename);
+          for (const f of files) {
+            try { fs.unlinkSync(path.join(appBgUploadDir, f)); } catch {}
+          }
+        }
+      } catch {}
+
+      const customUrl = `/api/admin/settings/app-background/image?v=${Date.now()}`;
+      const companyId = req.scope?.companyId ?? null;
+
+      const keysToClear = ["APP_BACKGROUND_URL", "APP_BACKGROUND_PRESET"];
+      for (const k of keysToClear) {
+        if (companyId != null) {
+          await query(
+            `DELETE FROM adm_system_settings WHERE setting_key = :k AND company_id = :companyId`,
+            { k, companyId }
+          );
+        }
+        await query(
+          `DELETE FROM adm_system_settings WHERE setting_key = :k AND company_id IS NULL`,
+          { k }
+        );
+      }
+
+      if (companyId != null) {
+        await query(
+          `INSERT INTO adm_system_settings (company_id, branch_id, setting_key, setting_value)
+           VALUES (:companyId, NULL, 'APP_BACKGROUND_URL', :url)`,
+          { companyId, url: customUrl }
+        );
+        await query(
+          `INSERT INTO adm_system_settings (company_id, branch_id, setting_key, setting_value)
+           VALUES (:companyId, NULL, 'APP_BACKGROUND_PRESET', 'custom')`,
+          { companyId }
+        );
+      }
+
+      await query(
+        `INSERT INTO adm_system_settings (company_id, branch_id, setting_key, setting_value)
+         VALUES (NULL, NULL, 'APP_BACKGROUND_URL', :url)`,
+        { url: customUrl }
+      );
+      await query(
+        `INSERT INTO adm_system_settings (company_id, branch_id, setting_key, setting_value)
+         VALUES (NULL, NULL, 'APP_BACKGROUND_PRESET', 'custom')`,
+        {}
+      );
+
+      res.json({
+        success: true,
+        message: "Custom background image uploaded and saved successfully",
+        background_url: customUrl,
+        background_preset: "custom",
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get("/settings/app-background/image", async (req, res, next) => {
+  try {
+    if (fs.existsSync(appBgUploadDir)) {
+      const files = fs.readdirSync(appBgUploadDir).filter((f) => f.startsWith("custom-bg-"));
+      if (files.length > 0) {
+        const latestFile = files.sort().reverse()[0];
+        const fullPath = path.join(appBgUploadDir, latestFile);
+        res.setHeader("Cache-Control", "public, max-age=300");
+        return res.sendFile(fullPath);
+      }
+    }
+
+    // Fallback to adm_login_branding if previously stored in DB
+    await ensureAppBackgroundColumns().catch(() => {});
+    const rows = await query(
+      `SELECT app_bg_image, app_bg_mime
+       FROM adm_login_branding
+       WHERE id = 1
+       LIMIT 1`
+    );
+    const row = rows[0] || null;
+    if (!row?.app_bg_image) return res.status(404).end();
+    const body = Buffer.isBuffer(row.app_bg_image)
+      ? row.app_bg_image
+      : Buffer.from(row.app_bg_image);
+    res.setHeader("Content-Type", row.app_bg_mime || "image/jpeg");
+    res.setHeader("Cache-Control", "public, max-age=300");
+    return res.end(body);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete(
+  "/settings/app-background/custom",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      if (fs.existsSync(appBgUploadDir)) {
+        const files = fs.readdirSync(appBgUploadDir).filter((f) => f.startsWith("custom-bg-"));
+        for (const f of files) {
+          try { fs.unlinkSync(path.join(appBgUploadDir, f)); } catch {}
+        }
+      }
+      await ensureAppBackgroundColumns().catch(() => {});
+      await query(
+        `UPDATE adm_login_branding
+         SET app_bg_image = NULL, app_bg_mime = NULL
+         WHERE id = 1`
+      ).catch(() => {});
+
+      const companyId = req.scope?.companyId ?? null;
+      const defaultUrl = "/backgrounds/abstract-silk-waves.jpg";
+
+      const keysToReset = [
+        { key: "APP_BACKGROUND_URL", value: defaultUrl },
+        { key: "APP_BACKGROUND_PRESET", value: "silk-waves" },
+      ];
+
+      for (const item of keysToReset) {
+        if (companyId != null) {
+          await query(
+            `DELETE FROM adm_system_settings WHERE setting_key = :key AND company_id = :companyId`,
+            { key: item.key, companyId }
+          );
+          await query(
+            `INSERT INTO adm_system_settings (company_id, branch_id, setting_key, setting_value)
+             VALUES (:companyId, NULL, :key, :value)`,
+            { companyId, key: item.key, value: item.value }
+          );
+        }
+        await query(
+          `DELETE FROM adm_system_settings WHERE setting_key = :key AND company_id IS NULL`,
+          { key: item.key }
+        );
+        await query(
+          `INSERT INTO adm_system_settings (company_id, branch_id, setting_key, setting_value)
+           VALUES (NULL, NULL, :key, :value)`,
+          { key: item.key, value: item.value }
+        );
+      }
+
+      res.json({ success: true, message: "Custom background removed and reset to default preset", default_url: defaultUrl });
+    } catch (err) {
+      next(err);
+    }
+  }
 );
 
 router.post("/email/test", requireAuth, async (req, res, next) => {
@@ -3317,15 +4205,18 @@ router.post("/settings/servicing-template", requireAuth, requireCompanyScope, as
 
 router.get("/settings/env", requireAuth, async (req, res, next) => {
   try {
-    if (req.user.id !== 1) {
-      return res.status(403).json({ message: "Forbidden" });
-    }
     const fs = await import("fs");
     const path = await import("path");
-    const envPath = path.resolve(process.cwd(), ".env");
+    const envPaths = [
+      path.resolve(process.cwd(), "server", ".env"),
+      path.resolve(process.cwd(), ".env"),
+    ];
     let content = "";
-    if (fs.existsSync(envPath)) {
-      content = fs.readFileSync(envPath, "utf-8");
+    for (const ep of envPaths) {
+      if (fs.existsSync(ep)) {
+        content = fs.readFileSync(ep, "utf-8");
+        break;
+      }
     }
     const envVars = {};
     content.split(/\r?\n/).forEach(line => {
@@ -3334,24 +4225,27 @@ router.get("/settings/env", requireAuth, async (req, res, next) => {
         envVars[match[1].trim()] = match[2].trim();
       }
     });
+
+    const getVal = (key) => envVars[key] || process.env[key] || "";
+
     return res.json({
-      GOOGLE_MAPS_API_KEY: envVars.GOOGLE_MAPS_API_KEY ? "********" : "",
-      GROQ_API_KEY: envVars.GROQ_API_KEY ? "********" : "",
-      ARKESEL_API_KEY: envVars.ARKESEL_API_KEY ? "********" : "",
-      ARKESEL_SENDER_ID: envVars.ARKESEL_SENDER_ID ? "********" : "",
-      GREEN_API_ID_INSTANCE: envVars.GREEN_API_ID_INSTANCE || "",
-      GREEN_API_TOKEN_INSTANCE: envVars.GREEN_API_TOKEN_INSTANCE ? "********" : "",
-      SMTP_HOST: envVars.SMTP_HOST || "",
-      SMTP_PORT: envVars.SMTP_PORT || "",
-      SMTP_USER: envVars.SMTP_USER || "",
-      SMTP_PASS: envVars.SMTP_PASS ? "********" : "",
-      SMTP_FROM: envVars.SMTP_FROM || "",
-      SMTP_SECURE: envVars.SMTP_SECURE || "false",
-      TEMPLATE_SALES_ORDER: envVars.TEMPLATE_SALES_ORDER || "Dear {customer_name},\n\nYour Sales Order {document_no} for {amount} has been {status}.\n\nThank you!",
-      TEMPLATE_PURCHASE_ORDER: envVars.TEMPLATE_PURCHASE_ORDER || "Dear {customer_name},\n\nYour Purchase Order {document_no} for {amount} has been {status}.\n\nThank you!",
-      TEMPLATE_SERVICE_ORDER: envVars.TEMPLATE_SERVICE_ORDER || "Dear {customer_name},\n\nYour Service Order {document_no} for {amount} has been {status}.\n\nThank you!",
-      TEMPLATE_MAINTENANCE_JOB: envVars.TEMPLATE_MAINTENANCE_JOB || "Dear {customer_name},\n\nYour Maintenance Job {document_no} has been {status}.\n\nThank you!",
-      TEMPLATE_PAYMENT_VOUCHER: envVars.TEMPLATE_PAYMENT_VOUCHER || "Dear {customer_name},\n\nYour Payment Voucher {document_no} for {amount} has been {status}.\n\nThank you!",
+      GOOGLE_MAPS_API_KEY: getVal("GOOGLE_MAPS_API_KEY") ? "********" : "",
+      GROQ_API_KEY: getVal("GROQ_API_KEY") ? "********" : "",
+      ARKESEL_API_KEY: getVal("ARKESEL_API_KEY") ? "********" : "",
+      ARKESEL_SENDER_ID: getVal("ARKESEL_SENDER_ID") ? "********" : "",
+      GREEN_API_ID_INSTANCE: getVal("GREEN_API_ID_INSTANCE"),
+      GREEN_API_TOKEN_INSTANCE: getVal("GREEN_API_TOKEN_INSTANCE") ? "********" : "",
+      SMTP_HOST: getVal("SMTP_HOST"),
+      SMTP_PORT: getVal("SMTP_PORT"),
+      SMTP_USER: getVal("SMTP_USER"),
+      SMTP_PASS: getVal("SMTP_PASS") ? "********" : "",
+      SMTP_FROM: getVal("SMTP_FROM"),
+      SMTP_SECURE: getVal("SMTP_SECURE") || "false",
+      TEMPLATE_SALES_ORDER: getVal("TEMPLATE_SALES_ORDER") || "Dear {customer_name},\n\nYour Sales Order {document_no} for {amount} has been {status}.\n\nThank you!",
+      TEMPLATE_PURCHASE_ORDER: getVal("TEMPLATE_PURCHASE_ORDER") || "Dear {customer_name},\n\nYour Purchase Order {document_no} for {amount} has been {status}.\n\nThank you!",
+      TEMPLATE_SERVICE_ORDER: getVal("TEMPLATE_SERVICE_ORDER") || "Dear {customer_name},\n\nYour Service Order {document_no} for {amount} has been {status}.\n\nThank you!",
+      TEMPLATE_MAINTENANCE_JOB: getVal("TEMPLATE_MAINTENANCE_JOB") || "Dear {customer_name},\n\nYour Maintenance Job {document_no} has been {status}.\n\nThank you!",
+      TEMPLATE_PAYMENT_VOUCHER: getVal("TEMPLATE_PAYMENT_VOUCHER") || "Dear {customer_name},\n\nYour Payment Voucher {document_no} for {amount} has been {status}.\n\nThank you!",
     });
   } catch (err) {
     next(err);
@@ -3360,17 +4254,12 @@ router.get("/settings/env", requireAuth, async (req, res, next) => {
 
 router.post("/settings/env", requireAuth, async (req, res, next) => {
   try {
-    if (req.user.id !== 1) {
-      return res.status(403).json({ message: "Forbidden" });
-    }
     const fs = await import("fs");
     const path = await import("path");
-    const envPath = path.resolve(process.cwd(), ".env");
-    
-    let content = "";
-    if (fs.existsSync(envPath)) {
-      content = fs.readFileSync(envPath, "utf-8");
-    }
+    const envPaths = [
+      path.resolve(process.cwd(), "server", ".env"),
+      path.resolve(process.cwd(), ".env"),
+    ];
 
     const updates = req.body;
     const allowedKeys = [
@@ -3379,25 +4268,44 @@ router.post("/settings/env", requireAuth, async (req, res, next) => {
       "TEMPLATE_SALES_ORDER", "TEMPLATE_PURCHASE_ORDER", "TEMPLATE_SERVICE_ORDER", 
       "TEMPLATE_MAINTENANCE_JOB", "TEMPLATE_PAYMENT_VOUCHER"
     ];
-    
-    let lines = content.split(/\r?\n/);
+
     for (const key of allowedKeys) {
       if (updates[key] !== undefined && updates[key] !== "********") {
         const val = String(updates[key]);
-        const index = lines.findIndex(line => line.startsWith(key + "="));
-        if (index >= 0) {
-          lines[index] = `${key}=${val}`;
-        } else {
-          lines.push(`${key}=${val}`);
-        }
         process.env[key] = val; // Update in-memory
         if (key === "GROQ_API_KEY") {
           setRuntimeApiKey(val);
         }
       }
     }
-    
-    fs.writeFileSync(envPath, lines.join("\n"));
+
+    for (const envPath of envPaths) {
+      let content = "";
+      if (fs.existsSync(envPath)) {
+        content = fs.readFileSync(envPath, "utf-8");
+      } else if (!envPath.includes("server")) {
+        continue;
+      }
+
+      let lines = content.split(/\r?\n/);
+      for (const key of allowedKeys) {
+        if (updates[key] !== undefined && updates[key] !== "********") {
+          const val = String(updates[key]);
+          const index = lines.findIndex(line => line.startsWith(key + "="));
+          if (index >= 0) {
+            lines[index] = `${key}=${val}`;
+          } else {
+            lines.push(`${key}=${val}`);
+          }
+        }
+      }
+      try {
+        fs.writeFileSync(envPath, lines.join("\n"));
+      } catch (writeErr) {
+        console.warn(`Could not write to ${envPath}:`, writeErr.message);
+      }
+    }
+
     return res.json({ message: "Environment variables updated successfully" });
   } catch (err) {
     next(err);

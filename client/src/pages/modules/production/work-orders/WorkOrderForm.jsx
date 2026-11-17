@@ -367,13 +367,13 @@ export default function WorkOrderForm() {
         {/* Order Header */}
         <div className="card p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
               Select Item / Product *
             </label>
             <select
               value={formData.item_id}
               onChange={(e) => handleItemChange(e.target.value)}
-              className="input w-full font-bold text-brand-700 dark:text-brand-300"
+              className="input w-full font-semibold text-brand-700 dark:text-brand-300"
             >
               <option value="">Select Item to Produce...</option>
               {inventoryItems.map((i) => (
@@ -390,7 +390,7 @@ export default function WorkOrderForm() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
               Planned Output Qty *
             </label>
             <input
@@ -399,12 +399,12 @@ export default function WorkOrderForm() {
               required
               value={formData.qty_to_produce}
               onChange={(e) => handleQtyChange(e.target.value)}
-              className="input w-full font-bold text-brand-600 dark:text-brand-400"
+              className="input w-full font-semibold text-brand-600 dark:text-brand-400"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
               Production Warehouse *
             </label>
             <select
@@ -422,7 +422,7 @@ export default function WorkOrderForm() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
               Order Date *
             </label>
             <input
@@ -435,7 +435,7 @@ export default function WorkOrderForm() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
               Target Completion Date
             </label>
             <input
@@ -447,13 +447,13 @@ export default function WorkOrderForm() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
               Lifecycle Status
             </label>
             <select
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              className="input w-full font-bold"
+              className="input w-full font-semibold"
             >
               <option value="DRAFT">Draft</option>
               <option value="PLANNED">Planned</option>
@@ -466,7 +466,7 @@ export default function WorkOrderForm() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
               Estimated Material Cost ({baseCurrency.code})
             </label>
             <div className="input w-full font-mono font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/70 dark:bg-emerald-950/30 flex items-center h-10 px-3">

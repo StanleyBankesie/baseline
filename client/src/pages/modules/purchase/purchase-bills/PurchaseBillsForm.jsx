@@ -10,7 +10,9 @@ import { api } from "api/client";
 import { Trash2, Plus } from "lucide-react";
 import { useExchangeRate } from "../../../../hooks/useExchangeRate";
 import { usePermission } from "../../../../auth/PermissionContext.jsx";
-import TaxPricingModal, { TaxModeRadioSelector } from "@/components/common/TaxPricingModal.jsx";
+import TaxPricingModal, {
+  TaxModeRadioSelector,
+} from "@/components/common/TaxPricingModal.jsx";
 
 const CURRENCIES = [
   { id: 4, code: "GHS", name: "Ghanaian Cedi" },
@@ -21,14 +23,15 @@ const CURRENCIES = [
 
 /**
  *  component
- * 
+ *
  * @returns {JSX.Element} The rendered component
  */
 export default function PurchaseBillsForm() {
   const { canAccessPath, isModuleEnabled } = usePermission();
   const canAccessProjects = Boolean(
     canAccessPath?.("/project-management") ||
-      (typeof isModuleEnabled === "function" && isModuleEnabled("project-management")),
+    (typeof isModuleEnabled === "function" &&
+      isModuleEnabled("project-management")),
   );
   const { id } = useParams();
   const navigate = useNavigate();
@@ -124,29 +127,31 @@ export default function PurchaseBillsForm() {
               : `PLB-${String(1).padStart(6, "0")}`;
           setFormData((prev) => ({ ...prev, bill_no: initialNo }));
         }
-        const [supRes, poRes, itemsRes, uomsRes, taxesRes, curRes, projRes, ccRes] =
-          await Promise.all([
-            api
-              .get("/purchase/suppliers")
-              .catch(() => ({ data: { items: [] } })),
-            api.get("/purchase/orders").catch(() => ({ data: { items: [] } })),
-            api.get("/inventory/items").catch(() => ({ data: { items: [] } })),
-            api.get("/inventory/uoms").catch(() => ({ data: { items: [] } })),
-            api
-              .get(
-                `/finance/tax-codes?form=${billType === "IMPORT" ? "PURCHASE_BILL_IMPORT" : "PURCHASE_BILL_LOCAL"}`,
-              )
-              .catch(() => ({ data: { items: [] } })),
-            api
-              .get("/finance/currencies")
-              .catch(() => ({ data: { items: [] } })),
-            api
-              .get("/projects/projects")
-              .catch(() => ({ data: { items: [] } })),
-            api
-              .get("/finance/cost-centers")
-              .catch(() => ({ data: { items: [] } })),
-          ]);
+        const [
+          supRes,
+          poRes,
+          itemsRes,
+          uomsRes,
+          taxesRes,
+          curRes,
+          projRes,
+          ccRes,
+        ] = await Promise.all([
+          api.get("/purchase/suppliers").catch(() => ({ data: { items: [] } })),
+          api.get("/purchase/orders").catch(() => ({ data: { items: [] } })),
+          api.get("/inventory/items").catch(() => ({ data: { items: [] } })),
+          api.get("/inventory/uoms").catch(() => ({ data: { items: [] } })),
+          api
+            .get(
+              `/finance/tax-codes?form=${billType === "IMPORT" ? "PURCHASE_BILL_IMPORT" : "PURCHASE_BILL_LOCAL"}`,
+            )
+            .catch(() => ({ data: { items: [] } })),
+          api.get("/finance/currencies").catch(() => ({ data: { items: [] } })),
+          api.get("/projects/projects").catch(() => ({ data: { items: [] } })),
+          api
+            .get("/finance/cost-centers")
+            .catch(() => ({ data: { items: [] } })),
+        ]);
 
         if (mounted) {
           setSuppliers(
@@ -173,7 +178,11 @@ export default function PurchaseBillsForm() {
             Array.isArray(projRes.data?.items) ? projRes.data.items : [],
           );
           setCostCenters(
-            Array.isArray(ccRes.data?.items) ? ccRes.data.items : (Array.isArray(ccRes.data?.data?.items) ? ccRes.data.data.items : []),
+            Array.isArray(ccRes.data?.items)
+              ? ccRes.data.items
+              : Array.isArray(ccRes.data?.data?.items)
+                ? ccRes.data.data.items
+                : [],
           );
           // Auto-select the first tax code for new (blank) items
           if (fetchedTaxCodes.length > 0) {
@@ -203,7 +212,9 @@ export default function PurchaseBillsForm() {
               ? curRes.data.items
               : [];
             setFinCurrencies(items);
-            const base = items.find((c) => Number(c.is_base) === 1 || c.is_base === true);
+            const base = items.find(
+              (c) => Number(c.is_base) === 1 || c.is_base === true,
+            );
             setBaseFinCurrencyId(base ? Number(base.id) : null);
 
             if (isNew && !formData.currency_id && base) {
@@ -445,16 +456,24 @@ export default function PurchaseBillsForm() {
     const discount = gross * (discountPercent / 100);
     const taxable = gross - discount;
 
-    const effectiveMode = String(line.tax_mode || formData.tax_mode || '').toUpperCase();
-    const isInclusive = effectiveMode === 'INCLUSIVE';
+    const effectiveMode = String(
+      line.tax_mode || formData.tax_mode || "",
+    ).toUpperCase();
+    const isInclusive = effectiveMode === "INCLUSIVE";
 
-    const fallbackRate = formData.tax_rate !== undefined && formData.tax_rate !== null ? Number(formData.tax_rate) : 0;
+    const fallbackRate =
+      formData.tax_rate !== undefined && formData.tax_rate !== null
+        ? Number(formData.tax_rate)
+        : 0;
     const tc = taxCodes.find(
       (t) => String(t.id) === String(line.tax_code_id || formData.tax_code_id),
     );
-    const tcRate = line.tax_rate !== undefined && line.tax_rate !== null
-      ? Number(line.tax_rate)
-      : (tc ? Number(tc.rate_percent) || 0 : fallbackRate);
+    const tcRate =
+      line.tax_rate !== undefined && line.tax_rate !== null
+        ? Number(line.tax_rate)
+        : tc
+          ? Number(tc.rate_percent) || 0
+          : fallbackRate;
 
     let lineTotal = taxable;
     if (isInclusive && tcRate > 0) {
@@ -462,7 +481,7 @@ export default function PurchaseBillsForm() {
       taxAmount = Math.round((taxable - net) * 100) / 100;
       lineTotal = taxable;
     } else if (!isInclusive && tcRate > 0) {
-      taxAmount = Math.round((taxable * (tcRate / 100)) * 100) / 100;
+      taxAmount = Math.round(taxable * (tcRate / 100) * 100) / 100;
       lineTotal = Math.round((taxable + taxAmount) * 100) / 100;
     } else {
       taxAmount = 0;
@@ -474,9 +493,13 @@ export default function PurchaseBillsForm() {
       tax_amount: taxAmount,
       line_total: lineTotal,
       tax_rate: tcRate,
-      tax_mode: isInclusive ? 'INCLUSIVE' : 'EXCLUSIVE',
-      tax_code_id: line.tax_code_id || formData.tax_code_id || '',
-      tax_component_name: line.tax_component_name || formData.tax_component_name || (tc?.name || ''),
+      tax_mode: isInclusive ? "INCLUSIVE" : "EXCLUSIVE",
+      tax_code_id: line.tax_code_id || formData.tax_code_id || "",
+      tax_component_name:
+        line.tax_component_name ||
+        formData.tax_component_name ||
+        tc?.name ||
+        "",
     };
   };
 
@@ -612,7 +635,8 @@ export default function PurchaseBillsForm() {
             taxCodes.find((t) => String(t.id) === String(d.tax_code_id)) ||
             taxCodes.find(
               (t) => Number(t.rate_percent) === Number(taxPercent),
-            ) || null;
+            ) ||
+            null;
           return {
             id: Date.now() + Math.random(),
             item_id: d.item_id ? String(d.item_id) : "",
@@ -663,8 +687,9 @@ export default function PurchaseBillsForm() {
                   "",
               ).toUpperCase();
               const cur =
-                finCurrencies.find((c) => String(c.code).toUpperCase() === code) ||
-                null;
+                finCurrencies.find(
+                  (c) => String(c.code).toUpperCase() === code,
+                ) || null;
               setFormData((prev) => ({
                 ...prev,
                 currency_id:
@@ -807,7 +832,10 @@ export default function PurchaseBillsForm() {
           }
         }
       } else {
-        setFormData((prev) => ({ ...prev, currency_id: baseFinCurrencyId || "" }));
+        setFormData((prev) => ({
+          ...prev,
+          currency_id: baseFinCurrencyId || "",
+        }));
       }
     }
 
@@ -826,10 +854,18 @@ export default function PurchaseBillsForm() {
         const poRes = await api.get(`/purchase/orders/${value}`);
         const poItem = poRes.data?.item;
         if (poItem) {
-          const code = String(poItem.currency || poItem.currency_code || "").toUpperCase();
-          const cur = finCurrencies.find((c) => String(c.code).toUpperCase() === code) || null;
-          poCurrencyId = Number(poItem.currency_id) || (cur ? Number(cur.id) : null);
-          poExchangeRate = poItem.exchange_rate != null ? Number(poItem.exchange_rate || 1) : null;
+          const code = String(
+            poItem.currency || poItem.currency_code || "",
+          ).toUpperCase();
+          const cur =
+            finCurrencies.find((c) => String(c.code).toUpperCase() === code) ||
+            null;
+          poCurrencyId =
+            Number(poItem.currency_id) || (cur ? Number(cur.id) : null);
+          poExchangeRate =
+            poItem.exchange_rate != null
+              ? Number(poItem.exchange_rate || 1)
+              : null;
           // Build tax code map from PO line items
           const details = Array.isArray(poItem.details) ? poItem.details : [];
           details.forEach((d) => {
@@ -852,14 +888,16 @@ export default function PurchaseBillsForm() {
         setFormData((prev) => ({
           ...prev,
           currency_id: poCurrencyId || prev.currency_id,
-          exchange_rate: poExchangeRate != null ? poExchangeRate : prev.exchange_rate,
+          exchange_rate:
+            poExchangeRate != null ? poExchangeRate : prev.exchange_rate,
           supplier_id: newSupplierId,
         }));
       } else if (poCurrencyId) {
         setFormData((prev) => ({
           ...prev,
           currency_id: poCurrencyId,
-          exchange_rate: poExchangeRate != null ? poExchangeRate : prev.exchange_rate,
+          exchange_rate:
+            poExchangeRate != null ? poExchangeRate : prev.exchange_rate,
         }));
       }
 
@@ -926,7 +964,8 @@ export default function PurchaseBillsForm() {
   };
 
   const totals = useMemo(() => {
-    const isInclusive = String(formData.tax_mode || "").toUpperCase() === "INCLUSIVE";
+    const isInclusive =
+      String(formData.tax_mode || "").toUpperCase() === "INCLUSIVE";
     const grossSub = lines.reduce(
       (sum, l) => sum + (Number(l.qty) || 0) * (Number(l.unit_price) || 0),
       0,
@@ -936,10 +975,24 @@ export default function PurchaseBillsForm() {
     lines.forEach((l) => {
       const amt = Number(l.tax_amount || 0);
       if (amt > 0) {
-        const tc = taxCodes.find((t) => String(t.id) === String(l.tax_code_id || formData.tax_code_id));
-        const name = l.tax_component_name || formData.tax_component_name || tc?.name || (l.tax_rate ? `Tax (${l.tax_rate}%)` : "Tax");
+        const tc = taxCodes.find(
+          (t) => String(t.id) === String(l.tax_code_id || formData.tax_code_id),
+        );
+        const name =
+          l.tax_component_name ||
+          formData.tax_component_name ||
+          tc?.name ||
+          (l.tax_rate ? `Tax (${l.tax_rate}%)` : "Tax");
         if (!compTotals[name]) {
-          compTotals[name] = { amount: 0, rate: Number(l.tax_rate !== undefined ? l.tax_rate : (formData.tax_rate || tc?.rate_percent || 0)), sort_order: 99 };
+          compTotals[name] = {
+            amount: 0,
+            rate: Number(
+              l.tax_rate !== undefined
+                ? l.tax_rate
+                : formData.tax_rate || tc?.rate_percent || 0,
+            ),
+            sort_order: 99,
+          };
         }
         compTotals[name].amount += amt;
       }
@@ -954,12 +1007,23 @@ export default function PurchaseBillsForm() {
       }))
       .sort((a, b) => a.sort_order - b.sort_order);
 
-    const lineTaxTotal = lines.reduce((s, l) => s + Number(l.tax_amount || 0), 0);
+    const lineTaxTotal = lines.reduce(
+      (s, l) => s + Number(l.tax_amount || 0),
+      0,
+    );
     if (components.length === 0 && lineTaxTotal > 0) {
-      const tc = taxCodes.find((t) => String(t.id) === String(formData.tax_code_id));
-      const rate = formData.tax_rate !== undefined ? formData.tax_rate : (tc?.rate_percent || 0);
+      const tc = taxCodes.find(
+        (t) => String(t.id) === String(formData.tax_code_id),
+      );
+      const rate =
+        formData.tax_rate !== undefined
+          ? formData.tax_rate
+          : tc?.rate_percent || 0;
       components.push({
-        name: formData.tax_component_name || tc?.name || (rate ? `Tax (${rate}%)` : "Tax"),
+        name:
+          formData.tax_component_name ||
+          tc?.name ||
+          (rate ? `Tax (${rate}%)` : "Tax"),
         amount: Math.round(lineTaxTotal * 100) / 100,
         rate,
         sort_order: 1,
@@ -977,12 +1041,21 @@ export default function PurchaseBillsForm() {
     const other = Number(formData.other_charges) || 0;
 
     // Subtotal: when inclusive, Subtotal must be LESS TAX:
-    const subTotal = isInclusive ? Math.max(0, grossSub - lineTaxTotal) : grossSub;
+    const subTotal = isInclusive
+      ? Math.max(0, grossSub - lineTaxTotal)
+      : grossSub;
     const grandTotal = isInclusive
       ? grossSub - totalDiscount + freight + other
       : subTotal - totalDiscount + lineTaxTotal + freight + other;
 
-    return { grossSub, subTotal, itemDiscounts, lineTaxTotal, grandTotal, components };
+    return {
+      grossSub,
+      subTotal,
+      itemDiscounts,
+      lineTaxTotal,
+      grandTotal,
+      components,
+    };
   }, [
     lines,
     formData.tax_mode,
@@ -1037,11 +1110,16 @@ export default function PurchaseBillsForm() {
         supplier_id: Number(formData.supplier_id),
         po_id: formData.po_id ? Number(formData.po_id) : null,
         grn_id: formData.grn_id ? Number(formData.grn_id) : null,
-        project_id: canAccessProjects && formData.project_id ? Number(formData.project_id) : null,
+        project_id:
+          canAccessProjects && formData.project_id
+            ? Number(formData.project_id)
+            : null,
         currency_id: Number(formData.currency_id),
         exchange_rate: Number(formData.exchange_rate),
         payment_terms: Number(formData.payment_terms),
-        cost_center_id: formData.cost_center_id ? Number(formData.cost_center_id) : null,
+        cost_center_id: formData.cost_center_id
+          ? Number(formData.cost_center_id)
+          : null,
         discount_amount: Number(formData.discount_amount),
         freight_charges: Number(formData.freight_charges),
         other_charges: Number(formData.other_charges),
@@ -1112,7 +1190,9 @@ export default function PurchaseBillsForm() {
         currency_id: Number(formData.currency_id),
         exchange_rate: Number(formData.exchange_rate),
         payment_terms: Number(formData.payment_terms),
-        cost_center_id: formData.cost_center_id ? Number(formData.cost_center_id) : null,
+        cost_center_id: formData.cost_center_id
+          ? Number(formData.cost_center_id)
+          : null,
         discount_amount: Number(formData.discount_amount),
         freight_charges: Number(formData.freight_charges),
         other_charges: Number(formData.other_charges),
@@ -1381,14 +1461,14 @@ export default function PurchaseBillsForm() {
               onChange={handleChange}
             />
           </div>
-
-
         </div>
       </div>
 
       <div className="card">
         <div className="card-header flex justify-between items-center py-2.5 px-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
-          <div className="font-semibold text-slate-800 dark:text-slate-100">Bill Items</div>
+          <div className="font-semibold text-slate-800 dark:text-slate-100">
+            Bill Items
+          </div>
           <TaxModeRadioSelector
             taxMode={formData.tax_mode || "EXCLUSIVE"}
             onModeChange={(newMode) => {
@@ -1400,14 +1480,16 @@ export default function PurchaseBillsForm() {
                     tax_mode: newMode,
                   };
                   return recalcLine(updated);
-                })
+                }),
               );
             }}
             onOpenTaxModal={() => {
               setEditingLineId(null);
               setTaxModalOpen(true);
             }}
-            selectedTaxLabel={lines.find((l) => l.tax_component_name)?.tax_component_name || ""}
+            selectedTaxLabel={
+              lines.find((l) => l.tax_component_name)?.tax_component_name || ""
+            }
             openAlert={showTaxModeAlert}
             onCloseAlert={() => setShowTaxModeAlert(false)}
             anchorSelector="#purchase-bill-items-table"
@@ -1431,15 +1513,15 @@ export default function PurchaseBillsForm() {
             </thead>
             <tbody>
               {lines.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan="9"
-                      className="text-center py-10 text-slate-400 bg-slate-50 italic"
-                    >
-                      No items added yet. Use the section above to add items or
-                      pick a PO/GRN.
-                    </td>
-                  </tr>
+                <tr>
+                  <td
+                    colSpan="9"
+                    className="text-center py-10 text-slate-400 bg-slate-50 italic"
+                  >
+                    No items added yet. Use the section above to add items or
+                    pick a PO/GRN.
+                  </td>
+                </tr>
               ) : (
                 lines.map((l, idx) => {
                   const gross =
@@ -1479,7 +1561,7 @@ export default function PurchaseBillsForm() {
                         )}
                       </td>
                       <td className="text-right">
-                        {l.uom_name || uo?.uom_code || ""}
+                        {uo?.uom_code || l.uom || ""}
                       </td>
                       <td className="text-right">
                         {isNew ? (
@@ -1513,8 +1595,10 @@ export default function PurchaseBillsForm() {
                           <div>
                             <div>{Number(l.unit_price).toFixed(2)}</div>
                             {l.tax_mode ? (
-                              <span className={`text-[9px] font-bold px-1 rounded ${l.tax_mode === 'INCLUSIVE' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-                                {l.tax_mode === 'INCLUSIVE' ? 'Incl' : 'Excl'}
+                              <span
+                                className={`text-[9px] font-bold px-1 rounded ${l.tax_mode === "INCLUSIVE" ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700"}`}
+                              >
+                                {l.tax_mode === "INCLUSIVE" ? "Incl" : "Excl"}
                               </span>
                             ) : null}
                           </div>
@@ -1533,21 +1617,57 @@ export default function PurchaseBillsForm() {
                             title="Click to select tax component or mode"
                           >
                             <div className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[12rem]">
-                              {l.tax_component_name || formData.tax_component_name || (taxCodes.find((t) => String(t.id) === String(l.tax_code_id || formData.tax_code_id))?.name) || (l.tax_rate ? `Tax (${l.tax_rate}%)` : '-')}
+                              {l.tax_component_name ||
+                                formData.tax_component_name ||
+                                taxCodes.find(
+                                  (t) =>
+                                    String(t.id) ===
+                                    String(
+                                      l.tax_code_id || formData.tax_code_id,
+                                    ),
+                                )?.name ||
+                                (l.tax_rate ? `Tax (${l.tax_rate}%)` : "-")}
                             </div>
                             <div className="text-[10px] text-slate-500 flex items-center justify-between gap-1 mt-0.5">
-                              <span className={`px-1 rounded text-[9px] font-bold ${(l.tax_mode || formData.tax_mode) === 'INCLUSIVE' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-                                {(l.tax_mode || formData.tax_mode) === 'INCLUSIVE' ? 'Incl' : 'Excl'}
+                              <span
+                                className={`px-1 rounded text-[9px] font-bold ${(l.tax_mode || formData.tax_mode) === "INCLUSIVE" ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700"}`}
+                              >
+                                {(l.tax_mode || formData.tax_mode) ===
+                                "INCLUSIVE"
+                                  ? "Incl"
+                                  : "Excl"}
                               </span>
                               <span className="font-bold text-brand-600">
-                                {Number(l.tax_rate !== undefined && l.tax_rate !== null ? l.tax_rate : (formData.tax_rate !== undefined && formData.tax_rate !== null ? formData.tax_rate : (taxCodes.find((t) => String(t.id) === String(l.tax_code_id || formData.tax_code_id))?.rate_percent || 0)))}%
+                                {Number(
+                                  l.tax_rate !== undefined &&
+                                    l.tax_rate !== null
+                                    ? l.tax_rate
+                                    : formData.tax_rate !== undefined &&
+                                        formData.tax_rate !== null
+                                      ? formData.tax_rate
+                                      : taxCodes.find(
+                                          (t) =>
+                                            String(t.id) ===
+                                            String(
+                                              l.tax_code_id ||
+                                                formData.tax_code_id,
+                                            ),
+                                        )?.rate_percent || 0,
+                                )}
+                                %
                               </span>
                             </div>
                           </div>
                         ) : (
                           <span className="text-xs text-slate-600">
-                            {l.tax_component_name || (taxCodes.find((t) => String(t.id) === String(l.tax_code_id))?.name) || ""}
-                            {l.tax_mode ? ` [${l.tax_mode === 'INCLUSIVE' ? 'Incl' : 'Excl'}]` : ''}
+                            {l.tax_component_name ||
+                              taxCodes.find(
+                                (t) => String(t.id) === String(l.tax_code_id),
+                              )?.name ||
+                              ""}
+                            {l.tax_mode
+                              ? ` [${l.tax_mode === "INCLUSIVE" ? "Incl" : "Excl"}]`
+                              : ""}
                           </span>
                         )}
                       </td>
@@ -1673,7 +1793,9 @@ export default function PurchaseBillsForm() {
           className="input w-full"
           rows={3}
           value={formData.notes || ""}
-          onChange={(e) => setFormData((p) => ({ ...p, notes: e.target.value }))}
+          onChange={(e) =>
+            setFormData((p) => ({ ...p, notes: e.target.value }))
+          }
           placeholder="Additional notes or terms..."
         />
       </div>
@@ -1699,13 +1821,19 @@ export default function PurchaseBillsForm() {
       {/* Universal Tax Pricing & Components Modal */}
       <TaxPricingModal
         open={taxModalOpen}
-        form={billType === "IMPORT" ? "PURCHASE_BILL_IMPORT" : "PURCHASE_BILL_LOCAL"}
+        form={
+          billType === "IMPORT" ? "PURCHASE_BILL_IMPORT" : "PURCHASE_BILL_LOCAL"
+        }
         pageId={billType === "IMPORT" ? 4 : 3}
         onClose={() => {
           setTaxModalOpen(false);
           setEditingLineId(null);
         }}
-        taxMode={lines.find((l) => l.id === editingLineId)?.tax_mode || formData.tax_mode || 'EXCLUSIVE'}
+        taxMode={
+          lines.find((l) => l.id === editingLineId)?.tax_mode ||
+          formData.tax_mode ||
+          "EXCLUSIVE"
+        }
         price={lines.find((l) => l.id === editingLineId)?.unit_price || 0}
         selectedComponent={{
           name: lines.find((l) => l.id === editingLineId)?.tax_component_name,
@@ -1713,13 +1841,15 @@ export default function PurchaseBillsForm() {
           id: lines.find((l) => l.id === editingLineId)?.tax_code_id,
         }}
         onSelectComponent={(comp) => {
-          const compLabel = `${comp.name}${comp.rate !== undefined ? ` (${comp.rate}%)` : ''}`;
-          const taxCodeId = String(comp.taxCodeId || comp.originalId || comp.id || '');
+          const compLabel = `${comp.name}${comp.rate !== undefined ? ` (${comp.rate}%)` : ""}`;
+          const taxCodeId = String(
+            comp.taxCodeId || comp.originalId || comp.id || "",
+          );
           const taxRate = comp.rate;
 
           setFormData((prev) => ({
             ...prev,
-            tax_mode: formData.tax_mode || 'EXCLUSIVE',
+            tax_mode: formData.tax_mode || "EXCLUSIVE",
             tax_code_id: taxCodeId,
             tax_rate: taxRate,
             tax_component_name: compLabel,
@@ -1730,7 +1860,7 @@ export default function PurchaseBillsForm() {
             tax_code_id: taxCodeId,
             tax_rate: taxRate,
             tax_component_name: compLabel,
-            tax_mode: formData.tax_mode || 'EXCLUSIVE',
+            tax_mode: formData.tax_mode || "EXCLUSIVE",
           }));
 
           setLines((prev) =>
@@ -1740,10 +1870,10 @@ export default function PurchaseBillsForm() {
                 tax_code_id: taxCodeId || l.tax_code_id,
                 tax_rate: taxRate,
                 tax_component_name: compLabel,
-                tax_mode: formData.tax_mode || 'EXCLUSIVE',
+                tax_mode: formData.tax_mode || "EXCLUSIVE",
               };
               return recalcLine(next);
-            })
+            }),
           );
 
           if (taxCodeId) {

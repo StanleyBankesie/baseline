@@ -161,7 +161,7 @@ export default function ItemBatchesList() {
       <div className="card">
         <div className="card-body grid grid-cols-1 md:grid-cols-4 gap-3">
           <div>
-            <label className="text-[10px] font-bold uppercase text-slate-400 block mb-1">Item</label>
+            <label className="text-[10px] font-semibold uppercase text-slate-400 block mb-1">Item</label>
             <select
               className="input h-9 text-sm w-full"
               value={filters.item_id}
@@ -176,7 +176,7 @@ export default function ItemBatchesList() {
             </select>
           </div>
           <div>
-            <label className="text-[10px] font-bold uppercase text-slate-400 block mb-1">Batch No</label>
+            <label className="text-[10px] font-semibold uppercase text-slate-400 block mb-1">Batch No</label>
             <input
               className="input h-9 text-sm w-full"
               value={filters.batch_no}
@@ -185,7 +185,7 @@ export default function ItemBatchesList() {
             />
           </div>
           <div>
-            <label className="text-[10px] font-bold uppercase text-slate-400 block mb-1">Expiry From</label>
+            <label className="text-[10px] font-semibold uppercase text-slate-400 block mb-1">Expiry From</label>
             <input
               type="date"
               className="input h-9 text-sm w-full"
@@ -194,7 +194,7 @@ export default function ItemBatchesList() {
             />
           </div>
           <div>
-            <label className="text-[10px] font-bold uppercase text-slate-400 block mb-1">Expiry To</label>
+            <label className="text-[10px] font-semibold uppercase text-slate-400 block mb-1">Expiry To</label>
             <input
               type="date"
               className="input h-9 text-sm w-full"
@@ -274,14 +274,14 @@ export default function ItemBatchesList() {
 
             <form onSubmit={handleSaveBatch} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Item</label>
+                <label className="block text-xs font-semibold uppercase text-slate-500 mb-1">Item</label>
                 <div className="text-sm font-bold text-brand-900 dark:text-brand-300">
                   {editingBatch.item_code} - {editingBatch.item_name}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Batch Number *</label>
+                <label className="block text-xs font-semibold uppercase text-slate-500 mb-1">Batch Number *</label>
                 <input
                   type="text"
                   required
@@ -292,7 +292,7 @@ export default function ItemBatchesList() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Serial Number</label>
+                <label className="block text-xs font-semibold uppercase text-slate-500 mb-1">Serial Number</label>
                 <input
                   type="text"
                   value={editingBatch.serial_no}
@@ -302,19 +302,19 @@ export default function ItemBatchesList() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Stock Quantity *</label>
+                <label className="block text-xs font-semibold uppercase text-slate-500 mb-1">Stock Quantity *</label>
                 <input
                   type="number"
                   step="any"
                   required
                   value={editingBatch.qty}
                   onChange={(e) => setEditingBatch({ ...editingBatch, qty: e.target.value })}
-                  className="input w-full font-bold"
+                  className="input w-full font-semibold"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Expiry Date</label>
+                <label className="block text-xs font-semibold uppercase text-slate-500 mb-1">Expiry Date</label>
                 <input
                   type="date"
                   value={editingBatch.expiry_date}

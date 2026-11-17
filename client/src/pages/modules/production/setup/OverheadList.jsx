@@ -183,7 +183,7 @@ export default function OverheadList() {
 
             <form onSubmit={handleSave} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                   Overhead Category / Description *
                 </label>
                 <input
@@ -197,7 +197,7 @@ export default function OverheadList() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                   Allocation Basis *
                 </label>
                 <select
@@ -213,7 +213,7 @@ export default function OverheadList() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                   Default Cost Rate
                 </label>
                 <input
@@ -225,12 +225,12 @@ export default function OverheadList() {
                     setCurrentOverhead({ ...currentOverhead, default_cost_rate: isNaN(val) ? "" : val });
                   }}
                   placeholder="e.g. 15.00"
-                  className="input w-full font-mono font-bold text-slate-900 dark:text-white"
+                  className="input w-full font-mono font-semibold text-slate-900 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                   Notes & Details
                 </label>
                 <textarea
@@ -250,7 +250,7 @@ export default function OverheadList() {
                   onChange={(e) => setCurrentOverhead({ ...currentOverhead, is_active: e.target.checked })}
                   className="w-4 h-4 rounded border-slate-300 text-brand-600"
                 />
-                <label htmlFor="ovhActive" className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                <label htmlFor="ovhActive" className="text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
                   Active for Manufacturing Processes
                 </label>
               </div>

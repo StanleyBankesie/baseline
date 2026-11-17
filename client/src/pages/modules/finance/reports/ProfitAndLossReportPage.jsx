@@ -29,6 +29,8 @@ export default function ProfitAndLossReportPage() {
   const [to, setTo] = useState("");
   const [userBranches, setUserBranches] = useState([]);
   const [selectedBranchId, setSelectedBranchId] = useState("");
+  const [projects, setProjects] = useState([]);
+  const [selectedProjectId, setSelectedProjectId] = useState("");
   const [income, setIncome] = useState({ items: [], total: 0 });
   const [expenses, setExpenses] = useState({ items: [], total: 0 });
   const [net, setNet] = useState(0);
@@ -129,6 +131,25 @@ export default function ProfitAndLossReportPage() {
   }
 
   useEffect(() => {
+    async function loadProjects() {
+      try {
+        const res = await api.get("/projects");
+        const list = Array.isArray(res.data?.data)
+          ? res.data.data
+          : Array.isArray(res.data?.items)
+          ? res.data.items
+          : Array.isArray(res.data)
+          ? res.data
+          : [];
+        setProjects(list);
+      } catch {
+        setProjects([]);
+      }
+    }
+    loadProjects();
+  }, []);
+
+  useEffect(() => {
     async function fetchBranches() {
       try {
         const res = await api.get("/auth/user-branches");
@@ -165,6 +186,7 @@ export default function ProfitAndLossReportPage() {
           from: from || null,
           to: to || null,
           branchId: selectedBranchId || null,
+          projectId: selectedProjectId || null,
         },
       });
       setIncome(res.data?.income || { items: [], total: 0 });
@@ -188,7 +210,7 @@ export default function ProfitAndLossReportPage() {
   useEffect(() => {
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, to, selectedBranchId, pollingCounter]);
+  }, [from, to, selectedBranchId, selectedProjectId, pollingCounter]);
 
   // Flatten tree for export purposes
   function flattenTree(nodes, maxLevel = 99, rows = [], section = "") {
@@ -231,6 +253,10 @@ export default function ProfitAndLossReportPage() {
       ? userBranches[0].name
       : "All Assigned Branches";
 
+    const projectName = selectedProjectId
+      ? projects.find((p) => String(p.id) === String(selectedProjectId))?.project_name || "Selected Project"
+      : "All Projects (Company-wide)";
+
     const contactParts = [];
     if (header.companyPhone) contactParts.push(`Contact No: ${header.companyPhone}`);
     if (header.companyEmail) contactParts.push(`Email: ${header.companyEmail}`);
@@ -246,7 +272,7 @@ export default function ProfitAndLossReportPage() {
     }
     headerRows.push(
       { Section: "STATEMENT OF PROFIT AND LOSS", Type: "", Level: "", Code: "", Name: "", Amount: "" },
-      { Section: `Currency: ${currCode} (${currSymbol}) | Period: ${from || "Beginning"} to ${to || "Today"} | Branch: ${branchName} | Generated: ${new Date().toLocaleString()}`, Type: "", Level: "", Code: "", Name: "", Amount: "" },
+      { Section: `Currency: ${currCode} (${currSymbol}) | Period: ${from || "Beginning"} to ${to || "Today"} | Branch: ${branchName} | Project: ${projectName} | Generated: ${new Date().toLocaleString()}`, Type: "", Level: "", Code: "", Name: "", Amount: "" },
       { Section: "", Type: "", Level: "", Code: "", Name: "", Amount: "" }
     );
 
@@ -290,6 +316,10 @@ export default function ProfitAndLossReportPage() {
       : userBranches.length === 1
       ? userBranches[0].name
       : "All Assigned Branches";
+
+    const projectName = selectedProjectId
+      ? projects.find((p) => String(p.id) === String(selectedProjectId))?.project_name || "Selected Project"
+      : "All Projects (Company-wide)";
 
     // 1. Report Header Template: Left = Stanness Logo Image, Right = Company Info
     if (header.logoUrl) {
@@ -345,7 +375,7 @@ export default function ProfitAndLossReportPage() {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.setTextColor(203, 213, 225);
-    doc.text(`Period: ${from || "Beginning"} to ${to || "Today"}   |   Branch: ${branchName}`, margin + 4, y + 10.5);
+    doc.text(`Period: ${from || "Beginning"} to ${to || "Today"}   |   Branch: ${branchName}   |   Project: ${projectName}`, margin + 4, y + 10.5);
 
     const genDate = new Date().toLocaleDateString();
     doc.text(`Currency: ${currCode}   |   Generated: ${genDate}`, pageW - margin - 4, y + 10.5, { align: "right" });
@@ -603,7 +633,7 @@ export default function ProfitAndLossReportPage() {
         <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex flex-wrap items-center gap-4 bg-slate-50 dark:bg-slate-800/50">
           {userBranches.length > 1 && (
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-slate-600 dark:text-slate-400 whitespace-nowrap">Branch:</span>
+              <span className="text-sm font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap">Branch:</span>
               <select
                 className="select select-bordered select-sm text-xs font-semibold bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
                 value={selectedBranchId}
@@ -628,10 +658,27 @@ export default function ProfitAndLossReportPage() {
             </div>
           )}
 
+          {/* Project Selector (Optional) */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap">Project:</span>
+            <select
+              className="select select-bordered select-sm text-xs font-semibold bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 max-w-[210px]"
+              value={selectedProjectId}
+              onChange={(e) => setSelectedProjectId(e.target.value)}
+            >
+              <option value="">All Projects (Company-wide)</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.project_code ? `${p.project_code} - ` : ""}{p.project_name || p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Currency Selector */}
           {currencies.length > 1 ? (
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-slate-600 dark:text-slate-400 whitespace-nowrap">Currency:</span>
+              <span className="text-sm font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap">Currency:</span>
               <select
                 className="select select-bordered select-sm text-xs font-semibold bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
                 value={selectedCurrency.code}
@@ -657,11 +704,11 @@ export default function ProfitAndLossReportPage() {
           )}
 
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-slate-600 dark:text-slate-400">From:</span>
+            <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">From:</span>
             <input className="input input-bordered input-sm" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-slate-600 dark:text-slate-400">To:</span>
+            <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">To:</span>
             <input className="input input-bordered input-sm" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
           </div>
           <div className="flex items-center gap-4 border-l pl-4 border-slate-200 dark:border-slate-700">
@@ -680,6 +727,7 @@ export default function ProfitAndLossReportPage() {
               setFrom(jan1.toISOString().slice(0, 10));
               setTo(today.toISOString().slice(0, 10));
               if (userBranches.length > 1) setSelectedBranchId("");
+              setSelectedProjectId("");
             }} disabled={loading}>
             Reset
           </button>

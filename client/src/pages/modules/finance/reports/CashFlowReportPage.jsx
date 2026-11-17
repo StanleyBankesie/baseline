@@ -38,15 +38,36 @@ export default function CashFlowReportPage() {
 
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [projects, setProjects] = useState([]);
+  const [selectedProjectId, setSelectedProjectId] = useState("");
   const [items, setItems] = useState([]);
   const [totals, setTotals] = useState({ inflow: 0, outflow: 0, net: 0 });
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    async function loadProjects() {
+      try {
+        const res = await api.get("/projects");
+        const list = Array.isArray(res.data?.data)
+          ? res.data.data
+          : Array.isArray(res.data?.items)
+          ? res.data.items
+          : Array.isArray(res.data)
+          ? res.data
+          : [];
+        setProjects(list);
+      } catch {
+        setProjects([]);
+      }
+    }
+    loadProjects();
+  }, []);
 
   async function run() {
     try {
       setLoading(true);
       const res = await api.get("/finance/reports/cash-flow", {
-        params: { from: from || null, to: to || null },
+        params: { from: from || null, to: to || null, projectId: selectedProjectId || null },
       });
       setItems(res.data?.items || []);
       setTotals(res.data?.totals || { inflow: 0, outflow: 0, net: 0 });
@@ -69,7 +90,7 @@ export default function CashFlowReportPage() {
   useEffect(() => {
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, to, pollingCounter]);
+  }, [from, to, selectedProjectId, pollingCounter]);
 
   const { sorted: sortedItems, sortKey, sortDir, toggle } = useSort(items, "bank_name", "asc");
 
@@ -104,9 +125,11 @@ export default function CashFlowReportPage() {
               const rows = Array.isArray(items) ? items : [];
               if (!rows.length) return;
               const headerInfo = await fetchReportHeader(api);
+              const selProj = selectedProjectId ? projects.find(p => String(p.id) === String(selectedProjectId)) : null;
+              const projStr = selProj ? ` | Project: ${selProj.project_name}` : "";
               const headerRows = buildExcelHeaderRows(headerInfo, {
                 title: "STATEMENT OF CASH FLOWS",
-                period: `${from || "Beginning"} to ${to || "Today"}`,
+                period: `${from || "Beginning"} to ${to || "Today"}${projStr}`,
               });
               const ws = XLSX.utils.json_to_sheet([...headerRows, ...rows]);
               const wb = XLSX.utils.book_new();
@@ -128,9 +151,10 @@ export default function CashFlowReportPage() {
               const margin = 14;
               const pageW = 210;
 
+              const selProj = selectedProjectId ? projects.find(p => String(p.id) === String(selectedProjectId)) : null;
               let y = applyPdfHeader(doc, headerInfo, {
                 title: "STATEMENT OF CASH FLOWS",
-                subtitle: `Period: ${from || "Beginning"} to ${to || "Today"}`,
+                subtitle: `Period: ${from || "Beginning"} to ${to || "Today"}${selProj ? ` | Project: ${selProj.project_name}` : ""}`,
                 kpis: [
                   { label: "TOTAL INFLOW", value: `${headerInfo.currPrefix}${fmt(totals.inflow)}`, color: [16, 185, 129] },
                   { label: "TOTAL OUTFLOW", value: `${headerInfo.currPrefix}${fmt(totals.outflow)}`, color: [239, 68, 68] },
@@ -225,7 +249,22 @@ export default function CashFlowReportPage() {
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex flex-wrap items-center gap-4 bg-slate-50 dark:bg-slate-800/50">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-slate-600 dark:text-slate-400">From:</span>
+            <span className="text-sm font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap">Project:</span>
+            <select
+              className="select select-bordered select-sm text-xs font-semibold bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 max-w-[210px]"
+              value={selectedProjectId}
+              onChange={(e) => setSelectedProjectId(e.target.value)}
+            >
+              <option value="">All Projects (Company-wide)</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.project_code ? `${p.project_code} - ` : ""}{p.project_name || p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">From:</span>
             <input
               className="input input-bordered input-sm focus:ring-brand focus:border-brand"
               type="date"
@@ -234,7 +273,7 @@ export default function CashFlowReportPage() {
             />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-slate-600 dark:text-slate-400">To:</span>
+            <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">To:</span>
             <input
               className="input input-bordered input-sm focus:ring-brand focus:border-brand"
               type="date"
@@ -248,6 +287,7 @@ export default function CashFlowReportPage() {
             onClick={() => {
               setFrom("");
               setTo("");
+              setSelectedProjectId("");
             }}
             disabled={loading}
           >

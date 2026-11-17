@@ -788,7 +788,7 @@ export default function FMTaskExecution() {
               </div>
 
               <div className="pt-2">
-                <label className="label font-bold text-slate-700 dark:text-slate-300 mb-1.5 block">
+                <label className="label font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">
                   Select New Assignee <span className="text-red-500">*</span>
                 </label>
                 <select

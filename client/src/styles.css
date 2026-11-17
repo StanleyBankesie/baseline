@@ -30,12 +30,18 @@
     font-size: 0.875rem; /* 14px default base font size */
     line-height: 1.5;
   }
+  label {
+    font-weight: 600;
+  }
   input,
   select,
   textarea,
   button {
     font-family: inherit;
     font-size: 0.875rem;
+  }
+  .font-mono {
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
   }
   :root {
     --success-color: #28a745;
@@ -62,6 +68,31 @@
   }
   .shadow-apple-dock {
     box-shadow: 0 -4px 20px -2px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.04);
+  }
+  /* Smoky Shadows: rich, atmospheric, soft multi-stage shadow with subtle dark diffuse spread */
+  .shadow-smoky {
+    box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.06);
+  }
+  .dark .shadow-smoky {
+    box-shadow: 0 14px 40px -8px rgba(0, 0, 0, 0.65), 0 6px 16px -4px rgba(0, 0, 0, 0.45);
+  }
+  .shadow-smoky-lg {
+    box-shadow: 0 20px 48px -10px rgba(15, 23, 42, 0.18), 0 8px 20px -4px rgba(15, 23, 42, 0.08);
+  }
+  .dark .shadow-smoky-lg {
+    box-shadow: 0 24px 56px -12px rgba(0, 0, 0, 0.8), 0 10px 24px -6px rgba(0, 0, 0, 0.55);
+  }
+  .shadow-smoky-card {
+    box-shadow: 0 6px 20px -4px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  }
+  .dark .shadow-smoky-card {
+    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5), 0 2px 8px -2px rgba(0, 0, 0, 0.35);
+  }
+  .shadow-smoky-card:hover {
+    box-shadow: 0 14px 32px -6px rgba(15, 23, 42, 0.16), 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+  }
+  .dark .shadow-smoky-card:hover {
+    box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.75), 0 6px 16px -2px rgba(0, 0, 0, 0.5);
   }
 }
 
@@ -563,6 +594,34 @@
     display: none;
   }
 
+  /* Mobile Carousel scrollbar hiding */
+  [data-carousel-container] {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
+  [data-carousel-container]::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  /* Page metric and KPI cards: twice original height */
+  [data-page-carousel] [data-carousel-card] > .card {
+    min-height: 160px;
+  }
+
+  /* Module home and homepage overview cards: +30% height */
+  [data-home-carousel] [data-carousel-card] > div,
+  [data-module-carousel] [data-carousel-card] > div {
+    min-height: 185px;
+  }
+  @media (min-width: 640px) {
+    [data-home-carousel] [data-carousel-card] > div,
+    [data-module-carousel] [data-carousel-card] > div {
+      min-height: 210px;
+    }
+  }
+
   /* Chat default background */
   .chat-bg {
     background-color: #faf7f2;
@@ -697,31 +756,46 @@
       max-width: calc(100vw - 16px) !important;
     }
 
-    /* -- Buttons: full-width stack -- */
-    .btn-primary,
-    .btn-secondary,
-    .btn-outline,
-    .btn-success {
-      width: 100%;
-      justify-content: center;
-    }
-    button.btn-primary,
-    button.btn-secondary,
-    button.btn-outline,
-    button.btn-success,
-    a.btn-primary,
-    a.btn-secondary,
-    a.btn-outline,
-    a.btn-success {
-      width: 100%;
+    /* -- Hide page subtitle in title banners on smaller devices -- */
+    .card-header p,
+    .card-header h1 + p,
+    .card-header h2 + p,
+    .card-header div > p.text-sm,
+    .card-header div > p.text-xs,
+    .card-header p.text-slate-100,
+    .card-header p.text-slate-200,
+    .card-header p.text-slate-300,
+    .card-header p.text-slate-400,
+    .card-header p.text-slate-500 {
+      display: none !important;
     }
 
-    /* -- Button groups: stack vertically -- */
-    .flex.gap-2,
-    .flex.gap-3,
-    .flex.gap-4 {
-      flex-wrap: wrap;
+    /* -- Header banner on mobile: stack title on top, full-width buttons below -- */
+    .card-header > .flex,
+    .card-header > div.flex,
+    .card-header .flex.justify-between {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 0.75rem !important;
     }
+
+    /* -- All buttons in headers and toolbars arranged horizontally in a 2-grid column -- */
+    .card-header .flex:has(> button, > a, > .btn),
+    .card-header .flex-wrap,
+    .header-actions,
+    .action-toolbar,
+    .flex.gap-2:not(.flex-nowrap):not([data-carousel-container]):has(> .btn-primary, > .btn-secondary, > .btn-outline, > .btn-success, > button, > a.btn),
+    .flex.gap-3:not(.flex-nowrap):not([data-carousel-container]):has(> .btn-primary, > .btn-secondary, > .btn-outline, > .btn-success, > button, > a.btn),
+    .flex.gap-4:not(.flex-nowrap):not([data-carousel-container]):has(> .btn-primary, > .btn-secondary, > .btn-outline, > .btn-success, > button, > a.btn) {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      width: 100% !important;
+      gap: 0.5rem !important;
+    }
+
+    .card-header .flex > .btn,
+    .card-header .flex > button,
+    .card-header .flex > a,
     .flex.gap-2 > .btn-primary,
     .flex.gap-2 > .btn-secondary,
     .flex.gap-2 > .btn-outline,
@@ -733,9 +807,71 @@
     .flex.gap-4 > .btn-primary,
     .flex.gap-4 > .btn-secondary,
     .flex.gap-4 > .btn-outline,
-    .flex.gap-4 > .btn-success {
-      flex: 1 1 100%;
+    .flex.gap-4 > .btn-success,
+    button.btn,
+    a.btn,
+    .btn-primary,
+    .btn-secondary,
+    .btn-outline,
+    .btn-success {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+      min-height: 2.25rem !important;
+      padding: 0.35rem 0.5rem !important;
+      font-size: 0.75rem !important;
+      line-height: 1.2 !important;
+      white-space: normal !important;
+      word-break: normal !important;
+      overflow: visible !important;
+      text-overflow: clip !important;
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      flex: 1 1 auto !important;
     }
+
+    /* -- All filter and search fields in all pages arranged horizontally in a 2-grid column -- */
+    .card .grid:has(> select, > input, > .relative > input, > div > select, > div > input),
+    .filter-grid,
+    .search-filter-grid,
+    [data-filter-bar],
+    .card-body > .grid:has(> select, > input, > .relative > input) {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 0.5rem !important;
+      width: 100% !important;
+    }
+
+    .card .grid:has(> select, > input, > .relative > input) > *,
+    .filter-grid > *,
+    .search-filter-grid > * {
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .card .grid:has(> select, > input, > .relative > input) select,
+    .card .grid:has(> select, > input, > .relative > input) input {
+      width: 100% !important;
+      text-overflow: ellipsis !important;
+      font-size: 0.75rem !important;
+    }
+
+    /* -- Page metric cards: twice original height (160px) -- */
+    [data-page-carousel] [data-carousel-card] > .card,
+    .page-metric-card,
+    .page-stats-card {
+      min-height: 160px !important;
+    }
+
+    /* -- Module home and homepage overview cards: +30% height (185px mobile, 210px desktop) -- */
+    [data-home-carousel] [data-carousel-card] > div,
+    [data-module-carousel] [data-carousel-card] > div {
+      min-height: 185px !important;
+    }
+
+
 
     /* -- Keep icon-only buttons compact (exclude floating chat) -- */
     button.p-2,

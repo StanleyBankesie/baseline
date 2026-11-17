@@ -45,8 +45,6 @@ export default function FMMaterialUtilizationForm() {
     taskId: "",
     taskSummary: "",
     warehouseId: "",
-    remarks: "",
-    status: "DRAFT",
   });
 
   const [items, setItems] = useState([
@@ -656,9 +654,7 @@ export default function FMMaterialUtilizationForm() {
                                     { code: "MTR", name: "MTR" },
                                   ]
                               ).map((u) => (
-                                <option key={u.code} value={u.code}>
-                                  {u.name ? `${u.name} (${u.code})` : u.code}
-                                </option>
+                                <option key={u.code} value={u.code}>{u.code}</option>
                               ))}
                             </select>
                           </td>

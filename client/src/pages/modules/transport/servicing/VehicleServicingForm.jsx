@@ -446,8 +446,8 @@ export default function VehicleServicingForm() {
             </div>
             
             <div className="form-group">
-              <label className="form-label font-bold text-brand-700">Total Service Cost</label>
-              <input type="text" readOnly className="input bg-brand-50 font-bold text-lg text-brand-800" value={totalCost.toFixed(2)} />
+              <label className="form-label font-semibold text-brand-700">Total Service Cost</label>
+              <input type="text" readOnly className="input bg-brand-50 font-semibold text-lg text-brand-800" value={totalCost.toFixed(2)} />
             </div>
 
             {/* Removed Payment Status and Payment Reference as requested */}

@@ -275,6 +275,7 @@ export const MODULE_SECTIONS = {
         { key: "payment-voucher", label: "Make Payment", path: "/finance/payment-voucher" },
         { key: "receipt-voucher", label: "Receive Payment", path: "/finance/receipt-voucher" },
         { key: "contra-voucher", label: "Contra Entry", path: "/finance/contra-voucher" },
+        { key: "petty-cash", label: "Petty Cash Book", path: "/finance/petty-cash" },
         { key: "credit-note", label: "Credit Note", path: "/finance/credit-note" },
         { key: "debit-note", label: "Debit Note", path: "/finance/debit-note" },
         { key: "sales-voucher", label: "Sales Voucher", path: "/finance/sales-voucher" },
@@ -289,6 +290,7 @@ export const MODULE_SECTIONS = {
       icon: "🏦",
       features: [
         { key: "bank-reconciliation", label: "Bank Reconciliation", path: "/finance/bank-reconciliation" },
+        { key: "petty-cash", label: "Petty Cash Book", path: "/finance/petty-cash" },
         { key: "budget", label: "Budget Management", path: "/finance/budget" },
         { key: "fixed-assets", label: "Fixed Assets", path: "/finance/fixed-assets" },
       ],
@@ -554,7 +556,7 @@ export const MODULE_SECTIONS = {
         { key: "schedule", label: "Planning & Scheduling", path: "/project-management/schedule" },
         { key: "monitoring", label: "Schedule Monitoring", path: "/project-management/schedule-monitoring" },
         { key: "cpm", label: "Critical Path (CPM)", path: "/project-management/critical-path" },
-        { key: "boqs", label: "Bill of Quantities (BOQ)", path: "/project-management/boqs" },
+        { key: "boqs", label: "Project Costing", path: "/project-management/costing" },
         { key: "resources", label: "Resource Management", path: "/project-management/resources" },
         { key: "purchase-requisitions", label: "Purchase Requisitions", path: "/project-management/purchase-requisitions" },
         { key: "documents", label: "Drawings & Documents", path: "/project-management/documents" },
@@ -569,7 +571,7 @@ export const MODULE_SECTIONS = {
         { key: "material-requisitions", label: "Material Requisitions", path: "/project-management/material-requisitions" },
         { key: "material-receipts", label: "Material Receipts", path: "/project-management/material-receipts" },
         { key: "material-utilizations", label: "Material Utilization", path: "/project-management/material-utilizations" },
-        { key: "daily-reports", label: "Daily Site Diary (DSR)", path: "/project-management/daily-reports" },
+        { key: "daily-reports", label: "Daily Project Report", path: "/project-management/daily-reports" },
         { key: "equipment-logs", label: "Plant & Equipment Logs", path: "/project-management/equipment-logs" },
         { key: "subcontracts", label: "Subcontractors & Trade Works", path: "/project-management/subcontracts" },
       ],
@@ -578,13 +580,13 @@ export const MODULE_SECTIONS = {
       title: "Monitoring and Control",
       icon: "📊",
       features: [
-        { key: "cost-control", label: "Cost Control & EVM", path: "/project-management/cost-control" },
+        { key: "cost-control", label: "Project Cost Control & Budget Management", path: "/project-management/cost-control" },
         { key: "expenses", label: "Project Direct Expenses", path: "/project-management/expenses" },
         { key: "income", label: "Project Income & Billing", path: "/project-management/income" },
         { key: "project-invoices", label: "Project Invoices", path: "/project-management/project-invoices" },
-        { key: "variations", label: "Variations & Change Orders", path: "/project-management/variations" },
-        { key: "client-valuations", label: "Client Valuations", path: "/project-management/client-valuations" },
-        { key: "payment-applications", label: "Payment Applications (IPAs)", path: "/project-management/payment-applications" },
+        { key: "variations", label: "Project Change Management", path: "/project-management/variations" },
+        { key: "client-valuations", label: "Client Progress Assessments", path: "/project-management/client-progress-assessments" },
+        { key: "payment-applications", label: "Progress Payment Claims", path: "/project-management/payment-applications" },
         { key: "quality-control", label: "Quality Control (QA/QC)", path: "/project-management/quality-control" },
         { key: "project-status-report", label: "Project Status & Progress Report", path: "/project-management/reports/project-status" },
         { key: "task-execution-report", label: "Task Execution & Delay Log", path: "/project-management/reports/task-execution" },
@@ -596,8 +598,8 @@ export const MODULE_SECTIONS = {
       icon: "🏁",
       features: [
         { key: "closure", label: "Project Handover & Closeout", path: "/project-management/closure" },
-        { key: "snags", label: "Snag & Punch List Resolution", path: "/project-management/quality-control" },
-        { key: "final-accounts", label: "Final Account & Retention Release", path: "/project-management/client-valuations" },
+        { key: "snags", label: "Defect & Issue Management", path: "/project-management/snags" },
+        { key: "final-accounts", label: "Final Account & Retention Release", path: "/project-management/final-accounts" },
       ],
     },
     {
@@ -742,14 +744,27 @@ export const MODULE_SECTIONS = {
 
   system: [
     {
-      title: "System Administration",
-      icon: "💻",
+      title: "System Administration & Setup",
+      icon: "⚙️",
       features: [
+        { key: "companies", label: "Companies Setup", path: "/system-configuration/companies" },
+        { key: "branches", label: "Branches Setup", path: "/system-configuration/branches" },
+        { key: "admin-permissions", label: "Admin Permissions", path: "/system-configuration/admin-permissions" },
+        { key: "backups", label: "System Backups", path: "/system-configuration/backups" },
+        { key: "licenses", label: "Software Licenses", path: "/system-configuration/licenses" },
+        { key: "payment-packages", label: "Payment Packages", path: "/system-configuration/payment-packages" },
+        { key: "general-settings", label: "General Settings", path: "/system-configuration/general-settings" },
         { key: "system-logs", label: "System Audit Logs" },
       ],
     },
   ],
 };
+
+// Aliases
+MODULE_SECTIONS["hse"] = MODULE_SECTIONS["environmental-health-safety"];
+MODULE_SECTIONS["ehs"] = MODULE_SECTIONS["environmental-health-safety"];
+MODULE_SECTIONS["system-configuration"] = MODULE_SECTIONS["system"];
+MODULE_SECTIONS["asset-management"] = MODULE_SECTIONS["assets"];
 
 /**
  * Returns canonical key for aliased or duplicate keys

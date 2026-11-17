@@ -325,7 +325,7 @@ export default function FacilitiesBudgetingFinancePage() {
                     type="number"
                     value={budgetForm.fiscal_year}
                     onChange={(e) => setBudgetForm({ ...budgetForm, fiscal_year: parseInt(e.target.value) || 2026 })}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs font-mono font-bold"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs font-mono font-semibold"
                     required
                   />
                 </div>
@@ -400,7 +400,7 @@ export default function FacilitiesBudgetingFinancePage() {
                   {budgetForm.lines.map((line, idx) => (
                     <div key={idx} className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
                       <div className="sm:col-span-4">
-                        <label className="block text-[10px] font-bold text-slate-400 mb-0.5">Category</label>
+                        <label className="block text-[10px] font-semibold text-slate-400 mb-0.5">Category</label>
                         <select
                           value={line.cost_category}
                           onChange={(e) => handleLineChange(idx, "cost_category", e.target.value)}
@@ -416,7 +416,7 @@ export default function FacilitiesBudgetingFinancePage() {
                       </div>
 
                       <div className="sm:col-span-5">
-                        <label className="block text-[10px] font-bold text-slate-400 mb-0.5">Scope Description</label>
+                        <label className="block text-[10px] font-semibold text-slate-400 mb-0.5">Scope Description</label>
                         <input
                           type="text"
                           value={line.item_description}
@@ -427,13 +427,13 @@ export default function FacilitiesBudgetingFinancePage() {
                       </div>
 
                       <div className="sm:col-span-2">
-                        <label className="block text-[10px] font-bold text-slate-400 mb-0.5">Allocated (GHS)</label>
+                        <label className="block text-[10px] font-semibold text-slate-400 mb-0.5">Allocated (GHS)</label>
                         <input
                           type="number"
                           step="0.01"
                           value={line.allocated_budget}
                           onChange={(e) => handleLineChange(idx, "allocated_budget", parseFloat(e.target.value) || 0)}
-                          className="w-full bg-slate-50 dark:bg-slate-900 border rounded-lg p-1.5 text-xs font-mono text-right font-bold"
+                          className="w-full bg-slate-50 dark:bg-slate-900 border rounded-lg p-1.5 text-xs font-mono text-right font-semibold"
                         />
                       </div>
 

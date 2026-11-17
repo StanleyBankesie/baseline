@@ -41,12 +41,12 @@ export default function SubcontractorManager() {
     project_id: "",
     subcontract_number: "",
     subcontractor_id: "",
-    trade: "CONCRETE_FRAME",
+    trade: "",
     scope_of_work: "",
-    contract_sum: 0,
-    retention_percent: 5,
-    advance_payment: 0,
-    advance_recovery_percent: 10,
+    contract_sum: "",
+    retention_percent: "",
+    advance_payment: "",
+    advance_recovery_percent: "",
     start_date: "",
     completion_date: "",
   });
@@ -55,8 +55,8 @@ export default function SubcontractorManager() {
     valuation_number: "",
     period_from: "",
     period_to: "",
-    cumulative_work_done: 0,
-    previous_certified: 0,
+    cumulative_work_done: "",
+    previous_certified: "",
     remarks: "",
   });
 
@@ -66,11 +66,8 @@ export default function SubcontractorManager() {
         const pRes = await api.get("/projects/projects", { params: { active: "all" } });
         const prjs = pRes.data?.items || [];
         setProjects(prjs);
-        if (prjs.length > 0) {
-          setSelectedProjectId(String(prjs[0].id));
-        } else {
-          setLoading(false);
-        }
+        // Do not select any project by default (keep empty / All Projects)
+        setSelectedProjectId("");
 
         const sRes = await api.get("/purchase/suppliers?contractor=Y");
         const list = sRes.data?.items || sRes.data?.data?.items || [];
@@ -122,6 +119,9 @@ export default function SubcontractorManager() {
       await api.post("/construction/subcontracts", {
         ...contractForm,
         project_id: projId,
+        contract_sum: contractForm.contract_sum !== "" ? Number(contractForm.contract_sum) : 0,
+        retention_percent: contractForm.retention_percent !== "" ? Number(contractForm.retention_percent) : 0,
+        advance_recovery_percent: contractForm.advance_recovery_percent !== "" ? Number(contractForm.advance_recovery_percent) : 0,
       });
       toast.success("Subcontract agreement registered");
       setShowContractModal(false);
@@ -143,8 +143,8 @@ export default function SubcontractorManager() {
       valuation_number: `IPC-${subNo}-${prev.length + 1}`,
       period_from: "",
       period_to: new Date().toISOString().split("T")[0],
-      cumulative_work_done: lastCertified,
-      previous_certified: lastCertified,
+      cumulative_work_done: lastCertified > 0 ? lastCertified : "",
+      previous_certified: lastCertified > 0 ? lastCertified : "",
       remarks: "",
     });
     setShowValuationModal(true);
@@ -155,6 +155,8 @@ export default function SubcontractorManager() {
     try {
       await api.post("/construction/subcontract-valuations", {
         ...valuationForm,
+        cumulative_work_done: valuationForm.cumulative_work_done !== "" ? Number(valuationForm.cumulative_work_done) : 0,
+        previous_certified: valuationForm.previous_certified !== "" ? Number(valuationForm.previous_certified) : 0,
         subcontract_id: selectedContract.id,
       });
       toast.success("Interim Payment Certificate (IPC) certified");
@@ -207,49 +209,27 @@ export default function SubcontractorManager() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <select
-            className="input text-sm py-1.5 h-auto min-w-[180px]"
-            value={selectedProjectId}
-            onChange={e => setSelectedProjectId(e.target.value)}
-          >
-            <option value="">All Projects</option>
-            {projects.map(p => (
-              <option key={p.id} value={p.id}>
-                {p.project_code} - {p.project_name}
-              </option>
-            ))}
-          </select>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input
-              type="text"
-              placeholder="Search subcontracts..."
-              className="input pl-9 pr-3 py-1.5 text-sm h-auto w-48"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <button
-            onClick={fetchSubcontracts}
-            className="btn btn-secondary p-2"
-            title="Refresh"
-          >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-          </button>
-          <button
-            onClick={() => {
-              setContractForm({
-                ...contractForm,
-                project_id: selectedProjectId || (projects[0]?.id ? String(projects[0].id) : "")
-              });
-              setShowContractModal(true);
-            }}
-            className="btn btn-primary inline-flex items-center gap-2"
-          >
-            <Plus size={16} /> New Subcontract
-          </button>
-        </div>
+        <button
+          onClick={() => {
+            setContractForm({
+              project_id: "",
+              subcontract_number: "",
+              subcontractor_id: "",
+              trade: "",
+              scope_of_work: "",
+              contract_sum: "",
+              retention_percent: "",
+              advance_payment: "",
+              advance_recovery_percent: "",
+              start_date: "",
+              completion_date: "",
+            });
+            setShowContractModal(true);
+          }}
+          className="btn btn-primary inline-flex items-center gap-2"
+        >
+          <Plus size={16} /> New Subcontract
+        </button>
       </div>
 
       {/* KPI Cards */}
@@ -299,6 +279,43 @@ export default function SubcontractorManager() {
         ))}
       </div>
 
+      {/* Filters & Search Row (Placed below the cards) */}
+      <div className="card p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
+          <select
+            className="input text-sm py-1.5 h-auto min-w-[200px]"
+            value={selectedProjectId}
+            onChange={e => setSelectedProjectId(e.target.value)}
+          >
+            <option value="">All Projects</option>
+            {projects.map(p => (
+              <option key={p.id} value={p.id}>
+                {p.project_name || p.name || p.title || `Project #${p.id}`}
+              </option>
+            ))}
+          </select>
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input
+              type="text"
+              placeholder="Search subcontracts..."
+              className="input pl-9 pr-3 py-1.5 text-sm h-auto w-full"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="flex items-center gap-2 self-end sm:self-center">
+          <button
+            onClick={fetchSubcontracts}
+            className="btn btn-secondary p-2"
+            title="Refresh"
+          >
+            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+          </button>
+        </div>
+      </div>
+
       {/* Subcontracts Table */}
       <div className="card overflow-hidden">
         <div className="p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
@@ -337,8 +354,9 @@ export default function SubcontractorManager() {
                       {sc.subcontract_number || sc.contract_no}
                     </td>
                     <td>
-                      <div className="font-semibold text-slate-800 dark:text-slate-200">{sc.project_code || "-"}</div>
-                      <div className="text-xs text-slate-400 truncate max-w-[150px]">{sc.project_name}</div>
+                      <div className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[200px]" title={sc.project_name}>
+                        {sc.project_name || "General Project"}
+                      </div>
                     </td>
                     <td className="font-semibold text-slate-900 dark:text-white">
                       {sc.supplier_name || sc.subcontractor_name || "Specialist Contractor"}
@@ -445,29 +463,29 @@ export default function SubcontractorManager() {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Project <span className="text-red-500">*</span>
             </label>
             <select
               required
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
-              value={contractForm.project_id || selectedProjectId}
+              value={contractForm.project_id || ""}
               onChange={e => setContractForm({ ...contractForm, project_id: e.target.value })}
             >
               <option value="">Select Project...</option>
               {projects.map(p => (
-                <option key={p.id} value={p.id}>{p.project_code} - {p.project_name}</option>
+                <option key={p.id} value={p.id}>{p.project_name || p.name || p.title}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Subcontractor <span className="text-red-500">*</span>
             </label>
             <select
               required
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
-              value={contractForm.subcontractor_id}
+              value={contractForm.subcontractor_id || ""}
               onChange={e => setContractForm({ ...contractForm, subcontractor_id: e.target.value })}
             >
               <option value="">Select Subcontractor...</option>
@@ -484,7 +502,7 @@ export default function SubcontractorManager() {
         </div>
 
         <div>
-          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
             Trade / Specialty <span className="text-red-500">*</span>
           </label>
           <input
@@ -492,50 +510,53 @@ export default function SubcontractorManager() {
             required
             placeholder="e.g. Electrical / Formwork / Plumbing / HVAC"
             className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
-            value={contractForm.trade}
+            value={contractForm.trade || ""}
             onChange={e => setContractForm({ ...contractForm, trade: e.target.value })}
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Agreed Contract Sum (GHS) <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
               step="0.01"
               required
+              placeholder="0.00"
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium"
-              value={contractForm.contract_sum}
-              onChange={e => setContractForm({ ...contractForm, contract_sum: Number(e.target.value) })}
+              value={contractForm.contract_sum ?? ""}
+              onChange={e => setContractForm({ ...contractForm, contract_sum: e.target.value })}
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Retention (%)</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Retention (%)</label>
             <input
               type="number"
               step="0.1"
+              placeholder="e.g. 5"
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono"
-              value={contractForm.retention_percent}
-              onChange={e => setContractForm({ ...contractForm, retention_percent: Number(e.target.value) })}
+              value={contractForm.retention_percent ?? ""}
+              onChange={e => setContractForm({ ...contractForm, retention_percent: e.target.value })}
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Advance Rec (%)</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Advance Rec (%)</label>
             <input
               type="number"
               step="0.1"
+              placeholder="e.g. 10"
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono"
-              value={contractForm.advance_recovery_percent}
-              onChange={e => setContractForm({ ...contractForm, advance_recovery_percent: Number(e.target.value) })}
+              value={contractForm.advance_recovery_percent ?? ""}
+              onChange={e => setContractForm({ ...contractForm, advance_recovery_percent: e.target.value })}
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Start Date</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Start Date</label>
             <input
               type="date"
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono"
@@ -544,7 +565,7 @@ export default function SubcontractorManager() {
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Expected Completion</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Expected Completion</label>
             <input
               type="date"
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono"
@@ -555,7 +576,7 @@ export default function SubcontractorManager() {
         </div>
 
         <div>
-          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Package Scope / Terms</label>
+          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Package Scope / Terms</label>
           <textarea
             className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 min-h-[70px]"
             placeholder="Detailed scope, milestone requirements, or specifications..."
@@ -577,7 +598,7 @@ export default function SubcontractorManager() {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Valuation / IPC Ref <span className="text-red-500">*</span>
             </label>
             <input
@@ -589,7 +610,7 @@ export default function SubcontractorManager() {
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Valuation Date <span className="text-red-500">*</span>
             </label>
             <input
@@ -604,28 +625,29 @@ export default function SubcontractorManager() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
-              Cumulative Work Done (GHS) <span className="text-red-500">*</span>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              Cumulative Work Done (GHS)
             </label>
             <input
               type="number"
               step="0.01"
-              required
+              placeholder="0.00"
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium"
-              value={valuationForm.cumulative_work_done}
-              onChange={e => setValuationForm({ ...valuationForm, cumulative_work_done: Number(e.target.value) })}
+              value={valuationForm.cumulative_work_done ?? ""}
+              onChange={e => setValuationForm({ ...valuationForm, cumulative_work_done: e.target.value })}
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Previous Certified (GHS)
             </label>
             <input
               type="number"
               step="0.01"
+              placeholder="0.00"
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono"
-              value={valuationForm.previous_certified}
-              onChange={e => setValuationForm({ ...valuationForm, previous_certified: Number(e.target.value) })}
+              value={valuationForm.previous_certified ?? ""}
+              onChange={e => setValuationForm({ ...valuationForm, previous_certified: e.target.value })}
             />
           </div>
         </div>

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @fileoverview LoginPage component for OmniSuite ERP.
  * Handles user authentication, remembering credentials, and redirecting based on assigned branches.
  */
@@ -554,7 +554,7 @@ export default function LoginPage() {
             >
               <div className="relative w-full">
                 <label
-                  className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1 tracking-wide"
+                  className="block text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-200 mb-1 tracking-wide"
                   htmlFor="username"
                 >
                   Username
@@ -563,7 +563,7 @@ export default function LoginPage() {
                   id="username"
                   name="username"
                   type="text"
-                  className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-slate-300 dark:border-slate-700 text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 shadow-xs focus:border-amber-500 focus:ring-3 focus:ring-amber-400/20 outline-none transition-all"
+                  className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-slate-300 dark:border-slate-700 text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 shadow-xs focus:border-blue-500 focus:ring-3 focus:ring-blue-400/20 outline-none transition-all"
                   ref={usernameRef}
                   autoComplete="username"
                   required
@@ -646,7 +646,7 @@ export default function LoginPage() {
 
               <div className="w-full">
                 <label
-                  className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-200 mb-1 tracking-wide"
+                  className="block text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-200 mb-1 tracking-wide"
                   htmlFor="password"
                 >
                   Password
@@ -656,7 +656,7 @@ export default function LoginPage() {
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
-                    className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-slate-300 dark:border-slate-700 text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 shadow-xs focus:border-amber-500 focus:ring-3 focus:ring-amber-400/20 outline-none transition-all pr-12"
+                    className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-slate-300 dark:border-slate-700 text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 shadow-xs focus:border-blue-500 focus:ring-3 focus:ring-blue-400/20 outline-none transition-all pr-12"
                     ref={passwordRef}
                     autoComplete="current-password"
                     required
@@ -675,7 +675,7 @@ export default function LoginPage() {
               <label className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 cursor-pointer pt-0.5">
                 <input
                   type="checkbox"
-                  className="rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-amber-500 w-4 h-4 cursor-pointer"
+                  className="rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-blue-500 w-4 h-4 cursor-pointer"
                   checked={rememberMe}
                   onChange={(e) => {
                     const checked = e.target.checked;

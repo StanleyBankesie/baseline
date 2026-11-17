@@ -18,7 +18,6 @@ import {
   Eye,
   Edit2,
   Trash2,
-  Search,
   RefreshCw,
   Send,
   RotateCcw,
@@ -29,7 +28,7 @@ import {
   ShieldCheck,
   Building,
   UserCheck,
-  Activity
+  Activity,
 } from "lucide-react";
 import { api } from "../../../../api/client.js";
 import { usePermission } from "../../../../auth/PermissionContext.jsx";
@@ -38,17 +37,13 @@ import addNotification from "../../../../utils/addNotification.js";
 
 export default function DailySiteReportList() {
   const navigate = useNavigate();
-  const {
-    canPerformAction,
-    canDeleteOnPage,
-    canReverseApproval,
-  } = usePermission();
+  const { canPerformAction, canDeleteOnPage, canReverseApproval } =
+    usePermission();
 
   const [projects, setProjects] = useState([]);
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
 
   // Workflow states matching SalesOrderList
@@ -77,7 +72,9 @@ export default function DailySiteReportList() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await api.get("/projects/projects", { params: { active: "all" } });
+        const res = await api.get("/projects/projects", {
+          params: { active: "all" },
+        });
         const prjs = res.data?.items || [];
         setProjects(prjs);
         setSelectedProjectId("");
@@ -104,13 +101,18 @@ export default function DailySiteReportList() {
       // Populate local forwardedTo map
       const fwd = {};
       items.forEach((it) => {
-        if (it.forwarded_to_username && !["DRAFT", "RETURNED", "REJECTED"].includes(String(it.status).toUpperCase())) {
+        if (
+          it.forwarded_to_username &&
+          !["DRAFT", "RETURNED", "REJECTED"].includes(
+            String(it.status).toUpperCase(),
+          )
+        ) {
           fwd[it.id] = String(it.forwarded_to_username);
         }
       });
       setForwardedTo(fwd);
     } catch (e) {
-      toast.error("Failed to load daily site reports");
+      toast.error("Failed to load daily project reports");
     } finally {
       setLoading(false);
     }
@@ -136,13 +138,24 @@ export default function DailySiteReportList() {
             String(w.document_route) === route ||
             normalize(w.document_type) === "DAILY_SITE_REPORT" ||
             normalize(w.document_type) === "SITE_DIARY" ||
-            normalize(w.document_type) === "DSR"
+            normalize(w.document_type) === "DSR",
         );
         const hasInactive = matching.some((w) => Number(w.is_active) === 0);
         const chosen =
-          list.find((w) => Number(w.is_active) === 1 && String(w.document_route) === route) ||
-          list.find((w) => Number(w.is_active) === 1 && normalize(w.document_type) === "DAILY_SITE_REPORT") ||
-          list.find((w) => Number(w.is_active) === 1 && normalize(w.document_type) === "SITE_DIARY") ||
+          list.find(
+            (w) =>
+              Number(w.is_active) === 1 && String(w.document_route) === route,
+          ) ||
+          list.find(
+            (w) =>
+              Number(w.is_active) === 1 &&
+              normalize(w.document_type) === "DAILY_SITE_REPORT",
+          ) ||
+          list.find(
+            (w) =>
+              Number(w.is_active) === 1 &&
+              normalize(w.document_type) === "SITE_DIARY",
+          ) ||
           null;
         setCandidateWorkflow(chosen || null);
         setHasInactiveWorkflow(!chosen && hasInactive);
@@ -169,10 +182,12 @@ export default function DailySiteReportList() {
               ? {
                   ...x,
                   status: normalized,
-                  ...(normalized === "DRAFT" ? { forwarded_to_username: null } : {}),
+                  ...(normalized === "DRAFT"
+                    ? { forwarded_to_username: null }
+                    : {}),
                 }
-              : x
-          )
+              : x,
+          ),
         );
         if (normalized === "DRAFT") {
           setForwardedTo((prev) => {
@@ -184,7 +199,8 @@ export default function DailySiteReportList() {
       } catch {}
     }
     window.addEventListener("omni.workflow.status", onWorkflowStatus);
-    return () => window.removeEventListener("omni.workflow.status", onWorkflowStatus);
+    return () =>
+      window.removeEventListener("omni.workflow.status", onWorkflowStatus);
   }, []);
 
   // Compute Workflow Candidate and Steps
@@ -207,13 +223,23 @@ export default function DailySiteReportList() {
         String(w.document_route) === route ||
         normalize(w.document_type) === "DAILY_SITE_REPORT" ||
         normalize(w.document_type) === "SITE_DIARY" ||
-        normalize(w.document_type) === "DSR"
+        normalize(w.document_type) === "DSR",
     );
     const hasInactive = matching.some((w) => Number(w.is_active) === 0);
     const chosen =
-      workflowsCache.find((w) => Number(w.is_active) === 1 && String(w.document_route) === route) ||
-      workflowsCache.find((w) => Number(w.is_active) === 1 && normalize(w.document_type) === "DAILY_SITE_REPORT") ||
-      workflowsCache.find((w) => Number(w.is_active) === 1 && normalize(w.document_type) === "SITE_DIARY") ||
+      workflowsCache.find(
+        (w) => Number(w.is_active) === 1 && String(w.document_route) === route,
+      ) ||
+      workflowsCache.find(
+        (w) =>
+          Number(w.is_active) === 1 &&
+          normalize(w.document_type) === "DAILY_SITE_REPORT",
+      ) ||
+      workflowsCache.find(
+        (w) =>
+          Number(w.is_active) === 1 &&
+          normalize(w.document_type) === "SITE_DIARY",
+      ) ||
       null;
     setCandidateWorkflow(chosen || null);
     setHasInactiveWorkflow(!chosen && hasInactive);
@@ -236,7 +262,7 @@ export default function DailySiteReportList() {
               stepOrder: first.step_order,
               approvalLimit: first.approval_limit,
             }
-          : null
+          : null,
       );
       if (first) {
         const defaultTarget =
@@ -248,7 +274,9 @@ export default function DailySiteReportList() {
         setTargetApproverId(null);
       }
     } catch (e) {
-      setWfError(e?.response?.data?.message || "Failed to load workflow details");
+      setWfError(
+        e?.response?.data?.message || "Failed to load workflow details",
+      );
     } finally {
       setWfLoading(false);
     }
@@ -284,16 +312,26 @@ export default function DailySiteReportList() {
     try {
       let optimisticApprover = null;
       try {
-        const first = Array.isArray(workflowSteps) && workflowSteps.length ? workflowSteps[0] : null;
+        const first =
+          Array.isArray(workflowSteps) && workflowSteps.length
+            ? workflowSteps[0]
+            : null;
         const opts = first
           ? Array.isArray(first.approvers) && first.approvers.length
             ? first.approvers.map((u) => ({ id: u.id, name: u.username }))
             : first.approver_user_id
-            ? [{ id: first.approver_user_id, name: first.approver_name || String(first.approver_user_id) }]
-            : []
+              ? [
+                  {
+                    id: first.approver_user_id,
+                    name: first.approver_name || String(first.approver_user_id),
+                  },
+                ]
+              : []
           : [];
         if (targetApproverId && opts.length) {
-          const hit = opts.find((u) => Number(u.id) === Number(targetApproverId));
+          const hit = opts.find(
+            (u) => Number(u.id) === Number(targetApproverId),
+          );
           optimisticApprover = hit ? hit.name : null;
         }
       } catch {}
@@ -305,25 +343,30 @@ export default function DailySiteReportList() {
             ? {
                 ...x,
                 status: "PENDING_APPROVAL",
-                forwarded_to_username: optimisticApprover || x.forwarded_to_username || "Approver",
+                forwarded_to_username:
+                  optimisticApprover || x.forwarded_to_username || "Approver",
               }
-            : x
-        )
+            : x,
+        ),
       );
       setForwardedTo((prev) => ({
         ...prev,
-        [selectedReport.id]: optimisticApprover || prev[selectedReport.id] || "Approver",
+        [selectedReport.id]:
+          optimisticApprover || prev[selectedReport.id] || "Approver",
       }));
       setShowForwardModal(false);
 
       // Primary submission
       let success = false;
       try {
-        const res = await api.post(`/construction/daily-reports/${selectedReport.id}/submit`, {
-          workflow_id: candidateWorkflow ? candidateWorkflow.id : null,
-          target_user_id: targetApproverId || null,
-          comments: forwardComments,
-        });
+        const res = await api.post(
+          `/construction/daily-reports/${selectedReport.id}/submit`,
+          {
+            workflow_id: candidateWorkflow ? candidateWorkflow.id : null,
+            target_user_id: targetApproverId || null,
+            comments: forwardComments,
+          },
+        );
         success = true;
       } catch (e1) {
         // Fallback to central workflow engine
@@ -337,15 +380,19 @@ export default function DailySiteReportList() {
           });
           success = true;
         } catch (e2) {
-          throw new Error(e1?.response?.data?.message || e2?.response?.data?.message || "Failed to forward report");
+          throw new Error(
+            e1?.response?.data?.message ||
+              e2?.response?.data?.message ||
+              "Failed to forward report",
+          );
         }
       }
 
-      toast.success("Daily site report forwarded for approval");
+      toast.success("Daily project report forwarded for approval");
       try {
         addNotification({
-          title: "Daily Site Diary forwarded",
-          message: `DSR ${selectedReport.report_number || selectedReport.id} forwarded for approval`,
+          title: "Daily Project Report forwarded",
+          message: `Report ${selectedReport.report_number || selectedReport.id} forwarded for approval`,
           icon: "/OMNISUITE_ICON_CLEAR.png",
         });
       } catch {}
@@ -372,10 +419,13 @@ export default function DailySiteReportList() {
     setSubmittingReverse(true);
     try {
       try {
-        await api.post(`/construction/daily-reports/${selectedReport.id}/reverse`, {
-          desired_status: "DRAFT",
-          reason: reverseReason,
-        });
+        await api.post(
+          `/construction/daily-reports/${selectedReport.id}/reverse`,
+          {
+            desired_status: "DRAFT",
+            reason: reverseReason,
+          },
+        );
       } catch (e1) {
         // Fallback
         await api.post("/workflows/reverse-by-document", {
@@ -388,9 +438,14 @@ export default function DailySiteReportList() {
       setReports((prev) =>
         prev.map((x) =>
           x.id === selectedReport.id
-            ? { ...x, status: "DRAFT", forwarded_to_username: null, approved_by_name: null }
-            : x
-        )
+            ? {
+                ...x,
+                status: "DRAFT",
+                forwarded_to_username: null,
+                approved_by_name: null,
+              }
+            : x,
+        ),
       );
       setForwardedTo((prev) => {
         const next = { ...prev };
@@ -404,15 +459,19 @@ export default function DailySiteReportList() {
 
       try {
         addNotification({
-          title: "Daily Site Report reversed",
-          message: `DSR ${selectedReport.report_number || selectedReport.id} is now back in Draft status`,
+          title: "Daily Project Report reversed",
+          message: `Report ${selectedReport.report_number || selectedReport.id} is now back in Draft status`,
           icon: "/OMNISUITE_ICON_CLEAR.png",
         });
       } catch {}
 
       await fetchReports();
     } catch (err) {
-      toast.error(err?.response?.data?.message || err.message || "Failed to reverse approval");
+      toast.error(
+        err?.response?.data?.message ||
+          err.message ||
+          "Failed to reverse approval",
+      );
     } finally {
       setSubmittingReverse(false);
     }
@@ -426,48 +485,56 @@ export default function DailySiteReportList() {
 
   // Delete Draft Report
   const handleDeleteReport = async (report) => {
-    if (!window.confirm(`Are you sure you want to delete Daily Site Report (${report.report_number || report.id})?`)) {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete Daily Project Report (${report.report_number || report.id})?`,
+      )
+    ) {
       return;
     }
     try {
       await api.delete(`/construction/daily-reports/${report.id}`);
-      toast.success("Daily site report deleted successfully");
+      toast.success("Daily project report deleted successfully");
       setReports((prev) => prev.filter((x) => x.id !== report.id));
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to delete daily report");
+      toast.error(
+        err?.response?.data?.message || "Failed to delete daily report",
+      );
     }
   };
 
   // Filtered List
   const filteredReports = reports.filter((r) => {
-    const q = searchTerm.toLowerCase().trim();
-    const matchSearch =
-      !q ||
-      r.report_number?.toLowerCase().includes(q) ||
-      r.report_no?.toLowerCase().includes(q) ||
-      r.site_engineer_name?.toLowerCase().includes(q) ||
-      r.site_condition?.toLowerCase().includes(q) ||
-      r.project_name?.toLowerCase().includes(q) ||
-      r.status?.toLowerCase().includes(q);
-
     const st = String(r.status || "DRAFT").toUpperCase();
     const matchStatus =
       statusFilter === "ALL" ||
       (statusFilter === "DRAFT" && (st === "DRAFT" || st === "RETURNED")) ||
-      (statusFilter === "PENDING" && (st === "PENDING_APPROVAL" || st === "SUBMITTED" || st === "UNDER_REVIEW")) ||
+      (statusFilter === "PENDING" &&
+        (st === "PENDING_APPROVAL" ||
+          st === "SUBMITTED" ||
+          st === "UNDER_REVIEW")) ||
       (statusFilter === "APPROVED" && st === "APPROVED") ||
       (statusFilter === "REJECTED" && st === "REJECTED");
 
-    return matchSearch && matchStatus;
+    return matchStatus;
   });
 
-  const totalHeadcount = reports.reduce((acc, r) => acc + (Number(r.total_headcount) || 0), 0);
-  const approvedCount = reports.filter((r) => String(r.status).toUpperCase() === "APPROVED").length;
+  const totalHeadcount = reports.reduce(
+    (acc, r) => acc + (Number(r.total_headcount) || 0),
+    0,
+  );
+  const approvedCount = reports.filter(
+    (r) => String(r.status).toUpperCase() === "APPROVED",
+  ).length;
   const pendingCount = reports.filter((r) =>
-    ["PENDING_APPROVAL", "SUBMITTED", "UNDER_REVIEW"].includes(String(r.status).toUpperCase())
+    ["PENDING_APPROVAL", "SUBMITTED", "UNDER_REVIEW"].includes(
+      String(r.status).toUpperCase(),
+    ),
   ).length;
   const draftCount = reports.filter((r) =>
-    ["DRAFT", "RETURNED", ""].includes(String(r.status || "DRAFT").toUpperCase())
+    ["DRAFT", "RETURNED", ""].includes(
+      String(r.status || "DRAFT").toUpperCase(),
+    ),
   ).length;
 
   return (
@@ -486,66 +553,17 @@ export default function DailySiteReportList() {
               <span className="p-2 rounded-xl bg-brand-50 text-brand-900 dark:bg-brand-900/30 dark:text-brand-400 border border-brand-200/50 dark:border-brand-800/50 shadow-sm">
                 <BookOpen size={20} />
               </span>
-              Daily Site Diary (DSR)
+              Daily Project Report
             </h1>
             <p className="text-slate-500 text-xs sm:text-sm mt-0.5 font-normal">
-              Site weather, daily workforce headcount, plant deployment, material receipts, and activity logs
+              Daily project progress logs, team allocation, milestones, activity
+              records, and blocker tracking
             </p>
           </div>
         </div>
 
-        {/* Global Action Bar */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* Project Filter */}
-          <select
-            className="input text-sm py-1.5 h-9 min-w-[190px] shadow-sm bg-white dark:bg-slate-800"
-            value={selectedProjectId}
-            onChange={(e) => setSelectedProjectId(e.target.value)}
-          >
-            <option value="">All Projects</option>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.project_code ? `${p.project_code} - ` : ""}
-                {p.project_name || p.name}
-              </option>
-            ))}
-          </select>
-
-          {/* Status Filter */}
-          <select
-            className="input text-sm py-1.5 h-9 min-w-[130px] shadow-sm bg-white dark:bg-slate-800"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="ALL">All Statuses</option>
-            <option value="DRAFT">Draft</option>
-            <option value="PENDING">Pending Approval</option>
-            <option value="APPROVED">Approved</option>
-            <option value="REJECTED">Rejected</option>
-          </select>
-
-          {/* Search Box */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
-            <input
-              type="text"
-              placeholder="Search reports..."
-              className="input pl-9 pr-3 py-1.5 text-sm h-9 w-44 md:w-52 shadow-sm bg-white dark:bg-slate-800"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          {/* Refresh Button */}
-          <button
-            onClick={fetchReports}
-            className="btn btn-secondary p-2 h-9 w-9 flex items-center justify-center shadow-sm"
-            title="Refresh List"
-          >
-            <RefreshCw size={15} className={loading ? "animate-spin text-brand-600" : ""} />
-          </button>
-
-          {/* Primary Create Button */}
+        {/* Global Action Header - Primary Action Only */}
+        <div className="flex items-center gap-2.5">
           <Link
             to={
               selectedProjectId
@@ -563,13 +581,13 @@ export default function DailySiteReportList() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
           {
-            label: "Approved Diaries",
+            label: "Approved Reports",
             val: approvedCount,
             icon: <Activity size={20} className="stroke-[2.5]" />,
             color: "bg-sky-600 dark:bg-sky-500 text-white",
           },
           {
-            label: "Total Site Diaries",
+            label: "Total Daily Reports",
             val: reports.length,
             icon: <BookOpen size={20} className="stroke-[2.5]" />,
             color: "bg-brand-900 dark:bg-brand-700 text-white",
@@ -581,13 +599,16 @@ export default function DailySiteReportList() {
             color: "bg-amber-500 text-white",
           },
           {
-            label: "Total Site Headcount",
-            val: `${totalHeadcount.toLocaleString()} Workers`,
+            label: "Total Workforce / Team",
+            val: `${totalHeadcount.toLocaleString()} Logged`,
             icon: <Users size={20} className="stroke-[2.5]" />,
             color: "bg-emerald-600 text-white",
           },
         ].map((stat, i) => (
-          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+          <div
+            key={i}
+            className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm"
+          >
             <div>
               <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 {stat.label}
@@ -596,11 +617,82 @@ export default function DailySiteReportList() {
                 {stat.val}
               </p>
             </div>
-            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+            <div
+              className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}
+            >
               {stat.icon}
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Horizontal Filter Bar - Positioned Immediately After the Summary Cards */}
+      <div className="card p-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2.5 flex-1">
+          {/* Project Filter */}
+          <div className="flex items-center gap-1.5 min-w-[220px]">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+              Project:
+            </span>
+            <select
+              className="input text-sm py-1.5 h-9 flex-1 shadow-sm bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl"
+              value={selectedProjectId}
+              onChange={(e) => setSelectedProjectId(e.target.value)}
+            >
+              <option value="">All Projects</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.project_code ? `${p.project_code} - ` : ""}
+                  {p.project_name || p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Status Filter */}
+          <div className="flex items-center gap-1.5 min-w-[170px]">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+              Status:
+            </span>
+            <select
+              className="input text-sm py-1.5 h-9 flex-1 shadow-sm bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="ALL">All Statuses</option>
+              <option value="DRAFT">Draft</option>
+              <option value="PENDING">Pending Approval</option>
+              <option value="APPROVED">Approved</option>
+              <option value="REJECTED">Rejected</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Filter Actions */}
+        <div className="flex items-center gap-2 self-end md:self-center shrink-0">
+          {(statusFilter !== "ALL" || selectedProjectId) && (
+            <button
+              type="button"
+              onClick={() => {
+                setStatusFilter("ALL");
+                setSelectedProjectId("");
+              }}
+              className="btn btn-secondary text-xs h-9 px-3 rounded-xl shadow-sm text-slate-600 dark:text-slate-300"
+            >
+              Reset
+            </button>
+          )}
+          <button
+            onClick={fetchReports}
+            className="btn btn-secondary p-2 h-9 w-9 flex items-center justify-center rounded-xl shadow-sm"
+            title="Refresh List"
+          >
+            <RefreshCw
+              size={15}
+              className={loading ? "animate-spin text-brand-600" : ""}
+            />
+          </button>
+        </div>
       </div>
 
       {/* Reports Table Card */}
@@ -608,11 +700,14 @@ export default function DailySiteReportList() {
         <div className="p-4 bg-slate-50/70 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700/80 flex justify-between items-center">
           <h2 className="font-bold text-xs uppercase tracking-wider text-slate-800 dark:text-slate-200 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-brand-500"></span>
-            Daily Logged Site Diaries ({filteredReports.length})
+            Daily Project Reports ({filteredReports.length})
           </h2>
           {statusFilter !== "ALL" && (
             <span className="text-xs text-slate-500">
-              Filtered by: <span className="font-semibold text-slate-700 dark:text-slate-300">{statusFilter}</span>
+              Filtered by:{" "}
+              <span className="font-semibold text-slate-700 dark:text-slate-300">
+                {statusFilter}
+              </span>
             </span>
           )}
         </div>
@@ -622,26 +717,34 @@ export default function DailySiteReportList() {
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800/80 text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 dark:border-slate-700">
                 <th className="py-3 px-4">Report #</th>
+                <th className="py-3 px-4">Project</th>
                 <th className="py-3 px-4">Date</th>
-                <th className="py-3 px-4 text-center">Workforce</th>
+                <th className="py-3 px-4 text-center">Team / Workforce</th>
                 <th className="py-3 px-4 text-center">Activities</th>
-                <th className="py-3 px-4">Site Engineer</th>
+                <th className="py-3 px-4">Reported By / Lead</th>
                 <th className="py-3 px-4 text-center">Status</th>
-                <th className="py-3 px-4 text-center min-w-[280px]">Action & Approval</th>
+                <th className="py-3 px-4 text-center min-w-[280px]">
+                  Action & Approval
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
               {filteredReports.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-12 text-center text-slate-400 italic">
+                  <td
+                    colSpan={8}
+                    className="p-12 text-center text-slate-400 italic"
+                  >
                     {reports.length === 0
-                      ? 'No daily reports recorded for this project yet. Click "New Daily Report" to log today\'s site diary.'
-                      : 'No daily site reports match your search criteria.'}
+                      ? 'No daily project reports recorded yet. Click "New Daily Report" to log today\'s progress.'
+                      : "No daily project reports match the selected filters."}
                   </td>
                 </tr>
               ) : (
                 filteredReports.map((r) => {
-                  const displayStatus = String(r.status || "DRAFT").toUpperCase();
+                  const displayStatus = String(
+                    r.status || "DRAFT",
+                  ).toUpperCase();
                   const isApproved = displayStatus === "APPROVED";
                   const isPending =
                     displayStatus === "PENDING_APPROVAL" ||
@@ -658,16 +761,21 @@ export default function DailySiteReportList() {
                         {r.report_number || r.report_no}
                       </td>
 
+                      {/* Project Name & Code */}
+                      <td className="py-3 px-4">
+                        <div className="font-semibold text-slate-900 dark:text-slate-100 line-clamp-1 max-w-[220px]">
+                          {r.project_name || "General Project"}
+                        </div>
+                      </td>
+
                       {/* Date */}
                       <td className="py-3 px-4 font-mono text-slate-600 dark:text-slate-300 whitespace-nowrap">
                         {r.report_date ? r.report_date.split("T")[0] : "-"}
                       </td>
 
-
-
                       {/* Workforce Headcount */}
                       <td className="py-3 px-4 text-center font-bold text-blue-600 dark:text-blue-400 font-mono whitespace-nowrap">
-                        {r.total_headcount || 0} Pers
+                        {r.total_headcount || 0} Members
                       </td>
 
                       {/* Activity Count */}
@@ -675,9 +783,12 @@ export default function DailySiteReportList() {
                         {r.activity_count || 0} Tasks
                       </td>
 
-                      {/* Site Engineer */}
+                      {/* Reported By / Lead */}
                       <td className="py-3 px-4 text-slate-700 dark:text-slate-200 font-medium whitespace-nowrap">
-                        {r.site_engineer_name || r.reporting_officer_name || "Resident Engineer"}
+                        {r.site_engineer_name ||
+                          r.reporting_officer_name ||
+                          r.created_by_name ||
+                          "Project Lead"}
                       </td>
 
                       {/* Status Badge */}
@@ -687,13 +798,15 @@ export default function DailySiteReportList() {
                             isApproved
                               ? "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800"
                               : isPending
-                              ? "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800"
-                              : displayStatus === "REJECTED"
-                              ? "bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800"
-                              : "bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
+                                ? "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800"
+                                : displayStatus === "REJECTED"
+                                  ? "bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800"
+                                  : "bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
                           }`}
                         >
-                          {displayStatus === "PENDING_APPROVAL" ? "PENDING APPROVAL" : displayStatus}
+                          {displayStatus === "PENDING_APPROVAL"
+                            ? "PENDING APPROVAL"
+                            : displayStatus}
                         </span>
                       </td>
 
@@ -704,7 +817,7 @@ export default function DailySiteReportList() {
                           <Link
                             to={`/project-management/daily-reports/${r.id}`}
                             className="p-1.5 h-9 w-9 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 inline-flex items-center justify-center transition-colors shadow-sm"
-                            title="View Daily Site Report"
+                            title="View Daily Project Report"
                           >
                             <Eye size={15} />
                           </Link>
@@ -714,7 +827,7 @@ export default function DailySiteReportList() {
                             <Link
                               to={`/project-management/daily-reports/${r.id}?mode=edit`}
                               className="p-1.5 h-9 w-9 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 inline-flex items-center justify-center transition-colors shadow-sm"
-                              title="Edit Daily Site Report"
+                              title="Edit Daily Project Report"
                             >
                               <Edit2 size={15} />
                             </Link>
@@ -727,7 +840,7 @@ export default function DailySiteReportList() {
                             type="button"
                             onClick={() => handlePrint(r)}
                             className="p-1.5 h-9 w-9 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 inline-flex items-center justify-center transition-colors shadow-sm"
-                            title="Print / Export Daily Site Diary"
+                            title="Print / Export Daily Project Report"
                           >
                             <Printer size={15} />
                           </button>
@@ -752,7 +865,10 @@ export default function DailySiteReportList() {
                               </div>
                             ) : isPending ? (
                               <span className="list-approval-forwarded-pill text-xs px-3 py-1.5 h-9 max-w-[190px]">
-                                Forwarded to {r.forwarded_to_username || forwardedTo[r.id] || "Approver"}
+                                Forwarded to{" "}
+                                {r.forwarded_to_username ||
+                                  forwardedTo[r.id] ||
+                                  "Approver"}
                               </span>
                             ) : displayStatus !== "REJECTED" ? (
                               <button
@@ -767,16 +883,20 @@ export default function DailySiteReportList() {
                           </div>
 
                           {/* Slot 5: Delete (if draft & permitted) */}
-                          {!isApproved && !isPending && canDeleteOnPage("project-management:daily-reports") && (
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteReport(r)}
-                              className="p-1.5 h-9 w-9 rounded-lg text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-200 dark:border-rose-900 inline-flex items-center justify-center transition-colors shadow-sm"
-                              title="Delete Report"
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          )}
+                          {!isApproved &&
+                            !isPending &&
+                            canDeleteOnPage(
+                              "project-management:daily-reports",
+                            ) && (
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteReport(r)}
+                                className="p-1.5 h-9 w-9 rounded-lg text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-200 dark:border-rose-900 inline-flex items-center justify-center transition-colors shadow-sm"
+                                title="Delete Report"
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            )}
                         </div>
                       </td>
                     </tr>
@@ -801,9 +921,11 @@ export default function DailySiteReportList() {
                   <Send size={18} />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white">Forward for Approval</h3>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                    Forward for Approval
+                  </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Submit daily site diary into the approval workflow
+                    Submit daily project report into the approval workflow
                   </p>
                 </div>
               </div>
@@ -824,21 +946,33 @@ export default function DailySiteReportList() {
             <div className="p-6 space-y-4">
               <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-xl border border-slate-200/70 dark:border-slate-700/60 space-y-2 text-xs">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 font-medium">Document Number:</span>
+                  <span className="text-slate-500 font-medium">
+                    Document Number:
+                  </span>
                   <span className="font-mono font-bold text-slate-900 dark:text-white">
-                    {selectedReport?.report_number || selectedReport?.report_no || `#${selectedReport?.id}`}
+                    {selectedReport?.report_number ||
+                      selectedReport?.report_no ||
+                      `#${selectedReport?.id}`}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 font-medium">Report Date:</span>
+                  <span className="text-slate-500 font-medium">
+                    Report Date:
+                  </span>
                   <span className="font-mono text-slate-700 dark:text-slate-300">
-                    {selectedReport?.report_date ? selectedReport.report_date.split("T")[0] : "-"}
+                    {selectedReport?.report_date
+                      ? selectedReport.report_date.split("T")[0]
+                      : "-"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 font-medium">Site Engineer:</span>
+                  <span className="text-slate-500 font-medium">
+                    Reported By / Lead:
+                  </span>
                   <span className="font-semibold text-slate-800 dark:text-slate-200">
-                    {selectedReport?.site_engineer_name || selectedReport?.reporting_officer_name || "Engineer"}
+                    {selectedReport?.site_engineer_name ||
+                      selectedReport?.reporting_officer_name ||
+                      "Project Lead"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -853,7 +987,8 @@ export default function DailySiteReportList() {
 
               {wfLoading && (
                 <div className="text-xs text-brand-600 font-medium flex items-center gap-2">
-                  <RefreshCw size={13} className="animate-spin" /> Loading workflow approvers...
+                  <RefreshCw size={13} className="animate-spin" /> Loading
+                  workflow approvers...
                 </div>
               )}
 
@@ -865,18 +1000,29 @@ export default function DailySiteReportList() {
 
               {/* Target Approver Selection */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   Target Approver *
                 </label>
                 {(() => {
-                  const hasSteps = Array.isArray(workflowSteps) && workflowSteps.length > 0;
+                  const hasSteps =
+                    Array.isArray(workflowSteps) && workflowSteps.length > 0;
                   const first = hasSteps ? workflowSteps[0] : null;
                   const opts = first
                     ? Array.isArray(first.approvers) && first.approvers.length
-                      ? first.approvers.map((u) => ({ id: u.id, name: u.username }))
+                      ? first.approvers.map((u) => ({
+                          id: u.id,
+                          name: u.username,
+                        }))
                       : first.approver_user_id
-                      ? [{ id: first.approver_user_id, name: first.approver_name || String(first.approver_user_id) }]
-                      : []
+                        ? [
+                            {
+                              id: first.approver_user_id,
+                              name:
+                                first.approver_name ||
+                                String(first.approver_user_id),
+                            },
+                          ]
+                        : []
                     : [];
 
                   return opts.length > 0 ? (
@@ -884,7 +1030,11 @@ export default function DailySiteReportList() {
                       <select
                         className="input w-full text-sm h-10"
                         value={targetApproverId || ""}
-                        onChange={(e) => setTargetApproverId(e.target.value ? Number(e.target.value) : null)}
+                        onChange={(e) =>
+                          setTargetApproverId(
+                            e.target.value ? Number(e.target.value) : null,
+                          )
+                        }
                       >
                         <option value="">Select target approver</option>
                         {opts.map((u) => (
@@ -901,7 +1051,8 @@ export default function DailySiteReportList() {
                     </div>
                   ) : (
                     <div className="p-3 bg-amber-50 text-amber-800 rounded-xl text-xs border border-amber-200">
-                      Standard site supervisor approval will apply upon submission.
+                      Standard site supervisor approval will apply upon
+                      submission.
                     </div>
                   );
                 })()}
@@ -909,7 +1060,7 @@ export default function DailySiteReportList() {
 
               {/* Comments */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   Submission Notes / Remarks
                 </label>
                 <textarea
@@ -940,7 +1091,8 @@ export default function DailySiteReportList() {
                 onClick={forwardDocument}
                 disabled={submittingForward}
               >
-                <Send size={15} /> {submittingForward ? "Forwarding..." : "Forward for Approval"}
+                <Send size={15} />{" "}
+                {submittingForward ? "Forwarding..." : "Forward for Approval"}
               </button>
             </div>
           </div>
@@ -959,7 +1111,9 @@ export default function DailySiteReportList() {
                   <RotateCcw size={18} />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white">Reverse Approval</h3>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                    Reverse Approval
+                  </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     Revert certified daily report back to Draft status
                   </p>
@@ -981,12 +1135,15 @@ export default function DailySiteReportList() {
               <p className="text-xs text-slate-600 dark:text-slate-300">
                 You are about to reverse the approval for Daily Site Report{" "}
                 <span className="font-mono font-bold text-slate-900 dark:text-white">
-                  {selectedReport?.report_number || selectedReport?.report_no || `#${selectedReport?.id}`}
+                  {selectedReport?.report_number ||
+                    selectedReport?.report_no ||
+                    `#${selectedReport?.id}`}
                 </span>
-                . This will unlock the report for editing and require a new forward-for-approval cycle.
+                . This will unlock the report for editing and require a new
+                forward-for-approval cycle.
               </p>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   Reversal Reason / Audit Notes *
                 </label>
                 <textarea
@@ -1015,7 +1172,8 @@ export default function DailySiteReportList() {
                 onClick={confirmReverseReport}
                 disabled={submittingReverse}
               >
-                <RotateCcw size={15} /> {submittingReverse ? "Reversing..." : "Confirm Reversal"}
+                <RotateCcw size={15} />{" "}
+                {submittingReverse ? "Reversing..." : "Confirm Reversal"}
               </button>
             </div>
           </div>
@@ -1031,7 +1189,9 @@ export default function DailySiteReportList() {
             <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 shrink-0">
               <div className="flex items-center gap-3">
                 <Printer size={20} className="text-brand-600" />
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">Daily Site Diary Print Preview</h3>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                  Daily Project Report Print Preview
+                </h3>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -1055,63 +1215,113 @@ export default function DailySiteReportList() {
               {/* Header */}
               <div className="border-b pb-4 flex justify-between items-start">
                 <div>
-                  <h1 className="text-xl font-bold text-slate-900 dark:text-white">DAILY SITE REPORT (DSR)</h1>
+                  <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                    DAILY PROJECT REPORT
+                  </h1>
                   <p className="text-xs text-slate-500 font-mono mt-1">
-                    REPORT #: {printReport.report_number || printReport.report_no}
+                    REPORT #:{" "}
+                    {printReport.report_number || printReport.report_no}
                   </p>
-                  <p className="text-xs text-slate-500">PROJECT: {printReport.project_name || "General Project"}</p>
+                  <p className="text-xs text-slate-500">
+                    PROJECT: {printReport.project_name || "General Project"}
+                  </p>
                 </div>
                 <div className="text-right text-xs space-y-1">
-                  <p><span className="text-slate-500">DATE:</span> <span className="font-mono font-bold">{printReport.report_date?.split("T")[0]}</span></p>
-                  <p><span className="text-slate-500">STATUS:</span> <span className="font-bold">{printReport.status}</span></p>
-                  <p><span className="text-slate-500">ENGINEER:</span> {printReport.site_engineer_name || printReport.reporting_officer_name}</p>
+                  <p>
+                    <span className="text-slate-500">DATE:</span>{" "}
+                    <span className="font-mono font-bold">
+                      {printReport.report_date?.split("T")[0]}
+                    </span>
+                  </p>
+                  <p>
+                    <span className="text-slate-500">STATUS:</span>{" "}
+                    <span className="font-bold">{printReport.status}</span>
+                  </p>
+                  <p>
+                    <span className="text-slate-500">REPORTED BY:</span>{" "}
+                    {printReport.site_engineer_name ||
+                      printReport.reporting_officer_name ||
+                      printReport.created_by_name ||
+                      "Project Lead"}
+                  </p>
                 </div>
               </div>
 
               {/* Weather & Site Condition */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800 text-xs">
                 <div>
-                  <p className="text-slate-500 font-semibold uppercase">Morning Weather</p>
-                  <p className="font-bold mt-0.5">{printReport.weather_morning || "SUNNY"}</p>
+                  <p className="text-slate-500 font-semibold uppercase">
+                    Working Environment
+                  </p>
+                  <p className="font-bold mt-0.5">
+                    {printReport.weather_morning || "NORMAL / CLEAR"}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-slate-500 font-semibold uppercase">Afternoon Weather</p>
-                  <p className="font-bold mt-0.5">{printReport.weather_afternoon || "SUNNY"}</p>
+                  <p className="text-slate-500 font-semibold uppercase">
+                    Schedule / Status
+                  </p>
+                  <p className="font-bold mt-0.5">
+                    {printReport.weather_afternoon || "ON SCHEDULE"}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-slate-500 font-semibold uppercase">Site Condition</p>
-                  <p className="font-bold mt-0.5">{printReport.site_condition || "DRY"}</p>
+                  <p className="text-slate-500 font-semibold uppercase">
+                    Operating Condition
+                  </p>
+                  <p className="font-bold mt-0.5">
+                    {printReport.site_condition || "NORMAL OPERATION"}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-slate-500 font-semibold uppercase">Working Hours</p>
-                  <p className="font-bold font-mono mt-0.5">{printReport.working_hours_from || "08:00"} - {printReport.working_hours_to || "17:00"}</p>
+                  <p className="text-slate-500 font-semibold uppercase">
+                    Working Hours
+                  </p>
+                  <p className="font-bold font-mono mt-0.5">
+                    {printReport.working_hours_from || "08:00"} -{" "}
+                    {printReport.working_hours_to || "17:00"}
+                  </p>
                 </div>
               </div>
 
               {/* Workforce & Summary */}
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                  <p className="text-slate-500 uppercase font-semibold">Total Workforce Headcount</p>
-                  <p className="text-2xl font-medium mt-1 text-blue-600">{printReport.total_headcount || 0} Persons</p>
+                  <p className="text-slate-500 uppercase font-semibold">
+                    Total Team / Workforce Headcount
+                  </p>
+                  <p className="text-2xl font-medium mt-1 text-blue-600">
+                    {printReport.total_headcount || 0} Members
+                  </p>
                 </div>
                 <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                  <p className="text-slate-500 uppercase font-semibold">Total Activities Recorded</p>
-                  <p className="text-2xl font-bold font-mono mt-1 text-brand-600">{printReport.activity_count || 0} Items</p>
+                  <p className="text-slate-500 uppercase font-semibold">
+                    Total Activities / Tasks Logged
+                  </p>
+                  <p className="text-2xl font-bold font-mono mt-1 text-brand-600">
+                    {printReport.activity_count || 0} Tasks
+                  </p>
                 </div>
               </div>
 
               {/* Remarks */}
               <div className="space-y-3 text-xs">
                 <div>
-                  <p className="font-bold text-slate-700 dark:text-slate-300 uppercase">HSE Observations & Incidents:</p>
+                  <p className="font-bold text-slate-700 dark:text-slate-300 uppercase">
+                    Project Observations, Risks & Issues:
+                  </p>
                   <p className="p-3 mt-1 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                    {printReport.safety_observations || "No incidents or safety hazards recorded today."}
+                    {printReport.safety_observations ||
+                      "No blockers, risks, or safety incidents recorded today."}
                   </p>
                 </div>
                 <div>
-                  <p className="font-bold text-slate-700 dark:text-slate-300 uppercase">General Remarks / Site Instructions:</p>
+                  <p className="font-bold text-slate-700 dark:text-slate-300 uppercase">
+                    General Remarks, Notes & Progress Updates:
+                  </p>
                   <p className="p-3 mt-1 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                    {printReport.general_remarks || "Normal progression according to site master schedule."}
+                    {printReport.general_remarks ||
+                      "Normal progression according to project work plan/wbs."}
                   </p>
                 </div>
               </div>
@@ -1120,15 +1330,25 @@ export default function DailySiteReportList() {
               <div className="pt-8 border-t grid grid-cols-2 gap-8 text-xs">
                 <div>
                   <div className="border-b border-dashed border-slate-400 pb-1 font-bold">
-                    {printReport.site_engineer_name || printReport.reporting_officer_name || "Resident Engineer"}
+                    {printReport.site_engineer_name ||
+                      printReport.reporting_officer_name ||
+                      printReport.created_by_name ||
+                      "Project Lead"}
                   </div>
-                  <p className="text-slate-400 mt-1">Prepared By (Site Engineer)</p>
+                  <p className="text-slate-400 mt-1">
+                    Prepared By (Project Lead / Reporter)
+                  </p>
                 </div>
                 <div className="text-right">
                   <div className="border-b border-dashed border-slate-400 pb-1 font-bold">
-                    {printReport.approved_by_name || (printReport.status === "APPROVED" ? "Certified Reviewer" : "Pending Signature")}
+                    {printReport.approved_by_name ||
+                      (printReport.status === "APPROVED"
+                        ? "Certified Reviewer"
+                        : "Pending Signature")}
                   </div>
-                  <p className="text-slate-400 mt-1">Reviewed & Approved By (Project Director / Consultant)</p>
+                  <p className="text-slate-400 mt-1">
+                    Reviewed & Approved By (Project Manager / Director)
+                  </p>
                 </div>
               </div>
             </div>

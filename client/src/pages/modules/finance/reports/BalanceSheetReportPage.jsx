@@ -32,6 +32,8 @@ export default function BalanceSheetReportPage() {
   const [to, setTo] = useState("");
   const [userBranches, setUserBranches] = useState([]);
   const [selectedBranchId, setSelectedBranchId] = useState("");
+  const [projects, setProjects] = useState([]);
+  const [selectedProjectId, setSelectedProjectId] = useState("");
   const [assets, setAssets] = useState({ items: [], total: 0 });
   const [liabilities, setLiabilities] = useState({ items: [], total: 0 });
   const [equity, setEquity] = useState({ items: [], total: 0 });
@@ -141,6 +143,25 @@ export default function BalanceSheetReportPage() {
   }
 
   useEffect(() => {
+    async function loadProjects() {
+      try {
+        const res = await api.get("/projects");
+        const list = Array.isArray(res.data?.data)
+          ? res.data.data
+          : Array.isArray(res.data?.items)
+          ? res.data.items
+          : Array.isArray(res.data)
+          ? res.data
+          : [];
+        setProjects(list);
+      } catch {
+        setProjects([]);
+      }
+    }
+    loadProjects();
+  }, []);
+
+  useEffect(() => {
     async function fetchBranches() {
       try {
         const res = await api.get("/auth/user-branches");
@@ -176,6 +197,7 @@ export default function BalanceSheetReportPage() {
         params: {
           to: to || null,
           branchId: selectedBranchId || null,
+          projectId: selectedProjectId || null,
         },
       });
       setAssets(res.data?.assets || { items: [], total: 0 });
@@ -201,7 +223,7 @@ export default function BalanceSheetReportPage() {
   useEffect(() => {
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [to, selectedBranchId, pollingCounter]);
+  }, [to, selectedBranchId, selectedProjectId, pollingCounter]);
 
   // Flatten tree for export
   function flattenTree(nodes, section, rows = []) {
@@ -245,6 +267,10 @@ export default function BalanceSheetReportPage() {
       ? userBranches[0].name
       : "All Assigned Branches";
 
+    const projectName = selectedProjectId
+      ? projects.find((p) => String(p.id) === String(selectedProjectId))?.project_name || "Selected Project"
+      : "All Projects (Company-wide)";
+
     const contactParts = [];
     if (header.companyPhone) contactParts.push(`Contact No: ${header.companyPhone}`);
     if (header.companyEmail) contactParts.push(`Email: ${header.companyEmail}`);
@@ -282,7 +308,7 @@ export default function BalanceSheetReportPage() {
         Amount: "",
       },
       {
-        Section: `Currency: ${currCode} (${currSymbol}) | As at: ${asOfDate || to || "Today"} | Branch: ${branchName} | Generated: ${new Date().toLocaleString()}`,
+        Section: `Currency: ${currCode} (${currSymbol}) | As at: ${asOfDate || to || "Today"} | Branch: ${branchName} | Project: ${projectName} | Generated: ${new Date().toLocaleString()}`,
         Type: "",
         Level: "",
         Code: "",
@@ -356,6 +382,10 @@ export default function BalanceSheetReportPage() {
       ? userBranches[0].name
       : "All Assigned Branches";
 
+    const projectName = selectedProjectId
+      ? projects.find((p) => String(p.id) === String(selectedProjectId))?.project_name || "Selected Project"
+      : "All Projects (Company-wide)";
+
     // 1. Report Header Template: Left = Stanness Logo Image, Right = Company Info
     if (header.logoUrl) {
       try {
@@ -411,7 +441,7 @@ export default function BalanceSheetReportPage() {
     doc.setFontSize(8);
     doc.setTextColor(203, 213, 225);
     doc.text(
-      `As at: ${asOfDate || to || "Today"}   |   Branch: ${branchName}`,
+      `As at: ${asOfDate || to || "Today"}   |   Branch: ${branchName}   |   Project: ${projectName}`,
       margin + 4,
       y + 10.5
     );
@@ -776,7 +806,7 @@ export default function BalanceSheetReportPage() {
         <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex flex-wrap items-center gap-4 bg-slate-50 dark:bg-slate-800/50">
           {userBranches.length > 1 && (
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-slate-600 dark:text-slate-400 whitespace-nowrap">
+              <span className="text-sm font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap">
                 Branch:
               </span>
               <select
@@ -806,10 +836,29 @@ export default function BalanceSheetReportPage() {
             </div>
           )}
 
+          {/* Project Selector (Optional) */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap">
+              Project:
+            </span>
+            <select
+              className="select select-bordered select-sm text-xs font-semibold bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 max-w-[210px]"
+              value={selectedProjectId}
+              onChange={(e) => setSelectedProjectId(e.target.value)}
+            >
+              <option value="">All Projects (Company-wide)</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.project_code ? `${p.project_code} - ` : ""}{p.project_name || p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Currency Selector */}
           {currencies.length > 1 ? (
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-slate-600 dark:text-slate-400 whitespace-nowrap">
+              <span className="text-sm font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap">
                 Currency:
               </span>
               <select
@@ -843,7 +892,7 @@ export default function BalanceSheetReportPage() {
           )}
 
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-slate-600 dark:text-slate-400">
+            <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
               As of Date:
             </span>
             <input
@@ -879,6 +928,7 @@ export default function BalanceSheetReportPage() {
               const today = new Date();
               setTo(today.toISOString().slice(0, 10));
               if (userBranches.length > 1) setSelectedBranchId("");
+              setSelectedProjectId("");
             }}
             disabled={loading}
           >

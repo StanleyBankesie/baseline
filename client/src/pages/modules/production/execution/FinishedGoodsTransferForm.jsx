@@ -280,7 +280,7 @@ export default function FinishedGoodsTransferForm() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Production Number */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Production Number (Completed Execution) <span className="text-rose-500">*</span>
               </label>
               <select
@@ -303,7 +303,7 @@ export default function FinishedGoodsTransferForm() {
 
             {/* QC Number */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 QC Number (Quality Audit #)
               </label>
               <div className="relative">
@@ -312,7 +312,7 @@ export default function FinishedGoodsTransferForm() {
                   value={formData.qc_number || (formData.qc_id ? `QC-${String(formData.qc_id).padStart(5, '0')}` : "")}
                   readOnly
                   placeholder="Auto-populated from passed QC inspection"
-                  className="input w-full text-xs font-mono font-bold bg-white dark:bg-slate-900 text-emerald-600 pl-8"
+                  className="input w-full text-xs font-mono font-semibold bg-white dark:bg-slate-900 text-emerald-600 pl-8"
                 />
                 <CheckCircle2 size={16} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-emerald-500" />
               </div>
@@ -337,7 +337,7 @@ export default function FinishedGoodsTransferForm() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Transfer Date */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Transfer Date <span className="text-rose-500">*</span>
               </label>
               <input
@@ -351,7 +351,7 @@ export default function FinishedGoodsTransferForm() {
 
             {/* Source FG Warehouse */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Source Finished Goods Warehouse <span className="text-rose-500">*</span>
               </label>
               <select
@@ -371,7 +371,7 @@ export default function FinishedGoodsTransferForm() {
 
             {/* Target Inventory Warehouse */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Target Inventory Warehouse <span className="text-rose-500">*</span>
               </label>
               <select
@@ -430,7 +430,7 @@ export default function FinishedGoodsTransferForm() {
                         min="0.01"
                         value={item.qty}
                         onChange={(e) => handleItemChange(idx, "qty", e.target.value)}
-                        className="input text-xs font-mono font-bold text-right w-28 inline-block"
+                        className="input text-xs font-mono font-semibold text-right w-28 inline-block"
                         required
                       />
                     </td>
@@ -461,7 +461,7 @@ export default function FinishedGoodsTransferForm() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Driver Name (Optional)
               </label>
               <input
@@ -474,7 +474,7 @@ export default function FinishedGoodsTransferForm() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Vehicle No / Reg No (Optional)
               </label>
               <input
@@ -488,7 +488,7 @@ export default function FinishedGoodsTransferForm() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Dispatch Remarks & Handling Instructions
             </label>
             <textarea
@@ -510,7 +510,7 @@ export default function FinishedGoodsTransferForm() {
                 className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 cursor-pointer"
               />
               <div>
-                <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <span className="text-xs font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
                   <PackageCheck size={16} className={autoAccept ? "text-emerald-600" : "text-slate-400"} />
                   Direct Stock Receipt (One-Step Inventory Posting)
                 </span>

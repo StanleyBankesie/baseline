@@ -697,7 +697,7 @@ export default function SalaryExemptionsPage() {
                                   : ""}
                               </span>
                               <span
-                                className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                                className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
                                   period.status === "CLOSED"
                                     ? "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400"
                                     : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300"

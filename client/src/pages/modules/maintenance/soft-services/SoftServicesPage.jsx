@@ -1571,7 +1571,7 @@ export default function SoftServicesPage() {
               {/* Target Property */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Target Property <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -1602,7 +1602,7 @@ export default function SoftServicesPage() {
                 {/* Date fields per tab */}
                 {activeTab === "janitorial" && (
                   <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                       Log Date <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -1616,7 +1616,7 @@ export default function SoftServicesPage() {
                 )}
                 {activeTab === "pest" && (
                   <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                       Treatment Date <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -1630,7 +1630,7 @@ export default function SoftServicesPage() {
                 )}
                 {activeTab === "waste" && (
                   <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                       Collection Date <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -1646,7 +1646,7 @@ export default function SoftServicesPage() {
                 {/* For security: Checkpoint Name */}
                 {activeTab === "security" && (
                   <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                       Checkpoint / Location <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -1667,7 +1667,7 @@ export default function SoftServicesPage() {
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                      <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                         Cleaner / Assigned Staff <span className="text-red-500">*</span>
                       </label>
                       <select
@@ -1688,7 +1688,7 @@ export default function SoftServicesPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                      <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                         Shift
                       </label>
                       <select
@@ -1770,7 +1770,7 @@ export default function SoftServicesPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                      <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                         Supervisor Rating (1 - 5)
                       </label>
                       <select
@@ -1786,7 +1786,7 @@ export default function SoftServicesPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                      <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                         Supervisor Name
                       </label>
                       <input
@@ -1800,7 +1800,7 @@ export default function SoftServicesPage() {
                   </div>
 
                   <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                       Audit Notes / Observations
                     </label>
                     <textarea
@@ -1819,7 +1819,7 @@ export default function SoftServicesPage() {
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                      <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                         Security Guard / Officer <span className="text-red-500">*</span>
                       </label>
                       <select
@@ -1840,7 +1840,7 @@ export default function SoftServicesPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                      <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                         Checkpoint Status
                       </label>
                       <select
@@ -1857,7 +1857,7 @@ export default function SoftServicesPage() {
                   </div>
 
                   <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                       Incident / Observation Description
                     </label>
                     <textarea
@@ -1870,7 +1870,7 @@ export default function SoftServicesPage() {
                   </div>
 
                   <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                       Action Taken
                     </label>
                     <input
@@ -1889,7 +1889,7 @@ export default function SoftServicesPage() {
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                      <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                         Technician / Operator <span className="text-red-500">*</span>
                       </label>
                       <select
@@ -1910,7 +1910,7 @@ export default function SoftServicesPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                      <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                         Target Pest
                       </label>
                       <select
@@ -1930,7 +1930,7 @@ export default function SoftServicesPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                      <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                         Chemicals Applied
                       </label>
                       <input
@@ -1942,7 +1942,7 @@ export default function SoftServicesPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                      <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                         Dosage & Application Method
                       </label>
                       <input
@@ -1957,7 +1957,7 @@ export default function SoftServicesPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                      <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                         Bait Stations Checked
                       </label>
                       <input
@@ -1969,7 +1969,7 @@ export default function SoftServicesPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                      <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                         Bait Activity Detected
                       </label>
                       <input
@@ -1981,7 +1981,7 @@ export default function SoftServicesPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                      <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                         Risk Level
                       </label>
                       <select
@@ -1998,7 +1998,7 @@ export default function SoftServicesPage() {
                   </div>
 
                   <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                       Treatment Notes & Findings
                     </label>
                     <textarea
@@ -2017,7 +2017,7 @@ export default function SoftServicesPage() {
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1 flex items-center justify-between">
+                      <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1 flex items-center justify-between">
                         <span>Waste Stream / Type</span>
                         <span className="text-[10px] text-slate-500 font-normal">From Operations Setup</span>
                       </label>
@@ -2055,7 +2055,7 @@ export default function SoftServicesPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                        <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                           Quantity
                         </label>
                         <input
@@ -2069,7 +2069,7 @@ export default function SoftServicesPage() {
                         />
                       </div>
                       <div>
-                        <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                        <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                           Unit
                         </label>
                         <select
@@ -2088,7 +2088,7 @@ export default function SoftServicesPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1 flex items-center justify-between">
+                      <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1 flex items-center justify-between">
                         <span>Contractor Carrier</span>
                         <span className="text-[10px] text-slate-500 font-normal">From Suppliers Setup</span>
                       </label>
@@ -2127,7 +2127,7 @@ export default function SoftServicesPage() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                      <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                         Manifest Reference No.
                       </label>
                       <input
@@ -2198,7 +2198,7 @@ export default function SoftServicesPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* 1. Property (code removed) */}
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Property <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -2218,7 +2218,7 @@ export default function SoftServicesPage() {
 
                 {/* 2. Service Category */}
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Service Category <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -2250,7 +2250,7 @@ export default function SoftServicesPage() {
 
                 {/* 3. Priority Level */}
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Priority Level <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -2269,7 +2269,7 @@ export default function SoftServicesPage() {
 
                 {/* 4. Shift (name shortened from Shift (from Operations Setup)) */}
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Shift <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -2299,7 +2299,7 @@ export default function SoftServicesPage() {
                 {/* 5. Multiple Assignees Selector with Busy Assignee Filtering */}
                 <div className="md:col-span-2 lg:col-span-1">
                   <div className="flex items-center justify-between mb-1">
-                    <label className="block text-slate-700 dark:text-slate-300 font-bold">
+                    <label className="block text-slate-700 dark:text-slate-300 font-semibold">
                       Assignee (Responsible User / Tech) <span className="text-red-500">*</span>
                     </label>
                     {taskForm.selected_assignees?.length > 0 && (
@@ -2437,7 +2437,7 @@ export default function SoftServicesPage() {
 
                 {/* 6. Supervisor */}
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Supervisor <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -2475,7 +2475,7 @@ export default function SoftServicesPage() {
 
                 {/* Checklist Template Selector */}
                 <div className="md:col-span-2 lg:col-span-3">
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1 flex items-center justify-between">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1 flex items-center justify-between">
                     <span className="flex items-center gap-1.5">
                       <CheckSquare size={13} className="text-emerald-600 dark:text-emerald-400" />
                       Inspection Checklist Template (Populates Scope &amp; Instructions)
@@ -2524,7 +2524,7 @@ export default function SoftServicesPage() {
 
                 {/* 7. Task Title */}
                 <div className="md:col-span-2 lg:col-span-3">
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Task Title <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -2540,7 +2540,7 @@ export default function SoftServicesPage() {
                 {/* 8. Description / Instructions with Multi-Points Feature */}
                 <div className="md:col-span-2 lg:col-span-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="block text-slate-700 dark:text-slate-300 font-bold">
+                    <label className="block text-slate-700 dark:text-slate-300 font-semibold">
                       Description / Instructions <span className="text-red-500">*</span>
                     </label>
                     <button
@@ -2646,7 +2646,7 @@ export default function SoftServicesPage() {
                       className="w-4 h-4 rounded text-brand-900 focus:ring-brand-900"
                     />
                     <div>
-                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                      <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
                         This is an Inspection or Preventive Routine
                       </span>
                       <p className="text-[11px] text-slate-500">
@@ -2709,7 +2709,7 @@ export default function SoftServicesPage() {
                 {/* Multi-Date / Scheduling & Roster System Section (Brought below Inspection Routine) */}
                 <div className="md:col-span-2 lg:col-span-3 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700/60 space-y-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-700 pb-2">
-                    <label className="text-slate-800 dark:text-slate-200 font-bold text-xs flex items-center gap-1.5">
+                    <label className="text-slate-800 dark:text-slate-200 font-semibold text-xs flex items-center gap-1.5">
                       <Calendar size={15} className="text-emerald-500" />
                       Personnel Scheduling & Multi-Date Assignment <span className="text-red-500">*</span>
                     </label>
@@ -2978,7 +2978,7 @@ export default function SoftServicesPage() {
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-2">Checklist Items (Tap to Mark Done):</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-2">Checklist Items (Tap to Mark Done):</label>
                 <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
                   {executionForm.items.map((item, idx) => (
                     <label key={idx} className="flex items-center gap-2.5 p-2.5 bg-slate-50 dark:bg-slate-800/80 rounded-xl cursor-pointer hover:bg-emerald-50/50 dark:hover:bg-emerald-950/30 transition-colors border border-slate-200/50 dark:border-slate-700/50">
@@ -3001,7 +3001,7 @@ export default function SoftServicesPage() {
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Completion Notes / Supplies Used</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Completion Notes / Supplies Used</label>
                 <textarea
                   rows={3}
                   value={executionForm.completion_notes}
@@ -3057,7 +3057,7 @@ export default function SoftServicesPage() {
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Supervisor Quality Rating (1 - 5 Stars)</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Supervisor Quality Rating (1 - 5 Stars)</label>
                 <div className="flex items-center gap-2 mt-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -3074,7 +3074,7 @@ export default function SoftServicesPage() {
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Supervisor Inspection Notes</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Supervisor Inspection Notes</label>
                 <textarea
                   rows={3}
                   value={verifyForm.supervisor_comments}

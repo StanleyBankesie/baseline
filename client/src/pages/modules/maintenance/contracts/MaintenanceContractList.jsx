@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 /**
  * @fileoverview MaintenanceContractList component.
  * Provides functionality for MaintenanceContractList.
@@ -58,8 +59,23 @@ export default function MaintenanceContractList() {
 
   return (
     <div className="p-6 space-y-4">
-            {/* Metric Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            
+
+      <div className="card">
+        <div className="card-header bg-brand text-white rounded-t-lg">
+          <div className="flex justify-between items-center">
+            <div className="font-semibold">Maintenance Contracts</div>
+            <div className="grid grid-cols-2 sm:flex gap-2">
+              <Link to="/maintenance?section=Equipment %26 Assets" className="btn btn-secondary flex items-center gap-1.5"><ArrowLeft size={16} /> Back</Link>
+              <Link to="/maintenance/contracts/new" className="btn-success">+ New Contract</Link>
+            </div>
+          </div>
+        </div>
+        </div>
+
+      {/* Metric Stats Cards Carousel */}
+      {/* Metric Stats Cards */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="md:grid-cols-4" gapClass="gap-4">
         {[
           {
             label: "Active SLA Contracts",
@@ -86,7 +102,7 @@ export default function MaintenanceContractList() {
             color: "bg-emerald-600 text-white",
           },
         ].map((stat, i) => (
-          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+          <div key={i} className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
             <div>
               <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 {stat.label}
@@ -100,18 +116,9 @@ export default function MaintenanceContractList() {
             </div>
           </div>
         ))}
-      </div>
+      </MobileMovingCarousel>
 
       <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg">
-          <div className="flex justify-between items-center">
-            <div className="font-semibold">Maintenance Contracts</div>
-            <div className="flex gap-2">
-              <Link to="/maintenance?section=Equipment %26 Assets" className="btn btn-secondary flex items-center gap-1.5"><ArrowLeft size={16} /> Back</Link>
-              <Link to="/maintenance/contracts/new" className="btn-success">+ New Contract</Link>
-            </div>
-          </div>
-        </div>
         <div className="card-body">
           <div className="mb-4"><input className="input max-w-md" placeholder="Search by no, supplier, status..." value={search} onChange={e => setSearch(e.target.value)} /></div>
           

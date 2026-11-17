@@ -295,7 +295,7 @@ export default function InteractiveFormCard({ form, onFormSubmit }) {
                 <label className="flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-slate-200">
                   <span className="flex items-center gap-1">
                     {field.label}
-                    {field.required && <span className="text-rose-500 font-bold">*</span>}
+                    {field.required && <span className="text-rose-500 font-semibold">*</span>}
                   </span>
                   {field.helpText && (
                     <span className="text-[10px] font-normal text-slate-400">

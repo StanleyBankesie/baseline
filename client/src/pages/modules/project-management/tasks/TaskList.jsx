@@ -5,10 +5,11 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { CheckCircle2, Loader2, Check, X, ListTodo, ArrowLeft, Plus, Activity, Clock, FolderKanban } from "lucide-react";
+import { CheckCircle2, Loader2, Check, X, ListTodo, ArrowLeft, Plus, Activity, Clock, FolderKanban, BarChart2, Calendar } from "lucide-react";
 import ProjectModal from "../components/ProjectModal.jsx";
 import { Link, useSearchParams } from "react-router-dom";
 import TaskAssignmentKanban from "./TaskAssignmentKanban.jsx";
+import TaskExecution from "./TaskExecution.jsx";
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 import useSort from "@/hooks/useSort.js";
@@ -152,11 +153,14 @@ const calcDue = (item) => {
 };
 
 export default function TaskList() {
-  const [searchParams] = useSearchParams();
-  const isKanban = searchParams.get("view") === "kanban";
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentView = searchParams.get("view") || "table";
 
-  if (isKanban) {
+  if (currentView === "kanban") {
     return <TaskAssignmentKanban />;
+  }
+  if (currentView === "execution") {
+    return <TaskExecution />;
   }
 
   const [viewMode, setViewMode] = useViewMode();
@@ -186,8 +190,10 @@ export default function TaskList() {
   const filteredItems = activeItems.filter(i => {
     const title = (i.task_title || i.title || i.name || "").toLowerCase();
     const proj = (i.project_name || "").toLowerCase();
+    const wbs = (i.wbs_code || "").toLowerCase();
+    const scope = (i.scope_name || "").toLowerCase();
     const query = searchTerm.toLowerCase();
-    return title.includes(query) || proj.includes(query);
+    return title.includes(query) || proj.includes(query) || wbs.includes(query) || scope.includes(query);
   });
 
   const { sorted: sortedItems, sortKey, sortDir, toggle } = useSort(filteredItems, "created_at", "desc");
@@ -238,21 +244,64 @@ export default function TaskList() {
               <ListTodo size={24} className="text-brand-900 dark:text-brand-400" /> Task Management
             </h1>
             <p className="text-slate-500 text-sm mt-0.5">
-              WBS task allocation, scope management & assignment tracking
+              Project Work Plan/WBS task allocation, scope management & assignment tracking
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* View Mode Switcher */}
+          <div className="inline-flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+            <button
+              type="button"
+              onClick={() => setSearchParams({})}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                currentView === "table"
+                  ? "bg-white dark:bg-slate-700 text-brand-900 dark:text-white shadow-sm"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+              }`}
+            >
+              <ListTodo size={14} /> Table
+            </button>
+            <button
+              type="button"
+              onClick={() => setSearchParams({ view: "kanban" })}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                currentView === "kanban"
+                  ? "bg-white dark:bg-slate-700 text-brand-900 dark:text-white shadow-sm"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+              }`}
+            >
+              <FolderKanban size={14} /> Assignment Board
+            </button>
+            <button
+              type="button"
+              onClick={() => setSearchParams({ view: "execution" })}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                currentView === "execution"
+                  ? "bg-white dark:bg-slate-700 text-brand-900 dark:text-white shadow-sm"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+              }`}
+            >
+              <Activity size={14} /> Execution
+            </button>
+          </div>
+
           <Link
-            to="/project-management/tasks/assignment"
-            className="btn btn-secondary inline-flex items-center gap-2 text-xs font-semibold"
+            to="/project-management/gantt"
+            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs font-semibold h-10 px-3 rounded-xl text-brand-700 dark:text-brand-300 border-brand-200 dark:border-brand-800"
           >
-            <FolderKanban size={15} /> Task Assignment Kanban
+            <BarChart2 size={15} /> Gantt Chart
+          </Link>
+          <Link
+            to="/project-management/calendar"
+            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs font-semibold h-10 px-3 rounded-xl text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800"
+          >
+            <Calendar size={15} /> Calendar
           </Link>
           <Link
             to="/project-management/tasks/new"
-            className="btn btn-primary inline-flex items-center gap-2"
+            className="btn btn-primary inline-flex items-center gap-2 h-10 px-4 rounded-xl font-semibold shadow-sm"
           >
             <Plus size={16} /> New Task
           </Link>
@@ -292,7 +341,7 @@ export default function TaskList() {
               <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 {stat.label}
               </p>
-              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+              <p className="text-xl font-bold text-slate-900 dark:text-white mt-1">
                 {stat.val}
               </p>
             </div>
@@ -330,7 +379,7 @@ export default function TaskList() {
                   <SortableHeader label="Task Due"   sortKey="due_status"          currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <th>Assignee</th>
                   <SortableHeader label="Completion (%)" sortKey="completion_percent"  currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                  <SortableHeader label="Hours"      sortKey="estimated_hours"     currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-center" />
+                  <SortableHeader label="Duration"   sortKey="estimated_hours"     currentKey={sortKey} direction={sortDir} onToggle={toggle} className="text-center" />
                   <SortableHeader label="Status & Actions" sortKey="status"        currentKey={sortKey} direction={sortDir} onToggle={toggle} />
                   <th className="text-center">Docs</th>
                   <th className="text-center text-rose-600 dark:text-rose-400">Cancel</th>
@@ -360,7 +409,19 @@ export default function TaskList() {
                             <div className="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate max-w-[220px]">
                               {displayTaskTitle}
                             </div>
-                            <PriorityBadge priority={item.priority} />
+                            <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                              {item.wbs_code && (
+                                <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-brand-50 text-brand-800 dark:bg-brand-900/50 dark:text-brand-300 border border-brand-200 dark:border-brand-800">
+                                  Work Plan/WBS: {item.wbs_code}
+                                </span>
+                              )}
+                              {item.scope_name && (
+                                <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800 truncate max-w-[130px]" title={item.scope_name}>
+                                  {item.scope_name}
+                                </span>
+                              )}
+                              <PriorityBadge priority={item.priority} />
+                            </div>
                           </div>
                         </div>
                       </td>
@@ -496,6 +557,17 @@ export default function TaskList() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-700/60">
+                <span className="text-slate-400 block text-xs font-semibold mb-1 uppercase tracking-wider">Project Scope</span>
+                <span className="font-bold text-sm text-purple-700 dark:text-purple-300">{viewModalTask.scope_name || "General Scope"}</span>
+              </div>
+              <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-700/60">
+                <span className="text-slate-400 block text-xs font-semibold mb-1 uppercase tracking-wider">Project Work Plan/WBS</span>
+                <span className="font-bold text-sm text-brand-700 dark:text-brand-300">{viewModalTask.wbs_code || "—"}</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-between">
                 <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Status</span>
                 <StatusBadge status={viewModalTask.status} />
@@ -509,11 +581,11 @@ export default function TaskList() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-700/60">
                 <span className="text-slate-400 block text-xs font-semibold mb-1 uppercase tracking-wider">Start Date</span>
-                <span className="font-mono text-slate-800 dark:text-slate-200 font-semibold">{fmtDate(viewModalTask.start_date || viewModalTask.startDate)}</span>
+                <span className="text-slate-800 dark:text-slate-200 font-semibold">{fmtDate(viewModalTask.start_date || viewModalTask.startDate)}</span>
               </div>
               <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-700/60">
                 <span className="text-slate-400 block text-xs font-semibold mb-1 uppercase tracking-wider">Due Date</span>
-                <span className="font-mono text-slate-800 dark:text-slate-200 font-semibold">{fmtDate(viewModalTask.end_date || viewModalTask.endDate || viewModalTask.due_date)}</span>
+                <span className="text-slate-800 dark:text-slate-200 font-semibold">{fmtDate(viewModalTask.end_date || viewModalTask.endDate || viewModalTask.due_date)}</span>
               </div>
             </div>
 

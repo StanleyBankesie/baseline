@@ -632,7 +632,7 @@ export default function ExpenseLogList() {
               </div>
 
               <div className="form-control">
-                <label className="label"><span className="label-text font-bold">Description <span className="text-error">*</span></span></label>
+                <label className="label"><span className="label-text font-semibold">Description <span className="text-error">*</span></span></label>
                 <textarea required className="textarea textarea-bordered border border-slate-300 rounded-lg w-full h-24 p-3" value={form.description} onChange={e => setForm({...form, description: e.target.value})}></textarea>
               </div>
 

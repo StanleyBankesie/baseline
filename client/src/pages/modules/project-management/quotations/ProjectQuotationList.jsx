@@ -1118,7 +1118,7 @@ export default function ProjectQuotationList() {
               )}
               {candidateWorkflow && firstApprover && (
                 <div>
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Approver
                   </label>
                   {firstApprover.approvers && firstApprover.approvers.length > 1 ? (
@@ -1149,7 +1149,7 @@ export default function ProjectQuotationList() {
           )}
 
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Comments (Optional)</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Comments (Optional)</label>
             <textarea
               value={forwardComments}
               onChange={(e) => setForwardComments(e.target.value)}

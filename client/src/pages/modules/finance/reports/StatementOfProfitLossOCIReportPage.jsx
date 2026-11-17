@@ -909,7 +909,7 @@ export default function StatementOfProfitLossOCIReportPage() {
 
         {/* Date Inputs */}
         <div className="flex items-center gap-2">
-          <label className="text-xs font-bold text-slate-600 dark:text-slate-300">From:</label>
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">From:</label>
           <input
             type="date"
             value={from}
@@ -919,7 +919,7 @@ export default function StatementOfProfitLossOCIReportPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <label className="text-xs font-bold text-slate-600 dark:text-slate-300">To:</label>
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">To:</label>
           <input
             type="date"
             value={to}
@@ -930,7 +930,7 @@ export default function StatementOfProfitLossOCIReportPage() {
 
         {/* Comparative Selector */}
         <div className="flex items-center gap-2">
-          <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Compare:</label>
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Compare:</label>
           <select
             value={comparative}
             onChange={(e) => setComparative(e.target.value)}
@@ -945,7 +945,7 @@ export default function StatementOfProfitLossOCIReportPage() {
         {/* Branch Filter */}
         {userBranches.length > 1 && (
           <div className="flex items-center gap-2">
-            <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Branch:</label>
+            <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Branch:</label>
             <select
               value={selectedBranchId}
               onChange={(e) => setSelectedBranchId(e.target.value)}
@@ -962,7 +962,7 @@ export default function StatementOfProfitLossOCIReportPage() {
         {/* Cost Center Filter */}
         {costCenters.length > 0 && (
           <div className="flex items-center gap-2">
-            <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Cost Center:</label>
+            <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Cost Center:</label>
             <select
               value={selectedCostCenterId}
               onChange={(e) => setSelectedCostCenterId(e.target.value)}
@@ -979,7 +979,7 @@ export default function StatementOfProfitLossOCIReportPage() {
         {/* Currency Filter */}
         {currencies.length > 1 && (
           <div className="flex items-center gap-2">
-            <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Currency:</label>
+            <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Currency:</label>
             <select
               value={selectedCurrency.code}
               onChange={(e) => {

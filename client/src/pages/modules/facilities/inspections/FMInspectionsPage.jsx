@@ -998,7 +998,7 @@ export default function FMInspectionsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block font-semibold mb-1">Overall Score % *</label>
-                  <input type="number" min="0" max="100" step="0.1" placeholder="e.g. 87.5" value={completeForm.overall_score_pct} onChange={fc("overall_score_pct")} className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs font-mono font-bold" required />
+                  <input type="number" min="0" max="100" step="0.1" placeholder="e.g. 87.5" value={completeForm.overall_score_pct} onChange={fc("overall_score_pct")} className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs font-mono font-semibold" required />
                 </div>
                 <div>
                   <label className="block font-semibold mb-1">Pass / Fail Result *</label>

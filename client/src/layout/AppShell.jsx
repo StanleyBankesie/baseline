@@ -108,12 +108,14 @@ const DashboardPermissions = React.lazy(
 import addNotification from "../utils/addNotification.js";
 
 import logoDark from "../assets/resources/OMNISUITE_WHITE_LOGO.png";
-import logoLight from "../assets/resources/OMNISUITE_LOGO_FILL.png";
+import logoLight from "../assets/resources/OMNISUITE_LOGO_CLEAR.png";
 import clearIcon from "../assets/resources/OMNISUITE_ICON_CLEAR.png";
 import PaymentPackageModal from "../components/PaymentPackageModal.jsx";
 import { api } from "../api/client.js";
 import useOfflineQueue from "../offline/useOfflineQueue.js";
 import FloatingInstallButton from "../components/FloatingInstallButton.jsx";
+import OmniSuiteFavoriteButton from "../components/OmniSuiteFavoriteButton.jsx";
+import { recordPageVisit, resolvePageMetadata } from "../utils/favorites.js";
 import { toast } from "react-toastify";
 import {
   Bell,
@@ -1105,25 +1107,86 @@ export default function AppShell() {
               theme === "dark"
                 ? "/OMNISUITE_ICON_CLEAR.png"
                 : "/OMNISUITE_ICON_CLEAR.png";
-            for (const n of items) {
+            // Identify all new unread notifications that haven't been alerted yet
+            const pendingNotifs = items.filter((n) => {
               const id = Number(n.id);
               const isUnread = Number(n.is_read) !== 1;
-              if (isUnread && !prevSet.has(id)) {
-                try {
-                  addNotification({
-                    title: String(n.title || "Notification"),
-                    message: String(n.message || ""),
-                    native: nativeAllowed,
-                    icon,
-                    onClick: () => {
-                      if (n.link) navigate(String(n.link));
-                      else navigate("/notifications");
-                    },
-                  });
-                } catch {}
-                prevSet.add(id);
+              return isUnread && !prevSet.has(id);
+            });
+
+            if (pendingNotifs.length === 1) {
+              // Single notification: display directly
+              const single = pendingNotifs[0];
+              try {
+                addNotification({
+                  title: String(single.title || "Notification"),
+                  message: String(single.message || ""),
+                  native: nativeAllowed,
+                  icon,
+                  onClick: () => {
+                    if (single.link) navigate(String(single.link));
+                    else navigate("/notifications");
+                  },
+                });
+              } catch {}
+              prevSet.add(Number(single.id));
+            } else if (pendingNotifs.length > 1) {
+              // Multiple notifications: Consolidate into ONE single push notification
+              // Group and count distinct notification types
+              const typeCounts = {};
+              for (const n of pendingNotifs) {
+                const title = String(n.title || "").trim();
+                const msg = String(n.message || "").toLowerCase();
+                const link = String(n.link || "").toLowerCase();
+                const t = String(n.type || "").toLowerCase();
+
+                let category = "General Alert";
+                if (t.includes("stock") || title.toLowerCase().includes("stock") || msg.includes("reorder") || link.includes("low-stock")) {
+                  category = "Low Stock Alert";
+                } else if (t.includes("approval_req") || title.toLowerCase().includes("approval required") || title.toLowerCase().includes("pending approval") || msg.includes("requires your approval")) {
+                  category = "Approval Request";
+                } else if (t.includes("approved") || title.toLowerCase().includes("approved")) {
+                  category = "Document Approved";
+                } else if (t.includes("reject") || title.toLowerCase().includes("rejected") || title.toLowerCase().includes("returned")) {
+                  category = "Document Rejected";
+                } else if (t.includes("workflow") || link.includes("workflow") || title.toLowerCase().includes("workflow")) {
+                  category = "Workflow Update";
+                } else if (t.includes("post") || t.includes("feed") || title.toLowerCase().includes("post") || link.includes("feed")) {
+                  category = "Social Feed Post";
+                } else if (t.includes("petty") || t.includes("voucher") || link.includes("finance") || title.toLowerCase().includes("voucher") || title.toLowerCase().includes("cash")) {
+                  category = "Finance Voucher";
+                } else if (t.includes("task") || t.includes("project") || link.includes("project") || title.toLowerCase().includes("project")) {
+                  category = "Project Task";
+                } else if (title) {
+                  category = title;
+                }
+
+                typeCounts[category] = (typeCounts[category] || 0) + 1;
+                prevSet.add(Number(n.id));
               }
+
+              const totalCount = pendingNotifs.length;
+              // Format breakdown of types, e.g. "10 Low Stock Alerts, 1 Approval Request, 1 Document Approved"
+              const typeBreakdown = Object.entries(typeCounts)
+                .map(([type, count]) => {
+                  const plural = count === 1 ? type : (type.endsWith("s") ? type : `${type}s`);
+                  return `${count} ${plural}`;
+                })
+                .join(", ");
+
+              try {
+                addNotification({
+                  title: `🔔 You have ${totalCount} new notifications`,
+                  message: `${typeBreakdown}. Click to review all notifications.`,
+                  native: nativeAllowed,
+                  icon,
+                  onClick: () => {
+                    navigate("/notifications");
+                  },
+                });
+              } catch {}
             }
+
             localStorage.setItem(storeKey, JSON.stringify(Array.from(prevSet)));
           } catch {}
         }
@@ -1609,19 +1672,21 @@ export default function AppShell() {
     };
   }, [location.pathname, canPerformAction, globalOverrides]);
 
+  // Track page visits for auto-generating frequently visited pages in Favorites section
+  useEffect(() => {
+    if (location.pathname) {
+      const meta = resolvePageMetadata(location.pathname);
+      recordPageVisit(user?.id, {
+        path: location.pathname,
+        title: meta.title,
+        module: meta.module,
+        iconKey: meta.iconKey,
+      });
+    }
+  }, [location.pathname, user?.id]);
+
   return (
     <div className="min-h-screen text-slate-900 dark:text-slate-100 flex flex-col bg-slate-50 dark:bg-slate-900">
-      {!sidebarOpen && (
-        <button
-          type="button"
-          aria-label="Toggle navigation menu"
-          className="lg:hidden fixed left-3 top-3 z-[90] inline-flex items-center justify-center w-12 h-12 rounded-full shadow-erp bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700"
-          onClick={() => setSidebarOpen(true)}
-          data-rbac-exempt="true"
-        >
-          <Menu className="w-6 h-6" />
-        </button>
-      )}
       {/* Floating Social Feed Notification - Always Visible */}
       <SocialFeedNotification />
 
@@ -1635,7 +1700,7 @@ export default function AppShell() {
             aria-label="Toggle navigation menu"
             data-rbac-exempt="true"
             onClick={() => setSidebarOpen((v) => !v)}
-            className="inline-flex items-center justify-center w-10 h-10 rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors active:scale-95"
+            className="hidden md:inline-flex items-center justify-center w-10 h-10 rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors active:scale-95"
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -1656,6 +1721,7 @@ export default function AppShell() {
           {/* <div className="badge bg-brand-100 dark:bg-brand-900/50 text-brand-800 dark:text-brand-200 border border-brand-300 dark:border-brand-700">
             Role-based + Branch-based
           </div> */}
+          <OmniSuiteFavoriteButton />
           <FloatingInstallButton />
           <ThemeToggle />
           <Link

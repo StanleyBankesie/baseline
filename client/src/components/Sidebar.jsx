@@ -163,6 +163,21 @@ export default function Sidebar() {
           path: "/finance/accounts",
         },
         {
+          key: "petty-cash",
+          label: "Petty Cash Book",
+          path: "/finance/petty-cash",
+        },
+        {
+          key: "contra-voucher",
+          label: "Account Transfer",
+          path: "/finance/contra-voucher",
+        },
+        {
+          key: "payment-voucher",
+          label: "Make Payment",
+          path: "/finance/payment-voucher",
+        },
+        {
           key: "journal-entries",
           label: "Journal Entries",
           path: "/finance/journal",
@@ -293,6 +308,21 @@ export default function Sidebar() {
           path: "/projects/new",
         },
         { key: "task-management", label: "Tasks", path: "/projects/tasks" },
+        {
+          key: "gantt-chart",
+          label: "Gantt Chart",
+          path: "/project-management/gantt",
+        },
+        {
+          key: "task-calendar",
+          label: "Task Calendar",
+          path: "/project-management/calendar",
+        },
+        {
+          key: "project-costing",
+          label: "Project Costing",
+          path: "/project-management/costing",
+        },
         {
           key: "resource-allocation",
           label: "Resources",

@@ -399,7 +399,7 @@ export default function ProductionStockJournalForm() {
             
             {/* Journal Type */}
             <div className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Journal Type *
               </label>
               <select
@@ -417,7 +417,7 @@ export default function ProductionStockJournalForm() {
 
             {/* Production Execution (Job Card) */}
             <div className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
                 <ClipboardList size={15} className="text-brand-600" /> Production Execution (Job Card)
               </label>
               <select
@@ -437,7 +437,7 @@ export default function ProductionStockJournalForm() {
 
             {/* Production Plan */}
             <div className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
                 <BookOpenCheck size={15} className="text-brand-600" /> Production Plan
               </label>
               <select
@@ -457,7 +457,7 @@ export default function ProductionStockJournalForm() {
 
             {/* Posting Date */}
             <div className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
                 <Calendar size={15} className="text-brand-600" /> Posting Date *
               </label>
               <input
@@ -478,7 +478,7 @@ export default function ProductionStockJournalForm() {
               
               {/* Source Warehouse */}
               <div className="space-y-1.5">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                   <Warehouse size={15} className="text-rose-600" /> Source Warehouse
                 </label>
                 <select
@@ -496,7 +496,7 @@ export default function ProductionStockJournalForm() {
 
               {/* Destination Warehouse */}
               <div className="space-y-1.5">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                   <Warehouse size={15} className="text-emerald-600" /> Destination Warehouse
                 </label>
                 <select
@@ -516,7 +516,7 @@ export default function ProductionStockJournalForm() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-2 border-t border-slate-100 dark:border-slate-700/60">
               <div className="space-y-1.5">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                   <Warehouse size={15} className="text-brand-600" /> Production Warehouse Location
                 </label>
                 <select
@@ -585,7 +585,7 @@ export default function ProductionStockJournalForm() {
 
                 {/* Item Search & Select */}
                 <div className="md:col-span-3 space-y-1 relative">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-tight">Item</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Item</label>
                   {isViewMode ? (
                     <input
                       disabled
@@ -678,7 +678,7 @@ export default function ProductionStockJournalForm() {
 
                 {/* Warehouse Location (Auto-populated) */}
                 <div className="md:col-span-2 space-y-1">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-tight">Warehouse</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Warehouse</label>
                   <select
                     disabled={isViewMode}
                     className="input text-sm w-full"
@@ -694,7 +694,7 @@ export default function ProductionStockJournalForm() {
 
                 {/* Available Qty */}
                 <div className="md:col-span-2 space-y-1">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-tight">Available Qty</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Available Qty</label>
                   <div className="px-3 py-2 bg-slate-100/80 dark:bg-slate-900/80 rounded-lg text-sm font-mono font-bold text-brand-700 dark:text-brand-300">
                     {avail}
                   </div>
@@ -702,13 +702,13 @@ export default function ProductionStockJournalForm() {
 
                 {/* Quantity */}
                 <div className="md:col-span-1 space-y-1">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-tight">Quantity</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-tight">Quantity</label>
                   <input 
                     type="number" 
                     step="0.001"
                     required
                     disabled={isViewMode}
-                    className={`input text-sm font-mono font-bold w-full ${item.type === "CONSUMPTION" ? "text-rose-600" : "text-emerald-600"}`}
+                    className={`input text-sm font-mono font-semibold w-full ${item.type === "CONSUMPTION" ? "text-rose-600" : "text-emerald-600"}`}
                     value={item.qty}
                     onChange={(e) => updateItem(index, "qty", e.target.value)}
                   />
@@ -716,11 +716,11 @@ export default function ProductionStockJournalForm() {
 
                 {/* UOM */}
                 <div className="md:col-span-1 space-y-1">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-tight">UOM</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-tight">UOM</label>
                   <input 
                     type="text" 
                     disabled
-                    className="input text-sm font-bold text-slate-500 bg-white dark:bg-slate-900 w-full"
+                    className="input text-sm font-semibold text-slate-500 bg-white dark:bg-slate-900 w-full"
                     value={item.uom || "PCS"}
                   />
                 </div>
@@ -750,7 +750,7 @@ export default function ProductionStockJournalForm() {
 
         {/* Section 3: Journal Remarks / Document Reference */}
         <div className="card p-6 bg-white dark:bg-slate-800 space-y-2 shadow-xs">
-          <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
             <FileText size={16} className="text-brand-600" />
             Journal Remarks / Shift Notes / Document Reference
           </label>

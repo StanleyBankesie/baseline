@@ -20,9 +20,11 @@ import {
   AlertTriangle,
   RefreshCw,
   FolderPlus,
+  Wallet,
 } from "lucide-react";
 import AccountsPage from "./AccountsPage";
 import AccountGroupsPage from "./AccountGroupsPage";
+import PettyCashSetupSection from "./PettyCashSetupSection";
 
 /**
  * Enhanced Finance Setup Page: Chart of Accounts & Account Groups
@@ -691,6 +693,14 @@ export default function FinanceSetupPage() {
 
             {/* Action Buttons: Direct Template Download/Upload, Bulk Operations, Create Group, Create Account */}
             <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto justify-start lg:justify-end">
+              {activeTab === "petty-cash" && (
+                <Link
+                  to="/finance/petty-cash"
+                  className="btn-success font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-95 cursor-pointer"
+                >
+                  <Wallet size={16} /> Open Petty Cash Book
+                </Link>
+              )}
               {/* Direct Download Template Button */}
               <button
                 type="button"
@@ -866,6 +876,11 @@ export default function FinanceSetupPage() {
                 label: `Account Groups ${groupsCount > 0 ? `(${groupsCount})` : ""}`,
                 icon: FolderTree,
               },
+              {
+                value: "petty-cash",
+                label: "Petty Cash Setup",
+                icon: Wallet,
+              },
             ]}
             value={activeTab}
             onChange={handleTabChange}
@@ -874,7 +889,7 @@ export default function FinanceSetupPage() {
 
           <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-3">
             <span>
-              Showing: <strong className="text-slate-800 dark:text-slate-200">{activeTab === "accounts" ? "Ledger Accounts" : "Account Groups Hierarchy"}</strong>
+              Showing: <strong className="text-slate-800 dark:text-slate-200">{activeTab === "accounts" ? "Ledger Accounts" : activeTab === "groups" ? "Account Groups Hierarchy" : "Petty Cash & Expense Account Configuration"}</strong>
             </span>
           </div>
         </div>
@@ -889,13 +904,15 @@ export default function FinanceSetupPage() {
             onResetTriggerCreate={() => setTriggerCreateAccount(0)}
             onCountChange={(count) => setAccountsCount(count)}
           />
-        ) : (
+        ) : activeTab === "groups" ? (
           <AccountGroupsPage
             hideBanner={true}
             triggerCreate={triggerCreateGroup}
             onResetTriggerCreate={() => setTriggerCreateGroup(0)}
             onCountChange={(count) => setGroupsCount(count)}
           />
+        ) : (
+          <PettyCashSetupSection />
         )}
       </div>
 

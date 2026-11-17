@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 import { Activity, Clock, CheckCircle2 } from "lucide-react";
 /**
  * @fileoverview BankReconciliationList component.
@@ -184,51 +185,9 @@ export default function BankReconciliationList() {
           </p>
         </div>
 
-      {/* Metric Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        {[
-          {
-            label: "Active Reconciliations",
-            val: (items || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
-            icon: <Activity size={20} className="stroke-[2.5]" />,
-            color: "bg-sky-600 dark:bg-sky-500 text-white",
-          },
-          {
-            label: "Total Reconciliations",
-            val: (items || []).length,
-            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
-            color: "bg-brand-900 dark:bg-brand-700 text-white",
-          },
-          {
-            label: "Pending Reconciliations",
-            val: (items || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "SCHEDULED").length,
-            icon: <Clock size={20} className="stroke-[2.5]" />,
-            color: "bg-amber-500 text-white",
-          },
-          {
-            label: "Completed Reconciliations",
-            val: (items || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "HIRED" || x.status === "PAID").length,
-            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
-            color: "bg-emerald-600 text-white",
-          },
-        ].map((stat, i) => (
-          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
-            <div>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                {stat.label}
-              </p>
-              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
-                {stat.val}
-              </p>
-            </div>
-            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
-              {stat.icon}
-            </div>
-          </div>
-        ))}
-      </div>
+      
 
-        <div className="flex gap-2">
+        <div className="grid grid-cols-2 sm:flex gap-2">
           <Link
             to="/finance?section=Banking"
             className="font-sans btn btn-sm btn-outline text-white border-white hover:bg-white/20"
@@ -368,6 +327,53 @@ export default function BankReconciliationList() {
         </div>
       </div>
 
+      {/* Metric Stats Cards Carousel */}
+      {/* Metric Stats Cards */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="md:grid-cols-4" gapClass="gap-4">
+        {[
+          {
+            label: "Active Reconciliations",
+            val: (items || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Total Reconciliations",
+            val: (items || []).length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+          {
+            label: "Pending Reconciliations",
+            val: (items || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "SCHEDULED").length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Completed Reconciliations",
+            val: (items || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "HIRED" || x.status === "PAID").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div key={i} className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
+      </MobileMovingCarousel>
+
+
+
       {/* New Reconciliation Modal */}
       {showModal && (
         <div
@@ -398,7 +404,7 @@ export default function BankReconciliationList() {
             <form onSubmit={create} className="card-body p-6 space-y-4">
               {/* Bank Account */}
               <div className="form-control">
-                <label className="label text-xs font-bold text-slate-500 uppercase pb-1">
+                <label className="label text-xs font-semibold text-slate-500 uppercase pb-1">
                   Bank Account <span className="text-error">*</span>
                 </label>
                 <select
@@ -418,7 +424,7 @@ export default function BankReconciliationList() {
 
               {/* Opening Balance (read-only) */}
               <div className="form-control">
-                <label className="label text-xs font-bold text-slate-500 uppercase pb-1">
+                <label className="label text-xs font-semibold text-slate-500 uppercase pb-1">
                   Opening Balance
                 </label>
                 <input
@@ -434,7 +440,7 @@ export default function BankReconciliationList() {
               <div className="grid grid-cols-2 gap-3">
                 {/* Statement From */}
                 <div className="form-control">
-                  <label className="label text-xs font-bold text-slate-500 uppercase pb-1">
+                  <label className="label text-xs font-semibold text-slate-500 uppercase pb-1">
                     From <span className="text-error">*</span>
                   </label>
                   <input
@@ -451,7 +457,7 @@ export default function BankReconciliationList() {
 
                 {/* Statement To */}
                 <div className="form-control">
-                  <label className="label text-xs font-bold text-slate-500 uppercase pb-1">
+                  <label className="label text-xs font-semibold text-slate-500 uppercase pb-1">
                     To <span className="text-error">*</span>
                   </label>
                   <input
@@ -466,7 +472,7 @@ export default function BankReconciliationList() {
 
               {/* Ending Balance */}
               <div className="form-control">
-                <label className="label text-xs font-bold text-slate-500 uppercase pb-1">
+                <label className="label text-xs font-semibold text-slate-500 uppercase pb-1">
                   Ending Balance (Bank Statement)
                 </label>
                 <input

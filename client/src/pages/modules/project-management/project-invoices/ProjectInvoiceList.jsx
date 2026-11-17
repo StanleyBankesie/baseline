@@ -916,7 +916,7 @@ export default function ProjectInvoiceList() {
           )}
 
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Target Approver</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Target Approver</label>
             {(() => {
               const hasSteps = Array.isArray(workflowSteps) && workflowSteps.length > 0;
               const first = hasSteps ? workflowSteps[0] : null;
@@ -953,7 +953,7 @@ export default function ProjectInvoiceList() {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Comments (Optional)</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Comments (Optional)</label>
             <textarea
               value={forwardComments}
               onChange={(e) => setForwardComments(e.target.value)}

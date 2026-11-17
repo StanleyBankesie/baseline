@@ -298,7 +298,7 @@ export default function TripForm() {
 
             <div className="form-control md:col-span-2">
               <label className="label">
-                <span className="label-text text-brand-700 font-bold">Origin</span>
+                <span className="label-text text-brand-700 font-semibold">Origin</span>
               </label>
               <AddressMapPicker 
                 value={formData.origin_name}
@@ -312,7 +312,7 @@ export default function TripForm() {
 
             <div className="form-control md:col-span-2">
               <label className="label">
-                <span className="label-text text-brand-700 font-bold">Destination</span>
+                <span className="label-text text-brand-700 font-semibold">Destination</span>
               </label>
               <AddressMapPicker 
                 value={formData.destination_name}

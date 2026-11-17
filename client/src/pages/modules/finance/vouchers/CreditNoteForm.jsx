@@ -3415,7 +3415,7 @@ export default function CreditNoteForm() {
                 )}
                 {(isPAYV || isRV || isCV || isSV || isPV) && (
                   <div className="md:col-span-3">
-                    <label className="label font-bold text-brand">
+                    <label className="label font-semibold text-brand">
                       Narration *
                     </label>
                     <input
@@ -3604,7 +3604,7 @@ export default function CreditNoteForm() {
                       <div>
                         <label className="label">Total Amount</label>
                         <input
-                          className="input bg-white dark:bg-slate-900 font-bold text-brand"
+                          className="input bg-white dark:bg-slate-900 font-semibold text-brand"
                           value={`GH₵ ${(Number(cnTotalAmount || 0) * Number(dncnExchangeRate || 1)).toFixed(2)}`}
                           readOnly
                         />

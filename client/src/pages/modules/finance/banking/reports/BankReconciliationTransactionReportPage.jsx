@@ -190,7 +190,7 @@ export default function BankReconciliationTransactionReportPage() {
         <div className="card-body p-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div className="form-control">
-              <label className="label text-xs font-bold text-slate-500 uppercase">
+              <label className="label text-xs font-semibold text-slate-500 uppercase">
                 Bank Account
               </label>
               <select
@@ -209,7 +209,7 @@ export default function BankReconciliationTransactionReportPage() {
               </select>
             </div>
             <div className="form-control">
-              <label className="label text-xs font-bold text-slate-500 uppercase">
+              <label className="label text-xs font-semibold text-slate-500 uppercase">
                 From Date
               </label>
               <input
@@ -222,7 +222,7 @@ export default function BankReconciliationTransactionReportPage() {
               />
             </div>
             <div className="form-control">
-              <label className="label text-xs font-bold text-slate-500 uppercase">
+              <label className="label text-xs font-semibold text-slate-500 uppercase">
                 To Date
               </label>
               <input

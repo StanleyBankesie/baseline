@@ -185,6 +185,9 @@ export const MODULES_REGISTRY = {
     name: "Finance",
     icon: "🏦",
     features: [
+      { key: "dashboard", label: "Finance Dashboard", type: "feature" },
+      { key: "setup", label: "Finance Setup", type: "feature" },
+      { key: "petty-cash", label: "Petty Cash Book", type: "feature" },
       { key: "journal-voucher", label: "Journal Entry", type: "feature" },
       { key: "payment-voucher", label: "Make Payment", type: "feature" },
       { key: "receipt-voucher", label: "Receive Payment", type: "feature" },
@@ -300,10 +303,29 @@ export const MODULES_REGISTRY = {
     features: [
       { key: "dashboard", label: "Facilities Command Center", type: "feature" },
       { key: "properties", label: "Properties & Estates", type: "feature" },
+      { key: "equipment", label: "Equipment & Assets", type: "feature" },
+      { key: "setup", label: "Operations Setup", type: "feature" },
       { key: "contracts", label: "FM Service Contracts", type: "feature" },
-      { key: "field-service", label: "Field Technician Workspace", type: "feature" },
-      { key: "checklists", label: "Inspection Checklists", type: "feature" },
+      { key: "sla-policies", label: "SLA Policies & Performance", type: "feature" },
+      { key: "servicebilling", label: "Service Billing", type: "feature" },
+      { key: "helpdesk", label: "Helpdesk & Service Requests", type: "feature" },
       { key: "soft-services", label: "Soft Facilities Services", type: "feature" },
+      { key: "hard-services", label: "Hard Services & Technical", type: "feature" },
+      { key: "field-service", label: "Field Technician Workspace", type: "feature" },
+      { key: "tasks", label: "FM Task Assignment", type: "feature" },
+      { key: "tasks-execution", label: "FM Task Execution", type: "feature" },
+      { key: "purchase-requisitions", label: "FM Purchase Requisitions", type: "feature" },
+      { key: "material-requisitions", label: "FM Material Requisitions", type: "feature" },
+      { key: "material-receipts", label: "FM Materials Receipt", type: "feature" },
+      { key: "material-utilizations", label: "FM Material Utilization", type: "feature" },
+      { key: "inspections", label: "Inspection Runs", type: "feature" },
+      { key: "checklists", label: "Inspection Checklists", type: "feature" },
+      { key: "utilities-energy", label: "Utilities & Energy Management", type: "feature" },
+      { key: "security", label: "Security & Access Management", type: "feature" },
+      { key: "workforce", label: "Workforce Roster & Deployment", type: "feature" },
+      { key: "space-bookings", label: "Room & Space Bookings", type: "feature" },
+      { key: "contractors-vendors", label: "Contractors & Supplier Contracts", type: "feature" },
+      { key: "budgeting-finance", label: "Budgeting & Financial Management", type: "feature" },
       { key: "reports", label: "Facilities Reports", type: "feature" },
     ],
     dashboards: [
@@ -358,6 +380,8 @@ export const MODULES_REGISTRY = {
     name: "Project Management",
     icon: "📊",
     features: [
+      { key: "dashboard", label: "Project Management Dashboard", type: "feature" },
+      { key: "mindmap", label: "Project Mindmap", type: "feature" },
       { key: "projects", label: "Projects", type: "feature" },
       { key: "tasks", label: "Task Management", type: "feature" },
       { key: "setup", label: "Setup", type: "feature" },
@@ -390,6 +414,18 @@ export const MODULES_REGISTRY = {
       { key: "rfis", label: "RFIs (Requests for Information)", type: "feature" },
       { key: "equipment-logs", label: "Plant & Equipment Logs", type: "feature" },
       { key: "closure", label: "Project Handover & Closeout", type: "feature" },
+      { key: "snags", label: "Defect & Issue Management", type: "feature" },
+      { key: "final-accounts", label: "Final Account & Retention Release", type: "feature" },
+      { key: "scopes", label: "Project Scopes & Deliverables", type: "feature" },
+      { key: "costing-categories", label: "Cost Categories", type: "feature" },
+      { key: "gantt-chart", label: "Gantt Chart & Timeline", type: "feature" },
+      { key: "critical-path", label: "Critical Path Method (CPM)", type: "feature" },
+      { key: "payment-claims", label: "Progress Payment Claims", type: "feature" },
+      { key: "risk-management", label: "Risk Management & Assessment", type: "feature" },
+      { key: "temporal-warehouses", label: "Site Temporal Warehouses Report", type: "feature" },
+      { key: "pm-warehouse-stock", label: "Site Warehouse Stock Report", type: "feature" },
+      { key: "cost-variance-report", label: "Cost & Budget Variance Report", type: "feature" },
+      { key: "resource-allocation-report", label: "Resource Allocation Report", type: "feature" },
     ],
     dashboards: [
 
@@ -398,6 +434,42 @@ export const MODULES_REGISTRY = {
   },
 
   "environmental-health-safety": {
+    name: "Environmental, Health & Safety",
+    icon: "🛡️",
+    features: [
+      { key: "safety", label: "Safety Management (HSE)", type: "feature" },
+      { key: "incidents", label: "Incident Register & Near Misses", type: "feature" },
+      { key: "toolbox-talks", label: "Toolbox Talks & Briefings", type: "feature" },
+      { key: "hsa-compliance", label: "Health, Safety & Compliance", type: "feature" },
+      { key: "compliance", label: "Statutory Obligations & Hazards", type: "feature" },
+      { key: "sustainability", label: "Sustainability & Environmental", type: "feature" },
+    ],
+    dashboards: [
+      { key: "ehs-incident-rate", label: "Incident Frequency Rate", type: "dashboard" },
+      { key: "ehs-active-permits", label: "Active Permits to Work", type: "dashboard" },
+      { key: "ehs-compliance-score", label: "Statutory Compliance Score", type: "dashboard" },
+    ],
+  },
+
+  hse: {
+    name: "Safety Management (HSE)",
+    icon: "🦺",
+    features: [
+      { key: "safety", label: "Safety Management (HSE)", type: "feature" },
+      { key: "incidents", label: "Incident Register & Near Misses", type: "feature" },
+      { key: "toolbox-talks", label: "Toolbox Talks & Briefings", type: "feature" },
+      { key: "hsa-compliance", label: "Health, Safety & Compliance", type: "feature" },
+      { key: "compliance", label: "Statutory Obligations & Hazards", type: "feature" },
+      { key: "sustainability", label: "Sustainability & Environmental", type: "feature" },
+    ],
+    dashboards: [
+      { key: "ehs-incident-rate", label: "Incident Frequency Rate", type: "dashboard" },
+      { key: "ehs-active-permits", label: "Active Permits to Work", type: "dashboard" },
+      { key: "ehs-compliance-score", label: "Statutory Compliance Score", type: "dashboard" },
+    ],
+  },
+
+  ehs: {
     name: "Environmental, Health & Safety",
     icon: "🛡️",
     features: [
@@ -561,12 +633,40 @@ export const MODULES_REGISTRY = {
     name: "System Operations",
     icon: "🔧",
     features: [
+      { key: "companies", label: "Companies Setup", type: "feature" },
+      { key: "branches", label: "Branches Setup", type: "feature" },
+      { key: "admin-permissions", label: "Admin Permissions", type: "feature" },
+      { key: "backups", label: "System Backups", type: "feature" },
+      { key: "licenses", label: "Software Licenses", type: "feature" },
+      { key: "payment-packages", label: "Payment Packages", type: "feature" },
+      { key: "general-settings", label: "General Settings", type: "feature" },
       { key: "license-renewal", label: "License Renewal Access", type: "feature", isExclusive: true }
     ],
-    dashboards: [      { key: "sys-cpu-usage", label: "System CPU Usage", type: "dashboard" },
+    dashboards: [
+      { key: "sys-cpu-usage", label: "System CPU Usage", type: "dashboard" },
       { key: "sys-memory-usage", label: "System Memory Usage", type: "dashboard" },
       { key: "sys-active-sessions", label: "Active User Sessions", type: "dashboard" },
-]
+    ]
+  },
+
+  "system-configuration": {
+    name: "System Configuration",
+    icon: "⚙️",
+    features: [
+      { key: "companies", label: "Companies Setup", type: "feature" },
+      { key: "branches", label: "Branches Setup", type: "feature" },
+      { key: "admin-permissions", label: "Admin Permissions", type: "feature" },
+      { key: "backups", label: "System Backups", type: "feature" },
+      { key: "licenses", label: "Software Licenses", type: "feature" },
+      { key: "payment-packages", label: "Payment Packages", type: "feature" },
+      { key: "general-settings", label: "General Settings", type: "feature" },
+      { key: "license-renewal", label: "License Renewal Access", type: "feature", isExclusive: true }
+    ],
+    dashboards: [
+      { key: "sys-cpu-usage", label: "System CPU Usage", type: "dashboard" },
+      { key: "sys-memory-usage", label: "System Memory Usage", type: "dashboard" },
+      { key: "sys-active-sessions", label: "Active User Sessions", type: "dashboard" },
+    ]
   }
 };
 

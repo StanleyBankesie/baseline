@@ -210,7 +210,7 @@ export default function LeaveApplication({ isEmbedded }) {
                     <div>
                       <label className="label flex justify-between">
                         <span>Total Days Extracted</span>
-                        <span className="text-brand font-bold">
+                        <span className="text-brand font-semibold">
                           {totalDays > 0 ? totalDays : 0}
                         </span>
                       </label>

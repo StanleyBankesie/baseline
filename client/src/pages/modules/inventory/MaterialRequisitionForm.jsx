@@ -389,7 +389,10 @@ export default function MaterialRequisitionForm() {
                 Request materials from warehouse inventory
               </p>
             </div>
-            <button onClick={() => window.history.back()} className="btn-success">
+            <button
+              onClick={() => window.history.back()}
+              className="btn-success"
+            >
               Back to List
             </button>
           </div>
@@ -421,7 +424,6 @@ export default function MaterialRequisitionForm() {
                     })
                   }
                   required
-                
                   disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
@@ -582,7 +584,8 @@ export default function MaterialRequisitionForm() {
                           <td>
                             <div className="relative">
                               <input
-                                id={`mr-item-search-${item.id}`} autoComplete="off"
+                                id={`mr-item-search-${item.id}`}
+                                autoComplete="off"
                                 className="input w-full"
                                 placeholder="Type to search items"
                                 value={itemQueries[item.id] || ""}
@@ -617,31 +620,41 @@ export default function MaterialRequisitionForm() {
                                   }
                                 }}
                               />
-                              {searchResults.length ? (
-                                (() => {
-                                  const el = document.getElementById(`mr-item-search-${item.id}`);
-                                  const r = el ? el.getBoundingClientRect() : { bottom: 0, left: 0, width: 0 };
-                                  return (
-                                    <div
-                                      className="bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-auto"
-                                      style={{ position: 'fixed', top: `${r.bottom + 4}px`, left: `${r.left}px`, width: `${r.width}px`, zIndex: 9999 }}
-                                    >
-                                      {searchResults.map((o) => (
-                                        <button
-                                          type="button"
-                                          key={o.id}
-                                          className="block w-full text-left px-3 py-2 hover:bg-slate-50 text-xs"
-                                          onClick={() => {
-                                            handleSelectItem(item.id, o);
-                                          }}
-                                        >
-                                          {o.item_code} - {o.item_name}
-                                        </button>
-                                      ))}
-                                    </div>
-                                  );
-                                })()
-                              ) : null}
+                              {searchResults.length
+                                ? (() => {
+                                    const el = document.getElementById(
+                                      `mr-item-search-${item.id}`,
+                                    );
+                                    const r = el
+                                      ? el.getBoundingClientRect()
+                                      : { bottom: 0, left: 0, width: 0 };
+                                    return (
+                                      <div
+                                        className="bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-auto"
+                                        style={{
+                                          position: "fixed",
+                                          top: `${r.bottom + 4}px`,
+                                          left: `${r.left}px`,
+                                          width: `${r.width}px`,
+                                          zIndex: 9999,
+                                        }}
+                                      >
+                                        {searchResults.map((o) => (
+                                          <button
+                                            type="button"
+                                            key={o.id}
+                                            className="block w-full text-left px-3 py-2 hover:bg-slate-50 text-xs"
+                                            onClick={() => {
+                                              handleSelectItem(item.id, o);
+                                            }}
+                                          >
+                                            {o.item_code} - {o.item_name}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    );
+                                  })()
+                                : null}
                             </div>
                           </td>
                           <td>
@@ -697,7 +710,7 @@ export default function MaterialRequisitionForm() {
                                   ]
                               ).map((u) => (
                                 <option key={u.code} value={u.code}>
-                                  {u.name ? `${u.name} (${u.code})` : u.code}
+                                  {u.code}
                                 </option>
                               ))}
                             </select>
@@ -752,7 +765,9 @@ export default function MaterialRequisitionForm() {
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-              <button onClick={() => window.history.back()} className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+              <button
+                onClick={() => window.history.back()}
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
               >
                 Cancel
               </button>

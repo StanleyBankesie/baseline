@@ -820,7 +820,7 @@ export default function JobCardExecution() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                   Assigned Machines (Process Line / Work Centers)
                 </label>
                 <div className="flex flex-wrap gap-1.5 p-2 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 min-h-[42px] items-center">
@@ -863,12 +863,12 @@ export default function JobCardExecution() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                     Work Shift
                   </label>
                   <select 
                     disabled={isViewOnly}
-                    className="input w-full font-bold"
+                    className="input w-full font-semibold"
                     value={formData.shift_id}
                     onChange={e => setFormData({ ...formData, shift_id: e.target.value })}
                   >
@@ -880,12 +880,12 @@ export default function JobCardExecution() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                     Machine Operator
                   </label>
                   <select 
                     disabled={isViewOnly}
-                    className="input w-full font-bold"
+                    className="input w-full font-semibold"
                     value={formData.operator_id}
                     onChange={e => {
                       const op = operators.find(o => String(o.id) === String(e.target.value));
@@ -908,20 +908,20 @@ export default function JobCardExecution() {
             {/* Batch Lot & Date Tracking (MFG & EXP Date) */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-slate-100 dark:border-slate-800">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                   Batch / Lot No
                 </label>
                 <input
                   type="text"
                   readOnly={isViewOnly}
-                  className="input w-full font-mono font-bold text-xs"
+                  className="input w-full font-mono font-semibold text-xs"
                   value={formData.batch_no}
                   onChange={e => setFormData({ ...formData, batch_no: e.target.value })}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                   Manufacture Date (MFG Date)
                 </label>
                 <input
@@ -935,7 +935,7 @@ export default function JobCardExecution() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                   Expiry Date (EXP Date)
                 </label>
                 <input
@@ -952,9 +952,9 @@ export default function JobCardExecution() {
             <div className="space-y-4 pt-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+                  <label className="block text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider mb-1 flex items-center justify-between">
                     <span>Good Produced Output Quantity *</span>
-                    <span className="text-xs font-bold text-emerald-600/75 dark:text-emerald-400/75 font-mono">({productUom})</span>
+                    <span className="text-xs font-semibold text-emerald-600/75 dark:text-emerald-400/75 font-mono">({productUom})</span>
                   </label>
                   <div className="relative flex items-center">
                     <input 
@@ -978,9 +978,9 @@ export default function JobCardExecution() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-rose-700 dark:text-rose-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+                  <label className="block text-xs font-semibold text-rose-700 dark:text-rose-400 uppercase tracking-wider mb-1 flex items-center justify-between">
                     <span>Scrap / Rejected Quantity</span>
-                    <span className="text-xs font-bold text-rose-600/75 dark:text-rose-400/75 font-mono">({productUom})</span>
+                    <span className="text-xs font-semibold text-rose-600/75 dark:text-rose-400/75 font-mono">({productUom})</span>
                   </label>
                   <div className="relative flex items-center">
                     <input 
@@ -1015,7 +1015,7 @@ export default function JobCardExecution() {
                       className="checkbox checkbox-primary h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                     />
                     <div className="text-xs">
-                      <span className="font-bold text-slate-800 dark:text-slate-200 block">
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 block">
                         🛡️ Automatically create Quality Control (QC Inspection) on execution completion
                       </span>
                       <span className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -1459,7 +1459,7 @@ export default function JobCardExecution() {
               {editRowModal.type === "consumption" && (
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                       Raw Material Item Name *
                     </label>
                     <input
@@ -1477,7 +1477,7 @@ export default function JobCardExecution() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                         Item Code
                       </label>
                       <input
@@ -1492,7 +1492,7 @@ export default function JobCardExecution() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                         UOM (Unit)
                       </label>
                       <input
@@ -1510,14 +1510,14 @@ export default function JobCardExecution() {
 
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                         Recipe Unit Qty
                       </label>
                       <input
                         type="number"
                         step="any"
                         placeholder="1"
-                        className="input w-full font-bold text-xs"
+                        className="input w-full font-semibold text-xs"
                         value={editRowModal.data.qty ?? ""}
                         onChange={e => setEditRowModal({
                           ...editRowModal,
@@ -1526,7 +1526,7 @@ export default function JobCardExecution() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-brand-600 uppercase tracking-wider mb-1">
+                      <label className="block text-xs font-semibold text-brand-600 uppercase tracking-wider mb-1">
                         Consumed Qty *
                       </label>
                       <input
@@ -1534,7 +1534,7 @@ export default function JobCardExecution() {
                         step="any"
                         required
                         placeholder="1"
-                        className="input w-full font-bold text-xs text-brand-600"
+                        className="input w-full font-semibold text-xs text-brand-600"
                         value={editRowModal.data.actual_qty ?? ""}
                         onChange={e => setEditRowModal({
                           ...editRowModal,
@@ -1543,14 +1543,14 @@ export default function JobCardExecution() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                         Unit Cost ({currencySymbol})
                       </label>
                       <input
                         type="number"
                         step="any"
                         placeholder="0.00"
-                        className="input w-full font-mono text-xs font-bold"
+                        className="input w-full font-mono text-xs font-semibold"
                         value={editRowModal.data.unit_cost ?? ""}
                         onChange={e => setEditRowModal({
                           ...editRowModal,
@@ -1576,7 +1576,7 @@ export default function JobCardExecution() {
               {editRowModal.type === "overhead" && (
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                       Overhead Type / Description *
                     </label>
                     <input
@@ -1593,7 +1593,7 @@ export default function JobCardExecution() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                       Allocation Basis
                     </label>
                     <input
@@ -1610,7 +1610,7 @@ export default function JobCardExecution() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                         Quantity / Hours *
                       </label>
                       <input
@@ -1618,7 +1618,7 @@ export default function JobCardExecution() {
                         step="any"
                         required
                         placeholder="1"
-                        className="input w-full font-bold text-xs"
+                        className="input w-full font-semibold text-xs"
                         value={editRowModal.data.qty ?? ""}
                         onChange={e => setEditRowModal({
                           ...editRowModal,
@@ -1627,7 +1627,7 @@ export default function JobCardExecution() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                         Cost Rate ({currencySymbol}) *
                       </label>
                       <input
@@ -1635,7 +1635,7 @@ export default function JobCardExecution() {
                         step="any"
                         required
                         placeholder="0.00"
-                        className="input w-full font-mono font-bold text-xs"
+                        className="input w-full font-mono font-semibold text-xs"
                         value={editRowModal.data.rate ?? ""}
                         onChange={e => setEditRowModal({
                           ...editRowModal,
@@ -1661,7 +1661,7 @@ export default function JobCardExecution() {
               {editRowModal.type === "byproduct" && (
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                       By-Product Item Name *
                     </label>
                     <input
@@ -1679,7 +1679,7 @@ export default function JobCardExecution() {
 
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                         Item Code
                       </label>
                       <input
@@ -1694,7 +1694,7 @@ export default function JobCardExecution() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">
+                      <label className="block text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">
                         Qty Produced *
                       </label>
                       <input
@@ -1702,7 +1702,7 @@ export default function JobCardExecution() {
                         step="any"
                         required
                         placeholder="1"
-                        className="input w-full font-bold text-xs text-emerald-600"
+                        className="input w-full font-semibold text-xs text-emerald-600"
                         value={editRowModal.data.qty ?? ""}
                         onChange={e => setEditRowModal({
                           ...editRowModal,
@@ -1711,7 +1711,7 @@ export default function JobCardExecution() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                         UOM
                       </label>
                       <input
@@ -1733,7 +1733,7 @@ export default function JobCardExecution() {
               {editRowModal.type === "breakdown" && (
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                       Machine / Work Center *
                     </label>
                     <input
@@ -1750,7 +1750,7 @@ export default function JobCardExecution() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                       Downtime (Hours) *
                     </label>
                     <input
@@ -1758,7 +1758,7 @@ export default function JobCardExecution() {
                       step="any"
                       required
                       placeholder="0.5"
-                      className="input w-full font-bold text-xs text-amber-600"
+                      className="input w-full font-semibold text-xs text-amber-600"
                       value={editRowModal.data.downtime_hrs ?? ""}
                       onChange={e => setEditRowModal({
                         ...editRowModal,
@@ -1768,7 +1768,7 @@ export default function JobCardExecution() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                       Reason / Root Cause
                     </label>
                     <textarea

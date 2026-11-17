@@ -188,7 +188,7 @@ export default function ScheduleMonitoringPage() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-3xl font-black font-mono text-slate-900 dark:text-white leading-none">
+                  <p className="text-3xl font-black text-slate-900 dark:text-white leading-none">
                     {kpi.value}
                   </p>
                   <p className="text-xs text-slate-400 mt-1.5 font-medium">{kpi.sub}</p>
@@ -201,14 +201,14 @@ export default function ScheduleMonitoringPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div className="card p-5 space-y-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Earned Value SPI</span>
-              <p className="text-3xl font-bold font-mono text-brand-600 dark:text-brand-400">{variance?.spi || 1.0}</p>
+              <p className="text-3xl font-bold text-brand-600 dark:text-brand-400">{variance?.spi || 1.0}</p>
               <p className="text-xs text-slate-500">
                 {(variance?.spi || 1.0) >= 1.0 ? "SPI ≥ 1.0 — On Track or Ahead of Schedule" : "SPI < 1.0 — Behind Target Pace"}
               </p>
             </div>
             <div className="card p-5 space-y-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Planned vs Actual Delta</span>
-              <p className="text-3xl font-bold font-mono text-slate-900 dark:text-white">
+              <p className="text-3xl font-bold text-slate-900 dark:text-white">
                 {variance?.actualProgress || 0}% <span className="text-sm font-normal text-slate-400">vs {variance?.plannedProgress || 0}%</span>
               </p>
               <p className="text-xs text-slate-500">
@@ -217,7 +217,7 @@ export default function ScheduleMonitoringPage() {
             </div>
             <div className="card p-5 space-y-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Target vs Forecast Handover</span>
-              <p className="text-lg font-bold font-mono text-slate-900 dark:text-white">{cpm?.forecastCompletionDate || "Pending"}</p>
+              <p className="text-lg font-bold text-slate-900 dark:text-white">{cpm?.forecastCompletionDate || "Pending"}</p>
               <p className="text-xs text-slate-500">Contract End: {project?.end_date ? String(project.end_date).split("T")[0] : "TBD"}</p>
             </div>
           </div>
@@ -232,9 +232,12 @@ export default function ScheduleMonitoringPage() {
                 {delayedTasks.map(t => (
                   <div key={t.id} className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-800 text-xs space-y-1">
                     <div className="flex justify-between items-center">
-                      <span className="font-mono font-bold text-rose-600">{t.wbs_code || `T-${t.id}`}</span>
-                      <span className="font-mono text-slate-400">{t.completion_percent || 0}% Done</span>
+                      <span className="font-bold text-rose-600">{t.wbs_code ? `Work Plan/WBS: ${t.wbs_code}` : `T-${t.id}`}</span>
+                      <span className="text-slate-500 font-semibold">{t.completion_percent || 0}% Done</span>
                     </div>
+                    {t.scope_name && (
+                      <p className="text-[11px] font-bold text-slate-500">{t.scope_name}</p>
+                    )}
                     <p className="font-bold text-slate-800 dark:text-slate-200 truncate">{t.task_title || t.title}</p>
                     <p className="text-slate-400">Assignee: {t.assigned_to_name || "Unassigned"}</p>
                     <p className="text-slate-400">Due: {t.end_date || t.due_date ? String(t.end_date || t.due_date).split("T")[0] : "—"}</p>

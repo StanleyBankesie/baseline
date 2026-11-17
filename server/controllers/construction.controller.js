@@ -8,6 +8,7 @@ import { query, pool } from "../db/pool.js";
 import { httpError } from "../utils/httpError.js";
 import { calculateCPM } from "../services/cpmEngine.js";
 import { ensureConstructionTables } from "../utils/constructionTables.js";
+import { sendPushToUser } from "../routes/push.routes.js";
 
 function toNumber(v, fallback = null) {
   const n = Number(v);
@@ -22,7 +23,9 @@ export const listSites = async (req, res, next) => {
   try {
     const { companyId, branchId } = req.scope || {};
     await ensureConstructionTables();
-    const projectId = req.query.project_id ? toNumber(req.query.project_id) : null;
+    const projectId = req.query.project_id
+      ? toNumber(req.query.project_id)
+      : null;
     let sql = `SELECT s.*, p.project_name, p.project_code 
                FROM pm_sites s
                LEFT JOIN pm_projects p ON p.id = s.project_id
@@ -44,7 +47,8 @@ export const createSite = async (req, res, next) => {
   try {
     const { companyId, branchId } = req.scope || {};
     const b = req.body || {};
-    if (!b.site_name) throw httpError(400, "VALIDATION_ERROR", "Site name is required");
+    if (!b.site_name)
+      throw httpError(400, "VALIDATION_ERROR", "Site name is required");
 
     const result = await query(
       `INSERT INTO pm_sites (company_id, branch_id, project_id, site_code, site_name, address, city, state, country, gps_latitude, gps_longitude, site_engineer_name, contact_phone, status, remarks)
@@ -65,9 +69,11 @@ export const createSite = async (req, res, next) => {
         contact_phone: b.contact_phone || null,
         status: b.status || "ACTIVE",
         remarks: b.remarks || null,
-      }
+      },
     );
-    res.status(201).json({ id: result.insertId, message: "Site created successfully" });
+    res
+      .status(201)
+      .json({ id: result.insertId, message: "Site created successfully" });
   } catch (err) {
     next(err);
   }
@@ -79,9 +85,113 @@ export const listCostCodes = async (req, res, next) => {
     await ensureConstructionTables();
     const items = await query(
       `SELECT * FROM pm_cost_codes WHERE (company_id = :companyId OR company_id IS NULL) AND is_active = 'Y' ORDER BY code ASC`,
-      { companyId }
+      { companyId },
     );
     res.json({ items });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const listCostCategories = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    await ensureConstructionTables();
+    const items = await query(
+      `SELECT * FROM pm_cost_categories 
+       WHERE (company_id = :companyId OR company_id = 1 OR company_id IS NULL)
+       ORDER BY sort_order ASC, category_name ASC`,
+      { companyId: companyId || 1 },
+    );
+    res.json({ items });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createCostCategory = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const b = req.body || {};
+    if (!b.category_code || !b.category_name) {
+      throw httpError(400, "VALIDATION_ERROR", "Category code and name are required");
+    }
+    await ensureConstructionTables();
+    const cleanCode = String(b.category_code).trim().toUpperCase().replace(/\s+/g, '_');
+    const result = await query(
+      `INSERT INTO pm_cost_categories 
+        (company_id, category_code, category_name, description, cost_type, color_code, default_overhead_percent, default_profit_percent, is_active, sort_order)
+       VALUES 
+        (:companyId, :code, :name, :description, :cost_type, :color_code, :default_overhead_percent, :default_profit_percent, :is_active, :sort_order)`,
+      {
+        companyId: companyId || 1,
+        code: cleanCode,
+        name: String(b.category_name).trim(),
+        description: b.description || null,
+        cost_type: b.cost_type || "DIRECT",
+        color_code: b.color_code || "blue",
+        default_overhead_percent: Number(b.default_overhead_percent || 0),
+        default_profit_percent: Number(b.default_profit_percent || 0),
+        is_active: b.is_active === "N" ? "N" : "Y",
+        sort_order: Number(b.sort_order || 0),
+      },
+    );
+    res.status(201).json({ id: result.insertId, message: "Cost category created successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateCostCategory = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const id = toNumber(req.params.id);
+    const b = req.body || {};
+    if (!b.category_name) {
+      throw httpError(400, "VALIDATION_ERROR", "Category name is required");
+    }
+    await ensureConstructionTables();
+    await query(
+      `UPDATE pm_cost_categories SET
+        category_name = :name,
+        description = :description,
+        cost_type = :cost_type,
+        color_code = :color_code,
+        default_overhead_percent = :default_overhead_percent,
+        default_profit_percent = :default_profit_percent,
+        is_active = :is_active,
+        sort_order = :sort_order
+       WHERE id = :id AND (company_id = :companyId OR company_id = 1 OR company_id IS NULL)`,
+      {
+        id,
+        companyId: companyId || 1,
+        name: String(b.category_name).trim(),
+        description: b.description || null,
+        cost_type: b.cost_type || "DIRECT",
+        color_code: b.color_code || "blue",
+        default_overhead_percent: Number(b.default_overhead_percent || 0),
+        default_profit_percent: Number(b.default_profit_percent || 0),
+        is_active: b.is_active === "N" ? "N" : "Y",
+        sort_order: Number(b.sort_order || 0),
+      },
+    );
+    res.json({ ok: true, message: "Cost category updated successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteCostCategory = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const id = toNumber(req.params.id);
+    await ensureConstructionTables();
+    await query(
+      `DELETE FROM pm_cost_categories 
+       WHERE id = :id AND (company_id = :companyId OR company_id = 1 OR company_id IS NULL)`,
+      { id, companyId: companyId || 1 },
+    );
+    res.json({ ok: true, message: "Cost category removed" });
   } catch (err) {
     next(err);
   }
@@ -91,7 +201,8 @@ export const createCostCode = async (req, res, next) => {
   try {
     const { companyId } = req.scope || {};
     const b = req.body || {};
-    if (!b.code || !b.name) throw httpError(400, "VALIDATION_ERROR", "Code and name are required");
+    if (!b.code || !b.name)
+      throw httpError(400, "VALIDATION_ERROR", "Code and name are required");
 
     const result = await query(
       `INSERT INTO pm_cost_codes (company_id, code, name, category, standard_type, parent_id, description)
@@ -104,7 +215,7 @@ export const createCostCode = async (req, res, next) => {
         standard_type: b.standard_type || "CUSTOM",
         parent_id: toNumber(b.parent_id),
         description: b.description || null,
-      }
+      },
     );
     res.status(201).json({ id: result.insertId, message: "Cost code created" });
   } catch (err) {
@@ -134,7 +245,12 @@ export const createPhase = async (req, res, next) => {
   try {
     const { companyId } = req.scope || {};
     const b = req.body || {};
-    if (!b.project_id || !b.phase_name) throw httpError(400, "VALIDATION_ERROR", "Project and phase name required");
+    if (!b.project_id || !b.phase_name)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Project and phase name required",
+      );
 
     const result = await query(
       `INSERT INTO pm_phases (company_id, project_id, phase_code, phase_name, sequence_order, start_date, end_date, budget, status, description)
@@ -150,7 +266,7 @@ export const createPhase = async (req, res, next) => {
         budget: Number(b.budget || 0),
         status: b.status || "PLANNED",
         description: b.description || null,
-      }
+      },
     );
     res.status(201).json({ id: result.insertId, message: "Phase created" });
   } catch (err) {
@@ -184,7 +300,12 @@ export const createWorkPackage = async (req, res, next) => {
   try {
     const { companyId } = req.scope || {};
     const b = req.body || {};
-    if (!b.project_id || !b.package_name) throw httpError(400, "VALIDATION_ERROR", "Project and package name required");
+    if (!b.project_id || !b.package_name)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Project and package name required",
+      );
 
     const result = await query(
       `INSERT INTO pm_work_packages (company_id, project_id, phase_id, wbs_code, package_name, lead_user_id, estimated_cost, start_date, end_date, status, scope_description)
@@ -201,9 +322,11 @@ export const createWorkPackage = async (req, res, next) => {
         end_date: b.end_date || null,
         status: b.status || "PLANNED",
         scope_description: b.scope_description || null,
-      }
+      },
     );
-    res.status(201).json({ id: result.insertId, message: "Work package created" });
+    res
+      .status(201)
+      .json({ id: result.insertId, message: "Work package created" });
   } catch (err) {
     next(err);
   }
@@ -223,7 +346,7 @@ export const listTenders = async (req, res, next) => {
        LEFT JOIN sal_customers c ON c.id = t.client_id
        LEFT JOIN pm_projects p ON p.id = t.awarded_project_id
        WHERE (t.company_id = :companyId OR :companyId IS NULL) ORDER BY t.id DESC`,
-      { companyId: companyId || null }
+      { companyId: companyId || null },
     );
     res.json({ items });
   } catch (err) {
@@ -240,7 +363,7 @@ export const getTenderById = async (req, res, next) => {
        FROM pm_tenders t 
        LEFT JOIN sal_customers c ON c.id = t.client_id
        WHERE t.id = :id AND (t.company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
-      { id, companyId: companyId || null }
+      { id, companyId: companyId || null },
     );
     if (!rows.length) throw httpError(404, "NOT_FOUND", "Tender not found");
     res.json({ item: rows[0] });
@@ -253,7 +376,12 @@ export const createTender = async (req, res, next) => {
   try {
     const { companyId, branchId } = req.scope || {};
     const b = req.body || {};
-    if (!b.tender_code || !b.title) throw httpError(400, "VALIDATION_ERROR", "Tender code and title required");
+    if (!b.tender_code || !b.title)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Tender code and title required",
+      );
 
     const result = await query(
       `INSERT INTO pm_tenders (company_id, branch_id, tender_code, title, client_id, client_name, project_type, site_location, submission_date, estimated_value, bid_bond_amount, bid_bond_expiry, status, remarks, created_by)
@@ -274,9 +402,11 @@ export const createTender = async (req, res, next) => {
         status: b.status || "DRAFT",
         remarks: b.remarks || null,
         created_by: req.user?.id || null,
-      }
+      },
     );
-    res.status(201).json({ id: result.insertId, message: "Tender created successfully" });
+    res
+      .status(201)
+      .json({ id: result.insertId, message: "Tender created successfully" });
   } catch (err) {
     next(err);
   }
@@ -310,7 +440,7 @@ export const updateTender = async (req, res, next) => {
         bid_bond_expiry: b.bid_bond_expiry || null,
         status: b.status || "DRAFT",
         remarks: b.remarks || null,
-      }
+      },
     );
     res.json({ ok: true, message: "Tender updated" });
   } catch (err) {
@@ -324,7 +454,10 @@ export const awardTenderToProject = async (req, res, next) => {
     const tenderId = toNumber(req.params.id);
     const b = req.body || {};
 
-    const tenders = await query(`SELECT * FROM pm_tenders WHERE id = :tenderId AND company_id = :companyId LIMIT 1`, { tenderId, companyId });
+    const tenders = await query(
+      `SELECT * FROM pm_tenders WHERE id = :tenderId AND company_id = :companyId LIMIT 1`,
+      { tenderId, companyId },
+    );
     if (!tenders.length) throw httpError(404, "NOT_FOUND", "Tender not found");
     const tender = tenders[0];
 
@@ -345,13 +478,15 @@ export const awardTenderToProject = async (req, res, next) => {
         client_name: tender.client_name,
         contract_ref_no: b.contract_ref_no || tender.tender_code,
         contract_sum: Number(b.contract_sum || tender.estimated_value || 0),
-        revised_contract_sum: Number(b.contract_sum || tender.estimated_value || 0),
+        revised_contract_sum: Number(
+          b.contract_sum || tender.estimated_value || 0,
+        ),
         budget: Number(b.budget || tender.estimated_value || 0),
         start_date: b.start_date || new Date().toISOString().split("T")[0],
         end_date: b.end_date || null,
         site_address: tender.site_location,
         created_by: req.user?.id || null,
-      }
+      },
     );
 
     const projectId = projResult.insertId;
@@ -359,16 +494,20 @@ export const awardTenderToProject = async (req, res, next) => {
     // Link tender to awarded project and mark awarded
     await query(
       `UPDATE pm_tenders SET status = 'AWARDED', awarded_project_id = :projectId WHERE id = :tenderId`,
-      { projectId, tenderId }
+      { projectId, tenderId },
     );
 
     // Link any tender BOQs to this project
     await query(
       `UPDATE pm_boqs SET project_id = :projectId WHERE tender_id = :tenderId`,
-      { projectId, tenderId }
+      { projectId, tenderId },
     );
 
-    res.json({ ok: true, project_id: projectId, message: "Tender awarded and project initiated successfully" });
+    res.json({
+      ok: true,
+      project_id: projectId,
+      message: "Tender awarded and project initiated successfully",
+    });
   } catch (err) {
     next(err);
   }
@@ -378,11 +517,14 @@ export const listBOQs = async (req, res, next) => {
   try {
     const { companyId } = req.scope || {};
     await ensureConstructionTables();
-    const projectId = req.query.project_id ? toNumber(req.query.project_id) : null;
+    const projectId = req.query.project_id
+      ? toNumber(req.query.project_id)
+      : null;
     const tenderId = req.query.tender_id ? toNumber(req.query.tender_id) : null;
 
     let sql = `SELECT b.*, 
-                      p.project_name, 
+                      p.project_name,
+                      p.project_code, 
                       p.project_code, 
                       COALESCE(b.client_name, p.client_name) AS client_name,
                       COALESCE(b.site_location, p.site_address) AS site_location,
@@ -428,7 +570,7 @@ export const getBOQById = async (req, res, next) => {
        LEFT JOIN adm_users u ON u.id = b.created_by
        WHERE b.id = :id AND (b.company_id = :companyId OR :companyId IS NULL)
        LIMIT 1`,
-      { id, companyId: companyId || 1 }
+      { id, companyId: companyId || 1 },
     );
     if (!boqs.length) throw httpError(404, "NOT_FOUND", "BOQ not found");
 
@@ -437,7 +579,9 @@ export const getBOQById = async (req, res, next) => {
       boq.client_name = boq.proj_client_name;
     }
     if (!boq.site_location && boq.proj_site_address) {
-      boq.site_location = [boq.proj_site_address, boq.proj_site_city].filter(Boolean).join(", ");
+      boq.site_location = [boq.proj_site_address, boq.proj_site_city]
+        .filter(Boolean)
+        .join(", ");
     }
 
     const items = await query(
@@ -454,12 +598,12 @@ export const getBOQById = async (req, res, next) => {
        LEFT JOIN pm_cost_codes cc ON cc.id = bi.cost_code_id
        WHERE bi.boq_id = :id 
        ORDER BY bi.item_order ASC, bi.id ASC`,
-      { id }
+      { id },
     );
 
     const revisions = await query(
       `SELECT * FROM pm_boq_revisions WHERE boq_id = :id ORDER BY id DESC`,
-      { id }
+      { id },
     ).catch(() => []);
 
     res.json({ item: boq, items, revisions });
@@ -473,7 +617,8 @@ export const createBOQ = async (req, res, next) => {
     const { companyId, branchId } = req.scope || {};
     const b = req.body || {};
     const title = b.boq_title || b.title;
-    if (!title) throw httpError(400, "VALIDATION_ERROR", "BOQ title is required");
+    if (!title)
+      throw httpError(400, "VALIDATION_ERROR", "BOQ title is required");
 
     const projectId = toNumber(b.project_id);
     let clientName = b.client_name || "";
@@ -481,27 +626,46 @@ export const createBOQ = async (req, res, next) => {
     let projectCode = "";
 
     if (projectId) {
-      const pRows = await query(`SELECT project_code, project_name, client_name, site_address, site_city FROM pm_projects WHERE id = :projectId LIMIT 1`, { projectId });
+      const pRows = await query(
+        `SELECT project_code, project_name, client_name, site_address, site_city FROM pm_projects WHERE id = :projectId LIMIT 1`,
+        { projectId },
+      );
       if (pRows.length) {
         projectCode = pRows[0].project_code || "";
         if (!clientName) clientName = pRows[0].client_name || "";
-        if (!siteLocation) siteLocation = [pRows[0].site_address, pRows[0].site_city].filter(Boolean).join(", ");
+        if (!siteLocation)
+          siteLocation = [pRows[0].site_address, pRows[0].site_city]
+            .filter(Boolean)
+            .join(", ");
       }
     }
 
-    const boqRef = b.boq_reference || b.boq_number || `BOQ-${projectCode ? projectCode + '-' : ''}${Date.now().toString().slice(-4)}`;
+    const boqRef =
+      b.boq_reference ||
+      b.boq_number ||
+      `BOQ-${projectCode ? projectCode + "-" : ""}${Date.now().toString().slice(-4)}`;
     const boqDate = b.boq_date || new Date().toISOString().split("T")[0];
     const version = b.version || "1.0";
     const currency = b.currency || "GHS";
     const subtotal = Number(b.subtotal || 0);
     const contingencyPercent = Number(b.contingency_percent || 0);
-    const contingencyAmount = Number(b.contingency_amount || (subtotal * contingencyPercent / 100));
+    const contingencyAmount = Number(
+      b.contingency_amount || (subtotal * contingencyPercent) / 100,
+    );
     const taxPercent = Number(b.tax_percent || 0);
-    const taxAmount = Number(b.tax_amount || ((subtotal + contingencyAmount) * taxPercent / 100));
+    const taxAmount = Number(
+      b.tax_amount || ((subtotal + contingencyAmount) * taxPercent) / 100,
+    );
     const otherCharges = Number(b.other_charges || 0);
-    const totalAmount = Number(b.total_amount || (subtotal + contingencyAmount + taxAmount + otherCharges));
+    const totalAmount = Number(
+      b.total_amount || subtotal + contingencyAmount + taxAmount + otherCharges,
+    );
     const status = b.status || "DRAFT";
-    const prepByName = b.prepared_by_name || req.user?.username || req.user?.name || "System User";
+    const prepByName =
+      b.prepared_by_name ||
+      req.user?.username ||
+      req.user?.name ||
+      "System User";
     const prepDate = b.prepared_date || boqDate;
 
     const result = await query(
@@ -551,7 +715,7 @@ export const createBOQ = async (req, res, next) => {
         approved_date: b.approved_date || null,
         remarks: b.remarks || null,
         created_by: req.user?.id || null,
-      }
+      },
     );
 
     const boqId = result.insertId;
@@ -579,8 +743,8 @@ export const createBOQ = async (req, res, next) => {
           total_amount: totalAmount,
           status,
           remarks: "Initial BOQ creation",
-          snapshot_json: JSON.stringify({ header: b, items: b.items || [] })
-        }
+          snapshot_json: JSON.stringify({ header: b, items: b.items || [] }),
+        },
       );
     } catch (e) {}
 
@@ -592,18 +756,18 @@ export const createBOQ = async (req, res, next) => {
         idx++;
         const qty = Number(itm.quantity || itm.estimated_qty || 0);
         const rate = Number(itm.unit_rate || itm.tender_rate || 0);
-        const amt = Number(itm.amount || itm.total_amount || (qty * rate));
+        const amt = Number(itm.amount || itm.total_amount || qty * rate);
         runningSubtotal += amt;
         const taxRate = Number(itm.tax_rate_percent || 0);
         const itmTaxAmt = (amt * taxRate) / 100;
 
         await query(
           `INSERT INTO pm_boq_items (
-            company_id, boq_id, project_id, item_code, item_description, uom,
+            company_id, boq_id, project_id, item_code, wbs_code, scope_name, item_description, uom,
             cost_category, quantity, unit_rate, amount, tax_rate_percent, tax_amount,
             estimated_qty, tender_rate, tender_amount, item_order, remarks
           ) VALUES (
-            :companyId, :boq_id, :project_id, :item_code, :item_description, :uom,
+            :companyId, :boq_id, :project_id, :item_code, :wbs_code, :scope_name, :item_description, :uom,
             :cost_category, :quantity, :unit_rate, :amount, :tax_rate_percent, :tax_amount,
             :estimated_qty, :tender_rate, :tender_amount, :item_order, :remarks
           )`,
@@ -612,6 +776,8 @@ export const createBOQ = async (req, res, next) => {
             boq_id: boqId,
             project_id: projectId,
             item_code: itm.item_code || `ITM-${idx}`,
+            wbs_code: itm.wbs_code || null,
+            scope_name: itm.scope_name || null,
             item_description: itm.item_description || itm.description || "",
             uom: itm.uom || itm.unit || "EA",
             cost_category: itm.cost_category || "MATERIALS",
@@ -625,13 +791,15 @@ export const createBOQ = async (req, res, next) => {
             tender_amount: amt,
             item_order: idx,
             remarks: itm.remarks || null,
-          }
+          },
         );
       }
 
       const finalContingency = (runningSubtotal * contingencyPercent) / 100;
-      const finalTax = ((runningSubtotal + finalContingency) * taxPercent) / 100;
-      const finalTotal = runningSubtotal + finalContingency + finalTax + otherCharges;
+      const finalTax =
+        ((runningSubtotal + finalContingency) * taxPercent) / 100;
+      const finalTotal =
+        runningSubtotal + finalContingency + finalTax + otherCharges;
 
       await query(
         `UPDATE pm_boqs SET 
@@ -640,11 +808,23 @@ export const createBOQ = async (req, res, next) => {
            tax_amount = :taxAmount, 
            total_amount = :finalTotal
          WHERE id = :boqId`,
-        { subtotal: runningSubtotal, contingencyAmount: finalContingency, taxAmount: finalTax, finalTotal, boqId }
+        {
+          subtotal: runningSubtotal,
+          contingencyAmount: finalContingency,
+          taxAmount: finalTax,
+          finalTotal,
+          boqId,
+        },
       );
     }
 
-    res.status(201).json({ id: boqId, boq_reference: boqRef, message: "BOQ created successfully" });
+    res
+      .status(201)
+      .json({
+        id: boqId,
+        boq_reference: boqRef,
+        message: "BOQ created successfully",
+      });
   } catch (err) {
     next(err);
   }
@@ -656,7 +836,10 @@ export const updateBOQ = async (req, res, next) => {
     const id = toNumber(req.params.id);
     const b = req.body || {};
 
-    const boqCheck = await query(`SELECT id FROM pm_boqs WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`, { id, companyId: companyId || 1 });
+    const boqCheck = await query(
+      `SELECT id FROM pm_boqs WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`,
+      { id, companyId: companyId || 1 },
+    );
     if (!boqCheck.length) throw httpError(404, "NOT_FOUND", "BOQ not found");
 
     await query(
@@ -694,13 +877,21 @@ export const updateBOQ = async (req, res, next) => {
         boq_date: b.boq_date || null,
         version: b.version || null,
         currency: b.currency || null,
-        contingency_percent: b.contingency_percent !== undefined ? Number(b.contingency_percent) : null,
-        contingency_amount: b.contingency_amount !== undefined ? Number(b.contingency_amount) : null,
+        contingency_percent:
+          b.contingency_percent !== undefined
+            ? Number(b.contingency_percent)
+            : null,
+        contingency_amount:
+          b.contingency_amount !== undefined
+            ? Number(b.contingency_amount)
+            : null,
         tax_percent: b.tax_percent !== undefined ? Number(b.tax_percent) : null,
         tax_amount: b.tax_amount !== undefined ? Number(b.tax_amount) : null,
-        other_charges: b.other_charges !== undefined ? Number(b.other_charges) : null,
+        other_charges:
+          b.other_charges !== undefined ? Number(b.other_charges) : null,
         subtotal: b.subtotal !== undefined ? Number(b.subtotal) : null,
-        total_amount: b.total_amount !== undefined ? Number(b.total_amount) : null,
+        total_amount:
+          b.total_amount !== undefined ? Number(b.total_amount) : null,
         status: b.status || null,
         prepared_by_name: b.prepared_by_name || null,
         prepared_date: b.prepared_date || null,
@@ -710,7 +901,7 @@ export const updateBOQ = async (req, res, next) => {
         approved_date: b.approved_date || null,
         approval_remarks: b.approval_remarks || null,
         remarks: b.remarks || null,
-      }
+      },
     );
 
     res.json({ ok: true, message: "BOQ updated successfully" });
@@ -723,10 +914,10 @@ export const saveBOQItems = async (req, res, next) => {
   try {
     const { companyId } = req.scope || {};
     const boqId = toNumber(req.params.id);
-    const { 
-      items = [], 
-      contingency_percent, 
-      tax_percent, 
+    const {
+      items = [],
+      contingency_percent,
+      tax_percent,
       other_charges,
       version,
       status,
@@ -735,10 +926,13 @@ export const saveBOQItems = async (req, res, next) => {
       approved_by_name,
       remarks,
       record_revision = false,
-      revision_remarks = ""
+      revision_remarks = "",
     } = req.body;
 
-    const boqRows = await query(`SELECT * FROM pm_boqs WHERE id = :boqId AND (company_id = :companyId OR :companyId IS NULL)`, { boqId, companyId: companyId || 1 });
+    const boqRows = await query(
+      `SELECT * FROM pm_boqs WHERE id = :boqId AND (company_id = :companyId OR :companyId IS NULL)`,
+      { boqId, companyId: companyId || 1 },
+    );
     if (!boqRows.length) throw httpError(404, "NOT_FOUND", "BOQ not found");
     const currentBoq = boqRows[0];
 
@@ -750,9 +944,19 @@ export const saveBOQItems = async (req, res, next) => {
 
     for (const itm of items) {
       idx++;
-      const qty = Number(itm.quantity !== undefined ? itm.quantity : (itm.estimated_qty || 0));
-      const rate = Number(itm.unit_rate !== undefined ? itm.unit_rate : (itm.tender_rate || 0));
-      const amt = Number(itm.amount !== undefined ? itm.amount : (itm.total_amount !== undefined ? itm.total_amount : (qty * rate)));
+      const qty = Number(
+        itm.quantity !== undefined ? itm.quantity : itm.estimated_qty || 0,
+      );
+      const rate = Number(
+        itm.unit_rate !== undefined ? itm.unit_rate : itm.tender_rate || 0,
+      );
+      const amt = Number(
+        itm.amount !== undefined
+          ? itm.amount
+          : itm.total_amount !== undefined
+            ? itm.total_amount
+            : qty * rate,
+      );
       runningSubtotal += amt;
 
       const taxRate = Number(itm.tax_rate_percent || 0);
@@ -764,19 +968,23 @@ export const saveBOQItems = async (req, res, next) => {
 
       await query(
         `INSERT INTO pm_boq_items (
-          company_id, boq_id, project_id, item_code, item_description, uom,
+          company_id, boq_id, project_id, item_code, wbs_code, scope_name, item_description, uom,
           cost_category, quantity, unit_rate, amount, tax_rate_percent, tax_amount,
-          estimated_qty, tender_rate, tender_amount, item_order, remarks
+          estimated_qty, tender_rate, tender_amount, item_order, remarks,
+          task_id, cost_category_id, cost_centre_id, department_id, base_cost, discount_percent, discount_amount, tax_type, total_cost, estimation_details_json
         ) VALUES (
-          :companyId, :boq_id, :project_id, :item_code, :item_description, :uom,
+          :companyId, :boq_id, :project_id, :item_code, :wbs_code, :scope_name, :item_description, :uom,
           :cost_category, :quantity, :unit_rate, :amount, :tax_rate_percent, :tax_amount,
-          :estimated_qty, :tender_rate, :tender_amount, :item_order, :remarks
+          :estimated_qty, :tender_rate, :tender_amount, :item_order, :remarks,
+          :task_id, :cost_category_id, :cost_centre_id, :department_id, :base_cost, :discount_percent, :discount_amount, :tax_type, :total_cost, :estimation_details_json
         )`,
         {
           companyId: companyId || 1,
           boq_id: boqId,
           project_id: currentBoq.project_id,
           item_code: code,
+          wbs_code: itm.wbs_code || null,
+          scope_name: itm.scope_name || null,
           item_description: desc,
           uom,
           cost_category: cat,
@@ -790,15 +998,34 @@ export const saveBOQItems = async (req, res, next) => {
           tender_amount: amt,
           item_order: itm.item_order || idx,
           remarks: itm.remarks || null,
-        }
+          task_id: itm.task_id ? Number(itm.task_id) : null,
+          cost_category_id: itm.cost_category_id ? Number(itm.cost_category_id) : null,
+          cost_centre_id: itm.cost_centre_id ? Number(itm.cost_centre_id) : null,
+          department_id: itm.department_id ? Number(itm.department_id) : null,
+          base_cost: itm.base_cost !== undefined ? Number(itm.base_cost) : (qty * rate),
+          discount_percent: Number(itm.discount_percent || 0),
+          discount_amount: Number(itm.discount_amount || 0),
+          tax_type: itm.tax_type || 'STANDARD',
+          total_cost: itm.total_cost !== undefined ? Number(itm.total_cost) : amt,
+          estimation_details_json: itm.estimation_details ? (typeof itm.estimation_details === 'string' ? itm.estimation_details : JSON.stringify(itm.estimation_details)) : null,
+        },
       );
     }
 
-    const contPct = contingency_percent !== undefined ? Number(contingency_percent) : Number(currentBoq.contingency_percent || 0);
+    const contPct =
+      contingency_percent !== undefined
+        ? Number(contingency_percent)
+        : Number(currentBoq.contingency_percent || 0);
     const contAmt = (runningSubtotal * contPct) / 100;
-    const taxPct = tax_percent !== undefined ? Number(tax_percent) : Number(currentBoq.tax_percent || 0);
+    const taxPct =
+      tax_percent !== undefined
+        ? Number(tax_percent)
+        : Number(currentBoq.tax_percent || 0);
     const taxAmt = ((runningSubtotal + contAmt) * taxPct) / 100;
-    const otherChg = other_charges !== undefined ? Number(other_charges) : Number(currentBoq.other_charges || 0);
+    const otherChg =
+      other_charges !== undefined
+        ? Number(other_charges)
+        : Number(currentBoq.other_charges || 0);
     const finalTotal = runningSubtotal + contAmt + taxAmt + otherChg;
 
     await query(
@@ -817,13 +1044,38 @@ export const saveBOQItems = async (req, res, next) => {
          prepared_by_name = COALESCE(:prepared_by_name, prepared_by_name),
          reviewed_by_name = COALESCE(:reviewed_by_name, reviewed_by_name),
          approved_by_name = COALESCE(:approved_by_name, approved_by_name),
-         remarks = COALESCE(:remarks, remarks)
+         remarks = COALESCE(:remarks, remarks),
+         estimate_number = COALESCE(:estimate_number, estimate_number),
+         estimate_title = COALESCE(:estimate_title, estimate_title),
+         estimate_description = COALESCE(:estimate_description, estimate_description),
+         estimation_method = COALESCE(:estimation_method, estimation_method),
+         validity_date = COALESCE(:validity_date, validity_date),
+         department_id = COALESCE(:department_id, department_id),
+         department_name = COALESCE(:department_name, department_name),
+         cost_centre_id = COALESCE(:cost_centre_id, cost_centre_id),
+         cost_centre_name = COALESCE(:cost_centre_name, cost_centre_name),
+         direct_cost_subtotal = COALESCE(:direct_cost_subtotal, direct_cost_subtotal),
+         indirect_cost_subtotal = COALESCE(:indirect_cost_subtotal, indirect_cost_subtotal),
+         escalation_percent = COALESCE(:escalation_percent, escalation_percent),
+         escalation_amount = COALESCE(:escalation_amount, escalation_amount),
+         discount_percent = COALESCE(:discount_percent, discount_percent),
+         discount_amount = COALESCE(:discount_amount, discount_amount),
+         apply_profit_margin = COALESCE(:apply_profit_margin, apply_profit_margin),
+         profit_margin_percent = COALESCE(:profit_margin_percent, profit_margin_percent),
+         profit_margin_amount = COALESCE(:profit_margin_amount, profit_margin_amount),
+         proposed_budget = COALESCE(:proposed_budget, proposed_budget),
+         notes_and_assumptions = COALESCE(:notes_and_assumptions, notes_and_assumptions),
+         indirect_costs_json = COALESCE(:indirect_costs_json, indirect_costs_json),
+         allocations_json = COALESCE(:allocations_json, allocations_json)
        WHERE id = :boqId`,
       {
         subtotal: runningSubtotal,
         contingency_percent: contPct,
         contingency_amount: contAmt,
-        tax_code_id: req.body.tax_code_id !== undefined ? toNumber(req.body.tax_code_id) : null,
+        tax_code_id:
+          req.body.tax_code_id !== undefined
+            ? toNumber(req.body.tax_code_id)
+            : null,
         tax_code: req.body.tax_code || null,
         tax_percent: taxPct,
         tax_amount: taxAmt,
@@ -835,8 +1087,30 @@ export const saveBOQItems = async (req, res, next) => {
         reviewed_by_name: reviewed_by_name || null,
         approved_by_name: approved_by_name || null,
         remarks: remarks || null,
+        estimate_number: req.body.estimate_number || null,
+        estimate_title: req.body.estimate_title || null,
+        estimate_description: req.body.estimate_description || null,
+        estimation_method: req.body.estimation_method || null,
+        validity_date: req.body.validity_date || null,
+        department_id: req.body.department_id ? Number(req.body.department_id) : null,
+        department_name: req.body.department_name || null,
+        cost_centre_id: req.body.cost_centre_id ? Number(req.body.cost_centre_id) : null,
+        cost_centre_name: req.body.cost_centre_name || null,
+        direct_cost_subtotal: req.body.direct_cost_subtotal !== undefined ? Number(req.body.direct_cost_subtotal) : null,
+        indirect_cost_subtotal: req.body.indirect_cost_subtotal !== undefined ? Number(req.body.indirect_cost_subtotal) : null,
+        escalation_percent: req.body.escalation_percent !== undefined ? Number(req.body.escalation_percent) : null,
+        escalation_amount: req.body.escalation_amount !== undefined ? Number(req.body.escalation_amount) : null,
+        discount_percent: req.body.discount_percent !== undefined ? Number(req.body.discount_percent) : null,
+        discount_amount: req.body.discount_amount !== undefined ? Number(req.body.discount_amount) : null,
+        apply_profit_margin: req.body.apply_profit_margin !== undefined ? (req.body.apply_profit_margin ? 1 : 0) : null,
+        profit_margin_percent: req.body.profit_margin_percent !== undefined ? Number(req.body.profit_margin_percent) : null,
+        profit_margin_amount: req.body.profit_margin_amount !== undefined ? Number(req.body.profit_margin_amount) : null,
+        proposed_budget: req.body.proposed_budget !== undefined ? Number(req.body.proposed_budget) : null,
+        notes_and_assumptions: req.body.notes_and_assumptions || null,
+        indirect_costs_json: req.body.indirect_costs_json ? (typeof req.body.indirect_costs_json === 'string' ? req.body.indirect_costs_json : JSON.stringify(req.body.indirect_costs_json)) : null,
+        allocations_json: req.body.allocations_json ? (typeof req.body.allocations_json === 'string' ? req.body.allocations_json : JSON.stringify(req.body.allocations_json)) : null,
         boqId,
-      }
+      },
     );
 
     // Save revision entry if requested
@@ -853,17 +1127,27 @@ export const saveBOQItems = async (req, res, next) => {
           {
             boq_id: boqId,
             version: version || currentBoq.version || "1.0",
-            prepared_by: prepared_by_name || currentBoq.prepared_by_name || null,
-            reviewed_by: reviewed_by_name || currentBoq.reviewed_by_name || null,
-            approved_by: approved_by_name || currentBoq.approved_by_name || null,
+            prepared_by:
+              prepared_by_name || currentBoq.prepared_by_name || null,
+            reviewed_by:
+              reviewed_by_name || currentBoq.reviewed_by_name || null,
+            approved_by:
+              approved_by_name || currentBoq.approved_by_name || null,
             subtotal: runningSubtotal,
             contingency_amount: contAmt,
             tax_amount: taxAmt,
             total_amount: finalTotal,
             status: status || currentBoq.status || "DRAFT",
-            remarks: revision_remarks || remarks || `Revision update with ${items.length} items`,
-            snapshot_json: JSON.stringify({ items, subtotal: runningSubtotal, total_amount: finalTotal })
-          }
+            remarks:
+              revision_remarks ||
+              remarks ||
+              `Revision update with ${items.length} items`,
+            snapshot_json: JSON.stringify({
+              items,
+              subtotal: runningSubtotal,
+              total_amount: finalTotal,
+            }),
+          },
         );
       } catch (e) {}
     }
@@ -875,7 +1159,7 @@ export const saveBOQItems = async (req, res, next) => {
       tax_amount: taxAmt,
       total_amount: finalTotal,
       item_count: items.length,
-      message: "BOQ items and calculated totals saved successfully"
+      message: "BOQ items and calculated totals saved successfully",
     });
   } catch (err) {
     next(err);
@@ -886,15 +1170,27 @@ export const updateBOQStatus = async (req, res, next) => {
   try {
     const { companyId } = req.scope || {};
     const id = toNumber(req.params.id);
-    const { status, approved_by_name, approved_date, approval_remarks } = req.body;
+    const { status, approved_by_name, approved_date, approval_remarks } =
+      req.body;
     if (!status) throw httpError(400, "VALIDATION_ERROR", "Status is required");
 
-    const boqRows = await query(`SELECT * FROM pm_boqs WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`, { id, companyId: companyId || 1 });
+    const boqRows = await query(
+      `SELECT * FROM pm_boqs WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`,
+      { id, companyId: companyId || 1 },
+    );
     if (!boqRows.length) throw httpError(404, "NOT_FOUND", "BOQ not found");
     const boq = boqRows[0];
 
-    const appName = approved_by_name || (status === 'APPROVED' ? (req.user?.username || req.user?.name || "Project Director") : boq.approved_by_name);
-    const appDate = approved_date || (status === 'APPROVED' ? new Date().toISOString().split("T")[0] : boq.approved_date);
+    const appName =
+      approved_by_name ||
+      (status === "APPROVED"
+        ? req.user?.username || req.user?.name || "Project Director"
+        : boq.approved_by_name);
+    const appDate =
+      approved_date ||
+      (status === "APPROVED"
+        ? new Date().toISOString().split("T")[0]
+        : boq.approved_date);
 
     await query(
       `UPDATE pm_boqs SET 
@@ -908,8 +1204,8 @@ export const updateBOQStatus = async (req, res, next) => {
         approved_by_name: appName,
         approved_date: appDate,
         approval_remarks: approval_remarks || null,
-        id
-      }
+        id,
+      },
     );
 
     // Record revision entry on approval / status transition
@@ -933,12 +1229,16 @@ export const updateBOQStatus = async (req, res, next) => {
           tax_amount: boq.tax_amount,
           total_amount: boq.total_amount,
           status,
-          remarks: approval_remarks || `Status transitioned to ${status}`
-        }
+          remarks: approval_remarks || `Status transitioned to ${status}`,
+        },
       );
     } catch (e) {}
 
-    res.json({ ok: true, status, message: `BOQ status transitioned to ${status}` });
+    res.json({
+      ok: true,
+      status,
+      message: `BOQ status transitioned to ${status}`,
+    });
   } catch (err) {
     next(err);
   }
@@ -950,17 +1250,22 @@ export const createBOQRevision = async (req, res, next) => {
     const id = toNumber(req.params.id);
     const { new_version, revision_remarks } = req.body;
 
-    const boqRows = await query(`SELECT * FROM pm_boqs WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`, { id, companyId: companyId || 1 });
+    const boqRows = await query(
+      `SELECT * FROM pm_boqs WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`,
+      { id, companyId: companyId || 1 },
+    );
     if (!boqRows.length) throw httpError(404, "NOT_FOUND", "BOQ not found");
     const boq = boqRows[0];
 
-    const items = await query(`SELECT * FROM pm_boq_items WHERE boq_id = :id`, { id });
+    const items = await query(`SELECT * FROM pm_boq_items WHERE boq_id = :id`, {
+      id,
+    });
     const currentVerNum = parseFloat(boq.version || "1.0") || 1.0;
     const nextVer = new_version || (currentVerNum + 1.0).toFixed(1);
 
     await query(
       `UPDATE pm_boqs SET version = :nextVer, status = 'REVISED' WHERE id = :id`,
-      { nextVer, id }
+      { nextVer, id },
     );
 
     await query(
@@ -982,11 +1287,15 @@ export const createBOQRevision = async (req, res, next) => {
         tax_amount: boq.tax_amount,
         total_amount: boq.total_amount,
         remarks: revision_remarks || `New revision ${nextVer} initialized`,
-        snapshot_json: JSON.stringify({ header: boq, items })
-      }
+        snapshot_json: JSON.stringify({ header: boq, items }),
+      },
     );
 
-    res.json({ ok: true, version: nextVer, message: `New revision ${nextVer} created successfully` });
+    res.json({
+      ok: true,
+      version: nextVer,
+      message: `New revision ${nextVer} created successfully`,
+    });
   } catch (err) {
     next(err);
   }
@@ -995,7 +1304,10 @@ export const createBOQRevision = async (req, res, next) => {
 export const getBOQRevisions = async (req, res, next) => {
   try {
     const id = toNumber(req.params.id);
-    const revisions = await query(`SELECT * FROM pm_boq_revisions WHERE boq_id = :id ORDER BY id DESC`, { id });
+    const revisions = await query(
+      `SELECT * FROM pm_boq_revisions WHERE boq_id = :id ORDER BY id DESC`,
+      { id },
+    );
     res.json({ revisions });
   } catch (err) {
     next(err);
@@ -1007,10 +1319,16 @@ export const deleteBOQ = async (req, res, next) => {
     const { companyId } = req.scope || {};
     const id = toNumber(req.params.id);
 
-    await query(`DELETE FROM pm_rate_analyses WHERE boq_item_id IN (SELECT id FROM pm_boq_items WHERE boq_id = :id)`, { id });
+    await query(
+      `DELETE FROM pm_rate_analyses WHERE boq_item_id IN (SELECT id FROM pm_boq_items WHERE boq_id = :id)`,
+      { id },
+    );
     await query(`DELETE FROM pm_boq_items WHERE boq_id = :id`, { id });
     await query(`DELETE FROM pm_boq_revisions WHERE boq_id = :id`, { id });
-    await query(`DELETE FROM pm_boqs WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`, { id, companyId: companyId || 1 });
+    await query(
+      `DELETE FROM pm_boqs WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`,
+      { id, companyId: companyId || 1 },
+    );
 
     res.json({ ok: true, message: "BOQ deleted successfully" });
   } catch (err) {
@@ -1021,8 +1339,29 @@ export const deleteBOQ = async (req, res, next) => {
 export const getRateAnalysis = async (req, res, next) => {
   try {
     const boqItemId = toNumber(req.params.boqItemId);
-    const rows = await query(`SELECT * FROM pm_rate_analyses WHERE boq_item_id = :boqItemId LIMIT 1`, { boqItemId });
-    res.json({ item: rows.length ? rows[0] : null });
+    await ensureConstructionTables();
+    const rows = await query(
+      `SELECT ra.*, bi.item_code, bi.item_description, bi.uom, bi.quantity, bi.unit_rate AS current_unit_rate, bi.cost_category
+       FROM pm_rate_analyses ra
+       JOIN pm_boq_items bi ON bi.id = ra.boq_item_id
+       WHERE ra.boq_item_id = :boqItemId LIMIT 1`,
+      { boqItemId },
+    );
+    if (!rows.length) {
+      const itemRows = await query(
+        `SELECT id, item_code, item_description, uom, quantity, unit_rate AS current_unit_rate, cost_category FROM pm_boq_items WHERE id = :boqItemId LIMIT 1`,
+        { boqItemId },
+      );
+      return res.json({ item: null, boq_item: itemRows.length ? itemRows[0] : null });
+    }
+    const r = rows[0];
+    let breakdown = null;
+    if (r.breakdown_json) {
+      try {
+        breakdown = typeof r.breakdown_json === "string" ? JSON.parse(r.breakdown_json) : r.breakdown_json;
+      } catch (e) {}
+    }
+    res.json({ item: { ...r, breakdown } });
   } catch (err) {
     next(err);
   }
@@ -1030,51 +1369,99 @@ export const getRateAnalysis = async (req, res, next) => {
 
 export const saveRateAnalysis = async (req, res, next) => {
   try {
+    const { companyId } = req.scope || {};
     const boqItemId = toNumber(req.params.boqItemId);
     const b = req.body || {};
+    await ensureConstructionTables();
 
     const mat = Number(b.material_cost || 0);
     const lab = Number(b.labour_cost || 0);
     const plant = Number(b.plant_cost || 0);
-    const sub = Number(b.subcontract_cost || 0);
-    const directTotal = mat + lab + plant + sub;
+    const sub = Number(b.subcontract_cost ?? b.subc_cost ?? 0);
+    const cloud = Number(b.cloud_software_cost || 0);
+    const logistics = Number(b.logistics_cost ?? b.transport_cost ?? 0);
+    const other = Number(b.other_cost || 0);
+
+    const directTotal = mat + lab + plant + sub + cloud + logistics + other;
+
+    const wastagePct = Number(b.wastage_percent || 0);
+    const wastageAmt = (mat * wastagePct) / 100;
+    const directWithWastage = directTotal + wastageAmt;
 
     const ovhPct = Number(b.overhead_percent || 0);
-    const ovhAmt = (directTotal * ovhPct) / 100;
-    const profitPct = Number(b.profit_percent || 0);
-    const profitAmt = ((directTotal + ovhAmt) * profitPct) / 100;
-    const computedUnitRate = directTotal + ovhAmt + profitAmt;
+    const ovhAmt =
+      b.overhead_amount !== undefined && b.overhead_amount !== null && !isNaN(b.overhead_amount) && Number(b.overhead_amount) > 0 && ovhPct === 0
+        ? Number(b.overhead_amount)
+        : (directWithWastage * ovhPct) / 100;
+
+    const profitPct = Number(b.profit_percent ?? b.profit_markup_percent ?? 0);
+    const costBase = directWithWastage + ovhAmt;
+    const profitAmt =
+      b.profit_amount !== undefined && b.profit_amount !== null && !isNaN(b.profit_amount) && Number(b.profit_amount) > 0 && profitPct === 0
+        ? Number(b.profit_amount)
+        : (costBase * profitPct) / 100;
+
+    const computedUnitRate = Number((costBase + profitAmt).toFixed(2));
+
+    const breakdownJsonStr = b.breakdown
+      ? JSON.stringify(b.breakdown)
+      : b.breakdown_json
+      ? typeof b.breakdown_json === "string"
+        ? b.breakdown_json
+        : JSON.stringify(b.breakdown_json)
+      : null;
 
     await query(
       `INSERT INTO pm_rate_analyses 
-        (boq_item_id, material_cost, labour_cost, plant_cost, subcontract_cost, overhead_percent, overhead_amount, profit_percent, profit_amount, computed_unit_rate, notes)
+        (company_id, boq_item_id, material_cost, labour_cost, plant_cost, subcontract_cost, subc_cost, transport_cost, cloud_software_cost, logistics_cost, overhead_percent, overhead_amount, profit_percent, profit_markup_percent, profit_amount, wastage_percent, computed_unit_rate, breakdown_json, notes)
        VALUES 
-        (:boqItemId, :mat, :lab, :plant, :sub, :ovhPct, :ovhAmt, :profitPct, :profitAmt, :computedUnitRate, :notes)
+        (:companyId, :boqItemId, :mat, :lab, :plant, :sub, :sub, :logistics, :cloud, :logistics, :ovhPct, :ovhAmt, :profitPct, :profitPct, :profitAmt, :wastagePct, :computedUnitRate, :breakdownJsonStr, :notes)
        ON DUPLICATE KEY UPDATE
-        material_cost = :mat, labour_cost = :lab, plant_cost = :plant, subcontract_cost = :sub,
-        overhead_percent = :ovhPct, overhead_amount = :ovhAmt, profit_percent = :profitPct,
-        profit_amount = :profitAmt, computed_unit_rate = :computedUnitRate, notes = :notes`,
+        material_cost = :mat, labour_cost = :lab, plant_cost = :plant,
+        subcontract_cost = :sub, subc_cost = :sub,
+        transport_cost = :logistics, cloud_software_cost = :cloud, logistics_cost = :logistics,
+        overhead_percent = :ovhPct, overhead_amount = :ovhAmt,
+        profit_percent = :profitPct, profit_markup_percent = :profitPct,
+        profit_amount = :profitAmt, wastage_percent = :wastagePct,
+        computed_unit_rate = :computedUnitRate,
+        breakdown_json = :breakdownJsonStr,
+        notes = :notes`,
       {
+        companyId: companyId || 1,
         boqItemId,
         mat,
         lab,
         plant,
         sub,
+        cloud,
+        logistics,
         ovhPct,
         ovhAmt,
         profitPct,
         profitAmt,
+        wastagePct,
         computedUnitRate,
+        breakdownJsonStr,
         notes: b.notes || null,
-      }
+      },
     );
 
-    // Optionally update BOQ item unit rate
+    // Update BOQ item unit rate and amount if requested
     if (b.update_boq_item_rate) {
-      await query(`UPDATE pm_boq_items SET unit_rate = :computedUnitRate, total_amount = quantity * :computedUnitRate WHERE id = :boqItemId`, { computedUnitRate, boqItemId });
+      await query(
+        `UPDATE pm_boq_items SET unit_rate = :computedUnitRate, total_amount = quantity * :computedUnitRate, amount = quantity * :computedUnitRate WHERE id = :boqItemId`,
+        { computedUnitRate, boqItemId },
+      );
     }
 
-    res.json({ ok: true, computed_unit_rate: computedUnitRate });
+    res.json({
+      ok: true,
+      computed_unit_rate: computedUnitRate,
+      direct_total: directTotal,
+      overhead_amount: ovhAmt,
+      profit_amount: profitAmt,
+      wastage_amount: wastageAmt,
+    });
   } catch (err) {
     next(err);
   }
@@ -1096,9 +1483,10 @@ export const getCostControlSummary = async (req, res, next) => {
     const projRows = await query(
       `SELECT id, project_code, project_name, client_name, contract_sum, revised_contract_sum, budget, completion_percent, start_date, end_date
        FROM pm_projects WHERE id = :projectId AND (company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
-      { projectId, companyId: companyId || null }
+      { projectId, companyId: companyId || null },
     );
-    if (!projRows.length) throw httpError(404, "NOT_FOUND", "Project not found");
+    if (!projRows.length)
+      throw httpError(404, "NOT_FOUND", "Project not found");
     const proj = projRows[0];
     let currency = "GH₵";
 
@@ -1110,14 +1498,14 @@ export const getCostControlSummary = async (req, res, next) => {
       EQUIPMENT: 0,
       SUBCONTRACTING: 0,
       TRANSPORTATION: 0,
-      OTHER: 0
+      OTHER: 0,
     };
     try {
       const boqRows = await query(
         `SELECT id, boq_reference, boq_title, version, status, subtotal, contingency_percent, contingency_amount, tax_percent, tax_amount, other_charges, total_amount, currency
          FROM pm_boqs WHERE project_id = :projectId
          ORDER BY CASE WHEN status = 'APPROVED' THEN 0 ELSE 1 END, id DESC LIMIT 1`,
-        { projectId }
+        { projectId },
       );
       if (boqRows.length) {
         activeBOQ = boqRows[0];
@@ -1129,9 +1517,9 @@ export const getCostControlSummary = async (req, res, next) => {
            FROM pm_boq_items
            WHERE boq_id = :boqId
            GROUP BY UPPER(COALESCE(cost_category, 'OTHER'))`,
-          { boqId: activeBOQ.id }
+          { boqId: activeBOQ.id },
         );
-        catRows.forEach(r => {
+        catRows.forEach((r) => {
           const cat = (r.category || "").trim();
           if (boqCategories[cat] !== undefined) {
             boqCategories[cat] = Number(r.total_amount || 0);
@@ -1162,7 +1550,7 @@ export const getCostControlSummary = async (req, res, next) => {
          LEFT JOIN pm_cost_codes cc ON cc.id = bl.cost_code_id
          WHERE pb.project_id = :projectId AND (pb.status = 'APPROVED' OR pb.status IS NULL)
          ORDER BY cc.code ASC`,
-        { projectId }
+        { projectId },
       );
     } catch (e) {}
 
@@ -1174,7 +1562,7 @@ export const getCostControlSummary = async (req, res, next) => {
       EQUIPMENT: 0,
       SUBCONTRACTING: 0,
       TRANSPORTATION: 0,
-      OTHER: 0
+      OTHER: 0,
     };
     try {
       const expRows = await query(
@@ -1182,9 +1570,9 @@ export const getCostControlSummary = async (req, res, next) => {
                 COALESCE(SUM(amount), 0) AS category_total
          FROM pm_expenses WHERE project_id = :projectId
          GROUP BY UPPER(COALESCE(category, 'OTHER'))`,
-        { projectId }
+        { projectId },
       );
-      expRows.forEach(r => {
+      expRows.forEach((r) => {
         const cat = (r.category || "").trim();
         const amt = Number(r.category_total || 0);
         directExpenses += amt;
@@ -1212,7 +1600,7 @@ export const getCostControlSummary = async (req, res, next) => {
          FROM pm_material_utilization_items mui
          JOIN pm_material_utilization mu ON mu.id = mui.utilization_id
          WHERE mu.project_id = :projectId AND mu.status NOT IN ('CANCELLED', 'DRAFT')`,
-        { projectId }
+        { projectId },
       );
       materialUtilizationCost = Number(matRows[0]?.mat_total || 0);
       expensesByCategory.MATERIALS += materialUtilizationCost;
@@ -1225,7 +1613,7 @@ export const getCostControlSummary = async (req, res, next) => {
         `SELECT COALESCE(SUM(net_payable), 0) AS sub_total 
          FROM pm_subcontract_valuations 
          WHERE project_id = :projectId AND status IN ('CERTIFIED', 'APPROVED', 'PAID')`,
-        { projectId }
+        { projectId },
       );
       subValuations = Number(svRows[0]?.sub_total || 0);
       expensesByCategory.SUBCONTRACTING += subValuations;
@@ -1237,7 +1625,7 @@ export const getCostControlSummary = async (req, res, next) => {
       const tsRows = await query(
         `SELECT COALESCE(SUM(hours * 25.00), 0) AS labour_cost 
          FROM pm_timesheets WHERE project_id = :projectId`,
-        { projectId }
+        { projectId },
       );
       timesheetLabourCost = Number(tsRows[0]?.labour_cost || 0);
       expensesByCategory.LABOUR += timesheetLabourCost;
@@ -1252,25 +1640,39 @@ export const getCostControlSummary = async (req, res, next) => {
          FROM pm_orders
          WHERE project_id = :projectId AND status NOT IN ('CANCELLED', 'REJECTED')
          ORDER BY id DESC`,
-        { projectId }
+        { projectId },
       );
       purchaseOrders = poRows;
-      poCommitted = poRows.reduce((sum, r) => sum + Number(r.total_amount || 0), 0);
+      poCommitted = poRows.reduce(
+        (sum, r) => sum + Number(r.total_amount || 0),
+        0,
+      );
     } catch (e) {}
 
     // 9. Cost Calculations based on User Specification
     const originalContractSum = Number(proj.contract_sum || 0);
-    const revisedContractSum = Number(proj.revised_contract_sum || proj.contract_sum || 0);
-    const boqEstimatedCost = activeBOQ ? Number(activeBOQ.total_amount || 0) : 0;
+    const revisedContractSum = Number(
+      proj.revised_contract_sum || proj.contract_sum || 0,
+    );
+    const boqEstimatedCost = activeBOQ
+      ? Number(activeBOQ.total_amount || 0)
+      : 0;
     const projectSetBudget = Number(proj.budget || 0);
 
     // Effective Approved Budget
-    const approvedBudget = projectSetBudget > 0 
-      ? projectSetBudget 
-      : (boqEstimatedCost > 0 ? boqEstimatedCost : revisedContractSum);
+    const approvedBudget =
+      projectSetBudget > 0
+        ? projectSetBudget
+        : boqEstimatedCost > 0
+          ? boqEstimatedCost
+          : revisedContractSum;
 
     // Actual Cost Incurred (Expenses + Subcontracts + Labour + Consumed Materials)
-    const actualCost = directExpenses + subValuations + timesheetLabourCost + materialUtilizationCost;
+    const actualCost =
+      directExpenses +
+      subValuations +
+      timesheetLabourCost +
+      materialUtilizationCost;
 
     // Remaining Budget: Approved budget − Actual cost
     const remainingBudget = approvedBudget - actualCost;
@@ -1280,60 +1682,110 @@ export const getCostControlSummary = async (req, res, next) => {
 
     // Cost Variance: Budget − Actual cost (Positive = under budget / savings, Negative = over budget / overrun)
     const costVariance = approvedBudget - actualCost;
-    const costVariancePercent = approvedBudget > 0 ? Number(((approvedBudget - actualCost) / approvedBudget * 100).toFixed(2)) : 0;
+    const costVariancePercent =
+      approvedBudget > 0
+        ? Number(
+            (((approvedBudget - actualCost) / approvedBudget) * 100).toFixed(2),
+          )
+        : 0;
 
     // Cost Overrun: Actual - Budget (if Actual > Budget)
-    const costOverrun = actualCost > approvedBudget ? (actualCost - approvedBudget) : 0;
-    const costOverrunPercent = approvedBudget > 0 ? Number(((costOverrun / approvedBudget) * 100).toFixed(2)) : 0;
+    const costOverrun =
+      actualCost > approvedBudget ? actualCost - approvedBudget : 0;
+    const costOverrunPercent =
+      approvedBudget > 0
+        ? Number(((costOverrun / approvedBudget) * 100).toFixed(2))
+        : 0;
 
     // Budget Utilization: Actual cost ÷ Budget × 100
-    const budgetUtilizationPercent = approvedBudget > 0 ? Number(((actualCost / approvedBudget) * 100).toFixed(2)) : 0;
+    const budgetUtilizationPercent =
+      approvedBudget > 0
+        ? Number(((actualCost / approvedBudget) * 100).toFixed(2))
+        : 0;
 
     // Total Committed + Incurred
     const totalCommittedAndActual = actualCost + poCommitted;
-    const totalUtilizationWithCommitments = approvedBudget > 0 ? Number(((totalCommittedAndActual / approvedBudget) * 100).toFixed(2)) : 0;
+    const totalUtilizationWithCommitments =
+      approvedBudget > 0
+        ? Number(((totalCommittedAndActual / approvedBudget) * 100).toFixed(2))
+        : 0;
 
     // EVM & Completion Calculations
     const completionPercent = Number(proj.completion_percent || 0);
     const earnedValue = (approvedBudget * completionPercent) / 100;
-    const cpi = actualCost > 0 ? Number((earnedValue / actualCost).toFixed(2)) : 1.0;
-    const spi = approvedBudget > 0 ? Number((earnedValue / (approvedBudget * 0.5 || 1)).toFixed(2)) : 1.0;
+    const cpi =
+      actualCost > 0 ? Number((earnedValue / actualCost).toFixed(2)) : 1.0;
+    const spi =
+      approvedBudget > 0
+        ? Number((earnedValue / (approvedBudget * 0.5 || 1)).toFixed(2))
+        : 1.0;
 
     // Forecast Final Cost: Actual cost + estimated remaining cost
     let estimatedRemainingCost = 0;
     if (completionPercent >= 100) {
       estimatedRemainingCost = 0;
     } else if (completionPercent > 0 && cpi > 0) {
-      estimatedRemainingCost = Math.max(0, (approvedBudget - earnedValue) / cpi);
+      estimatedRemainingCost = Math.max(
+        0,
+        (approvedBudget - earnedValue) / cpi,
+      );
     } else {
       estimatedRemainingCost = Math.max(0, approvedBudget - actualCost);
     }
-    const forecastFinalCost = Number((actualCost + poCommitted + estimatedRemainingCost).toFixed(2));
-    const projectedOverrun = forecastFinalCost > approvedBudget ? Number((forecastFinalCost - approvedBudget).toFixed(2)) : 0;
+    const forecastFinalCost = Number(
+      (actualCost + poCommitted + estimatedRemainingCost).toFixed(2),
+    );
+    const projectedOverrun =
+      forecastFinalCost > approvedBudget
+        ? Number((forecastFinalCost - approvedBudget).toFixed(2))
+        : 0;
 
     // Contingency: Allocated from BOQ, used, remaining
-    const contingencyAllocated = activeBOQ ? Number(activeBOQ.contingency_amount || 0) : 0;
-    const contingencyUsed = Math.min(contingencyAllocated, Math.max(0, costOverrun));
-    const contingencyRemaining = Math.max(0, contingencyAllocated - contingencyUsed);
+    const contingencyAllocated = activeBOQ
+      ? Number(activeBOQ.contingency_amount || 0)
+      : 0;
+    const contingencyUsed = Math.min(
+      contingencyAllocated,
+      Math.max(0, costOverrun),
+    );
+    const contingencyRemaining = Math.max(
+      0,
+      contingencyAllocated - contingencyUsed,
+    );
 
     // Cost Category Breakdown Table (Matching dustbin / labour / transportation example)
-    const categoryKeys = ["MATERIALS", "LABOUR", "EQUIPMENT", "SUBCONTRACTING", "TRANSPORTATION", "OTHER"];
+    const categoryKeys = [
+      "MATERIALS",
+      "LABOUR",
+      "EQUIPMENT",
+      "SUBCONTRACTING",
+      "TRANSPORTATION",
+      "OTHER",
+    ];
     const categoryLabels = {
       MATERIALS: "Materials & Consumables",
       LABOUR: "Labour & Direct Workforce",
       EQUIPMENT: "Plant & Equipment",
       SUBCONTRACTING: "Subcontractor Works",
       TRANSPORTATION: "Logistics & Transportation",
-      OTHER: "Other Site & Direct Expenses"
+      OTHER: "Other Site & Direct Expenses",
     };
 
-    const categoryBreakdown = categoryKeys.map(cat => {
+    const categoryBreakdown = categoryKeys.map((cat) => {
       const catBudget = boqCategories[cat] || 0;
       const catActual = expensesByCategory[cat] || 0;
       const catVariance = catBudget - catActual; // positive: under budget, negative: overrun
-      const catOverrun = catActual > catBudget ? (catActual - catBudget) : 0;
-      const catVariancePct = catBudget > 0 ? Number(((catVariance / catBudget) * 100).toFixed(1)) : 0;
-      const catUtilPct = catBudget > 0 ? Number(((catActual / catBudget) * 100).toFixed(1)) : (catActual > 0 ? 100 : 0);
+      const catOverrun = catActual > catBudget ? catActual - catBudget : 0;
+      const catVariancePct =
+        catBudget > 0
+          ? Number(((catVariance / catBudget) * 100).toFixed(1))
+          : 0;
+      const catUtilPct =
+        catBudget > 0
+          ? Number(((catActual / catBudget) * 100).toFixed(1))
+          : catActual > 0
+            ? 100
+            : 0;
 
       let status = "UNDER_BUDGET"; // green
       if (catActual > catBudget && catBudget > 0) {
@@ -1353,7 +1805,7 @@ export const getCostControlSummary = async (req, res, next) => {
         overrun: catOverrun,
         variance_percent: catVariancePct,
         utilization_percent: catUtilPct,
-        status
+        status,
       };
     });
 
@@ -1363,13 +1815,13 @@ export const getCostControlSummary = async (req, res, next) => {
       alerts.push({
         type: "CRITICAL",
         title: "Budget Overrun Incurred",
-        message: `Project actual expenditure has exceeded the approved budget by ${currency} ${costOverrun.toLocaleString(undefined, { minimumFractionDigits: 2 })} (${costOverrunPercent}% overrun). Immediate corrective action and budget revision required.`
+        message: `Project actual expenditure has exceeded the approved budget by ${currency} ${costOverrun.toLocaleString(undefined, { minimumFractionDigits: 2 })} (${costOverrunPercent}% overrun). Immediate corrective action and budget revision required.`,
       });
     } else if (budgetUtilizationPercent >= 80) {
       alerts.push({
         type: "WARNING",
         title: "High Budget Consumption",
-        message: `Budget utilization has reached ${budgetUtilizationPercent}%. Available uncommitted budget is ${currency} ${availableBudget.toLocaleString(undefined, { minimumFractionDigits: 2 })}.`
+        message: `Budget utilization has reached ${budgetUtilizationPercent}%. Available uncommitted budget is ${currency} ${availableBudget.toLocaleString(undefined, { minimumFractionDigits: 2 })}.`,
       });
     }
 
@@ -1377,18 +1829,20 @@ export const getCostControlSummary = async (req, res, next) => {
       alerts.push({
         type: "WARNING",
         title: "Commitment Over-Allocation",
-        message: `Total purchase commitments (${currency} ${poCommitted.toLocaleString(undefined, { minimumFractionDigits: 2 })}) plus actual costs exceed the approved budget by ${currency} ${Math.abs(availableBudget).toLocaleString(undefined, { minimumFractionDigits: 2 })}.`
+        message: `Total purchase commitments (${currency} ${poCommitted.toLocaleString(undefined, { minimumFractionDigits: 2 })}) plus actual costs exceed the approved budget by ${currency} ${Math.abs(availableBudget).toLocaleString(undefined, { minimumFractionDigits: 2 })}.`,
       });
     }
 
     // Category overruns
-    categoryBreakdown.filter(c => c.status === "OVERRUN").forEach(c => {
-      alerts.push({
-        type: "CATEGORY_ALERT",
-        title: `${c.label} Exceeded Budget`,
-        message: `${c.label} costs (${currency} ${c.actual.toLocaleString()}) exceeded the budget of ${currency} ${c.budget.toLocaleString()} by ${currency} ${c.overrun.toLocaleString()} (+${Math.abs(c.variance_percent)}%).`
+    categoryBreakdown
+      .filter((c) => c.status === "OVERRUN")
+      .forEach((c) => {
+        alerts.push({
+          type: "CATEGORY_ALERT",
+          title: `${c.label} Exceeded Budget`,
+          message: `${c.label} costs (${currency} ${c.actual.toLocaleString()}) exceeded the budget of ${currency} ${c.budget.toLocaleString()} by ${currency} ${c.overrun.toLocaleString()} (+${Math.abs(c.variance_percent)}%).`,
+        });
       });
-    });
 
     res.json({
       project: proj,
@@ -1427,8 +1881,8 @@ export const getCostControlSummary = async (req, res, next) => {
         subcontractor_valuations: subValuations,
         labour_costs: timesheetLabourCost,
         category_breakdown: categoryBreakdown,
-        alerts
-      }
+        alerts,
+      },
     });
   } catch (err) {
     next(err);
@@ -1439,7 +1893,8 @@ export const createProjectBudget = async (req, res, next) => {
   try {
     const { companyId, branchId } = req.scope || {};
     const b = req.body || {};
-    if (!b.project_id) throw httpError(400, "VALIDATION_ERROR", "Project ID is required");
+    if (!b.project_id)
+      throw httpError(400, "VALIDATION_ERROR", "Project ID is required");
 
     const lines = b.lines || [];
     let totalBudget = 0;
@@ -1459,7 +1914,7 @@ export const createProjectBudget = async (req, res, next) => {
         status: b.status || "APPROVED",
         remarks: b.remarks || null,
         created_by: req.user?.id || null,
-      }
+      },
     );
 
     const budgetId = result.insertId;
@@ -1477,14 +1932,23 @@ export const createProjectBudget = async (req, res, next) => {
           quantity: Number(l.quantity || 1),
           unit_rate: Number(l.unit_rate || l.budget_amount || 0),
           remarks: l.remarks || null,
-        }
+        },
       );
     }
 
     // Update project budget
-    await query(`UPDATE pm_projects SET budget = :totalBudget WHERE id = :projectId`, { totalBudget, projectId: toNumber(b.project_id) });
+    await query(
+      `UPDATE pm_projects SET budget = :totalBudget WHERE id = :projectId`,
+      { totalBudget, projectId: toNumber(b.project_id) },
+    );
 
-    res.status(201).json({ id: budgetId, total_budget: totalBudget, message: "Budget saved successfully" });
+    res
+      .status(201)
+      .json({
+        id: budgetId,
+        total_budget: totalBudget,
+        message: "Budget saved successfully",
+      });
   } catch (err) {
     next(err);
   }
@@ -1508,63 +1972,109 @@ export const getProjectSchedule = async (req, res, next) => {
     const projRows = await query(
       `SELECT p.id, p.project_name, p.project_code, p.start_date, p.end_date,
               p.practical_completion_date, p.final_completion_date,
-              p.budget, p.contract_sum, p.revised_contract_sum,
+              p.budget, p.contract_sum, p.revised_contract_sum, p.project_scopes,
               COALESCE(p.project_status, 'IN_PROGRESS') AS status, p.site_address, p.project_type,
               COALESCE(p.manager_name, u.full_name, u.username, 'Project Manager') AS manager_name
        FROM pm_projects p
        LEFT JOIN adm_users u ON u.id = p.manager_id
        WHERE p.id = :projectId AND (p.company_id = :companyId OR :companyId IS NULL)
        LIMIT 1`,
-      { projectId, companyId: companyId || null }
+      { projectId, companyId: companyId || null },
     );
-    if (!projRows.length) throw httpError(404, "NOT_FOUND", "Project not found");
+    if (!projRows.length)
+      throw httpError(404, "NOT_FOUND", "Project not found");
     const project = projRows[0];
 
-    // 2. Fetch work packages
+    // 2. Fetch project scopes and work packages
+    let scopes = [];
+    try {
+      if (project.project_scopes) {
+        scopes =
+          typeof project.project_scopes === "string"
+            ? JSON.parse(project.project_scopes)
+            : project.project_scopes;
+      }
+    } catch {}
+    if (!Array.isArray(scopes) || !scopes.length) {
+      try {
+        const scRows = await query(
+          `SELECT * FROM pm_project_scopes WHERE project_id = :projectId ORDER BY id ASC`,
+          { projectId },
+        );
+        scopes = scRows.map((s) => ({
+          id: s.id,
+          name: s.scope_name,
+          title: s.scope_name,
+          wbs: s.wbs_code,
+          wbs_code: s.wbs_code,
+          start_date: s.start_date,
+          end_date: s.due_date,
+          description: s.description,
+          wbs_list: [
+            {
+              id: s.id,
+              wbs: s.wbs_code || "1.0",
+              start_date: s.start_date,
+              end_date: s.due_date,
+            },
+          ],
+          tasks: [],
+        }));
+      } catch {}
+    }
+
     const workPackages = await query(
       `SELECT id, package_name, package_code, status
        FROM pm_work_packages
        WHERE project_id = :projectId
        ORDER BY package_code ASC, id ASC`,
-      { projectId }
+      { projectId },
     );
 
-    // 3. Fetch active tasks
+    // 3. Fetch active tasks with Scope and WBS
     const tasks = await query(
-      `SELECT t.id, t.project_id, t.wbs_code, t.work_package_id, t.task_title, t.task_description,
+      `SELECT t.id, t.project_id, t.scope_id, t.scope_name, t.wbs_code, t.work_package_id, t.task_title, t.task_description,
               t.assigned_to_id, t.assigned_to_name, t.priority, t.status,
-              t.start_date, t.end_date, t.baseline_start, t.baseline_end,
+              t.start_date, t.end_date, t.baseline_start, t.baseline_end, t.estimated_hours,
               COALESCE(t.duration_days, DATEDIFF(COALESCE(t.end_date, CURDATE()), COALESCE(t.start_date, CURDATE())), 1) AS duration_days,
               t.completion_percent, t.early_start, t.early_finish, t.late_start, t.late_finish,
               t.total_float, t.free_float, t.is_critical, t.reason_for_delay,
+              COALESCE(t.milestone_flag, 0) AS milestone_flag,
+              COALESCE(t.constraint_type, 'ASAP') AS constraint_type,
+              t.constraint_date,
               wp.package_name AS work_package_name
        FROM pm_tasks t
        LEFT JOIN pm_work_packages wp ON wp.id = t.work_package_id
        WHERE t.project_id = :projectId AND (t.is_active = 'Y' OR t.is_active IS NULL)
        ORDER BY t.wbs_code ASC, t.id ASC`,
-      { projectId }
+      { projectId },
     );
 
     // 4. Fetch dependencies
     const dependencies = await query(
-      `SELECT d.id, d.task_id, d.predecessor_id, d.dependency_type, d.lag_days,
-              pred.task_title AS predecessor_title, pred.wbs_code AS predecessor_wbs
+      `SELECT d.id, d.task_id, d.predecessor_id, d.dependency_type, d.lag_days, d.notes,
+              pred.task_title AS predecessor_title, pred.wbs_code AS predecessor_wbs,
+              succ.task_title AS successor_title, succ.wbs_code AS successor_wbs
        FROM pm_task_dependencies d
        JOIN pm_tasks t ON t.id = d.task_id
        JOIN pm_tasks pred ON pred.id = d.predecessor_id
+       LEFT JOIN pm_tasks succ ON succ.id = d.task_id
        WHERE t.project_id = :projectId`,
-      { projectId }
+      { projectId },
     );
 
     // 5. Fetch EOT claims
     const eotClaims = await query(
       `SELECT * FROM pm_eot_requests WHERE project_id = :projectId ORDER BY id DESC`,
-      { projectId }
+      { projectId },
     );
 
     // 6. Run CPM calculation
-    const baseDate = project.start_date || new Date().toISOString().split("T")[0];
-    const cpmResult = calculateCPM(tasks, baseDate, dependencies, { calendar: "6_DAY" });
+    const baseDate =
+      project.start_date || new Date().toISOString().split("T")[0];
+    const cpmResult = calculateCPM(tasks, baseDate, dependencies, {
+      calendar: "6_DAY",
+    });
 
     // 7. Group dependencies by task
     const predMap = new Map();
@@ -1576,6 +2086,7 @@ export const getProjectSchedule = async (req, res, next) => {
         predecessor_id: d.predecessor_id,
         dependency_type: d.dependency_type || "FS",
         lag_days: d.lag_days || 0,
+        notes: d.notes || "",
         predecessor_title: d.predecessor_title,
         predecessor_wbs: d.predecessor_wbs,
       });
@@ -1584,22 +2095,51 @@ export const getProjectSchedule = async (req, res, next) => {
       succMap.get(d.predecessor_id).push({
         id: d.id,
         task_id: d.task_id,
+        successor_id: d.task_id,
         dependency_type: d.dependency_type || "FS",
         lag_days: d.lag_days || 0,
+        notes: d.notes || "",
+        successor_title: d.successor_title,
+        successor_wbs: d.successor_wbs,
       });
     }
 
-    const enrichedTasks = cpmResult.tasks.map((t) => ({
-      ...t,
-      predecessors: predMap.get(t.id) || [],
-      successors: succMap.get(t.id) || [],
-    }));
+    const taskStatusMap = new Map();
+    cpmResult.tasks.forEach(t => taskStatusMap.set(t.id, t.status));
+
+    const enrichedTasks = cpmResult.tasks.map((t) => {
+      const preds = predMap.get(t.id) || [];
+      const succs = succMap.get(t.id) || [];
+      const isBlocked = preds.some(p => {
+        const pStatus = taskStatusMap.get(p.predecessor_id);
+        return pStatus !== "COMPLETED";
+      });
+      const isReady = preds.length > 0 && !isBlocked && t.status !== "COMPLETED";
+
+      return {
+        ...t,
+        predecessors: preds,
+        successors: succs,
+        is_blocked: isBlocked,
+        is_ready: isReady,
+      };
+    });
 
     // 8. Progress and Schedule Variance Metrics
-    const totalDuration = enrichedTasks.reduce((sum, t) => sum + (Number(t.duration_days) || 1), 0);
-    const weightedActualProgress = totalDuration > 0
-      ? enrichedTasks.reduce((sum, t) => sum + ((Number(t.completion_percent) || 0) * (Number(t.duration_days) || 1)), 0) / totalDuration
-      : 0;
+    const totalDuration = enrichedTasks.reduce(
+      (sum, t) => sum + (Number(t.duration_days) || 1),
+      0,
+    );
+    const weightedActualProgress =
+      totalDuration > 0
+        ? enrichedTasks.reduce(
+            (sum, t) =>
+              sum +
+              (Number(t.completion_percent) || 0) *
+                (Number(t.duration_days) || 1),
+            0,
+          ) / totalDuration
+        : 0;
 
     // Planned progress based on current date
     const now = new Date();
@@ -1607,8 +2147,16 @@ export const getProjectSchedule = async (req, res, next) => {
     if (totalDuration > 0) {
       let earnedPlanned = 0;
       for (const t of enrichedTasks) {
-        const s = t.baseline_start ? new Date(t.baseline_start) : (t.start_date ? new Date(t.start_date) : new Date(baseDate));
-        const e = t.baseline_end ? new Date(t.baseline_end) : (t.end_date ? new Date(t.end_date) : new Date(baseDate));
+        const s = t.baseline_start
+          ? new Date(t.baseline_start)
+          : t.start_date
+            ? new Date(t.start_date)
+            : new Date(baseDate);
+        const e = t.baseline_end
+          ? new Date(t.baseline_end)
+          : t.end_date
+            ? new Date(t.end_date)
+            : new Date(baseDate);
         const dur = Number(t.duration_days) || 1;
         if (now <= s) {
           earnedPlanned += 0;
@@ -1626,18 +2174,26 @@ export const getProjectSchedule = async (req, res, next) => {
 
     const actualProgressPct = Math.round(weightedActualProgress * 10) / 10;
     const plannedProgressPct = Math.round(weightedPlannedProgress * 10) / 10;
-    const spi = plannedProgressPct > 0 ? Math.round((actualProgressPct / plannedProgressPct) * 100) / 100 : 1.0;
+    const spi =
+      plannedProgressPct > 0
+        ? Math.round((actualProgressPct / plannedProgressPct) * 100) / 100
+        : 1.0;
 
     // Delayed tasks and activities threatening deadline
     const delayedTasks = enrichedTasks.filter((t) => {
-      if (t.status === "COMPLETED" || (Number(t.completion_percent) || 0) >= 100) return false;
+      if (
+        t.status === "COMPLETED" ||
+        (Number(t.completion_percent) || 0) >= 100
+      )
+        return false;
       const finish = t.end_date ? new Date(t.end_date) : null;
       return (finish && finish < now) || t.status === "DELAYED";
     });
 
     const activitiesThreateningDeadline = enrichedTasks.filter((t) => {
-      const isCriticalOrNear = t.is_critical || (t.total_float <= 1);
-      const isNotDone = t.status !== "COMPLETED" && (Number(t.completion_percent) || 0) < 100;
+      const isCriticalOrNear = t.is_critical || t.total_float <= 1;
+      const isNotDone =
+        t.status !== "COMPLETED" && (Number(t.completion_percent) || 0) < 100;
       return isCriticalOrNear && isNotDone;
     });
 
@@ -1654,13 +2210,17 @@ export const getProjectSchedule = async (req, res, next) => {
         type: "CRITICAL_PATH_COMPRESSION",
         severity: "HIGH",
         title: "Compress Critical Path Activities",
-        description: `Project is forecasting ${Math.abs(scheduleVarianceDays)} days behind schedule. Add double-shift or overtime on critical tasks (${cpmResult.criticalPathSequence.slice(0, 3).map((t) => t.task_title).join(", ")}) to recover timeline.`,
+        description: `Project is forecasting ${Math.abs(scheduleVarianceDays)} days behind schedule. Add double-shift or overtime on critical tasks (${cpmResult.criticalPathSequence
+          .slice(0, 3)
+          .map((t) => t.task_title)
+          .join(", ")}) to recover timeline.`,
       });
       recoveryPlan.push({
         type: "FAST_TRACKING",
         severity: "MEDIUM",
         title: "Fast-Track Successor Activities",
-        description: "Review finish-to-start (FS) dependencies on long-duration structural tasks and convert to start-to-start (SS) with lead days where site conditions permit parallel execution.",
+        description:
+          "Review finish-to-start (FS) dependencies on long-duration structural tasks and convert to start-to-start (SS) with lead days where site conditions permit parallel execution.",
       });
     }
     if (delayedTasks.length > 0) {
@@ -1668,12 +2228,18 @@ export const getProjectSchedule = async (req, res, next) => {
         type: "RESOURCE_REALLOCATION",
         severity: "MEDIUM",
         title: `Remediate ${delayedTasks.length} Delayed Activities`,
-        description: `Prioritize delayed items (${delayedTasks.slice(0, 3).map((t) => t.task_title).join(", ")}) by mobilizing supplementary subcontractor gangs or equipment.`,
+        description: `Prioritize delayed items (${delayedTasks
+          .slice(0, 3)
+          .map((t) => t.task_title)
+          .join(
+            ", ",
+          )}) by mobilizing supplementary subcontractor gangs or equipment.`,
       });
     }
 
     res.json({
       project,
+      scopes,
       tasks: enrichedTasks,
       cpm: {
         ...cpmResult,
@@ -1710,11 +2276,16 @@ export const calculateProjectCPM = async (req, res, next) => {
        FROM pm_tasks t
        WHERE t.project_id = :projectId AND (t.is_active = 'Y' OR t.is_active IS NULL)
        ORDER BY t.wbs_code ASC, t.id ASC`,
-      { projectId }
+      { projectId },
     );
 
     if (!tasks.length) {
-      return res.json({ tasks: [], projectDurationDays: 0, criticalPathIds: [], criticalPathSequence: [] });
+      return res.json({
+        tasks: [],
+        projectDurationDays: 0,
+        criticalPathIds: [],
+        criticalPathSequence: [],
+      });
     }
 
     const dependencies = await query(
@@ -1722,13 +2293,19 @@ export const calculateProjectCPM = async (req, res, next) => {
        FROM pm_task_dependencies d
        JOIN pm_tasks t ON t.id = d.task_id
        WHERE t.project_id = :projectId`,
-      { projectId }
+      { projectId },
     );
 
-    const proj = await query(`SELECT start_date FROM pm_projects WHERE id = :projectId`, { projectId });
-    const baseDate = proj[0]?.start_date || new Date().toISOString().split("T")[0];
+    const proj = await query(
+      `SELECT start_date FROM pm_projects WHERE id = :projectId`,
+      { projectId },
+    );
+    const baseDate =
+      proj[0]?.start_date || new Date().toISOString().split("T")[0];
 
-    const cpmResult = calculateCPM(tasks, baseDate, dependencies, { calendar: "6_DAY" });
+    const cpmResult = calculateCPM(tasks, baseDate, dependencies, {
+      calendar: "6_DAY",
+    });
 
     // Persist computed attributes into pm_tasks
     for (const t of cpmResult.tasks) {
@@ -1748,7 +2325,7 @@ export const calculateProjectCPM = async (req, res, next) => {
           total_float: t.total_float,
           free_float: t.free_float,
           is_critical: t.is_critical,
-        }
+        },
       );
     }
 
@@ -1763,29 +2340,39 @@ export const createScheduleActivity = async (req, res, next) => {
     const { companyId, branchId } = req.scope || {};
     const projectId = toNumber(req.params.projectId);
     const b = req.body || {};
-    if (!b.task_title) throw httpError(400, "VALIDATION_ERROR", "Activity title is required");
+    if (!b.task_title)
+      throw httpError(400, "VALIDATION_ERROR", "Activity title is required");
 
     await ensureConstructionTables();
 
-    const projRows = await query(`SELECT id, company_id, branch_id, start_date FROM pm_projects WHERE id = :id LIMIT 1`, { id: projectId });
-    if (!projRows.length) throw httpError(404, "NOT_FOUND", "Project not found");
+    const projRows = await query(
+      `SELECT id, company_id, branch_id, start_date FROM pm_projects WHERE id = :id LIMIT 1`,
+      { id: projectId },
+    );
+    if (!projRows.length)
+      throw httpError(404, "NOT_FOUND", "Project not found");
 
     const targetCompId = companyId || projRows[0].company_id || 1;
     const targetBranchId = branchId || projRows[0].branch_id || 1;
     const durationDays = Math.max(1, Number(b.duration_days || 1));
-    const startDate = b.start_date || projRows[0].start_date || new Date().toISOString().split("T")[0];
+    const startDate =
+      b.start_date ||
+      projRows[0].start_date ||
+      new Date().toISOString().split("T")[0];
     const endDate = b.end_date || addWorkDays(startDate, durationDays, "6_DAY");
 
     // Insert task
     const taskResult = await query(
       `INSERT INTO pm_tasks 
-        (company_id, branch_id, project_id, work_package_id, wbs_code, task_title, task_description, duration_days, start_date, end_date, assigned_to_id, assigned_to_name, priority, status, completion_percent, is_active)
+        (company_id, branch_id, project_id, scope_id, scope_name, work_package_id, wbs_code, task_title, task_description, duration_days, start_date, end_date, estimated_hours, assigned_to_id, assigned_to_name, priority, status, completion_percent, is_active)
        VALUES 
-        (:companyId, :branchId, :project_id, :work_package_id, :wbs_code, :task_title, :task_description, :duration_days, :start_date, :end_date, :assigned_to_id, :assigned_to_name, :priority, :status, :completion_percent, 'Y')`,
+        (:companyId, :branchId, :project_id, :scope_id, :scope_name, :work_package_id, :wbs_code, :task_title, :task_description, :duration_days, :start_date, :end_date, :estimated_hours, :assigned_to_id, :assigned_to_name, :priority, :status, :completion_percent, 'Y')`,
       {
         companyId: targetCompId,
         branchId: targetBranchId,
         project_id: projectId,
+        scope_id: toNumber(b.scope_id),
+        scope_name: b.scope_name || null,
         work_package_id: toNumber(b.work_package_id),
         wbs_code: b.wbs_code || null,
         task_title: b.task_title,
@@ -1793,12 +2380,16 @@ export const createScheduleActivity = async (req, res, next) => {
         duration_days: durationDays,
         start_date: startDate,
         end_date: endDate,
+        estimated_hours:
+          b.estimated_hours !== undefined
+            ? Number(b.estimated_hours)
+            : durationDays * 8,
         assigned_to_id: toNumber(b.assigned_to_id),
         assigned_to_name: b.assigned_to_name || null,
         priority: b.priority || "NORMAL",
-        status: b.status || "NOT_STARTED",
+        status: b.status || (b.assigned_to_id ? "IN_PROGRESS" : "PENDING"),
         completion_percent: Number(b.completion_percent || 0),
-      }
+      },
     );
 
     const taskId = taskResult.insertId;
@@ -1818,13 +2409,15 @@ export const createScheduleActivity = async (req, res, next) => {
               predId,
               type: (p.dependency_type || "FS").toUpperCase(),
               lag: Number(p.lag_days || 0),
-            }
+            },
           );
         }
       }
     }
 
-    res.status(201).json({ id: taskId, message: "Activity added to project schedule" });
+    res
+      .status(201)
+      .json({ id: taskId, message: "Activity added to project schedule" });
   } catch (err) {
     next(err);
   }
@@ -1839,46 +2432,66 @@ export const updateScheduleActivity = async (req, res, next) => {
 
     await ensureConstructionTables();
 
-    const existing = await query(`SELECT id, company_id, branch_id FROM pm_tasks WHERE id = :taskId AND project_id = :projectId LIMIT 1`, { taskId, projectId });
-    if (!existing.length) throw httpError(404, "NOT_FOUND", "Activity not found");
+    const existing = await query(
+      `SELECT id, company_id, branch_id FROM pm_tasks WHERE id = :taskId AND project_id = :projectId LIMIT 1`,
+      { taskId, projectId },
+    );
+    if (!existing.length)
+      throw httpError(404, "NOT_FOUND", "Activity not found");
 
-    const durationDays = b.duration_days ? Math.max(1, Number(b.duration_days)) : undefined;
+    const durationDays = b.duration_days
+      ? Math.max(1, Number(b.duration_days))
+      : undefined;
 
     await query(
       `UPDATE pm_tasks SET
+        scope_id = COALESCE(:scope_id, scope_id),
+        scope_name = COALESCE(:scope_name, scope_name),
         wbs_code = COALESCE(:wbs_code, wbs_code),
         work_package_id = :work_package_id,
         task_title = COALESCE(:task_title, task_title),
         task_description = COALESCE(:task_description, task_description),
         duration_days = COALESCE(:duration_days, duration_days),
+        estimated_hours = COALESCE(:estimated_hours, estimated_hours),
         start_date = COALESCE(:start_date, start_date),
         end_date = COALESCE(:end_date, end_date),
         completion_percent = COALESCE(:completion_percent, completion_percent),
         status = COALESCE(:status, status),
+        assigned_to_id = COALESCE(:assigned_to_id, assigned_to_id),
         assigned_to_name = COALESCE(:assigned_to_name, assigned_to_name),
         priority = COALESCE(:priority, priority),
         reason_for_delay = COALESCE(:reason_for_delay, reason_for_delay)
        WHERE id = :taskId`,
       {
         taskId,
+        scope_id: toNumber(b.scope_id),
+        scope_name: b.scope_name ?? null,
         wbs_code: b.wbs_code ?? null,
         work_package_id: toNumber(b.work_package_id),
         task_title: b.task_title ?? null,
         task_description: b.task_description ?? null,
         duration_days: durationDays ?? null,
+        estimated_hours:
+          b.estimated_hours !== undefined ? Number(b.estimated_hours) : null,
         start_date: b.start_date ?? null,
         end_date: b.end_date ?? null,
-        completion_percent: b.completion_percent !== undefined ? Number(b.completion_percent) : null,
+        completion_percent:
+          b.completion_percent !== undefined
+            ? Number(b.completion_percent)
+            : null,
         status: b.status ?? null,
+        assigned_to_id: toNumber(b.assigned_to_id),
         assigned_to_name: b.assigned_to_name ?? null,
         priority: b.priority ?? null,
         reason_for_delay: b.reason_for_delay ?? null,
-      }
+      },
     );
 
     // Update predecessors if provided
     if (Array.isArray(b.predecessors)) {
-      await query(`DELETE FROM pm_task_dependencies WHERE task_id = :taskId`, { taskId });
+      await query(`DELETE FROM pm_task_dependencies WHERE task_id = :taskId`, {
+        taskId,
+      });
       for (const p of b.predecessors) {
         const predId = toNumber(p.predecessor_id || p.id);
         if (predId && predId !== taskId) {
@@ -1892,7 +2505,7 @@ export const updateScheduleActivity = async (req, res, next) => {
               predId,
               type: (p.dependency_type || "FS").toUpperCase(),
               lag: Number(p.lag_days || 0),
-            }
+            },
           );
         }
       }
@@ -1910,8 +2523,14 @@ export const deleteScheduleActivity = async (req, res, next) => {
     const projectId = toNumber(req.params.projectId);
     const taskId = toNumber(req.params.taskId);
 
-    await query(`DELETE FROM pm_task_dependencies WHERE task_id = :taskId OR predecessor_id = :taskId`, { taskId });
-    await query(`DELETE FROM pm_tasks WHERE id = :taskId AND project_id = :projectId`, { taskId, projectId });
+    await query(
+      `DELETE FROM pm_task_dependencies WHERE task_id = :taskId OR predecessor_id = :taskId`,
+      { taskId },
+    );
+    await query(
+      `DELETE FROM pm_tasks WHERE id = :taskId AND project_id = :projectId`,
+      { taskId, projectId },
+    );
 
     res.json({ success: true, message: "Activity deleted from schedule" });
   } catch (err) {
@@ -1922,14 +2541,168 @@ export const deleteScheduleActivity = async (req, res, next) => {
 export const setScheduleBaseline = async (req, res, next) => {
   try {
     const projectId = toNumber(req.params.projectId);
+    const { companyId } = req.scope || {};
+    const { baseline_name = "Approved Project Baseline", description = "" } = req.body || {};
+    await ensureConstructionTables();
+
+    // 1. Fetch current tasks for snapshot
+    const currentTasks = await query(
+      `SELECT id, task_title, wbs_code, start_date, end_date, duration_days, completion_percent, is_critical, early_start, early_finish
+       FROM pm_tasks
+       WHERE project_id = :projectId AND (is_active = 'Y' OR is_active IS NULL)`,
+      { projectId },
+    );
+
+    // 2. Count existing baselines to determine version
+    const countRows = await query(
+      `SELECT COUNT(*) AS cnt FROM pm_schedule_baselines WHERE project_id = :projectId`,
+      { projectId },
+    );
+    const versionNo = Number(countRows[0]?.cnt || 0) + 1;
+
+    // 3. Save baseline snapshot
+    const snapshotJson = JSON.stringify(currentTasks || []);
+    const insertRes = await query(
+      `INSERT INTO pm_schedule_baselines 
+        (company_id, project_id, baseline_name, description, version_no, snapshot_json, approved_by, approved_at)
+       VALUES 
+        (:companyId, :projectId, :baseline_name, :description, :versionNo, :snapshotJson, :userId, NOW())`,
+      {
+        companyId: companyId || 1,
+        projectId,
+        baseline_name: baseline_name || `Baseline v${versionNo}`,
+        description: description || null,
+        versionNo,
+        snapshotJson,
+        userId: req.user?.id || null,
+      },
+    );
+
+    // 4. Update pm_tasks baseline_start and baseline_end
     await query(
       `UPDATE pm_tasks SET
         baseline_start = COALESCE(start_date, early_start, CURDATE()),
         baseline_end = COALESCE(end_date, early_finish, CURDATE())
        WHERE project_id = :projectId AND (is_active = 'Y' OR is_active IS NULL)`,
-      { projectId }
+      { projectId },
     );
-    res.json({ success: true, message: "Project schedule baseline recorded successfully" });
+
+    res.json({
+      success: true,
+      id: insertRes.insertId,
+      version_no: versionNo,
+      baseline_name: baseline_name || `Baseline v${versionNo}`,
+      task_count: currentTasks.length,
+      message: `Project schedule baseline v${versionNo} recorded successfully`,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const listScheduleBaselines = async (req, res, next) => {
+  try {
+    const projectId = toNumber(req.params.projectId);
+    await ensureConstructionTables();
+    const rows = await query(
+      `SELECT b.id, b.project_id, b.baseline_name, b.description, b.version_no, b.snapshot_json,
+              b.approved_at, b.created_at, u.username AS approved_by_name
+       FROM pm_schedule_baselines b
+       LEFT JOIN adm_users u ON u.id = b.approved_by
+       WHERE b.project_id = :projectId
+       ORDER BY b.version_no DESC, b.id DESC`,
+      { projectId },
+    );
+    const baselines = rows.map((b) => {
+      let snapshot = [];
+      try {
+        snapshot = JSON.parse(b.snapshot_json || "[]");
+      } catch {}
+      return {
+        ...b,
+        snapshot,
+        task_count: snapshot.length,
+      };
+    });
+    res.json({ items: baselines });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createScheduleDependency = async (req, res, next) => {
+  try {
+    const { companyId, branchId = 1 } = req.scope || {};
+    const projectId = toNumber(req.params.projectId);
+    const { taskId, predecessorId, dependencyType = "FS", lagDays = 0, notes = "" } = req.body || {};
+
+    if (!taskId || !predecessorId) {
+      throw httpError(400, "VALIDATION_ERROR", "Task ID and Predecessor ID are required");
+    }
+    if (toNumber(taskId) === toNumber(predecessorId)) {
+      throw httpError(400, "VALIDATION_ERROR", "A task cannot depend on itself");
+    }
+
+    await ensureConstructionTables();
+
+    // Check for circular dependency by running CPM with proposed link
+    const allTasks = await query(
+      `SELECT id, duration_days, start_date, end_date FROM pm_tasks WHERE project_id = :projectId AND (is_active = 'Y' OR is_active IS NULL)`,
+      { projectId },
+    );
+    const existingDeps = await query(
+      `SELECT d.task_id, d.predecessor_id, d.dependency_type, d.lag_days FROM pm_task_dependencies d JOIN pm_tasks t ON t.id = d.task_id WHERE t.project_id = :projectId`,
+      { projectId },
+    );
+    const testDeps = [
+      ...existingDeps,
+      {
+        task_id: toNumber(taskId),
+        predecessor_id: toNumber(predecessorId),
+        dependency_type: dependencyType,
+        lag_days: Number(lagDays || 0),
+      },
+    ];
+    const testCpm = calculateCPM(allTasks, new Date(), testDeps);
+    if (testCpm.hasCycle) {
+      throw httpError(
+        400,
+        "CIRCULAR_DEPENDENCY",
+        "Cannot add dependency: this would create a circular predecessor loop in the schedule network.",
+      );
+    }
+
+    // Insert or update
+    await query(
+      `DELETE FROM pm_task_dependencies WHERE task_id = :taskId AND predecessor_id = :predecessorId`,
+      { taskId: toNumber(taskId), predecessorId: toNumber(predecessorId) },
+    );
+    const insertRes = await query(
+      `INSERT INTO pm_task_dependencies (company_id, branch_id, task_id, predecessor_id, dependency_type, lag_days, notes)
+       VALUES (:companyId, :branchId, :taskId, :predecessorId, :dependencyType, :lagDays, :notes)`,
+      {
+        companyId: companyId || 1,
+        branchId: branchId || 1,
+        taskId: toNumber(taskId),
+        predecessorId: toNumber(predecessorId),
+        dependencyType: (dependencyType || "FS").toUpperCase(),
+        lagDays: Number(lagDays || 0),
+        notes: notes || null,
+      },
+    );
+
+    res.status(201).json({ id: insertRes.insertId, message: "Dependency created successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteScheduleDependency = async (req, res, next) => {
+  try {
+    const depId = toNumber(req.params.depId || req.params.dependencyId);
+    if (!depId) throw httpError(400, "VALIDATION_ERROR", "Invalid dependency id");
+    await query(`DELETE FROM pm_task_dependencies WHERE id = :depId`, { depId });
+    res.json({ ok: true, message: "Dependency deleted successfully" });
   } catch (err) {
     next(err);
   }
@@ -1967,15 +2740,26 @@ export const createEOTRequest = async (req, res, next) => {
   try {
     const { companyId, branchId } = req.scope || {};
     const b = req.body || {};
-    if (!b.project_id || !b.days_requested) throw httpError(400, "VALIDATION_ERROR", "Project and days requested required");
+    if (!b.project_id || !b.days_requested)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Project and days requested required",
+      );
 
     await ensureConstructionTables();
 
-    const projRows = await query(`SELECT id, company_id, branch_id FROM pm_projects WHERE id = :id LIMIT 1`, { id: toNumber(b.project_id) });
+    const projRows = await query(
+      `SELECT id, company_id, branch_id FROM pm_projects WHERE id = :id LIMIT 1`,
+      { id: toNumber(b.project_id) },
+    );
     const targetCompId = companyId || projRows[0]?.company_id || 1;
     const targetBranchId = branchId || projRows[0]?.branch_id || 1;
 
-    const reqNo = b.request_number || b.request_no || `EOT-${Date.now().toString().slice(-6)}`;
+    const reqNo =
+      b.request_number ||
+      b.request_no ||
+      `EOT-${Date.now().toString().slice(-6)}`;
     const delayCause = b.delay_cause || b.reason || "Delay Claim";
 
     const result = await query(
@@ -1994,14 +2778,21 @@ export const createEOTRequest = async (req, res, next) => {
         delay_category: b.delay_category || "CLIENT_CHANGE",
         days_requested: Number(b.days_requested),
         financial_claim_amount: Number(b.financial_claim_amount || 0),
-        requested_date: b.requested_date || new Date().toISOString().split("T")[0],
+        requested_date:
+          b.requested_date || new Date().toISOString().split("T")[0],
         justification: b.justification || null,
         impact_assessment: b.justification || null,
         status: "SUBMITTED",
         created_by: req.user?.id || null,
-      }
+      },
     );
-    res.status(201).json({ id: result.insertId, request_no: reqNo, message: "EOT request submitted successfully" });
+    res
+      .status(201)
+      .json({
+        id: result.insertId,
+        request_no: reqNo,
+        message: "EOT request submitted successfully",
+      });
   } catch (err) {
     next(err);
   }
@@ -2024,6 +2815,7 @@ export const listDailyReports = async (req, res, next) => {
                       COALESCE(r.weather_afternoon, r.weather, 'SUNNY') AS weather_afternoon,
                       COALESCE(r.general_remarks, r.supervisor_comments) AS general_remarks,
                       p.project_name,
+                      p.project_code,
                       s.site_name,
                       (SELECT COUNT(*) FROM pm_daily_site_activities WHERE report_id = r.id) AS activity_count,
                       (SELECT COALESCE(SUM(headcount), 0) FROM pm_daily_site_workforce WHERE report_id = r.id) AS total_headcount
@@ -2061,28 +2853,32 @@ export const getDailyReportById = async (req, res, next) => {
        FROM pm_daily_site_reports r
        LEFT JOIN pm_projects p ON p.id = r.project_id
        WHERE r.id = :id AND (r.company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
-      { id, companyId: companyId || null }
+      { id, companyId: companyId || null },
     );
-    if (!rows.length) throw httpError(404, "NOT_FOUND", "Daily site report not found");
+    if (!rows.length)
+      throw httpError(404, "NOT_FOUND", "Daily site report not found");
 
     const report = rows[0];
     const activities = await query(
       `SELECT id, report_id, project_id, COALESCE(description, activity_name) AS description, COALESCE(location_grid, location) AS location_grid, COALESCE(quantity_completed, measured_qty_completed) AS quantity_completed, COALESCE(unit, uom) AS unit, progress_percent, remarks FROM pm_daily_site_activities WHERE report_id = :id ORDER BY id ASC`,
-      { id }
+      { id },
     );
     const workforce = await query(
       `SELECT id, report_id, trade_category, COALESCE(trade_name, 'General Labour') AS trade_name, subcontractor_name, headcount, total_hours, remarks FROM pm_daily_site_workforce WHERE report_id = :id ORDER BY id ASC`,
-      { id }
+      { id },
     );
     const equipment = await query(
       `SELECT id, report_id, equipment_name, COALESCE(equipment_tag, asset_no) AS equipment_tag, COALESCE(hours_worked, operating_hours) AS hours_worked, COALESCE(hours_idle, idle_hours) AS hours_idle, COALESCE(hours_breakdown, breakdown_hours) AS hours_breakdown, remarks FROM pm_daily_site_equipment WHERE report_id = :id ORDER BY id ASC`,
-      { id }
+      { id },
     );
     const materials = await query(
       `SELECT id, report_id, COALESCE(material_name, item_name) AS material_name, COALESCE(quantity, qty_received) AS quantity, COALESCE(unit, uom) AS unit, supplier_name, COALESCE(delivery_note_no, delivery_note_ref) AS delivery_note_no, remarks FROM pm_daily_site_materials WHERE report_id = :id ORDER BY id ASC`,
-      { id }
+      { id },
     );
-    const photos = await query(`SELECT * FROM pm_daily_site_photos WHERE report_id = :id ORDER BY id ASC`, { id });
+    const photos = await query(
+      `SELECT * FROM pm_daily_site_photos WHERE report_id = :id ORDER BY id ASC`,
+      { id },
+    );
 
     res.json({
       item: report,
@@ -2120,7 +2916,7 @@ async function insertDailyReportSubItems(reportId, projectId, b) {
           unit: a.unit || "NR",
           progress_percent: Number(a.progress_percent || 0),
           remarks: a.remarks || null,
-        }
+        },
       );
     }
   }
@@ -2135,13 +2931,13 @@ async function insertDailyReportSubItems(reportId, projectId, b) {
           (:reportId, :trade_category, :trade_name, :subcontractor_name, :headcount, :total_hours, :remarks)`,
         {
           reportId,
-          trade_category: w.trade_category || "SKILLED",
+          trade_category: w.trade_category || "",
           trade_name: w.trade_name || "General Labour",
           subcontractor_name: w.subcontractor_name || null,
           headcount: Number(w.headcount || 1),
           total_hours: Number(w.total_hours || 8),
           remarks: w.remarks || null,
-        }
+        },
       );
     }
   }
@@ -2171,7 +2967,7 @@ async function insertDailyReportSubItems(reportId, projectId, b) {
           breakdown_hours: hb,
           hours_breakdown: hb,
           remarks: eq.remarks || null,
-        }
+        },
       );
     }
   }
@@ -2200,7 +2996,7 @@ async function insertDailyReportSubItems(reportId, projectId, b) {
           delivery_note_ref: dn,
           delivery_note_no: dn,
           remarks: m.remarks || null,
-        }
+        },
       );
     }
   }
@@ -2210,11 +3006,19 @@ export const createDailyReport = async (req, res, next) => {
   try {
     const { companyId, branchId } = req.scope || {};
     const b = req.body || {};
-    if (!b.project_id || !b.report_date) throw httpError(400, "VALIDATION_ERROR", "Project and report date required");
+    if (!b.project_id || !b.report_date)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Project and report date required",
+      );
 
     await ensureConstructionTables();
 
-    const projRows = await query(`SELECT id, project_code, company_id, branch_id FROM pm_projects WHERE id = :id LIMIT 1`, { id: toNumber(b.project_id) });
+    const projRows = await query(
+      `SELECT id, project_code, company_id, branch_id FROM pm_projects WHERE id = :id LIMIT 1`,
+      { id: toNumber(b.project_id) },
+    );
     const targetCompId = companyId || projRows[0]?.company_id || 1;
     const targetBranchId = branchId || projRows[0]?.branch_id || 1;
 
@@ -2226,8 +3030,8 @@ export const createDailyReport = async (req, res, next) => {
 
     const weatherM = b.weather_morning || "SUNNY";
     const weatherA = b.weather_afternoon || "SUNNY";
-    const allowedWeathers = ['SUNNY', 'RAINY', 'CLOUDY', 'STORMY', 'WINDY'];
-    const weatherEnum = allowedWeathers.includes(weatherM) ? weatherM : 'SUNNY';
+    const allowedWeathers = ["SUNNY", "RAINY", "CLOUDY", "STORMY", "WINDY"];
+    const weatherEnum = allowedWeathers.includes(weatherM) ? weatherM : "SUNNY";
 
     const result = await query(
       `INSERT INTO pm_daily_site_reports 
@@ -2244,8 +3048,10 @@ export const createDailyReport = async (req, res, next) => {
         report_date: b.report_date,
         shift: b.shift || "DAY",
         reporting_officer_id: req.user?.id || null,
-        reporting_officer_name: b.site_engineer_name || req.user?.username || "Site Engineer",
-        site_engineer_name: b.site_engineer_name || req.user?.username || "Site Engineer",
+        reporting_officer_name:
+          b.site_engineer_name || req.user?.username || "Site Engineer",
+        site_engineer_name:
+          b.site_engineer_name || req.user?.username || "Site Engineer",
         weather: weatherEnum,
         weather_morning: weatherM,
         weather_afternoon: weatherA,
@@ -2258,14 +3064,20 @@ export const createDailyReport = async (req, res, next) => {
         status: b.status || "DRAFT",
         prepared_by: req.user?.id || null,
         created_by: req.user?.id || null,
-      }
+      },
     );
 
     const reportId = result.insertId;
 
     await insertDailyReportSubItems(reportId, toNumber(b.project_id), b);
 
-    res.status(201).json({ id: reportId, report_number: reportNo, message: "Daily site report logged successfully" });
+    res
+      .status(201)
+      .json({
+        id: reportId,
+        report_number: reportNo,
+        message: "Daily site report logged successfully",
+      });
   } catch (err) {
     next(err);
   }
@@ -2277,12 +3089,16 @@ export const updateDailyReport = async (req, res, next) => {
     const id = toNumber(req.params.id);
     const b = req.body || {};
 
-    const existing = await query(`SELECT id, project_id FROM pm_daily_site_reports WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL) LIMIT 1`, { id, companyId: companyId || null });
-    if (!existing.length) throw httpError(404, "NOT_FOUND", "Daily site report not found");
+    const existing = await query(
+      `SELECT id, project_id FROM pm_daily_site_reports WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
+      { id, companyId: companyId || null },
+    );
+    if (!existing.length)
+      throw httpError(404, "NOT_FOUND", "Daily site report not found");
 
     const weatherM = b.weather_morning || "SUNNY";
-    const allowedWeathers = ['SUNNY', 'RAINY', 'CLOUDY', 'STORMY', 'WINDY'];
-    const weatherEnum = allowedWeathers.includes(weatherM) ? weatherM : 'SUNNY';
+    const allowedWeathers = ["SUNNY", "RAINY", "CLOUDY", "STORMY", "WINDY"];
+    const weatherEnum = allowedWeathers.includes(weatherM) ? weatherM : "SUNNY";
 
     await query(
       `UPDATE pm_daily_site_reports SET
@@ -2305,8 +3121,10 @@ export const updateDailyReport = async (req, res, next) => {
         id,
         site_id: toNumber(b.site_id),
         report_date: b.report_date,
-        site_engineer_name: b.site_engineer_name || req.user?.username || "Site Engineer",
-        reporting_officer_name: b.site_engineer_name || req.user?.username || "Site Engineer",
+        site_engineer_name:
+          b.site_engineer_name || req.user?.username || "Site Engineer",
+        reporting_officer_name:
+          b.site_engineer_name || req.user?.username || "Site Engineer",
         weather: weatherEnum,
         weather_morning: weatherM,
         weather_afternoon: b.weather_afternoon || "SUNNY",
@@ -2317,15 +3135,27 @@ export const updateDailyReport = async (req, res, next) => {
         general_remarks: b.general_remarks || null,
         safety_observations: b.safety_observations || null,
         status: b.status || "DRAFT",
-      }
+      },
     );
 
-    await query(`DELETE FROM pm_daily_site_activities WHERE report_id = :id`, { id });
-    await query(`DELETE FROM pm_daily_site_workforce WHERE report_id = :id`, { id });
-    await query(`DELETE FROM pm_daily_site_equipment WHERE report_id = :id`, { id });
-    await query(`DELETE FROM pm_daily_site_materials WHERE report_id = :id`, { id });
+    await query(`DELETE FROM pm_daily_site_activities WHERE report_id = :id`, {
+      id,
+    });
+    await query(`DELETE FROM pm_daily_site_workforce WHERE report_id = :id`, {
+      id,
+    });
+    await query(`DELETE FROM pm_daily_site_equipment WHERE report_id = :id`, {
+      id,
+    });
+    await query(`DELETE FROM pm_daily_site_materials WHERE report_id = :id`, {
+      id,
+    });
 
-    await insertDailyReportSubItems(id, toNumber(b.project_id || existing[0].project_id), b);
+    await insertDailyReportSubItems(
+      id,
+      toNumber(b.project_id || existing[0].project_id),
+      b,
+    );
 
     res.json({ id, message: "Daily site report updated successfully" });
   } catch (err) {
@@ -2337,12 +3167,25 @@ export const deleteDailyReport = async (req, res, next) => {
   try {
     const { companyId } = req.scope || {};
     const id = toNumber(req.params.id);
-    await query(`DELETE FROM pm_daily_site_activities WHERE report_id = :id`, { id });
-    await query(`DELETE FROM pm_daily_site_workforce WHERE report_id = :id`, { id });
-    await query(`DELETE FROM pm_daily_site_equipment WHERE report_id = :id`, { id });
-    await query(`DELETE FROM pm_daily_site_materials WHERE report_id = :id`, { id });
-    await query(`DELETE FROM pm_daily_site_photos WHERE report_id = :id`, { id });
-    await query(`DELETE FROM pm_daily_site_reports WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`, { id, companyId: companyId || null });
+    await query(`DELETE FROM pm_daily_site_activities WHERE report_id = :id`, {
+      id,
+    });
+    await query(`DELETE FROM pm_daily_site_workforce WHERE report_id = :id`, {
+      id,
+    });
+    await query(`DELETE FROM pm_daily_site_equipment WHERE report_id = :id`, {
+      id,
+    });
+    await query(`DELETE FROM pm_daily_site_materials WHERE report_id = :id`, {
+      id,
+    });
+    await query(`DELETE FROM pm_daily_site_photos WHERE report_id = :id`, {
+      id,
+    });
+    await query(
+      `DELETE FROM pm_daily_site_reports WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`,
+      { id, companyId: companyId || null },
+    );
     res.json({ success: true, message: "Daily site report deleted" });
   } catch (err) {
     next(err);
@@ -2355,13 +3198,20 @@ export const submitDailyReport = async (req, res, next) => {
     const id = toNumber(req.params.id);
     const { workflow_id, target_user_id, comments } = req.body || {};
 
-    const repRows = await query(`SELECT * FROM pm_daily_site_reports WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`, { id, companyId: companyId || null });
-    if (!repRows.length) throw httpError(404, "NOT_FOUND", "Daily site report not found");
+    const repRows = await query(
+      `SELECT * FROM pm_daily_site_reports WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`,
+      { id, companyId: companyId || null },
+    );
+    if (!repRows.length)
+      throw httpError(404, "NOT_FOUND", "Daily site report not found");
     const report = repRows[0];
 
     let targetUserName = null;
     if (target_user_id) {
-      const uRows = await query(`SELECT username FROM adm_users WHERE id = :uid LIMIT 1`, { uid: target_user_id });
+      const uRows = await query(
+        `SELECT username FROM adm_users WHERE id = :uid LIMIT 1`,
+        { uid: target_user_id },
+      );
       if (uRows.length) targetUserName = uRows[0].username;
     }
 
@@ -2374,37 +3224,50 @@ export const submitDailyReport = async (req, res, next) => {
       {
         targetUserName,
         comments: comments || null,
-        id
-      }
+        id,
+      },
     );
 
     try {
       if (workflow_id) {
+        let wfDocType = "DAILY_SITE_REPORT";
+        try {
+          const wfRow = await query(
+            `SELECT document_type FROM adm_workflows WHERE id = :wid LIMIT 1`,
+            { wid: workflow_id },
+          );
+          if (wfRow.length && wfRow[0].document_type) {
+            wfDocType = wfRow[0].document_type;
+          }
+        } catch (e) {}
+
         const dwRes = await query(
           `INSERT INTO adm_document_workflows 
              (company_id, workflow_id, document_id, document_type, amount, current_step_order, status, assigned_to_user_id)
            VALUES 
-             (:companyId, :workflow_id, :id, 'DAILY_SITE_REPORT', 0, 1, 'PENDING', :assignedTo)`,
+             (:companyId, :workflow_id, :id, :wfDocType, 0, 1, 'PENDING', :assignedTo)`,
           {
             companyId: companyId || 1,
             workflow_id,
             id,
+            wfDocType,
             assignedTo: target_user_id || null,
-          }
+          },
         );
         const dwId = dwRes.insertId;
         await query(
           `INSERT INTO adm_workflow_tasks
              (company_id, workflow_id, document_workflow_id, document_id, document_type, step_order, assigned_to_user_id, action)
            VALUES
-             (:companyId, :workflow_id, :dwId, :id, 'DAILY_SITE_REPORT', 1, :assignedTo, 'PENDING')`,
+             (:companyId, :workflow_id, :dwId, :id, :wfDocType, 1, :assignedTo, 'PENDING')`,
           {
             companyId: companyId || 1,
             workflow_id,
             dwId,
             id,
+            wfDocType,
             assignedTo: target_user_id || null,
-          }
+          },
         );
         await query(
           `INSERT INTO adm_workflow_logs
@@ -2415,7 +3278,7 @@ export const submitDailyReport = async (req, res, next) => {
             dwId,
             actor: req.user?.id || req.user?.sub || null,
             comments: comments || "Submitted into workflow",
-          }
+          },
         );
       }
     } catch (e) {}
@@ -2424,7 +3287,7 @@ export const submitDailyReport = async (req, res, next) => {
       ok: true,
       status: "PENDING_APPROVAL",
       forwarded_to_username: targetUserName,
-      message: "Daily site report forwarded for approval"
+      message: "Daily site report forwarded for approval",
     });
   } catch (err) {
     next(err);
@@ -2437,30 +3300,58 @@ export const approveDailyReport = async (req, res, next) => {
     const id = toNumber(req.params.id);
     const { comments, approved_by_name } = req.body || {};
 
-    const repRows = await query(`SELECT * FROM pm_daily_site_reports WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`, { id, companyId: companyId || null });
-    if (!repRows.length) throw httpError(404, "NOT_FOUND", "Daily site report not found");
+    const repRows = await query(
+      `SELECT * FROM pm_daily_site_reports WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`,
+      { id, companyId: companyId || null },
+    );
+    if (!repRows.length)
+      throw httpError(404, "NOT_FOUND", "Daily site report not found");
 
-    const approver = approved_by_name || req.user?.username || req.user?.name || "Site Reviewer";
+    const approver =
+      approved_by_name ||
+      req.user?.username ||
+      req.user?.name ||
+      "Site Reviewer";
 
     await query(
       `UPDATE pm_daily_site_reports SET 
          status = 'APPROVED', 
          approved_by_name = :approver, 
          approved_at = NOW(), 
+         forwarded_to_username = NULL,
          reviewer_comments = COALESCE(:comments, reviewer_comments) 
        WHERE id = :id`,
       {
         approver,
         comments: comments || null,
-        id
-      }
+        id,
+      },
     );
+
+    try {
+      await query(
+        `UPDATE adm_document_workflows 
+         SET status = 'APPROVED', assigned_to_user_id = NULL 
+         WHERE (document_id = :id OR document_id = :idStr)
+           AND (document_type = 'DAILY_SITE_REPORT' OR document_type = 'DAILY_PROJECT_REPORT' OR document_type = 'Daily Project Report' OR document_type = 'Daily Site Report')
+           AND status = 'PENDING'`,
+        { id, idStr: String(id) },
+      );
+      await query(
+        `UPDATE adm_workflow_tasks 
+         SET action = 'APPROVED' 
+         WHERE (document_id = :id OR document_id = :idStr)
+           AND (document_type = 'DAILY_SITE_REPORT' OR document_type = 'DAILY_PROJECT_REPORT' OR document_type = 'Daily Project Report' OR document_type = 'Daily Site Report')
+           AND action = 'PENDING'`,
+        { id, idStr: String(id) },
+      );
+    } catch (e) {}
 
     res.json({
       ok: true,
       status: "APPROVED",
       approved_by_name: approver,
-      message: "Daily site report approved successfully"
+      message: "Daily site report approved successfully",
     });
   } catch (err) {
     next(err);
@@ -2473,8 +3364,12 @@ export const reverseDailyReport = async (req, res, next) => {
     const id = toNumber(req.params.id);
     const { desired_status = "DRAFT", reason } = req.body || {};
 
-    const repRows = await query(`SELECT * FROM pm_daily_site_reports WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`, { id, companyId: companyId || null });
-    if (!repRows.length) throw httpError(404, "NOT_FOUND", "Daily site report not found");
+    const repRows = await query(
+      `SELECT * FROM pm_daily_site_reports WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`,
+      { id, companyId: companyId || null },
+    );
+    if (!repRows.length)
+      throw httpError(404, "NOT_FOUND", "Daily site report not found");
 
     await query(
       `UPDATE pm_daily_site_reports SET 
@@ -2485,15 +3380,15 @@ export const reverseDailyReport = async (req, res, next) => {
        WHERE id = :id`,
       {
         desired_status,
-        reason: reason || `Reversed by ${req.user?.username || 'user'}`,
-        id
-      }
+        reason: reason || `Reversed by ${req.user?.username || "user"}`,
+        id,
+      },
     );
 
     res.json({
       ok: true,
       status: desired_status,
-      message: "Daily site report reversed"
+      message: "Daily site report reversed",
     });
   } catch (err) {
     next(err);
@@ -2517,6 +3412,7 @@ export const listSubcontracts = async (req, res, next) => {
                       sc.advance_percent AS advance_recovery_percent,
                       sc.advance_paid AS advance_payment,
                       p.project_name,
+                      p.project_code,
                       p.project_code
                FROM pm_subcontracts sc
                LEFT JOIN pm_projects p ON p.id = sc.project_id
@@ -2542,21 +3438,34 @@ export const createSubcontract = async (req, res, next) => {
     let contractNo = b.subcontract_number || b.contract_no;
     const suppId = toNumber(b.subcontractor_id || b.supplier_id);
     if (!b.project_id || !suppId) {
-      throw httpError(400, "VALIDATION_ERROR", "Project and subcontractor required");
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Project and subcontractor required",
+      );
     }
 
-    const projRows = await query(`SELECT id, project_code, company_id, branch_id FROM pm_projects WHERE id = :id LIMIT 1`, { id: toNumber(b.project_id) });
+    const projRows = await query(
+      `SELECT id, project_code, company_id, branch_id FROM pm_projects WHERE id = :id LIMIT 1`,
+      { id: toNumber(b.project_id) },
+    );
     const targetCompId = companyId || projRows[0]?.company_id || 1;
     const targetBranchId = branchId || projRows[0]?.branch_id || 1;
 
     // System-generated Subcontract No if not provided or hidden on frontend
     if (!contractNo || !String(contractNo).trim()) {
       const pCode = projRows[0]?.project_code || `PRJ${b.project_id}`;
-      const countRows = await query(`SELECT COUNT(*) as c FROM pm_subcontracts WHERE project_id = :projId`, { projId: toNumber(b.project_id) });
+      const countRows = await query(
+        `SELECT COUNT(*) as c FROM pm_subcontracts WHERE project_id = :projId`,
+        { projId: toNumber(b.project_id) },
+      );
       let nextSeq = Number(countRows[0]?.c || 0) + 1;
       contractNo = `SC-${pCode}-${String(nextSeq).padStart(3, "0")}`;
       // Verify uniqueness
-      const existing = await query(`SELECT id FROM pm_subcontracts WHERE contract_no = :contractNo LIMIT 1`, { contractNo });
+      const existing = await query(
+        `SELECT id FROM pm_subcontracts WHERE contract_no = :contractNo LIMIT 1`,
+        { contractNo },
+      );
       if (existing.length) {
         contractNo = `SC-${pCode}-${Date.now().toString().slice(-4)}`;
       }
@@ -2564,7 +3473,10 @@ export const createSubcontract = async (req, res, next) => {
 
     let suppName = b.subcontractor_name;
     if (!suppName) {
-      const suppRows = await query(`SELECT supplier_name FROM pur_suppliers WHERE id = :suppId LIMIT 1`, { suppId });
+      const suppRows = await query(
+        `SELECT supplier_name FROM pur_suppliers WHERE id = :suppId LIMIT 1`,
+        { suppId },
+      );
       suppName = suppRows[0]?.supplier_name || "Specialist Contractor";
     }
 
@@ -2585,7 +3497,9 @@ export const createSubcontract = async (req, res, next) => {
         contract_value: Number(b.contract_sum || b.contract_value || 0),
         retention_percent: Number(b.retention_percent ?? 5.0),
         retention_cap: Number(b.retention_cap || 0),
-        advance_percent: Number(b.advance_recovery_percent || b.advance_percent || 10.0),
+        advance_percent: Number(
+          b.advance_recovery_percent || b.advance_percent || 10.0,
+        ),
         advance_paid: Number(b.advance_payment || b.advance_paid || 0),
         advance_recovered: 0,
         start_date: b.start_date || null,
@@ -2593,9 +3507,15 @@ export const createSubcontract = async (req, res, next) => {
         status: b.status || "ACTIVE",
         terms_and_conditions: b.remarks || b.terms_and_conditions || null,
         created_by: req.user?.id || null,
-      }
+      },
     );
-    res.status(201).json({ id: result.insertId, contract_no: contractNo, message: "Subcontract registered successfully" });
+    res
+      .status(201)
+      .json({
+        id: result.insertId,
+        contract_no: contractNo,
+        message: "Subcontract registered successfully",
+      });
   } catch (err) {
     next(err);
   }
@@ -2641,14 +3561,19 @@ export const createSubcontractValuation = async (req, res, next) => {
     const b = req.body || {};
     const valNo = b.valuation_number || b.valuation_no;
     if (!b.subcontract_id || !valNo) {
-      throw httpError(400, "VALIDATION_ERROR", "Subcontract and valuation number required");
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Subcontract and valuation number required",
+      );
     }
 
     const scRows = await query(
-      `SELECT * FROM pm_subcontracts WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL) LIMIT 1`, 
-      { id: toNumber(b.subcontract_id), companyId: companyId || null }
+      `SELECT * FROM pm_subcontracts WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
+      { id: toNumber(b.subcontract_id), companyId: companyId || null },
     );
-    if (!scRows.length) throw httpError(404, "NOT_FOUND", "Subcontract not found");
+    if (!scRows.length)
+      throw httpError(404, "NOT_FOUND", "Subcontract not found");
     const sc = scRows[0];
 
     const cumWorkDone = Number(b.cumulative_work_done || b.gross_claimed || 0);
@@ -2658,11 +3583,16 @@ export const createSubcontractValuation = async (req, res, next) => {
     const retPct = Number(sc.retention_percent ?? 5);
     const retentionDeducted = Number(((currWork * retPct) / 100).toFixed(2));
 
-    const advRecPct = Number(sc.advance_percent ?? sc.advance_recovery_percent ?? 10);
+    const advRecPct = Number(
+      sc.advance_percent ?? sc.advance_recovery_percent ?? 10,
+    );
     const advanceRecovered = Number(((currWork * advRecPct) / 100).toFixed(2));
 
     const otherDeductions = Number(b.other_deductions || 0);
-    const netPayable = Math.max(0, currWork - retentionDeducted - advanceRecovered - otherDeductions);
+    const netPayable = Math.max(
+      0,
+      currWork - retentionDeducted - advanceRecovered - otherDeductions,
+    );
 
     const targetCompId = companyId || sc.company_id || 1;
     const targetBranchId = branchId || sc.branch_id || 1;
@@ -2678,7 +3608,8 @@ export const createSubcontractValuation = async (req, res, next) => {
         subcontract_id: sc.id,
         project_id: sc.project_id,
         valuation_no: valNo,
-        valuation_date: b.valuation_date || new Date().toISOString().split("T")[0],
+        valuation_date:
+          b.valuation_date || new Date().toISOString().split("T")[0],
         period_from: b.period_from || null,
         period_to: b.period_to || null,
         gross_claimed: cumWorkDone,
@@ -2693,12 +3624,18 @@ export const createSubcontractValuation = async (req, res, next) => {
         remarks: b.remarks || null,
         certified_by: req.user?.id || null,
         certified_at: b.status === "CERTIFIED" ? new Date() : null,
-      }
+      },
     );
 
     const valuationId = result.insertId;
 
-    res.status(201).json({ id: valuationId, net_payable: netPayable, message: "Subcontract valuation recorded" });
+    res
+      .status(201)
+      .json({
+        id: valuationId,
+        net_payable: netPayable,
+        message: "Subcontract valuation recorded",
+      });
   } catch (err) {
     next(err);
   }
@@ -2721,7 +3658,8 @@ export const listClientValuations = async (req, res, next) => {
                       v.current_certified AS current_claim,
                       v.advance_recovered AS advance_recovery,
                       v.net_amount_due AS net_certified_amount,
-                      p.project_name, 
+                      p.project_name,
+                      p.project_code, 
                       p.project_code, 
                       COALESCE(c.customer_name, v.client_name, p.client_name, 'Client') AS client_name,
                       (SELECT COUNT(*) FROM pm_client_valuation_lines WHERE valuation_id = v.id) AS item_count
@@ -2747,7 +3685,8 @@ export const getClientValuationBaseline = async (req, res, next) => {
     const { companyId } = req.scope || {};
     await ensureConstructionTables();
     const projectId = toNumber(req.params.projectId);
-    if (!projectId) throw httpError(400, "VALIDATION_ERROR", "Project ID is required");
+    if (!projectId)
+      throw httpError(400, "VALIDATION_ERROR", "Project ID is required");
 
     const projRows = await query(
       `SELECT p.*, COALESCE(c.customer_name, p.client_name, 'Client') AS client_name,
@@ -2755,9 +3694,10 @@ export const getClientValuationBaseline = async (req, res, next) => {
        FROM pm_projects p
        LEFT JOIN sal_customers c ON c.id = p.client_id
        WHERE p.id = :id AND (p.company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
-      { id: projectId, companyId: companyId || null }
+      { id: projectId, companyId: companyId || null },
     );
-    if (!projRows.length) throw httpError(404, "NOT_FOUND", "Project not found");
+    if (!projRows.length)
+      throw httpError(404, "NOT_FOUND", "Project not found");
     const project = projRows[0];
 
     // Find active or approved BOQ
@@ -2765,7 +3705,7 @@ export const getClientValuationBaseline = async (req, res, next) => {
       `SELECT * FROM pm_boqs 
        WHERE project_id = :projectId AND (company_id = :companyId OR :companyId IS NULL)
        ORDER BY CASE WHEN status = 'APPROVED' THEN 1 ELSE 2 END, id DESC LIMIT 1`,
-      { projectId, companyId: companyId || null }
+      { projectId, companyId: companyId || null },
     );
     const boq = boqRows[0] || null;
 
@@ -2778,7 +3718,7 @@ export const getClientValuationBaseline = async (req, res, next) => {
          FROM pm_boq_items bi
          WHERE bi.boq_id = :boqId
          ORDER BY bi.sort_order ASC, bi.id ASC`,
-        { boqId: boq.id }
+        { boqId: boq.id },
       );
     }
 
@@ -2789,7 +3729,7 @@ export const getClientValuationBaseline = async (req, res, next) => {
        WHERE v.project_id = :projectId AND (v.company_id = :companyId OR :companyId IS NULL)
          AND v.status IN ('APPROVED', 'CERTIFIED', 'SUBMITTED')
        ORDER BY v.id DESC`,
-      { projectId, companyId: companyId || null }
+      { projectId, companyId: companyId || null },
     );
     const previousValuation = valRows[0] || null;
 
@@ -2803,7 +3743,7 @@ export const getClientValuationBaseline = async (req, res, next) => {
        WHERE v.project_id = :projectId AND (v.company_id = :companyId OR :companyId IS NULL)
          AND v.status IN ('APPROVED', 'CERTIFIED')
        GROUP BY vl.boq_item_id, vl.item_code`,
-      { projectId, companyId: companyId || null }
+      { projectId, companyId: companyId || null },
     );
     const prevMap = new Map();
     for (const pl of prevLines) {
@@ -2811,10 +3751,13 @@ export const getClientValuationBaseline = async (req, res, next) => {
       if (key) prevMap.set(String(key), pl);
     }
 
-    const itemsWithBaseline = boqItems.map(item => {
-      const prev = prevMap.get(String(item.id)) || prevMap.get(String(item.item_code));
+    const itemsWithBaseline = boqItems.map((item) => {
+      const prev =
+        prevMap.get(String(item.id)) || prevMap.get(String(item.item_code));
       const prevQty = Number(prev?.prev_cumulative_qty || 0);
-      const prevCertVal = Number(prev?.prev_certified_value || (prevQty * Number(item.contract_rate || 0)));
+      const prevCertVal = Number(
+        prev?.prev_certified_value || prevQty * Number(item.contract_rate || 0),
+      );
       return {
         boq_item_id: item.id,
         item_code: item.item_code || "",
@@ -2826,8 +3769,13 @@ export const getClientValuationBaseline = async (req, res, next) => {
         prev_cumulative_qty: prevQty,
         current_period_qty: 0,
         cumulative_qty: prevQty,
-        percentage_complete: Number(item.contract_qty) > 0 ? Number(((prevQty / Number(item.contract_qty)) * 100).toFixed(2)) : 0,
-        cumulative_value: Number((prevQty * Number(item.contract_rate || 0)).toFixed(2)),
+        percentage_complete:
+          Number(item.contract_qty) > 0
+            ? Number(((prevQty / Number(item.contract_qty)) * 100).toFixed(2))
+            : 0,
+        cumulative_value: Number(
+          (prevQty * Number(item.contract_rate || 0)).toFixed(2),
+        ),
         prev_certified_value: prevCertVal,
         current_period_value: 0,
         assessed_value: 0,
@@ -2845,13 +3793,13 @@ export const getClientValuationBaseline = async (req, res, next) => {
        LEFT JOIN pm_variation_items vi ON vi.variation_id = v.id
        WHERE v.project_id = :projectId AND (v.company_id = :companyId OR :companyId IS NULL)
          AND v.status = 'APPROVED'`,
-      { projectId, companyId: companyId || null }
+      { projectId, companyId: companyId || null },
     );
 
     // Auto-generate next valuation ref
     const totalVals = await query(
       `SELECT COUNT(*) AS c FROM pm_client_valuations WHERE (company_id = :companyId OR :companyId IS NULL)`,
-      { companyId: companyId || null }
+      { companyId: companyId || null },
     );
     const nextValNo = `VAL-${project.project_code || "PRJ"}-${Number(totalVals[0]?.c || 0) + 1}`;
 
@@ -2861,7 +3809,7 @@ export const getClientValuationBaseline = async (req, res, next) => {
       boq_items: itemsWithBaseline,
       previous_valuation: previousValuation,
       approved_variations: approvedVariations,
-      suggested_valuation_no: nextValNo
+      suggested_valuation_no: nextValNo,
     });
   } catch (err) {
     next(err);
@@ -2885,14 +3833,15 @@ export const getClientValuationById = async (req, res, next) => {
        LEFT JOIN sal_customers c ON c.id = p.client_id
        LEFT JOIN adm_users u ON u.id = v.created_by
        WHERE v.id = :id AND (v.company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
-      { id, companyId: companyId || null }
+      { id, companyId: companyId || null },
     );
-    if (!rows.length) throw httpError(404, "NOT_FOUND", "Client valuation not found");
+    if (!rows.length)
+      throw httpError(404, "NOT_FOUND", "Client valuation not found");
     const valuation = rows[0];
 
     const lines = await query(
       `SELECT * FROM pm_client_valuation_lines WHERE valuation_id = :id ORDER BY id ASC`,
-      { id }
+      { id },
     );
     valuation.items = lines;
 
@@ -2906,16 +3855,25 @@ export const createClientValuation = async (req, res, next) => {
   try {
     const { companyId, branchId } = req.scope || {};
     const b = req.body || {};
-    const valNo = b.valuation_no || b.valuation_number || b.application_no || b.application_number;
+    const valNo =
+      b.valuation_no ||
+      b.valuation_number ||
+      b.application_no ||
+      b.application_number;
     if (!b.project_id || !valNo) {
-      throw httpError(400, "VALIDATION_ERROR", "Project and valuation number required");
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Project and valuation number required",
+      );
     }
 
     const projRows = await query(
-      `SELECT * FROM pm_projects WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL) LIMIT 1`, 
-      { id: toNumber(b.project_id), companyId: companyId || null }
+      `SELECT * FROM pm_projects WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
+      { id: toNumber(b.project_id), companyId: companyId || null },
     );
-    if (!projRows.length) throw httpError(404, "NOT_FOUND", "Project not found");
+    if (!projRows.length)
+      throw httpError(404, "NOT_FOUND", "Project not found");
     const proj = projRows[0];
 
     const targetCompanyId = companyId || proj.company_id || 1;
@@ -2927,9 +3885,14 @@ export const createClientValuation = async (req, res, next) => {
     let currentWorkTotal = 0;
 
     for (const it of items) {
-      const cVal = Number(it.cumulative_value || (Number(it.cumulative_qty || 0) * Number(it.contract_rate || 0)));
+      const cVal = Number(
+        it.cumulative_value ||
+          Number(it.cumulative_qty || 0) * Number(it.contract_rate || 0),
+      );
       const pVal = Number(it.prev_certified_value || 0);
-      const curVal = Number(it.assessed_value || it.current_period_value || (cVal - pVal));
+      const curVal = Number(
+        it.assessed_value || it.current_period_value || cVal - pVal,
+      );
       grossClaimed += cVal;
       prevCertifiedTotal += pVal;
       currentWorkTotal += curVal;
@@ -2937,25 +3900,39 @@ export const createClientValuation = async (req, res, next) => {
 
     if (items.length === 0) {
       grossClaimed = Number(b.cumulative_work_done || b.gross_claimed || 0);
-      prevCertifiedTotal = Number(b.previously_certified || b.previous_certified || 0);
+      prevCertifiedTotal = Number(
+        b.previously_certified || b.previous_certified || 0,
+      );
       currentWorkTotal = Math.max(0, grossClaimed - prevCertifiedTotal);
     }
 
     const matOnSite = Number(b.materials_on_site_value || 0);
     const dayworks = Number(b.dayworks_value || 0);
-    const approvedVars = Number(b.approved_variations_total || b.approved_variations_value || 0);
+    const approvedVars = Number(
+      b.approved_variations_total || b.approved_variations_value || 0,
+    );
     const otherAdds = Number(b.other_additions_value || 0);
 
-    const grossAssessed = currentWorkTotal + matOnSite + dayworks + approvedVars + otherAdds;
+    const grossAssessed =
+      currentWorkTotal + matOnSite + dayworks + approvedVars + otherAdds;
 
     const retPct = Number(b.retention_percent ?? proj.retention_percent ?? 5.0);
     const retentionAmt = Number(((grossAssessed * retPct) / 100).toFixed(2));
 
-    const advRecPct = Number(b.advance_recovery_percent ?? proj.advance_recovery_percent ?? 10.0);
-    const advanceRecoveryAmt = Number(((grossAssessed * advRecPct) / 100).toFixed(2));
+    const advRecPct = Number(
+      b.advance_recovery_percent ?? proj.advance_recovery_percent ?? 10.0,
+    );
+    const advanceRecoveryAmt = Number(
+      ((grossAssessed * advRecPct) / 100).toFixed(2),
+    );
 
-    const otherDeductions = Number(b.other_deductions || b.other_deductions_amount || 0);
-    const netAmountDue = Math.max(0, grossAssessed - retentionAmt - advanceRecoveryAmt - otherDeductions);
+    const otherDeductions = Number(
+      b.other_deductions || b.other_deductions_amount || 0,
+    );
+    const netAmountDue = Math.max(
+      0,
+      grossAssessed - retentionAmt - advanceRecoveryAmt - otherDeductions,
+    );
 
     const status = b.status || "DRAFT";
 
@@ -2988,12 +3965,15 @@ export const createClientValuation = async (req, res, next) => {
         contract_ref: b.contract_ref || proj.contract_ref_no || null,
         valuation_no: valNo,
         application_no: valNo,
-        valuation_date: b.valuation_date || new Date().toISOString().split("T")[0],
+        valuation_date:
+          b.valuation_date || new Date().toISOString().split("T")[0],
         period_from: b.period_from || null,
         period_to: b.period_to || null,
         valuation_type: b.valuation_type || "INTERIM",
         boq_id: b.boq_id ? toNumber(b.boq_id) : null,
-        previous_valuation_id: b.previous_valuation_id ? toNumber(b.previous_valuation_id) : null,
+        previous_valuation_id: b.previous_valuation_id
+          ? toNumber(b.previous_valuation_id)
+          : null,
         previous_valuation_no: b.previous_valuation_no || null,
         prepared_by_name: b.prepared_by_name || req.user?.username || null,
         gross_claimed: grossClaimed,
@@ -3016,7 +3996,7 @@ export const createClientValuation = async (req, res, next) => {
         remarks: b.remarks || null,
         attachments: b.attachments ? JSON.stringify(b.attachments) : null,
         created_by: req.user?.id || null,
-      }
+      },
     );
 
     const valuationId = result.insertId;
@@ -3044,19 +4024,28 @@ export const createClientValuation = async (req, res, next) => {
           unit_rate: Number(it.contract_rate || it.unit_rate || 0),
           contract_qty: Number(it.contract_qty || 0),
           contract_rate: Number(it.contract_rate || 0),
-          contract_amount: Number(it.contract_amount || (Number(it.contract_qty || 0) * Number(it.contract_rate || 0))),
+          contract_amount: Number(
+            it.contract_amount ||
+              Number(it.contract_qty || 0) * Number(it.contract_rate || 0),
+          ),
           prev_cumulative_qty: Number(it.prev_cumulative_qty || 0),
           current_period_qty: Number(it.current_period_qty || 0),
-          cumulative_qty: Number(it.cumulative_qty || (Number(it.prev_cumulative_qty || 0) + Number(it.current_period_qty || 0))),
+          cumulative_qty: Number(
+            it.cumulative_qty ||
+              Number(it.prev_cumulative_qty || 0) +
+                Number(it.current_period_qty || 0),
+          ),
           percentage_complete: Number(it.percentage_complete || 0),
           cumulative_value: Number(it.cumulative_value || 0),
           prev_certified_value: Number(it.prev_certified_value || 0),
           current_period_value: Number(it.current_period_value || 0),
-          assessed_value: Number(it.assessed_value || it.current_period_value || 0),
+          assessed_value: Number(
+            it.assessed_value || it.current_period_value || 0,
+          ),
           remarks: it.remarks || null,
           is_variation: it.is_variation ? 1 : 0,
           variation_id: it.variation_id ? toNumber(it.variation_id) : null,
-        }
+        },
       );
     }
 
@@ -3065,7 +4054,7 @@ export const createClientValuation = async (req, res, next) => {
       valuation_number: valNo,
       net_certified_amount: netAmountDue,
       net_amount_due: netAmountDue,
-      message: "Client valuation created successfully"
+      message: "Client valuation created successfully",
     });
   } catch (err) {
     next(err);
@@ -3080,12 +4069,17 @@ export const updateClientValuation = async (req, res, next) => {
 
     const existingRows = await query(
       `SELECT * FROM pm_client_valuations WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
-      { id, companyId: companyId || null }
+      { id, companyId: companyId || null },
     );
-    if (!existingRows.length) throw httpError(404, "NOT_FOUND", "Valuation not found");
+    if (!existingRows.length)
+      throw httpError(404, "NOT_FOUND", "Valuation not found");
     const existing = existingRows[0];
     if (existing.status === "APPROVED" && req.user?.role !== "admin") {
-      throw httpError(403, "FORBIDDEN", "Cannot modify an approved valuation without administrator authorization");
+      throw httpError(
+        403,
+        "FORBIDDEN",
+        "Cannot modify an approved valuation without administrator authorization",
+      );
     }
 
     const items = Array.isArray(b.items) ? b.items : [];
@@ -3094,35 +4088,74 @@ export const updateClientValuation = async (req, res, next) => {
     let currentWorkTotal = 0;
 
     for (const it of items) {
-      const cVal = Number(it.cumulative_value || (Number(it.cumulative_qty || 0) * Number(it.contract_rate || 0)));
+      const cVal = Number(
+        it.cumulative_value ||
+          Number(it.cumulative_qty || 0) * Number(it.contract_rate || 0),
+      );
       const pVal = Number(it.prev_certified_value || 0);
-      const curVal = Number(it.assessed_value || it.current_period_value || (cVal - pVal));
+      const curVal = Number(
+        it.assessed_value || it.current_period_value || cVal - pVal,
+      );
       grossClaimed += cVal;
       prevCertifiedTotal += pVal;
       currentWorkTotal += curVal;
     }
 
     if (items.length === 0) {
-      grossClaimed = Number(b.cumulative_work_done || b.gross_claimed || existing.gross_claimed || 0);
-      prevCertifiedTotal = Number(b.previously_certified || b.previous_certified || existing.previous_certified || 0);
+      grossClaimed = Number(
+        b.cumulative_work_done ||
+          b.gross_claimed ||
+          existing.gross_claimed ||
+          0,
+      );
+      prevCertifiedTotal = Number(
+        b.previously_certified ||
+          b.previous_certified ||
+          existing.previous_certified ||
+          0,
+      );
       currentWorkTotal = Math.max(0, grossClaimed - prevCertifiedTotal);
     }
 
-    const matOnSite = Number(b.materials_on_site_value ?? existing.materials_on_site_value ?? 0);
+    const matOnSite = Number(
+      b.materials_on_site_value ?? existing.materials_on_site_value ?? 0,
+    );
     const dayworks = Number(b.dayworks_value ?? existing.dayworks_value ?? 0);
-    const approvedVars = Number(b.approved_variations_total ?? b.approved_variations_value ?? existing.approved_variations_total ?? 0);
-    const otherAdds = Number(b.other_additions_value ?? existing.other_additions_value ?? 0);
+    const approvedVars = Number(
+      b.approved_variations_total ??
+        b.approved_variations_value ??
+        existing.approved_variations_total ??
+        0,
+    );
+    const otherAdds = Number(
+      b.other_additions_value ?? existing.other_additions_value ?? 0,
+    );
 
-    const grossAssessed = currentWorkTotal + matOnSite + dayworks + approvedVars + otherAdds;
+    const grossAssessed =
+      currentWorkTotal + matOnSite + dayworks + approvedVars + otherAdds;
 
-    const retPct = Number(b.retention_percent ?? existing.retention_percent ?? 5.0);
+    const retPct = Number(
+      b.retention_percent ?? existing.retention_percent ?? 5.0,
+    );
     const retentionAmt = Number(((grossAssessed * retPct) / 100).toFixed(2));
 
-    const advRecPct = Number(b.advance_recovery_percent ?? existing.advance_recovery_percent ?? 10.0);
-    const advanceRecoveryAmt = Number(((grossAssessed * advRecPct) / 100).toFixed(2));
+    const advRecPct = Number(
+      b.advance_recovery_percent ?? existing.advance_recovery_percent ?? 10.0,
+    );
+    const advanceRecoveryAmt = Number(
+      ((grossAssessed * advRecPct) / 100).toFixed(2),
+    );
 
-    const otherDeductions = Number(b.other_deductions ?? b.other_deductions_amount ?? existing.other_deductions ?? 0);
-    const netAmountDue = Math.max(0, grossAssessed - retentionAmt - advanceRecoveryAmt - otherDeductions);
+    const otherDeductions = Number(
+      b.other_deductions ??
+        b.other_deductions_amount ??
+        existing.other_deductions ??
+        0,
+    );
+    const netAmountDue = Math.max(
+      0,
+      grossAssessed - retentionAmt - advanceRecoveryAmt - otherDeductions,
+    );
 
     await query(
       `UPDATE pm_client_valuations SET 
@@ -3154,7 +4187,8 @@ export const updateClientValuation = async (req, res, next) => {
         valuation_date: b.valuation_date || existing.valuation_date,
         period_from: b.period_from || existing.period_from,
         period_to: b.period_to || existing.period_to,
-        valuation_type: b.valuation_type || existing.valuation_type || "INTERIM",
+        valuation_type:
+          b.valuation_type || existing.valuation_type || "INTERIM",
         gross_claimed: grossClaimed,
         gross_certified: grossAssessed,
         previous_certified: prevCertifiedTotal,
@@ -3173,11 +4207,14 @@ export const updateClientValuation = async (req, res, next) => {
         net_amount_due: netAmountDue,
         status: b.status || existing.status,
         remarks: b.remarks || existing.remarks,
-      }
+      },
     );
 
     if (items.length > 0) {
-      await query(`DELETE FROM pm_client_valuation_lines WHERE valuation_id = :id`, { id });
+      await query(
+        `DELETE FROM pm_client_valuation_lines WHERE valuation_id = :id`,
+        { id },
+      );
       for (const it of items) {
         await query(
           `INSERT INTO pm_client_valuation_lines 
@@ -3200,7 +4237,10 @@ export const updateClientValuation = async (req, res, next) => {
             unit_rate: Number(it.contract_rate || it.unit_rate || 0),
             contract_qty: Number(it.contract_qty || 0),
             contract_rate: Number(it.contract_rate || 0),
-            contract_amount: Number(it.contract_amount || (Number(it.contract_qty || 0) * Number(it.contract_rate || 0))),
+            contract_amount: Number(
+              it.contract_amount ||
+                Number(it.contract_qty || 0) * Number(it.contract_rate || 0),
+            ),
             prev_cumulative_qty: Number(it.prev_cumulative_qty || 0),
             current_period_qty: Number(it.current_period_qty || 0),
             cumulative_qty: Number(it.cumulative_qty || 0),
@@ -3208,11 +4248,13 @@ export const updateClientValuation = async (req, res, next) => {
             cumulative_value: Number(it.cumulative_value || 0),
             prev_certified_value: Number(it.prev_certified_value || 0),
             current_period_value: Number(it.current_period_value || 0),
-            assessed_value: Number(it.assessed_value || it.current_period_value || 0),
+            assessed_value: Number(
+              it.assessed_value || it.current_period_value || 0,
+            ),
             remarks: it.remarks || null,
             is_variation: it.is_variation ? 1 : 0,
             variation_id: it.variation_id ? toNumber(it.variation_id) : null,
-          }
+          },
         );
       }
     }
@@ -3230,19 +4272,33 @@ export const updateClientValuationStatus = async (req, res, next) => {
     const { status, remarks, forwarded_to_username } = req.body || {};
     if (!status) throw httpError(400, "VALIDATION_ERROR", "Status is required");
 
-    const validStatuses = ["DRAFT", "PENDING_APPROVAL", "SUBMITTED", "UNDER_REVIEW", "APPROVED", "REJECTED", "CERTIFIED", "REVERSED"];
-    if (!validStatuses.includes(status)) throw httpError(400, "VALIDATION_ERROR", "Invalid valuation status");
+    const validStatuses = [
+      "DRAFT",
+      "PENDING_APPROVAL",
+      "SUBMITTED",
+      "UNDER_REVIEW",
+      "APPROVED",
+      "REJECTED",
+      "CERTIFIED",
+      "REVERSED",
+    ];
+    if (!validStatuses.includes(status))
+      throw httpError(400, "VALIDATION_ERROR", "Invalid valuation status");
 
     const existingRows = await query(
       `SELECT * FROM pm_client_valuations WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
-      { id, companyId: companyId || null }
+      { id, companyId: companyId || null },
     );
-    if (!existingRows.length) throw httpError(404, "NOT_FOUND", "Valuation not found");
+    if (!existingRows.length)
+      throw httpError(404, "NOT_FOUND", "Valuation not found");
     const val = existingRows[0];
 
     let history = [];
     try {
-      history = typeof val.approval_history === "string" ? JSON.parse(val.approval_history || "[]") : (val.approval_history || []);
+      history =
+        typeof val.approval_history === "string"
+          ? JSON.parse(val.approval_history || "[]")
+          : val.approval_history || [];
     } catch (_) {}
     history.push({
       action: status,
@@ -3251,14 +4307,21 @@ export const updateClientValuationStatus = async (req, res, next) => {
       user_id: req.user?.id || null,
       username: req.user?.username || "System",
       remarks: remarks || "",
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     await query(
       `UPDATE pm_client_valuations 
        SET status = :status, forwarded_to_username = :forwarded_to_username, remarks = COALESCE(:remarks, remarks), approval_history = :history
        WHERE id = :id`,
-      { id, status, forwarded_to_username: forwarded_to_username !== undefined ? forwarded_to_username : null, remarks: remarks || null, history: JSON.stringify(history) }
+      {
+        id,
+        status,
+        forwarded_to_username:
+          forwarded_to_username !== undefined ? forwarded_to_username : null,
+        remarks: remarks || null,
+        history: JSON.stringify(history),
+      },
     );
 
     res.json({ id, status, message: `Valuation status updated to ${status}` });
@@ -3278,7 +4341,8 @@ export const listPaymentApplications = async (req, res, next) => {
     const projectId = toNumber(req.query.project_id);
     const valuationId = toNumber(req.query.valuation_id);
     let sql = `SELECT pa.*,
-                      p.project_name, p.project_code,
+                      p.project_name,
+                      p.project_code, p.project_code,
                       COALESCE(c.customer_name, pa.client_name, p.client_name, 'Client') AS client_name,
                       v.valuation_no AS linked_valuation_no
                FROM pm_payment_applications pa
@@ -3318,9 +4382,10 @@ export const getPaymentApplicationById = async (req, res, next) => {
        LEFT JOIN sal_customers c ON c.id = p.client_id
        LEFT JOIN pm_client_valuations v ON v.id = pa.valuation_id
        WHERE pa.id = :id AND (pa.company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
-      { id, companyId: companyId || null }
+      { id, companyId: companyId || null },
     );
-    if (!rows.length) throw httpError(404, "NOT_FOUND", "Payment application not found");
+    if (!rows.length)
+      throw httpError(404, "NOT_FOUND", "Payment application not found");
     res.json({ item: rows[0] });
   } catch (err) {
     next(err);
@@ -3334,14 +4399,19 @@ export const createPaymentApplication = async (req, res, next) => {
     const b = req.body || {};
     const appNo = b.application_number;
     if (!b.project_id || !appNo) {
-      throw httpError(400, "VALIDATION_ERROR", "Project and application number required");
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Project and application number required",
+      );
     }
 
     const projRows = await query(
-      `SELECT * FROM pm_projects WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL) LIMIT 1`, 
-      { id: toNumber(b.project_id), companyId: companyId || null }
+      `SELECT * FROM pm_projects WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
+      { id: toNumber(b.project_id), companyId: companyId || null },
     );
-    if (!projRows.length) throw httpError(404, "NOT_FOUND", "Project not found");
+    if (!projRows.length)
+      throw httpError(404, "NOT_FOUND", "Project not found");
     const proj = projRows[0];
 
     const targetCompanyId = companyId || proj.company_id || 1;
@@ -3350,22 +4420,45 @@ export const createPaymentApplication = async (req, res, next) => {
     // Check duplicate
     const dup = await query(
       `SELECT id FROM pm_payment_applications WHERE company_id = :companyId AND application_number = :appNo LIMIT 1`,
-      { companyId: targetCompanyId, appNo }
+      { companyId: targetCompanyId, appNo },
     );
-    if (dup.length) throw httpError(409, "DUPLICATE", `Application number ${appNo} already exists`);
+    if (dup.length)
+      throw httpError(
+        409,
+        "DUPLICATE",
+        `Application number ${appNo} already exists`,
+      );
 
     // Financial numbers
     const workCompleted = Number(b.work_completed_value || 0);
     const approvedVars = Number(b.approved_variations_value || 0);
     const materialsOnSite = Number(b.materials_on_site_value || 0);
     const otherAdds = Number(b.other_additions_value || 0);
-    const grossAssessed = Number(b.gross_amount_assessed || (workCompleted + approvedVars + materialsOnSite + otherAdds));
+    const grossAssessed = Number(
+      b.gross_amount_assessed ||
+        workCompleted + approvedVars + materialsOnSite + otherAdds,
+    );
     const retentionAmt = Number(b.retention_amount || 0);
     const advanceRecAmt = Number(b.advance_recovery_amount || 0);
     const otherDeductions = Number(b.other_deductions_amount || 0);
     const prevCertified = Number(b.previous_certified_amount || 0);
     const adjustments = Number(b.adjustments_amount || 0);
-    const netRequested = Number(b.net_amount_requested || (grossAssessed - retentionAmt - advanceRecAmt - otherDeductions - prevCertified + adjustments));
+    const netRequested = Number(
+      b.net_amount_requested ||
+        grossAssessed -
+          retentionAmt -
+          advanceRecAmt -
+          otherDeductions -
+          prevCertified +
+          adjustments,
+    );
+
+    const workItems = b.work_items ? JSON.stringify(b.work_items) : null;
+    const materialsItems = b.materials_items ? JSON.stringify(b.materials_items) : null;
+    const deductionsItems = b.deductions_items ? JSON.stringify(b.deductions_items) : null;
+    const retentionPercent = Number(b.retention_percent || 0);
+    const retentionCap = Number(b.retention_cap || 0);
+    const description = b.description || b.remarks || null;
 
     const result = await query(
       `INSERT INTO pm_payment_applications 
@@ -3376,6 +4469,7 @@ export const createPaymentApplication = async (req, res, next) => {
          gross_amount_assessed, retention_amount, advance_recovery_amount, other_deductions_amount,
          previous_certified_amount, adjustments_amount, net_amount_requested,
          submitted_amount, assessed_amount, certified_amount, outstanding_balance, payment_status,
+         work_items, materials_items, deductions_items, retention_percent, retention_cap, description,
          attachments, created_by)
        VALUES 
         (:companyId, :branchId, :application_number, :project_id, :contract_ref, :client_id, :client_name, :contractor_name,
@@ -3385,6 +4479,7 @@ export const createPaymentApplication = async (req, res, next) => {
          :gross_amount_assessed, :retention_amount, :advance_recovery_amount, :other_deductions_amount,
          :previous_certified_amount, :adjustments_amount, :net_amount_requested,
          :submitted_amount, :assessed_amount, :certified_amount, :outstanding_balance, :payment_status,
+         :work_items, :materials_items, :deductions_items, :retention_percent, :retention_cap, :description,
          :attachments, :created_by)`,
       {
         companyId: targetCompanyId,
@@ -3397,7 +4492,8 @@ export const createPaymentApplication = async (req, res, next) => {
         contractor_name: b.contractor_name || "Contractor",
         valuation_id: b.valuation_id ? toNumber(b.valuation_id) : null,
         valuation_no: b.valuation_no || null,
-        application_date: b.application_date || new Date().toISOString().split("T")[0],
+        application_date:
+          b.application_date || new Date().toISOString().split("T")[0],
         period_from: b.period_from || null,
         period_to: b.period_to || null,
         due_date: b.due_date || null,
@@ -3421,16 +4517,22 @@ export const createPaymentApplication = async (req, res, next) => {
         certified_amount: 0,
         outstanding_balance: 0,
         payment_status: "UNPAID",
+        work_items: workItems,
+        materials_items: materialsItems,
+        deductions_items: deductionsItems,
+        retention_percent: retentionPercent,
+        retention_cap: retentionCap,
+        description: description,
         attachments: b.attachments ? JSON.stringify(b.attachments) : null,
         created_by: req.user?.id || null,
-      }
+      },
     );
 
     res.status(201).json({
       id: result.insertId,
       application_number: appNo,
       net_amount_requested: netRequested,
-      message: "Interim Payment Application submitted successfully"
+      message: "Interim Payment Application submitted successfully",
     });
   } catch (err) {
     next(err);
@@ -3448,9 +4550,10 @@ export const createPaymentApplicationFromValuation = async (req, res, next) => {
        FROM pm_client_valuations v
        JOIN pm_projects p ON p.id = v.project_id
        WHERE v.id = :id AND (v.company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
-      { id: valuationId, companyId: companyId || null }
+      { id: valuationId, companyId: companyId || null },
     );
-    if (!valRows.length) throw httpError(404, "NOT_FOUND", "Valuation not found");
+    if (!valRows.length)
+      throw httpError(404, "NOT_FOUND", "Valuation not found");
     const val = valRows[0];
 
     const targetCompanyId = companyId || val.company_id || 1;
@@ -3459,7 +4562,7 @@ export const createPaymentApplicationFromValuation = async (req, res, next) => {
     // Generate IPA number
     const countRows = await query(
       `SELECT COUNT(*) as c FROM pm_payment_applications WHERE company_id = :companyId`,
-      { companyId: targetCompanyId }
+      { companyId: targetCompanyId },
     );
     const ipaNo = `IPA-${val.project_code || "PRJ"}-${Number(countRows[0]?.c || 0) + 1}`;
 
@@ -3468,19 +4571,27 @@ export const createPaymentApplicationFromValuation = async (req, res, next) => {
       `SELECT SUM(certified_amount) as total FROM pm_payment_applications 
        WHERE project_id = :projectId AND (company_id = :companyId OR :companyId IS NULL)
          AND status IN ('CERTIFIED', 'PARTIALLY_CERTIFIED', 'PAID')`,
-      { projectId: val.project_id, companyId: targetCompanyId }
+      { projectId: val.project_id, companyId: targetCompanyId },
     );
-    const prevCertified = Number(prevCertRows[0]?.total || val.previous_certified || 0);
+    const prevCertified = Number(
+      prevCertRows[0]?.total || val.previous_certified || 0,
+    );
 
-    const workVal = Number(val.current_certified || (val.gross_claimed - val.previous_certified) || 0);
+    const workVal = Number(
+      val.current_certified || val.gross_claimed - val.previous_certified || 0,
+    );
     const varsVal = Number(val.approved_variations_total || 0);
     const matVal = Number(val.materials_on_site_value || 0);
     const otherVal = Number(val.other_additions_value || 0);
-    const grossAssessed = Number(val.gross_assessed_value || (workVal + varsVal + matVal + otherVal));
+    const grossAssessed = Number(
+      val.gross_assessed_value || workVal + varsVal + matVal + otherVal,
+    );
     const retAmt = Number(val.retention_deducted || 0);
     const advAmt = Number(val.advance_recovered || 0);
     const otherDed = Number(val.other_deductions || 0);
-    const netRequested = Number(val.net_amount_due || (grossAssessed - retAmt - advAmt - otherDed));
+    const netRequested = Number(
+      val.net_amount_due || grossAssessed - retAmt - advAmt - otherDed,
+    );
 
     const result = await query(
       `INSERT INTO pm_payment_applications 
@@ -3515,7 +4626,9 @@ export const createPaymentApplicationFromValuation = async (req, res, next) => {
         application_date: new Date().toISOString().split("T")[0],
         period_from: val.period_from || null,
         period_to: val.period_to || null,
-        due_date: new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
+        due_date: new Date(Date.now() + 30 * 86400000)
+          .toISOString()
+          .split("T")[0],
         payment_terms: "30 Days from Certification",
         currency: "GHS",
         application_type: val.valuation_type || "INTERIM",
@@ -3537,14 +4650,14 @@ export const createPaymentApplicationFromValuation = async (req, res, next) => {
         outstanding_balance: 0,
         payment_status: "UNPAID",
         created_by: req.user?.id || null,
-      }
+      },
     );
 
     res.status(201).json({
       id: result.insertId,
       application_number: ipaNo,
       net_amount_requested: netRequested,
-      message: `Interim Payment Application ${ipaNo} prepared from Valuation`
+      message: `Interim Payment Application ${ipaNo} prepared from Valuation`,
     });
   } catch (err) {
     next(err);
@@ -3559,22 +4672,51 @@ export const updatePaymentApplication = async (req, res, next) => {
 
     const existingRows = await query(
       `SELECT * FROM pm_payment_applications WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
-      { id, companyId: companyId || null }
+      { id, companyId: companyId || null },
     );
-    if (!existingRows.length) throw httpError(404, "NOT_FOUND", "Payment application not found");
+    if (!existingRows.length)
+      throw httpError(404, "NOT_FOUND", "Payment application not found");
     const existing = existingRows[0];
 
-    const workVal = Number(b.work_completed_value ?? existing.work_completed_value ?? 0);
-    const varsVal = Number(b.approved_variations_value ?? existing.approved_variations_value ?? 0);
-    const matVal = Number(b.materials_on_site_value ?? existing.materials_on_site_value ?? 0);
-    const otherVal = Number(b.other_additions_value ?? existing.other_additions_value ?? 0);
-    const grossAssessed = Number(b.gross_amount_assessed ?? (workVal + varsVal + matVal + otherVal));
+    const workVal = Number(
+      b.work_completed_value ?? existing.work_completed_value ?? 0,
+    );
+    const varsVal = Number(
+      b.approved_variations_value ?? existing.approved_variations_value ?? 0,
+    );
+    const matVal = Number(
+      b.materials_on_site_value ?? existing.materials_on_site_value ?? 0,
+    );
+    const otherVal = Number(
+      b.other_additions_value ?? existing.other_additions_value ?? 0,
+    );
+    const grossAssessed = Number(
+      b.gross_amount_assessed ?? workVal + varsVal + matVal + otherVal,
+    );
     const retAmt = Number(b.retention_amount ?? existing.retention_amount ?? 0);
-    const advAmt = Number(b.advance_recovery_amount ?? existing.advance_recovery_amount ?? 0);
-    const otherDed = Number(b.other_deductions_amount ?? existing.other_deductions_amount ?? 0);
-    const prevCert = Number(b.previous_certified_amount ?? existing.previous_certified_amount ?? 0);
-    const adj = Number(b.adjustments_amount ?? existing.adjustments_amount ?? 0);
-    const netReq = Number(b.net_amount_requested ?? (grossAssessed - retAmt - advAmt - otherDed - prevCert + adj));
+    const advAmt = Number(
+      b.advance_recovery_amount ?? existing.advance_recovery_amount ?? 0,
+    );
+    const otherDed = Number(
+      b.other_deductions_amount ?? existing.other_deductions_amount ?? 0,
+    );
+    const prevCert = Number(
+      b.previous_certified_amount ?? existing.previous_certified_amount ?? 0,
+    );
+    const adj = Number(
+      b.adjustments_amount ?? existing.adjustments_amount ?? 0,
+    );
+    const netReq = Number(
+      b.net_amount_requested ??
+        grossAssessed - retAmt - advAmt - otherDed - prevCert + adj,
+    );
+
+    const workItems = b.work_items !== undefined ? (b.work_items ? JSON.stringify(b.work_items) : null) : existing.work_items;
+    const materialsItems = b.materials_items !== undefined ? (b.materials_items ? JSON.stringify(b.materials_items) : null) : existing.materials_items;
+    const deductionsItems = b.deductions_items !== undefined ? (b.deductions_items ? JSON.stringify(b.deductions_items) : null) : existing.deductions_items;
+    const retentionPercent = Number(b.retention_percent ?? existing.retention_percent ?? 0);
+    const retentionCap = Number(b.retention_cap ?? existing.retention_cap ?? 0);
+    const description = b.description !== undefined ? b.description : (b.remarks !== undefined ? b.remarks : existing.description);
 
     await query(
       `UPDATE pm_payment_applications SET
@@ -3586,6 +4728,7 @@ export const updatePaymentApplication = async (req, res, next) => {
          currency = :currency,
          application_type = :application_type,
          status = :status,
+         contractor_name = :contractor_name,
          work_completed_value = :work_completed_value,
          approved_variations_value = :approved_variations_value,
          materials_on_site_value = :materials_on_site_value,
@@ -3598,7 +4741,13 @@ export const updatePaymentApplication = async (req, res, next) => {
          adjustments_amount = :adjustments_amount,
          net_amount_requested = :net_amount_requested,
          submitted_amount = :submitted_amount,
-         assessed_amount = :assessed_amount
+         assessed_amount = :assessed_amount,
+         work_items = :work_items,
+         materials_items = :materials_items,
+         deductions_items = :deductions_items,
+         retention_percent = :retention_percent,
+         retention_cap = :retention_cap,
+         description = :description
        WHERE id = :id`,
       {
         id,
@@ -3610,6 +4759,7 @@ export const updatePaymentApplication = async (req, res, next) => {
         currency: b.currency || existing.currency,
         application_type: b.application_type || existing.application_type,
         status: b.status || existing.status,
+        contractor_name: b.contractor_name || existing.contractor_name || "Contractor",
         work_completed_value: workVal,
         approved_variations_value: varsVal,
         materials_on_site_value: matVal,
@@ -3623,10 +4773,37 @@ export const updatePaymentApplication = async (req, res, next) => {
         net_amount_requested: netReq,
         submitted_amount: netReq,
         assessed_amount: Number(b.assessed_amount ?? netReq),
-      }
+        work_items: workItems,
+        materials_items: materialsItems,
+        deductions_items: deductionsItems,
+        retention_percent: retentionPercent,
+        retention_cap: retentionCap,
+        description: description,
+      },
     );
 
     res.json({ id, message: "Payment application updated successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deletePaymentApplication = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const id = toNumber(req.params.id);
+    const existingRows = await query(
+      `SELECT * FROM pm_payment_applications WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
+      { id, companyId: companyId || null },
+    );
+    if (!existingRows.length)
+      throw httpError(404, "NOT_FOUND", "Payment application not found");
+    const existing = existingRows[0];
+    if (Number(existing.amount_paid || 0) > 0) {
+      throw httpError(400, "FORBIDDEN", "Cannot delete an application with recorded payments");
+    }
+    await query(`DELETE FROM pm_payment_applications WHERE id = :id`, { id });
+    res.json({ message: "Payment application deleted successfully" });
   } catch (err) {
     next(err);
   }
@@ -3642,22 +4819,46 @@ export const certifyPaymentApplication = async (req, res, next) => {
       `SELECT pa.*, p.project_code FROM pm_payment_applications pa 
        JOIN pm_projects p ON p.id = pa.project_id
        WHERE pa.id = :id AND (pa.company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
-      { id, companyId: companyId || null }
+      { id, companyId: companyId || null },
     );
-    if (!existingRows.length) throw httpError(404, "NOT_FOUND", "Payment application not found");
+    if (!existingRows.length)
+      throw httpError(404, "NOT_FOUND", "Payment application not found");
     const existing = existingRows[0];
 
-    const certAmount = Number(b.certified_amount ?? existing.net_amount_requested);
-    const assessedAmount = Number(b.assessed_amount ?? existing.assessed_amount ?? existing.net_amount_requested);
-    const rejectedAmount = Number(b.rejected_amount ?? Math.max(0, existing.net_amount_requested - certAmount));
-    const status = b.status || (certAmount === 0 ? "REJECTED" : certAmount < existing.net_amount_requested ? "PARTIALLY_CERTIFIED" : "CERTIFIED");
+    const certAmount = Number(
+      b.certified_amount ?? existing.net_amount_requested,
+    );
+    const assessedAmount = Number(
+      b.assessed_amount ??
+        existing.assessed_amount ??
+        existing.net_amount_requested,
+    );
+    const rejectedAmount = Number(
+      b.rejected_amount ??
+        Math.max(0, existing.net_amount_requested - certAmount),
+    );
+    const status =
+      b.status ||
+      (certAmount === 0
+        ? "REJECTED"
+        : certAmount < existing.net_amount_requested
+          ? "PARTIALLY_CERTIFIED"
+          : "CERTIFIED");
 
-    const certDocNo = b.certification_doc_no || `IPC-${existing.project_code || "PRJ"}-${existing.id}`;
-    const outstandingBalance = Math.max(0, certAmount - Number(existing.amount_paid || 0));
+    const certDocNo =
+      b.certification_doc_no ||
+      `IPC-${existing.project_code || "PRJ"}-${existing.id}`;
+    const outstandingBalance = Math.max(
+      0,
+      certAmount - Number(existing.amount_paid || 0),
+    );
 
     let history = [];
     try {
-      history = typeof existing.approval_history === "string" ? JSON.parse(existing.approval_history || "[]") : (existing.approval_history || []);
+      history =
+        typeof existing.approval_history === "string"
+          ? JSON.parse(existing.approval_history || "[]")
+          : existing.approval_history || [];
     } catch (_) {}
     history.push({
       action: status,
@@ -3665,7 +4866,7 @@ export const certifyPaymentApplication = async (req, res, next) => {
       user_id: req.user?.id || null,
       username: req.user?.username || "Certifier",
       reason: b.adjustment_reason || "",
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     await query(
@@ -3697,8 +4898,8 @@ export const certifyPaymentApplication = async (req, res, next) => {
         certification_doc_no: certDocNo,
         outstanding_balance: outstandingBalance,
         status,
-        approval_history: JSON.stringify(history)
-      }
+        approval_history: JSON.stringify(history),
+      },
     );
 
     res.json({
@@ -3706,7 +4907,7 @@ export const certifyPaymentApplication = async (req, res, next) => {
       certified_amount: certAmount,
       status,
       certification_doc_no: certDocNo,
-      message: `Payment application ${status.toLowerCase().replace("_", " ")} successfully`
+      message: `Payment application ${status.toLowerCase().replace("_", " ")} successfully`,
     });
   } catch (err) {
     next(err);
@@ -3719,17 +4920,25 @@ export const recordPaymentApplicationPayment = async (req, res, next) => {
     const id = toNumber(req.params.id);
     const b = req.body || {};
     const paymentAmount = Number(b.payment_amount || 0);
-    if (paymentAmount <= 0) throw httpError(400, "VALIDATION_ERROR", "Payment amount must be greater than zero");
+    if (paymentAmount <= 0)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Payment amount must be greater than zero",
+      );
 
     const existingRows = await query(
       `SELECT * FROM pm_payment_applications WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
-      { id, companyId: companyId || null }
+      { id, companyId: companyId || null },
     );
-    if (!existingRows.length) throw httpError(404, "NOT_FOUND", "Payment application not found");
+    if (!existingRows.length)
+      throw httpError(404, "NOT_FOUND", "Payment application not found");
     const existing = existingRows[0];
 
     const newAmountPaid = Number(existing.amount_paid || 0) + paymentAmount;
-    const certAmount = Number(existing.certified_amount || existing.net_amount_requested || 0);
+    const certAmount = Number(
+      existing.certified_amount || existing.net_amount_requested || 0,
+    );
     const outstanding = Math.max(0, certAmount - newAmountPaid);
     const paymentStatus = outstanding <= 0 ? "PAID" : "PARTIALLY_PAID";
     const appStatus = outstanding <= 0 ? "PAID" : existing.status;
@@ -3755,7 +4964,7 @@ export const recordPaymentApplicationPayment = async (req, res, next) => {
         payment_date: b.payment_date || new Date().toISOString().split("T")[0],
         payment_method: b.payment_method || "BANK_TRANSFER",
         finance_notes: b.finance_notes || null,
-      }
+      },
     );
 
     res.json({
@@ -3763,7 +4972,7 @@ export const recordPaymentApplicationPayment = async (req, res, next) => {
       amount_paid: newAmountPaid,
       outstanding_balance: outstanding,
       payment_status: paymentStatus,
-      message: `Payment of GHS ${paymentAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })} recorded`
+      message: `Payment of GHS ${paymentAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })} recorded`,
     });
   } catch (err) {
     next(err);
@@ -3833,15 +5042,16 @@ export const getVariationDetails = async (req, res, next) => {
        LEFT JOIN adm_users app ON app.id = v.approved_by
        WHERE v.id = :id AND (v.company_id = :companyId OR :companyId IS NULL)
        LIMIT 1`,
-      { id, companyId: companyId || null }
+      { id, companyId: companyId || null },
     );
-    if (!varRows.length) throw httpError(404, "NOT_FOUND", "Variation not found");
+    if (!varRows.length)
+      throw httpError(404, "NOT_FOUND", "Variation not found");
     const variation = varRows[0];
 
     // Fetch line items
     const items = await query(
       `SELECT * FROM pm_variation_items WHERE variation_id = :id ORDER BY id ASC`,
-      { id }
+      { id },
     );
 
     // Fetch previously approved variation totals on this project (excluding current)
@@ -3849,7 +5059,7 @@ export const getVariationDetails = async (req, res, next) => {
       `SELECT COALESCE(SUM(amount_approved), 0) AS total_prev_approved
        FROM pm_variations 
        WHERE project_id = :projectId AND status IN ('APPROVED', 'IN_IMPLEMENTATION', 'COMPLETED') AND id != :id`,
-      { projectId: variation.project_id, id }
+      { projectId: variation.project_id, id },
     );
     const previouslyApproved = Number(prevRows[0]?.total_prev_approved || 0);
 
@@ -3859,7 +5069,7 @@ export const getVariationDetails = async (req, res, next) => {
       tasks = await query(
         `SELECT id, task_code, title, start_date, end_date, status 
          FROM pm_tasks WHERE project_id = :projectId ORDER BY id ASC`,
-        { projectId: variation.project_id }
+        { projectId: variation.project_id },
       );
     } catch (e) {}
 
@@ -3868,13 +5078,13 @@ export const getVariationDetails = async (req, res, next) => {
     try {
       const boqRows = await query(
         `SELECT id FROM pm_boqs WHERE project_id = :projectId ORDER BY CASE WHEN status = 'APPROVED' THEN 0 ELSE 1 END, id DESC LIMIT 1`,
-        { projectId: variation.project_id }
+        { projectId: variation.project_id },
       );
       if (boqRows.length) {
         boqItems = await query(
           `SELECT id, item_code, item_description, uom, quantity, unit_rate, amount, cost_category
            FROM pm_boq_items WHERE boq_id = :boqId ORDER BY item_order ASC, id ASC`,
-          { boqId: boqRows[0].id }
+          { boqId: boqRows[0].id },
         );
       }
     } catch (e) {}
@@ -3888,12 +5098,17 @@ export const getVariationDetails = async (req, res, next) => {
         original_contract_sum: Number(variation.contract_sum || 0),
         previously_approved_variations: previouslyApproved,
         current_proposed_change: Number(variation.cost_impact || 0),
-        contractor_proposed_amount: Number(variation.contractor_proposed_amount || variation.cost_impact || 0),
+        contractor_proposed_amount: Number(
+          variation.contractor_proposed_amount || variation.cost_impact || 0,
+        ),
         assessed_amount: Number(variation.assessed_amount || 0),
         amount_approved: Number(variation.amount_approved || 0),
-        revised_contract_sum: Number(variation.contract_sum || 0) + previouslyApproved + Number(variation.amount_approved || variation.cost_impact || 0),
+        revised_contract_sum:
+          Number(variation.contract_sum || 0) +
+          previouslyApproved +
+          Number(variation.amount_approved || variation.cost_impact || 0),
         approved_project_budget: Number(variation.budget || 0),
-      }
+      },
     });
   } catch (err) {
     next(err);
@@ -3905,7 +5120,11 @@ export const createVariation = async (req, res, next) => {
     const { companyId, branchId } = req.scope || {};
     const b = req.body || {};
     if (!b.project_id || !b.title) {
-      throw httpError(400, "VALIDATION_ERROR", "Project and title are required");
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Project and title are required",
+      );
     }
 
     // Generate variation number if not provided
@@ -3913,12 +5132,12 @@ export const createVariation = async (req, res, next) => {
     if (!variationNo) {
       const projRows = await query(
         `SELECT project_code FROM pm_projects WHERE id = :projectId LIMIT 1`,
-        { projectId: toNumber(b.project_id) }
+        { projectId: toNumber(b.project_id) },
       );
       const code = projRows[0]?.project_code || "PRJ";
       const countRows = await query(
         `SELECT COUNT(*) AS total FROM pm_variations WHERE project_id = :projectId`,
-        { projectId: toNumber(b.project_id) }
+        { projectId: toNumber(b.project_id) },
       );
       const seq = String(Number(countRows[0]?.total || 0) + 1).padStart(3, "0");
       const prefix = b.document_stage === "CHANGE_ORDER" ? "CO" : "VAR";
@@ -3928,7 +5147,7 @@ export const createVariation = async (req, res, next) => {
     const items = Array.isArray(b.items) ? b.items : [];
     // Compute line cost impact
     let totalCostImpact = 0;
-    const processedItems = items.map(it => {
+    const processedItems = items.map((it) => {
       const origQty = Number(it.original_qty || 0);
       const origRate = Number(it.original_rate || 0);
       const revQty = Number(it.revised_qty || 0);
@@ -3947,11 +5166,13 @@ export const createVariation = async (req, res, next) => {
         proposed_rate: propRate,
         proposed_amount: propAmt,
         qty_diff: qtyDiff,
-        cost_diff: costDiff
+        cost_diff: costDiff,
       };
     });
 
-    const netCostImpact = Number(b.cost_impact !== undefined ? b.cost_impact : totalCostImpact);
+    const netCostImpact = Number(
+      b.cost_impact !== undefined ? b.cost_impact : totalCostImpact,
+    );
 
     const result = await query(
       `INSERT INTO pm_variations 
@@ -3985,11 +5206,15 @@ export const createVariation = async (req, res, next) => {
         contract_ref: b.contract_ref || null,
         client_name: b.client_name || null,
         contractor_name: b.contractor_name || null,
-        subcontractor_id: b.subcontractor_id ? toNumber(b.subcontractor_id) : null,
+        subcontractor_id: b.subcontractor_id
+          ? toNumber(b.subcontractor_id)
+          : null,
         date_raised: b.date_raised || new Date().toISOString().split("T")[0],
         effective_date: b.effective_date || null,
         cost_impact: netCostImpact,
-        contractor_proposed_amount: Number(b.contractor_proposed_amount || netCostImpact),
+        contractor_proposed_amount: Number(
+          b.contractor_proposed_amount || netCostImpact,
+        ),
         assessed_amount: Number(b.assessed_amount || netCostImpact),
         amount_approved: Number(b.amount_approved || 0),
         schedule_impact_days: Number(b.schedule_impact_days || 0),
@@ -4004,12 +5229,14 @@ export const createVariation = async (req, res, next) => {
         overhead_cost: Number(b.overhead_cost || 0),
         markup_percent: Number(b.markup_percent || 0),
         tax_amount: Number(b.tax_amount || 0),
-        supporting_documents: b.supporting_documents ? JSON.stringify(b.supporting_documents) : null,
+        supporting_documents: b.supporting_documents
+          ? JSON.stringify(b.supporting_documents)
+          : null,
         status: b.status || "DRAFT",
         workflow_stage: b.workflow_stage || 1,
         remarks: b.remarks || null,
-        created_by: req.user?.id || null
-      }
+        created_by: req.user?.id || null,
+      },
     );
 
     const variationId = result.insertId;
@@ -4042,12 +5269,18 @@ export const createVariation = async (req, res, next) => {
           qty_diff: it.qty_diff,
           cost_diff: it.cost_diff,
           cost_category: it.cost_category || "MATERIALS",
-          reason_and_spec: it.reason_and_spec || null
-        }
+          reason_and_spec: it.reason_and_spec || null,
+        },
       );
     }
 
-    res.status(201).json({ id: variationId, variation_no: variationNo, message: "Variation request created successfully" });
+    res
+      .status(201)
+      .json({
+        id: variationId,
+        variation_no: variationNo,
+        message: "Variation request created successfully",
+      });
   } catch (err) {
     next(err);
   }
@@ -4061,15 +5294,16 @@ export const updateVariation = async (req, res, next) => {
 
     const varRows = await query(
       `SELECT * FROM pm_variations WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
-      { id, companyId: companyId || null }
+      { id, companyId: companyId || null },
     );
-    if (!varRows.length) throw httpError(404, "NOT_FOUND", "Variation not found");
+    if (!varRows.length)
+      throw httpError(404, "NOT_FOUND", "Variation not found");
     const v = varRows[0];
 
     // Compute line items cost impact
     const items = Array.isArray(b.items) ? b.items : [];
     let totalCostImpact = 0;
-    const processedItems = items.map(it => {
+    const processedItems = items.map((it) => {
       const origQty = Number(it.original_qty || 0);
       const origRate = Number(it.original_rate || 0);
       const revQty = Number(it.revised_qty || 0);
@@ -4088,11 +5322,17 @@ export const updateVariation = async (req, res, next) => {
         proposed_rate: propRate,
         proposed_amount: propAmt,
         qty_diff: qtyDiff,
-        cost_diff: costDiff
+        cost_diff: costDiff,
       };
     });
 
-    const netCostImpact = Number(b.cost_impact !== undefined ? b.cost_impact : (items.length ? totalCostImpact : v.cost_impact));
+    const netCostImpact = Number(
+      b.cost_impact !== undefined
+        ? b.cost_impact
+        : items.length
+          ? totalCostImpact
+          : v.cost_impact,
+    );
 
     await query(
       `UPDATE pm_variations SET
@@ -4133,42 +5373,94 @@ export const updateVariation = async (req, res, next) => {
         id,
         title: b.title || v.title,
         currency: b.currency || v.currency || "GHS",
-        exchange_rate: Number(b.exchange_rate !== undefined ? b.exchange_rate : (v.exchange_rate || 1)),
+        exchange_rate: Number(
+          b.exchange_rate !== undefined
+            ? b.exchange_rate
+            : v.exchange_rate || 1,
+        ),
         document_stage: b.document_stage || v.document_stage,
-        description: b.description !== undefined ? b.description : v.description,
+        description:
+          b.description !== undefined ? b.description : v.description,
         reason: b.reason || v.reason,
         change_type: b.change_type || v.change_type,
         priority: b.priority || v.priority,
         originator: b.originator || v.originator,
-        contract_ref: b.contract_ref !== undefined ? b.contract_ref : v.contract_ref,
-        client_name: b.client_name !== undefined ? b.client_name : v.client_name,
-        contractor_name: b.contractor_name !== undefined ? b.contractor_name : v.contractor_name,
-        subcontractor_id: b.subcontractor_id ? toNumber(b.subcontractor_id) : null,
+        contract_ref:
+          b.contract_ref !== undefined ? b.contract_ref : v.contract_ref,
+        client_name:
+          b.client_name !== undefined ? b.client_name : v.client_name,
+        contractor_name:
+          b.contractor_name !== undefined
+            ? b.contractor_name
+            : v.contractor_name,
+        subcontractor_id: b.subcontractor_id
+          ? toNumber(b.subcontractor_id)
+          : null,
         date_raised: b.date_raised || v.date_raised,
-        effective_date: b.effective_date !== undefined ? b.effective_date : v.effective_date,
+        effective_date:
+          b.effective_date !== undefined ? b.effective_date : v.effective_date,
         cost_impact: netCostImpact,
-        contractor_proposed_amount: Number(b.contractor_proposed_amount !== undefined ? b.contractor_proposed_amount : v.contractor_proposed_amount),
-        assessed_amount: Number(b.assessed_amount !== undefined ? b.assessed_amount : v.assessed_amount),
-        schedule_impact_days: Number(b.schedule_impact_days !== undefined ? b.schedule_impact_days : v.schedule_impact_days),
-        original_completion_date: b.original_completion_date || v.original_completion_date,
-        revised_completion_date: b.revised_completion_date || v.revised_completion_date,
-        affected_tasks: b.affected_tasks !== undefined ? b.affected_tasks : v.affected_tasks,
-        risk_assessment: b.risk_assessment !== undefined ? b.risk_assessment : v.risk_assessment,
-        hsq_implications: b.hsq_implications !== undefined ? b.hsq_implications : v.hsq_implications,
+        contractor_proposed_amount: Number(
+          b.contractor_proposed_amount !== undefined
+            ? b.contractor_proposed_amount
+            : v.contractor_proposed_amount,
+        ),
+        assessed_amount: Number(
+          b.assessed_amount !== undefined
+            ? b.assessed_amount
+            : v.assessed_amount,
+        ),
+        schedule_impact_days: Number(
+          b.schedule_impact_days !== undefined
+            ? b.schedule_impact_days
+            : v.schedule_impact_days,
+        ),
+        original_completion_date:
+          b.original_completion_date || v.original_completion_date,
+        revised_completion_date:
+          b.revised_completion_date || v.revised_completion_date,
+        affected_tasks:
+          b.affected_tasks !== undefined ? b.affected_tasks : v.affected_tasks,
+        risk_assessment:
+          b.risk_assessment !== undefined
+            ? b.risk_assessment
+            : v.risk_assessment,
+        hsq_implications:
+          b.hsq_implications !== undefined
+            ? b.hsq_implications
+            : v.hsq_implications,
         funding_source: b.funding_source || v.funding_source,
-        contingency_impact: Number(b.contingency_impact !== undefined ? b.contingency_impact : v.contingency_impact),
-        direct_cost: Number(b.direct_cost !== undefined ? b.direct_cost : v.direct_cost),
-        overhead_cost: Number(b.overhead_cost !== undefined ? b.overhead_cost : v.overhead_cost),
-        markup_percent: Number(b.markup_percent !== undefined ? b.markup_percent : v.markup_percent),
-        tax_amount: Number(b.tax_amount !== undefined ? b.tax_amount : v.tax_amount),
-        supporting_documents: b.supporting_documents ? JSON.stringify(b.supporting_documents) : (v.supporting_documents ? JSON.stringify(v.supporting_documents) : null),
-        remarks: b.remarks !== undefined ? b.remarks : v.remarks
-      }
+        contingency_impact: Number(
+          b.contingency_impact !== undefined
+            ? b.contingency_impact
+            : v.contingency_impact,
+        ),
+        direct_cost: Number(
+          b.direct_cost !== undefined ? b.direct_cost : v.direct_cost,
+        ),
+        overhead_cost: Number(
+          b.overhead_cost !== undefined ? b.overhead_cost : v.overhead_cost,
+        ),
+        markup_percent: Number(
+          b.markup_percent !== undefined ? b.markup_percent : v.markup_percent,
+        ),
+        tax_amount: Number(
+          b.tax_amount !== undefined ? b.tax_amount : v.tax_amount,
+        ),
+        supporting_documents: b.supporting_documents
+          ? JSON.stringify(b.supporting_documents)
+          : v.supporting_documents
+            ? JSON.stringify(v.supporting_documents)
+            : null,
+        remarks: b.remarks !== undefined ? b.remarks : v.remarks,
+      },
     );
 
     // Sync line items if provided
     if (Array.isArray(b.items)) {
-      await query(`DELETE FROM pm_variation_items WHERE variation_id = :id`, { id });
+      await query(`DELETE FROM pm_variation_items WHERE variation_id = :id`, {
+        id,
+      });
       for (const it of processedItems) {
         await query(
           `INSERT INTO pm_variation_items
@@ -4196,8 +5488,8 @@ export const updateVariation = async (req, res, next) => {
             qty_diff: it.qty_diff,
             cost_diff: it.cost_diff,
             cost_category: it.cost_category || "MATERIALS",
-            reason_and_spec: it.reason_and_spec || null
-          }
+            reason_and_spec: it.reason_and_spec || null,
+          },
         );
       }
     }
@@ -4219,14 +5511,15 @@ export const advanceVariationWorkflow = async (req, res, next) => {
       schedule_impact_days,
       update_contract_sum = true,
       update_project_budget = false,
-      budget_adjustment_amount = 0
+      budget_adjustment_amount = 0,
     } = req.body || {};
 
     const varRows = await query(
       `SELECT * FROM pm_variations WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
-      { id, companyId: companyId || null }
+      { id, companyId: companyId || null },
     );
-    if (!varRows.length) throw httpError(404, "NOT_FOUND", "Variation not found");
+    if (!varRows.length)
+      throw httpError(404, "NOT_FOUND", "Variation not found");
     const v = varRows[0];
 
     const STAGE_MAP = {
@@ -4241,20 +5534,34 @@ export const advanceVariationWorkflow = async (req, res, next) => {
       REJECTED: 0,
       WITHDRAWN: 0,
       RETURNED: 1,
-      REVERSED: 1
+      REVERSED: 1,
     };
 
-    const newStage = STAGE_MAP[target_status] !== undefined ? STAGE_MAP[target_status] : v.workflow_stage;
-    const finalApprovedAmt = amount_approved !== undefined ? Number(amount_approved) : Number(v.assessed_amount || v.cost_impact);
-    const finalDays = schedule_impact_days !== undefined ? Number(schedule_impact_days) : Number(v.schedule_impact_days || 0);
+    const newStage =
+      STAGE_MAP[target_status] !== undefined
+        ? STAGE_MAP[target_status]
+        : v.workflow_stage;
+    const finalApprovedAmt =
+      amount_approved !== undefined
+        ? Number(amount_approved)
+        : Number(v.assessed_amount || v.cost_impact);
+    const finalDays =
+      schedule_impact_days !== undefined
+        ? Number(schedule_impact_days)
+        : Number(v.schedule_impact_days || 0);
 
-    const forwarded_to_username = req.body?.forwarded_to_username !== undefined ? req.body.forwarded_to_username : (target_status === "DRAFT" || target_status === "REVERSED" ? null : v.forwarded_to_username);
+    const forwarded_to_username =
+      req.body?.forwarded_to_username !== undefined
+        ? req.body.forwarded_to_username
+        : target_status === "DRAFT" || target_status === "REVERSED"
+          ? null
+          : v.forwarded_to_username;
     let updateFields = `status = :target_status, workflow_stage = :newStage, forwarded_to_username = :forwarded_to_username`;
     const params = {
       id,
       target_status,
       newStage,
-      forwarded_to_username
+      forwarded_to_username,
     };
 
     if (target_status === "APPROVED") {
@@ -4267,19 +5574,22 @@ export const advanceVariationWorkflow = async (req, res, next) => {
       if (update_contract_sum && finalApprovedAmt !== 0) {
         await query(
           `UPDATE pm_projects SET revised_contract_sum = revised_contract_sum + :finalApprovedAmt WHERE id = :projectId`,
-          { finalApprovedAmt, projectId: v.project_id }
+          { finalApprovedAmt, projectId: v.project_id },
         );
       }
       if (update_project_budget && Number(budget_adjustment_amount) !== 0) {
         await query(
           `UPDATE pm_projects SET budget = budget + :budgetAdj WHERE id = :projectId`,
-          { budgetAdj: Number(budget_adjustment_amount), projectId: v.project_id }
+          {
+            budgetAdj: Number(budget_adjustment_amount),
+            projectId: v.project_id,
+          },
         );
       }
       if (finalDays > 0) {
         await query(
           `UPDATE pm_projects SET end_date = DATE_ADD(end_date, INTERVAL :finalDays DAY) WHERE id = :projectId AND end_date IS NOT NULL`,
-          { finalDays, projectId: v.project_id }
+          { finalDays, projectId: v.project_id },
         );
       }
     } else if (target_status === "REJECTED") {
@@ -4290,13 +5600,16 @@ export const advanceVariationWorkflow = async (req, res, next) => {
       params.comments = comments || "";
     }
 
-    await query(`UPDATE pm_variations SET ${updateFields} WHERE id = :id`, params);
+    await query(
+      `UPDATE pm_variations SET ${updateFields} WHERE id = :id`,
+      params,
+    );
 
     res.json({
       ok: true,
       status: target_status,
       workflow_stage: newStage,
-      message: `Variation status updated to ${target_status}`
+      message: `Variation status updated to ${target_status}`,
     });
   } catch (err) {
     next(err);
@@ -4314,14 +5627,21 @@ export const deleteVariation = async (req, res, next) => {
     const id = toNumber(req.params.id);
     const varRows = await query(
       `SELECT * FROM pm_variations WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL) LIMIT 1`,
-      { id, companyId: companyId || null }
+      { id, companyId: companyId || null },
     );
-    if (!varRows.length) throw httpError(404, "NOT_FOUND", "Variation not found");
+    if (!varRows.length)
+      throw httpError(404, "NOT_FOUND", "Variation not found");
     if (varRows[0].status !== "DRAFT") {
-      throw httpError(400, "BAD_REQUEST", "Only draft variations can be deleted");
+      throw httpError(
+        400,
+        "BAD_REQUEST",
+        "Only draft variations can be deleted",
+      );
     }
 
-    await query(`DELETE FROM pm_variation_items WHERE variation_id = :id`, { id });
+    await query(`DELETE FROM pm_variation_items WHERE variation_id = :id`, {
+      id,
+    });
     await query(`DELETE FROM pm_variations WHERE id = :id`, { id });
 
     res.json({ ok: true, message: "Variation deleted successfully" });
@@ -4357,7 +5677,12 @@ export const createInspection = async (req, res, next) => {
   try {
     const { companyId, branchId } = req.scope || {};
     const b = req.body || {};
-    if (!b.project_id || !b.inspection_title) throw httpError(400, "VALIDATION_ERROR", "Project and inspection title required");
+    if (!b.project_id || !b.inspection_title)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Project and inspection title required",
+      );
 
     const result = await query(
       `INSERT INTO pm_inspection_requests 
@@ -4372,14 +5697,17 @@ export const createInspection = async (req, res, next) => {
         inspection_title: b.inspection_title,
         inspection_type: b.inspection_type || "STRUCTURAL",
         location_grid: b.location_grid || null,
-        scheduled_date: b.scheduled_date || new Date().toISOString().split("T")[0],
+        scheduled_date:
+          b.scheduled_date || new Date().toISOString().split("T")[0],
         inspector_name: b.inspector_name || null,
         result: b.result || "PENDING",
         remarks: b.remarks || null,
         requested_by: req.user?.id || null,
-      }
+      },
     );
-    res.status(201).json({ id: result.insertId, message: "Inspection scheduled" });
+    res
+      .status(201)
+      .json({ id: result.insertId, message: "Inspection scheduled" });
   } catch (err) {
     next(err);
   }
@@ -4408,7 +5736,12 @@ export const createNCR = async (req, res, next) => {
   try {
     const { companyId } = req.scope || {};
     const b = req.body || {};
-    if (!b.project_id || !b.issue_description) throw httpError(400, "VALIDATION_ERROR", "Project and issue description required");
+    if (!b.project_id || !b.issue_description)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Project and issue description required",
+      );
 
     const result = await query(
       `INSERT INTO pm_ncrs 
@@ -4428,9 +5761,11 @@ export const createNCR = async (req, res, next) => {
         status: "OPEN",
         issued_date: b.issued_date || new Date().toISOString().split("T")[0],
         created_by: req.user?.id || null,
-      }
+      },
     );
-    res.status(201).json({ id: result.insertId, message: "Non-conformance report issued" });
+    res
+      .status(201)
+      .json({ id: result.insertId, message: "Non-conformance report issued" });
   } catch (err) {
     next(err);
   }
@@ -4459,7 +5794,12 @@ export const createSnagItem = async (req, res, next) => {
   try {
     const { companyId } = req.scope || {};
     const b = req.body || {};
-    if (!b.project_id || !b.defect_description) throw httpError(400, "VALIDATION_ERROR", "Project and defect description required");
+    if (!b.project_id || !b.defect_description)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Project and defect description required",
+      );
 
     const result = await query(
       `INSERT INTO pm_snag_list (company_id, project_id, room_area, defect_description, trade_responsible, priority, status, created_by)
@@ -4473,12 +5813,460 @@ export const createSnagItem = async (req, res, next) => {
         priority: b.priority || "MEDIUM",
         status: "OPEN",
         created_by: req.user?.id || null,
-      }
+      },
     );
     res.status(201).json({ id: result.insertId, message: "Snag item logged" });
   } catch (err) {
     next(err);
   }
+};
+
+const issueStatusFlow = ["OPEN", "ASSIGNED", "IN_PROGRESS", "PENDING_REVIEW", "VERIFIED", "CLOSED"];
+
+const normalizeIssueStatus = (value) => {
+  const v = String(value || "OPEN").trim().toUpperCase();
+  const allowed = ["OPEN", "ASSIGNED", "IN_PROGRESS", "PENDING_REVIEW", "VERIFIED", "CLOSED", "ON_HOLD", "CANCELLED", "DEFERRED", "REJECTED"];
+  return allowed.includes(v) ? v : "OPEN";
+};
+
+const generateIssueReference = async (companyId) => {
+  const [row] = await query(
+    `SELECT COALESCE(MAX(CAST(SUBSTRING(reference_no, 5) AS UNSIGNED)), 0) + 1 AS nextNo
+     FROM pm_project_issues WHERE company_id = :companyId AND reference_no REGEXP '^ISS-'`,
+    { companyId },
+  );
+  return `ISS-${String(row?.nextNo || 1).padStart(6, "0")}`;
+};
+
+const issueOverdue = (row) => {
+  if (!row?.target_resolution_date) return false;
+  const status = String(row.status || "").toUpperCase();
+  const closedStatuses = ["CLOSED", "VERIFIED", "CANCELLED", "DEFERRED"];
+  if (closedStatuses.includes(status)) return false;
+  const due = new Date(row.target_resolution_date);
+  if (Number.isNaN(due.getTime())) return false;
+  const today = new Date();
+  due.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+  return due < today;
+};
+
+const notifyProjectIssueUser = async ({ companyId, userId, title, message, issueId }) => {
+  if (!companyId || !userId) return;
+  await query(
+    `INSERT INTO adm_notifications (company_id, user_id, title, message, link, is_read)
+     VALUES (:companyId, :userId, :title, :message, :link, 0)`,
+    { companyId, userId, title, message, link: `/project-management/quality-control?issue=${issueId}` },
+  ).catch(() => {});
+  sendPushToUser(Number(userId), { title, body: message, url: `/project-management/quality-control?issue=${issueId}` }).catch(() => {});
+};
+
+const findProjectIssueAssigneeId = async (companyId, assignedTo) => {
+  if (!assignedTo) return null;
+  const rows = await query(
+    `SELECT id FROM adm_users WHERE company_id = :companyId AND (username = :assignedTo OR full_name = :assignedTo) LIMIT 1`,
+    { companyId, assignedTo },
+  ).catch(() => []);
+  return rows?.[0]?.id || null;
+};
+
+export const listProjectIssues = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    await ensureConstructionTables();
+    const projectId = toNumber(req.query.project_id);
+    const status = String(req.query.status || "").trim();
+    let sql = `SELECT i.*, p.project_name FROM pm_project_issues i LEFT JOIN pm_projects p ON p.id = i.project_id WHERE i.company_id = :companyId`;
+    const params = { companyId };
+    if (projectId) {
+      sql += ` AND i.project_id = :projectId`;
+      params.projectId = projectId;
+    }
+    if (status) {
+      sql += ` AND i.status = :status`;
+      params.status = normalizeIssueStatus(status);
+    }
+    sql += ` ORDER BY i.id DESC`;
+    const rows = await query(sql, params);
+    const items = (rows || []).map((row) => ({
+      ...row,
+      is_overdue: issueOverdue(row),
+      is_open: !["CLOSED", "VERIFIED", "CANCELLED", "DEFERRED"].includes(String(row.status || "").toUpperCase()),
+    }));
+    res.json({ items });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getProjectIssueById = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const id = toNumber(req.params.id);
+    await ensureConstructionTables();
+    const rows = await query(
+      `SELECT i.*, p.project_name FROM pm_project_issues i LEFT JOIN pm_projects p ON p.id = i.project_id WHERE i.id = :id AND i.company_id = :companyId LIMIT 1`,
+      { id, companyId },
+    );
+    if (!rows.length) throw httpError(404, "NOT_FOUND", "Issue not found");
+    const item = rows[0];
+    item.is_overdue = issueOverdue(item);
+    res.json({ item });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createProjectIssue = async (req, res, next) => {
+  try {
+    const { companyId, branchId } = req.scope || {};
+    const b = req.body || {};
+    if (!b.project_id || !b.issue_title || !b.description) {
+      throw httpError(400, "VALIDATION_ERROR", "Project, issue title and description are required");
+    }
+
+    const [project] = await query(
+      "SELECT id FROM pm_projects WHERE id = :projectId AND company_id = :companyId LIMIT 1",
+      { projectId: toNumber(b.project_id), companyId },
+    );
+    if (!project) throw httpError(400, "VALIDATION_ERROR", "Select a project in your company");
+
+    const refNo = b.reference_no || (await generateIssueReference(companyId));
+    const status = normalizeIssueStatus(b.status);
+
+    const result = await query(
+      `INSERT INTO pm_project_issues (
+        company_id, branch_id, project_id, reference_no, issue_title, description, category, severity, priority, impact,
+        wbs_code, milestone, task_name, location, department, date_identified, identified_by, responsible_department,
+        assigned_to, contractor_vendor, assigned_date, target_resolution_date, required_corrective_action,
+        proposed_solution, actual_action_taken, resolution_start_date, completion_date, additional_cost,
+        supporting_documents, before_after_evidence, resolution_remarks, verification_required, reviewer,
+        review_date, verification_result, review_comments, rejection_reason, approved_by, closure_date, status, created_by
+      ) VALUES (
+        :companyId, :branchId, :project_id, :reference_no, :issue_title, :description, :category, :severity, :priority, :impact,
+        :wbs_code, :milestone, :task_name, :location, :department, :date_identified, :identified_by, :responsible_department,
+        :assigned_to, :contractor_vendor, :assigned_date, :target_resolution_date, :required_corrective_action,
+        :proposed_solution, :actual_action_taken, :resolution_start_date, :completion_date, :additional_cost,
+        :supporting_documents, :before_after_evidence, :resolution_remarks, :verification_required, :reviewer,
+        :review_date, :verification_result, :review_comments, :rejection_reason, :approved_by, :closure_date, :status, :created_by
+      )`,
+      {
+        companyId,
+        branchId: branchId || null,
+        project_id: toNumber(b.project_id),
+        reference_no: refNo,
+        issue_title: b.issue_title,
+        description: b.description,
+        category: b.category || "OTHER",
+        severity: b.severity || "MODERATE",
+        priority: b.priority || "MEDIUM",
+        impact: b.impact || null,
+        wbs_code: b.wbs_code || null,
+        milestone: b.milestone || null,
+        task_name: b.task_name || null,
+        location: b.location || null,
+        department: b.department || null,
+        date_identified: b.date_identified || null,
+        identified_by: b.identified_by || null,
+        responsible_department: b.responsible_department || null,
+        assigned_to: b.assigned_to || null,
+        contractor_vendor: b.contractor_vendor || null,
+        assigned_date: b.assigned_date || null,
+        target_resolution_date: b.target_resolution_date || null,
+        required_corrective_action: b.required_corrective_action || null,
+        proposed_solution: b.proposed_solution || null,
+        actual_action_taken: b.actual_action_taken || null,
+        resolution_start_date: b.resolution_start_date || null,
+        completion_date: b.completion_date || null,
+        additional_cost: Number(b.additional_cost || 0),
+        supporting_documents: Array.isArray(b.supporting_documents) ? JSON.stringify(b.supporting_documents) : (b.supporting_documents || null),
+        before_after_evidence: Array.isArray(b.before_after_evidence) ? JSON.stringify(b.before_after_evidence) : (b.before_after_evidence || null),
+        resolution_remarks: b.resolution_remarks || null,
+        verification_required: Number(Boolean(b.verification_required)),
+        reviewer: b.reviewer || null,
+        review_date: b.review_date || null,
+        verification_result: b.verification_result || null,
+        review_comments: b.review_comments || null,
+        rejection_reason: b.rejection_reason || null,
+        approved_by: b.approved_by || null,
+        closure_date: b.closure_date || null,
+        status,
+        created_by: req.user?.id || null,
+      },
+    );
+    await query(
+      `INSERT INTO pm_project_issue_history (company_id, issue_id, action, new_status, changed_by)
+       VALUES (:companyId, :issueId, 'CREATED', :status, :changedBy)`,
+      { companyId, issueId: result.insertId, status, changedBy: req.user?.id || null },
+    );
+    const assignedUserId = await findProjectIssueAssigneeId(companyId, b.assigned_to);
+    await notifyProjectIssueUser({
+      companyId,
+      userId: assignedUserId,
+      title: `Issue assigned: ${refNo}`,
+      message: b.issue_title,
+      issueId: result.insertId,
+    });
+    res.status(201).json({ id: result.insertId, reference_no: refNo, message: "Issue created" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateProjectIssue = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const id = toNumber(req.params.id);
+    const b = req.body || {};
+
+    const existing = await query(
+      `SELECT * FROM pm_project_issues WHERE id = :id AND company_id = :companyId LIMIT 1`,
+      { id, companyId },
+    );
+    if (!existing.length) throw httpError(404, "NOT_FOUND", "Issue not found");
+
+    const [project] = await query(
+      "SELECT id FROM pm_projects WHERE id = :projectId AND company_id = :companyId LIMIT 1",
+      { projectId: toNumber(b.project_id), companyId },
+    );
+    if (!project) throw httpError(400, "VALIDATION_ERROR", "Select a project in your company");
+
+    let nextStatus = normalizeIssueStatus(b.status);
+    const currentStatus = String(existing[0].status || "OPEN").toUpperCase();
+    if (b.verification_result === "REJECTED" && nextStatus === "PENDING_REVIEW") {
+      nextStatus = "IN_PROGRESS";
+    }
+    if (nextStatus === "CLOSED" && Number(b.verification_required) === 1 && String(b.verification_result || "").toUpperCase() !== "VERIFIED") {
+      throw httpError(400, "VALIDATION_ERROR", "Complete verification before closing this issue");
+    }
+    const validTransitions = {
+      OPEN: ["OPEN", "ASSIGNED", "ON_HOLD", "CANCELLED", "DEFERRED"],
+      ASSIGNED: ["ASSIGNED", "IN_PROGRESS", "ON_HOLD", "CANCELLED", "DEFERRED"],
+      IN_PROGRESS: ["IN_PROGRESS", "PENDING_REVIEW", "ON_HOLD", "CANCELLED", "DEFERRED"],
+      PENDING_REVIEW: ["PENDING_REVIEW", "VERIFIED", "IN_PROGRESS", "ON_HOLD", "CANCELLED", "DEFERRED"],
+      VERIFIED: ["VERIFIED", "CLOSED", "IN_PROGRESS", "CANCELLED"],
+      CLOSED: ["CLOSED", "IN_PROGRESS"],
+      ON_HOLD: ["ON_HOLD", "ASSIGNED", "IN_PROGRESS", "CANCELLED", "DEFERRED"],
+      DEFERRED: ["DEFERRED", "OPEN", "ASSIGNED", "IN_PROGRESS", "CANCELLED"],
+      CANCELLED: ["CANCELLED", "OPEN"],
+      REJECTED: ["IN_PROGRESS"],
+    };
+    if (!(validTransitions[currentStatus] || ["OPEN"]).includes(nextStatus)) {
+      throw httpError(400, "INVALID_STATUS_TRANSITION", `Cannot move issue from ${currentStatus} to ${nextStatus}`);
+    }
+    await query(
+      `UPDATE pm_project_issues SET
+        project_id = :project_id,
+        issue_title = :issue_title,
+        description = :description,
+        category = :category,
+        severity = :severity,
+        priority = :priority,
+        impact = :impact,
+        wbs_code = :wbs_code,
+        milestone = :milestone,
+        task_name = :task_name,
+        location = :location,
+        department = :department,
+        date_identified = :date_identified,
+        identified_by = :identified_by,
+        responsible_department = :responsible_department,
+        assigned_to = :assigned_to,
+        contractor_vendor = :contractor_vendor,
+        assigned_date = :assigned_date,
+        target_resolution_date = :target_resolution_date,
+        required_corrective_action = :required_corrective_action,
+        proposed_solution = :proposed_solution,
+        actual_action_taken = :actual_action_taken,
+        resolution_start_date = :resolution_start_date,
+        completion_date = :completion_date,
+        additional_cost = :additional_cost,
+        supporting_documents = :supporting_documents,
+        before_after_evidence = :before_after_evidence,
+        resolution_remarks = :resolution_remarks,
+        verification_required = :verification_required,
+        reviewer = :reviewer,
+        review_date = :review_date,
+        verification_result = :verification_result,
+        review_comments = :review_comments,
+        rejection_reason = :rejection_reason,
+        approved_by = :approved_by,
+        closure_date = :closure_date,
+        status = :status
+      WHERE id = :id AND company_id = :companyId`,
+      {
+        id,
+        companyId,
+        project_id: toNumber(b.project_id),
+        issue_title: b.issue_title,
+        description: b.description,
+        category: b.category || "OTHER",
+        severity: b.severity || "MODERATE",
+        priority: b.priority || "MEDIUM",
+        impact: b.impact || null,
+        wbs_code: b.wbs_code || null,
+        milestone: b.milestone || null,
+        task_name: b.task_name || null,
+        location: b.location || null,
+        department: b.department || null,
+        date_identified: b.date_identified || null,
+        identified_by: b.identified_by || null,
+        responsible_department: b.responsible_department || null,
+        assigned_to: b.assigned_to || null,
+        contractor_vendor: b.contractor_vendor || null,
+        assigned_date: b.assigned_date || null,
+        target_resolution_date: b.target_resolution_date || null,
+        required_corrective_action: b.required_corrective_action || null,
+        proposed_solution: b.proposed_solution || null,
+        actual_action_taken: b.actual_action_taken || null,
+        resolution_start_date: b.resolution_start_date || null,
+        completion_date: b.completion_date || null,
+        additional_cost: Number(b.additional_cost || 0),
+        supporting_documents: Array.isArray(b.supporting_documents) ? JSON.stringify(b.supporting_documents) : (b.supporting_documents || null),
+        before_after_evidence: Array.isArray(b.before_after_evidence) ? JSON.stringify(b.before_after_evidence) : (b.before_after_evidence || null),
+        resolution_remarks: b.resolution_remarks || null,
+        verification_required: Number(Boolean(b.verification_required)),
+        reviewer: b.reviewer || null,
+        review_date: b.review_date || null,
+        verification_result: b.verification_result || null,
+        review_comments: b.review_comments || null,
+        rejection_reason: b.rejection_reason || null,
+        approved_by: b.approved_by || null,
+        closure_date: b.closure_date || null,
+        status: nextStatus,
+      },
+    );
+    if (String(existing[0].status || "").toUpperCase() !== nextStatus) {
+      await query(
+        `INSERT INTO pm_project_issue_history (company_id, issue_id, action, old_status, new_status, comments, changed_by)
+         VALUES (:companyId, :issueId, 'STATUS_CHANGED', :oldStatus, :newStatus, :comments, :changedBy)`,
+        {
+          companyId,
+          issueId: id,
+          oldStatus: existing[0].status || null,
+          newStatus: nextStatus,
+          comments: b.status_comment || b.review_comments || b.resolution_remarks || null,
+          changedBy: req.user?.id || null,
+        },
+      );
+    }
+    const oldAssigneeId = await findProjectIssueAssigneeId(companyId, existing[0].assigned_to);
+    const newAssigneeId = await findProjectIssueAssigneeId(companyId, b.assigned_to);
+    if (newAssigneeId && newAssigneeId !== oldAssigneeId) {
+      await notifyProjectIssueUser({
+        companyId,
+        userId: newAssigneeId,
+        title: `Issue assigned: ${existing[0].reference_no}`,
+        message: b.issue_title || existing[0].issue_title,
+        issueId: id,
+      });
+    }
+    if (String(existing[0].status || "").toUpperCase() !== nextStatus && newAssigneeId) {
+      await notifyProjectIssueUser({
+        companyId,
+        userId: newAssigneeId,
+        title: `Issue status: ${existing[0].reference_no}`,
+        message: `Status changed to ${nextStatus.replaceAll("_", " ")}`,
+        issueId: id,
+      });
+    }
+    const auditFields = [
+      "assigned_to",
+      "responsible_department",
+      "required_corrective_action",
+      "actual_action_taken",
+      "verification_result",
+      "reviewer",
+      "review_comments",
+      "rejection_reason",
+      "approved_by",
+      "closure_date",
+    ];
+    for (const field of auditFields) {
+      const oldValue = existing[0][field] == null ? "" : String(existing[0][field]);
+      const newValue = b[field] == null ? "" : String(b[field]);
+      if (oldValue !== newValue) {
+        await query(
+          `INSERT INTO pm_project_issue_history (company_id, issue_id, action, comments, changed_by)
+           VALUES (:companyId, :issueId, :action, :comments, :changedBy)`,
+          {
+            companyId,
+            issueId: id,
+            action: field.toUpperCase(),
+            comments: `${oldValue || "(empty)"} → ${newValue || "(empty)"}`,
+            changedBy: req.user?.id || null,
+          },
+        );
+      }
+    }
+    res.json({ ok: true, message: "Issue updated" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const listProjectIssueHistory = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const issueId = toNumber(req.params.id);
+    await ensureConstructionTables();
+    const [issue] = await query(
+      "SELECT id FROM pm_project_issues WHERE id = :issueId AND company_id = :companyId LIMIT 1",
+      { companyId, issueId },
+    );
+    if (!issue) throw httpError(404, "NOT_FOUND", "Issue not found");
+    const items = await query(
+      `SELECT h.*, COALESCE(u.full_name, u.username) AS changed_by_name
+       FROM pm_project_issue_history h
+       LEFT JOIN adm_users u ON u.id = h.changed_by
+       WHERE h.company_id = :companyId AND h.issue_id = :issueId
+       ORDER BY h.id DESC`,
+      { companyId, issueId },
+    );
+    res.json({ items });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const runProjectIssueOverdueEscalations = async () => {
+  await ensureConstructionTables();
+  const overdueIssues = await query(
+    `SELECT i.id, i.company_id, i.reference_no, i.issue_title, i.assigned_to, u.id AS assigned_user_id
+     FROM pm_project_issues i
+     LEFT JOIN adm_users u ON u.company_id = i.company_id
+       AND (u.username = i.assigned_to OR u.full_name = i.assigned_to)
+     WHERE i.target_resolution_date < CURRENT_DATE()
+       AND i.status NOT IN ('CLOSED','VERIFIED','CANCELLED','DEFERRED')
+       AND i.assigned_to IS NOT NULL AND i.assigned_to <> ''`,
+  );
+  let escalated = 0;
+  for (const issue of overdueIssues || []) {
+    const [alreadySent] = await query(
+      `SELECT id FROM pm_project_issue_history
+       WHERE company_id = :companyId AND issue_id = :issueId
+         AND action = 'OVERDUE_ESCALATION' AND DATE(created_at) = CURRENT_DATE()
+       LIMIT 1`,
+      { companyId: issue.company_id, issueId: issue.id },
+    );
+    if (alreadySent) continue;
+    if (issue.assigned_user_id) {
+      await notifyProjectIssueUser({
+        companyId: issue.company_id,
+        userId: issue.assigned_user_id,
+        title: `Overdue project issue: ${issue.reference_no}`,
+        message: issue.issue_title,
+        issueId: issue.id,
+      });
+    }
+    await query(
+      `INSERT INTO pm_project_issue_history (company_id, issue_id, action, comments)
+       VALUES (:companyId, :issueId, 'OVERDUE_ESCALATION', 'Automated daily overdue notification')`,
+      { companyId: issue.company_id, issueId: issue.id },
+    );
+    escalated++;
+  }
+  return { escalated };
 };
 
 export const listMaterialTests = async (req, res, next) => {
@@ -4504,7 +6292,12 @@ export const createMaterialTest = async (req, res, next) => {
   try {
     const { companyId } = req.scope || {};
     const b = req.body || {};
-    if (!b.project_id || !b.test_name) throw httpError(400, "VALIDATION_ERROR", "Project and test name required");
+    if (!b.project_id || !b.test_name)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Project and test name required",
+      );
 
     const result = await query(
       `INSERT INTO pm_material_tests 
@@ -4526,9 +6319,11 @@ export const createMaterialTest = async (req, res, next) => {
         lab_name: b.lab_name || null,
         remarks: b.remarks || null,
         tested_by: req.user?.username || null,
-      }
+      },
     );
-    res.status(201).json({ id: result.insertId, message: "Material test record logged" });
+    res
+      .status(201)
+      .json({ id: result.insertId, message: "Material test record logged" });
   } catch (err) {
     next(err);
   }
@@ -4551,7 +6346,8 @@ export const listSafetyIncidents = async (req, res, next) => {
                       COALESCE(i.root_cause, i.investigation_findings) AS root_cause,
                       COALESCE(i.corrective_action, i.corrective_actions) AS corrective_action,
                       COALESCE(i.reported_to_authority, 'N') AS reported_to_authority,
-                      p.project_name, p.project_code
+                      p.project_name,
+                      p.project_code, p.project_code
                FROM pm_safety_incidents i 
                JOIN pm_projects p ON p.id = i.project_id 
                WHERE i.company_id = :companyId`;
@@ -4572,19 +6368,31 @@ export const createSafetyIncident = async (req, res, next) => {
   try {
     const { companyId, branchId } = req.scope || {};
     const b = req.body || {};
-    if (!b.project_id || !b.description) throw httpError(400, "VALIDATION_ERROR", "Project and incident description required");
+    if (!b.project_id || !b.description)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Project and incident description required",
+      );
 
     await ensureConstructionTables();
 
-    const incidentNo = b.incident_no || b.incident_number || `INC-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
+    const incidentNo =
+      b.incident_no ||
+      b.incident_number ||
+      `INC-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
     const branch_id = branchId || 1;
-    const reported_by = b.reported_by || req.user?.username || req.user?.name || "Safety Officer";
+    const reported_by =
+      b.reported_by || req.user?.username || req.user?.name || "Safety Officer";
     const location = b.location || "Site";
     const person = b.injured_person_name || b.persons_involved || null;
-    const days = Number(b.days_lost ?? b.lost_workdays ?? b.lost_work_days ?? 0);
+    const days = Number(
+      b.days_lost ?? b.lost_workdays ?? b.lost_work_days ?? 0,
+    );
     const cause = b.root_cause || b.investigation_findings || null;
     const action = b.corrective_action || b.corrective_actions || null;
-    const reportedToAuth = b.reported_to_authority || (b.regulatory_notified ? "Y" : "N") || "N";
+    const reportedToAuth =
+      b.reported_to_authority || (b.regulatory_notified ? "Y" : "N") || "N";
     const incType = b.incident_type || "NEAR_MISS";
     const severity = b.severity || "LOW";
 
@@ -4604,7 +6412,8 @@ export const createSafetyIncident = async (req, res, next) => {
         branch_id,
         project_id: toNumber(b.project_id),
         incident_no: incidentNo,
-        incident_date: b.incident_date || new Date().toISOString().split("T")[0],
+        incident_date:
+          b.incident_date || new Date().toISOString().split("T")[0],
         incident_type: incType,
         severity,
         location,
@@ -4621,9 +6430,15 @@ export const createSafetyIncident = async (req, res, next) => {
         reported_to_authority: reportedToAuth,
         status: b.status || "REPORTED",
         reported_by,
-      }
+      },
     );
-    res.status(201).json({ id: result.insertId, incident_no: incidentNo, message: "Safety incident logged" });
+    res
+      .status(201)
+      .json({
+        id: result.insertId,
+        incident_no: incidentNo,
+        message: "Safety incident logged",
+      });
   } catch (err) {
     next(err);
   }
@@ -4641,7 +6456,8 @@ export const listToolboxTalks = async (req, res, next) => {
                       COALESCE(t.attendees_count, t.attendee_count, 0) AS attendees_count,
                       COALESCE(t.notes, t.summary_points) AS notes,
                       COALESCE(t.summary_points, t.notes) AS summary_points,
-                      p.project_name, p.project_code 
+                      p.project_name,
+                      p.project_code, p.project_code 
                FROM pm_toolbox_talks t 
                JOIN pm_projects p ON p.id = t.project_id 
                WHERE t.company_id = :companyId`;
@@ -4662,12 +6478,18 @@ export const createToolboxTalk = async (req, res, next) => {
   try {
     const { companyId, branchId } = req.scope || {};
     const b = req.body || {};
-    if (!b.project_id || !b.topic) throw httpError(400, "VALIDATION_ERROR", "Project and topic required");
+    if (!b.project_id || !b.topic)
+      throw httpError(400, "VALIDATION_ERROR", "Project and topic required");
 
     await ensureConstructionTables();
 
     const branch_id = branchId || 1;
-    const conductor = b.conductor_name || b.delivered_by || req.user?.username || req.user?.name || "Safety Officer";
+    const conductor =
+      b.conductor_name ||
+      b.delivered_by ||
+      req.user?.username ||
+      req.user?.name ||
+      "Safety Officer";
     const count = Number(b.attendee_count ?? b.attendees_count ?? 0);
     const notes = b.notes || b.summary_points || null;
 
@@ -4690,9 +6512,11 @@ export const createToolboxTalk = async (req, res, next) => {
         attendee_count: count,
         summary_points: notes,
         notes: notes,
-      }
+      },
     );
-    res.status(201).json({ id: result.insertId, message: "Toolbox talk recorded" });
+    res
+      .status(201)
+      .json({ id: result.insertId, message: "Toolbox talk recorded" });
   } catch (err) {
     next(err);
   }
@@ -4710,7 +6534,8 @@ export const listDocuments = async (req, res, next) => {
     let sql = `SELECT d.*, 
                       COALESCE(d.document_number, d.doc_number) AS document_number,
                       COALESCE(d.discipline, d.doc_category) AS discipline,
-                      p.project_name, p.project_code
+                      p.project_name,
+                      p.project_code, p.project_code
                FROM pm_documents d 
                JOIN pm_projects p ON p.id = d.project_id 
                WHERE d.company_id = :companyId`;
@@ -4731,15 +6556,27 @@ export const createDocument = async (req, res, next) => {
   try {
     const { companyId, branchId } = req.scope || {};
     const b = req.body || {};
-    if (!b.project_id || !b.document_number || !b.title) throw httpError(400, "VALIDATION_ERROR", "Project, document number, and title required");
+    if (!b.project_id || !b.document_number || !b.title)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Project, document number, and title required",
+      );
 
     await ensureConstructionTables();
 
     const branch_id = branchId || 1;
     const attachmentsJson = b.attachments_json
-      ? (typeof b.attachments_json === "string" ? b.attachments_json : JSON.stringify(b.attachments_json))
-      : (Array.isArray(b.attachments) ? JSON.stringify(b.attachments) : null);
-    const fileUrl = b.file_url || (Array.isArray(b.attachments) && b.attachments[0]?.url) || null;
+      ? typeof b.attachments_json === "string"
+        ? b.attachments_json
+        : JSON.stringify(b.attachments_json)
+      : Array.isArray(b.attachments)
+        ? JSON.stringify(b.attachments)
+        : null;
+    const fileUrl =
+      b.file_url ||
+      (Array.isArray(b.attachments) && b.attachments[0]?.url) ||
+      null;
 
     const result = await query(
       `INSERT INTO pm_documents 
@@ -4759,9 +6596,14 @@ export const createDocument = async (req, res, next) => {
         file_url: fileUrl,
         attachments_json: attachmentsJson,
         uploaded_by: req.user?.id || null,
-      }
+      },
     );
-    res.status(201).json({ id: result.insertId, message: "Document registered in drawing register" });
+    res
+      .status(201)
+      .json({
+        id: result.insertId,
+        message: "Document registered in drawing register",
+      });
   } catch (err) {
     next(err);
   }
@@ -4778,7 +6620,8 @@ export const listRFIs = async (req, res, next) => {
                       COALESCE(r.cost_impact, r.has_cost_impact, 'N') AS cost_impact,
                       COALESCE(r.schedule_impact, r.has_schedule_impact, 'N') AS schedule_impact,
                       COALESCE(r.answer, r.response) AS answer,
-                      p.project_name, p.project_code
+                      p.project_name,
+                      p.project_code, p.project_code
                FROM pm_rfis r 
                JOIN pm_projects p ON p.id = r.project_id 
                WHERE r.company_id = :companyId`;
@@ -4799,19 +6642,32 @@ export const createRFI = async (req, res, next) => {
   try {
     const { companyId, branchId } = req.scope || {};
     const b = req.body || {};
-    if (!b.project_id || !b.subject || !b.question) throw httpError(400, "VALIDATION_ERROR", "Project, subject, and question required");
+    if (!b.project_id || !b.subject || !b.question)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Project, subject, and question required",
+      );
 
     await ensureConstructionTables();
 
     const branch_id = branchId || 1;
-    const rfiNo = b.rfi_number || b.rfi_no || `RFI-${Date.now().toString().slice(-6)}`;
+    const rfiNo =
+      b.rfi_number || b.rfi_no || `RFI-${Date.now().toString().slice(-6)}`;
     const drawingRef = b.drawing_reference || b.drawing_ref || null;
     const costImp = b.cost_impact || b.has_cost_impact || "N";
     const schedImp = b.schedule_impact || b.has_schedule_impact || "N";
     const attachmentsJson = b.attachments_json
-      ? (typeof b.attachments_json === "string" ? b.attachments_json : JSON.stringify(b.attachments_json))
-      : (Array.isArray(b.attachments) ? JSON.stringify(b.attachments) : null);
-    const fileUrl = b.file_url || (Array.isArray(b.attachments) && b.attachments[0]?.url) || null;
+      ? typeof b.attachments_json === "string"
+        ? b.attachments_json
+        : JSON.stringify(b.attachments_json)
+      : Array.isArray(b.attachments)
+        ? JSON.stringify(b.attachments)
+        : null;
+    const fileUrl =
+      b.file_url ||
+      (Array.isArray(b.attachments) && b.attachments[0]?.url) ||
+      null;
 
     const result = await query(
       `INSERT INTO pm_rfis 
@@ -4834,16 +6690,25 @@ export const createRFI = async (req, res, next) => {
         drawing_reference: drawingRef,
         file_url: fileUrl,
         attachments_json: attachmentsJson,
-        date_raised: b.date_raised || b.date_issued || new Date().toISOString().split("T")[0],
+        date_raised:
+          b.date_raised ||
+          b.date_issued ||
+          new Date().toISOString().split("T")[0],
         due_date: b.due_date || null,
         cost_impact: costImp,
         schedule_impact: schedImp,
         status: "OPEN",
         created_by: req.user?.id || null,
         raised_by: req.user?.id || null,
-      }
+      },
     );
-    res.status(201).json({ id: result.insertId, rfi_number: rfiNo, message: "RFI raised successfully" });
+    res
+      .status(201)
+      .json({
+        id: result.insertId,
+        rfi_number: rfiNo,
+        message: "RFI raised successfully",
+      });
   } catch (err) {
     next(err);
   }
@@ -4875,7 +6740,7 @@ export const updateRFI = async (req, res, next) => {
         answered_by: req.user?.id || null,
         answered_date: ansDate,
         status: b.status || (ans ? "CLOSED" : "OPEN"),
-      }
+      },
     );
     res.json({ ok: true, message: "RFI updated" });
   } catch (err) {
@@ -4900,6 +6765,7 @@ export const listEquipmentLogs = async (req, res, next) => {
                       COALESCE(l.hourly_cost_rate, l.hourly_rate, 0) AS hourly_rate,
                       COALESCE(eq.name, l.equipment_name, 'Heavy Equipment') AS equipment_name,
                       p.project_name,
+                      p.project_code,
                       p.project_code
                FROM pm_equipment_logs l
                LEFT JOIN pm_projects p ON p.id = l.project_id
@@ -4922,17 +6788,28 @@ export const createEquipmentLog = async (req, res, next) => {
   try {
     const { companyId, branchId } = req.scope || {};
     const b = req.body || {};
-    if (!b.project_id || !b.equipment_id) throw httpError(400, "VALIDATION_ERROR", "Project and equipment required");
+    if (!b.project_id || !b.equipment_id)
+      throw httpError(
+        400,
+        "VALIDATION_ERROR",
+        "Project and equipment required",
+      );
 
     await ensureConstructionTables();
 
-    const projRows = await query(`SELECT id, company_id, branch_id FROM pm_projects WHERE id = :id LIMIT 1`, { id: toNumber(b.project_id) });
+    const projRows = await query(
+      `SELECT id, company_id, branch_id FROM pm_projects WHERE id = :id LIMIT 1`,
+      { id: toNumber(b.project_id) },
+    );
     const targetCompId = companyId || projRows[0]?.company_id || 1;
     const targetBranchId = branchId || projRows[0]?.branch_id || 1;
 
     let eqName = b.equipment_name;
     if (!eqName) {
-      const eqRows = await query(`SELECT name FROM pm_equipments WHERE id = :id LIMIT 1`, { id: toNumber(b.equipment_id) });
+      const eqRows = await query(
+        `SELECT name FROM pm_equipments WHERE id = :id LIMIT 1`,
+        { id: toNumber(b.equipment_id) },
+      );
       eqName = eqRows[0]?.name || "Heavy Equipment";
     }
 
@@ -4970,9 +6847,15 @@ export const createEquipmentLog = async (req, res, next) => {
         remarks: b.remarks || null,
         created_by: req.user?.id || null,
         logged_by: req.user?.id || null,
-      }
+      },
     );
-    res.status(201).json({ id: result.insertId, total_cost: calculatedCost, message: "Equipment operating log recorded" });
+    res
+      .status(201)
+      .json({
+        id: result.insertId,
+        total_cost: calculatedCost,
+        message: "Equipment operating log recorded",
+      });
   } catch (err) {
     next(err);
   }
@@ -4982,7 +6865,10 @@ export const deleteEquipmentLog = async (req, res, next) => {
   try {
     const { companyId } = req.scope || {};
     const id = toNumber(req.params.id);
-    await query(`DELETE FROM pm_equipment_logs WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`, { id, companyId: companyId || null });
+    await query(
+      `DELETE FROM pm_equipment_logs WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`,
+      { id, companyId: companyId || null },
+    );
     res.json({ success: true, message: "Equipment operating log deleted" });
   } catch (err) {
     next(err);
@@ -4995,13 +6881,19 @@ export const submitBOQ = async (req, res, next) => {
     const id = toNumber(req.params.id);
     const { workflow_id, target_user_id, comments } = req.body || {};
 
-    const boqRows = await query(`SELECT * FROM pm_boqs WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`, { id, companyId: companyId || 1 });
+    const boqRows = await query(
+      `SELECT * FROM pm_boqs WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`,
+      { id, companyId: companyId || 1 },
+    );
     if (!boqRows.length) throw httpError(404, "NOT_FOUND", "BOQ not found");
     const boq = boqRows[0];
 
     let targetUserName = null;
     if (target_user_id) {
-      const uRows = await query(`SELECT username FROM adm_users WHERE id = :uid LIMIT 1`, { uid: target_user_id });
+      const uRows = await query(
+        `SELECT username FROM adm_users WHERE id = :uid LIMIT 1`,
+        { uid: target_user_id },
+      );
       if (uRows.length) targetUserName = uRows[0].username;
     }
 
@@ -5016,8 +6908,8 @@ export const submitBOQ = async (req, res, next) => {
         target_user_id: target_user_id || null,
         target_user_name: targetUserName,
         comments: comments || null,
-        id
-      }
+        id,
+      },
     );
 
     try {
@@ -5032,15 +6924,18 @@ export const submitBOQ = async (req, res, next) => {
         {
           boq_id: id,
           version: boq.version || "1.0",
-          prepared_by: boq.prepared_by_name || req.user?.username || "Estimator",
+          prepared_by:
+            boq.prepared_by_name || req.user?.username || "Estimator",
           reviewed_by: targetUserName || null,
           approved_by: null,
           subtotal: boq.subtotal,
           contingency_amount: boq.contingency_amount,
           tax_amount: boq.tax_amount,
           total_amount: boq.total_amount,
-          remarks: comments || `Forwarded for approval to ${targetUserName || 'Approver'}`
-        }
+          remarks:
+            comments ||
+            `Forwarded for approval to ${targetUserName || "Approver"}`,
+        },
       );
     } catch (e) {}
 
@@ -5057,7 +6952,7 @@ export const submitBOQ = async (req, res, next) => {
             id,
             amount: boq.total_amount,
             assignedTo: target_user_id || null,
-          }
+          },
         );
       }
     } catch (e) {}
@@ -5066,7 +6961,7 @@ export const submitBOQ = async (req, res, next) => {
       ok: true,
       status: "PENDING_APPROVAL",
       forwarded_to_username: targetUserName,
-      message: "BOQ forwarded for approval"
+      message: "BOQ forwarded for approval",
     });
   } catch (err) {
     next(err);
@@ -5079,11 +6974,18 @@ export const approveBOQ = async (req, res, next) => {
     const id = toNumber(req.params.id);
     const { comments, approved_by_name } = req.body || {};
 
-    const boqRows = await query(`SELECT * FROM pm_boqs WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`, { id, companyId: companyId || 1 });
+    const boqRows = await query(
+      `SELECT * FROM pm_boqs WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`,
+      { id, companyId: companyId || 1 },
+    );
     if (!boqRows.length) throw httpError(404, "NOT_FOUND", "BOQ not found");
     const boq = boqRows[0];
 
-    const approver = approved_by_name || req.user?.username || req.user?.name || "Project Approver";
+    const approver =
+      approved_by_name ||
+      req.user?.username ||
+      req.user?.name ||
+      "Project Approver";
 
     await query(
       `UPDATE pm_boqs SET 
@@ -5095,8 +6997,8 @@ export const approveBOQ = async (req, res, next) => {
       {
         approver,
         comments: comments || null,
-        id
-      }
+        id,
+      },
     );
 
     try {
@@ -5118,12 +7020,16 @@ export const approveBOQ = async (req, res, next) => {
           contingency_amount: boq.contingency_amount,
           tax_amount: boq.tax_amount,
           total_amount: boq.total_amount,
-          remarks: comments || "BOQ Approved"
-        }
+          remarks: comments || "BOQ Approved",
+        },
       );
     } catch (e) {}
 
-    res.json({ ok: true, status: "APPROVED", message: "BOQ successfully approved" });
+    res.json({
+      ok: true,
+      status: "APPROVED",
+      message: "BOQ successfully approved",
+    });
   } catch (err) {
     next(err);
   }
@@ -5135,7 +7041,10 @@ export const rejectBOQ = async (req, res, next) => {
     const id = toNumber(req.params.id);
     const { rejection_reason } = req.body || {};
 
-    const boqRows = await query(`SELECT * FROM pm_boqs WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`, { id, companyId: companyId || 1 });
+    const boqRows = await query(
+      `SELECT * FROM pm_boqs WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`,
+      { id, companyId: companyId || 1 },
+    );
     if (!boqRows.length) throw httpError(404, "NOT_FOUND", "BOQ not found");
     const boq = boqRows[0];
 
@@ -5146,8 +7055,8 @@ export const rejectBOQ = async (req, res, next) => {
        WHERE id = :id`,
       {
         rejection_reason: rejection_reason || "Rejected by reviewer",
-        id
-      }
+        id,
+      },
     );
 
     try {
@@ -5169,8 +7078,8 @@ export const rejectBOQ = async (req, res, next) => {
           contingency_amount: boq.contingency_amount,
           tax_amount: boq.tax_amount,
           total_amount: boq.total_amount,
-          remarks: rejection_reason || "BOQ Rejected"
-        }
+          remarks: rejection_reason || "BOQ Rejected",
+        },
       );
     } catch (e) {}
 
@@ -5186,7 +7095,10 @@ export const reverseBOQ = async (req, res, next) => {
     const id = toNumber(req.params.id);
     const { reason } = req.body || {};
 
-    const boqRows = await query(`SELECT * FROM pm_boqs WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`, { id, companyId: companyId || 1 });
+    const boqRows = await query(
+      `SELECT * FROM pm_boqs WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`,
+      { id, companyId: companyId || 1 },
+    );
     if (!boqRows.length) throw httpError(404, "NOT_FOUND", "BOQ not found");
     const boq = boqRows[0];
 
@@ -5199,8 +7111,8 @@ export const reverseBOQ = async (req, res, next) => {
        WHERE id = :id`,
       {
         reason: reason || "Approval reversed",
-        id
-      }
+        id,
+      },
     );
 
     try {
@@ -5222,12 +7134,279 @@ export const reverseBOQ = async (req, res, next) => {
           contingency_amount: boq.contingency_amount,
           tax_amount: boq.tax_amount,
           total_amount: boq.total_amount,
-          remarks: reason || "Approval reversed, returned to DRAFT"
+          remarks: reason || "Approval reversed, returned to DRAFT",
+        },
+      );
+    } catch (e) {}
+
+    res.json({
+      ok: true,
+      status: "DRAFT",
+      message: "Approval reversed, BOQ returned to DRAFT",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+export const baselineBOQ = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const id = toNumber(req.params.id);
+    const { approved_budget, notes } = req.body || {};
+
+    const boqRows = await query(
+      `SELECT * FROM pm_boqs WHERE id = :id AND (company_id = :companyId OR :companyId IS NULL)`,
+      { id, companyId: companyId || 1 }
+    );
+    if (!boqRows.length) throw httpError(404, 'NOT_FOUND', 'Cost Estimate / BOQ not found');
+    const boq = boqRows[0];
+
+    const baselineBudget = approved_budget !== undefined ? Number(approved_budget) : Number(boq.total_amount || 0);
+    const lockedBy = req.user?.username || req.user?.name || 'Administrator';
+
+    await query(
+      `UPDATE pm_boqs SET 
+         is_baselined = 1,
+         baseline_locked_at = NOW(),
+         baseline_locked_by = :lockedBy,
+         approved_budget = :baselineBudget,
+         status = 'APPROVED',
+         approved_by_name = COALESCE(:lockedBy, approved_by_name),
+         approved_date = CURRENT_DATE()
+       WHERE id = :id`,
+      { id, lockedBy, baselineBudget }
+    );
+
+    if (boq.project_id) {
+      await query(
+        `UPDATE pm_projects SET budget = :baselineBudget WHERE id = :projectId`,
+        { baselineBudget, projectId: boq.project_id }
+      ).catch(() => {});
+    }
+
+    const items = await query(`SELECT * FROM pm_boq_items WHERE boq_id = :id`, { id });
+    try {
+      await query(
+        `INSERT INTO pm_boq_revisions (
+          boq_id, version, revision_date, prepared_by, reviewed_by, approved_by,
+          subtotal, contingency_amount, tax_amount, total_amount, status, remarks, snapshot_json
+        ) VALUES (
+          :boq_id, :version, CURRENT_DATE(), :prepared_by, :reviewed_by, :approved_by,
+          :subtotal, :contingency_amount, :tax_amount, :total_amount, 'APPROVED', :remarks, :snapshot_json
+        )`,
+        {
+          boq_id: id,
+          version: boq.version || '1.0',
+          prepared_by: boq.prepared_by_name || 'System User',
+          reviewed_by: boq.reviewed_by_name || null,
+          approved_by: lockedBy,
+          subtotal: boq.subtotal,
+          contingency_amount: boq.contingency_amount,
+          tax_amount: boq.tax_amount,
+          total_amount: boq.total_amount,
+          remarks: notes || `Baseline budget locked at ${baselineBudget.toFixed(2)}`,
+          snapshot_json: JSON.stringify({ header: { ...boq, is_baselined: 1, approved_budget: baselineBudget }, items })
         }
       );
     } catch (e) {}
 
-    res.json({ ok: true, status: "DRAFT", message: "Approval reversed, BOQ returned to DRAFT" });
+    res.json({ ok: true, message: 'Cost Estimate baseline locked successfully', approved_budget: baselineBudget });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getBudgetAllocations = async (req, res, next) => {
+  try {
+    const boqId = toNumber(req.params.id);
+    const allocations = await query(
+      `SELECT * FROM pm_budget_allocations WHERE boq_id = :boqId ORDER BY id ASC`,
+      { boqId }
+    );
+    res.json({ allocations });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const saveBudgetAllocations = async (req, res, next) => {
+  try {
+    const { companyId } = req.scope || {};
+    const boqId = toNumber(req.params.id);
+    const { allocations = [] } = req.body || {};
+
+    const boqRows = await query(
+      `SELECT id, project_id, approved_budget, total_amount FROM pm_boqs WHERE id = :boqId`,
+      { boqId }
+    );
+    if (!boqRows.length) throw httpError(404, 'NOT_FOUND', 'Cost Estimate not found');
+    const boq = boqRows[0];
+
+    await query(`DELETE FROM pm_budget_allocations WHERE boq_id = :boqId`, { boqId });
+
+    for (const alloc of allocations) {
+      if (!alloc.allocation_type && !alloc.target_name) continue;
+      await query(
+        `INSERT INTO pm_budget_allocations (
+          company_id, project_id, boq_id, allocation_type, target_id, target_name, allocated_amount, percentage, notes
+        ) VALUES (
+          :companyId, :projectId, :boqId, :type, :targetId, :targetName, :amount, :percentage, :notes
+        )`,
+        {
+          companyId: companyId || 1,
+          projectId: boq.project_id,
+          boqId,
+          type: alloc.allocation_type || 'PHASE',
+          targetId: alloc.target_id || null,
+          targetName: alloc.target_name || '',
+          amount: Number(alloc.allocated_amount || 0),
+          percentage: Number(alloc.percentage || 0),
+          notes: alloc.notes || null
+        }
+      );
+    }
+
+    await query(
+      `UPDATE pm_boqs SET allocations_json = :allocJson WHERE id = :boqId`,
+      { allocJson: JSON.stringify(allocations), boqId }
+    );
+
+    res.json({ ok: true, count: allocations.length, message: 'Budget allocations saved successfully' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getProjectCostSummary = async (req, res, next) => {
+  try {
+    const projectId = toNumber(req.params.projectId);
+
+    const projRows = await query(
+      `SELECT id, project_code, project_name, budget, currency, project_status FROM pm_projects WHERE id = :projectId`,
+      { projectId }
+    );
+    if (!projRows.length) throw httpError(404, 'NOT_FOUND', 'Project not found');
+    const project = projRows[0];
+
+    const boqs = await query(
+      `SELECT * FROM pm_boqs WHERE project_id = :projectId ORDER BY id DESC`,
+      { projectId }
+    );
+    const activeBoq = boqs.find(b => b.is_baselined || b.status === 'APPROVED') || boqs[0] || null;
+
+    let items = [];
+    if (activeBoq) {
+      items = await query(
+        `SELECT bi.*, cc.category_name, cc.category_code, cc.cost_type, cc.color_code
+         FROM pm_boq_items bi
+         LEFT JOIN pm_cost_categories cc ON cc.id = bi.cost_category_id OR cc.category_code = bi.cost_category
+         WHERE bi.boq_id = :boqId
+         ORDER BY bi.item_order ASC, bi.id ASC`,
+        { boqId: activeBoq.id }
+      );
+    }
+
+    const tasks = await query(
+      `SELECT id, wbs_code, task_title, scope_name, priority, status, start_date, end_date, estimated_hours
+       FROM pm_tasks WHERE project_id = :projectId ORDER BY wbs_code ASC, id ASC`,
+      { projectId }
+    );
+
+    const categoryTotals = {};
+    let totalDirect = 0;
+    let totalIndirect = 0;
+    let unallocatedCount = 0;
+    let unallocatedAmount = 0;
+
+    for (const itm of items) {
+      const amt = Number(itm.total_cost || itm.amount || (Number(itm.quantity || 0) * Number(itm.unit_rate || 0)));
+      const catKey = itm.category_name || itm.cost_category || 'OTHER';
+      const costType = itm.cost_type || (['OVERHEAD', 'PERMITS', 'INSURANCE'].includes(catKey.toUpperCase()) ? 'INDIRECT' : 'DIRECT');
+      
+      if (costType === 'INDIRECT') totalIndirect += amt;
+      else totalDirect += amt;
+
+      if (!categoryTotals[catKey]) {
+        categoryTotals[catKey] = {
+          name: catKey,
+          code: itm.category_code || itm.cost_category || 'OTHER',
+          cost_type: costType,
+          color: itm.color_code || '#6366F1',
+          total: 0,
+          itemCount: 0
+        };
+      }
+      categoryTotals[catKey].total += amt;
+      categoryTotals[catKey].itemCount++;
+
+      if (!itm.task_id && !itm.wbs_code) {
+        unallocatedCount++;
+        unallocatedAmount += amt;
+      }
+    }
+
+    const taskCostMap = {};
+    const wbsCostMap = {};
+
+    for (const itm of items) {
+      const amt = Number(itm.total_cost || itm.amount || (Number(itm.quantity || 0) * Number(itm.unit_rate || 0)));
+      if (itm.task_id) {
+        taskCostMap[itm.task_id] = (taskCostMap[itm.task_id] || 0) + amt;
+      }
+      if (itm.wbs_code) {
+        wbsCostMap[itm.wbs_code] = (wbsCostMap[itm.wbs_code] || 0) + amt;
+      }
+    }
+
+    const wbsRollups = tasks.map(t => {
+      const directTaskCost = taskCostMap[t.id] || 0;
+      const wbsCost = wbsCostMap[t.wbs_code] || directTaskCost;
+      return {
+        task_id: t.id,
+        wbs_code: t.wbs_code || 'WBS-0',
+        task_title: t.task_title,
+        scope_name: t.scope_name,
+        estimated_hours: t.estimated_hours,
+        status: t.status,
+        estimated_cost: wbsCost
+      };
+    });
+
+    let allocations = [];
+    if (activeBoq) {
+      allocations = await query(
+        `SELECT * FROM pm_budget_allocations WHERE boq_id = :boqId ORDER BY id ASC`,
+        { boqId: activeBoq.id }
+      );
+    }
+    const totalAllocated = allocations.reduce((sum, a) => sum + Number(a.allocated_amount || 0), 0);
+    const approvedBudget = Number(activeBoq?.approved_budget || project.budget || activeBoq?.total_amount || 0);
+    const unallocatedBudget = Math.max(0, approvedBudget - totalAllocated);
+
+    res.json({
+      project,
+      activeBoq,
+      estimates: boqs,
+      summary: {
+        totalEstimatedCost: Number(activeBoq?.total_amount || (totalDirect + totalIndirect)),
+        approvedBudget,
+        directCosts: totalDirect,
+        indirectCosts: totalIndirect + Number(activeBoq?.indirect_cost_subtotal || 0),
+        contingencyAmount: Number(activeBoq?.contingency_amount || 0),
+        escalationAmount: Number(activeBoq?.escalation_amount || 0),
+        profitMarginAmount: Number(activeBoq?.profit_margin_amount || 0),
+        totalAllocatedBudget: totalAllocated,
+        unallocatedBudget,
+        unallocatedItemCount: unallocatedCount,
+        unallocatedItemCost: unallocatedAmount,
+        currency: activeBoq?.currency || project.currency || 'GHS'
+      },
+      categoryDistribution: Object.values(categoryTotals),
+      wbsRollups,
+      allocations
+    });
   } catch (err) {
     next(err);
   }

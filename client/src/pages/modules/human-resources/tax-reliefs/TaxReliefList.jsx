@@ -708,7 +708,7 @@ export default function TaxReliefList() {
             {/* Row 1: Employee & Category (No employee ID / code in options, no amount attached in category options) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
                   Employee <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -730,7 +730,7 @@ export default function TaxReliefList() {
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
                     Relief Category <span className="text-red-500">*</span>
                   </label>
                   <Link
@@ -761,7 +761,7 @@ export default function TaxReliefList() {
             {/* Row 2: Monthly Relief & Certificate / Document Number */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
                   Monthly Relief Amount (GHS) <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -772,7 +772,7 @@ export default function TaxReliefList() {
                     type="number"
                     step="0.01"
                     min="0"
-                    className="input pl-12 w-full font-mono font-bold text-slate-900 dark:text-white"
+                    className="input pl-12 w-full font-mono font-semibold text-slate-900 dark:text-white"
                     value={formData.monthly_amount}
                     onChange={(e) =>
                       setFormData((p) => ({ ...p, monthly_amount: e.target.value }))
@@ -787,7 +787,7 @@ export default function TaxReliefList() {
               </div>
 
               <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
                   Certificate / Document Number
                 </label>
                 <input
@@ -808,7 +808,7 @@ export default function TaxReliefList() {
             {/* Row 3: Dates & Status */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
                   Effective Start Date <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -823,7 +823,7 @@ export default function TaxReliefList() {
               </div>
 
               <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
                   Effective End Date
                 </label>
                 <input
@@ -837,7 +837,7 @@ export default function TaxReliefList() {
               </div>
 
               <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
                   Status
                 </label>
                 <select

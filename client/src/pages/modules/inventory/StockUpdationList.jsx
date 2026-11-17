@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 import { Activity, Clock, CheckCircle2, RefreshCw } from "lucide-react";
 /**
  * @fileoverview StockUpdationList component.
@@ -162,8 +163,34 @@ export default function StockUpdationList() {
 
   return (
     <div className="space-y-6">
-            {/* Metric Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            
+
+      <div className="card">
+        <div className="card-header bg-brand text-white rounded-t-lg">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 text-white">
+            <div>
+              <h1 className="text-2xl font-bold dark:text-brand-300">
+                Stock Updation
+              </h1>
+              <p className="hidden sm:block text-sm mt-1">
+                Add stock items to the system
+              </p>
+            </div>
+            <div className="grid grid-cols-2 sm:flex gap-2">
+              <Link to="/inventory?section=Stock%20Operations" className="btn btn-secondary">
+                Return to Menu
+              </Link>
+              <Link to="/inventory/stock-updation/new" className="btn-success">
+                + New Updation
+              </Link>
+            </div>
+          </div>
+        </div>
+        </div>
+
+      {/* Metric Stats Cards Carousel */}
+      {/* Metric Stats Cards */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="md:grid-cols-4" gapClass="gap-4">
         {[
           {
             label: "Active Stock Updates",
@@ -190,7 +217,7 @@ export default function StockUpdationList() {
             color: "bg-emerald-600 text-white",
           },
         ].map((stat, i) => (
-          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+          <div key={i} className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
             <div>
               <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 {stat.label}
@@ -204,29 +231,9 @@ export default function StockUpdationList() {
             </div>
           </div>
         ))}
-      </div>
+      </MobileMovingCarousel>
 
       <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg">
-          <div className="flex justify-between items-center text-white">
-            <div>
-              <h1 className="text-2xl font-bold dark:text-brand-300">
-                Stock Updation
-              </h1>
-              <p className="text-sm mt-1">
-                Add stock items to the system
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Link to="/inventory?section=Stock%20Operations" className="btn btn-secondary">
-                Return to Menu
-              </Link>
-              <Link to="/inventory/stock-updation/new" className="btn-success">
-                + New Updation
-              </Link>
-            </div>
-          </div>
-        </div>
         <div className="card-body">
           <div className="mb-4">
             <input

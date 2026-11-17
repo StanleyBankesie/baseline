@@ -146,58 +146,27 @@ export default function EquipmentLogsPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <select
-            className="input text-sm py-1.5 h-auto min-w-[200px]"
-            value={selectedProjectId}
-            onChange={e => setSelectedProjectId(e.target.value)}
-          >
-            <option value="">All Projects</option>
-            {projects.map(p => (
-              <option key={p.id} value={p.id}>
-                {p.project_code ? `${p.project_code} - ` : ""}{p.project_name || p.name}
-              </option>
-            ))}
-          </select>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input
-              type="text"
-              placeholder="Search equipment..."
-              className="input pl-9 pr-3 py-1.5 text-sm h-auto w-48"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <button
-            onClick={fetchLogs}
-            className="btn btn-secondary p-2"
-            title="Refresh"
-          >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-          </button>
-          <button
-            onClick={() => {
-              setForm(prev => ({
-                ...prev,
-                project_id: selectedProjectId || "",
-                equipment_id: "",
-                equipment_name: "",
-                hours_worked: "",
-                hours_idle: "",
-                hours_breakdown: "",
-                fuel_consumed_litres: "",
-                operator_name: "",
-                hourly_rate: "",
-                remarks: "",
-              }));
-              setShowModal(true);
-            }}
-            className="btn btn-primary inline-flex items-center gap-2"
-          >
-            <Plus size={16} /> Log Operating Hours
-          </button>
-        </div>
+        <button
+          onClick={() => {
+            setForm({
+              project_id: "",
+              equipment_id: "",
+              equipment_name: "",
+              log_date: new Date().toISOString().split("T")[0],
+              hours_worked: "",
+              hours_idle: "",
+              hours_breakdown: "",
+              fuel_consumed_litres: "",
+              operator_name: "",
+              hourly_rate: "",
+              remarks: "",
+            });
+            setShowModal(true);
+          }}
+          className="btn btn-primary inline-flex items-center gap-2"
+        >
+          <Plus size={16} /> Log Operating Hours
+        </button>
       </div>
 
       {/* KPI Stats */}
@@ -242,6 +211,43 @@ export default function EquipmentLogsPage() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Filters & Search Row (Placed below the cards) */}
+      <div className="card p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
+          <select
+            className="input text-sm py-1.5 h-auto min-w-[200px]"
+            value={selectedProjectId}
+            onChange={e => setSelectedProjectId(e.target.value)}
+          >
+            <option value="">All Projects</option>
+            {projects.map(p => (
+              <option key={p.id} value={p.id}>
+                {p.project_name || p.name || p.title || `Project #${p.id}`}
+              </option>
+            ))}
+          </select>
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input
+              type="text"
+              placeholder="Search equipment..."
+              className="input pl-9 pr-3 py-1.5 text-sm h-auto w-full"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="flex items-center gap-2 self-end sm:self-center">
+          <button
+            onClick={fetchLogs}
+            className="btn btn-secondary p-2"
+            title="Refresh"
+          >
+            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+          </button>
+        </div>
       </div>
 
       {/* Logs Table */}
@@ -309,26 +315,26 @@ export default function EquipmentLogsPage() {
       >
         <div className="space-y-4">
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Project <span className="text-red-500">*</span>
             </label>
             <select
               required
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
-              value={form.project_id || selectedProjectId || ""}
+              value={form.project_id || ""}
               onChange={e => setForm({ ...form, project_id: e.target.value })}
             >
               <option value="">-- Select Project --</option>
               {projects.map(p => (
                 <option key={p.id} value={p.id}>
-                  {p.project_code ? `${p.project_code} - ` : ""}{p.project_name || p.name}
+                  {p.project_name || p.name || p.title}
                 </option>
               ))}
             </select>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Equipment / Machine <span className="text-red-500">*</span>
               </label>
               <select
@@ -355,7 +361,7 @@ export default function EquipmentLogsPage() {
               </select>
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Log Date <span className="text-red-500">*</span>
               </label>
               <input
@@ -370,20 +376,20 @@ export default function EquipmentLogsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Worked (Hrs) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
                 step="0.5"
                 required
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono font-bold"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono font-semibold"
                 placeholder="0" value={form.hours_worked ?? ""}
                 onChange={e => setForm({ ...form, hours_worked: e.target.value === "" ? "" : Number(e.target.value) })}
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Idle (Hrs)
               </label>
               <input
@@ -395,7 +401,7 @@ export default function EquipmentLogsPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Breakdown (Hrs)
               </label>
               <input
@@ -410,7 +416,7 @@ export default function EquipmentLogsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Fuel Used (Ltrs)
               </label>
               <input
@@ -421,7 +427,7 @@ export default function EquipmentLogsPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Rate (GHS/hr)
               </label>
               <input
@@ -432,7 +438,7 @@ export default function EquipmentLogsPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Operator Name
               </label>
               <input
@@ -446,7 +452,7 @@ export default function EquipmentLogsPage() {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Notes / Maintenance Remarks
             </label>
             <textarea

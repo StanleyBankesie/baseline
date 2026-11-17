@@ -21,7 +21,69 @@ import { DASHBOARD_CARDS, getCardModule, getAllCardAliases } from "../data/dashb
  * - Module/feature visibility control
  */
 
-const PermissionContext = createContext();
+const defaultFallbackContext = {
+  appMode: "STANDARD",
+  isBasicMode: false,
+  setAppMode: () => {},
+  moduleSectionViewEnabled: false,
+  setModuleSectionViewEnabled: () => {},
+  appBackground: {
+    url: "",
+    preset: "silk-waves",
+    opacity: 40,
+    blur: 0,
+    hasCustom: false,
+    customUrl: null,
+  },
+  setAppBackground: () => {},
+  modules: new Set(),
+  licensedModules: new Set(),
+  permissions: [],
+  roleFeatures: new Set(),
+  exceptionalPerms: new Set(),
+  loading: false,
+  error: null,
+  isModuleEnabled: () => true,
+  canViewModule: () => true,
+  isFeatureEnabled: () => true,
+  isDashboardEnabled: () => true,
+  canAccessPath: () => true,
+  canAccessFeatureKey: () => true,
+  hasRoleFeature: () => true,
+  canPerformAction: () => true,
+  canCreateOnPage: () => true,
+  canDeleteOnPage: () => true,
+  featureKeyFromPath: () => null,
+  getEnabledModules: () => [],
+  getEnabledFeatures: () => [],
+  getEnabledDashboards: () => [],
+  getDisabledFeatures: () => [],
+  refreshPermissions: async () => {},
+  MODULES_REGISTRY: MODULES_REGISTRY || {},
+  globalOverrides: {},
+  setGlobalOverrides: () => {},
+  sessionOverrides: new Map(),
+  setSessionOverrides: () => {},
+  pagePermsByPath: {},
+  ensurePagePerms: async () => {},
+  getPagePerms: () => ({
+    can_view: true,
+    can_create: true,
+    can_edit: true,
+    can_delete: true,
+  }),
+  canPerformPageAction: () => true,
+  basePathFrom: (p) => p,
+  canViewDashboardElement: () => true,
+  setActionSessionOverride: () => {},
+  clearSessionOverrides: () => {},
+  hasExceptional: () => true,
+  canReverseApproval: () => false,
+  canReversePendingApproval: () => false,
+  canEditDiscount: () => true,
+};
+
+const PermissionContext = createContext(defaultFallbackContext);
 const RBAC_CACHE_KEY = "rbac.permission.snapshot.v1";
 const PAGE_PERM_RETRY_MS = 30_000;
 const DASHBOARD_PERM_POLL_MS = 15_000; // 15 seconds fast sync
@@ -66,10 +128,7 @@ function writePermissionSnapshot(snapshot) {
 
 export const usePermission = () => {
   const context = useContext(PermissionContext);
-  if (!context) {
-    throw new Error("usePermission must be used within a PermissionProvider");
-  }
-  return context;
+  return context || defaultFallbackContext;
 };
 
 export const PermissionProvider = ({ children }) => {

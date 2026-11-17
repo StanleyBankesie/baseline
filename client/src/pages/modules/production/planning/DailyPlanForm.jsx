@@ -580,7 +580,7 @@ export default function DailyPlanForm() {
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="input py-1 text-xs font-bold uppercase"
+                  className="input py-1 text-xs font-semibold uppercase"
                 >
                   <option value="DRAFT">DRAFT</option>
                   <option value="RELEASED">RELEASED</option>
@@ -595,7 +595,7 @@ export default function DailyPlanForm() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Plan Period */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                 Plan Period *
               </label>
               <select
@@ -612,7 +612,7 @@ export default function DailyPlanForm() {
                     setShowCalendarModal(true);
                   }
                 }}
-                className="input w-full font-bold text-slate-900 dark:text-slate-100"
+                className="input w-full font-semibold text-slate-900 dark:text-slate-100"
               >
                 <option value="DAILY">Daily Plan (Single Date)</option>
                 <option value="WEEKLY">Weekly Production Run</option>
@@ -623,7 +623,7 @@ export default function DailyPlanForm() {
 
             {/* Plan Date / Multi-Date Picker Launcher */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                 {formData.plan_period === "DAILY" ? "Plan Date *" : "Production Schedule Dates *"}
               </label>
               {formData.plan_period === "CUSTOM" ? (
@@ -667,7 +667,7 @@ export default function DailyPlanForm() {
             {/* End Date (shown for Weekly, Monthly) */}
             {formData.plan_period !== "DAILY" && formData.plan_period !== "CUSTOM" && (
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                   End Date *
                 </label>
                 <input
@@ -694,13 +694,13 @@ export default function DailyPlanForm() {
 
             {/* Production Order Dropdown */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                 Production Order (Work Order)
               </label>
               <select
                 value={formData.work_order_id || ""}
                 onChange={(e) => handleWorkOrderChange(e.target.value)}
-                className={`input w-full transition-colors ${!formData.work_order_id ? "text-slate-400 font-normal" : "text-slate-900 dark:text-slate-100 font-bold"}`}
+                className={`input w-full transition-colors ${!formData.work_order_id ? "text-slate-400 font-normal" : "text-slate-900 dark:text-slate-100 font-semibold"}`}
               >
                 <option value="" className="text-slate-400 font-normal">Select Production Order (Optional)...</option>
                 {workOrders.map((wo) => (
@@ -713,14 +713,14 @@ export default function DailyPlanForm() {
 
             {/* Product Name (Populated from inv_items) */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                 Product Name *
               </label>
               <select
                 value={formData.item_id || ""}
                 onChange={(e) => handleProductSelect(e.target.value)}
                 required
-                className={`input w-full transition-colors ${!formData.item_id ? "text-slate-400 font-normal" : "text-slate-900 dark:text-slate-100 font-bold"}`}
+                className={`input w-full transition-colors ${!formData.item_id ? "text-slate-400 font-normal" : "text-slate-900 dark:text-slate-100 font-semibold"}`}
               >
                 <option value="" className="text-slate-400 font-normal">Select Finished Product (from Inventory)...</option>
                 {itemsList.map((item) => (
@@ -733,13 +733,13 @@ export default function DailyPlanForm() {
 
             {/* BOM Selection */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                 BOM
               </label>
               <select
                 value={formData.bom_id || ""}
                 onChange={(e) => handleBomChange(e.target.value)}
-                className={`input w-full transition-colors ${!formData.bom_id ? "text-slate-400 font-normal" : "text-slate-900 dark:text-slate-100 font-bold"}`}
+                className={`input w-full transition-colors ${!formData.bom_id ? "text-slate-400 font-normal" : "text-slate-900 dark:text-slate-100 font-semibold"}`}
               >
                 <option value="" className="text-slate-400 font-normal">Select BOM Recipe...</option>
                 {availableBoms.map((bom) => (
@@ -752,7 +752,7 @@ export default function DailyPlanForm() {
 
             {/* Plan Quantity */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                 Plan Quantity *
               </label>
               <input
@@ -771,13 +771,13 @@ export default function DailyPlanForm() {
                     return updated;
                   });
                 }}
-                className="input w-full text-indigo-600 dark:text-indigo-400 placeholder:text-slate-400 placeholder:font-normal font-bold"
+                className="input w-full text-indigo-600 dark:text-indigo-400 placeholder:text-slate-400 placeholder:font-normal font-semibold"
               />
             </div>
 
             {/* Manufacture Date */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                 Manufacture Date
               </label>
               <input
@@ -790,7 +790,7 @@ export default function DailyPlanForm() {
 
             {/* Expiry Date */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                 Expiry Date
               </label>
               <input
@@ -804,7 +804,7 @@ export default function DailyPlanForm() {
             {/* Batch Number */}
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   Batch Number
                 </label>
                 <button
@@ -995,7 +995,7 @@ export default function DailyPlanForm() {
                               type="text"
                               value={proc.process_name}
                               onChange={(e) => updateProcessRow(idx, "process_name", e.target.value)}
-                              className="input w-full py-1 text-sm font-bold min-w-[140px]"
+                              className="input w-full py-1 text-sm font-semibold min-w-[140px]"
                             />
                           ) : (
                             <span className="font-bold text-slate-900 dark:text-white text-sm">{proc.process_name}</span>
@@ -1024,7 +1024,7 @@ export default function DailyPlanForm() {
                               step="1"
                               value={planQuantityVal}
                               onChange={(e) => updateProcessRow(idx, "planned_qty", parseInt(e.target.value) || 0)}
-                              className="input w-24 py-1 text-sm font-bold text-right text-indigo-600 dark:text-indigo-400"
+                              className="input w-24 py-1 text-sm font-semibold text-right text-indigo-600 dark:text-indigo-400"
                             />
                           ) : (
                             <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">{planQuantityVal}</span>
@@ -1128,7 +1128,7 @@ export default function DailyPlanForm() {
                               type="number"
                               value={proc.total_time_mins}
                               onChange={(e) => updateProcessRow(idx, "total_time_mins", parseInt(e.target.value) || 0)}
-                              className="input w-20 py-1 text-sm font-bold text-right"
+                              className="input w-20 py-1 text-sm font-semibold text-right"
                             />
                           ) : (
                             <span className="text-sm font-bold text-slate-900 dark:text-white">{proc.total_time_mins} mins</span>

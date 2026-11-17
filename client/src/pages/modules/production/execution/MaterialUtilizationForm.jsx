@@ -365,7 +365,7 @@ export default function MaterialUtilizationForm() {
 
             {/* Production Execution / Job Card */}
             <div className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                 <FileCheck size={15} className="text-indigo-600" /> Production Execution (Job Card)
               </label>
               <select
@@ -386,7 +386,7 @@ export default function MaterialUtilizationForm() {
             {/* Material Receipt (Auto-hidden if Job Card is selected) */}
             {!formData.job_card_id && (
               <div className="space-y-1.5 animate-in fade-in duration-200">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                   <Package size={15} className="text-emerald-600" /> Material Receipt
                 </label>
                 <select
@@ -407,7 +407,7 @@ export default function MaterialUtilizationForm() {
 
             {/* Utilization Date */}
             <div className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                 <Calendar size={15} className="text-brand-600" /> Utilization Date
               </label>
               <input
@@ -425,7 +425,7 @@ export default function MaterialUtilizationForm() {
           {/* Row 2: Production Warehouse (Stock Deduction) - Exclusively from prod_warehouses */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-2 border-t border-slate-100 dark:border-slate-700/60">
             <div className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                 <Warehouse size={15} className="text-rose-600" /> Production Warehouse (Stock Deduction)
               </label>
               <select
@@ -616,7 +616,7 @@ export default function MaterialUtilizationForm() {
                           step="0.001"
                           required
                           disabled={isViewMode}
-                          className="input text-sm font-mono font-bold text-right w-full text-rose-600"
+                          className="input text-sm font-mono font-semibold text-right w-full text-rose-600"
                           value={row.qty_utilized}
                           onChange={(e) => updateItemRow(index, "qty_utilized", e.target.value)}
                         />
@@ -656,7 +656,7 @@ export default function MaterialUtilizationForm() {
 
         {/* Remarks Section */}
         <div className="card p-6 bg-white dark:bg-slate-800 space-y-2 shadow-xs">
-          <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
+          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
             Utilization Remarks / Shop Floor Justification
           </label>
           <textarea

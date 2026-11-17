@@ -544,7 +544,7 @@ export default function FMContractsList() {
             </div>
             <form onSubmit={handleGenerateInvoice} className="p-6 space-y-4 text-xs">
               <div>
-                <label className="text-[11px] text-slate-400 font-bold uppercase block">Contract Title</label>
+                <label className="text-[11px] text-slate-400 font-semibold uppercase block">Contract Title</label>
                 <div className="font-bold text-slate-900 dark:text-slate-100 text-sm mt-0.5">
                   {billingContract.contract_title}
                 </div>
@@ -561,7 +561,7 @@ export default function FMContractsList() {
               </div>
 
               <div>
-                <label className="label mb-1 font-bold text-slate-700 dark:text-slate-200">
+                <label className="label mb-1 font-semibold text-slate-700 dark:text-slate-200">
                   Billing Period Description <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -622,7 +622,7 @@ export default function FMContractsList() {
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="md:col-span-2">
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">
                       Contract Title <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -636,7 +636,7 @@ export default function FMContractsList() {
                   </div>
 
                   <div>
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Contract Reference No</label>
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Contract Reference No</label>
                     <input
                       type="text"
                       className="input w-full text-xs font-mono"
@@ -647,7 +647,7 @@ export default function FMContractsList() {
                   </div>
 
                   <div className="md:col-span-3">
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">
                       Client / Customer Organization <span className="text-red-500">*</span>
                     </label>
                     <select
@@ -672,7 +672,7 @@ export default function FMContractsList() {
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">
                       Effective Start Date <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -685,7 +685,7 @@ export default function FMContractsList() {
                   </div>
 
                   <div>
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">
                       Expiration End Date <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -698,7 +698,7 @@ export default function FMContractsList() {
                   </div>
 
                   <div>
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Billing Frequency</label>
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Billing Frequency</label>
                     <select
                       className="input w-full text-xs font-medium"
                       value={formData.billing_frequency}
@@ -712,7 +712,7 @@ export default function FMContractsList() {
                   </div>
 
                   <div>
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">
                       Recurring Fee Amount (₵)
                     </label>
                     <input
@@ -733,7 +733,7 @@ export default function FMContractsList() {
                   <Building2 size={14} className="text-purple-500" /> Property Coverage Scope
                 </h4>
                 <div>
-                  <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Select Properties Covered</label>
+                  <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Select Properties Covered</label>
                   <select
                     className="input w-full text-xs"
                     onChange={(e) => {
@@ -781,7 +781,7 @@ export default function FMContractsList() {
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Critical Response (Hrs)</label>
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Critical Response (Hrs)</label>
                     <input
                       type="number"
                       step="0.5"
@@ -792,7 +792,7 @@ export default function FMContractsList() {
                   </div>
 
                   <div>
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Critical Resolution (Hrs)</label>
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Critical Resolution (Hrs)</label>
                     <input
                       type="number"
                       step="0.5"
@@ -803,7 +803,7 @@ export default function FMContractsList() {
                   </div>
 
                   <div>
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Standard Response (Hrs)</label>
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Standard Response (Hrs)</label>
                     <input
                       type="number"
                       step="0.5"
@@ -814,7 +814,7 @@ export default function FMContractsList() {
                   </div>
 
                   <div>
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Standard Resolution (Hrs)</label>
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Standard Resolution (Hrs)</label>
                     <input
                       type="number"
                       step="0.5"

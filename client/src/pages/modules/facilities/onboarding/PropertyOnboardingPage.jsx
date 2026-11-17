@@ -508,7 +508,7 @@ export default function PropertyOnboardingPage() {
 
                 {/* Stage update */}
                 <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-xl">
-                  <span className="font-bold text-blue-800 dark:text-blue-300 whitespace-nowrap">Update Stage:</span>
+                  <span className="font-semibold text-blue-800 dark:text-blue-300 whitespace-nowrap">Update Stage:</span>
                   <select
                     value={detailStage}
                     onChange={(e) => setDetailStage(e.target.value)}

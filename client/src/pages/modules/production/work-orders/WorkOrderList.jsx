@@ -115,7 +115,7 @@ export default function WorkOrderList() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="input w-full md:w-48 text-xs font-bold"
+            className="input w-full md:w-48 text-xs font-semibold"
           >
             <option value="ALL">All Statuses</option>
             <option value="DRAFT">Draft</option>

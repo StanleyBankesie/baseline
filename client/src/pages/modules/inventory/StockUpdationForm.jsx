@@ -736,7 +736,7 @@ export default function StockUpdationForm({
                             <td className="p-2">
                               <input
                                 type="number"
-                                className="input text-sm py-1 font-bold"
+                                className="input text-sm py-1 font-semibold"
                                 value={item.qty}
                                 onChange={(e) =>
                                   updateItem(item.id, "qty", e.target.value)

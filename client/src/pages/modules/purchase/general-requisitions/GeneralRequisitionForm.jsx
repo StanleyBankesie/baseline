@@ -12,7 +12,7 @@ import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
- * 
+ *
  * @returns {JSX.Element} The rendered component
  */
 export default function GeneralRequisitionForm() {
@@ -277,7 +277,9 @@ export default function GeneralRequisitionForm() {
                 : "Request items or services for purchase"}
             </p>
           </div>
-          <button onClick={() => window.history.back()} className="px-3 py-1.5 rounded bg-white text-brand hover:bg-slate-100 text-sm font-semibold"
+          <button
+            onClick={() => window.history.back()}
+            className="px-3 py-1.5 rounded bg-white text-brand hover:bg-slate-100 text-sm font-semibold"
           >
             ← Back to List
           </button>
@@ -404,7 +406,7 @@ export default function GeneralRequisitionForm() {
               />
             </div>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
               <label className="label">Purpose / Justification</label>
@@ -451,9 +453,7 @@ export default function GeneralRequisitionForm() {
                     <th className="w-20">Qty</th>
                     <th className="w-24">UOM</th>
                     <th className="w-32">Est. Unit Cost</th>
-                    <th className="w-32 text-right">
-                      Est. Total
-                    </th>
+                    <th className="w-32 text-right">Est. Total</th>
                     {canEdit && <th className="w-20"></th>}
                   </tr>
                 </thead>
@@ -668,9 +668,7 @@ export default function GeneralRequisitionForm() {
                             <option value="">UOM</option>
                             {uoms.map((u) => (
                               <option key={u.id} value={u.uom_code}>
-                                {u.uom_name
-                                  ? `${u.uom_name} (${u.uom_code})`
-                                  : u.uom_code}
+                                {u.uom_code}
                               </option>
                             ))}
                           </select>

@@ -16,6 +16,7 @@ import PaymentVoucherList from "./vouchers/PaymentVoucherList.jsx";
 import PaymentVoucherForm from "./vouchers/PaymentVoucherForm.jsx";
 import ContraVoucherList from "./vouchers/ContraVoucherList.jsx";
 import ContraVoucherForm from "./vouchers/ContraVoucherForm.jsx";
+import PettyCashPage from "./petty-cash/PettyCashPage.jsx";
 import SalesVoucherList from "./vouchers/SalesVoucherList.jsx";
 import SalesVoucherForm from "./vouchers/SalesVoucherForm.jsx";
 import PurchaseVoucherList from "./vouchers/PurchaseVoucherList.jsx";
@@ -129,6 +130,10 @@ export default function FinanceRoutes() {
           element={<ContraVoucherForm />}
         />
 
+        {/* Petty Cash Book */}
+        <Route path="petty-cash" element={<PettyCashPage />} />
+        <Route path="petty-cash/disburse" element={<PettyCashPage />} />
+
         <Route path="sales-voucher" element={<SalesVoucherList />} />
         <Route
           path="sales-voucher/create"
@@ -163,7 +168,10 @@ export default function FinanceRoutes() {
         <Route path="import-vouchers" element={<VoucherImportPage />} />
 
         {/* Setup & Master Data */}
+        <Route path="setup" element={<Navigate to="/finance/setup/finance" replace />} />
+        <Route path="finance-setup" element={<Navigate to="/finance/setup/finance" replace />} />
         <Route path="setup/finance" element={<FinanceSetupPage />} />
+        <Route path="setup/petty-cash" element={<Navigate to="/finance/setup/finance?tab=petty-cash" replace />} />
         {/* Redirects from old separate routes to the combined page */}
         <Route path="setup/account-groups" element={<Navigate to="/finance/setup/finance?tab=groups" replace />} />
         <Route path="setup/account-groups/*" element={<Navigate to="/finance/setup/finance?tab=groups" replace />} />

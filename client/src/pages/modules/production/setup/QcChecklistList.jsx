@@ -290,7 +290,7 @@ export default function QcChecklistList() {
             <form onSubmit={handleSave} className="space-y-6 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="sm:col-span-2">
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Checklist Name *</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Checklist Name *</label>
                   <input 
                     type="text" 
                     required 
@@ -301,13 +301,13 @@ export default function QcChecklistList() {
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Min Passing Score (%)</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Min Passing Score (%)</label>
                   <input 
                     type="number" 
                     min="0" 
                     max="100" 
                     required 
-                    className="input w-full font-bold text-emerald-600"
+                    className="input w-full font-semibold text-emerald-600"
                     value={formData.min_pass_score}
                     onChange={e => setFormData({ ...formData, min_pass_score: parseFloat(e.target.value) || 70 })}
                   />
@@ -364,7 +364,7 @@ export default function QcChecklistList() {
                               min="1" 
                               max="100" 
                               required 
-                              className="input w-20 py-1 text-xs text-right font-bold"
+                              className="input w-20 py-1 text-xs text-right font-semibold"
                               value={item.max_points}
                               onChange={e => {
                                 const updated = [...formData.items];

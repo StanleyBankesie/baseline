@@ -816,7 +816,7 @@ export default function SalaryPostingPage() {
                     const accKey = `loan_account_${ls.account_id || ls.loan_type}`;
                     return (
                       <div key={accKey} className="sm:col-span-2 bg-indigo-50/60 dark:bg-indigo-950/20 p-2 rounded-lg border border-indigo-200/60 dark:border-indigo-800/40">
-                        <label className="block text-[11px] font-bold text-indigo-900 dark:text-indigo-300 mb-0.5">
+                        <label className="block text-[11px] font-semibold text-indigo-900 dark:text-indigo-300 mb-0.5">
                           Staff Loan Recovery Account: {ls.loan_type} (Cr)
                           <span className="text-[10px] font-normal text-indigo-600 dark:text-indigo-400 ml-1.5">
                             (GHS {fmt(ls.total_amount)} recovered)

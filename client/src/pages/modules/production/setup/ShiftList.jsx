@@ -226,7 +226,7 @@ export default function ShiftList() {
             </div>
             <form onSubmit={handleSubmit} className="p-8 space-y-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight">Shift Name</label>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-tight">Shift Name</label>
                 <input 
                   type="text" 
                   required
@@ -238,21 +238,21 @@ export default function ShiftList() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight">Start Time</label>
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-tight">Start Time</label>
                   <input 
                     type="time" 
                     required
-                    className="input py-3 w-full font-bold"
+                    className="input py-3 w-full font-semibold"
                     value={currentShift.start_time}
                     onChange={e => setCurrentShift({...currentShift, start_time: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight">End Time</label>
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-tight">End Time</label>
                   <input 
                     type="time" 
                     required
-                    className="input py-3 w-full font-bold"
+                    className="input py-3 w-full font-semibold"
                     value={currentShift.end_time}
                     onChange={e => setCurrentShift({...currentShift, end_time: e.target.value})}
                   />

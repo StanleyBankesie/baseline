@@ -533,7 +533,7 @@ export default function BomForm() {
             </div>
 
             {/* Active Status Checkbox (Default Checked) */}
-            <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer bg-slate-50 dark:bg-slate-700/50 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600">
+            <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer bg-slate-50 dark:bg-slate-700/50 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600">
               <input
                 type="checkbox"
                 checked={!!formData.is_active}
@@ -608,7 +608,7 @@ export default function BomForm() {
             return (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                     Production Route *
                   </label>
                   <select
@@ -626,7 +626,7 @@ export default function BomForm() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                     Specification / BOM Name *
                   </label>
                   <input
@@ -644,7 +644,7 @@ export default function BomForm() {
                 {/* Finished Product Item - Only visible when Production Route is selected */}
                 {selectedRoutingId ? (
                   <div className="animate-in fade-in zoom-in-95 duration-200">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                       Finished Product Item *
                     </label>
                     <select
@@ -653,7 +653,7 @@ export default function BomForm() {
                       onChange={(e) =>
                         setFormData({ ...formData, item_id: e.target.value })
                       }
-                      className="input w-full font-bold text-brand-700 dark:text-brand-300"
+                      className="input w-full font-semibold text-brand-700 dark:text-brand-300"
                     >
                       <option value="">Select Finished Item...</option>
                       {items.map((it) => (
@@ -666,7 +666,7 @@ export default function BomForm() {
                 ) : null}
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                     Output Batch Qty *
                   </label>
                   <input
@@ -726,7 +726,7 @@ export default function BomForm() {
                       }
                     }}
                     placeholder="e.g. 1"
-                    className="input w-full font-bold text-brand-600 dark:text-brand-400"
+                    className="input w-full font-semibold text-brand-600 dark:text-brand-400"
                   />
                 </div>
 
@@ -734,7 +734,7 @@ export default function BomForm() {
                 {hasModalData && (
                   <>
                     <div className="animate-in fade-in zoom-in-95 duration-200">
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                         Total Cost per Batch ({baseCurrency.code})
                       </label>
                       <div className="input w-full font-mono font-bold text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600 flex items-center h-10 px-3">
@@ -743,7 +743,7 @@ export default function BomForm() {
                     </div>
 
                     <div className="animate-in fade-in zoom-in-95 duration-200">
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                         Total Output Batch Value ({baseCurrency.code})
                       </label>
                       <div className="input w-full font-mono font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800 flex items-center h-10 px-3">
@@ -1102,7 +1102,7 @@ export default function BomForm() {
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <div className="sm:col-span-2">
-                              <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                              <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                 Item Name / Material *
                               </label>
                               <input
@@ -1134,7 +1134,7 @@ export default function BomForm() {
                               </datalist>
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                              <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                 Required Qty *
                               </label>
                               <input
@@ -1155,11 +1155,11 @@ export default function BomForm() {
                                   );
                                 }}
                                 placeholder="e.g. 1"
-                                className="input w-full text-xs font-bold text-slate-900 dark:text-white"
+                                className="input w-full text-xs font-semibold text-slate-900 dark:text-white"
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                              <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                 UOM
                               </label>
                               <input
@@ -1178,7 +1178,7 @@ export default function BomForm() {
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                              <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                 Unit Cost
                               </label>
                               <input
@@ -1203,7 +1203,7 @@ export default function BomForm() {
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                              <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                 Scrap Allowance %
                               </label>
                               <input
@@ -1395,7 +1395,7 @@ export default function BomForm() {
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                               <div className="sm:col-span-2">
-                                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                                <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                   Output Item Name *
                                 </label>
                                 <input
@@ -1415,7 +1415,7 @@ export default function BomForm() {
                                 />
                               </div>
                               <div>
-                                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                                <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                   Output Qty *
                                 </label>
                                 <input
@@ -1436,11 +1436,11 @@ export default function BomForm() {
                                     );
                                   }}
                                   placeholder="e.g. 1"
-                                  className="input w-full text-xs font-bold text-slate-900 dark:text-white"
+                                  className="input w-full text-xs font-semibold text-slate-900 dark:text-white"
                                 />
                               </div>
                               <div>
-                                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                                <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                   UOM
                                 </label>
                                 <input
@@ -1459,7 +1459,7 @@ export default function BomForm() {
                                 />
                               </div>
                               <div>
-                                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                                <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                   Classification
                                 </label>
                                 <select
@@ -1489,7 +1489,7 @@ export default function BomForm() {
                               </div>
 
                               <div>
-                                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                                <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                   Output Cost{" "}
                                   <span className="text-slate-400 font-normal">
                                     (Auto calculated)
@@ -1525,7 +1525,7 @@ export default function BomForm() {
                               {isCoProduct && (
                                 <>
                                   <div className="animate-in fade-in zoom-in-95 duration-150">
-                                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                                    <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                       Input Cost Sharing Ratio %
                                     </label>
                                     <input
@@ -1555,7 +1555,7 @@ export default function BomForm() {
                                     />
                                   </div>
                                   <div className="animate-in fade-in zoom-in-95 duration-150">
-                                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                                    <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                       Input Qty Sharing Ratio %
                                     </label>
                                     <input
@@ -1659,7 +1659,7 @@ export default function BomForm() {
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <div className="sm:col-span-2">
-                              <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                              <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                 By-Product / Waste Name *
                               </label>
                               <input
@@ -1691,7 +1691,7 @@ export default function BomForm() {
                               </datalist>
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                              <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                 Expected Qty *
                               </label>
                               <input
@@ -1717,11 +1717,11 @@ export default function BomForm() {
                                   );
                                 }}
                                 placeholder="e.g. 1"
-                                className="input w-full text-xs font-bold text-slate-900 dark:text-white"
+                                className="input w-full text-xs font-semibold text-slate-900 dark:text-white"
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                              <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                 UOM
                               </label>
                               <input
@@ -1740,7 +1740,7 @@ export default function BomForm() {
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                              <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                 Expected Cost
                               </label>
                               <input
@@ -1765,7 +1765,7 @@ export default function BomForm() {
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                              <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                 Scrap Recovery Value
                               </label>
                               <input
@@ -1857,7 +1857,7 @@ export default function BomForm() {
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                             <div className="sm:col-span-2">
-                              <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                              <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                 Overhead Item Name *
                               </label>
                               <input
@@ -1889,7 +1889,7 @@ export default function BomForm() {
                               </datalist>
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                              <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                 Quantity *
                               </label>
                               <input
@@ -1914,11 +1914,11 @@ export default function BomForm() {
                                   );
                                 }}
                                 placeholder="e.g. 1"
-                                className="input w-full text-xs font-bold text-slate-900 dark:text-white"
+                                className="input w-full text-xs font-semibold text-slate-900 dark:text-white"
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                              <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                 Cost Rate *
                               </label>
                               <input
@@ -1943,11 +1943,11 @@ export default function BomForm() {
                                   );
                                 }}
                                 placeholder="e.g. 10.00"
-                                className="input w-full text-xs font-bold text-slate-900 dark:text-white"
+                                className="input w-full text-xs font-semibold text-slate-900 dark:text-white"
                               />
                             </div>
                             <div className="sm:col-span-4">
-                              <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
+                              <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">
                                 Allocation Basis
                               </label>
                               <input

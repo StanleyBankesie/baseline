@@ -438,7 +438,7 @@ export default function IncidentRegisterPage() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Project <span className="text-red-500">*</span>
               </label>
               <select
@@ -457,7 +457,7 @@ export default function IncidentRegisterPage() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Incident Date <span className="text-red-500">*</span>
               </label>
               <input
@@ -472,7 +472,7 @@ export default function IncidentRegisterPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Classification <span className="text-red-500">*</span>
               </label>
               <select
@@ -491,7 +491,7 @@ export default function IncidentRegisterPage() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Severity Rating
               </label>
               <select
@@ -509,7 +509,7 @@ export default function IncidentRegisterPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Location / Site Zone
               </label>
               <input
@@ -522,7 +522,7 @@ export default function IncidentRegisterPage() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Injured / Involved Persons
               </label>
               <input
@@ -536,7 +536,7 @@ export default function IncidentRegisterPage() {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Incident Description <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -550,7 +550,7 @@ export default function IncidentRegisterPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Immediate Action Taken
               </label>
               <textarea
@@ -562,7 +562,7 @@ export default function IncidentRegisterPage() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Root Cause / Findings
               </label>
               <textarea
@@ -575,7 +575,7 @@ export default function IncidentRegisterPage() {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Corrective & Preventive Action
             </label>
             <textarea
@@ -588,7 +588,7 @@ export default function IncidentRegisterPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Lost Workdays (Man-Days)
               </label>
               <input
@@ -602,7 +602,7 @@ export default function IncidentRegisterPage() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Statutory Regulatory Notification
               </label>
               <select

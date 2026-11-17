@@ -81,26 +81,26 @@ export default function AssetMeterModal({ asset, onClose }) {
           <div className="bg-indigo-600 rounded-3xl p-6 text-white shadow-xl shadow-indigo-100 dark:shadow-none">
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-widest opacity-80">Reading Date</label>
+                <label className="text-[10px] font-semibold uppercase tracking-widest opacity-80">Reading Date</label>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 opacity-60" size={16} />
                   <input 
                     type="date"
                     required
-                    className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-xl focus:ring-2 focus:ring-white/40 outline-none font-bold text-sm"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-xl focus:ring-2 focus:ring-white/40 outline-none font-semibold text-sm"
                     value={formData.reading_date}
                     onChange={e => setFormData({...formData, reading_date: e.target.value})}
                   />
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-widest opacity-80">Current Value ({formData.uom})</label>
+                <label className="text-[10px] font-semibold uppercase tracking-widest opacity-80">Current Value ({formData.uom})</label>
                 <input 
                   type="number"
                   step="0.01"
                   required
                   placeholder="0.00"
-                  className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl focus:ring-2 focus:ring-white/40 outline-none font-bold text-sm text-center"
+                  className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl focus:ring-2 focus:ring-white/40 outline-none font-semibold text-sm text-center"
                   value={formData.reading_value}
                   onChange={e => setFormData({...formData, reading_value: e.target.value})}
                 />

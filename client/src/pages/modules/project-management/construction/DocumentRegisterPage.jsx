@@ -523,7 +523,7 @@ export default function DocumentRegisterPage() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Drawing Number <span className="text-red-500">*</span>
               </label>
               <input
@@ -536,7 +536,7 @@ export default function DocumentRegisterPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Revision No. <span className="text-red-500">*</span>
               </label>
               <input
@@ -551,7 +551,7 @@ export default function DocumentRegisterPage() {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Drawing Title <span className="text-red-500">*</span>
             </label>
             <input
@@ -565,7 +565,7 @@ export default function DocumentRegisterPage() {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Discipline <span className="text-red-500">*</span>
             </label>
             <select
@@ -616,7 +616,7 @@ export default function DocumentRegisterPage() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 RFI Number <span className="text-red-500">*</span>
               </label>
               <input
@@ -628,7 +628,7 @@ export default function DocumentRegisterPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Drawing Ref
               </label>
               <input
@@ -642,7 +642,7 @@ export default function DocumentRegisterPage() {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Subject <span className="text-red-500">*</span>
             </label>
             <input
@@ -656,7 +656,7 @@ export default function DocumentRegisterPage() {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Clarification Question <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -670,7 +670,7 @@ export default function DocumentRegisterPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Potential Cost Impact?
               </label>
               <select
@@ -683,7 +683,7 @@ export default function DocumentRegisterPage() {
               </select>
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Schedule Impact?
               </label>
               <select
@@ -752,7 +752,7 @@ export default function DocumentRegisterPage() {
           )}
 
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Consultant / Engineer Determination <span className="text-red-500">*</span>
             </label>
             <textarea

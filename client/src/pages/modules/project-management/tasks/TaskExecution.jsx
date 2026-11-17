@@ -1,6 +1,6 @@
 /**
  * @fileoverview TaskExecution component.
- * Provides Task Execution page with description checklist, interactive checkboxes,
+ * Provides modern and attractive Task Execution page with description checklist/deliverables, interactive checkboxes,
  * automatic completion % calculation, dynamic Reason for Delay input fields,
  * mandatory Reason for Delay validation for overdue/due tasks, visual Car Odometer completion gauge,
  * status filter tab selection, manual task selection prompt, mobile-responsive layout, and Exceptional Permission task reassignment.
@@ -34,7 +34,10 @@ import {
   ArrowLeft,
   MessageSquare,
   ChevronDown,
-  Brain
+  Brain,
+  Search,
+  Layers,
+  FolderGit2
 } from "lucide-react";
 import CarOdometerGauge from "@/components/CarOdometerGauge.jsx";
 import ProjectModal from "../components/ProjectModal.jsx";
@@ -86,7 +89,7 @@ export default function TaskExecution() {
   const [taskCompletionPercent, setTaskCompletionPercent] = useState(0);
   const [taskNotes, setTaskNotes] = useState(""); // General task notes (optional)
   const [savingNotes, setSavingNotes] = useState(false);
-  const [expandedNoteIdx, setExpandedNoteIdx] = useState(null); // Which checklist item note is open
+  const [expandedNoteIdx, setExpandedNoteIdx] = useState(null); // Which checklist/deliverables item note is open
 
   const fetchTasks = async () => {
     try {
@@ -115,6 +118,18 @@ export default function TaskExecution() {
   useEffect(() => {
     fetchTasks();
   }, [user?.id, user?.username]);
+
+  // Overall task stats for summary pills
+  const taskStats = useMemo(() => {
+    const total = tasks.length;
+    const pending = tasks.filter((t) => t.status === "PENDING").length;
+    const inProgress = tasks.filter((t) => t.status === "IN_PROGRESS").length;
+    const completed = tasks.filter(
+      (t) => Number(t.completion_percent || 0) >= 100 || t.status === "COMPLETED"
+    ).length;
+    const blocked = tasks.filter((t) => t.status === "BLOCKED").length;
+    return { total, pending, inProgress, completed, blocked };
+  }, [tasks]);
 
   // Compute filtered tasks list based on search and status filter (e.g. IN_PROGRESS, PENDING)
   const filteredTasks = useMemo(() => {
@@ -167,7 +182,7 @@ export default function TaskExecution() {
     return false;
   }, [selectedTask]);
 
-  // Initialize Scope Checklist Items & delay reasons SPECIFICALLY for the selectedTask
+  // Initialize Scope Checklist/Deliverables Items & delay reasons SPECIFICALLY for the selectedTask
   useEffect(() => {
     if (!selectedTask) {
       setChecklistItems([]);
@@ -176,7 +191,7 @@ export default function TaskExecution() {
       return;
     }
 
-    // Parse task_description into checklist objects [{ id, text, completed }] for the selected task
+    // Parse task_description into checklist/deliverables objects [{ id, text, completed }] for the selected task
     let parsedChecklist = [];
     if (selectedTask.task_description) {
       try {
@@ -210,7 +225,7 @@ export default function TaskExecution() {
 
     setChecklistItems(parsedChecklist);
 
-    // Calculate completion percent based on selected task's checklist items
+    // Calculate completion percent based on selected task's checklist/deliverables items
     const completedCount = parsedChecklist.filter((i) => Boolean(i.completed)).length;
     const totalCount = parsedChecklist.length;
     const calcPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
@@ -244,7 +259,7 @@ export default function TaskExecution() {
     setExpandedNoteIdx(null);
   }, [selectedTask]);
 
-  // Toggle item completion in checklist for selected task
+  // Toggle item completion in checklist/deliverables for selected task
   const handleToggleChecklist = async (index) => {
     if (!selectedTask) return;
 
@@ -284,13 +299,13 @@ export default function TaskExecution() {
         completion_percent: newPercent,
         status: newStatus,
       });
-      toast.success(`Checklist updated (${completedCount}/${totalCount} items completed - ${newPercent}%)`);
+      toast.success(`Checklist/Deliverables updated (${completedCount}/${totalCount} items completed - ${newPercent}%)`);
     } catch {
-      toast.error("Failed to save checklist update");
+      toast.error("Failed to save checklist/deliverables update");
     }
   };
 
-  // Update note for a specific checklist item (auto-saves after typing stops via blur)
+  // Update note for a specific checklist/deliverables item (auto-saves after typing stops via blur)
   const handleNoteChange = (index, value) => {
     const updated = checklistItems.map((item, i) =>
       i === index ? { ...item, note: value } : item
@@ -313,7 +328,7 @@ export default function TaskExecution() {
           t.id === selectedTask.id ? { ...t, task_description: jsonDescription } : t
         )
       );
-      toast.success("Checklist note saved");
+      toast.success("Checklist/Deliverables note saved");
     } catch {
       toast.error("Failed to save note");
     }
@@ -424,126 +439,248 @@ export default function TaskExecution() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto px-2 sm:px-4">
-      {/* Header */}
-      {/* Canonical Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Link to="/project-management" className="btn btn-secondary inline-flex items-center gap-1.5">
-            <ArrowLeft size={16} /> Back
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <ListTodo size={24} className="text-brand-900 dark:text-brand-400" /> Task Execution
-            </h1>
-            <p className="text-slate-500 text-sm mt-0.5">
-              Interactive WBS execution, checklist tracking & gauge progress monitoring
-            </p>
+    <div className="space-y-4 sm:space-y-5 max-w-7xl mx-auto px-2 sm:px-4 pb-12">
+      {/* 1. Header Card with concise overview KPIs */}
+      <div className="card p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <Link
+              to="/project-management"
+              className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-sm shrink-0"
+              title="Back to Project Management"
+            >
+              <ArrowLeft size={18} />
+            </Link>
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-brand-50 to-indigo-50 dark:from-brand-950/40 dark:to-indigo-950/30 text-brand-900 dark:text-brand-300 border border-brand-200/50 dark:border-brand-800/50 shadow-sm shrink-0">
+              <ListTodo size={22} className="stroke-[2.2]" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                  Task Execution
+                </h1>
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Live Workspace
+                </span>
+              </div>
+              <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-0.5">
+                Interactive Project Work Plan/WBS execution, checklist/deliverables tracking & gauge progress monitoring
+              </p>
+            </div>
           </div>
-        </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Link
-            to={selectedTask ? `/project-management/mindmap?taskId=${selectedTask.id}&projectId=${selectedTask.project_id || ''}` : "/project-management/mindmap"}
-            className="btn btn-secondary inline-flex items-center gap-1.5"
-            title="Collate thoughts and map execution strategy before working"
-          >
-            <Brain size={16} className="text-purple-600 dark:text-purple-400" />
-            Execution Mindmap
-          </Link>
-          <Link to="/project-management/tasks" className="btn btn-primary inline-flex items-center gap-1.5">
-            Task Management
-          </Link>
+          <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-auto">
+            <Link
+              to={`/project-management/calendar?assignedTo=${user?.id || ""}&mode=MY_CALENDAR`}
+              className="btn btn-secondary inline-flex items-center gap-2 text-xs sm:text-sm shadow-sm font-semibold text-brand-900 dark:text-brand-300 border-brand-200 dark:border-brand-800"
+              title="View your tasks on the interactive Task Calendar"
+            >
+              <Calendar size={16} className="text-brand-600 dark:text-brand-400" />
+              <span>View Task Calendar</span>
+            </Link>
+            <Link
+              to={
+                selectedTask
+                  ? `/project-management/mindmap?taskId=${selectedTask.id}&projectId=${selectedTask.project_id || ""}`
+                  : "/project-management/mindmap"
+              }
+              className="btn btn-secondary inline-flex items-center gap-2 text-xs sm:text-sm shadow-sm"
+              title="Collate thoughts and map execution strategy before working"
+            >
+              <Brain size={16} className="text-purple-600 dark:text-purple-400" />
+              <span>Execution Mindmap</span>
+            </Link>
+            <Link
+              to="/project-management/tasks"
+              className="btn btn-primary inline-flex items-center gap-2 text-xs sm:text-sm shadow-sm font-semibold"
+            >
+              <Layers size={16} />
+              <span>Task Management</span>
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* Main Grid: Task Sidebar & Execution Panel */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+      {/* 2. Main Grid: Task Sidebar & Execution Panel */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
         {/* Task List / Sidebar */}
-        <div className="lg:col-span-4 space-y-4">
-          <div className="card p-3.5 sm:p-4 space-y-3">
-            <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center justify-between">
-              <span>Select Task ({filteredTasks.length})</span>
-              {statusFilter !== "ALL" && (
-                <span className="text-xs font-bold text-brand uppercase bg-brand/10 px-2 py-0.5 rounded">
-                  {statusFilter.replace("_", " ")}
-                </span>
-              )}
-            </h2>
-            <input
-              type="text"
-              placeholder="Search task title or project..."
-              className="input w-full text-xs"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            {/* Status Filter Buttons (Default active: PENDING) */}
-            <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-thin">
-              {["PENDING", "IN_PROGRESS", "COMPLETED", "BLOCKED", "ALL"].map((st) => (
+        <div className="lg:col-span-4 space-y-3.5">
+          <div className="card p-3.5 sm:p-4 space-y-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                Tasks Assigned to You ({filteredTasks.length})
+              </span>
+              <div className="flex items-center gap-2">
+                {statusFilter !== "ALL" && (
+                  <span className="text-[11px] font-bold text-brand-700 dark:text-brand-300 uppercase bg-brand-50 dark:bg-brand-950/60 px-2 py-0.5 rounded-md border border-brand-200/60 dark:border-brand-800/50">
+                    {statusFilter.replace("_", " ")}
+                  </span>
+                )}
+                <Link
+                  to={`/project-management/calendar?assignedTo=${user?.id || ""}&mode=MY_CALENDAR`}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-700 hover:text-brand-800 dark:text-brand-300 hover:underline"
+                  title="View your tasks in the Task Calendar"
+                >
+                  <Calendar size={13} />
+                  <span>Calendar</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Search Input */}
+            <div className="relative">
+              <Search
+                size={14}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+              />
+              <input
+                type="text"
+                placeholder="Search task title or project..."
+                className="input w-full pl-9 pr-8 text-xs h-9 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/40 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
                 <button
-                  key={st}
-                  onClick={() => handleStatusFilterChange(st)}
-                  className={`px-2.5 py-1.5 rounded text-xs font-bold uppercase whitespace-nowrap transition-all ${
-                    statusFilter === st
-                      ? "bg-brand text-white shadow-sm"
-                      : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                  type="button"
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+
+            {/* Status Filter Tabs (Clean styled segmented pill strip, no horizontal scrollbar) */}
+            <div className="flex gap-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden p-1 bg-slate-100 dark:bg-slate-800/60 rounded-xl">
+              {[
+                { id: "PENDING", label: "Pending", count: taskStats.pending },
+                { id: "IN_PROGRESS", label: "In Prog", count: taskStats.inProgress },
+                { id: "COMPLETED", label: "Done", count: taskStats.completed },
+                { id: "BLOCKED", label: "Blocked", count: taskStats.blocked },
+                { id: "ALL", label: "All", count: taskStats.total },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => handleStatusFilterChange(tab.id)}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                    statusFilter === tab.id
+                      ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
                   }`}
                 >
-                  {st.replace("_", " ")}
+                  <span>{tab.label}</span>
+                  <span
+                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                      statusFilter === tab.id
+                        ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                        : "bg-slate-200/70 dark:bg-slate-700/60 text-slate-600 dark:text-slate-400"
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Task List Items */}
-          <div className="space-y-2 max-h-[350px] sm:max-h-[550px] overflow-y-auto pr-1">
+          {/* Task Cards List */}
+          <div className="space-y-2.5 max-h-[540px] overflow-y-auto pr-1">
             {loading ? (
-              <div className="text-center py-8 text-slate-400 text-sm">Loading tasks...</div>
+              <div className="card p-8 text-center text-slate-400 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
+                <Loader2 size={18} className="animate-spin mx-auto mb-2 text-brand" />
+                Loading your assigned tasks...
+              </div>
             ) : filteredTasks.length > 0 ? (
               filteredTasks.map((t) => {
                 const isSel = t.id === selectedTaskId;
-                const isComplete = Number(t.completion_percent || 0) >= 100;
+                const pct = Number(t.completion_percent || 0);
+                const isComplete = pct >= 100;
                 return (
                   <div
                     key={t.id}
                     onClick={() => setSelectedTaskId(t.id)}
-                    className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
+                    className={`p-3.5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden group ${
                       isSel
-                        ? "bg-brand/10 border-brand shadow-sm dark:bg-brand/20 ring-2 ring-brand/30"
-                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300"
+                        ? "bg-brand-50/40 dark:bg-brand-950/20 border-brand-500 shadow-sm ring-1 ring-brand-500/30"
+                        : "bg-white dark:bg-slate-900 border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xs"
                     }`}
                   >
+                    {isSel && (
+                      <span className="absolute left-0 top-0 bottom-0 w-1.5 bg-brand-600 rounded-r" />
+                    )}
+
                     <div className="flex items-start justify-between gap-2 mb-1.5">
-                      <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 line-clamp-1 flex items-center gap-1.5">
-                        {isSel && <ChevronRight size={14} className="text-brand shrink-0" />}
+                      <h3 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 line-clamp-1 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
                         {t.task_title}
                       </h3>
                       <span
-                        className={`text-xs font-bold px-1.5 py-0.5 rounded uppercase shrink-0 ${
+                        className={`text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0 border ${
                           isComplete
-                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
-                            : "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800"
+                            : pct > 0
+                              ? "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800"
+                              : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800"
                         }`}
                       >
-                        {t.completion_percent || 0}%
+                        {pct}%
                       </span>
                     </div>
 
-                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate mb-2">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mb-2">
                       {t.project_name || "—"}
                     </p>
 
-                    <div className="flex items-center justify-between text-xs text-slate-400">
-                      <span className="flex items-center gap-1">
-                        <User size={12} /> {t.assigned_to_name || "Unassigned"}
+                    {/* Progress Bar */}
+                    <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mb-2.5">
+                      <div
+                        className={`h-full transition-all duration-300 rounded-full ${
+                          isComplete ? "bg-emerald-500" : pct > 0 ? "bg-sky-500" : "bg-amber-500"
+                        }`}
+                        style={{ width: `${Math.max(pct, 0)}%` }}
+                      />
+                    </div>
+
+                    {/* Tags row */}
+                    <div className="flex flex-wrap items-center gap-1.5 mb-2.5">
+                      {t.wbs_code && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-brand-50 text-brand-900 dark:bg-brand-950/50 dark:text-brand-300 border border-brand-200/60 dark:border-brand-800/60 truncate max-w-[170px]">
+                          Work Plan/WBS: {t.wbs_code}
+                        </span>
+                      )}
+                      {t.scope_name && (
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60 truncate max-w-[130px]">
+                          {t.scope_name}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1.5 border-t border-slate-100 dark:border-slate-800/60">
+                      <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+                        <span className="w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-[9px] font-bold text-slate-700 dark:text-slate-300">
+                          {String(t.assigned_to_name || "U")[0].toUpperCase()}
+                        </span>
+                        <span className="truncate max-w-[110px]">{t.assigned_to_name || "Unassigned"}</span>
                       </span>
-                      <span className="font-semibold">{t.priority}</span>
+                      <span
+                        className={`px-1.5 py-0.2 rounded text-[10px] font-bold uppercase border ${
+                          String(t.priority || "").toUpperCase() === "HIGH" || String(t.priority || "").toUpperCase() === "URGENT"
+                            ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800"
+                            : String(t.priority || "").toUpperCase() === "MEDIUM"
+                              ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800"
+                              : "bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
+                        }`}
+                      >
+                        {t.priority || "Normal"}
+                      </span>
                     </div>
                   </div>
                 );
               })
             ) : (
-              <div className="card p-6 text-center text-slate-400 text-xs">
+              <div className="card p-8 text-center text-slate-400 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
                 No {statusFilter.toLowerCase().replace("_", " ")} tasks found.
               </div>
             )}
@@ -551,39 +688,55 @@ export default function TaskExecution() {
         </div>
 
         {/* Selected Task Details & Interactive Execution Panel */}
-        <div className="lg:col-span-8 space-y-4 sm:space-y-6">
+        <div className="lg:col-span-8 space-y-4">
           {selectedTask ? (
             <>
               {/* Top Banner: Task Summary & Odometer Gauge */}
-              <div className="card p-4 sm:p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
+              <div className="card p-5 sm:p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-5">
                   <div className="space-y-3 flex-1 w-full">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="px-2.5 py-0.5 rounded text-xs font-bold bg-brand/10 text-brand dark:bg-brand/20 dark:text-brand-300">
+                      <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-brand-50 text-brand-900 dark:bg-brand-950/60 dark:text-brand-300 border border-brand-200/50 dark:border-brand-800/50 inline-flex items-center gap-1">
+                        <FolderGit2 size={12} />
                         {selectedTask.project_name || "Project Task"}
                       </span>
+                      {selectedTask.scope_name && (
+                        <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60">
+                          Scope: {selectedTask.scope_name}
+                        </span>
+                      )}
+                      {selectedTask.wbs_code && (
+                        <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-brand-50 text-brand-800 dark:bg-brand-900/50 dark:text-brand-300 border border-brand-200 dark:border-brand-800">
+                          Work Plan/WBS: {selectedTask.wbs_code}
+                        </span>
+                      )}
                       <span className="text-xs text-slate-400">• Priority: {selectedTask.priority}</span>
+                      {isDelayReasonRequired && (
+                        <span className="text-xs font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/50 px-2 py-0.5 rounded-md border border-rose-200 dark:border-rose-800">
+                          Overdue / Due
+                        </span>
+                      )}
                     </div>
-                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
+
+                    <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
                       {selectedTask.task_title}
                     </h2>
 
                     <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-slate-600 dark:text-slate-400 pt-1">
                       <span className="flex flex-wrap items-center gap-1.5">
                         <User size={14} className="text-slate-400" /> Assignee:{" "}
-                        <strong className="text-slate-800 dark:text-slate-200">
+                        <strong className="text-slate-800 dark:text-slate-200 font-semibold">
                           {selectedTask.assigned_to_name || "Unassigned"}
                         </strong>
-                        {/* Reassign Task Trigger (Only rendered if user has permission) */}
                         {canReassignTask && (
                           <button
                             type="button"
                             onClick={() => setShowReassignModal(true)}
-                            className="px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1 border border-brand/30 bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all"
+                            className="px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1 border border-brand/30 bg-brand/10 text-brand hover:bg-brand hover:text-white transition-all ml-1"
                             title="Reassign task to another user"
                           >
                             <UserCheck size={12} />
-                            Reassign Task
+                            Reassign
                           </button>
                         )}
                       </span>
@@ -593,27 +746,41 @@ export default function TaskExecution() {
                           ? new Date(selectedTask.start_date.split("T")[0]).toLocaleDateString()
                           : "—"}
                       </span>
-                      <span className="flex items-center gap-1.5">
-                        <Clock size={14} className="text-slate-400" /> Due:{" "}
+                      <span className={`flex items-center gap-1.5 ${isDelayReasonRequired ? "font-bold text-rose-600 dark:text-rose-400" : ""}`}>
+                        <Clock size={14} className={isDelayReasonRequired ? "text-rose-500" : "text-slate-400"} /> Due:{" "}
                         {selectedTask.end_date
                           ? new Date(selectedTask.end_date.split("T")[0]).toLocaleDateString()
                           : "—"}
                       </span>
                     </div>
 
-                    <div className="pt-2">
+                    <div className="flex flex-wrap items-center gap-2 pt-2">
                       <button
                         type="button"
                         onClick={() => setShowAttach(true)}
-                        className="btn btn-secondary text-xs flex items-center gap-1.5 w-full sm:w-auto justify-center"
+                        className="btn btn-secondary text-xs inline-flex items-center gap-1.5 shadow-sm"
                       >
-                        <Paperclip size={14} /> Add Attachment
+                        <Paperclip size={13} /> Add Attachment
                       </button>
+                      <Link
+                        to={`/project-management/mindmap?taskId=${selectedTask.id}&projectId=${selectedTask.project_id || ""}`}
+                        className="btn bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/30 text-xs inline-flex items-center gap-1.5 shadow-sm"
+                      >
+                        <Brain size={13} /> Open Mindmap
+                      </Link>
+                      <Link
+                        to={`/project-management/calendar?assignedTo=${user?.id || ""}&mode=MY_CALENDAR&projectId=${selectedTask.project_id || ""}`}
+                        className="btn bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-brand-700 dark:text-brand-300 hover:bg-brand-50 dark:hover:bg-brand-950/30 text-xs inline-flex items-center gap-1.5 shadow-sm"
+                        title="View this task and your schedule on the Task Calendar"
+                      >
+                        <Calendar size={13} className="text-brand-600 dark:text-brand-400" />
+                        <span>View in Calendar</span>
+                      </Link>
                     </div>
                   </div>
 
-                  {/* Visual Car Odometer Gauge with TOP Percentage Box */}
-                  <div className="shrink-0 bg-slate-900 p-3 sm:p-4 rounded-2xl border border-slate-800 shadow-lg flex flex-col items-center w-full md:w-auto">
+                  {/* Visual Car Odometer Gauge with framed container */}
+                  <div className="shrink-0 bg-gradient-to-b from-slate-900 to-slate-950 p-3.5 sm:p-4 rounded-2xl border border-slate-800 shadow-xl flex flex-col items-center w-full md:w-auto">
                     <CarOdometerGauge
                       value={taskCompletionPercent}
                       label="Task Completion Gauge"
@@ -623,15 +790,15 @@ export default function TaskExecution() {
                 </div>
               </div>
 
-              {/* Task-Specific Scope Checklist Items */}
-              <div className="card p-4 sm:p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 gap-2">
+              {/* Task-Specific Scope Checklist/Deliverables Items */}
+              <div className="card p-5 sm:p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 gap-2">
                   <div>
                     <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Scope Checklist Items
+                      <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Scope Checklist/Deliverables Items
                     </h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                      Checklist items for: <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedTask.task_title}</span>
+                      Checklist/Deliverables items for: <span className="font-semibold text-slate-700 dark:text-slate-300">{selectedTask.task_title}</span>
                     </p>
                   </div>
                   <div className="text-xs font-semibold px-2.5 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 self-start sm:self-auto">
@@ -639,7 +806,7 @@ export default function TaskExecution() {
                   </div>
                 </div>
 
-                <div className="space-y-2.5 sm:space-y-3">
+                <div className="space-y-2">
                   {checklistItems.length > 0 ? (
                     checklistItems.map((item, idx) => (
                       <div
@@ -648,15 +815,15 @@ export default function TaskExecution() {
                         className={`flex items-center justify-between p-3 sm:p-3.5 rounded-xl border transition-all cursor-pointer ${
                           item.completed
                             ? "bg-emerald-50/60 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-800/60"
-                            : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300"
+                            : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
                         }`}
                       >
                         <div className="flex items-center gap-3 pr-2">
                           <button
                             type="button"
-                            className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                            className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all ${
                               item.completed
-                                ? "bg-emerald-500 text-white"
+                                ? "bg-emerald-500 text-white shadow-xs"
                                 : "border-2 border-slate-300 dark:border-slate-600 text-transparent hover:border-emerald-500"
                             }`}
                           >
@@ -674,10 +841,10 @@ export default function TaskExecution() {
                         </div>
 
                         <span
-                          className={`text-xs sm:text-xs font-bold px-2 py-0.5 rounded uppercase shrink-0 ${
+                          className={`text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full uppercase shrink-0 border ${
                             item.completed
-                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
-                              : "bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-400"
+                              ? "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-800"
+                              : "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
                           }`}
                         >
                           {item.completed ? "COMPLETED" : "PENDING"}
@@ -686,15 +853,15 @@ export default function TaskExecution() {
                     ))
                   ) : (
                     <div className="text-center py-6 text-slate-400 text-xs italic">
-                      No scope checklist items specified for this task.
+                      No scope checklist/deliverables items specified for this task.
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* ── Task Notes (Optional) — appears before Reason for Delay ── */}
-              <div className="card p-4 sm:p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+              {/* Task Notes (Optional) */}
+              <div className="card p-5 sm:p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                   <div>
                     <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                       <MessageSquare className="w-5 h-5 text-sky-500" /> Task Notes
@@ -707,7 +874,7 @@ export default function TaskExecution() {
                 </div>
                 <textarea
                   rows={3}
-                  className="input w-full text-xs sm:text-sm resize-none rounded-xl"
+                  className="input w-full text-xs sm:text-sm resize-none rounded-xl border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-brand-500/20"
                   placeholder="Add any general notes, observations or progress updates for this task (optional)..."
                   value={taskNotes}
                   onChange={(e) => setTaskNotes(e.target.value)}
@@ -729,15 +896,16 @@ export default function TaskExecution() {
               </div>
 
               {/* Dynamic Reason for Delay Input Fields */}
-              <div className={`card p-4 sm:p-6 bg-white dark:bg-slate-900 border space-y-4 ${
+              <div className={`card p-5 sm:p-6 bg-white dark:bg-slate-900 border rounded-2xl shadow-sm space-y-4 ${
                 isDelayReasonRequired
-                  ? "border-rose-300 dark:border-rose-800 shadow-sm"
+                  ? "border-rose-300 dark:border-rose-800 ring-1 ring-rose-200 dark:ring-rose-950/40"
                   : "border-slate-200 dark:border-slate-800"
               }`}>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 gap-2">
                   <div>
                     <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 flex-wrap">
-                      <AlertTriangle className="w-5 h-5 text-amber-500" /> Reason for Delay Log
+                      <AlertTriangle className={`w-5 h-5 ${isDelayReasonRequired ? "text-rose-500" : "text-amber-500"}`} />
+                      Reason for Delay Log
                       {isDelayReasonRequired && (
                         <span className="text-xs font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-800">
                           * Required (Task Overdue/Due)
@@ -759,16 +927,16 @@ export default function TaskExecution() {
                   </button>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {delayReasons.map((reason, idx) => (
                     <div key={idx} className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-400 w-4 sm:w-5 text-right shrink-0">{idx + 1}.</span>
+                      <span className="text-xs font-bold text-slate-400 w-5 text-right shrink-0">{idx + 1}.</span>
                       <input
                         type="text"
-                        className={`input w-full text-xs sm:text-sm ${
+                        className={`input w-full text-xs sm:text-sm rounded-xl ${
                           isDelayReasonRequired && !reason.trim()
                             ? "border-rose-400 focus:border-rose-500 focus:ring-rose-200"
-                            : ""
+                            : "border-slate-200 dark:border-slate-700"
                         }`}
                         placeholder={
                           isDelayReasonRequired
@@ -814,16 +982,33 @@ export default function TaskExecution() {
               </div>
             </>
           ) : (
-            <div className="card p-8 sm:p-12 text-center text-slate-400 space-y-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-              <MousePointerClick className="w-12 h-12 mx-auto text-brand/60 animate-bounce" />
-              <h3 className="text-base sm:text-lg font-bold text-slate-700 dark:text-slate-300">
-                Select a Task to View Execution Details
-              </h3>
-              <p className="text-xs text-slate-500 max-w-md mx-auto">
-                {filteredTasks.length > 0
-                  ? `There are ${filteredTasks.length} ${statusFilter.toLowerCase().replace("_", " ")} task(s) available. Click any task from the left list to view and manage its scope checklist items.`
-                  : `No ${statusFilter.toLowerCase().replace("_", " ")} tasks assigned to your user account.`}
-              </p>
+            <div className="card p-8 sm:p-14 text-center space-y-4 bg-gradient-to-b from-slate-50/60 via-white to-slate-50/40 dark:from-slate-900/60 dark:via-slate-900 dark:to-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
+              <div className="w-16 h-16 rounded-2xl bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 border border-brand-200/60 dark:border-brand-800/60 flex items-center justify-center mx-auto shadow-sm ring-8 ring-brand-50/50 dark:ring-brand-900/10">
+                <ListTodo className="w-8 h-8 stroke-[2.2]" />
+              </div>
+              <div className="space-y-1.5 max-w-md mx-auto">
+                <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">
+                  Select a Task to View Execution Details
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                  {filteredTasks.length > 0
+                    ? `There are ${filteredTasks.length} ${statusFilter.toLowerCase().replace("_", " ")} task(s) available. Click any task from the left list to view its execution gauge and manage checklist/deliverables items.`
+                    : `No ${statusFilter.toLowerCase().replace("_", " ")} tasks assigned to your user account.`}
+                </p>
+              </div>
+
+              {filteredTasks.length > 0 && (
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedTaskId(filteredTasks[0].id)}
+                    className="btn btn-primary inline-flex items-center gap-2 text-xs font-semibold px-4 py-2 shadow-sm rounded-xl hover:scale-[1.02] transition-transform"
+                  >
+                    <MousePointerClick size={14} />
+                    <span>Select &ldquo;{filteredTasks[0].task_title}&rdquo;</span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -857,7 +1042,7 @@ export default function TaskExecution() {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Select New Assignee <span className="text-red-500">*</span>
             </label>
             <select

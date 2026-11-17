@@ -114,16 +114,25 @@ export default function PhysicalStockTakeForm() {
       try {
         const whRes = await api.get("/inventory/warehouses").catch(() => null);
         if (whRes?.data) {
-          const list = Array.isArray(whRes.data.items) ? whRes.data.items : (Array.isArray(whRes.data) ? whRes.data : []);
+          const list = Array.isArray(whRes.data.items)
+            ? whRes.data.items
+            : Array.isArray(whRes.data)
+              ? whRes.data
+              : [];
           setWarehouses(list);
         }
       } catch {}
 
       try {
-        const catRes = await api.get("/inventory/categories").catch(() => null) 
-          || await api.get("/inventory/item-groups").catch(() => null);
+        const catRes =
+          (await api.get("/inventory/categories").catch(() => null)) ||
+          (await api.get("/inventory/item-groups").catch(() => null));
         if (catRes?.data) {
-          const list = Array.isArray(catRes.data.items) ? catRes.data.items : (Array.isArray(catRes.data) ? catRes.data : []);
+          const list = Array.isArray(catRes.data.items)
+            ? catRes.data.items
+            : Array.isArray(catRes.data)
+              ? catRes.data
+              : [];
           setCategories(list);
         }
       } catch {}
@@ -170,7 +179,7 @@ export default function PhysicalStockTakeForm() {
 
         if (pQty !== null && !isNaN(pQty)) {
           vQty = pQty - expQty;
-          vPct = expQty !== 0 ? (vQty / expQty) * 100 : (vQty === 0 ? 0 : 100);
+          vPct = expQty !== 0 ? (vQty / expQty) * 100 : vQty === 0 ? 0 : 100;
           vVal = vQty * cost;
           if (Math.abs(vQty) < 0.0001) {
             cStatus = "MATCHED";
@@ -195,21 +204,45 @@ export default function PhysicalStockTakeForm() {
 
   const handleVarianceReasonChange = (detailId, reason) => {
     setDetails((prev) =>
-      prev.map((d) => (d.id === detailId ? { ...d, variance_reason: reason } : d)),
+      prev.map((d) =>
+        d.id === detailId ? { ...d, variance_reason: reason } : d,
+      ),
     );
   };
 
   // Metrics summary
   const summary = useMemo(() => {
     const totalLines = details.length;
-    const countedLines = details.filter((d) => d.physical_qty !== null && d.physical_qty !== "" && d.physical_qty !== undefined).length;
-    const shortages = details.filter((d) => Number(d.variance_qty || 0) < -0.0001);
-    const surpluses = details.filter((d) => Number(d.variance_qty || 0) > 0.0001);
-    const matched = details.filter((d) => Math.abs(Number(d.variance_qty || 0)) < 0.0001 && d.physical_qty !== null && d.physical_qty !== "");
+    const countedLines = details.filter(
+      (d) =>
+        d.physical_qty !== null &&
+        d.physical_qty !== "" &&
+        d.physical_qty !== undefined,
+    ).length;
+    const shortages = details.filter(
+      (d) => Number(d.variance_qty || 0) < -0.0001,
+    );
+    const surpluses = details.filter(
+      (d) => Number(d.variance_qty || 0) > 0.0001,
+    );
+    const matched = details.filter(
+      (d) =>
+        Math.abs(Number(d.variance_qty || 0)) < 0.0001 &&
+        d.physical_qty !== null &&
+        d.physical_qty !== "",
+    );
 
-    const totalShortageVal = shortages.reduce((acc, c) => acc + Math.abs(Number(c.variance_value || 0)), 0);
-    const totalSurplusVal = surpluses.reduce((acc, c) => acc + Math.abs(Number(c.variance_value || 0)), 0);
-    const netVarianceVal = surpluses.reduce((acc, c) => acc + Number(c.variance_value || 0), 0) + shortages.reduce((acc, c) => acc + Number(c.variance_value || 0), 0);
+    const totalShortageVal = shortages.reduce(
+      (acc, c) => acc + Math.abs(Number(c.variance_value || 0)),
+      0,
+    );
+    const totalSurplusVal = surpluses.reduce(
+      (acc, c) => acc + Math.abs(Number(c.variance_value || 0)),
+      0,
+    );
+    const netVarianceVal =
+      surpluses.reduce((acc, c) => acc + Number(c.variance_value || 0), 0) +
+      shortages.reduce((acc, c) => acc + Number(c.variance_value || 0), 0);
 
     return {
       totalLines,
@@ -229,9 +262,16 @@ export default function PhysicalStockTakeForm() {
     let list = details;
 
     if (activeTab === "VARIANCES") {
-      list = list.filter((d) => Math.abs(Number(d.variance_qty || 0)) >= 0.0001);
+      list = list.filter(
+        (d) => Math.abs(Number(d.variance_qty || 0)) >= 0.0001,
+      );
     } else if (activeTab === "MATCHED") {
-      list = list.filter((d) => Math.abs(Number(d.variance_qty || 0)) < 0.0001 && d.physical_qty !== null && d.physical_qty !== "");
+      list = list.filter(
+        (d) =>
+          Math.abs(Number(d.variance_qty || 0)) < 0.0001 &&
+          d.physical_qty !== null &&
+          d.physical_qty !== "",
+      );
     }
 
     if (searchTerm.trim()) {
@@ -257,10 +297,14 @@ export default function PhysicalStockTakeForm() {
     setActionLoading(true);
     try {
       const res = await api.post("/inventory/stock-takes", createForm);
-      toast.success(`Stock Take ${res.data?.stock_take_no} created successfully`);
+      toast.success(
+        `Stock Take ${res.data?.stock_take_no} created successfully`,
+      );
       navigate(`/inventory/physical-stock-take/${res.data?.id}`);
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to create stock take");
+      toast.error(
+        err?.response?.data?.message || "Failed to create stock take",
+      );
     } finally {
       setActionLoading(false);
     }
@@ -271,7 +315,9 @@ export default function PhysicalStockTakeForm() {
     setActionLoading(true);
     try {
       const res = await api.post(`/inventory/stock-takes/${id}/start-count`);
-      toast.success(`Physical count started. Baseline snapshot captured for ${res.data?.total_items} items.`);
+      toast.success(
+        `Physical count started. Baseline snapshot captured for ${res.data?.total_items} items.`,
+      );
       await fetchStockTakeDetails();
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to start count");
@@ -298,10 +344,13 @@ export default function PhysicalStockTakeForm() {
   const handleSubmitCount = async () => {
     // Validate reasons for discrepancies
     const unreasonedVariances = details.filter(
-      (d) => Math.abs(Number(d.variance_qty || 0)) >= 0.0001 && !d.variance_reason,
+      (d) =>
+        Math.abs(Number(d.variance_qty || 0)) >= 0.0001 && !d.variance_reason,
     );
     if (unreasonedVariances.length > 0) {
-      toast.warning(`Please provide variance reasons for ${unreasonedVariances.length} discrepancies before submitting.`);
+      toast.warning(
+        `Please provide variance reasons for ${unreasonedVariances.length} discrepancies before submitting.`,
+      );
       setActiveTab("VARIANCES");
       return;
     }
@@ -310,7 +359,9 @@ export default function PhysicalStockTakeForm() {
     try {
       await api.put(`/inventory/stock-takes/${id}/save-count`, { details });
       const res = await api.post(`/inventory/stock-takes/${id}/submit-count`);
-      toast.success(`Stock take submitted for review (${res.data?.total_variance_items} discrepancies identified)`);
+      toast.success(
+        `Stock take submitted for review (${res.data?.total_variance_items} discrepancies identified)`,
+      );
       await fetchStockTakeDetails();
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to submit count");
@@ -327,7 +378,9 @@ export default function PhysicalStockTakeForm() {
     }
     setActionLoading(true);
     try {
-      await api.post(`/inventory/stock-takes/${id}/request-recount`, { reason: recountReason });
+      await api.post(`/inventory/stock-takes/${id}/request-recount`, {
+        reason: recountReason,
+      });
       toast.info("Recount requested. Stock take unlocked for recount.");
       setShowRecountModal(false);
       setRecountReason("");
@@ -344,11 +397,15 @@ export default function PhysicalStockTakeForm() {
     setActionLoading(true);
     try {
       await api.post(`/inventory/stock-takes/${id}/approve`);
-      toast.success("Stock Take approved. Ready for inventory adjustment posting.");
+      toast.success(
+        "Stock Take approved. Ready for inventory adjustment posting.",
+      );
       setShowApproveModal(false);
       await fetchStockTakeDetails();
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to approve stock take");
+      toast.error(
+        err?.response?.data?.message || "Failed to approve stock take",
+      );
     } finally {
       setActionLoading(false);
     }
@@ -358,7 +415,9 @@ export default function PhysicalStockTakeForm() {
   const handlePostAdjustment = async () => {
     setActionLoading(true);
     try {
-      const res = await api.post(`/inventory/stock-takes/${id}/post-adjustment`);
+      const res = await api.post(
+        `/inventory/stock-takes/${id}/post-adjustment`,
+      );
       toast.success(
         res.data?.adjustment_no
           ? `Inventory Adjustment ${res.data.adjustment_no} posted! Balances updated in ledger.`
@@ -375,10 +434,13 @@ export default function PhysicalStockTakeForm() {
 
   // 8. Cancel Stock Take
   const handleCancelStockTake = async () => {
-    if (!window.confirm("Are you sure you want to cancel this stock take?")) return;
+    if (!window.confirm("Are you sure you want to cancel this stock take?"))
+      return;
     setActionLoading(true);
     try {
-      await api.post(`/inventory/stock-takes/${id}/cancel`, { reason: "User requested cancellation" });
+      await api.post(`/inventory/stock-takes/${id}/cancel`, {
+        reason: "User requested cancellation",
+      });
       toast.warn("Stock Take cancelled");
       await fetchStockTakeDetails();
     } catch (err) {
@@ -399,8 +461,16 @@ export default function PhysicalStockTakeForm() {
       title: "PHYSICAL STOCK COUNT SHEET (BLANK AUDIT)",
       subtitle: `Stock Take: ${stockTake?.stock_take_no || "-"} | Warehouse: ${stockTake?.warehouse_name || "All"} | Date: ${stockTake?.count_date ? String(stockTake.count_date).slice(0, 10) : "-"}`,
       kpis: [
-        { label: "AUDIT ITEMS", value: String(details.length), color: [59, 130, 246] },
-        { label: "SCOPE", value: String(stockTake?.count_type || "FULL_COUNT"), color: [16, 185, 129] },
+        {
+          label: "AUDIT ITEMS",
+          value: String(details.length),
+          color: [59, 130, 246],
+        },
+        {
+          label: "SCOPE",
+          value: String(stockTake?.count_type || "FULL_COUNT"),
+          color: [16, 185, 129],
+        },
       ],
     });
 
@@ -425,7 +495,7 @@ export default function PhysicalStockTakeForm() {
       doc.setFontSize(7.5);
       doc.text(String(d.item_code || "-"), margin + 2, y);
       doc.text(String(d.item_name || "-").slice(0, 36), 55, y);
-      doc.text(String(d.uom_name || d.uom || "PCS"), 130, y);
+      doc.text(String(d.uom || d.uom_code || "PCS"), 130, y);
       doc.rect(pageW - margin - 25, y - 3.5, 25, 4.5);
       y += 6;
     });
@@ -445,10 +515,26 @@ export default function PhysicalStockTakeForm() {
       title: "PHYSICAL STOCK TAKE VARIANCE RECONCILIATION REPORT",
       subtitle: `Stock Take: ${stockTake?.stock_take_no || "-"} | Warehouse: ${stockTake?.warehouse_name || "All"} | Status: ${stockTake?.status}`,
       kpis: [
-        { label: "TOTAL ITEMS", value: String(summary.totalLines), color: [59, 130, 246] },
-        { label: "SHORTAGES", value: `${summary.shortagesCount} (-GH₵ ${summary.totalShortageVal.toFixed(2)})`, color: [239, 68, 68] },
-        { label: "SURPLUSES", value: `${summary.surplusesCount} (+GH₵ ${summary.totalSurplusVal.toFixed(2)})`, color: [16, 185, 129] },
-        { label: "NET IMPACT", value: `${headerInfo.currPrefix}${summary.netVarianceVal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, color: [245, 158, 11] },
+        {
+          label: "TOTAL ITEMS",
+          value: String(summary.totalLines),
+          color: [59, 130, 246],
+        },
+        {
+          label: "SHORTAGES",
+          value: `${summary.shortagesCount} (-GH₵ ${summary.totalShortageVal.toFixed(2)})`,
+          color: [239, 68, 68],
+        },
+        {
+          label: "SURPLUSES",
+          value: `${summary.surplusesCount} (+GH₵ ${summary.totalSurplusVal.toFixed(2)})`,
+          color: [16, 185, 129],
+        },
+        {
+          label: "NET IMPACT",
+          value: `${headerInfo.currPrefix}${summary.netVarianceVal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+          color: [245, 158, 11],
+        },
       ],
     });
 
@@ -478,19 +564,42 @@ export default function PhysicalStockTakeForm() {
 
       doc.setFont("helvetica", isDiscrepant ? "bold" : "normal");
       doc.setFontSize(7);
-      doc.text(`${d.item_code} - ${String(d.item_name || "").slice(0, 24)}`, margin + 2, y);
-      doc.text(String(d.uom_name || d.uom || "PCS"), 85, y);
-      doc.text(Number(d.system_qty || 0).toLocaleString(), 115, y, { align: "right" });
-      doc.text(Number(d.movement_qty || 0).toLocaleString(), 145, y, { align: "right" });
-      doc.text(Number(d.expected_qty || 0).toLocaleString(), 175, y, { align: "right" });
-      doc.text(d.physical_qty !== null ? Number(d.physical_qty).toLocaleString() : "-", 205, y, { align: "right" });
+      doc.text(
+        `${d.item_code} - ${String(d.item_name || "").slice(0, 24)}`,
+        margin + 2,
+        y,
+      );
+      doc.text(String(d.uom || d.uom_code || "PCS"), 85, y);
+      doc.text(Number(d.system_qty || 0).toLocaleString(), 115, y, {
+        align: "right",
+      });
+      doc.text(Number(d.movement_qty || 0).toLocaleString(), 145, y, {
+        align: "right",
+      });
+      doc.text(Number(d.expected_qty || 0).toLocaleString(), 175, y, {
+        align: "right",
+      });
+      doc.text(
+        d.physical_qty !== null ? Number(d.physical_qty).toLocaleString() : "-",
+        205,
+        y,
+        { align: "right" },
+      );
       doc.text(vQty.toLocaleString(), 235, y, { align: "right" });
-      doc.text(String(d.variance_reason || (isDiscrepant ? "Unspecified" : "Matched")).slice(0, 18), 242, y);
+      doc.text(
+        String(
+          d.variance_reason || (isDiscrepant ? "Unspecified" : "Matched"),
+        ).slice(0, 18),
+        242,
+        y,
+      );
       y += 4.5;
     });
 
     applyPdfFooter(doc);
-    doc.save(`stock-take-variance-report-${stockTake?.stock_take_no || id}.pdf`);
+    doc.save(
+      `stock-take-variance-report-${stockTake?.stock_take_no || id}.pdf`,
+    );
   }
 
   // ==========================================
@@ -507,10 +616,14 @@ export default function PhysicalStockTakeForm() {
                   <ClipboardCheck className="w-7 h-7" /> New Physical Stock Take
                 </h1>
                 <p className="text-sm mt-1 opacity-90">
-                  Configure stock-take parameters, target warehouse, counting scope, and baseline controls
+                  Configure stock-take parameters, target warehouse, counting
+                  scope, and baseline controls
                 </p>
               </div>
-              <button onClick={() => window.history.back()} className="btn btn-secondary text-xs">
+              <button
+                onClick={() => window.history.back()}
+                className="btn btn-secondary text-xs"
+              >
                 Back to List
               </button>
             </div>
@@ -526,13 +639,19 @@ export default function PhysicalStockTakeForm() {
                   <select
                     className="input w-full mt-1"
                     value={createForm.warehouse_id}
-                    onChange={(e) => setCreateForm({ ...createForm, warehouse_id: e.target.value })}
+                    onChange={(e) =>
+                      setCreateForm({
+                        ...createForm,
+                        warehouse_id: e.target.value,
+                      })
+                    }
                     required
                   >
                     <option value="">Select Warehouse...</option>
                     {warehouses.map((w) => (
                       <option key={w.id} value={String(w.id)}>
-                        {(w.warehouse_code ? `${w.warehouse_code} - ` : "") + w.warehouse_name}
+                        {(w.warehouse_code ? `${w.warehouse_code} - ` : "") +
+                          w.warehouse_name}
                       </option>
                     ))}
                   </select>
@@ -546,7 +665,12 @@ export default function PhysicalStockTakeForm() {
                     type="date"
                     className="input w-full mt-1"
                     value={createForm.stock_take_date}
-                    onChange={(e) => setCreateForm({ ...createForm, stock_take_date: e.target.value })}
+                    onChange={(e) =>
+                      setCreateForm({
+                        ...createForm,
+                        stock_take_date: e.target.value,
+                      })
+                    }
                     required
                   />
                 </div>
@@ -558,11 +682,20 @@ export default function PhysicalStockTakeForm() {
                   <select
                     className="input w-full mt-1"
                     value={createForm.count_type}
-                    onChange={(e) => setCreateForm({ ...createForm, count_type: e.target.value })}
+                    onChange={(e) =>
+                      setCreateForm({
+                        ...createForm,
+                        count_type: e.target.value,
+                      })
+                    }
                   >
                     <option value="FULL_COUNT">Full Warehouse Count</option>
-                    <option value="CATEGORY_COUNT">Category-Specific Count</option>
-                    <option value="CYCLE_COUNT">Cycle / High Value Count</option>
+                    <option value="CATEGORY_COUNT">
+                      Category-Specific Count
+                    </option>
+                    <option value="CYCLE_COUNT">
+                      Cycle / High Value Count
+                    </option>
                   </select>
                 </div>
 
@@ -574,7 +707,12 @@ export default function PhysicalStockTakeForm() {
                     <select
                       className="input w-full mt-1"
                       value={createForm.category_id}
-                      onChange={(e) => setCreateForm({ ...createForm, category_id: e.target.value })}
+                      onChange={(e) =>
+                        setCreateForm({
+                          ...createForm,
+                          category_id: e.target.value,
+                        })
+                      }
                       required
                     >
                       <option value="">Select Category...</option>
@@ -595,14 +733,20 @@ export default function PhysicalStockTakeForm() {
                     type="checkbox"
                     className="checkbox checkbox-primary mt-1"
                     checked={createForm.is_blind_count}
-                    onChange={(e) => setCreateForm({ ...createForm, is_blind_count: e.target.checked })}
+                    onChange={(e) =>
+                      setCreateForm({
+                        ...createForm,
+                        is_blind_count: e.target.checked,
+                      })
+                    }
                   />
                   <div>
-                    <span className="font-bold text-sm text-slate-800 dark:text-slate-200">
+                    <span className="font-semibold text-sm text-slate-800 dark:text-slate-200">
                       Enable Blind Count (Recommended for Audit Integrity)
                     </span>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      When enabled, expected system quantities will be hidden from counters during count entry to prevent bias.
+                      When enabled, expected system quantities will be hidden
+                      from counters during count entry to prevent bias.
                     </p>
                   </div>
                 </label>
@@ -616,7 +760,9 @@ export default function PhysicalStockTakeForm() {
                   className="input w-full mt-1 h-20 text-xs"
                   placeholder="e.g. Annual physical inventory audit across main distribution center..."
                   value={createForm.remarks}
-                  onChange={(e) => setCreateForm({ ...createForm, remarks: e.target.value })}
+                  onChange={(e) =>
+                    setCreateForm({ ...createForm, remarks: e.target.value })
+                  }
                 />
               </div>
 
@@ -633,7 +779,8 @@ export default function PhysicalStockTakeForm() {
                   disabled={actionLoading}
                   className="btn btn-success text-xs flex items-center gap-1.5 font-semibold"
                 >
-                  {actionLoading ? "Initializing..." : "Create Stock Take"} <ArrowRight size={14} />
+                  {actionLoading ? "Initializing..." : "Create Stock Take"}{" "}
+                  <ArrowRight size={14} />
                 </button>
               </div>
             </form>
@@ -647,10 +794,12 @@ export default function PhysicalStockTakeForm() {
   // RENDER: 2. WORKSPACE & AUDIT CONSOLE
   // ==========================================
   const currentStatus = (stockTake?.status || "DRAFT").toUpperCase();
-  const isCountingMode = currentStatus === "COUNTING" || currentStatus === "RECOUNT_REQUIRED";
+  const isCountingMode =
+    currentStatus === "COUNTING" || currentStatus === "RECOUNT_REQUIRED";
   const isReviewMode = currentStatus === "UNDER_REVIEW";
   const isApproved = currentStatus === "APPROVED";
-  const isPosted = currentStatus === "ADJUSTMENT_POSTED" || currentStatus === "CLOSED";
+  const isPosted =
+    currentStatus === "ADJUSTMENT_POSTED" || currentStatus === "CLOSED";
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6">
@@ -673,24 +822,52 @@ export default function PhysicalStockTakeForm() {
                 )}
               </div>
               <p className="text-sm mt-1 opacity-90 flex flex-wrap items-center gap-x-4 gap-y-1">
-                <span>Warehouse: <strong>{stockTake?.warehouse_name || "All"}</strong></span>
-                <span>Date: <strong>{stockTake?.count_date ? String(stockTake.count_date).slice(0, 10) : "-"}</strong></span>
-                <span>Scope: <strong>{stockTake?.category_name ? `${stockTake.category_name} (${stockTake.count_type})` : stockTake?.count_type || "FULL_COUNT"}</strong></span>
+                <span>
+                  Warehouse:{" "}
+                  <strong>{stockTake?.warehouse_name || "All"}</strong>
+                </span>
+                <span>
+                  Date:{" "}
+                  <strong>
+                    {stockTake?.count_date
+                      ? String(stockTake.count_date).slice(0, 10)
+                      : "-"}
+                  </strong>
+                </span>
+                <span>
+                  Scope:{" "}
+                  <strong>
+                    {stockTake?.category_name
+                      ? `${stockTake.category_name} (${stockTake.count_type})`
+                      : stockTake?.count_type || "FULL_COUNT"}
+                  </strong>
+                </span>
                 {stockTake?.adjustment_no && (
-                  <span>Adjustment Ref: <strong>{stockTake.adjustment_no}</strong></span>
+                  <span>
+                    Adjustment Ref: <strong>{stockTake.adjustment_no}</strong>
+                  </span>
                 )}
               </p>
             </div>
 
             {/* Top Buttons */}
             <div className="flex flex-wrap gap-2 items-center">
-              <button onClick={() => navigate("/inventory/physical-stock-take")} className="btn btn-secondary text-xs">
+              <button
+                onClick={() => navigate("/inventory/physical-stock-take")}
+                className="btn btn-secondary text-xs"
+              >
                 Back to List
               </button>
-              <button onClick={printCountSheet} className="btn btn-outline btn-sm text-white border-white/30 hover:bg-white/10 flex items-center gap-1.5 text-xs">
+              <button
+                onClick={printCountSheet}
+                className="btn btn-outline btn-sm text-white border-white/30 hover:bg-white/10 flex items-center gap-1.5 text-xs"
+              >
                 <FileText size={14} /> Count Sheet
               </button>
-              <button onClick={printVarianceReport} className="btn btn-outline btn-sm text-white border-white/30 hover:bg-white/10 flex items-center gap-1.5 text-xs">
+              <button
+                onClick={printVarianceReport}
+                className="btn btn-outline btn-sm text-white border-white/30 hover:bg-white/10 flex items-center gap-1.5 text-xs"
+              >
                 <Printer size={14} /> Variance Report
               </button>
             </div>
@@ -701,7 +878,9 @@ export default function PhysicalStockTakeForm() {
         <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900/40">
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs">
             {STATUS_STEPS.map((st, idx) => {
-              const stepIndex = STATUS_STEPS.findIndex((s) => s.key === currentStatus);
+              const stepIndex = STATUS_STEPS.findIndex(
+                (s) => s.key === currentStatus,
+              );
               const isPast = stepIndex > idx || isPosted;
               const isCurrent = currentStatus === st.key;
 
@@ -712,12 +891,17 @@ export default function PhysicalStockTakeForm() {
                     isCurrent
                       ? "bg-brand text-white border-brand shadow-sm font-bold"
                       : isPast
-                      ? "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/30 dark:text-emerald-300"
-                      : "bg-white dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700"
+                        ? "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/30 dark:text-emerald-300"
+                        : "bg-white dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700"
                   }`}
                 >
                   <div className="flex items-center justify-center gap-1">
-                    {isPast && <CheckCircle2 size={12} className="text-emerald-600 dark:text-emerald-400" />}
+                    {isPast && (
+                      <CheckCircle2
+                        size={12}
+                        className="text-emerald-600 dark:text-emerald-400"
+                      />
+                    )}
                     {st.label}
                   </div>
                 </div>
@@ -730,34 +914,61 @@ export default function PhysicalStockTakeForm() {
       {/* KPI Cards Summary */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
         <div className="card p-3 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 rounded-lg text-center">
-          <div className="text-xs text-slate-500 font-semibold uppercase">Total Scope Items</div>
-          <div className="text-xl font-bold text-slate-900 dark:text-slate-100 mt-0.5">{summary.totalLines}</div>
+          <div className="text-xs text-slate-500 font-semibold uppercase">
+            Total Scope Items
+          </div>
+          <div className="text-xl font-bold text-slate-900 dark:text-slate-100 mt-0.5">
+            {summary.totalLines}
+          </div>
         </div>
         <div className="card p-3 border border-blue-200 dark:border-blue-900/50 bg-blue-50/40 dark:bg-blue-950/20 rounded-lg text-center">
-          <div className="text-xs text-blue-600 dark:text-blue-400 font-semibold uppercase">Counted</div>
+          <div className="text-xs text-blue-600 dark:text-blue-400 font-semibold uppercase">
+            Counted
+          </div>
           <div className="text-xl font-bold text-blue-700 dark:text-blue-300 mt-0.5">
-            {summary.countedLines} <span className="text-xs text-slate-400">/ {summary.totalLines}</span>
+            {summary.countedLines}{" "}
+            <span className="text-xs text-slate-400">
+              / {summary.totalLines}
+            </span>
           </div>
         </div>
         <div className="card p-3 border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/40 dark:bg-emerald-950/20 rounded-lg text-center">
-          <div className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold uppercase">Matched</div>
-          <div className="text-xl font-bold text-emerald-700 dark:text-emerald-300 mt-0.5">{summary.matchedCount}</div>
+          <div className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold uppercase">
+            Matched
+          </div>
+          <div className="text-xl font-bold text-emerald-700 dark:text-emerald-300 mt-0.5">
+            {summary.matchedCount}
+          </div>
         </div>
         <div className="card p-3 border border-rose-200 dark:border-rose-900/50 bg-rose-50/40 dark:bg-rose-950/20 rounded-lg text-center">
-          <div className="text-xs text-rose-600 dark:text-rose-400 font-semibold uppercase">Shortages</div>
+          <div className="text-xs text-rose-600 dark:text-rose-400 font-semibold uppercase">
+            Shortages
+          </div>
           <div className="text-xl font-bold text-rose-700 dark:text-rose-300 mt-0.5">
-            {summary.shortagesCount} <span className="text-xs font-normal">(-GH₵ {summary.totalShortageVal.toFixed(2)})</span>
+            {summary.shortagesCount}{" "}
+            <span className="text-xs font-normal">
+              (-GH₵ {summary.totalShortageVal.toFixed(2)})
+            </span>
           </div>
         </div>
         <div className="card p-3 border border-teal-200 dark:border-teal-900/50 bg-teal-50/40 dark:bg-teal-950/20 rounded-lg text-center">
-          <div className="text-xs text-teal-600 dark:text-teal-400 font-semibold uppercase">Surpluses</div>
+          <div className="text-xs text-teal-600 dark:text-teal-400 font-semibold uppercase">
+            Surpluses
+          </div>
           <div className="text-xl font-bold text-teal-700 dark:text-teal-300 mt-0.5">
-            {summary.surplusesCount} <span className="text-xs font-normal">(+GH₵ {summary.totalSurplusVal.toFixed(2)})</span>
+            {summary.surplusesCount}{" "}
+            <span className="text-xs font-normal">
+              (+GH₵ {summary.totalSurplusVal.toFixed(2)})
+            </span>
           </div>
         </div>
         <div className="card p-3 border border-amber-200 dark:border-amber-900/50 bg-amber-50/40 dark:bg-amber-950/20 rounded-lg text-center">
-          <div className="text-xs text-amber-600 dark:text-amber-400 font-semibold uppercase">Net Variance</div>
-          <div className={`text-xl font-bold mt-0.5 ${summary.netVarianceVal < 0 ? "text-rose-600" : summary.netVarianceVal > 0 ? "text-emerald-600" : "text-slate-800"}`}>
+          <div className="text-xs text-amber-600 dark:text-amber-400 font-semibold uppercase">
+            Net Variance
+          </div>
+          <div
+            className={`text-xl font-bold mt-0.5 ${summary.netVarianceVal < 0 ? "text-rose-600" : summary.netVarianceVal > 0 ? "text-emerald-600" : "text-slate-800"}`}
+          >
             GH₵ {summary.netVarianceVal.toFixed(2)}
           </div>
         </div>
@@ -768,12 +979,18 @@ export default function PhysicalStockTakeForm() {
         <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
           <div className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
             <span className="font-bold text-brand">Action:</span>
-            {currentStatus === "DRAFT" && "Start counting to capture and lock immutable system inventory baseline."}
-            {currentStatus === "COUNTING" && "Enter physical quantities. System tracks interim warehouse movements in real-time."}
-            {currentStatus === "UNDER_REVIEW" && "Audit discrepancy analysis. Request recount or approve stock take."}
-            {currentStatus === "RECOUNT_REQUIRED" && "Recount in progress. Re-verify physical quantities."}
-            {currentStatus === "APPROVED" && "Stock Take approved. Generate atomic inventory adjustment."}
-            {isPosted && `Stock Take completed. Inventory adjustment ${stockTake?.adjustment_no || ""} posted to ledger.`}
+            {currentStatus === "DRAFT" &&
+              "Start counting to capture and lock immutable system inventory baseline."}
+            {currentStatus === "COUNTING" &&
+              "Enter physical quantities. System tracks interim warehouse movements in real-time."}
+            {currentStatus === "UNDER_REVIEW" &&
+              "Audit discrepancy analysis. Request recount or approve stock take."}
+            {currentStatus === "RECOUNT_REQUIRED" &&
+              "Recount in progress. Re-verify physical quantities."}
+            {currentStatus === "APPROVED" &&
+              "Stock Take approved. Generate atomic inventory adjustment."}
+            {isPosted &&
+              `Stock Take completed. Inventory adjustment ${stockTake?.adjustment_no || ""} posted to ledger.`}
           </div>
 
           <div className="flex flex-wrap gap-2 items-center justify-end">
@@ -840,7 +1057,8 @@ export default function PhysicalStockTakeForm() {
                 to={`/inventory/stock-adjustments`}
                 className="btn btn-outline border-emerald-600 text-emerald-700 hover:bg-emerald-600 hover:text-white text-xs flex items-center gap-1.5 font-semibold"
               >
-                <FileSpreadsheet size={14} /> View Adjustment {stockTake.adjustment_no}
+                <FileSpreadsheet size={14} /> View Adjustment{" "}
+                {stockTake.adjustment_no}
               </Link>
             )}
 
@@ -899,7 +1117,8 @@ export default function PhysicalStockTakeForm() {
                   : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200"
               }`}
             >
-              <History size={12} className="inline mr-1" /> Audit Trail ({auditLogs.length})
+              <History size={12} className="inline mr-1" /> Audit Trail (
+              {auditLogs.length})
             </button>
           </div>
 
@@ -938,17 +1157,27 @@ export default function PhysicalStockTakeForm() {
                   <th className="py-2.5 px-3 text-right">System Snapshot</th>
                   <th className="py-2.5 px-3 text-right">Interim Movements</th>
                   <th className="py-2.5 px-3 text-right">Expected Qty</th>
-                  <th className="py-2.5 px-3 text-center" style={{ width: "160px" }}>Physical Count</th>
+                  <th
+                    className="py-2.5 px-3 text-center"
+                    style={{ width: "160px" }}
+                  >
+                    Physical Count
+                  </th>
                   <th className="py-2.5 px-3 text-right">Variance</th>
                   <th className="py-2.5 px-3 text-right">Variance Value</th>
-                  <th className="py-2.5 px-3" style={{ minWidth: "180px" }}>Reason</th>
+                  <th className="py-2.5 px-3" style={{ minWidth: "180px" }}>
+                    Reason
+                  </th>
                   <th className="py-2.5 px-3 text-center">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-700 text-xs">
                 {!filteredDetails.length ? (
                   <tr>
-                    <td colSpan="10" className="text-center py-10 text-slate-500">
+                    <td
+                      colSpan="10"
+                      className="text-center py-10 text-slate-500"
+                    >
                       {currentStatus === "DRAFT"
                         ? "Stock Take is in Draft status. Click 'Start Count & Lock Baseline' above to capture snapshot."
                         : "No items match the selected filter."}
@@ -958,7 +1187,8 @@ export default function PhysicalStockTakeForm() {
 
                 {filteredDetails.map((d) => {
                   const pQty = d.physical_qty;
-                  const hasCount = pQty !== null && pQty !== "" && pQty !== undefined;
+                  const hasCount =
+                    pQty !== null && pQty !== "" && pQty !== undefined;
                   const vQty = Number(d.variance_qty || 0);
                   const isShortage = vQty < -0.0001;
                   const isSurplus = vQty > 0.0001;
@@ -971,22 +1201,31 @@ export default function PhysicalStockTakeForm() {
                         isShortage
                           ? "bg-rose-50/30 dark:bg-rose-950/10"
                           : isSurplus
-                          ? "bg-emerald-50/30 dark:bg-emerald-950/10"
-                          : ""
+                            ? "bg-emerald-50/30 dark:bg-emerald-950/10"
+                            : ""
                       }`}
                     >
                       <td className="py-2.5 px-3">
-                        <div className="font-mono font-bold text-slate-900 dark:text-slate-100">{d.item_code}</div>
-                        <div className="text-slate-600 dark:text-slate-400 truncate max-w-[220px]" title={d.item_name}>
+                        <div className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                          {d.item_code}
+                        </div>
+                        <div
+                          className="text-slate-600 dark:text-slate-400 truncate max-w-[220px]"
+                          title={d.item_name}
+                        >
                           {d.item_name}
                         </div>
                       </td>
-                      <td className="py-2.5 px-2 text-slate-500">{d.uom_name || d.uom || "PCS"}</td>
+                      <td className="py-2.5 px-2 text-slate-500">
+                        {d.uom || d.uom_code || "PCS"}
+                      </td>
 
                       {/* Snapshot & Expected Qty (Masked if blind count) */}
                       <td className="py-2.5 px-3 text-right font-mono font-medium text-slate-700 dark:text-slate-300">
                         {hideExpected ? (
-                          <span className="text-slate-400 italic">Hidden (Blind)</span>
+                          <span className="text-slate-400 italic">
+                            Hidden (Blind)
+                          </span>
                         ) : (
                           Number(d.system_qty || 0).toLocaleString()
                         )}
@@ -995,8 +1234,16 @@ export default function PhysicalStockTakeForm() {
                         {hideExpected ? (
                           <span className="text-slate-400 italic">—</span>
                         ) : Number(d.movement_qty || 0) !== 0 ? (
-                          <span className={Number(d.movement_qty) > 0 ? "text-emerald-600 font-semibold" : "text-rose-600 font-semibold"}>
-                            {Number(d.movement_qty) > 0 ? `+${Number(d.movement_qty)}` : Number(d.movement_qty)}
+                          <span
+                            className={
+                              Number(d.movement_qty) > 0
+                                ? "text-emerald-600 font-semibold"
+                                : "text-rose-600 font-semibold"
+                            }
+                          >
+                            {Number(d.movement_qty) > 0
+                              ? `+${Number(d.movement_qty)}`
+                              : Number(d.movement_qty)}
                           </span>
                         ) : (
                           "0"
@@ -1004,9 +1251,13 @@ export default function PhysicalStockTakeForm() {
                       </td>
                       <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-900 dark:text-slate-100">
                         {hideExpected ? (
-                          <span className="text-slate-400 italic">Hidden (Blind)</span>
+                          <span className="text-slate-400 italic">
+                            Hidden (Blind)
+                          </span>
                         ) : (
-                          Number(d.expected_qty || d.system_qty || 0).toLocaleString()
+                          Number(
+                            d.expected_qty || d.system_qty || 0,
+                          ).toLocaleString()
                         )}
                       </td>
 
@@ -1017,9 +1268,11 @@ export default function PhysicalStockTakeForm() {
                             type="number"
                             step="0.001"
                             placeholder="Enter count"
-                            className="input input-sm w-full font-mono text-center font-bold text-sm bg-white dark:bg-slate-900 border-brand/50 focus:border-brand"
+                            className="input input-sm w-full font-mono text-center font-semibold text-sm bg-white dark:bg-slate-900 border-brand/50 focus:border-brand"
                             value={pQty ?? ""}
-                            onChange={(e) => handlePhysicalQtyChange(d.id, e.target.value)}
+                            onChange={(e) =>
+                              handlePhysicalQtyChange(d.id, e.target.value)
+                            }
                           />
                         ) : (
                           <span className="font-mono font-bold text-sm text-slate-800 dark:text-slate-200">
@@ -1036,11 +1289,13 @@ export default function PhysicalStockTakeForm() {
                               isShortage
                                 ? "text-rose-600 dark:text-rose-400 font-bold"
                                 : isSurplus
-                                ? "text-emerald-600 dark:text-emerald-400 font-bold"
-                                : "text-slate-600"
+                                  ? "text-emerald-600 dark:text-emerald-400 font-bold"
+                                  : "text-slate-600"
                             }
                           >
-                            {vQty > 0 ? `+${vQty.toLocaleString()}` : vQty.toLocaleString()}
+                            {vQty > 0
+                              ? `+${vQty.toLocaleString()}`
+                              : vQty.toLocaleString()}
                           </span>
                         ) : (
                           <span className="text-slate-400">—</span>
@@ -1051,7 +1306,8 @@ export default function PhysicalStockTakeForm() {
                       <td className="py-2.5 px-3 text-right font-mono text-slate-700 dark:text-slate-300">
                         {hasCount && Math.abs(vQty) >= 0.0001 ? (
                           <span>
-                            GH₵ {Math.abs(Number(d.variance_value || 0)).toFixed(2)}
+                            GH₵{" "}
+                            {Math.abs(Number(d.variance_value || 0)).toFixed(2)}
                           </span>
                         ) : (
                           "—"
@@ -1065,7 +1321,9 @@ export default function PhysicalStockTakeForm() {
                             <select
                               className="input input-sm w-full text-xs"
                               value={d.variance_reason || ""}
-                              onChange={(e) => handleVarianceReasonChange(d.id, e.target.value)}
+                              onChange={(e) =>
+                                handleVarianceReasonChange(d.id, e.target.value)
+                              }
                             >
                               <option value="">Select Reason...</option>
                               {VARIANCE_REASONS.map((r) => (
@@ -1118,21 +1376,34 @@ export default function PhysicalStockTakeForm() {
             </h3>
             <div className="border-l-2 border-brand/40 pl-4 space-y-4">
               {!auditLogs.length && (
-                <div className="text-sm text-slate-500">No action logs recorded yet.</div>
+                <div className="text-sm text-slate-500">
+                  No action logs recorded yet.
+                </div>
               )}
               {auditLogs.map((log) => (
-                <div key={log.id} className="relative bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800 text-xs">
+                <div
+                  key={log.id}
+                  className="relative bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800 text-xs"
+                >
                   <div className="flex justify-between items-center font-semibold text-slate-800 dark:text-slate-200">
-                    <span className="text-brand font-bold uppercase">{log.action}</span>
+                    <span className="text-brand font-bold uppercase">
+                      {log.action}
+                    </span>
                     <span className="text-slate-400 font-mono">
-                      {log.created_at ? new Date(log.created_at).toLocaleString() : "-"}
+                      {log.created_at
+                        ? new Date(log.created_at).toLocaleString()
+                        : "-"}
                     </span>
                   </div>
                   <div className="text-slate-600 dark:text-slate-400 mt-1">
-                    Actor: <strong>{log.actor_username || log.actor_name || "User"}</strong>
+                    Actor:{" "}
+                    <strong>
+                      {log.actor_username || log.actor_name || "User"}
+                    </strong>
                     {log.old_status && log.new_status && (
                       <span className="ml-2">
-                        Status change: <code>{log.old_status}</code> → <code>{log.new_status}</code>
+                        Status change: <code>{log.old_status}</code> →{" "}
+                        <code>{log.new_status}</code>
                       </span>
                     )}
                   </div>
@@ -1153,13 +1424,18 @@ export default function PhysicalStockTakeForm() {
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full p-6 space-y-4 border border-slate-200 dark:border-slate-700">
             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <RotateCcw className="text-amber-600" size={18} /> Request Physical Recount
+              <RotateCcw className="text-amber-600" size={18} /> Request
+              Physical Recount
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-400">
-              The stock take will transition to <strong>RECOUNT_REQUIRED</strong> status. Existing counts will be saved into history, and re-verification will be requested.
+              The stock take will transition to{" "}
+              <strong>RECOUNT_REQUIRED</strong> status. Existing counts will be
+              saved into history, and re-verification will be requested.
             </p>
             <div>
-              <label className="label font-semibold text-xs">Recount Reason *</label>
+              <label className="label font-semibold text-xs">
+                Recount Reason *
+              </label>
               <textarea
                 className="input w-full h-24 mt-1 text-xs"
                 placeholder="Specify reason for recount..."
@@ -1194,10 +1470,12 @@ export default function PhysicalStockTakeForm() {
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full p-6 space-y-4 border border-slate-200 dark:border-slate-700">
             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <CheckCircle2 className="text-teal-600" size={18} /> Supervisor Authorization
+              <CheckCircle2 className="text-teal-600" size={18} /> Supervisor
+              Authorization
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-400">
-              Are you sure you want to approve this stock take? Approving authorizes inventory adjustments to be posted.
+              Are you sure you want to approve this stock take? Approving
+              authorizes inventory adjustments to be posted.
             </p>
             <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800 text-xs space-y-1">
               <div className="flex justify-between">
@@ -1206,7 +1484,13 @@ export default function PhysicalStockTakeForm() {
               </div>
               <div className="flex justify-between">
                 <span>Net Discrepancy Value:</span>
-                <strong className={summary.netVarianceVal < 0 ? "text-rose-600" : "text-emerald-600"}>
+                <strong
+                  className={
+                    summary.netVarianceVal < 0
+                      ? "text-rose-600"
+                      : "text-emerald-600"
+                  }
+                >
                   GH₵ {summary.netVarianceVal.toFixed(2)}
                 </strong>
               </div>
@@ -1237,10 +1521,13 @@ export default function PhysicalStockTakeForm() {
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-lg w-full p-6 space-y-4 border border-slate-200 dark:border-slate-700">
             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <CheckCircle2 className="text-emerald-600" size={18} /> Post Inventory Adjustments
+              <CheckCircle2 className="text-emerald-600" size={18} /> Post
+              Inventory Adjustments
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-400">
-              This action will atomically generate an official <strong>Inventory Adjustment</strong> document and post stock ledger entries for all verified discrepancies.
+              This action will atomically generate an official{" "}
+              <strong>Inventory Adjustment</strong> document and post stock
+              ledger entries for all verified discrepancies.
             </p>
 
             <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800 text-xs space-y-2">
@@ -1250,19 +1537,31 @@ export default function PhysicalStockTakeForm() {
               </div>
               <div className="flex justify-between font-medium">
                 <span>Discrepant Items:</span>
-                <strong className="text-rose-600">{summary.discrepanciesCount} items</strong>
+                <strong className="text-rose-600">
+                  {summary.discrepanciesCount} items
+                </strong>
               </div>
               <div className="flex justify-between font-medium">
                 <span>Total Shortage Value:</span>
-                <span className="text-rose-600">-GH₵ {summary.totalShortageVal.toFixed(2)}</span>
+                <span className="text-rose-600">
+                  -GH₵ {summary.totalShortageVal.toFixed(2)}
+                </span>
               </div>
               <div className="flex justify-between font-medium">
                 <span>Total Surplus Value:</span>
-                <span className="text-emerald-600">+GH₵ {summary.totalSurplusVal.toFixed(2)}</span>
+                <span className="text-emerald-600">
+                  +GH₵ {summary.totalSurplusVal.toFixed(2)}
+                </span>
               </div>
               <div className="flex justify-between font-bold pt-2 border-t border-slate-200 dark:border-slate-700 text-sm">
                 <span>Net Adjustment Impact:</span>
-                <span className={summary.netVarianceVal < 0 ? "text-rose-600" : "text-emerald-600"}>
+                <span
+                  className={
+                    summary.netVarianceVal < 0
+                      ? "text-rose-600"
+                      : "text-emerald-600"
+                  }
+                >
                   GH₵ {summary.netVarianceVal.toFixed(2)}
                 </span>
               </div>

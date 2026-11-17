@@ -12,7 +12,7 @@ import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
- * 
+ *
  * @returns {JSX.Element} The rendered component
  */
 export default function SupplierServiceRequestForm() {
@@ -83,16 +83,23 @@ export default function SupplierServiceRequestForm() {
     let mounted = true;
     async function load() {
       try {
-        const [itemsRes, deptRes, uomRes, usersRes, timelinesRes, wlRes] = await Promise.all([
-          api.get("/inventory/items").catch(() => ({ data: { items: [] } })),
-          api.get("/admin/departments").catch(() => ({ data: { items: [] } })),
-          api.get("/inventory/uoms").catch(() => ({ data: { items: [] } })),
-          api
-            .get("/admin/users", { params: { active: 1 } })
-            .catch(() => ({ data: { items: [] } })),
-          api.get("/purchase/service-setup/timelines").catch(() => ({ data: { items: [] } })),
-          api.get("/purchase/service-setup/work-locations").catch(() => ({ data: { items: [] } })),
-        ]);
+        const [itemsRes, deptRes, uomRes, usersRes, timelinesRes, wlRes] =
+          await Promise.all([
+            api.get("/inventory/items").catch(() => ({ data: { items: [] } })),
+            api
+              .get("/admin/departments")
+              .catch(() => ({ data: { items: [] } })),
+            api.get("/inventory/uoms").catch(() => ({ data: { items: [] } })),
+            api
+              .get("/admin/users", { params: { active: 1 } })
+              .catch(() => ({ data: { items: [] } })),
+            api
+              .get("/purchase/service-setup/timelines")
+              .catch(() => ({ data: { items: [] } })),
+            api
+              .get("/purchase/service-setup/work-locations")
+              .catch(() => ({ data: { items: [] } })),
+          ]);
         if (mounted) {
           setInventoryItems(itemsRes?.data?.items || []);
           setDepartments(deptRes?.data?.items || []);
@@ -287,7 +294,9 @@ export default function SupplierServiceRequestForm() {
                 : "Request items or services for purchase"}
             </p>
           </div>
-          <button onClick={() => window.history.back()} className="px-3 py-1.5 rounded bg-white text-brand hover:bg-slate-100 text-sm font-semibold"
+          <button
+            onClick={() => window.history.back()}
+            className="px-3 py-1.5 rounded bg-white text-brand hover:bg-slate-100 text-sm font-semibold"
           >
             ← Back to List
           </button>
@@ -412,7 +421,9 @@ export default function SupplierServiceRequestForm() {
               >
                 <option value="">Select timeline</option>
                 {timelines.map((t) => (
-                  <option key={t.id} value={t.name}>{t.name}</option>
+                  <option key={t.id} value={t.name}>
+                    {t.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -426,12 +437,14 @@ export default function SupplierServiceRequestForm() {
               >
                 <option value="">Select work location</option>
                 {workLocations.map((wl) => (
-                  <option key={wl.id} value={wl.name}>{wl.name}</option>
+                  <option key={wl.id} value={wl.name}>
+                    {wl.name}
+                  </option>
                 ))}
               </select>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
               <label className="label">Purpose / Justification</label>
@@ -462,9 +475,7 @@ export default function SupplierServiceRequestForm() {
               {form.requisition_type === "SERVICE" ? "Services" : "Items"}{" "}
               Requested
             </h3>
-            <div
-              className="rounded border border-[#dee2e6] overflow-x-auto"
-            >
+            <div className="rounded border border-[#dee2e6] overflow-x-auto">
               <table className="table w-full" style={{ tableLayout: "auto" }}>
                 <thead>
                   <tr>
@@ -477,9 +488,7 @@ export default function SupplierServiceRequestForm() {
                     <th className="w-20">Qty</th>
                     <th className="w-24">UOM</th>
                     <th className="w-32">Est. Unit Cost</th>
-                    <th className="w-32 text-right">
-                      Est. Total
-                    </th>
+                    <th className="w-32 text-right">Est. Total</th>
                     {canEdit && <th className="w-20"></th>}
                   </tr>
                 </thead>
@@ -694,9 +703,7 @@ export default function SupplierServiceRequestForm() {
                             <option value="">UOM</option>
                             {uoms.map((u) => (
                               <option key={u.id} value={u.uom_code}>
-                                {u.uom_name
-                                  ? `${u.uom_name} (${u.uom_code})`
-                                  : u.uom_code}
+                                {u.uom_code}
                               </option>
                             ))}
                           </select>
@@ -774,7 +781,9 @@ export default function SupplierServiceRequestForm() {
               <button
                 type="button"
                 className="inline-flex items-center justify-center px-6 py-2.5 rounded-lg text-sm font-semibold border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 shadow-sm"
-                onClick={() => navigate("/service-management/supplier-service-requests")}
+                onClick={() =>
+                  navigate("/service-management/supplier-service-requests")
+                }
               >
                 Back
               </button>
@@ -786,7 +795,9 @@ export default function SupplierServiceRequestForm() {
               <div className="mt-6 flex justify-end">
                 <button
                   className="btn"
-                  onClick={() => navigate("/service-management/supplier-service-requests")}
+                  onClick={() =>
+                    navigate("/service-management/supplier-service-requests")
+                  }
                 >
                   Back to List
                 </button>

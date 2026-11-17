@@ -6,7 +6,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Save, ClipboardCheck, Plus, Trash2 } from "lucide-react";
 import { api } from "../../../../api/client.js";
-import { useNavigate, useParams, useLocation, useSearchParams } from "react-router-dom";
+import {
+  useNavigate,
+  useParams,
+  useLocation,
+  useSearchParams,
+} from "react-router-dom";
 import { toast } from "react-toastify";
 import { filterByPrefix } from "@/utils/searchUtils.js";
 import { usePermission } from "@/auth/PermissionContext.jsx";
@@ -20,7 +25,8 @@ export default function PMPurchaseRequisitionForm() {
 
   const reqId = params?.id && params.id !== "new" ? Number(params.id) : null;
   const isNew = !reqId;
-  const isEditMode = location?.pathname?.endsWith("/edit") || searchParams.has("edit");
+  const isEditMode =
+    location?.pathname?.endsWith("/edit") || searchParams.has("edit");
   const isViewMode = !isNew && !isEditMode;
   const canEdit = !isViewMode;
   const disabled = isViewMode;
@@ -80,9 +86,16 @@ export default function PMPurchaseRequisitionForm() {
   const activeProjects = useMemo(() => {
     const list = Array.isArray(projects) ? projects : projects?.items || [];
     return list.filter((p) => {
-      if (form.project_id && String(form.project_id) === String(p.id)) return true;
+      if (form.project_id && String(form.project_id) === String(p.id))
+        return true;
       const st = String(p.project_status || p.status || "").toUpperCase();
-      if (st === "COMPLETED" || st === "CANCELLED" || st === "ARCHIVED" || st === "INACTIVE") return false;
+      if (
+        st === "COMPLETED" ||
+        st === "CANCELLED" ||
+        st === "ARCHIVED" ||
+        st === "INACTIVE"
+      )
+        return false;
       const isActive =
         p.is_active === "Y" ||
         p.is_active === 1 ||
@@ -102,20 +115,43 @@ export default function PMPurchaseRequisitionForm() {
     let mounted = true;
     async function loadReferenceData() {
       try {
-        const [itemsRes, projRes, deptRes, uomRes, usersRes] = await Promise.all([
-          api.get("/inventory/items").catch(() => ({ data: { items: [] } })),
-          api.get("/projects/projects").catch(() => ({ data: { items: [] } })),
-          api.get("/admin/departments").catch(() => ({ data: { items: [] } })),
-          api.get("/inventory/uoms").catch(() => ({ data: { items: [] } })),
-          api.get("/admin/users", { params: { active: 1 } }).catch(() => ({ data: { items: [] } })),
-        ]);
+        const [itemsRes, projRes, deptRes, uomRes, usersRes] =
+          await Promise.all([
+            api.get("/inventory/items").catch(() => ({ data: { items: [] } })),
+            api
+              .get("/projects/projects")
+              .catch(() => ({ data: { items: [] } })),
+            api
+              .get("/admin/departments")
+              .catch(() => ({ data: { items: [] } })),
+            api.get("/inventory/uoms").catch(() => ({ data: { items: [] } })),
+            api
+              .get("/admin/users", { params: { active: 1 } })
+              .catch(() => ({ data: { items: [] } })),
+          ]);
         if (mounted) {
-          setInventoryItems(itemsRes?.data?.items || (Array.isArray(itemsRes?.data) ? itemsRes.data : []));
-          setProjects(projRes?.data?.items || projRes?.data?.projects || (Array.isArray(projRes?.data) ? projRes.data : []));
-          setDepartments(deptRes?.data?.items || (Array.isArray(deptRes?.data) ? deptRes.data : []));
-          setUoms(uomRes?.data?.items || (Array.isArray(uomRes?.data) ? uomRes.data : []));
+          setInventoryItems(
+            itemsRes?.data?.items ||
+              (Array.isArray(itemsRes?.data) ? itemsRes.data : []),
+          );
+          setProjects(
+            projRes?.data?.items ||
+              projRes?.data?.projects ||
+              (Array.isArray(projRes?.data) ? projRes.data : []),
+          );
+          setDepartments(
+            deptRes?.data?.items ||
+              (Array.isArray(deptRes?.data) ? deptRes.data : []),
+          );
+          setUoms(
+            uomRes?.data?.items ||
+              (Array.isArray(uomRes?.data) ? uomRes.data : []),
+          );
           const usersList =
-            (usersRes?.data && usersRes.data.data && Array.isArray(usersRes.data.data.items) && usersRes.data.data.items) ||
+            (usersRes?.data &&
+              usersRes.data.data &&
+              Array.isArray(usersRes.data.data.items) &&
+              usersRes.data.data.items) ||
             (Array.isArray(usersRes?.data?.items) && usersRes.data.items) ||
             (Array.isArray(usersRes?.data) && usersRes.data) ||
             [];
@@ -150,7 +186,9 @@ export default function PMPurchaseRequisitionForm() {
           requested_by: data.requested_by || "",
           purpose: data.purpose || "",
           priority: data.priority || "MEDIUM",
-          required_date: data.required_date ? String(data.required_date).slice(0, 10) : "",
+          required_date: data.required_date
+            ? String(data.required_date).slice(0, 10)
+            : "",
           remarks: data.remarks || "",
           timeline: data.timeline || "",
         });
@@ -162,9 +200,12 @@ export default function PMPurchaseRequisitionForm() {
               description: i.description || i.item_name || "",
               qty: i.qty !== undefined ? Number(i.qty) : 1,
               uom: i.uom || "PCS",
-              estimated_unit_cost: i.estimated_unit_cost !== undefined ? Number(i.estimated_unit_cost) : "",
+              estimated_unit_cost:
+                i.estimated_unit_cost !== undefined
+                  ? Number(i.estimated_unit_cost)
+                  : "",
               remarks: i.remarks || "",
-            }))
+            })),
           );
           const initQueries = {};
           existingItems.forEach((x, idx) => {
@@ -206,11 +247,14 @@ export default function PMPurchaseRequisitionForm() {
         item_id: itemId,
         description: item ? item.item_name : next[idx].description,
         uom: item?.uom || next[idx].uom || "PCS",
-        estimated_unit_cost: item?.cost_price ? Number(item.cost_price) : next[idx].estimated_unit_cost,
+        estimated_unit_cost: item?.cost_price
+          ? Number(item.cost_price)
+          : next[idx].estimated_unit_cost,
       };
       return next;
     });
-    const key = form.requisition_type === "SERVICE" ? `svc-${idx}` : `item-${idx}`;
+    const key =
+      form.requisition_type === "SERVICE" ? `svc-${idx}` : `item-${idx}`;
     setItemQueries((prev) => ({
       ...prev,
       [key]: item ? item.item_name : "",
@@ -271,7 +315,9 @@ export default function PMPurchaseRequisitionForm() {
       }
 
       const validLines = lines
-        .filter((l) => (l.description && String(l.description).trim()) || l.item_id)
+        .filter(
+          (l) => (l.description && String(l.description).trim()) || l.item_id,
+        )
         .map((l) => ({
           item_id: l.item_id ? Number(l.item_id) : null,
           description: (l.description || "").trim(),
@@ -338,7 +384,9 @@ export default function PMPurchaseRequisitionForm() {
           </div>
           <button
             type="button"
-            onClick={() => navigate("/project-management/purchase-requisitions")}
+            onClick={() =>
+              navigate("/project-management/purchase-requisitions")
+            }
             className="btn btn-secondary inline-flex items-center gap-1.5 text-sm"
           >
             <ArrowLeft size={16} /> Back to List
@@ -347,7 +395,7 @@ export default function PMPurchaseRequisitionForm() {
 
         <div className="px-6 py-5 space-y-5">
           {error && <div className="alert alert-error">{error}</div>}
-          
+
           {headerData?.status && (
             <div className="flex gap-2 items-center text-sm">
               <span className="font-semibold text-slate-500">Status:</span>
@@ -356,14 +404,14 @@ export default function PMPurchaseRequisitionForm() {
                   headerData.status === "APPROVED"
                     ? "bg-emerald-100 text-emerald-700"
                     : headerData.status === "REJECTED"
-                    ? "bg-red-100 text-red-700"
-                    : headerData.status === "PENDING_APPROVAL"
-                    ? "bg-yellow-100 text-yellow-800"
-                    : headerData.status === "SUBMITTED"
-                    ? "bg-blue-100 text-blue-700"
-                    : headerData.status === "CANCELLED"
-                    ? "bg-orange-100 text-orange-700"
-                    : "bg-slate-100 text-slate-700"
+                      ? "bg-red-100 text-red-700"
+                      : headerData.status === "PENDING_APPROVAL"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : headerData.status === "SUBMITTED"
+                          ? "bg-blue-100 text-blue-700"
+                          : headerData.status === "CANCELLED"
+                            ? "bg-orange-100 text-orange-700"
+                            : "bg-slate-100 text-slate-700"
                 }`}
               >
                 {headerData.status}
@@ -387,7 +435,9 @@ export default function PMPurchaseRequisitionForm() {
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="label">Requisition Date <span className="text-red-500">*</span></label>
+              <label className="label">
+                Requisition Date <span className="text-red-500">*</span>
+              </label>
               <input
                 type="date"
                 className="input"
@@ -411,7 +461,9 @@ export default function PMPurchaseRequisitionForm() {
 
             {/* Project Field: Active projects from pm_projects */}
             <div className="flex flex-col gap-1">
-              <label className="label">Project <span className="text-red-500">*</span></label>
+              <label className="label">
+                Project <span className="text-red-500">*</span>
+              </label>
               <select
                 className="input"
                 value={form.project_id}
@@ -422,7 +474,8 @@ export default function PMPurchaseRequisitionForm() {
                 <option value="">-- Select Active Project --</option>
                 {activeProjects.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.project_code ? `${p.project_code} - ` : ""}{p.project_name}
+                    {p.project_code ? `${p.project_code} - ` : ""}
+                    {p.project_name}
                   </option>
                 ))}
               </select>
@@ -524,7 +577,8 @@ export default function PMPurchaseRequisitionForm() {
           {/* Line Items Section */}
           <div className="mt-6">
             <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">
-              {form.requisition_type === "SERVICE" ? "Services" : "Items"} Requested
+              {form.requisition_type === "SERVICE" ? "Services" : "Items"}{" "}
+              Requested
             </h3>
             <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
               <table className="table w-full" style={{ tableLayout: "auto" }}>
@@ -540,7 +594,8 @@ export default function PMPurchaseRequisitionForm() {
                 </thead>
                 <tbody>
                   {lines.map((l, i) => {
-                    const lineTotal = Number(l.qty || 0) * Number(l.estimated_unit_cost || 0);
+                    const lineTotal =
+                      Number(l.qty || 0) * Number(l.estimated_unit_cost || 0);
                     return (
                       <tr key={i}>
                         {/* Autocomplete Description Input */}
@@ -556,13 +611,24 @@ export default function PMPurchaseRequisitionForm() {
                                   : "Type to search items or enter description"
                               }
                               value={
-                                itemQueries[form.requisition_type === "SERVICE" ? `svc-${i}` : `item-${i}`] !== undefined
-                                  ? itemQueries[form.requisition_type === "SERVICE" ? `svc-${i}` : `item-${i}`]
+                                itemQueries[
+                                  form.requisition_type === "SERVICE"
+                                    ? `svc-${i}`
+                                    : `item-${i}`
+                                ] !== undefined
+                                  ? itemQueries[
+                                      form.requisition_type === "SERVICE"
+                                        ? `svc-${i}`
+                                        : `item-${i}`
+                                    ]
                                   : l.description || ""
                               }
                               onChange={(e) => {
                                 const val = e.target.value;
-                                const queryKey = form.requisition_type === "SERVICE" ? `svc-${i}` : `item-${i}`;
+                                const queryKey =
+                                  form.requisition_type === "SERVICE"
+                                    ? `svc-${i}`
+                                    : `item-${i}`;
                                 setItemQueries((prev) => ({
                                   ...prev,
                                   [queryKey]: val,
@@ -574,13 +640,25 @@ export default function PMPurchaseRequisitionForm() {
                               }}
                               onKeyDown={(e) => {
                                 if (e.key === "Enter") {
-                                  const queryKey = form.requisition_type === "SERVICE" ? `svc-${i}` : `item-${i}`;
-                                  const query = (itemQueries[queryKey] || "").trim();
-                                  const optionsList = form.requisition_type === "SERVICE" ? serviceOptions : itemOptions;
+                                  const queryKey =
+                                    form.requisition_type === "SERVICE"
+                                      ? `svc-${i}`
+                                      : `item-${i}`;
+                                  const query = (
+                                    itemQueries[queryKey] || ""
+                                  ).trim();
+                                  const optionsList =
+                                    form.requisition_type === "SERVICE"
+                                      ? serviceOptions
+                                      : itemOptions;
                                   const results = query
                                     ? filterByPrefix(optionsList, {
                                         query,
-                                        searchFields: ["item_code", "item_name", "barcode"],
+                                        searchFields: [
+                                          "item_code",
+                                          "item_name",
+                                          "barcode",
+                                        ],
                                       })
                                     : [];
                                   if (!query || !results.length) return;
@@ -595,13 +673,25 @@ export default function PMPurchaseRequisitionForm() {
                               disabled={disabled}
                             />
                             {(() => {
-                              const queryKey = form.requisition_type === "SERVICE" ? `svc-${i}` : `item-${i}`;
-                              const query = (itemQueries[queryKey] || "").trim();
-                              const optionsList = form.requisition_type === "SERVICE" ? serviceOptions : itemOptions;
+                              const queryKey =
+                                form.requisition_type === "SERVICE"
+                                  ? `svc-${i}`
+                                  : `item-${i}`;
+                              const query = (
+                                itemQueries[queryKey] || ""
+                              ).trim();
+                              const optionsList =
+                                form.requisition_type === "SERVICE"
+                                  ? serviceOptions
+                                  : itemOptions;
                               const results = query
                                 ? filterByPrefix(optionsList, {
                                     query,
-                                    searchFields: ["item_code", "item_name", "barcode"],
+                                    searchFields: [
+                                      "item_code",
+                                      "item_name",
+                                      "barcode",
+                                    ],
                                   })
                                 : [];
                               return results.length ? (
@@ -620,7 +710,10 @@ export default function PMPurchaseRequisitionForm() {
                                         });
                                       }}
                                     >
-                                      <span className="font-semibold text-brand-700 dark:text-brand-400">{o.item_code}</span> - {o.item_name}
+                                      <span className="font-semibold text-brand-700 dark:text-brand-400">
+                                        {o.item_code}
+                                      </span>{" "}
+                                      - {o.item_name}
                                     </button>
                                   ))}
                                 </div>
@@ -637,7 +730,9 @@ export default function PMPurchaseRequisitionForm() {
                             step="any"
                             className="input text-sm w-full"
                             value={l.qty}
-                            onChange={(e) => updateLine(i, "qty", e.target.value)}
+                            onChange={(e) =>
+                              updateLine(i, "qty", e.target.value)
+                            }
                             disabled={disabled}
                           />
                         </td>
@@ -647,13 +742,15 @@ export default function PMPurchaseRequisitionForm() {
                           <select
                             className="input text-sm w-full"
                             value={l.uom}
-                            onChange={(e) => updateLine(i, "uom", e.target.value)}
+                            onChange={(e) =>
+                              updateLine(i, "uom", e.target.value)
+                            }
                             disabled={disabled}
                           >
                             <option value="">UOM</option>
                             {uoms.map((u) => (
                               <option key={u.id} value={u.uom_code}>
-                                {u.uom_name ? `${u.uom_name} (${u.uom_code})` : u.uom_code}
+                                {u.uom_code}
                               </option>
                             ))}
                           </select>
@@ -667,7 +764,13 @@ export default function PMPurchaseRequisitionForm() {
                             step="any"
                             className="input text-sm w-full"
                             value={l.estimated_unit_cost}
-                            onChange={(e) => updateLine(i, "estimated_unit_cost", e.target.value)}
+                            onChange={(e) =>
+                              updateLine(
+                                i,
+                                "estimated_unit_cost",
+                                e.target.value,
+                              )
+                            }
                             disabled={disabled}
                           />
                         </td>
@@ -701,7 +804,11 @@ export default function PMPurchaseRequisitionForm() {
 
             {canEdit && (
               <div className="mt-3">
-                <button type="button" className="btn btn-secondary text-xs inline-flex items-center gap-1.5" onClick={addLine}>
+                <button
+                  type="button"
+                  className="btn btn-secondary text-xs inline-flex items-center gap-1.5"
+                  onClick={addLine}
+                >
                   + Add Line
                 </button>
               </div>
@@ -735,7 +842,9 @@ export default function PMPurchaseRequisitionForm() {
               <button
                 type="button"
                 className="btn btn-secondary text-sm"
-                onClick={() => navigate("/project-management/purchase-requisitions")}
+                onClick={() =>
+                  navigate("/project-management/purchase-requisitions")
+                }
               >
                 Back
               </button>
@@ -747,7 +856,9 @@ export default function PMPurchaseRequisitionForm() {
               <button
                 type="button"
                 className="btn btn-secondary px-6 py-2"
-                onClick={() => navigate("/project-management/purchase-requisitions")}
+                onClick={() =>
+                  navigate("/project-management/purchase-requisitions")
+                }
               >
                 Back to List
               </button>

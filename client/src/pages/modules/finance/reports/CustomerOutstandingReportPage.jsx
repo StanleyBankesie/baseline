@@ -347,7 +347,7 @@ export default function CustomerOutstandingReportPage({ backPath = "/finance", b
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-slate-600 dark:text-slate-400">As of Date:</span>
+            <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">As of Date:</span>
             <input className="input input-bordered input-sm" type="date" value={asOf}
               onChange={(e) => setAsOf(e.target.value)} />
           </div>

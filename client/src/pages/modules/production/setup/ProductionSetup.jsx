@@ -176,13 +176,13 @@ export default function ProductionSetup() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Default Production Warehouse */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                   default production warehouse *
                 </label>
                 <select
                   value={settings.default_warehouse_id || ""}
                   onChange={(e) => setSettings({ ...settings, default_warehouse_id: e.target.value })}
-                  className="input w-full font-bold"
+                  className="input w-full font-semibold"
                 >
                   <option value="">Select Default Production Warehouse...</option>
                   {prodWarehouses.map((w) => (
@@ -196,13 +196,13 @@ export default function ProductionSetup() {
 
               {/* Default Source Warehouse (Fetched from inv_warehouses table) */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                   default source warehouse *
                 </label>
                 <select
                   value={settings.default_source_warehouse_id || ""}
                   onChange={(e) => setSettings({ ...settings, default_source_warehouse_id: e.target.value })}
-                  className="input w-full font-bold"
+                  className="input w-full font-semibold"
                 >
                   <option value="">Select Default Source Warehouse...</option>
                   {invWarehouses.map((w) => (
@@ -216,7 +216,7 @@ export default function ProductionSetup() {
 
               {/* Tolerances */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                   Default Scrap Allowance %
                 </label>
                 <input
@@ -227,14 +227,14 @@ export default function ProductionSetup() {
                     const val = e.target.value;
                     setSettings({ ...settings, default_scrap_allowance_pct: val === "" ? "" : parseFloat(val) });
                   }}
-                  className="input w-full font-bold"
+                  className="input w-full font-semibold"
                 />
               </div>
 
               <div className="space-y-4 pt-4 col-span-1 md:col-span-2 lg:col-span-3 border-t border-slate-100 dark:border-slate-700">
                 {/* Field 1: Auto-generate Job Cards upon Order Release */}
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
                     Auto-generate Job Cards upon Order Release
                   </label>
                   <div className="flex items-center gap-6">
@@ -263,7 +263,7 @@ export default function ProductionSetup() {
 
                 {/* Field 2: Auto-generate Material Requisition */}
                 <div className="space-y-1.5 pt-2">
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
                     Auto-generate Material Requisition
                   </label>
                   <div className="flex items-center gap-6">

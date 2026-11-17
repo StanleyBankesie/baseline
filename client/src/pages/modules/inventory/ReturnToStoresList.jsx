@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 import { Send, X, Activity, Clock, CheckCircle2, RotateCcw } from "lucide-react";
 /**
  * @fileoverview ReturnToStoresList component.
@@ -526,8 +527,35 @@ export default function ReturnToStoresList() {
         </div>
       </div>
 
-            {/* Metric Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            
+
+      <div className="card">
+        <div className="card-header bg-brand text-white rounded-t-lg p-4">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <span>↩️</span> Return to Stores
+              </h1>
+              <p className="text-sm text-brand-100 mt-1">
+                Manage material returns and approvals
+              </p>
+            </div>
+            <div className="grid grid-cols-2 sm:flex gap-2">
+              <Link to="/inventory?section=Stock%20Operations" className="btn btn-secondary">
+                Return to Menu
+              </Link>
+              <Link
+                to="/inventory/return-to-stores/new"
+                className="btn btn-primary bg-[#2E7D9F] hover:bg-[#24637e] text-white px-4 py-2 rounded-lg flex items-center gap-2"
+              >
+                <span>+</span> New Return
+              </Link>
+            </div>
+          </div>
+
+      {/* Metric Stats Cards Carousel */}
+      {/* Metric Stats Cards */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="md:grid-cols-4" gapClass="gap-4">
         {[
           {
             label: "Active Returns to Stores",
@@ -554,7 +582,7 @@ export default function ReturnToStoresList() {
             color: "bg-emerald-600 text-white",
           },
         ].map((stat, i) => (
-          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+          <div key={i} className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
             <div>
               <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 {stat.label}
@@ -568,31 +596,9 @@ export default function ReturnToStoresList() {
             </div>
           </div>
         ))}
-      </div>
+      </MobileMovingCarousel>
 
-      <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg p-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <span>↩️</span> Return to Stores
-              </h1>
-              <p className="text-sm text-brand-100 mt-1">
-                Manage material returns and approvals
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Link to="/inventory?section=Stock%20Operations" className="btn btn-secondary">
-                Return to Menu
-              </Link>
-              <Link
-                to="/inventory/return-to-stores/new"
-                className="btn btn-primary bg-[#2E7D9F] hover:bg-[#24637e] text-white px-4 py-2 rounded-lg flex items-center gap-2"
-              >
-                <span>+</span> New Return
-              </Link>
-            </div>
-          </div>
+
         </div>
         <div className="card-body p-0">
           {loading ? (

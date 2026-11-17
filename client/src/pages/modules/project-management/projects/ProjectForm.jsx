@@ -9,6 +9,8 @@ import React, { useEffect, useState, useRef, useMemo } from "react";
 import Swal from "sweetalert2";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
+  Layers,
+  ListTodo,
   ArrowLeft,
   Save,
   Loader2,
@@ -17,7 +19,6 @@ import {
   User,
   Activity,
   DollarSign,
-  AlertCircle,
   Clock,
   Flag,
   FileText,
@@ -50,6 +51,13 @@ export default function ProjectForm() {
   const [saving, setSaving] = useState(false);
   const [managers, setManagers] = useState([]);
   const [clients, setClients] = useState([]);
+  const [currencies, setCurrencies] = useState([
+    { code: "GHS", symbol: "GH₵", name: "Ghana Cedis" },
+    { code: "USD", symbol: "$", name: "US Dollar" },
+    { code: "EUR", symbol: "€", name: "Euro" },
+    { code: "GBP", symbol: "£", name: "British Pound" },
+    { code: "NGN", symbol: "₦", name: "Nigerian Naira" },
+  ]);
   const [showContractSection, setShowContractSection] = useState(false);
   const [isManualCode, setIsManualCode] = useState(Boolean(isEdit));
   const [generatingCode, setGeneratingCode] = useState(false);
@@ -84,15 +92,17 @@ export default function ProjectForm() {
     manager_id: "",
     manager_name: "",
     budget: 0,
+    currency: "GHS",
+    contract_currency: "GHS",
     project_priority: "MEDIUM",
     project_status: "IN_PROGRESS",
     start_date: "",
     end_date: "",
     remarks: "",
+    scopes: [],
     milestones: [],
     is_active: true,
   });
-
 
   // Client / Organization search & SweetAlert states
   const [clientSearch, setClientSearch] = useState("");
@@ -101,9 +111,92 @@ export default function ProjectForm() {
   const lastAlertedClientSearchRef = useRef("");
   const clientSearchTimeoutRef = useRef(null);
 
-  // Milestone Modal states
-  const [milestoneModalOpen, setMilestoneModalOpen] = useState(false);
-  const [draftMilestones, setDraftMilestones] = useState([]);
+  // Project Scope, WBS & Tasks Modal states
+  const [scopeModalOpen, setScopeModalOpen] = useState(false);
+  const [draftScopes, setDraftScopes] = useState([]);
+  const [savingScope, setSavingScope] = useState(false);
+
+  const openScopeModal = () => {
+    const rawScopes =
+      form.scopes && form.scopes.length
+        ? JSON.parse(JSON.stringify(form.scopes))
+        : form.milestones && form.milestones.length
+          ? JSON.parse(JSON.stringify(form.milestones))
+          : [];
+
+    const normalized = rawScopes.map((scope, sIdx) => {
+      let wbsList = [];
+      const defaultStart = scope.start_date || form.start_date || "";
+      const defaultEnd =
+        scope.due_date || scope.end_date || form.end_date || "";
+
+      if (Array.isArray(scope.wbs_list) && scope.wbs_list.length > 0) {
+        wbsList = scope.wbs_list.map((w, wi) => ({
+          id: w.id || Date.now() + wi,
+          wbs: w.wbs || w.wbs_code || `${sIdx + 1}.${wi + 1}`,
+          start_date: w.start_date || defaultStart,
+          end_date: w.end_date || w.due_date || defaultEnd,
+          tasks: Array.isArray(w.tasks)
+            ? w.tasks.map((t) => ({
+                ...t,
+                id: t.id || undefined,
+                task_title: t.task_title || t.title || "",
+                duration_unit: t.duration_unit || "Days",
+                status:
+                  t.status || (t.assigned_to_id ? "IN_PROGRESS" : "PENDING"),
+              }))
+            : [],
+        }));
+      } else if (Array.isArray(scope.tasks) && scope.tasks.length > 0) {
+        const map = new Map();
+        scope.tasks.forEach((t, ti) => {
+          const wKey = (
+            t.wbs_code ||
+            t.wbs ||
+            scope.wbs_code ||
+            scope.wbs ||
+            `${sIdx + 1}.1`
+          ).trim();
+          if (!map.has(wKey)) {
+            map.set(wKey, {
+              id: Date.now() + ti,
+              wbs: wKey,
+              start_date: t.start_date || defaultStart,
+              end_date: t.end_date || t.due_date || defaultEnd,
+              tasks: [],
+            });
+          }
+          map.get(wKey).tasks.push({
+            ...t,
+            id: t.id || undefined,
+            task_title: t.task_title || t.title || "",
+            duration_unit: t.duration_unit || "Days",
+            status: t.status || (t.assigned_to_id ? "IN_PROGRESS" : "PENDING"),
+          });
+        });
+        wbsList = Array.from(map.values());
+      } else {
+        wbsList = [
+          {
+            id: Date.now(),
+            wbs: scope.wbs || scope.wbs_code || `${sIdx + 1}.1`,
+            start_date: defaultStart,
+            end_date: defaultEnd,
+            tasks: [],
+          },
+        ];
+      }
+      return {
+        ...scope,
+        name: scope.name || scope.title || `Scope ${sIdx + 1}`,
+        title: scope.name || scope.title || `Scope ${sIdx + 1}`,
+        wbs_list: wbsList,
+      };
+    });
+
+    setDraftScopes(normalized);
+    setScopeModalOpen(true);
+  };
 
   // Sync clientSearch with form.client_name
   useEffect(() => {
@@ -140,9 +233,12 @@ export default function ProjectForm() {
       clientSearchTimeoutRef.current = setTimeout(() => {
         const lower = trimmed.toLowerCase();
         const matches = clients.filter((c) =>
-          (c.customer_name || c.name || "").toLowerCase().includes(lower)
+          (c.customer_name || c.name || "").toLowerCase().includes(lower),
         );
-        if (matches.length === 0 && lastAlertedClientSearchRef.current !== lower) {
+        if (
+          matches.length === 0 &&
+          lastAlertedClientSearchRef.current !== lower
+        ) {
           lastAlertedClientSearchRef.current = lower;
           Swal.fire({
             title: "Client Not Found",
@@ -153,9 +249,12 @@ export default function ProjectForm() {
             confirmButtonColor: "#0284c7",
             cancelButtonColor: "#64748b",
             customClass: {
-              popup: "rounded-2xl dark:bg-slate-900 dark:text-white shadow-2xl border border-slate-200 dark:border-slate-800",
-              confirmButton: "btn btn-primary px-4 py-2 text-sm font-semibold rounded-xl",
-              cancelButton: "btn btn-secondary px-4 py-2 text-sm font-semibold rounded-xl",
+              popup:
+                "rounded-2xl dark:bg-slate-900 dark:text-white shadow-2xl border border-slate-200 dark:border-slate-800",
+              confirmButton:
+                "btn btn-primary px-4 py-2 text-sm font-semibold rounded-xl",
+              cancelButton:
+                "btn btn-secondary px-4 py-2 text-sm font-semibold rounded-xl",
             },
           }).then((result) => {
             if (result.isConfirmed) {
@@ -174,23 +273,16 @@ export default function ProjectForm() {
         c.is_active === "1" ||
         c.is_active === true ||
         c.is_active === null ||
-        c.is_active === undefined
+        c.is_active === undefined,
     );
     if (!clientSearch || !clientSearch.trim()) return activeList;
     const lower = clientSearch.trim().toLowerCase();
     return activeList.filter((c) =>
-      (c.customer_name || c.name || "").toLowerCase().includes(lower)
+      (c.customer_name || c.name || "").toLowerCase().includes(lower),
     );
   }, [clients, clientSearch]);
 
-  const openMilestoneModal = () => {
-    setDraftMilestones(
-      form.milestones && form.milestones.length
-        ? JSON.parse(JSON.stringify(form.milestones))
-        : []
-    );
-    setMilestoneModalOpen(true);
-  };
+  const openMilestoneModal = openScopeModal;
 
   useEffect(() => {
     fetchAuxiliaryData();
@@ -219,6 +311,25 @@ export default function ProjectForm() {
       const res = await api.get("/sales/customers?service_customer=Y");
       setClients(res.data?.items || res.data?.data?.items || []);
     } catch (e) {}
+
+    // Fetch active currencies from fin_currencies
+    try {
+      const curRes = await api.get("/finance/currencies", {
+        params: { active: 1 },
+      });
+      const curList =
+        curRes.data?.items ||
+        curRes.data?.data?.items ||
+        (Array.isArray(curRes.data) ? curRes.data : []);
+      if (curList && curList.length > 0) {
+        setCurrencies(curList);
+      }
+    } catch (e) {
+      console.warn(
+        "Could not load fin_currencies, using default currencies",
+        e,
+      );
+    }
   };
 
   const fetchProject = async () => {
@@ -230,18 +341,20 @@ export default function ProjectForm() {
         const parsedAttachments = Array.isArray(item.attachments)
           ? item.attachments
           : item.attachments && typeof item.attachments === "string"
-          ? JSON.parse(item.attachments)
-          : item.contract_file_url
-          ? [
-              {
-                url: item.contract_file_url,
-                filename: item.contract_file_url.split("/").pop(),
-              },
-            ]
-          : [];
+            ? JSON.parse(item.attachments)
+            : item.contract_file_url
+              ? [
+                  {
+                    url: item.contract_file_url,
+                    filename: item.contract_file_url.split("/").pop(),
+                  },
+                ]
+              : [];
 
         setForm({
           ...item,
+          currency: item.currency || "GHS",
+          contract_currency: item.contract_currency || item.currency || "GHS",
           start_date: item.start_date ? item.start_date.split("T")[0] : "",
           end_date: item.end_date ? item.end_date.split("T")[0] : "",
           practical_completion_date: item.practical_completion_date
@@ -251,7 +364,14 @@ export default function ProjectForm() {
             ? item.final_completion_date.split("T")[0]
             : "",
           attachments: parsedAttachments,
-          milestones: item.milestones || [],
+          scopes:
+            item.scopes && item.scopes.length > 0
+              ? item.scopes
+              : item.milestones || [],
+          milestones:
+            item.scopes && item.scopes.length > 0
+              ? item.scopes
+              : item.milestones || [],
           is_active: item.is_active !== "N",
         });
 
@@ -286,7 +406,10 @@ export default function ProjectForm() {
           .replace(/[^a-zA-Z0-9]/g, "")
           .toUpperCase();
       } else if (words.length === 1) {
-        prefix = words[0].slice(0, 3).replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+        prefix = words[0]
+          .slice(0, 3)
+          .replace(/[^a-zA-Z0-9]/g, "")
+          .toUpperCase();
       }
     }
     if (!prefix) prefix = "PRJ";
@@ -411,7 +534,7 @@ export default function ProjectForm() {
             {/* Project Code with Auto-Creation Support */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+                <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
                   Project Code
                 </label>
                 {!isEdit && (
@@ -424,7 +547,10 @@ export default function ProjectForm() {
                     className="text-[11px] text-brand-700 dark:text-brand-400 hover:underline flex items-center gap-1 font-medium"
                     title="Auto-generate code based on title and start date"
                   >
-                    <Sparkles size={11} className={generatingCode ? "animate-spin" : ""} />
+                    <Sparkles
+                      size={11}
+                      className={generatingCode ? "animate-spin" : ""}
+                    />
                     <span>Auto-create</span>
                   </button>
                 )}
@@ -432,7 +558,7 @@ export default function ProjectForm() {
               <div className="relative">
                 <input
                   type="text"
-                  className="input w-full font-mono text-xs"
+                  className="input w-full font-semibold text-xs"
                   placeholder="Auto (e.g. KNI/11/2026/001)"
                   value={form.project_code}
                   onChange={(e) => {
@@ -456,7 +582,7 @@ export default function ProjectForm() {
 
             {/* Project Title */}
             <div className="space-y-1.5 md:col-span-1 lg:col-span-2">
-              <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+              <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
                 Project Title <span className="text-red-500">*</span>
               </label>
               <input
@@ -473,7 +599,7 @@ export default function ProjectForm() {
 
             {/* Priority (from Section B) */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+              <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
                 Priority
               </label>
               <select
@@ -491,7 +617,7 @@ export default function ProjectForm() {
 
             {/* Client / Organization */}
             <div className="space-y-1.5 md:col-span-2" ref={clientContainerRef}>
-              <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+              <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
                 Client / Organization
               </label>
 
@@ -540,7 +666,10 @@ export default function ProjectForm() {
                         >
                           <span>{c.customer_name}</span>
                           {form.client_name === c.customer_name && (
-                            <CheckCircle size={14} className="text-brand-600 dark:text-brand-400" />
+                            <CheckCircle
+                              size={14}
+                              className="text-brand-600 dark:text-brand-400"
+                            />
                           )}
                         </div>
                       ))
@@ -553,7 +682,9 @@ export default function ProjectForm() {
                           type="button"
                           onClick={() => {
                             setIsClientOpen(false);
-                            navigate("/project-management/setup?tab=clients&new=true");
+                            navigate(
+                              "/project-management/setup?tab=clients&new=true",
+                            );
                           }}
                           className="btn btn-primary text-xs px-3 py-1.5 inline-flex items-center gap-1.5 font-semibold mx-auto"
                         >
@@ -568,7 +699,7 @@ export default function ProjectForm() {
 
             {/* Project Manager: Populates Full Name directly from adm_users */}
             <div className="space-y-1.5 md:col-span-2">
-              <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+              <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
                 Project Manager
               </label>
               <div className="relative">
@@ -593,9 +724,7 @@ export default function ProjectForm() {
                   {managers.map((m) => {
                     const mId = m.id || m.user_id;
                     const fullName = m.full_name?.trim();
-                    const label = fullName
-                      ? `${fullName} (${m.username})`
-                      : m.username;
+                    const label = fullName || m.username;
                     return (
                       <option key={mId} value={mId}>
                         {label}
@@ -612,7 +741,7 @@ export default function ProjectForm() {
 
             {/* Start Date */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+              <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
                 Start Date
               </label>
               <input
@@ -628,7 +757,7 @@ export default function ProjectForm() {
 
             {/* Target End Date */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+              <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
                 Target End Date
               </label>
               <input
@@ -640,19 +769,38 @@ export default function ProjectForm() {
               />
             </div>
 
-            {/* Budget (from Section B, seamlessly aligned) */}
+            {/* Budget & Multiple Currency Selection (from fin_currencies) */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
-                Estimated Budget (GHS)
+              <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+                Estimated Budget ({form.currency || "GHS"})
               </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">
-                  GHS
-                </span>
+              <div className="flex rounded-xl overflow-hidden shadow-xs border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus-within:ring-2 focus-within:ring-brand-500/20 focus-within:border-brand-500">
+                <select
+                  value={form.currency || "GHS"}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setForm((prev) => ({
+                      ...prev,
+                      currency: val,
+                      contract_currency:
+                        prev.contract_currency === prev.currency || !prev.contract_currency
+                          ? val
+                          : prev.contract_currency,
+                    }));
+                  }}
+                  className="bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-brand-700 dark:text-brand-300 px-3 py-2 border-r border-slate-200 dark:border-slate-700 outline-none cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-750 transition-colors"
+                  title="Select Currency"
+                >
+                  {currencies.map((c) => (
+                    <option key={c.id || c.code} value={c.code}>
+                      {c.code}
+                    </option>
+                  ))}
+                </select>
                 <input
                   type="number"
                   step="0.01"
-                  className="input w-full pl-12 font-semibold"
+                  className="w-full px-3 py-2 text-sm bg-transparent border-0 outline-none font-semibold text-slate-800 dark:text-slate-100"
                   placeholder="0.00"
                   value={form.budget}
                   onChange={(e) => setForm({ ...form, budget: e.target.value })}
@@ -662,7 +810,7 @@ export default function ProjectForm() {
 
             {/* Active / Inactive Status */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+              <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
                 Active / Inactive
               </label>
               <select
@@ -689,11 +837,11 @@ export default function ProjectForm() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+                <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
                   Workflow Stage
                 </label>
                 <select
-                  className="input w-full font-bold text-xs"
+                  className="input w-full font-semibold text-xs"
                   value={form.project_status}
                   onChange={(e) =>
                     setForm({ ...form, project_status: e.target.value })
@@ -712,104 +860,104 @@ export default function ProjectForm() {
                   ))}
                 </select>
               </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
-                  Active Status
-                </label>
-                <select
-                  className="input w-full font-bold text-xs"
-                  value={form.is_active ? "Y" : "N"}
-                  onChange={(e) =>
-                    setForm({ ...form, is_active: e.target.value === "Y" })
-                  }
-                >
-                  <option value="Y">Active</option>
-                  <option value="N">Inactive</option>
-                </select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
-                  Practical Completion Date
-                </label>
-                <input
-                  type="date"
-                  className="input w-full text-xs"
-                  value={form.practical_completion_date}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      practical_completion_date: e.target.value,
-                    })
-                  }
-                />
-              </div>
             </div>
           </div>
 
-          {/* Project Milestones & Timeline Field */}
+          {/* Project Scope Field */}
           <div className="space-y-1.5 pt-2">
-            <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
-              Project Milestones & Timeline
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+                Project Scope
+              </label>
+              {form.scopes && form.scopes.length > 0 && (
+                <span className="text-[11px] font-semibold text-slate-500">
+                  {form.scopes.length}{" "}
+                  {form.scopes.length === 1 ? "Scope" : "Scopes"} ·{" "}
+                  {form.scopes.reduce(
+                    (acc, s) =>
+                      acc +
+                      (s.wbs_list?.length || (s.wbs_code ? 1 : 0)),
+                    0,
+                  )}{" "}
+                  Project Work Plans/WBS
+                </span>
+              )}
+            </div>
 
-            {/* Interactive Card */}
+            {/* Interactive Scope Card */}
             <div
-              onClick={openMilestoneModal}
-              className="group cursor-pointer rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3.5 hover:border-brand-500/50 transition-all shadow-xs"
+              onClick={openScopeModal}
+              className="group cursor-pointer rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 hover:border-brand-500/50 hover:shadow-sm transition-all"
             >
-              {form.milestones && form.milestones.length > 0 ? (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                    <span className="font-semibold text-slate-700 dark:text-slate-200">
-                      {form.milestones.length} {form.milestones.length === 1 ? "Milestone" : "Milestones"} defined
+              {form.scopes && form.scopes.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400 pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <span className="font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                      <Layers
+                        size={15}
+                        className="text-brand-600 dark:text-brand-400"
+                      />
+                      {form.scopes.length}{" "}
+                      {form.scopes.length === 1
+                        ? "Project Scope"
+                        : "Project Scopes"}{" "}
+                      configured with Project Work Plan/WBS
                     </span>
-                    <span className="text-xs text-brand-600 dark:text-brand-400 font-medium inline-flex items-center gap-1 group-hover:underline">
-                      <Pencil size={12} /> Edit in Modal
-                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openScopeModal();
+                      }}
+                      className="btn btn-primary text-xs px-3.5 py-1.5 font-bold inline-flex items-center gap-1.5 shadow-sm rounded-lg hover:opacity-95 transition-all shrink-0"
+                    >
+                      <Pencil size={13} /> Manage Scope & Project Work Plan/WBS
+                    </button>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {form.milestones.map((m, idx) => (
-                      <div
-                        key={idx}
-                        className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-xs shadow-xs"
-                      >
-                        <span className="w-2 h-2 rounded-full bg-brand-500"></span>
-                        <span className="font-medium text-slate-800 dark:text-slate-200">{m.title || `Stage ${idx + 1}`}</span>
-                        {m.due_date && (
-                          <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                            ({m.due_date})
-                          </span>
-                        )}
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                          m.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' :
-                          m.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
-                          'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-                        }`}>
-                          {m.status || 'PENDING'}
-                        </span>
-                      </div>
-                    ))}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                    {form.scopes.map((s, idx) => {
+                      const wbsCount =
+                        s.wbs_list?.length || (s.wbs_code ? 1 : 0);
+                      return (
+                        <div
+                          key={idx}
+                          className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 text-xs flex flex-col justify-between gap-2 shadow-2xs"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <span className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5 leading-snug">
+                              <span className="w-2 h-2 rounded-full bg-brand-500 shrink-0"></span>
+                              {s.name || s.title || `Scope #${idx + 1}`}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
+                            <span className="font-semibold text-brand-700 dark:text-brand-300">
+                              📑 {wbsCount}{" "}
+                              {wbsCount === 1 ? "Project Work Plan/WBS" : "Project Work Plans/WBS"}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ) : (
                 <div className="flex items-center justify-between py-1">
                   <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
-                    <div className="p-1 text-slate-400 dark:text-slate-500">
-                      <MapPin size={20} />
+                    <div className="p-2.5 rounded-xl bg-brand-50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400">
+                      <Layers size={22} />
                     </div>
                     <div>
                       <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                        No Project Milestones Configured
+                        No Project Scope Configured
                       </div>
                       <div className="text-[11px] text-slate-400">
-                        Click to open modal and set critical stage gates, completion targets, and timelines.
+                        Click to define project scopes and work plans/wbs under each scope.
                       </div>
                     </div>
                   </div>
                   <span className="btn btn-secondary text-xs px-3 py-1.5 inline-flex items-center gap-1.5 font-semibold group-hover:bg-brand-600 group-hover:text-white transition-colors">
-                    <Plus size={13} /> Set Milestones
+                    <Plus size={13} /> Configure Project Scope
                   </span>
                 </div>
               )}
@@ -818,7 +966,7 @@ export default function ProjectForm() {
 
           {/* Scope & Remarks */}
           <div className="space-y-1.5 pt-2">
-            <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+            <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
               Project Scope & Remarks
             </label>
             <textarea
@@ -842,7 +990,8 @@ export default function ProjectForm() {
                   Project Specifications & Contract Details
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Contract sums, retention, advance recovery rates, and Cloudinary contract attachments.
+                  Contract sums, retention, advance recovery rates, and
+                  Cloudinary contract attachments.
                 </p>
               </div>
             </div>
@@ -878,7 +1027,7 @@ export default function ProjectForm() {
             {/* Project Type & Contract Reference No. */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+                <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
                   Project Type
                 </label>
                 <select
@@ -894,16 +1043,19 @@ export default function ProjectForm() {
                       {pt.type_name}
                     </option>
                   ))}
-                  {form.project_type && !projectTypes.some((pt) => pt.type_code === form.project_type) && (
-                    <option value={form.project_type}>
-                      {form.project_type.replace(/_/g, " ")}
-                    </option>
-                  )}
+                  {form.project_type &&
+                    !projectTypes.some(
+                      (pt) => pt.type_code === form.project_type,
+                    ) && (
+                      <option value={form.project_type}>
+                        {form.project_type.replace(/_/g, " ")}
+                      </option>
+                    )}
                 </select>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+                <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
                   Contract Reference No.
                 </label>
                 <input
@@ -921,43 +1073,75 @@ export default function ProjectForm() {
             {/* Commercial terms */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
-                  Original Contract Sum
+                <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+                  Original Contract Sum ({form.contract_currency || form.currency || "GHS"})
                 </label>
-                <input
-                  type="number"
-                  className="input w-full"
-                  value={form.contract_sum}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      contract_sum: Number(e.target.value),
-                      revised_contract_sum:
-                        form.revised_contract_sum || Number(e.target.value),
-                    })
-                  }
-                />
+                <div className="relative flex items-center">
+                  <select
+                    value={form.contract_currency || form.currency || "GHS"}
+                    onChange={(e) =>
+                      setForm({ ...form, contract_currency: e.target.value })
+                    }
+                    className="bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-brand-700 dark:text-brand-300 px-3 py-2 border border-r-0 border-slate-300 dark:border-slate-700 rounded-l-xl h-10 outline-none cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-750 transition-colors"
+                    title="Select Contract Currency"
+                  >
+                    {currencies.map((c) => (
+                      <option key={c.id || c.code} value={c.code}>
+                        {c.code}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    className="input w-full rounded-l-none"
+                    value={form.contract_sum}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        contract_sum: Number(e.target.value),
+                        revised_contract_sum:
+                          form.revised_contract_sum || Number(e.target.value),
+                      })
+                    }
+                  />
+                </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
-                  Revised Contract Sum
+                <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+                  Revised Contract Sum ({form.contract_currency || form.currency || "GHS"})
                 </label>
-                <input
-                  type="number"
-                  className="input w-full"
-                  value={form.revised_contract_sum}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      revised_contract_sum: Number(e.target.value),
-                    })
-                  }
-                />
+                <div className="relative flex items-center">
+                  <select
+                    value={form.contract_currency || form.currency || "GHS"}
+                    onChange={(e) =>
+                      setForm({ ...form, contract_currency: e.target.value })
+                    }
+                    className="bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-brand-700 dark:text-brand-300 px-3 py-2 border border-r-0 border-slate-300 dark:border-slate-700 rounded-l-xl h-10 outline-none cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-750 transition-colors"
+                    title="Select Contract Currency"
+                  >
+                    {currencies.map((c) => (
+                      <option key={c.id || c.code} value={c.code}>
+                        {c.code}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    className="input w-full rounded-l-none"
+                    value={form.revised_contract_sum}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        revised_contract_sum: Number(e.target.value),
+                      })
+                    }
+                  />
+                </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+                <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
                   Retention (%)
                 </label>
                 <input
@@ -975,40 +1159,72 @@ export default function ProjectForm() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
-                  Retention Cap
+                <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+                  Retention Cap ({form.contract_currency || form.currency || "GHS"})
                 </label>
-                <input
-                  type="number"
-                  className="input w-full"
-                  value={form.retention_cap}
-                  onChange={(e) =>
-                    setForm({ ...form, retention_cap: Number(e.target.value) })
-                  }
-                />
+                <div className="relative flex items-center">
+                  <select
+                    value={form.contract_currency || form.currency || "GHS"}
+                    onChange={(e) =>
+                      setForm({ ...form, contract_currency: e.target.value })
+                    }
+                    className="bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-brand-700 dark:text-brand-300 px-3 py-2 border border-r-0 border-slate-300 dark:border-slate-700 rounded-l-xl h-10 outline-none cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-750 transition-colors"
+                    title="Select Contract Currency"
+                  >
+                    {currencies.map((c) => (
+                      <option key={c.id || c.code} value={c.code}>
+                        {c.code}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    className="input w-full rounded-l-none"
+                    value={form.retention_cap}
+                    onChange={(e) =>
+                      setForm({ ...form, retention_cap: Number(e.target.value) })
+                    }
+                  />
+                </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
-                  Advance Payment Amount
+                <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+                  Advance Payment Amount ({form.contract_currency || form.currency || "GHS"})
                 </label>
-                <input
-                  type="number"
-                  className="input w-full"
-                  value={form.advance_payment_amount}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      advance_payment_amount: Number(e.target.value),
-                    })
-                  }
-                />
+                <div className="relative flex items-center">
+                  <select
+                    value={form.contract_currency || form.currency || "GHS"}
+                    onChange={(e) =>
+                      setForm({ ...form, contract_currency: e.target.value })
+                    }
+                    className="bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-brand-700 dark:text-brand-300 px-3 py-2 border border-r-0 border-slate-300 dark:border-slate-700 rounded-l-xl h-10 outline-none cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-750 transition-colors"
+                    title="Select Contract Currency"
+                  >
+                    {currencies.map((c) => (
+                      <option key={c.id || c.code} value={c.code}>
+                        {c.code}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    className="input w-full rounded-l-none"
+                    value={form.advance_payment_amount}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        advance_payment_amount: Number(e.target.value),
+                      })
+                    }
+                  />
+                </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+                <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
                   Advance Recovery (%)
                 </label>
                 <input
@@ -1026,7 +1242,7 @@ export default function ProjectForm() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+                <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
                   Defects Liability (Months)
                 </label>
                 <input
@@ -1046,7 +1262,7 @@ export default function ProjectForm() {
             {/* Site Location */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-3 border-t border-slate-100 dark:border-slate-800">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+                <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
                   Site Address
                 </label>
                 <input
@@ -1061,7 +1277,7 @@ export default function ProjectForm() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
+                <label className="text-xs font-semibold text-brand-900 dark:text-brand-300 uppercase tracking-wider block">
                   City / Town
                 </label>
                 <input
@@ -1104,48 +1320,35 @@ export default function ProjectForm() {
             </div>
           </div>
         )}
-
-        {/* Informational Banner when Editing */}
-        {isEdit && (
-          <div className="bg-rose-50 dark:bg-rose-900/20 p-4 rounded-xl border border-rose-100 dark:border-rose-900/30 flex items-start gap-3">
-            <div className="p-1.5 bg-rose-100 dark:bg-rose-900/50 rounded-lg text-rose-600">
-              <AlertCircle size={16} />
-            </div>
-            <p className="text-xs text-rose-700 dark:text-rose-400 font-medium">
-              Updating project parameters will reflect across all linked tasks,
-              contract schedules, and financial reports.
-            </p>
-          </div>
-        )}
       </div>
-      {/* Project Milestones & Timeline Modal */}
-      {milestoneModalOpen && (
+      {/* Project Scope, WBS & Tasks Modal */}
+      {scopeModalOpen && (
         <div
-          className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex justify-center items-start p-4 sm:p-6 md:p-10 animate-fadeIn"
-          onClick={() => setMilestoneModalOpen(false)}
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex justify-center items-start p-3 sm:p-6 md:p-8 animate-fadeIn"
+          onClick={() => setScopeModalOpen(false)}
         >
           <div
-            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden my-auto sm:my-8 transition-all"
+            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-5xl shadow-2xl overflow-hidden my-auto sm:my-6 transition-all flex flex-col max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/70 dark:bg-slate-900/60">
+            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 shrink-0">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-400">
-                  <MapPin size={22} />
+                <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                  <Layers size={22} />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                    Project Milestones & Timeline
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    Project Scope & Project Work Plan/WBS
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Define deliverables, critical phase gates, completion due dates, and statuses.
+                    Create multiple project work plans/wbs under each scope.
                   </p>
                 </div>
               </div>
               <button
                 type="button"
-                onClick={() => setMilestoneModalOpen(false)}
+                onClick={() => setScopeModalOpen(false)}
                 className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg"
               >
                 <X size={18} />
@@ -1153,219 +1356,367 @@ export default function ProjectForm() {
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+            <div className="p-6 space-y-6 overflow-y-auto flex-1">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
                 <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
-                  {draftMilestones.length} {draftMilestones.length === 1 ? "Milestone Stage" : "Milestone Stages"}
+                  {draftScopes.length}{" "}
+                  {draftScopes.length === 1
+                    ? "Project Scope"
+                    : "Project Scopes"}
                 </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const standard = [
-                        { title: "Site Mobilization & Excavation", start_date: form.start_date || "", due_date: "", status: "PENDING", priority: "HIGH", remarks: "Site handover, earthworks, and temporary utility setups" },
-                        { title: "Substructure & Concrete Foundations", start_date: "", due_date: "", status: "PENDING", priority: "HIGH", remarks: "Footing excavation, reinforcement bars, and concrete curing" },
-                        { title: "Superstructure & Frame Construction", start_date: "", due_date: "", status: "PENDING", priority: "MEDIUM", remarks: "Columns, beams, masonry walling, and floor slabs" },
-                        { title: "Roofing, Envelope & External Works", start_date: "", due_date: "", status: "PENDING", priority: "MEDIUM", remarks: "Roof truss framing, claddings, external waterproofing" },
-                        { title: "Interior Finishes, MEP & Fit-outs", start_date: "", due_date: "", status: "PENDING", priority: "MEDIUM", remarks: "Mechanical, electrical, plumbing installations, and wall plastering" },
-                        { title: "Inspection, Testing & Handover", start_date: "", due_date: form.end_date || "", status: "PENDING", priority: "CRITICAL", remarks: "Snag list clearance, practical completion certification, and handover" },
-                      ];
-                      setDraftMilestones(standard);
-                    }}
-                    className="text-xs px-2.5 py-1 rounded-lg border border-brand-200 dark:border-brand-800 text-brand-700 dark:text-brand-300 bg-brand-50/50 dark:bg-brand-950/30 hover:bg-brand-100 transition-colors inline-flex items-center gap-1.5"
-                  >
-                    <Sparkles size={13} /> Load Standard Phases
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDraftMilestones((prev) => [
-                        ...prev,
-                        {
-                          title: "",
-                          start_date: form.start_date || "",
-                          due_date: form.end_date || "",
-                          status: "PENDING",
-                          priority: "MEDIUM",
-                          remarks: "",
-                        },
-                      ]);
-                    }}
-                    className="btn btn-primary text-xs px-3 py-1.5 inline-flex items-center gap-1 font-semibold"
-                  >
-                    <Plus size={13} /> Add Milestone
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextIndex = draftScopes.length + 1;
+                    setDraftScopes((prev) => [
+                      ...prev,
+                      {
+                        name: `Scope ${nextIndex}`,
+                        title: `Scope ${nextIndex}`,
+                        description: "",
+                        wbs_list: [
+                          {
+                            id: Date.now(),
+                            wbs: `${nextIndex}.1`,
+                            start_date: form.start_date || "",
+                            end_date: form.end_date || "",
+                            tasks: [
+                              {
+                                task_title: "",
+                                assigned_to_id: "",
+                                assigned_to_name: "",
+                                estimated_hours: 8,
+                                priority: "MEDIUM",
+                                status: "PENDING",
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ]);
+                  }}
+                  className="btn btn-primary text-xs px-3.5 py-1.5 inline-flex items-center gap-1.5 font-semibold"
+                >
+                  <Plus size={14} /> Add Project Scope
+                </button>
               </div>
 
-              {draftMilestones.length === 0 ? (
+              {draftScopes.length === 0 ? (
                 <div className="text-center py-12 px-4 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
-                  <MapPin size={32} className="mx-auto text-slate-400 mb-2" />
-                  <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300">No Milestones Added Yet</h4>
-                  <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-                    Add milestone stages to track project delivery phases, critical paths, and completion targets.
+                  <Layers size={36} className="mx-auto text-slate-400 mb-2" />
+                  <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                    No Project Scope Added Yet
+                  </h4>
+                  <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                    Click below to add a Project Scope. Inside each scope, you
+                    can add multiple project work plans/wbs.
                   </p>
                   <div className="mt-4 flex justify-center gap-2">
                     <button
                       type="button"
                       onClick={() => {
-                        setDraftMilestones([
+                        setDraftScopes([
                           {
-                            title: "",
-                            start_date: form.start_date || "",
-                            due_date: form.end_date || "",
-                            status: "PENDING",
-                            priority: "MEDIUM",
-                            remarks: "",
+                            name: "Primary Project Scope",
+                            title: "Primary Project Scope",
+                            description: "",
+                            wbs_list: [
+                              {
+                                id: Date.now(),
+                                wbs: "1.1",
+                                start_date: form.start_date || "",
+                                end_date: form.end_date || "",
+                                tasks: [
+                                  {
+                                    task_title: "",
+                                    duration_unit: "Days",
+                                    estimated_hours: 8,
+                                    priority: "MEDIUM",
+                                    status: "PENDING",
+                                  },
+                                ],
+                              },
+                            ],
                           },
                         ]);
                       }}
-                      className="btn btn-primary text-xs px-3 py-1.5 inline-flex items-center gap-1"
+                      className="btn btn-primary text-xs px-3.5 py-2 inline-flex items-center gap-1.5"
                     >
-                      <Plus size={13} /> Add First Milestone
+                      <Plus size={13} /> Add First Scope
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {draftMilestones.map((m, index) => (
+                <div className="space-y-6">
+                  {draftScopes.map((scope, scopeIdx) => (
                     <div
-                      key={index}
-                      className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/30 space-y-3"
+                      key={scopeIdx}
+                      className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 shadow-sm space-y-4"
                     >
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 rounded-full bg-brand-500/10 text-brand-700 dark:text-brand-300 text-xs font-bold flex items-center justify-center">
-                            {index + 1}
+                      {/* Scope Header Bar */}
+                      <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center gap-2.5">
+                          <span className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-bold flex items-center justify-center shrink-0">
+                            {scopeIdx + 1}
                           </span>
-                          <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                            Milestone #{index + 1}
+                          <span className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
+                            Project Scope #{scopeIdx + 1}
                           </span>
                         </div>
                         <button
                           type="button"
                           onClick={() => {
-                            setDraftMilestones((prev) => prev.filter((_, i) => i !== index));
+                            setDraftScopes((prev) =>
+                              prev.filter((_, i) => i !== scopeIdx),
+                            );
                           }}
-                          className="text-slate-400 hover:text-red-500 p-1 rounded-md transition-colors"
-                          title="Remove milestone"
+                          className="text-slate-400 hover:text-red-500 p-1 rounded-lg transition-colors inline-flex items-center gap-1 text-xs font-medium"
+                          title="Remove scope"
                         >
-                          <Trash2 size={15} />
+                          <Trash2 size={14} /> Remove Scope
                         </button>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                      {/* Scope Details Fields (Scope Name, Remarks) */}
+                      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
                         <div className="sm:col-span-6">
-                          <label className="text-[11px] font-bold text-brand-900 dark:text-brand-300 uppercase block mb-1">
-                            Milestone Title / Phase <span className="text-red-500">*</span>
+                          <label className="text-[11px] font-semibold text-brand-900 dark:text-brand-300 uppercase block mb-1">
+                            Scope Name / Title{" "}
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            className="input w-full text-xs font-medium"
+                            placeholder="e.g. Substructure & Civil Foundations"
+                            value={scope.name || scope.title || ""}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setDraftScopes((prev) =>
+                                prev.map((s, i) =>
+                                  i === scopeIdx
+                                    ? { ...s, name: val, title: val }
+                                    : s,
+                                ),
+                              );
+                            }}
+                          />
+                        </div>
+
+                        <div className="sm:col-span-6">
+                          <label className="text-[11px] font-semibold text-brand-900 dark:text-brand-300 uppercase block mb-1">
+                            Scope Remarks / Deliverable Specs
                           </label>
                           <input
                             type="text"
                             className="input w-full text-xs"
-                            placeholder="e.g. Substructure Foundation & Concrete Pour"
-                            value={m.title}
+                            placeholder="Deliverables, quality criteria, scope specifications..."
+                            value={scope.description || scope.remarks || ""}
                             onChange={(e) => {
                               const val = e.target.value;
-                              setDraftMilestones((prev) =>
-                                prev.map((item, i) => (i === index ? { ...item, title: val } : item))
+                              setDraftScopes((prev) =>
+                                prev.map((s, i) =>
+                                  i === scopeIdx
+                                    ? { ...s, description: val, remarks: val }
+                                    : s,
+                                ),
                               );
                             }}
                           />
                         </div>
+                      </div>
 
-                        <div className="sm:col-span-3">
-                          <label className="text-[11px] font-bold text-brand-900 dark:text-brand-300 uppercase block mb-1">
-                            Start Date
-                          </label>
-                          <input
-                            type="date"
-                            className="input w-full text-xs"
-                            value={m.start_date || ""}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setDraftMilestones((prev) =>
-                                prev.map((item, i) => (i === index ? { ...item, start_date: val } : item))
+                      {/* MULTIPLE PROJECT WORK PLANS UNDER THIS SCOPE */}
+                      <div className="space-y-4 pt-2">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                            <Layers
+                              size={14}
+                              className="text-brand-600 dark:text-brand-400"
+                            />
+                            Project Work Plan/WBS Elements under this Scope (
+                            {(scope.wbs_list || []).length})
+                          </h4>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const currentWbsList = scope.wbs_list || [];
+                              const nextWbsSeq = currentWbsList.length + 1;
+                              const newWbsItem = {
+                                id: Date.now(),
+                                wbs: `${scopeIdx + 1}.${nextWbsSeq}`,
+                                start_date: form.start_date || "",
+                                end_date: form.end_date || "",
+                                tasks: [],
+                              };
+                              setDraftScopes((prev) =>
+                                prev.map((s, i) =>
+                                  i === scopeIdx
+                                    ? {
+                                        ...s,
+                                        wbs_list: [
+                                          ...(s.wbs_list || []),
+                                          newWbsItem,
+                                        ],
+                                      }
+                                    : s,
+                                ),
                               );
                             }}
-                          />
-                        </div>
-
-                        <div className="sm:col-span-3">
-                          <label className="text-[11px] font-bold text-brand-900 dark:text-brand-300 uppercase block mb-1">
-                            Target Due Date
-                          </label>
-                          <input
-                            type="date"
-                            className="input w-full text-xs"
-                            value={m.due_date || ""}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setDraftMilestones((prev) =>
-                                prev.map((item, i) => (i === index ? { ...item, due_date: val } : item))
-                              );
-                            }}
-                          />
-                        </div>
-
-                        <div className="sm:col-span-3">
-                          <label className="text-[11px] font-bold text-brand-900 dark:text-brand-300 uppercase block mb-1">
-                            Status
-                          </label>
-                          <select
-                            className="input w-full text-xs"
-                            value={m.status || "PENDING"}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setDraftMilestones((prev) =>
-                                prev.map((item, i) => (i === index ? { ...item, status: val } : item))
-                              );
-                            }}
+                            className="text-xs px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold inline-flex items-center gap-1 transition-colors border border-slate-300 dark:border-slate-600 shadow-2xs"
                           >
-                            <option value="PENDING">Pending</option>
-                            <option value="IN_PROGRESS">In Progress</option>
-                            <option value="COMPLETED">Completed</option>
-                            <option value="DELAYED">Delayed</option>
-                          </select>
+                            <Plus size={13} /> Add Project Work Plan/WBS under this Scope
+                          </button>
                         </div>
 
-                        <div className="sm:col-span-3">
-                          <label className="text-[11px] font-bold text-brand-900 dark:text-brand-300 uppercase block mb-1">
-                            Priority
-                          </label>
-                          <select
-                            className="input w-full text-xs"
-                            value={m.priority || "MEDIUM"}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setDraftMilestones((prev) =>
-                                prev.map((item, i) => (i === index ? { ...item, priority: val } : item))
-                              );
-                            }}
-                          >
-                            <option value="LOW">Low</option>
-                            <option value="MEDIUM">Medium</option>
-                            <option value="HIGH">High</option>
-                            <option value="CRITICAL">Critical</option>
-                          </select>
-                        </div>
+                        {!scope.wbs_list || scope.wbs_list.length === 0 ? (
+                          <div className="text-center py-4 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl text-slate-400 text-xs">
+                            No project work plans/wbs created yet. Click{" "}
+                            <strong className="text-brand-600">
+                              + Add Project Work Plan/WBS under this Scope
+                            </strong>
+                            .
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            {scope.wbs_list.map((wbsItem, wbsIdx) => (
+                              <div
+                                key={wbsItem.id || wbsIdx}
+                                className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 shadow-2xs"
+                              >
+                                {/* Work Plan/WBS Header Row with Start Date, End Date & Remove */}
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-center">
+                                    {/* Work Plan/WBS Name/Code */}
+                                    <div className="sm:col-span-5 flex items-center gap-2">
+                                      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-800 dark:text-slate-200 shrink-0">
+                                        Work Plan/WBS:
+                                      </span>
+                                      <input
+                                        type="text"
+                                        className="input text-xs font-semibold text-slate-800 dark:text-slate-200 flex-1 py-1"
+                                        placeholder="e.g. 1.1 Foundation Footings"
+                                        value={wbsItem.wbs || ""}
+                                        onChange={(e) => {
+                                          const val = e.target.value;
+                                          setDraftScopes((prev) =>
+                                            prev.map((s, i) =>
+                                              i === scopeIdx
+                                                ? {
+                                                    ...s,
+                                                    wbs_list: s.wbs_list.map(
+                                                      (w, wi) =>
+                                                        wi === wbsIdx
+                                                          ? { ...w, wbs: val }
+                                                          : w,
+                                                    ),
+                                                  }
+                                                : s,
+                                            ),
+                                          );
+                                        }}
+                                      />
+                                    </div>
 
-                        <div className="sm:col-span-6">
-                          <label className="text-[11px] font-bold text-brand-900 dark:text-brand-300 uppercase block mb-1">
-                            Remarks / Key Deliverables
-                          </label>
-                          <input
-                            type="text"
-                            className="input w-full text-xs"
-                            placeholder="Deliverables, quality checks, completion criteria..."
-                            value={m.remarks || ""}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setDraftMilestones((prev) =>
-                                prev.map((item, i) => (i === index ? { ...item, remarks: val } : item))
-                              );
-                            }}
-                          />
-                        </div>
+                                    {/* Directly linked Start Date */}
+                                    <div className="sm:col-span-3 flex items-center gap-1.5">
+                                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 shrink-0">
+                                        Start:
+                                      </span>
+                                      <input
+                                        type="date"
+                                        className="input text-xs py-1 w-full"
+                                        value={wbsItem.start_date || ""}
+                                        onChange={(e) => {
+                                          const val = e.target.value;
+                                          setDraftScopes((prev) =>
+                                            prev.map((s, i) =>
+                                              i === scopeIdx
+                                                ? {
+                                                    ...s,
+                                                    wbs_list: s.wbs_list.map(
+                                                      (w, wi) =>
+                                                        wi === wbsIdx
+                                                          ? {
+                                                              ...w,
+                                                              start_date: val,
+                                                            }
+                                                          : w,
+                                                    ),
+                                                  }
+                                                : s,
+                                            ),
+                                          );
+                                        }}
+                                      />
+                                    </div>
+
+                                    {/* Directly linked End Date */}
+                                    <div className="sm:col-span-4 flex items-center gap-1.5">
+                                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 shrink-0">
+                                        End:
+                                      </span>
+                                      <input
+                                        type="date"
+                                        className="input text-xs py-1 w-full"
+                                        value={
+                                          wbsItem.end_date ||
+                                          wbsItem.due_date ||
+                                          ""
+                                        }
+                                        onChange={(e) => {
+                                          const val = e.target.value;
+                                          setDraftScopes((prev) =>
+                                            prev.map((s, i) =>
+                                              i === scopeIdx
+                                                ? {
+                                                    ...s,
+                                                    wbs_list: s.wbs_list.map(
+                                                      (w, wi) =>
+                                                        wi === wbsIdx
+                                                          ? {
+                                                              ...w,
+                                                              end_date: val,
+                                                              due_date: val,
+                                                            }
+                                                          : w,
+                                                    ),
+                                                  }
+                                                : s,
+                                            ),
+                                          );
+                                        }}
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setDraftScopes((prev) =>
+                                          prev.map((s, i) =>
+                                            i === scopeIdx
+                                              ? {
+                                                  ...s,
+                                                  wbs_list: s.wbs_list.filter(
+                                                    (_, wi) => wi !== wbsIdx,
+                                                  ),
+                                                }
+                                              : s,
+                                          ),
+                                        );
+                                      }}
+                                      className="text-slate-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                                      title="Remove Project Work Plan/WBS"
+                                    >
+                                      <Trash2 size={15} />
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -1374,25 +1725,140 @@ export default function ProjectForm() {
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 flex items-center justify-between">
+            <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between shrink-0">
               <button
                 type="button"
-                onClick={() => setMilestoneModalOpen(false)}
+                onClick={() => setScopeModalOpen(false)}
                 className="btn btn-secondary text-xs px-4 py-2"
+                disabled={savingScope}
               >
                 Cancel
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  const cleaned = draftMilestones.filter((m) => m.title && m.title.trim());
-                  setForm((prev) => ({ ...prev, milestones: cleaned }));
-                  setMilestoneModalOpen(false);
-                  toast.success(`${cleaned.length} milestone(s) saved to project`);
+                disabled={savingScope}
+                onClick={async () => {
+                  setSavingScope(true);
+                  try {
+                    const cleaned = draftScopes
+                      .filter(
+                        (s) =>
+                          (s.name && s.name.trim()) ||
+                          (s.title && s.title.trim()),
+                      )
+                      .map((s) => {
+                        const scopeName = (s.name || s.title || "").trim();
+                        const validWbsList = (s.wbs_list || []).map((w, wi) => {
+                          const wbsCode = (
+                            w.wbs ||
+                            w.wbs_code ||
+                            `${wi + 1}`
+                          ).trim();
+                          const wbsStart = w.start_date || "";
+                          const wbsEnd = w.end_date || w.due_date || "";
+                          return {
+                            id: w.id || Date.now() + wi,
+                            wbs: wbsCode,
+                            start_date: wbsStart,
+                            end_date: wbsEnd,
+                            due_date: wbsEnd,
+                            tasks: (w.tasks || [])
+                              .filter(
+                                (t) =>
+                                  (t.task_title && t.task_title.trim()) ||
+                                  (t.title && t.title.trim()),
+                              )
+                              .map((t) => ({
+                                ...t,
+                                id: t.id || undefined,
+                                task_title: (
+                                  t.task_title ||
+                                  t.title ||
+                                  ""
+                                ).trim(),
+                                wbs_code: wbsCode,
+                                wbs: wbsCode,
+                                scope_name: scopeName,
+                                start_date: t.start_date || wbsStart,
+                                end_date: t.end_date || t.due_date || wbsEnd,
+                                duration_unit: t.duration_unit || "Days",
+                                estimated_hours: t.estimated_hours ?? 0,
+                                status:
+                                  t.status ||
+                                  (t.assigned_to_id
+                                    ? "IN_PROGRESS"
+                                    : "PENDING"),
+                              })),
+                          };
+                        });
+
+                        const allTasks = validWbsList.flatMap((w) => w.tasks);
+                        const primaryWbs =
+                          validWbsList.length > 0
+                            ? validWbsList[0].wbs
+                            : s.wbs || s.wbs_code || "1.0";
+
+                        return {
+                          ...s,
+                          id: s.id || undefined,
+                          name: scopeName,
+                          title: scopeName,
+                          wbs: primaryWbs,
+                          wbs_code: primaryWbs,
+                          wbs_list: validWbsList,
+                          tasks: allTasks,
+                        };
+                      });
+
+                    const totalTasks = cleaned.reduce(
+                      (acc, s) => acc + (s.tasks?.length || 0),
+                      0,
+                    );
+
+                    setForm((prev) => ({
+                      ...prev,
+                      scopes: cleaned,
+                      milestones: cleaned,
+                    }));
+
+                    // When editing an existing project, immediately save to backend so changes take effect everywhere!
+                    if (isEdit && id) {
+                      const payload = {
+                        ...form,
+                        scopes: cleaned,
+                        milestones: cleaned,
+                      };
+                      await api.put(`/projects/projects/${id}`, payload);
+                      await fetchProject();
+                      toast.success(
+                        `Project Scope & Project Work Plan/WBS saved and synchronized`,
+                      );
+                    } else {
+                      toast.success(
+                        `${cleaned.length} Project Scope(s) saved to project`,
+                      );
+                    }
+                    setScopeModalOpen(false);
+                  } catch (err) {
+                    toast.error(
+                      err?.response?.data?.message ||
+                        "Failed to save project scopes",
+                    );
+                  } finally {
+                    setSavingScope(false);
+                  }
                 }}
-                className="btn btn-primary text-xs px-5 py-2 font-semibold shadow-sm"
+                className="btn btn-primary text-xs px-5 py-2 font-semibold shadow-sm inline-flex items-center gap-1.5"
               >
-                Save Milestones
+                {savingScope ? (
+                  <>
+                    <Loader2 size={15} className="animate-spin" /> Saving...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle size={15} /> Save Project Scope
+                  </>
+                )}
               </button>
             </div>
           </div>

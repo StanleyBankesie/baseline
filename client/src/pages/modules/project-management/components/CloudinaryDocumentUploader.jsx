@@ -166,7 +166,7 @@ export default function CloudinaryDocumentUploader({
     <div className="space-y-3">
       {/* Label and Cloudinary Status Header */}
       <div className="flex items-center justify-between">
-        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
           {label}
         </label>
         

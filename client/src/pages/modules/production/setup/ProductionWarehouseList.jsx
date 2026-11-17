@@ -217,7 +217,7 @@ export default function ProductionWarehouseList() {
 
             <form onSubmit={handleSave} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                   Warehouse Location Name *
                 </label>
                 <input
@@ -231,7 +231,7 @@ export default function ProductionWarehouseList() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                   Description
                 </label>
                 <textarea
@@ -244,7 +244,7 @@ export default function ProductionWarehouseList() {
               </div>
 
               <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={Boolean(currentWh.is_active)}
@@ -254,7 +254,7 @@ export default function ProductionWarehouseList() {
                   Active
                 </label>
 
-                <label className="flex items-center gap-2 text-sm font-bold text-blue-700 dark:text-blue-400 cursor-pointer">
+                <label className="flex items-center gap-2 text-sm font-semibold text-blue-700 dark:text-blue-400 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={Boolean(currentWh.is_default)}

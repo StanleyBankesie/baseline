@@ -16,7 +16,7 @@ import { usePermission } from "@/auth/PermissionContext.jsx";
 
 /**
  *  component
- * 
+ *
  * @returns {JSX.Element} The rendered component
  */
 export default function RequestForQuotationForm() {
@@ -357,8 +357,9 @@ export default function RequestForQuotationForm() {
                   value={formData.rfq_date}
                   onChange={handleInputChange}
                   className="p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#0E3646] focus:border-transparent outline-none"
-                
-                  disabled={isView || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+                  disabled={
+                    isView || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))
+                  }
                 />
               </div>
               <div className="flex flex-col gap-1">
@@ -371,8 +372,9 @@ export default function RequestForQuotationForm() {
                   value={formData.expiry_date}
                   onChange={handleInputChange}
                   className="p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#0E3646] focus:border-transparent outline-none"
-                
-                  disabled={isView || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+                  disabled={
+                    isView || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))
+                  }
                 />
               </div>
               <div className="flex flex-col gap-1">
@@ -429,13 +431,18 @@ export default function RequestForQuotationForm() {
                 👥 Selected Suppliers ({selectedSuppliers.length})
               </h2>
               <div className="flex items-center gap-3">
-                <select 
+                <select
                   className="p-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-[#0E3646] outline-none"
                   onChange={(e) => {
                     const val = e.target.value;
                     if (!val) return;
-                    const supplier = allSuppliers.find((s) => String(s.id) === val);
-                    if (supplier && !selectedSuppliers.find((s) => s.id === supplier.id)) {
+                    const supplier = allSuppliers.find(
+                      (s) => String(s.id) === val,
+                    );
+                    if (
+                      supplier &&
+                      !selectedSuppliers.find((s) => s.id === supplier.id)
+                    ) {
                       toggleSupplier(supplier);
                     }
                     e.target.value = "";
@@ -444,7 +451,8 @@ export default function RequestForQuotationForm() {
                   <option value="">+ Quick Add Supplier...</option>
                   {allSuppliers.map((s) => (
                     <option key={s.id} value={s.id}>
-                      {s.supplier_name} {s.supplier_code ? `(${s.supplier_code})` : ""}
+                      {s.supplier_name}{" "}
+                      {s.supplier_code ? `(${s.supplier_code})` : ""}
                     </option>
                   ))}
                 </select>
@@ -548,10 +556,15 @@ export default function RequestForQuotationForm() {
                         <td className="p-3">
                           <div className="relative">
                             <input
-                              id={`rfq-item-search-${idx}`} autoComplete="off"
+                              id={`rfq-item-search-${idx}`}
+                              autoComplete="off"
                               className="w-full p-1 border border-gray-300 rounded focus:ring-2 focus:ring-[#0E3646] focus:border-transparent outline-none"
                               placeholder="Scan barcode or type item name"
-                              value={itemQueries[idx] !== undefined ? itemQueries[idx] : (item.item_name || "")}
+                              value={
+                                itemQueries[idx] !== undefined
+                                  ? itemQueries[idx]
+                                  : item.item_name || ""
+                              }
                               onChange={(e) => {
                                 const val = e.target.value;
                                 setItemQueries((prev) => ({
@@ -648,7 +661,7 @@ export default function RequestForQuotationForm() {
                             <option value="">Select UOM</option>
                             {uoms.map((u) => (
                               <option key={u.id} value={u.uom_code}>
-                                {u.uom_name} ({u.uom_code})
+                                {u.uom_code}
                               </option>
                             ))}
                           </select>
@@ -665,8 +678,10 @@ export default function RequestForQuotationForm() {
                               )
                             }
                             className="w-full p-1 border border-gray-300 rounded"
-                          
-                            disabled={isView || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+                            disabled={
+                              isView ||
+                              (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))
+                            }
                           />
                         </td>
                         <td className="p-3">

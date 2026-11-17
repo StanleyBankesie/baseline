@@ -478,7 +478,7 @@ export default function TransportExpenseList() {
                 )}
 
                 <div className="form-control">
-                  <label className="label"><span className="label-text font-bold">Amount <span className="text-error">*</span></span></label>
+                  <label className="label"><span className="label-text font-semibold">Amount <span className="text-error">*</span></span></label>
                   <div className="relative">
                     <span className="absolute left-3 top-3 text-gray-500">{form.currency}</span>
                     <input type="number" step="0.01" required className="input input-bordered w-full pl-12" value={form.amount} onChange={e => setForm({...form, amount: e.target.value})} />
@@ -489,7 +489,7 @@ export default function TransportExpenseList() {
                   <input type="date" required className="input input-bordered w-full" value={form.expense_date} onChange={e => setForm({...form, expense_date: e.target.value})} />
                 </div>
                 <div className="form-control relative z-50">
-                  <label className="label"><span className="label-text font-bold">Supplier <span className="text-error">*</span></span></label>
+                  <label className="label"><span className="label-text font-semibold">Supplier <span className="text-error">*</span></span></label>
                   <div className="relative z-50">
                     <input type="text" placeholder="Search Supplier..." className="input input-bordered w-full text-slate-900 font-medium" value={supplierSearch} onChange={e => { setSupplierSearch(e.target.value); if(!e.target.value) setForm({...form, supplier_id: "", supplier_name: ""}); }} onClick={() => setSupplierSearch(" ")} />
                     {supplierSearchResults.length > 0 && supplierSearch !== form.supplier_name && (
@@ -561,7 +561,7 @@ export default function TransportExpenseList() {
                 )}
               </div>
               <div className="form-control">
-                <label className="label"><span className="label-text font-bold">Description <span className="text-error">*</span></span></label>
+                <label className="label"><span className="label-text font-semibold">Description <span className="text-error">*</span></span></label>
                 <textarea required className="textarea textarea-bordered border border-slate-300 rounded-lg w-full h-24 p-3" value={form.description} onChange={e => setForm({...form, description: e.target.value})}></textarea>
               </div>
               <div className="flex justify-end gap-2 pt-4 border-t">

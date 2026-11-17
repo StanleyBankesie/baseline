@@ -770,7 +770,7 @@ export default function StockAdjustmentForm() {
                               <div className="flex items-center gap-3">
                                 <input
                                   type="number"
-                                  className="input text-sm py-1 font-bold w-36"
+                                  className="input text-sm py-1 font-semibold w-36"
                                   value={item.adjustedStock}
                                   onChange={(e) =>
                                     updateItem(

@@ -666,7 +666,7 @@ export default function ServiceBillForm() {
                 <label className="label">Bill No *</label>
                 <input
                   type="text"
-                  className="input bg-slate-50 dark:bg-slate-900 font-mono font-bold text-slate-800 dark:text-slate-200"
+                  className="input bg-slate-50 dark:bg-slate-900 font-mono font-semibold text-slate-800 dark:text-slate-200"
                   value={bill.bill_no}
                   readOnly
                   placeholder="Auto-generated"

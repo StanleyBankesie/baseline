@@ -759,7 +759,7 @@ export default function PropertiesList() {
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="md:col-span-2">
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">
                       Property / Site Name <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -773,7 +773,7 @@ export default function PropertiesList() {
                   </div>
 
                   <div>
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Property Type</label>
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Property Type</label>
                     <select
                       className="input w-full text-xs font-medium"
                       value={formData.property_type}
@@ -787,7 +787,7 @@ export default function PropertiesList() {
                   </div>
 
                   <div className="md:col-span-3">
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Client / Landlord Organization</label>
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Client / Landlord Organization</label>
                     <select
                       className="input w-full text-xs"
                       value={formData.client_id || ""}
@@ -809,7 +809,7 @@ export default function PropertiesList() {
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="md:col-span-2">
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Physical Address / Street / Zone</label>
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Physical Address / Street / Zone</label>
                     <input
                       type="text"
                       className="input w-full text-xs"
@@ -820,7 +820,7 @@ export default function PropertiesList() {
                   </div>
 
                   <div>
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">City / Metropolis</label>
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">City / Metropolis</label>
                     <input
                       type="text"
                       className="input w-full text-xs"
@@ -831,7 +831,7 @@ export default function PropertiesList() {
                   </div>
 
                   <div>
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">State / Region</label>
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">State / Region</label>
                     <input
                       type="text"
                       className="input w-full text-xs"
@@ -842,7 +842,7 @@ export default function PropertiesList() {
                   </div>
 
                   <div>
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Total Floor Area (m²)</label>
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Total Floor Area (m²)</label>
                     <input
                       type="number"
                       step="0.01"
@@ -862,7 +862,7 @@ export default function PropertiesList() {
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Facilities Manager</label>
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Facilities Manager</label>
                     <input
                       type="text"
                       className="input w-full text-xs"
@@ -873,7 +873,7 @@ export default function PropertiesList() {
                   </div>
 
                   <div>
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Site Contact Person</label>
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Site Contact Person</label>
                     <input
                       type="text"
                       className="input w-full text-xs"
@@ -884,7 +884,7 @@ export default function PropertiesList() {
                   </div>
 
                   <div>
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Site Contact Phone</label>
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Site Contact Phone</label>
                     <input
                       type="text"
                       className="input w-full text-xs"
@@ -895,7 +895,7 @@ export default function PropertiesList() {
                   </div>
 
                   <div>
-                    <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Site Contact Email</label>
+                    <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Site Contact Email</label>
                     <input
                       type="email"
                       className="input w-full text-xs"
@@ -909,7 +909,7 @@ export default function PropertiesList() {
 
               {/* Section 4: Operational Notes */}
               <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
-                <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">
+                <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">
                   Operational Guidelines & Site Scope Notes
                 </label>
                 <textarea
@@ -962,7 +962,7 @@ export default function PropertiesList() {
             </div>
             <form onSubmit={handleCreateOnboarding} className="p-6 space-y-4 text-xs">
               <div>
-                <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Property / Site <span className="text-red-500">*</span></label>
+                <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Property / Site <span className="text-red-500">*</span></label>
                 <select
                   className="input w-full text-xs"
                   value={onboardingForm.property_id}
@@ -976,7 +976,7 @@ export default function PropertiesList() {
                 </select>
               </div>
               <div>
-                <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Client / Customer</label>
+                <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Client / Customer</label>
                 <select
                   className="input w-full text-xs"
                   value={onboardingForm.client_id}
@@ -990,18 +990,18 @@ export default function PropertiesList() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Target Handover Date</label>
+                  <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Target Handover Date</label>
                   <input type="date" className="input w-full text-xs" value={onboardingForm.target_handover_date}
                     onChange={(e) => setOnboardingForm({ ...onboardingForm, target_handover_date: e.target.value })} />
                 </div>
                 <div>
-                  <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Property Manager Name</label>
+                  <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Property Manager Name</label>
                   <input type="text" className="input w-full text-xs" placeholder="Manager name" value={onboardingForm.property_manager_name}
                     onChange={(e) => setOnboardingForm({ ...onboardingForm, property_manager_name: e.target.value })} />
                 </div>
               </div>
               <div>
-                <label className="label mb-1 text-xs font-bold text-slate-700 dark:text-slate-200">Condition Summary</label>
+                <label className="label mb-1 text-xs font-semibold text-slate-700 dark:text-slate-200">Condition Summary</label>
                 <textarea rows={3} className="input w-full text-xs" placeholder="Current state of the property, outstanding issues..."
                   value={onboardingForm.condition_summary} onChange={(e) => setOnboardingForm({ ...onboardingForm, condition_summary: e.target.value })} />
               </div>
@@ -1048,7 +1048,7 @@ export default function PropertiesList() {
                     <div><span className="text-slate-500">Target Date:</span> <span className="font-semibold ml-1">{detailRecord.target_handover_date ? new Date(detailRecord.target_handover_date).toLocaleDateString() : "—"}</span></div>
                   </div>
                   <div className="flex items-center gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
-                    <label className="text-xs font-bold text-slate-600 dark:text-slate-300 shrink-0">Update Stage:</label>
+                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 shrink-0">Update Stage:</label>
                     <select className="input text-xs flex-1" value={detailStage} onChange={(e) => setDetailStage(e.target.value)}>
                       {STAGES.map(s => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
                     </select>

@@ -16,7 +16,7 @@ import { query } from "../db/pool.js";
 export const ensureUploadDir = () => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
-  const uploadDir = path.join(__dirname, "../../uploads");
+  const uploadDir = path.join(__dirname, "../uploads");
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
@@ -167,11 +167,24 @@ export const uploadFile = async (req, res, next) => {
     }
     
     // Fallback: local file storage
-    const fileUrl = `/uploads/${req.file.filename}`;
+    const forwardedProto = req.headers["x-forwarded-proto"];
+    const forwardedHost = req.headers["x-forwarded-host"];
+    const host = forwardedHost || req.get("host") || "";
+    const isHttps =
+      forwardedProto === "https" ||
+      req.secure ||
+      (host && host.includes("omnisuite-erp.com"));
+    const protocol = isHttps ? "https" : (req.protocol || "http");
+    const origin = host ? `${protocol}://${host}` : "";
+
+    const relativeUrl = `/uploads/${req.file.filename}`;
+    const fileUrl = origin ? `${origin}${relativeUrl}` : relativeUrl;
+
     return res.json({
       message: "File uploaded successfully",
       url: fileUrl,
       path: fileUrl,
+      relativeUrl: relativeUrl,
       filename: req.file.originalname || req.file.filename,
     });
   } catch (e) {
@@ -179,5 +192,116 @@ export const uploadFile = async (req, res, next) => {
       try { fs.unlinkSync(req.file.path); } catch {}
     }
     next(e);
+  }
+};
+
+
+export function extractCloudinaryPublicId(url) {
+  if (!url || typeof url !== 'string' || !url.includes('cloudinary.com')) return null;
+  const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[a-zA-Z0-9]+)?$/);
+  return match ? match[1] : null;
+}
+
+export function extractCloudinaryResourceType(url) {
+  if (!url || typeof url !== 'string') return 'image';
+  if (url.includes('/raw/')) return 'raw';
+  if (url.includes('/video/')) return 'video';
+  return 'image';
+}
+
+/**
+ * Handles file deletion from Cloudinary (or local fallback).
+ * Accepts { public_id, resource_type, url } or an array { files: [...] }.
+ */
+export const deleteFile = async (req, res, next) => {
+  try {
+    const { public_id, resource_type, url, files } = req.body || {};
+    const itemsToDelete = Array.isArray(files)
+      ? files
+      : (public_id || url ? [{ public_id, resource_type, url }] : []);
+
+    if (itemsToDelete.length === 0) {
+      return res.status(400).json({ message: 'No files specified for deletion' });
+    }
+
+    const cfg = await getCloudinaryConfig(req.scope || {});
+    const results = [];
+
+    for (const item of itemsToDelete) {
+      const pubId = item.public_id || extractCloudinaryPublicId(item.url);
+      const resType = item.resource_type || extractCloudinaryResourceType(item.url) || 'image';
+
+      if (cfg && pubId) {
+        try {
+          const timestamp = Math.floor(Date.now() / 1000);
+          const paramsToSign = new URLSearchParams();
+          paramsToSign.append('public_id', pubId);
+          paramsToSign.append('timestamp', String(timestamp));
+
+          const signatureBase = Array.from(paramsToSign.entries())
+            .sort(([a], [b]) => (a > b ? 1 : a < b ? -1 : 0))
+            .map(([k, v]) => `${k}=${v}`)
+            .join('&');
+
+          const signature = crypto
+            .createHash('sha1')
+            .update(signatureBase + cfg.api_secret)
+            .digest('hex');
+
+          const form = new URLSearchParams();
+          form.append('public_id', pubId);
+          form.append('api_key', cfg.api_key);
+          form.append('timestamp', String(timestamp));
+          form.append('signature', signature);
+
+          let endpoint = `https://api.cloudinary.com/v1_1/${cfg.cloud_name}/${resType}/destroy`;
+          let resp = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: form.toString(),
+          });
+
+          let data = await resp.json().catch(() => ({}));
+
+          // If not found as image, try raw resource type
+          if (data.result === 'not found' && resType === 'image') {
+            endpoint = `https://api.cloudinary.com/v1_1/${cfg.cloud_name}/raw/destroy`;
+            resp = await fetch(endpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: form.toString(),
+            });
+            data = await resp.json().catch(() => ({}));
+          }
+
+          results.push({ public_id: pubId, url: item.url, result: data.result || 'ok' });
+        } catch (err) {
+          console.warn('Cloudinary destroy error:', err.message);
+          results.push({ public_id: pubId, url: item.url, error: err.message });
+        }
+      } else if (item.url && item.url.includes('/uploads/')) {
+        try {
+          const filename = path.basename(item.url);
+          const uploadDir = ensureUploadDir();
+          const filePath = path.join(uploadDir, filename);
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+          }
+          results.push({ url: item.url, result: 'deleted_local' });
+        } catch (e) {
+          results.push({ url: item.url, error: e.message });
+        }
+      } else {
+        results.push({ url: item.url, result: 'skipped' });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Deletion completed',
+      deleted: results,
+    });
+  } catch (err) {
+    next(err);
   }
 };

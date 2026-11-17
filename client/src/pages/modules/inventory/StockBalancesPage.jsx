@@ -36,6 +36,7 @@ import { useViewMode } from "@/hooks/useViewMode";
 import ViewToggle from "@/components/ViewToggle";
 import useSort from "@/hooks/useSort";
 import SortableHeader from "@/components/SortableHeader";
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 
 export default function StockBalancesPage() {
   const [viewMode, setViewMode] = useViewMode();
@@ -190,39 +191,42 @@ export default function StockBalancesPage() {
               <Boxes className="h-7 w-7 text-amber-400" />
               Stock Balances & Overview
             </h1>
-            <p className="text-sm mt-1 text-slate-100">
+            <p className="hidden sm:block text-sm mt-1 text-slate-100">
               Live inventory on-hand balances, valuation, batch tracking, and warehouse distribution across branches.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Link to="/inventory?section=Stock%20Operations" className="font-sans btn btn-secondary text-xs">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
+            <Link to="/inventory?section=Stock%20Operations" className="font-sans btn btn-secondary text-xs justify-center text-center">
               Return to Menu
             </Link>
             <button
               type="button"
-              className="btn btn-secondary text-xs flex items-center gap-1.5"
+              className="btn btn-secondary text-xs flex items-center justify-center gap-1.5"
               onClick={exportToCSV}
             >
               <Download size={14} /> Export CSV
             </button>
             <button
               type="button"
-              className="btn-success flex items-center gap-1.5 text-xs font-bold"
+              className="btn-success flex items-center justify-center gap-1.5 text-xs font-bold"
               onClick={fetchStockData}
               disabled={loading}
             >
               <RotateCcw size={14} className={loading ? "animate-spin" : ""} /> Refresh
             </button>
-            <Link to="/inventory/stock-transfers/new" className="btn-success flex items-center gap-1.5 text-xs">
+            <Link to="/inventory/stock-transfers/new" className="btn-success flex items-center justify-center gap-1.5 text-xs">
               <Truck size={15} /> Transfer Stock
             </Link>
           </div>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="card p-4 bg-white dark:bg-slate-800 border-l-4 border-l-brand-600 shadow-xs">
+      {/* KPI Cards Carousel */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="sm:grid-cols-2 lg:grid-cols-4"
+        gapClass="gap-4"
+        autoInterval={3500}
+      >
+        <div className="card p-6 min-h-[160px] flex flex-col justify-between bg-white dark:bg-slate-800 border-l-4 border-l-brand-600 shadow-xs">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Stocked Items</p>
@@ -237,7 +241,7 @@ export default function StockBalancesPage() {
           <p className="text-[11px] text-slate-400 mt-2">Active catalog SKUs tracked</p>
         </div>
 
-        <div className="card p-4 bg-white dark:bg-slate-800 border-l-4 border-l-emerald-500 shadow-xs">
+        <div className="card p-6 min-h-[160px] flex flex-col justify-between bg-white dark:bg-slate-800 border-l-4 border-l-emerald-500 shadow-xs">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Quantity On-Hand</p>
@@ -252,7 +256,7 @@ export default function StockBalancesPage() {
           <p className="text-[11px] text-slate-400 mt-2">Across all warehouses</p>
         </div>
 
-        <div className="card p-4 bg-white dark:bg-slate-800 border-l-4 border-l-blue-500 shadow-xs">
+        <div className="card p-6 min-h-[160px] flex flex-col justify-between bg-white dark:bg-slate-800 border-l-4 border-l-blue-500 shadow-xs">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Stock Valuation</p>
@@ -267,7 +271,7 @@ export default function StockBalancesPage() {
           <p className="text-[11px] text-slate-400 mt-2">Valued at standard cost price</p>
         </div>
 
-        <div className="card p-4 bg-white dark:bg-slate-800 border-l-4 border-l-amber-500 shadow-xs">
+        <div className="card p-6 min-h-[160px] flex flex-col justify-between bg-white dark:bg-slate-800 border-l-4 border-l-amber-500 shadow-xs">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Low Stock Alerts</p>
@@ -281,7 +285,7 @@ export default function StockBalancesPage() {
           </div>
           <p className="text-[11px] text-slate-400 mt-2">Items at or below reorder level</p>
         </div>
-      </div>
+      </MobileMovingCarousel>
 
       {/* Filter and Control Bar */}
       <div className="card p-4 space-y-4">
@@ -328,7 +332,7 @@ export default function StockBalancesPage() {
         </div>
 
         {/* Bottom Filter Row: Search, Warehouse Select, Group, Health Status */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input

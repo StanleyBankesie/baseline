@@ -1381,6 +1381,16 @@ async function ensurePagesSeed() {
     },
     {
       module: "Project Management",
+      name: "Gantt Chart",
+      path: "/project-management/gantt",
+    },
+    {
+      module: "Project Management",
+      name: "Task Calendar",
+      path: "/project-management/calendar",
+    },
+    {
+      module: "Project Management",
       name: "Reports",
       path: "/project-management/reports",
     },

@@ -19,6 +19,7 @@ import { query, pool } from "../db/pool.js";
 // Utility Dependencies
 import { httpError } from "../utils/httpError.js";
 import { ensureSalesOrderColumns } from "../utils/dbUtils.js";
+import { isBranchSharingEnabled } from "../utils/branchSharing.js";
 import { checkAndSendAutomaticNotification } from "../utils/externalNotification.js";
 import {
   getInactiveWorkflowBehavior,
@@ -35,6 +36,183 @@ import * as XLSX from "xlsx";
 import { allocateFromBatchesTx } from "./inventory.routes.js";
 
 const router = express.Router();
+
+// Reference / lookup routes accessible to all authenticated company users (before module gate)
+router.get(
+  "/price-types",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensurePriceTables();
+      const companyId = req.scope?.companyId || req.user?.companyId || req.user?.company_id || 1;
+      await seedDefaultPriceTypes(companyId);
+      const items = await query(
+        `SELECT id, name, code, description, is_active FROM sal_price_types WHERE company_id = :companyId ORDER BY name ASC`,
+        { companyId },
+      );
+      res.json({ items: items || [] });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+router.post(
+  "/price-types",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensurePriceTables();
+      const companyId = req.scope?.companyId || req.user?.companyId || req.user?.company_id || 1;
+      const list = Array.isArray(req.body?.priceTypes)
+        ? req.body.priceTypes
+        : Array.isArray(req.body?.items)
+          ? req.body.items
+          : req.body?.name
+            ? [req.body]
+            : [];
+      if (!list.length) {
+        return res.status(400).json({ message: "No price types provided" });
+      }
+      for (const pt of list) {
+        if (!pt.name?.trim()) continue;
+        const name = pt.name.trim();
+        const code = (pt.code || name).toUpperCase().replace(/\s+/g, "_");
+        const description = pt.description || null;
+        const isActive = pt.is_active === 0 || pt.is_active === false || pt.is_active === "0" ? 0 : 1;
+        if (pt.id && /^\d+$/.test(String(pt.id))) {
+          await query(
+            `UPDATE sal_price_types 
+             SET name = :name, code = :code, description = :description, is_active = :isActive
+             WHERE id = :id AND company_id = :companyId`,
+            { id: Number(pt.id), companyId, name, code, description, isActive },
+          );
+        } else {
+          await query(
+            `INSERT INTO sal_price_types (company_id, name, code, description, is_active)
+             VALUES (:companyId, :name, :code, :description, :isActive)
+             ON DUPLICATE KEY UPDATE name = :name, description = :description, is_active = :isActive`,
+            { companyId, name, code, description, isActive },
+          );
+        }
+      }
+      res.json({ message: "Price types saved successfully", status: "SUCCESS" });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.delete(
+  "/price-types/:id",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensurePriceTables();
+      const companyId = req.scope?.companyId || req.user?.companyId || req.user?.company_id || 1;
+      const id = Number(req.params.id);
+      if (!Number.isFinite(id)) {
+        throw httpError(400, "VALIDATION_ERROR", "Invalid id");
+      }
+      await query(
+        `DELETE FROM sal_price_types WHERE id = :id AND company_id = :companyId`,
+        { id, companyId },
+      );
+      res.json({ message: "Price type deleted successfully" });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.get(
+  "/zones",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensureSalesReturnTables();
+      const companyId = req.scope?.companyId || req.user?.companyId || req.user?.company_id || 1;
+      const items = await query(
+        `SELECT id, zone_name, description, is_active FROM sal_zones WHERE company_id = :companyId ORDER BY zone_name ASC`,
+        { companyId },
+      );
+      res.json({ items: items || [] });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+router.post(
+  "/zones",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensureSalesReturnTables();
+      const companyId = req.scope?.companyId || req.user?.companyId || req.user?.company_id || 1;
+      const { zones } = req.body;
+      if (!Array.isArray(zones)) {
+        return res.status(400).json({ message: "zones must be an array" });
+      }
+      for (const z of zones) {
+        if (!z.zone_name) continue;
+        if (z.id && /^\d+$/.test(String(z.id))) {
+          await query(
+            `UPDATE sal_zones
+                SET zone_name = :zone_name, description = :description, is_active = :is_active
+              WHERE id = :id AND company_id = :companyId`,
+            {
+              id: Number(z.id),
+              company_id: companyId,
+              zone_name: z.zone_name,
+              description: z.description || null,
+              is_active: z.is_active ? 1 : 0,
+            },
+          );
+        } else {
+          await query(
+            `INSERT INTO sal_zones (company_id, zone_name, description, is_active)
+             VALUES (:companyId, :zone_name, :description, 1)
+             ON DUPLICATE KEY UPDATE description = :description, is_active = 1`,
+            {
+              companyId,
+              zone_name: z.zone_name,
+              description: z.description || null,
+            },
+          );
+        }
+      }
+      res.json({ message: "Zones saved successfully" });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+router.delete(
+  "/zones/:id",
+  requireAuth,
+  requireCompanyScope,
+  async (req, res, next) => {
+    try {
+      await ensureSalesReturnTables();
+      const companyId = req.scope?.companyId || req.user?.companyId || req.user?.company_id || 1;
+      const id = Number(req.params.id);
+      await query(
+        `DELETE FROM sal_zones WHERE id = :id AND company_id = :companyId`,
+        { id, companyId },
+      );
+      res.json({ message: "Zone deleted successfully" });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
 
 // Enforce module-level access for all Sales endpoints
 router.use(
@@ -83,10 +261,103 @@ async function hasColumn(tableName, columnName) {
         "ALTER TABLE sal_deliveries ADD COLUMN invoice_amount DECIMAL(18,2) DEFAULT 0",
       );
     }
+    await ensureCustomersTableColumns();
+    await ensureInvoiceTables();
+    await ensurePriceTables();
   } catch (err) {
-    console.error("Failed to update sal_deliveries schema:", err);
+    console.error("Failed to update sales schema on startup:", err);
   }
 })();
+
+// Ensure price tables exist
+async function ensurePriceTables() {
+  await query(`
+    CREATE TABLE IF NOT EXISTS sal_price_types (
+      id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      company_id BIGINT UNSIGNED NOT NULL,
+      name VARCHAR(100) NOT NULL,
+      code VARCHAR(50) NULL,
+      description VARCHAR(255) NULL,
+      is_active TINYINT(1) NOT NULL DEFAULT 1,
+      created_by BIGINT UNSIGNED NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      KEY idx_pt_company (company_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `).catch(() => null);
+
+  if (!(await hasColumn("sal_price_types", "description"))) {
+    await query("ALTER TABLE sal_price_types ADD COLUMN description VARCHAR(255) NULL").catch(() => null);
+  }
+  if (!(await hasColumn("sal_price_types", "code"))) {
+    await query("ALTER TABLE sal_price_types ADD COLUMN code VARCHAR(50) NULL").catch(() => null);
+  }
+  if (!(await hasColumn("sal_price_types", "is_active"))) {
+    await query("ALTER TABLE sal_price_types ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1").catch(() => null);
+  }
+
+  await query(`
+    CREATE TABLE IF NOT EXISTS sal_standard_prices (
+      id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      company_id BIGINT UNSIGNED NOT NULL,
+      product_id BIGINT UNSIGNED NOT NULL,
+      price_type_id BIGINT UNSIGNED NULL,
+      currency_id BIGINT UNSIGNED NULL,
+      cost_price DECIMAL(18,4) NOT NULL DEFAULT 0,
+      selling_price DECIMAL(18,4) NOT NULL DEFAULT 0,
+      margin_percent DECIMAL(8,2) NOT NULL DEFAULT 0,
+      effective_date DATE NOT NULL,
+      uom VARCHAR(50) NULL,
+      created_by BIGINT UNSIGNED NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      KEY idx_sp_company_product (company_id, product_id),
+      KEY idx_sp_price_type (price_type_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `).catch(() => null);
+
+  await query(`
+    CREATE TABLE IF NOT EXISTS sal_customer_prices (
+      id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      company_id BIGINT UNSIGNED NOT NULL,
+      customer_id BIGINT UNSIGNED NOT NULL,
+      product_id BIGINT UNSIGNED NOT NULL,
+      price_type_id BIGINT UNSIGNED NULL,
+      currency_id BIGINT UNSIGNED NULL,
+      standard_price DECIMAL(18,4) NOT NULL DEFAULT 0,
+      customer_price DECIMAL(18,4) NOT NULL DEFAULT 0,
+      discount_percent DECIMAL(8,2) NOT NULL DEFAULT 0,
+      min_quantity DECIMAL(18,4) NOT NULL DEFAULT 1,
+      max_quantity DECIMAL(18,4) NULL,
+      effective_from DATE NULL,
+      effective_to DATE NULL,
+      uom VARCHAR(50) NULL,
+      created_by BIGINT UNSIGNED NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      KEY idx_cp_company_customer (company_id, customer_id),
+      KEY idx_cp_product (product_id),
+      KEY idx_cp_price_type (price_type_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `).catch(() => null);
+}
+
+async function seedDefaultPriceTypes(companyId) {
+  if (!companyId) return;
+  const existing = await query(
+    `SELECT COUNT(*) AS c FROM sal_price_types WHERE company_id = :companyId`,
+    { companyId },
+  ).catch(() => [{ c: 0 }]);
+  if (Number(existing?.[0]?.c || 0) === 0) {
+    await query(
+      `INSERT INTO sal_price_types (company_id, name, code, description, is_active) VALUES
+       (:companyId, 'Retail', 'RETAIL', 'Standard Retail Price', 1),
+       (:companyId, 'Wholesale', 'WHOLESALE', 'Standard Wholesale Price', 1)
+      `,
+      { companyId },
+    ).catch(() => null);
+  }
+}
 
 // Ensure prospective customers table exists
 // Major Logical Block: Ensure 'sal_prospect_customers' table and columns exist
@@ -297,6 +568,16 @@ async function ensureInvoiceTables() {
       "ALTER TABLE sal_invoices ADD COLUMN tax_amount DECIMAL(18,2) DEFAULT 0 AFTER balance_amount",
     ).catch(() => null);
   }
+  if (!(await hasColumn("sal_invoices", "amount_paid"))) {
+    await query(
+      "ALTER TABLE sal_invoices ADD COLUMN amount_paid DECIMAL(18,2) DEFAULT 0 AFTER net_amount",
+    ).catch(() => null);
+  }
+  if (!(await hasColumn("sal_invoices", "payment_terms"))) {
+    await query(
+      "ALTER TABLE sal_invoices ADD COLUMN payment_terms VARCHAR(100) NULL AFTER remarks",
+    ).catch(() => null);
+  }
   await query(`
     CREATE TABLE IF NOT EXISTS sal_invoice_details (
       id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -407,17 +688,68 @@ async function ensureInvoiceTables() {
     ).catch(() => null);
 }
 
-// Ensure sal_customers has created_by column
+// Ensure sal_customers has required columns
 async function ensureCustomersTableColumns() {
-  if (!(await hasColumn("sal_customers", "created_by"))) {
+  const table = "sal_customers";
+  if (!(await hasColumn(table, "created_by"))) {
     await query(
       `ALTER TABLE sal_customers ADD COLUMN created_by BIGINT UNSIGNED NULL`,
     ).catch(() => null);
   }
-  if (!(await hasColumn("sal_customers", "sales_account_id"))) {
+  if (!(await hasColumn(table, "sales_account_id"))) {
     await query(
       `ALTER TABLE sal_customers ADD COLUMN sales_account_id BIGINT UNSIGNED NULL`,
     ).catch(() => null);
+  }
+  if (!(await hasColumn(table, "enforce_credit_limit"))) {
+    await query(
+      `ALTER TABLE sal_customers ADD COLUMN enforce_credit_limit TINYINT(1) NOT NULL DEFAULT 0`,
+    ).catch(() => null);
+  }
+  if (!(await hasColumn(table, "temp_credit_limit"))) {
+    await query(
+      `ALTER TABLE sal_customers ADD COLUMN temp_credit_limit DECIMAL(18,2) NULL DEFAULT NULL`,
+    ).catch(() => null);
+  }
+  if (!(await hasColumn(table, "temp_credit_limit_date"))) {
+    await query(
+      `ALTER TABLE sal_customers ADD COLUMN temp_credit_limit_date DATE NULL DEFAULT NULL`,
+    ).catch(() => null);
+  }
+  if (!(await hasColumn(table, "temp_credit_limit_by"))) {
+    await query(
+      `ALTER TABLE sal_customers ADD COLUMN temp_credit_limit_by BIGINT UNSIGNED NULL DEFAULT NULL`,
+    ).catch(() => null);
+  }
+
+  // Ensure service_customer exists (or rename service_client if present)
+  try {
+    const hasClient = await hasColumn(table, "service_client");
+    const hasCust = await hasColumn(table, "service_customer");
+    if (hasClient && !hasCust) {
+      await query(`ALTER TABLE sal_customers CHANGE service_client service_customer VARCHAR(1) DEFAULT 'N'`).catch(() => null);
+    } else if (!hasCust) {
+      await query(`ALTER TABLE sal_customers ADD COLUMN service_customer VARCHAR(1) DEFAULT 'N'`).catch(() => null);
+    }
+  } catch {}
+
+  if (!(await hasColumn(table, "currency_id"))) {
+    await query(`ALTER TABLE sal_customers ADD COLUMN currency_id BIGINT UNSIGNED NULL`).catch(() => null);
+  }
+  if (!(await hasColumn(table, "zone"))) {
+    await query(`ALTER TABLE sal_customers ADD COLUMN zone VARCHAR(100) NULL`).catch(() => null);
+  }
+  if (!(await hasColumn(table, "country"))) {
+    await query(`ALTER TABLE sal_customers ADD COLUMN country VARCHAR(100) NULL`).catch(() => null);
+  }
+  if (!(await hasColumn(table, "mobile"))) {
+    await query(`ALTER TABLE sal_customers ADD COLUMN mobile VARCHAR(100) NULL`).catch(() => null);
+  }
+  if (!(await hasColumn(table, "payment_terms"))) {
+    await query(`ALTER TABLE sal_customers ADD COLUMN payment_terms VARCHAR(100) NULL DEFAULT 'Net 30'`).catch(() => null);
+  }
+  if (!(await hasColumn(table, "customer_type"))) {
+    await query(`ALTER TABLE sal_customers ADD COLUMN customer_type VARCHAR(100) NULL DEFAULT 'Individual'`).catch(() => null);
   }
 }
 
@@ -489,7 +821,9 @@ async function ensureSalesReturnTables() {
     )
   `).catch(() => null);
 }
+let _deliveryTablesEnsured = false;
 async function ensureDeliveryTables() {
+  if (_deliveryTablesEnsured) return;
   await query(`
     CREATE TABLE IF NOT EXISTS sal_deliveries (
       id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -540,6 +874,7 @@ async function ensureDeliveryTables() {
     await query(
       `ALTER TABLE ${deliveries} ADD COLUMN created_by BIGINT UNSIGNED NULL AFTER invoice_id`,
     ).catch(() => null);
+  _deliveryTablesEnsured = true;
 }
 async function ensureDeliverySequenceTableTx(conn) {
   await conn
@@ -716,6 +1051,7 @@ async function ensureSalesperson(companyId, branchId, name) {
 }
 
 async function userHasExceptionalAllow(userId, permissionCode = null) {
+  if (Number(userId) === 1) return true;
   const rows = await query(
     `
     SELECT 1,
@@ -726,7 +1062,7 @@ async function userHasExceptionalAllow(userId, permissionCode = null) {
          WHERE user_id = :uid
        AND effect = 'ALLOW'
        AND is_active = 1
-       ${permissionCode ? "AND permission_code = :code" : ""}
+       ${permissionCode ? "AND (permission_code = :code OR permission_code = '*' OR UPPER(permission_code) = 'ALL')" : ""}
      LIMIT 1
     `,
     { uid: userId, code: permissionCode || undefined },
@@ -862,6 +1198,32 @@ async function nextInvoiceNoTx(conn, { companyId, branchId, branchIdsStr }) {
   );
   return nextNo;
 }
+
+async function nextSequentialNo(table, column, prefix, connObj = null) {
+  let sql = `
+    SELECT ${table}.${column} AS no
+    FROM ${table}
+    WHERE ${table}.${column} REGEXP '^${prefix}-?[0-9]{6}$'
+    ORDER BY CAST(REGEXP_REPLACE(${table}.${column}, '[^0-9]', '') AS UNSIGNED) DESC
+    LIMIT 1
+  `;
+  if (connObj) sql += " FOR UPDATE";
+  
+  const executeQuery = connObj 
+    ? connObj.execute(sql).then(r => r[0]).catch(() => []) 
+    : query(sql).catch(() => []);
+    
+  const rows = await executeQuery;
+  let nextNum = 1;
+  if (rows && rows.length > 0) {
+    const prev = String(rows[0].no || "");
+    const digits = prev.replace(/[^0-9]/g, "");
+    const n = parseInt(digits, 10);
+    if (Number.isFinite(n)) nextNum = n + 1;
+  }
+  return `${prefix}-${String(nextNum).padStart(6, "0")}`;
+}
+
 async function resolveOpenFiscalYearId(conn, { companyId }) {
   const [rows] = await conn.execute(
     "SELECT id FROM fin_fiscal_years WHERE company_id = :companyId AND is_open = 1 ORDER BY start_date DESC LIMIT 1",
@@ -1431,6 +1793,253 @@ export async function createPostedSalesVoucherForInvoiceTx(
   return voucherId;
 }
 
+export async function postSalesInvoiceReceiptVoucherTx(
+  conn,
+  {
+    companyId,
+    branchId,
+    branchIdsStr,
+    invoiceId,
+    customerId,
+    depositAccountId,
+    paymentMethod,
+    paymentReference,
+    chequeDate,
+    receivedAmount,
+    userId,
+    voucherDate,
+  },
+) {
+  const safeReceivedAmount = Math.max(0, Number(receivedAmount || 0));
+  if (!(safeReceivedAmount > 0) || !depositAccountId) {
+    return { voucherId: null, voucherNo: null, status: null };
+  }
+
+  // 1. Ensure/Resolve RV (Receipt Voucher) voucher type
+  let rvTypeId = await resolveVoucherTypeIdByCode(conn, {
+    code: "RV",
+    companyId,
+  });
+  if (!rvTypeId) {
+    await conn
+      .execute(
+        `INSERT INTO fin_voucher_types
+        (company_id, code, name, category, prefix, next_number, requires_approval, is_active)
+       VALUES
+        (:companyId, 'RV', 'Receipt Voucher', 'RECEIPT', 'RV', 1, 0, 1)`,
+        { companyId },
+      )
+      .catch(() => null);
+    rvTypeId = await resolveVoucherTypeIdByCode(conn, {
+      code: "RV",
+      companyId,
+    });
+  }
+
+  const fiscalYearId = await resolveOpenFiscalYearId(conn, { companyId });
+  const voucherNo = await nextVoucherNoTx(conn, {
+    voucherTypeId: rvTypeId,
+    companyId,
+  });
+
+  // 2. Resolve customer account & customer name
+  const customerAccountId = await ensureCustomerFinAccountIdTx(conn, {
+    companyId,
+    customerId,
+  });
+  const [custRows] = await conn.execute(
+    `SELECT customer_name FROM sal_customers WHERE id = :customerId AND company_id = :companyId LIMIT 1`,
+    { customerId, companyId },
+  );
+  const customerName = custRows?.[0]?.customer_name || "Customer";
+
+  // 3. Resolve Invoice info
+  const [invRows] = await conn.execute(
+    `SELECT invoice_no, invoice_date, currency_id, exchange_rate, net_amount FROM sal_invoices WHERE id = :invoiceId LIMIT 1`,
+    { invoiceId },
+  );
+  const invHdr = invRows?.[0] || {};
+
+  const effectiveVoucherDate = voucherDate || invHdr.invoice_date || toYmd(new Date());
+  const exchangeRate = Number(invHdr.exchange_rate || 1) || 1;
+  const currencyId = invHdr.currency_id || null;
+
+  // 4. Workflow resolution for RECEIPT_VOUCHER
+  const { activeWorkflow: activeWf, inactiveWorkflow } = await resolveWorkflowSelection({
+    companyId,
+    docRouteBase: "/finance/receipt-voucher",
+    typeSynonyms: ["RECEIPT_VOUCHER", "Receipt Voucher", "RV"],
+    amount: safeReceivedAmount,
+  });
+
+  let voucherStatus = "APPROVED";
+  let requiresWorkflow = false;
+  let firstStep = null;
+  let assignedToUserId = null;
+
+  if (activeWf) {
+    const [stepRows] = await conn.execute(
+      `SELECT * FROM adm_workflow_steps WHERE workflow_id = :wfId ORDER BY step_order ASC LIMIT 1`,
+      { wfId: activeWf.id },
+    );
+    if (stepRows && stepRows.length > 0 && stepRows[0].approver_user_id) {
+      firstStep = stepRows[0];
+      assignedToUserId = Number(firstStep.approver_user_id);
+      requiresWorkflow = true;
+      voucherStatus = "PENDING_APPROVAL";
+    }
+  } else {
+    const behavior = getInactiveWorkflowBehavior(inactiveWorkflow);
+    if (behavior === "REJECT") {
+      throw httpError(
+        400,
+        "WORKFLOW_INACTIVE",
+        "Receipt Voucher approval workflow is inactive and rejecting submissions.",
+      );
+    } else if (behavior === "PENDING" || behavior === "DRAFT") {
+      voucherStatus = behavior === "PENDING" ? "PENDING_APPROVAL" : "DRAFT";
+      requiresWorkflow = true;
+    } else {
+      voucherStatus = "APPROVED";
+      requiresWorkflow = false;
+    }
+  }
+
+  const narration = `Receipt for Invoice ${invHdr.invoice_no || ""} from ${customerName}${paymentReference ? ` | Ref: ${paymentReference}` : ""}`;
+
+  // 5. Insert fin_vouchers
+  const [vIns] = await conn.execute(
+    `INSERT INTO fin_vouchers
+      (company_id, branch_id, fiscal_year_id, voucher_type_id, voucher_no, voucher_date, narration, currency_id, exchange_rate, total_debit, total_credit, balanced_amount, status, created_by, approved_by, posted_by)
+     VALUES
+      (:companyId, :branchId, :fiscalYearId, :voucherTypeId, :voucherNo, :voucherDate, :narration, :currencyId, :exchangeRate, :totalDebit, :totalCredit, :balancedAmount, :status, :createdBy, :approvedBy, :postedBy)`,
+    {
+      companyId,
+      branchId: branchId || null,
+      fiscalYearId: fiscalYearId || null,
+      voucherTypeId: rvTypeId,
+      voucherNo,
+      voucherDate: effectiveVoucherDate,
+      narration,
+      currencyId,
+      exchangeRate,
+      totalDebit: safeReceivedAmount,
+      totalCredit: safeReceivedAmount,
+      balancedAmount: safeReceivedAmount,
+      status: voucherStatus,
+      createdBy: userId || null,
+      approvedBy: requiresWorkflow ? null : userId || null,
+      postedBy: requiresWorkflow ? null : userId || null,
+    },
+  );
+  const voucherId = Number(vIns?.insertId || 0) || 0;
+
+  // 6. Insert lines:
+  // Line 1: DEBIT Deposit Account (Cash/Bank)
+  await conn.execute(
+    `INSERT INTO fin_voucher_lines
+      (company_id, voucher_id, line_no, account_id, description, debit, credit, tax_code_id, reference_no, cheque_number, cheque_date, payment_method, currency_id, exchange_rate)
+     VALUES
+      (:companyId, :voucherId, 1, :accountId, :description, :debit, 0, NULL, :referenceNo, :chequeNumber, :chequeDate, :paymentMethod, :currencyId, :exchangeRate)`,
+    {
+      companyId,
+      voucherId,
+      accountId: depositAccountId,
+      description: `Receipt from ${customerName} for ${invHdr.invoice_no || ""}`,
+      debit: safeReceivedAmount,
+      referenceNo: paymentReference || invHdr.invoice_no || null,
+      chequeNumber: paymentReference || null,
+      chequeDate: chequeDate || null,
+      paymentMethod: paymentMethod || "Cash",
+      currencyId,
+      exchangeRate,
+    },
+  );
+
+  // Line 2: CREDIT Customer Accounts Receivable (reducing customer balance)
+  await conn.execute(
+    `INSERT INTO fin_voucher_lines
+      (company_id, voucher_id, line_no, account_id, description, debit, credit, tax_code_id, reference_no, cheque_number, cheque_date, payment_method, currency_id, exchange_rate)
+     VALUES
+      (:companyId, :voucherId, 2, :accountId, :description, 0, :credit, NULL, :referenceNo, :chequeNumber, :chequeDate, :paymentMethod, :currencyId, :exchangeRate)`,
+    {
+      companyId,
+      voucherId,
+      accountId: customerAccountId,
+      description: `Receipt from ${customerName} for ${invHdr.invoice_no || ""}`,
+      credit: safeReceivedAmount,
+      referenceNo: paymentReference || invHdr.invoice_no || null,
+      chequeNumber: paymentReference || null,
+      chequeDate: chequeDate || null,
+      paymentMethod: paymentMethod || "Cash",
+      currencyId,
+      exchangeRate,
+    },
+  );
+
+  // 7. If workflow approval is required, create workflow instance
+  if (requiresWorkflow && activeWf && firstStep) {
+    try {
+      const [dwRes] = await conn.execute(
+        `INSERT INTO adm_document_workflows
+          (company_id, workflow_id, document_id, document_type, amount, current_step_order, status, assigned_to_user_id)
+         VALUES
+          (:companyId, :workflowId, :documentId, 'RECEIPT_VOUCHER', :amount, :currentStepOrder, 'PENDING', :assignedToUserId)`,
+        {
+          companyId,
+          workflowId: activeWf.id,
+          documentId: voucherId,
+          amount: safeReceivedAmount,
+          currentStepOrder: Number(firstStep.step_order || 1),
+          assignedToUserId,
+        },
+      );
+      const dwId = dwRes?.insertId ? Number(dwRes.insertId) : null;
+      if (dwId) {
+        await conn
+          .execute(
+            `INSERT INTO adm_workflow_tasks
+              (company_id, workflow_id, document_workflow_id, document_id, document_type, step_order, assigned_to_user_id, action)
+             VALUES
+              (:companyId, :workflowId, :dwId, :documentId, 'RECEIPT_VOUCHER', :stepOrder, :assignedToUserId, 'PENDING')`,
+            {
+              companyId,
+              workflowId: activeWf.id,
+              dwId,
+              documentId: voucherId,
+              stepOrder: Number(firstStep.step_order || 1),
+              assignedToUserId,
+            },
+          )
+          .catch(() => null);
+      }
+    } catch (e) {
+      console.warn("Workflow task creation skipped:", e.message);
+    }
+  }
+
+  // 8. Update Invoice payment status
+  const invNetAmount = Number(invHdr.net_amount || 0);
+  const newAmountPaid = safeReceivedAmount;
+  const newPaymentStatus = newAmountPaid >= invNetAmount ? "PAID" : newAmountPaid > 0 ? "PARTIAL" : "UNPAID";
+  const newBalanceAmount = Math.max(0, invNetAmount - newAmountPaid);
+
+  await conn.execute(
+    `UPDATE sal_invoices 
+     SET amount_paid = :amountPaid, payment_status = :paymentStatus, balance_amount = :balanceAmount 
+     WHERE id = :invoiceId AND company_id = :companyId`,
+    {
+      amountPaid: newAmountPaid,
+      paymentStatus: newPaymentStatus,
+      balanceAmount: newBalanceAmount,
+      invoiceId,
+      companyId,
+    },
+  );
+
+  return { voucherId, voucherNo, status: voucherStatus };
+}
+
 async function createSalesReturnCreditNoteTx(conn, opts) {
   const {
     companyId,
@@ -1657,6 +2266,101 @@ async function createCreditNoteForReturnApprovalTx(
 }
 
 router.get(
+  "/dashboard-stats",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
+      const p = { companyId, branchId, branchIdsStr: String(branchIdsStr || "") };
+      const whereBranch = "(:branchId IS NULL OR branch_id = :branchId OR :branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr) OR branch_id IS NULL)";
+
+      const [
+        monthSalesData,
+        openQuotesData,
+        pendingDeliveriesData,
+        overdueInvoicesData,
+        allTimeSalesData,
+        prevMonthData,
+        todaySalesData
+      ] = await Promise.all([
+        query(`SELECT COALESCE(SUM(total_amount), 0) AS total, COUNT(*) AS count
+               FROM sal_invoices
+               WHERE (company_id = :companyId OR company_id IS NULL)
+                 AND ${whereBranch}
+                 AND MONTH(invoice_date) = MONTH(CURDATE())
+                 AND YEAR(invoice_date) = YEAR(CURDATE())
+                 AND status NOT IN ('CANCELLED', 'DRAFT')`, p).catch(() => [{ total: 0, count: 0 }]),
+        query(`SELECT COUNT(*) AS count
+               FROM sal_quotations
+               WHERE (company_id = :companyId OR company_id IS NULL)
+                 AND ${whereBranch}
+                 AND status IN ('OPEN', 'SENT', 'PENDING', 'DRAFT')`, p).catch(() => [{ count: 0 }]),
+        query(`SELECT COUNT(*) AS count
+               FROM sal_deliveries
+               WHERE (company_id = :companyId OR company_id IS NULL)
+                 AND ${whereBranch}
+                 AND status IN ('PENDING', 'IN_TRANSIT', 'PROCESSING', 'DRAFT')`, p).catch(() => [{ count: 0 }]),
+        query(`SELECT COUNT(*) AS count, COALESCE(SUM(total_amount - COALESCE(paid_amount, 0)), 0) AS total
+               FROM sal_invoices
+               WHERE (company_id = :companyId OR company_id IS NULL)
+                 AND ${whereBranch}
+                 AND due_date < CURDATE()
+                 AND status NOT IN ('PAID', 'CANCELLED', 'DRAFT')`, p).catch(() => [{ count: 0, total: 0 }]),
+        query(`SELECT COALESCE(SUM(total_amount), 0) AS total, COUNT(*) AS count
+               FROM sal_invoices
+               WHERE (company_id = :companyId OR company_id IS NULL)
+                 AND ${whereBranch}
+                 AND status NOT IN ('CANCELLED', 'DRAFT')`, p).catch(() => [{ total: 0, count: 0 }]),
+        query(`SELECT COALESCE(SUM(total_amount), 0) AS total
+               FROM sal_invoices
+               WHERE (company_id = :companyId OR company_id IS NULL)
+                 AND ${whereBranch}
+                 AND MONTH(invoice_date) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+                 AND YEAR(invoice_date) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+                 AND status NOT IN ('CANCELLED', 'DRAFT')`, p).catch(() => [{ total: 0 }]),
+        query(`SELECT COALESCE(SUM(total_amount), 0) AS total, COUNT(*) AS count
+               FROM sal_invoices
+               WHERE (company_id = :companyId OR company_id IS NULL)
+                 AND ${whereBranch}
+                 AND DATE(invoice_date) = CURDATE()
+                 AND status NOT IN ('CANCELLED', 'DRAFT')`, p).catch(() => [{ total: 0, count: 0 }]),
+      ]);
+
+      const thisMonth = Number(monthSalesData?.[0]?.total || 0);
+      const prevMonth = Number(prevMonthData?.[0]?.total || 0);
+      let growth = 0;
+      if (prevMonth > 0) {
+        growth = Math.round(((thisMonth - prevMonth) / prevMonth) * 100);
+      } else if (thisMonth > 0) {
+        growth = 100;
+      }
+
+      const curDay = Math.max(new Date().getDate(), 1);
+      const avgSalesThisMonth = curDay > 0 ? (thisMonth / curDay) : 0;
+
+      res.json({
+        success: true,
+        data: {
+          salesThisMonth: thisMonth,
+          avgSalesThisMonth: Number(avgSalesThisMonth.toFixed(2)),
+          openQuotations: Number(openQuotesData?.[0]?.count || 0),
+          pendingDeliveries: Number(pendingDeliveriesData?.[0]?.count || 0),
+          overdueInvoices: Number(overdueInvoicesData?.[0]?.count || 0),
+          totalRevenue: Number(allTimeSalesData?.[0]?.total || 0),
+          salesGrowth: `${growth >= 0 ? '+' : ''}${growth}%`,
+          todaySales: Number(todaySalesData?.[0]?.total || 0),
+          invoiceCount: Number(monthSalesData?.[0]?.count || 0),
+        }
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get(
   "/prospects",
   requireAuth,
   requireCompanyScope,
@@ -1798,63 +2502,201 @@ router.get(
   requirePermission("SAL.CUSTOMER.VIEW"),
   async (req, res, next) => {
     try {
-      const companyId = req.scope.companyId;
+      await ensureCustomersTableColumns();
+      const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
       const activeParam = String(req.query.active || "")
         .trim()
         .toLowerCase();
-      // If active=false is explicitly requested, show all. Otherwise show only active.
-      const onlyActive =
-        activeParam === "true" || activeParam === "1" || activeParam === "";
+      // If active=false, active=0, active=all, or all=1 is explicitly requested, show all/inactive. Otherwise show only active.
+      const showAllOrInactive =
+        ["all", "false", "0"].includes(activeParam) ||
+        req.query.all === "1" ||
+        req.query.all === "true";
+      const onlyActive = !showAllOrInactive;
       
       const serviceCustomerParam = String(req.query.service_customer || "").trim().toUpperCase();
 
-      const params = { companyId };
-      const where = ["c.company_id = :companyId"];
-      if (onlyActive) where.push("c.is_active = 1");
+      const params = { companyId, branchIdsStr };
+      const where = ["(c.company_id = :companyId OR c.company_id IS NULL)"];
+      const shareCustomers = await isBranchSharingEnabled(companyId, "BRANCH_SHARE_CUSTOMERS");
+      if (branchIdsStr && !shareCustomers) {
+        where.push("(:branchIdsStr = '' OR c.branch_id IS NULL OR FIND_IN_SET(c.branch_id, :branchIdsStr))");
+      }
+      if (onlyActive) where.push("(c.is_active = 1 OR c.is_active IS NULL)");
       if (serviceCustomerParam === "Y") where.push("c.service_customer = 'Y'");
-      else if (serviceCustomerParam === "N") where.push("c.service_customer = 'N'");
-      const items = await query(
-        `SELECT 
-           c.id,
-           c.company_id,
-           c.branch_id,
-           c.customer_code,
-           c.customer_name,
-           c.customer_type,
-           c.price_type_id,
-           pt.name AS price_type_name,
-           c.contact_person,
-           c.email,
-           c.phone,
-           c.mobile,
-           c.credit_limit,
-           c.is_active,
-           c.address,
-           c.city,
-           c.state,
-           c.zone,
-           c.country,
-           c.payment_terms,
-           c.currency_id,
-           c.sales_account_id,
-           c.service_customer,
-           fa.name AS sales_account_name,
-          c.created_at,
-          u.username AS created_by_name
-         FROM sal_customers c
-         LEFT JOIN sal_price_types pt
-           ON pt.id = c.price_type_id AND pt.company_id = c.company_id
-        LEFT JOIN adm_users u ON u.id = c.created_by
-        LEFT JOIN fin_accounts fa ON fa.id = c.sales_account_id AND fa.company_id = c.company_id
-         WHERE ${where.join(" AND ")}
-         ORDER BY c.customer_name ASC`,
-        params,
-      ).catch(() => []);
+      else if (serviceCustomerParam === "N") where.push("(c.service_customer = 'N' OR c.service_customer IS NULL OR c.service_customer = '')");
+
+      let items = [];
+      try {
+        items = await query(
+          `SELECT 
+             c.id,
+             c.company_id,
+             c.branch_id,
+             c.customer_code,
+             c.customer_name,
+             c.customer_type,
+             c.price_type_id,
+             pt.name AS price_type_name,
+             c.contact_person,
+             c.email,
+             c.phone,
+             c.mobile,
+             c.credit_limit,
+             c.enforce_credit_limit,
+             c.temp_credit_limit,
+             c.temp_credit_limit_date,
+             c.is_active,
+             c.address,
+             c.city,
+             c.state,
+             c.zone,
+             c.country,
+             c.payment_terms,
+             c.currency_id,
+             c.sales_account_id,
+             c.service_customer,
+             fa.name AS sales_account_name,
+            c.created_at,
+            u.username AS created_by_name
+           FROM sal_customers c
+           LEFT JOIN sal_price_types pt
+             ON pt.id = c.price_type_id AND (pt.company_id = c.company_id OR pt.company_id IS NULL)
+          LEFT JOIN adm_users u ON u.id = c.created_by
+          LEFT JOIN fin_accounts fa ON fa.id = c.sales_account_id AND (fa.company_id = c.company_id OR fa.company_id IS NULL)
+           WHERE ${where.join(" AND ")}
+           ORDER BY c.customer_name ASC`,
+          params,
+        );
+      } catch (err) {
+        console.error("GET /customers rich query error, falling back to basic query:", err);
+        items = await query(
+          `SELECT c.* FROM sal_customers c
+           WHERE ${where.join(" AND ")}
+           ORDER BY c.customer_name ASC`,
+          params,
+        ).catch((fallbackErr) => {
+          console.error("GET /customers fallback query error:", fallbackErr);
+          throw fallbackErr;
+        });
+      }
       res.json({ items: Array.isArray(items) ? items : [] });
     } catch (e) {
       next(e);
     }
   },
+);
+
+router.get(
+  "/customers/:id/credit-status",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      const { companyId = null } = req.scope || {};
+      const id = Number(req.params.id);
+      if (!Number.isFinite(id)) {
+        throw httpError(400, "VALIDATION_ERROR", "Invalid customer id");
+      }
+      await ensureCustomersTableColumns();
+      const rows = await query(
+        `SELECT id, customer_name, credit_limit, enforce_credit_limit, temp_credit_limit, DATE_FORMAT(temp_credit_limit_date, '%Y-%m-%d') as temp_credit_limit_date
+         FROM sal_customers
+         WHERE id = :id AND company_id = :companyId
+         LIMIT 1`,
+        { id, companyId }
+      );
+      if (!rows?.length) {
+        throw httpError(404, "NOT_FOUND", "Customer not found");
+      }
+      const cust = rows[0];
+      const todayYmd = new Date().toISOString().split("T")[0];
+      const isTempActive = Boolean(
+        cust.temp_credit_limit_date === todayYmd &&
+        cust.temp_credit_limit !== null &&
+        cust.temp_credit_limit !== undefined &&
+        Number(cust.temp_credit_limit) >= 0
+      );
+
+      const permanentLimit = Number(cust.credit_limit || 0);
+      const effectiveLimit = isTempActive ? Number(cust.temp_credit_limit) : permanentLimit;
+      const isEnforced = Number(cust.enforce_credit_limit) === 1;
+
+      // Calculate total outstanding balance from posted unpaid/partially-paid invoices
+      const [balRows] = await query(
+        `SELECT COALESCE(SUM(balance_amount), 0) AS outstanding_balance
+         FROM sal_invoices
+         WHERE company_id = :companyId AND customer_id = :id AND status != 'CANCELLED' AND balance_amount > 0`,
+        { companyId, id }
+      );
+      const outstandingBalance = Number(balRows?.outstanding_balance || 0);
+      const availableCredit = isEnforced ? Math.max(0, effectiveLimit - outstandingBalance) : null;
+
+      res.json({
+        customer_id: id,
+        customer_name: cust.customer_name,
+        enforce_credit_limit: isEnforced,
+        permanent_credit_limit: permanentLimit,
+        effective_credit_limit: effectiveLimit,
+        outstanding_balance: outstandingBalance,
+        available_credit: availableCredit,
+        is_temp_limit_active: isTempActive,
+        temp_credit_limit: cust.temp_credit_limit,
+        temp_credit_limit_date: cust.temp_credit_limit_date,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+router.post(
+  "/customers/:id/temp-credit-limit",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      const { companyId = null } = req.scope || {};
+      const id = Number(req.params.id);
+      if (!Number.isFinite(id)) {
+        throw httpError(400, "VALIDATION_ERROR", "Invalid customer id");
+      }
+      const userId = req.user?.id || req.user?.sub || null;
+      const canOverride = await userHasExceptionalAllow(userId, "SALES.CREDIT_LIMIT.OVERRIDE");
+      if (!canOverride) {
+        throw httpError(403, "PERMISSION_DENIED", "You do not have exceptional permission to override or increase credit limits.");
+      }
+
+      const { new_credit_limit } = req.body;
+      const limitAmount = Number(new_credit_limit);
+      if (!Number.isFinite(limitAmount) || limitAmount < 0) {
+        throw httpError(400, "VALIDATION_ERROR", "Valid credit limit amount is required");
+      }
+
+      await ensureCustomersTableColumns();
+      const todayYmd = new Date().toISOString().split("T")[0];
+
+      await query(
+        `UPDATE sal_customers 
+         SET temp_credit_limit = :limitAmount,
+             temp_credit_limit_date = :todayYmd,
+             temp_credit_limit_by = :userId
+         WHERE id = :id AND company_id = :companyId`,
+        { id, companyId, limitAmount, todayYmd, userId }
+      );
+
+      res.json({
+        message: "Temporary credit limit updated for today successfully",
+        customer_id: id,
+        temp_credit_limit: limitAmount,
+        temp_credit_limit_date: todayYmd,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 );
 
 router.get(
@@ -1865,7 +2707,7 @@ router.get(
   requirePermission("SAL.CUSTOMER.VIEW"),
   async (req, res, next) => {
     try {
-      const { companyId = null } = req.scope || {};
+      const { companyId = null, branchIdsStr = "" } = req.scope || {};
       const id = Number(req.params.id);
       if (!Number.isFinite(id)) {
         throw httpError(400, "VALIDATION_ERROR", "Invalid id");
@@ -1883,8 +2725,9 @@ router.get(
         LEFT JOIN adm_users u ON u.id = c.created_by
         LEFT JOIN fin_accounts fa ON fa.id = c.sales_account_id AND fa.company_id = c.company_id
          WHERE c.id = :id AND c.company_id = :companyId
+           AND (:branchIdsStr = '' OR c.branch_id IS NULL OR FIND_IN_SET(c.branch_id, :branchIdsStr))
          LIMIT 1`,
-        { id, companyId },
+        { id, companyId, branchIdsStr },
       ).catch(() => []);
       if (!rows.length) throw httpError(404, "NOT_FOUND", "Customer not found");
       res.json({ item: rows[0] });
@@ -1919,6 +2762,7 @@ router.post(
         price_type_id,
         currency_id,
         credit_limit,
+        enforce_credit_limit,
         payment_terms,
         is_active,
         sales_account_id,
@@ -1932,20 +2776,50 @@ router.post(
       // Ensure created_by column exists
       await ensureCustomersTableColumns();
 
-      const createdBy = req.user?.id || req.user?.id || req.user?.sub || null;
+      const createdBy = req.user?.id || req.user?.sub || null;
+      const isEnforced = enforce_credit_limit === true || enforce_credit_limit === 1 || String(enforce_credit_limit) === "true" ? 1 : 0;
+
+      let effectiveBranchId = Number(
+        req.body?.branch_id ||
+        (branchId !== "all" && branchId ? branchId : null) ||
+        req.user?.branch_id ||
+        req.user?.branchIds?.[0]
+      );
+      if (!Number.isFinite(effectiveBranchId) || effectiveBranchId <= 0) {
+        const [defaultBranch] = await query(
+          "SELECT id FROM adm_branches WHERE company_id = :companyId AND is_active = 1 ORDER BY is_head_office DESC, id ASC LIMIT 1",
+          { companyId }
+        ).catch(() => []);
+        effectiveBranchId = Number(defaultBranch?.id || 1);
+      }
+
+      let effectiveCustomerCode = customer_code ? String(customer_code).trim() : "";
+      if (!effectiveCustomerCode) {
+        const rows = await query(
+          "SELECT customer_code FROM sal_customers WHERE company_id = :companyId AND customer_code REGEXP '^C(-?[0-9]+)?$' ORDER BY id DESC LIMIT 1",
+          { companyId }
+        ).catch(() => []);
+        let nextNum = 1;
+        if (rows.length) {
+          const match = String(rows[0].customer_code || "").match(/\d+$/);
+          if (match) nextNum = parseInt(match[0], 10) + 1;
+        }
+        effectiveCustomerCode = "C-" + String(nextNum).padStart(6, "0");
+      }
 
       const result = await query(
         `INSERT INTO sal_customers 
          (company_id, branch_id, customer_code, customer_name, email, phone, mobile, 
           contact_person, address, city, state, zone, country, customer_type, 
-          price_type_id, currency_id, credit_limit, payment_terms, is_active, sales_account_id, service_customer, created_by)
+          price_type_id, currency_id, credit_limit, enforce_credit_limit, payment_terms, is_active, sales_account_id, service_customer, created_by)
          VALUES (:companyId, :branchId, :customer_code, :customer_name, :email, :phone, :mobile,
                  :contact_person, :address, :city, :state, :zone, :country, :customer_type,
-                 :price_type_id, :currency_id, :credit_limit, :payment_terms, :is_active, :sales_account_id, :service_customer, :createdBy)`,
+                 :price_type_id, :currency_id, :credit_limit, :enforce_credit_limit, :payment_terms, :is_active, :sales_account_id, :service_customer, :createdBy)`,
         {
           companyId,
-          branchId, branchIdsStr,
-          customer_code: customer_code || null,
+          branchId: effectiveBranchId,
+          branchIdsStr,
+          customer_code: effectiveCustomerCode,
           customer_name,
           email: email || null,
           phone: phone || null,
@@ -1959,7 +2833,8 @@ router.post(
           customer_type: customer_type || "Individual",
           price_type_id: price_type_id || null,
           currency_id: currency_id || null,
-          credit_limit: credit_limit || 0,
+          credit_limit: isEnforced ? (Number(credit_limit || 0) || 0) : 0,
+          enforce_credit_limit: isEnforced,
           payment_terms: payment_terms || "Net 30",
           is_active: is_active === false ? 0 : 1,
           sales_account_id: sales_account_id || null,
@@ -2025,11 +2900,15 @@ router.put(
         price_type_id,
         currency_id,
         credit_limit,
+        enforce_credit_limit,
         payment_terms,
         is_active,
         sales_account_id,
         service_customer,
+        branch_id,
       } = req.body;
+
+      await ensureCustomersTableColumns();
 
       const isActive =
         is_active === false ||
@@ -2040,6 +2919,10 @@ router.put(
         String(is_active || "").trim() === "0"
           ? 0
           : 1;
+
+      const isEnforced = enforce_credit_limit === true || enforce_credit_limit === 1 || String(enforce_credit_limit) === "true" ? 1 : 0;
+
+      const updateBranchSql = branch_id !== undefined ? ", branch_id = :branch_id" : "";
 
       const result = await query(
         `UPDATE sal_customers 
@@ -2058,14 +2941,17 @@ router.put(
              price_type_id = :price_type_id, 
              currency_id = :currency_id, 
              credit_limit = :credit_limit, 
+             enforce_credit_limit = :enforce_credit_limit,
              payment_terms = :payment_terms, 
              is_active = :is_active,
              sales_account_id = :sales_account_id,
              service_customer = :service_customer
+             ${updateBranchSql}
          WHERE id = :id AND company_id = :companyId`,
         {
           id,
           companyId,
+          branch_id: branch_id !== undefined ? (Number(branch_id) || null) : null,
           customer_code: customer_code || null,
           customer_name,
           email: email || null,
@@ -2080,7 +2966,8 @@ router.put(
           customer_type: customer_type || "Individual",
           price_type_id: price_type_id || null,
           currency_id: currency_id || null,
-          credit_limit: Number(credit_limit || 0) || 0,
+          credit_limit: isEnforced ? (Number(credit_limit || 0) || 0) : 0,
+          enforce_credit_limit: isEnforced,
           payment_terms: payment_terms || "Net 30",
           is_active: isActive,
           sales_account_id: sales_account_id || null,
@@ -4429,33 +5316,32 @@ router.get(
   "/invoices/next-no",
   requireAuth,
   requireCompanyScope,
-  requireBranchScope,
-  requireAnyPermission(["SAL.INVOICE.VIEW", "SAL.ORDER.VIEW"]),
   async (req, res, next) => {
     try {
-      const companyId = req.scope.companyId;
-      const branchId = req.scope.branchId;
-  const branchIdsStr = req.scope.branchIdsStr;
+      const companyId = req.scope?.companyId || req.user?.company_id || 1;
+      const rawBranchId = req.headers["x-branch-id"] || req.query.branchId;
+      const branchIdsStr = req.scope?.branchIdsStr !== undefined 
+        ? String(req.scope.branchIdsStr) 
+        : (rawBranchId && rawBranchId !== "all" ? String(rawBranchId) : "");
+
       const rows = await query(
         `
-        SELECT invoice_no,
-          created_at,
-          u.username AS created_by_name
-         FROM sal_invoices
-        LEFT JOIN adm_users u ON u.id = created_by
-         WHERE company_id = :companyId
+        SELECT invoice_no
+        FROM sal_invoices
+        WHERE (company_id = :companyId OR :companyId IS NULL)
           AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))
           AND invoice_no REGEXP '^INV-?[0-9]{6}$'
-        ORDER BY CAST(REPLACE(invoice_no, 'INV-', '') AS UNSIGNED) DESC
+        ORDER BY CAST(REGEXP_REPLACE(invoice_no, '[^0-9]', '') AS UNSIGNED) DESC
         LIMIT 1
         `,
-        { companyId, branchId, branchIdsStr },
-      );
+        { companyId, branchIdsStr },
+      ).catch(() => []);
+
       let nextNum = 1;
-      if (rows.length > 0) {
+      if (rows && rows.length > 0) {
         const prev = String(rows[0].invoice_no || "");
-        const numPart = prev.replace(/^INV-?/, "");
-        const n = parseInt(numPart, 10);
+        const digits = prev.replace(/[^0-9]/g, "");
+        const n = parseInt(digits, 10);
         if (Number.isFinite(n)) nextNum = n + 1;
       }
       const nextNo = `INV${String(nextNum).padStart(6, "0")}`;
@@ -4967,6 +5853,20 @@ router.post(
         );
       }
 
+      if (body.auto_receipt || body.auto_payment) {
+        const canReceipt = await userHasExceptionalAllow(
+          req.user?.id || req.user?.sub,
+          "SALES.INVOICE.AUTO_RECEIPT",
+        );
+        if (!canReceipt) {
+          throw httpError(
+            403,
+            "PERMISSION_DENIED",
+            "You do not have exceptional permission to record direct receipts upon invoicing.",
+          );
+        }
+      }
+
       let subTotal = 0;
       let taxTotal = 0;
       let grandTotal = 0;
@@ -4981,6 +5881,50 @@ router.post(
         subTotal += net;
         taxTotal += taxAmt;
         grandTotal += net + taxAmt;
+      }
+
+      // Check customer credit limit enforcement if not immediate full settlement
+      if (!body.auto_receipt && !body.auto_payment) {
+        await ensureCustomersTableColumns();
+        const [cRows] = await conn.execute(
+          `SELECT credit_limit, enforce_credit_limit, temp_credit_limit, DATE_FORMAT(temp_credit_limit_date, '%Y-%m-%d') as temp_credit_limit_date
+           FROM sal_customers
+           WHERE id = :customerId AND company_id = :companyId
+           LIMIT 1`,
+          { customerId: Number(customer_id), companyId }
+        );
+        if (cRows?.length && Number(cRows[0].enforce_credit_limit) === 1) {
+          const cust = cRows[0];
+          const todayYmd = new Date().toISOString().split("T")[0];
+          const isTemp = Boolean(
+            cust.temp_credit_limit_date === todayYmd &&
+            cust.temp_credit_limit !== null &&
+            cust.temp_credit_limit !== undefined &&
+            Number(cust.temp_credit_limit) >= 0
+          );
+          const effectiveLimit = isTemp ? Number(cust.temp_credit_limit) : Number(cust.credit_limit || 0);
+
+          const [balRows] = await conn.execute(
+            `SELECT COALESCE(SUM(balance_amount), 0) AS outstanding_balance
+             FROM sal_invoices
+             WHERE company_id = :companyId AND customer_id = :customerId AND status != 'CANCELLED' AND balance_amount > 0`,
+            { companyId, customerId: Number(customer_id) }
+          );
+          const currentBal = Number(balRows?.[0]?.outstanding_balance || 0);
+          const projectedBal = currentBal + grandTotal;
+
+          if (projectedBal > effectiveLimit) {
+            const userId = req.user?.id || req.user?.sub || null;
+            const canOverride = await userHasExceptionalAllow(userId, "SALES.CREDIT_LIMIT.OVERRIDE");
+            if (!canOverride) {
+              throw httpError(
+                400,
+                "CREDIT_LIMIT_EXCEEDED",
+                `Customer credit limit exceeded. Limit: ${effectiveLimit.toFixed(2)}, Current Outstanding: ${currentBal.toFixed(2)}, Invoice Amount: ${grandTotal.toFixed(2)}. Total projected: ${projectedBal.toFixed(2)}.`
+              );
+            }
+          }
+        }
       }
 
       const taxCreditLines = await calculateInvoiceTaxLines(conn, {
@@ -5013,9 +5957,9 @@ router.post(
 
       const [ins] = await conn.execute(
         `INSERT INTO sal_invoices
-          (company_id, branch_id, invoice_no, invoice_date, customer_id, payment_status, status, total_amount, net_amount, balance_amount, tax_amount, tax_components, price_type, payment_type, currency_id, exchange_rate, warehouse_id, sales_order_id, service_execution_id, remarks, payment_date, created_by, sales_person_id)
+          (company_id, branch_id, invoice_no, invoice_date, customer_id, payment_status, status, total_amount, net_amount, balance_amount, tax_amount, tax_components, price_type, payment_type, currency_id, exchange_rate, warehouse_id, sales_order_id, service_execution_id, remarks, payment_terms, payment_date, created_by, sales_person_id)
          VALUES
-          (:companyId, :branchId, :invoiceNo, :invoiceDate, :customerId, 'UNPAID', 'DRAFT', :totalAmount, :netAmount, :balanceAmount, :taxAmount, :taxComponents, :priceType, :paymentType, :currencyId, :exchangeRate, :warehouseId, :salesOrderId, :serviceExecutionId, :remarks, :paymentDate, :createdBy, :sales_person_id)`,
+          (:companyId, :branchId, :invoiceNo, :invoiceDate, :customerId, 'UNPAID', 'DRAFT', :totalAmount, :netAmount, :balanceAmount, :taxAmount, :taxComponents, :priceType, :paymentType, :currencyId, :exchangeRate, :warehouseId, :salesOrderId, :serviceExecutionId, :remarks, :paymentTerms, :paymentDate, :createdBy, :sales_person_id)`,
         {
           companyId,
           branchId, branchIdsStr,
@@ -5035,6 +5979,7 @@ router.post(
           salesOrderId: sales_order_id || null,
           serviceExecutionId: service_execution_id || null,
           remarks: remarks || null,
+          paymentTerms: body.payment_terms || "Net 30",
           paymentDate: body.payment_date
             ? String(body.payment_date).slice(0, 10)
             : null,
@@ -5071,6 +6016,12 @@ router.post(
         if (prResult && prResult.campaignApplied) {
           unitPrice = prResult.price;
         }
+        const lineQty = Number(l.qty || l.quantity || 0);
+        if (lineQty <= 0) continue;
+        const discountPct = Number(l.discount_percent || 0);
+        const lineNet = Number(l.net || l.net_amount || (lineQty * unitPrice * (1 - discountPct / 100)));
+        const lineTax = Number(l.taxAmt || l.tax_amount || 0);
+        const lineTotal = Number(l.total || l.total_amount || (lineNet + lineTax));
         await conn.execute(
           `INSERT INTO sal_invoice_details
              (invoice_id, item_id, quantity, unit_price, discount_percent, total_amount, net_amount, tax_amount, tax_type, uom, remarks)
@@ -5079,12 +6030,12 @@ router.post(
           {
             invoiceId,
             itemId: Number(l.item_id),
-            quantity: Number(l.qty || l.quantity || 0),
+            quantity: lineQty,
             unitPrice,
-            discountPercent: Number(l.discount_percent || 0),
-            totalAmount: Number(l.total || l.total_amount || 0),
-            netAmount: Number(l.net || l.net_amount || 0),
-            taxAmount: Number(l.taxAmt || l.tax_amount || 0),
+            discountPercent: discountPct,
+            totalAmount: lineTotal,
+            netAmount: lineNet,
+            taxAmount: lineTax,
             taxType: Number(l.tax_type || l.taxType || l.tax_id || 0) || null,
             uom: l.uom || null,
             remarks: l.remarks || null,
@@ -5092,7 +6043,7 @@ router.post(
         );
         invoiceItemList.push({
           item_id: l.item_id,
-          quantity: l.qty || l.quantity || 0,
+          quantity: lineQty,
         });
         lineNo++;
       }
@@ -5168,8 +6119,118 @@ router.post(
         }
       }
 
+      let receiptVoucherId = null;
+      let receiptVoucherNo = null;
+      let receiptVoucherStatus = null;
+
+      if ((body.auto_receipt || body.auto_payment) && (body.deposit_account_id || body.payment_account_id)) {
+        const effectiveReceivedAmount = Number(body.received_amount || body.paid_amount || 0) > 0
+          ? Number(body.received_amount || body.paid_amount)
+          : grandTotal;
+        const rvRes = await postSalesInvoiceReceiptVoucherTx(conn, {
+          companyId,
+          branchId,
+          branchIdsStr,
+          invoiceId,
+          customerId: Number(customer_id),
+          depositAccountId: Number(body.deposit_account_id || body.payment_account_id),
+          paymentMethod: body.payment_method || "Cash",
+          paymentReference: body.payment_reference || null,
+          chequeDate: body.cheque_date ? String(body.cheque_date).slice(0, 10) : null,
+          receivedAmount: effectiveReceivedAmount,
+          userId: req.user?.id || req.user?.sub || null,
+          voucherDate: invoice_date || new Date().toISOString().slice(0, 10),
+        });
+        if (rvRes?.voucherId) {
+          receiptVoucherId = rvRes.voucherId;
+          receiptVoucherNo = rvRes.voucherNo;
+          receiptVoucherStatus = rvRes.status;
+          finalPStatus = effectiveReceivedAmount >= grandTotal ? "PAID" : "PARTIAL";
+        }
+      }
+
+      let createdDeliveryNo = null;
+      if (body.auto_delivery) {
+        try {
+          await ensureDeliveryTables();
+          const finalDeliveryNo = await nextDeliveryNoTx(conn, {
+            companyId,
+            branchId,
+            branchIdsStr,
+          });
+          const ddate = invoice_date ? String(invoice_date).slice(0, 10) : toYmd(new Date());
+          const userId = Number(req.user?.sub || req.user?.id);
+          const [dIns] = await conn.execute(
+            `INSERT INTO sal_deliveries
+              (company_id, branch_id, delivery_no, delivery_date, customer_id, sales_order_id, invoice_id, remarks, status, total_tax, invoice_amount, created_by)
+             VALUES
+              (:companyId, :branchId, :delivery_no, DATE(:delivery_date), :customer_id, :sales_order_id, :invoice_id, :remarks, 'DELIVERED', :total_tax, :invoice_amount, :created_by)`,
+            {
+              companyId,
+              branchId: branchId || null,
+              delivery_no: finalDeliveryNo,
+              delivery_date: ddate,
+              customer_id: Number(customer_id),
+              sales_order_id: sales_order_id ? Number(sales_order_id) : null,
+              invoice_id: invoiceId,
+              remarks: `Auto delivery for invoice ${finalInvoiceNo}`,
+              total_tax: taxTotal,
+              invoice_amount: grandTotal,
+              created_by: userId || null,
+            },
+          );
+          const deliveryId = dIns.insertId;
+          const whId = warehouse_id ? Number(warehouse_id) : null;
+          for (const d of details) {
+            const item_id = Number(d.item_id || d.itemId);
+            const quantity = Number(d.qty || d.quantity || 0);
+            const unit_price = Number(d.unit_price || d.unitPrice || 0);
+            const uom = String(d.uom || "PCS").trim();
+            if (!Number.isFinite(item_id) || quantity <= 0) continue;
+            await conn.execute(
+              `INSERT INTO sal_delivery_details
+                 (delivery_id, item_id, quantity, unit_price, uom)
+               VALUES
+                 (:delivery_id, :item_id, :quantity, :unit_price, :uom)`,
+              {
+                delivery_id: deliveryId,
+                item_id,
+                quantity,
+                unit_price,
+                uom,
+              },
+            );
+            if (whId) {
+              await allocateFromBatchesTx(conn, {
+                companyId,
+                branchId,
+                branchIdsStr,
+                warehouseId: whId,
+                itemId: item_id,
+                qty: quantity,
+                refType: "DELIVERY",
+                refId: deliveryId,
+                refDate: ddate,
+                preferredBatchId: d?.batch_id || null,
+              }).catch(() => null);
+            }
+          }
+          createdDeliveryNo = finalDeliveryNo;
+        } catch (delErr) {
+          console.warn("Auto-delivery generation skipped/failed:", delErr.message);
+        }
+      }
+
       await conn.commit();
-      res.status(201).json({ id: invoiceId, status: finalStatus, payment_status: finalPStatus });
+      res.status(201).json({
+        id: invoiceId,
+        status: finalStatus,
+        payment_status: finalPStatus,
+        receipt_voucher_id: receiptVoucherId,
+        receipt_voucher_no: receiptVoucherNo,
+        receipt_voucher_status: receiptVoucherStatus,
+        delivery_no: createdDeliveryNo,
+      });
     } catch (e) {
       try {
         await conn.rollback();
@@ -5273,6 +6334,7 @@ router.put(
              warehouse_id = :warehouseId,
              sales_order_id = :salesOrderId,
              remarks = :remarks,
+             payment_terms = :paymentTerms,
              sales_person_id = :sales_person_id
          WHERE id = :id AND company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(branch_id, :branchIdsStr))`,
         {
@@ -5294,6 +6356,7 @@ router.put(
           warehouseId: warehouse_id || null,
           salesOrderId: sales_order_id || null,
           remarks: remarks || null,
+          paymentTerms: body.payment_terms || "Net 30",
           sales_person_id: body.salesperson 
             ? await ensureSalesperson(companyId, branchId, body.salesperson)
             : null,
@@ -5327,6 +6390,12 @@ router.put(
         if (prResult && prResult.campaignApplied) {
           unitPrice = prResult.price;
         }
+        const lineQty = Number(l.qty || l.quantity || 0);
+        if (lineQty <= 0) continue;
+        const discountPct = Number(l.discount_percent || 0);
+        const lineNet = Number(l.net || l.net_amount || (lineQty * unitPrice * (1 - discountPct / 100)));
+        const lineTax = Number(l.taxAmt || l.tax_amount || 0);
+        const lineTotal = Number(l.total || l.total_amount || (lineNet + lineTax));
         await conn.execute(
           `INSERT INTO sal_invoice_details
              (invoice_id, item_id, quantity, unit_price, discount_percent, total_amount, net_amount, tax_amount, tax_type, uom, remarks)
@@ -5335,12 +6404,12 @@ router.put(
           {
             invoiceId: id,
             itemId: Number(l.item_id),
-            quantity: Number(l.qty || l.quantity || 0),
+            quantity: lineQty,
             unitPrice,
-            discountPercent: Number(l.discount_percent || 0),
-            totalAmount: Number(l.total || l.total_amount || 0),
-            netAmount: Number(l.net || l.net_amount || 0),
-            taxAmount: Number(l.taxAmt || l.tax_amount || 0),
+            discountPercent: discountPct,
+            totalAmount: lineTotal,
+            netAmount: lineNet,
+            taxAmount: lineTax,
             taxType: Number(l.tax_type || l.taxType || l.tax_id || 0) || null,
             uom: l.uom || null,
             remarks: l.remarks || null,
@@ -8385,90 +9454,26 @@ router.post(
   }
 );
 
-router.get(
-  "/zones",
-  requireAuth,
-  requireCompanyScope,
-  async (req, res, next) => {
-    try {
-      await ensureSalesReturnTables();
-      const companyId = req.scope.companyId;
-      const items = await query(
-        `SELECT id, zone_name, description, is_active FROM sal_zones WHERE company_id = :companyId ORDER BY zone_name ASC`,
-        { companyId },
-      );
-      res.json({ items: items || [] });
-    } catch (e) {
-      next(e);
-    }
-  },
-);
-
-router.post(
-  "/zones",
-  requireAuth,
-  requireCompanyScope,
-  async (req, res, next) => {
-    try {
-      await ensureSalesReturnTables();
-      const companyId = req.scope.companyId;
-      const { zones } = req.body;
-      if (!Array.isArray(zones)) {
-        return res.status(400).json({ message: "zones must be an array" });
-      }
-      for (const z of zones) {
-        if (!z.zone_name) continue;
-        if (z.id && /^\d+$/.test(String(z.id))) {
-          await query(
-            `UPDATE sal_zones
-                SET zone_name = :zone_name, description = :description, is_active = :is_active
-              WHERE id = :id AND company_id = :companyId`,
-            {
-              id: Number(z.id),
-              company_id: companyId,
-              zone_name: z.zone_name,
-              description: z.description || null,
-              is_active: z.is_active ? 1 : 0,
-            },
-          );
-        } else {
-          await query(
-            `INSERT INTO sal_zones (company_id, zone_name, description, is_active)
-             VALUES (:companyId, :zone_name, :description, 1)
-             ON DUPLICATE KEY UPDATE description = :description, is_active = 1`,
-            {
-              companyId,
-              zone_name: z.zone_name,
-              description: z.description || null,
-            },
-          );
-        }
-      }
-      res.json({ message: "Zones saved successfully" });
-    } catch (e) {
-      next(e);
-    }
-  },
-);
-
 router.delete(
-  "/zones/:id",
+  "/sales-persons/:id",
   requireAuth,
   requireCompanyScope,
   async (req, res, next) => {
     try {
-      await ensureSalesReturnTables();
-      const companyId = req.scope.companyId;
+      const { companyId } = req.scope || {};
       const id = Number(req.params.id);
+      if (!Number.isFinite(id)) {
+        throw { status: 400, message: "Invalid id" };
+      }
       await query(
-        `DELETE FROM sal_zones WHERE id = :id AND company_id = :companyId`,
-        { id, companyId },
+        "DELETE FROM sal_salespersons WHERE id = :id AND company_id = :companyId",
+        { id, companyId }
       );
-      res.json({ message: "Zone deleted successfully" });
-    } catch (e) {
-      next(e);
+      res.json({ message: "Salesperson deleted successfully" });
+    } catch (err) {
+      next(err);
     }
-  },
+  }
 );
 
 router.get(
@@ -9012,9 +10017,12 @@ router.get(
       const activeParam = String(req.query.active || "")
         .trim()
         .toLowerCase();
-      // If active=false is explicitly requested, show all. Otherwise show only active.
-      const onlyActive =
-        activeParam === "true" || activeParam === "1" || activeParam === "";
+      // If active=false, active=0, active=all, or all=1 is explicitly requested, show all/inactive. Otherwise show only active.
+      const showAllOrInactive =
+        ["all", "false", "0"].includes(activeParam) ||
+        req.query.all === "1" ||
+        req.query.all === "true";
+      const onlyActive = !showAllOrInactive;
       const params = { companyId };
       const where = ["c.company_id = :companyId"];
       if (onlyActive) where.push("c.is_active = 1");
@@ -9335,6 +10343,7 @@ router.get(
   requireBranchScope,
   async (req, res, next) => {
     try {
+      await ensurePriceTables();
       const { companyId = null } = req.scope || {};
       const rows = await query(
         `SELECT sp.*, i.item_code, i.item_name,
@@ -9343,7 +10352,7 @@ router.get(
           sp.created_at,
           u.username AS created_by_name
          FROM sal_standard_prices sp
-         JOIN inv_items i ON i.id = sp.product_id AND i.company_id = sp.company_id
+         LEFT JOIN inv_items i ON i.id = sp.product_id AND i.company_id = sp.company_id
          LEFT JOIN sal_price_types pt
            ON pt.id = sp.price_type_id AND pt.company_id = sp.company_id
         LEFT JOIN adm_users u ON u.id = sp.created_by
@@ -9356,6 +10365,691 @@ router.get(
       next(err);
     }
   },
+);
+
+router.post(
+  "/prices/standard",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      await ensurePriceTables();
+      const { companyId = null } = req.scope || {};
+      const userId = req.user?.id || req.user?.sub || null;
+      const {
+        id,
+        product_id,
+        price_type_id,
+        currency_id,
+        cost_price,
+        selling_price,
+        margin_percent,
+        effective_date,
+        uom,
+      } = req.body || {};
+
+      if (!product_id || !effective_date) {
+        throw httpError(400, "VALIDATION_ERROR", "Product and effective date are required");
+      }
+
+      const cost = Number(cost_price || 0) || 0;
+      const selling = Number(selling_price || 0) || 0;
+      const margin = Number(margin_percent || 0) || (selling > 0 ? Number((((selling - cost) / selling) * 100).toFixed(2)) : 0);
+      const effDate = String(effective_date).slice(0, 10);
+
+      if (id && /^\d+$/.test(String(id))) {
+        await query(
+          `UPDATE sal_standard_prices
+           SET product_id = :productId,
+               price_type_id = :priceTypeId,
+               currency_id = :currencyId,
+               cost_price = :cost,
+               selling_price = :selling,
+               margin_percent = :margin,
+               effective_date = :effDate,
+               uom = :uom
+           WHERE id = :id AND company_id = :companyId`,
+          {
+            id: Number(id),
+            companyId,
+            productId: Number(product_id),
+            priceTypeId: price_type_id ? Number(price_type_id) : null,
+            currencyId: currency_id ? Number(currency_id) : null,
+            cost,
+            selling,
+            margin,
+            effDate,
+            uom: uom || null,
+          },
+        );
+        res.json({ success: true, id: Number(id), message: "Standard price updated" });
+      } else {
+        const ins = await query(
+          `INSERT INTO sal_standard_prices
+           (company_id, product_id, price_type_id, currency_id, cost_price, selling_price, margin_percent, effective_date, uom, created_by)
+           VALUES
+           (:companyId, :productId, :priceTypeId, :currencyId, :cost, :selling, :margin, :effDate, :uom, :userId)`,
+          {
+            companyId,
+            productId: Number(product_id),
+            priceTypeId: price_type_id ? Number(price_type_id) : null,
+            currencyId: currency_id ? Number(currency_id) : null,
+            cost,
+            selling,
+            margin,
+            effDate,
+            uom: uom || null,
+            userId,
+          },
+        );
+        res.status(201).json({ success: true, id: ins.insertId, message: "Standard price created" });
+      }
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.get(
+  "/prices/customer",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      await ensurePriceTables();
+      const { companyId = null } = req.scope || {};
+      const customerId = req.query.customer_id ? Number(req.query.customer_id) : null;
+      let sql = `
+        SELECT cp.*, 
+               c.customer_name, c.customer_code,
+               i.item_code, i.item_name,
+               pt.id AS price_type_lookup_id,
+               pt.name AS price_type_name,
+               cp.created_at,
+               u.username AS created_by_name
+        FROM sal_customer_prices cp
+        LEFT JOIN sal_customers c ON c.id = cp.customer_id AND c.company_id = cp.company_id
+        LEFT JOIN inv_items i ON i.id = cp.product_id AND i.company_id = cp.company_id
+        LEFT JOIN sal_price_types pt ON pt.id = cp.price_type_id AND pt.company_id = cp.company_id
+        LEFT JOIN adm_users u ON u.id = cp.created_by
+        WHERE cp.company_id = :companyId
+      `;
+      const params = { companyId };
+      if (customerId) {
+        sql += " AND cp.customer_id = :customerId ";
+        params.customerId = customerId;
+      }
+      sql += " ORDER BY c.customer_name ASC, i.item_name ASC, cp.id DESC";
+
+      const rows = await query(sql, params).catch(() => []);
+      res.json({ items: rows || [] });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.post(
+  "/prices/customer",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      await ensurePriceTables();
+      const { companyId = null } = req.scope || {};
+      const userId = req.user?.id || req.user?.sub || null;
+      const {
+        id,
+        customer_id,
+        product_id,
+        price_type_id,
+        currency_id,
+        standard_price,
+        customer_price,
+        discount_percent,
+        min_quantity,
+        max_quantity,
+        effective_from,
+        effective_to,
+        uom,
+      } = req.body || {};
+
+      if (!customer_id || !product_id) {
+        throw httpError(400, "VALIDATION_ERROR", "Customer and product are required");
+      }
+
+      const stdPrice = Number(standard_price || 0) || 0;
+      const custPrice = Number(customer_price || 0) || 0;
+      const disc = Number(discount_percent || 0) || (stdPrice > 0 ? Number((((stdPrice - custPrice) / stdPrice) * 100).toFixed(2)) : 0);
+      const minQty = Math.max(1, Number(min_quantity || 1));
+      const maxQty = max_quantity != null && max_quantity !== "" ? Number(max_quantity) : null;
+      const effFrom = effective_from ? String(effective_from).slice(0, 10) : null;
+      const effTo = effective_to ? String(effective_to).slice(0, 10) : null;
+
+      if (id && /^\d+$/.test(String(id))) {
+        await query(
+          `UPDATE sal_customer_prices
+           SET customer_id = :customerId,
+               product_id = :productId,
+               price_type_id = :priceTypeId,
+               currency_id = :currencyId,
+               standard_price = :stdPrice,
+               customer_price = :custPrice,
+               discount_percent = :disc,
+               min_quantity = :minQty,
+               max_quantity = :maxQty,
+               effective_from = :effFrom,
+               effective_to = :effTo,
+               uom = :uom
+           WHERE id = :id AND company_id = :companyId`,
+          {
+            id: Number(id),
+            companyId,
+            customerId: Number(customer_id),
+            productId: Number(product_id),
+            priceTypeId: price_type_id ? Number(price_type_id) : null,
+            currencyId: currency_id ? Number(currency_id) : null,
+            stdPrice,
+            custPrice,
+            disc,
+            minQty,
+            maxQty,
+            effFrom,
+            effTo,
+            uom: uom || null,
+          },
+        );
+        res.json({ success: true, id: Number(id), message: "Customer price updated" });
+      } else {
+        const ins = await query(
+          `INSERT INTO sal_customer_prices
+           (company_id, customer_id, product_id, price_type_id, currency_id, standard_price, customer_price, discount_percent, min_quantity, max_quantity, effective_from, effective_to, uom, created_by)
+           VALUES
+           (:companyId, :customerId, :productId, :priceTypeId, :currencyId, :stdPrice, :custPrice, :disc, :minQty, :maxQty, :effFrom, :effTo, :uom, :userId)`,
+          {
+            companyId,
+            customerId: Number(customer_id),
+            productId: Number(product_id),
+            priceTypeId: price_type_id ? Number(price_type_id) : null,
+            currencyId: currency_id ? Number(currency_id) : null,
+            stdPrice,
+            custPrice,
+            disc,
+            minQty,
+            maxQty,
+            effFrom,
+            effTo,
+            uom: uom || null,
+            userId,
+          },
+        );
+        res.status(201).json({ success: true, id: ins.insertId, message: "Customer price created" });
+      }
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.post(
+  "/prices/customer/bulk-percentage",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      await ensurePriceTables();
+      const { companyId = null } = req.scope || {};
+      const userId = req.user?.id || req.user?.sub || null;
+      const {
+        customer_id,
+        price_type_id,
+        item_ids = [],
+        percentage = 0,
+        operator = "+",
+      } = req.body || {};
+
+      const custId = Number(customer_id);
+      const pct = Number(percentage);
+      if (!custId || !Array.isArray(item_ids) || !item_ids.length || !pct) {
+        throw httpError(400, "VALIDATION_ERROR", "Customer, valid percentage, and item IDs are required");
+      }
+
+      for (const rawItemId of item_ids) {
+        const itemId = Number(rawItemId);
+        if (!itemId) continue;
+
+        const [stdRow] = await query(
+          `SELECT selling_price, cost_price, currency_id, uom 
+           FROM sal_standard_prices 
+           WHERE company_id = :companyId AND product_id = :itemId
+             AND (:priceTypeId IS NULL OR price_type_id = :priceTypeId)
+           ORDER BY effective_date DESC, id DESC LIMIT 1`,
+          { companyId, itemId, priceTypeId: price_type_id ? Number(price_type_id) : null },
+        );
+
+        const basePrice = Number(stdRow?.selling_price || 0);
+        let custPrice = basePrice;
+        if (operator === "-") {
+          custPrice = basePrice * (1 - pct / 100);
+        } else {
+          custPrice = basePrice * (1 + pct / 100);
+        }
+        custPrice = Math.max(0, Number(custPrice.toFixed(2)));
+        const discPct = basePrice > 0 ? Number((((basePrice - custPrice) / basePrice) * 100).toFixed(2)) : 0;
+
+        await query(
+          `INSERT INTO sal_customer_prices
+           (company_id, customer_id, product_id, price_type_id, currency_id, standard_price, customer_price, discount_percent, min_quantity, uom, created_by)
+           VALUES
+           (:companyId, :custId, :itemId, :priceTypeId, :currencyId, :basePrice, :custPrice, :discPct, 1, :uom, :userId)
+           ON DUPLICATE KEY UPDATE customer_price = :custPrice, discount_percent = :discPct`,
+          {
+            companyId,
+            custId,
+            itemId,
+            priceTypeId: price_type_id ? Number(price_type_id) : null,
+            currencyId: stdRow?.currency_id || null,
+            basePrice,
+            custPrice,
+            discPct,
+            uom: stdRow?.uom || null,
+            userId,
+          },
+        );
+      }
+
+      res.json({ success: true, message: "Bulk customer prices applied" });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.post(
+  "/prices/bulk/standard",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      await ensurePriceTables();
+      const { companyId = null } = req.scope || {};
+      const userId = req.user?.id || req.user?.sub || null;
+      const items = Array.isArray(req.body?.items) ? req.body.items : [];
+      let count = 0;
+      for (const row of items) {
+        const itemCode = row["Item Code"] || row.item_code;
+        const itemName = row["Item Name"] || row.item_name;
+        if (!itemCode && !itemName) continue;
+
+        const [prodRows] = await query(
+          `SELECT id FROM inv_items WHERE company_id = :companyId AND (item_code = :code OR LOWER(item_name) = LOWER(:name)) LIMIT 1`,
+          { companyId, code: String(itemCode || ""), name: String(itemName || "") },
+        );
+        const productId = prodRows?.[0]?.id;
+        if (!productId) continue;
+
+        const cost = Number(row["Cost Price"] || row.cost_price || 0) || 0;
+        const selling = Number(row["Selling Price"] || row.selling_price || 0) || 0;
+        const margin = Number(row["Margin %"] || row.margin_percent || 0) || (selling > 0 ? Number((((selling - cost) / selling) * 100).toFixed(2)) : 0);
+        const effDate = row["Effective Date (YYYY-MM-DD)"] || row.effective_date || new Date().toISOString().slice(0, 10);
+        const uom = row["UOM"] || row.uom || null;
+
+        await query(
+          `INSERT INTO sal_standard_prices
+           (company_id, product_id, cost_price, selling_price, margin_percent, effective_date, uom, created_by)
+           VALUES (:companyId, :productId, :cost, :selling, :margin, :effDate, :uom, :userId)`,
+          { companyId, productId, cost, selling, margin, effDate, uom, userId },
+        );
+        count++;
+      }
+      res.json({ success: true, count, message: `${count} standard prices uploaded` });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.post(
+  "/prices/bulk/customer",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    try {
+      await ensurePriceTables();
+      const { companyId = null } = req.scope || {};
+      const userId = req.user?.id || req.user?.sub || null;
+      const items = Array.isArray(req.body?.items) ? req.body.items : [];
+      let count = 0;
+      for (const row of items) {
+        const custName = row["Customer Name"] || row.customer_name;
+        const itemCode = row["Item Code"] || row.item_code;
+        const itemName = row["Item Name"] || row.item_name;
+        if (!custName || (!itemCode && !itemName)) continue;
+
+        const [cRows] = await query(
+          `SELECT id FROM sal_customers WHERE company_id = :companyId AND (LOWER(customer_name) = LOWER(:cname) OR customer_code = :cname) LIMIT 1`,
+          { companyId, cname: String(custName).trim() },
+        );
+        const custId = cRows?.[0]?.id;
+        if (!custId) continue;
+
+        const [prodRows] = await query(
+          `SELECT id FROM inv_items WHERE company_id = :companyId AND (item_code = :code OR LOWER(item_name) = LOWER(:name)) LIMIT 1`,
+          { companyId, code: String(itemCode || ""), name: String(itemName || "") },
+        );
+        const productId = prodRows?.[0]?.id;
+        if (!productId) continue;
+
+        const stdPrice = Number(row["Standard Price"] || row.standard_price || 0) || 0;
+        const custPrice = Number(row["Customer Price"] || row.customer_price || 0) || 0;
+        const disc = Number(row["Discount %"] || row.discount_percent || 0) || (stdPrice > 0 ? Number((((stdPrice - custPrice) / stdPrice) * 100).toFixed(2)) : 0);
+        const minQty = Number(row["Min Quantity"] || row.min_quantity || 1) || 1;
+        const effFrom = row["Effective From (YYYY-MM-DD)"] || row.effective_from || null;
+        const effTo = row["Effective To (YYYY-MM-DD)"] || row.effective_to || null;
+        const uom = row["UOM"] || row.uom || null;
+
+        await query(
+          `INSERT INTO sal_customer_prices
+           (company_id, customer_id, product_id, standard_price, customer_price, discount_percent, min_quantity, effective_from, effective_to, uom, created_by)
+           VALUES (:companyId, :custId, :productId, :stdPrice, :custPrice, :disc, :minQty, :effFrom, :effTo, :uom, :userId)`,
+          { companyId, custId, productId, stdPrice, custPrice, disc, minQty, effFrom, effTo, uom, userId },
+        );
+        count++;
+      }
+      res.json({ success: true, count, message: `${count} customer prices uploaded` });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.post(
+  "/bulk-upload",
+  requireAuth,
+  requireCompanyScope,
+  requireBranchScope,
+  async (req, res, next) => {
+    let conn;
+    try {
+      const companyId = Number(req.scope?.companyId || req.user?.companyId || 0);
+      const branchId = Number(req.body.branchId || req.scope?.branchId || req.user?.branchId || 0);
+      const branchIdsStr = String(branchId || "");
+      const warehouseIdDefault = req.body.warehouseId || req.body.warehouse_id ? Number(req.body.warehouseId || req.body.warehouse_id) : null;
+      const { invoices = [], updateFinanceVouchers = false } = req.body;
+
+      if (!Array.isArray(invoices) || invoices.length === 0) {
+        return res.status(400).json({ message: "No sales invoices provided for upload" });
+      }
+
+      conn = await pool.getConnection();
+      await conn.beginTransaction();
+
+      const createdInvoices = [];
+      const errors = [];
+
+      for (let i = 0; i < invoices.length; i++) {
+        const inv = invoices[i];
+        const custIdent = String(inv.customer_name || inv.customer_code || inv.customer_id || "").trim();
+        if (!custIdent) {
+          errors.push(`Row ${i + 1}: Customer is missing`);
+          continue;
+        }
+
+        const [custRows] = await conn.execute(
+          `SELECT id, customer_name, currency_id FROM sal_customers 
+           WHERE company_id = :companyId AND (id = :custId OR customer_code = :code OR LOWER(customer_name) = LOWER(:name)) 
+           LIMIT 1`,
+          {
+            companyId,
+            custId: isNaN(Number(custIdent)) ? 0 : Number(custIdent),
+            code: custIdent,
+            name: custIdent,
+          }
+        );
+
+        let customerId = custRows?.[0]?.id;
+        if (!customerId) {
+          errors.push(`Row ${i + 1}: Customer "${custIdent}" not found`);
+          continue;
+        }
+
+        const invDateYmd = inv.invoice_date ? String(inv.invoice_date).slice(0, 10) : toYmd(new Date());
+        const paymentDateYmd = inv.payment_date || inv.due_date ? String(inv.payment_date || inv.due_date).slice(0, 10) : null;
+        const priceType = String(inv.price_type || "RETAIL").toUpperCase();
+        const paymentType = String(inv.payment_type || "CREDIT").toUpperCase();
+        const currencyId = Number(inv.currency_id || custRows?.[0]?.currency_id || 1) || 1;
+        const exchangeRate = Number(inv.exchange_rate || 1) || 1;
+        const remarks = inv.remarks || null;
+
+        let invBranchId = branchId;
+        const brIdent = String(inv.branch_name || inv.branch_code || inv.branch || inv.branch_id || "").trim();
+        if (brIdent) {
+          const [brRows] = await conn.execute(
+            `SELECT id FROM adm_branches 
+             WHERE company_id = :companyId AND (id = :brId OR code = :code OR LOWER(name) = LOWER(:name)) 
+             LIMIT 1`,
+            {
+              companyId,
+              brId: isNaN(Number(brIdent)) ? 0 : Number(brIdent),
+              code: brIdent,
+              name: brIdent,
+            }
+          );
+          if (brRows?.[0]?.id) {
+            invBranchId = Number(brRows[0].id);
+          }
+        }
+
+        let invWarehouseId = warehouseIdDefault;
+        const whIdent = String(inv.warehouse_name || inv.warehouse_code || inv.warehouse || inv.warehouse_id || "").trim();
+        if (whIdent) {
+          const [whRows] = await conn.execute(
+            `SELECT id FROM inv_warehouses 
+             WHERE company_id = :companyId AND (id = :whId OR warehouse_code = :code OR LOWER(warehouse_name) = LOWER(:name)) 
+             LIMIT 1`,
+            {
+              companyId,
+              whId: isNaN(Number(whIdent)) ? 0 : Number(whIdent),
+              code: whIdent,
+              name: whIdent,
+            }
+          );
+          if (whRows?.[0]?.id) {
+            invWarehouseId = Number(whRows[0].id);
+          }
+        }
+
+        let invoiceNo = String(inv.invoice_no || "").trim();
+        if (!invoiceNo) {
+          invoiceNo = await nextSequentialNo("sal_invoices", "invoice_no", "INV", conn);
+        }
+
+        const lines = Array.isArray(inv.lines) && inv.lines.length > 0 ? inv.lines : [inv];
+        let grandTotal = 0;
+        let baseTotal = 0;
+        let taxTotal = 0;
+        let discountTotal = 0;
+
+        const preparedLines = [];
+        const itemLinesForVoucher = [];
+
+        for (const line of lines) {
+          const itemIdent = String(line.item_code || line.item_name || line.item_id || "").trim();
+          let itemId = null;
+          if (itemIdent) {
+            const [itRows] = await conn.execute(
+              `SELECT id, item_code, item_name FROM inv_items 
+               WHERE company_id = :companyId AND (id = :itId OR item_code = :code OR LOWER(item_name) = LOWER(:name)) 
+               LIMIT 1`,
+              {
+                companyId,
+                itId: isNaN(Number(itemIdent)) ? 0 : Number(itemIdent),
+                code: itemIdent,
+                name: itemIdent,
+              }
+            );
+            if (itRows?.[0]?.id) {
+              itemId = Number(itRows[0].id);
+            }
+          }
+
+          const qty = Math.max(0, Number(line.qty || line.quantity || 1));
+          const unitPrice = Math.max(0, Number(line.unit_price || line.price || 0));
+          const discPct = Math.max(0, Number(line.discount_percent || 0));
+          const lineGross = qty * unitPrice;
+          const lineDisc = (lineGross * discPct) / 100;
+          const lineNet = lineGross - lineDisc;
+          const taxAmt = Math.max(0, Number(line.tax_amount || line.tax || 0));
+          const lineTotal = lineNet + taxAmt;
+
+          grandTotal += lineTotal;
+          baseTotal += lineNet;
+          taxTotal += taxAmt;
+          discountTotal += lineDisc;
+
+          preparedLines.push({
+            itemId,
+            qty,
+            unitPrice,
+            discountPercent: discPct,
+            netAmount: lineNet,
+            taxAmount: taxAmt,
+            totalAmount: lineTotal,
+            uom: line.uom || null,
+            remarks: line.remarks || null,
+          });
+
+          if (itemId) {
+            itemLinesForVoucher.push({
+              item_id: itemId,
+              quantity: qty,
+              unit_price: unitPrice,
+              net_amount: lineNet,
+            });
+          }
+        }
+
+        const [ins] = await conn.execute(
+          `INSERT INTO sal_invoices
+            (company_id, branch_id, invoice_no, invoice_date, customer_id, payment_status, status, total_amount, net_amount, balance_amount, tax_amount, price_type, payment_type, currency_id, exchange_rate, warehouse_id, remarks, payment_date, created_by)
+           VALUES
+            (:companyId, :branchId, :invoiceNo, :invoiceDate, :customerId, 'UNPAID', 'POSTED', :totalAmount, :netAmount, :balanceAmount, :taxAmount, :priceType, :paymentType, :currencyId, :exchangeRate, :warehouseId, :remarks, :paymentDate, :createdBy)`,
+          {
+            companyId,
+            branchId: invBranchId,
+            branchIdsStr: String(invBranchId || ""),
+            invoiceNo,
+            invoiceDate: invDateYmd,
+            customerId: Number(customerId),
+            totalAmount: grandTotal,
+            netAmount: grandTotal,
+            balanceAmount: grandTotal,
+            taxAmount: taxTotal,
+            priceType,
+            paymentType,
+            currencyId,
+            exchangeRate,
+            warehouseId: invWarehouseId,
+            remarks,
+            paymentDate: paymentDateYmd,
+            createdBy: req.user?.id || req.user?.sub || null,
+          }
+        );
+
+        const invoiceId = Number(ins.insertId);
+
+        for (const pl of preparedLines) {
+          await conn.execute(
+            `INSERT INTO sal_invoice_details
+               (invoice_id, item_id, quantity, unit_price, discount_percent, total_amount, net_amount, tax_amount, tax_type, uom, remarks)
+             VALUES
+               (:invoiceId, :itemId, :quantity, :unitPrice, :discountPercent, :totalAmount, :netAmount, :taxAmount, NULL, :uom, :remarks)`,
+            {
+              invoiceId,
+              itemId: pl.itemId,
+              quantity: pl.qty,
+              unitPrice: pl.unitPrice,
+              discountPercent: pl.discountPercent,
+              totalAmount: pl.totalAmount,
+              netAmount: pl.netAmount,
+              taxAmount: pl.taxAmount,
+              uom: pl.uom,
+              remarks: pl.remarks,
+            }
+          );
+        }
+
+        let voucherId = null;
+        if (updateFinanceVouchers) {
+          try {
+            voucherId = await createPostedSalesVoucherForInvoiceTx(conn, {
+              companyId,
+              branchId: invBranchId,
+              branchIdsStr: String(invBranchId || ""),
+              invoiceId,
+              invoiceNo,
+              invoiceDate: invDateYmd,
+              customerId: Number(customerId),
+              grandTotal,
+              baseTotal,
+              taxTotal,
+              discountTotal,
+              currencyId,
+              exchangeRate,
+              createdBy: req.user?.id || req.user?.sub || null,
+              lineTaxes: [],
+              itemLines: itemLinesForVoucher,
+              remarks,
+            });
+            if (voucherId) {
+              await conn.execute("UPDATE sal_invoices SET voucher_id = :vid WHERE id = :iid", {
+                vid: voucherId,
+                iid: invoiceId,
+              }).catch(() => {});
+            }
+          } catch (vErr) {
+            console.error("Voucher posting error for uploaded sales invoice:", vErr);
+          }
+        }
+
+        createdInvoices.push({
+          invoiceId,
+          invoiceNo,
+          customerName: custRows[0].customer_name,
+          grandTotal,
+          voucherId: voucherId || null,
+        });
+      }
+
+      if (createdInvoices.length === 0 && errors.length > 0) {
+        await conn.rollback();
+        return res.status(400).json({ message: errors.join(", ") });
+      }
+
+      await conn.commit();
+      res.json({
+        success: true,
+        createdCount: createdInvoices.length,
+        createdInvoices,
+        errors,
+      });
+    } catch (err) {
+      if (conn) {
+        try {
+          await conn.rollback();
+        } catch {}
+      }
+      next(err);
+    } finally {
+      if (conn) conn.release();
+    }
+  }
 );
 
 export default router;

@@ -154,7 +154,7 @@ export default function DashboardBuilderPage() {
       <SectionCard>
         <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Dashboard Title
             </label>
             <input
@@ -165,7 +165,7 @@ export default function DashboardBuilderPage() {
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Description & Purpose
             </label>
             <input
@@ -290,7 +290,7 @@ export default function DashboardBuilderPage() {
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Widget Title</label>
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">Widget Title</label>
                 <input
                   type="text"
                   placeholder="e.g. Regional Gross Margin"
@@ -301,7 +301,7 @@ export default function DashboardBuilderPage() {
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Visualization Type</label>
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">Visualization Type</label>
                 <select
                   value={newWidgetType}
                   onChange={(e) => setNewWidgetType(e.target.value)}
@@ -315,7 +315,7 @@ export default function DashboardBuilderPage() {
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Measure</label>
+                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">Measure</label>
                   <select
                     value={newWidgetMeasure}
                     onChange={(e) => setNewWidgetMeasure(e.target.value)}
@@ -329,7 +329,7 @@ export default function DashboardBuilderPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Dimension</label>
+                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">Dimension</label>
                   <select
                     value={newWidgetDimension}
                     onChange={(e) => setNewWidgetDimension(e.target.value)}
@@ -344,7 +344,7 @@ export default function DashboardBuilderPage() {
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Accent Color</label>
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">Accent Color</label>
                 <div className="flex items-center gap-2">
                   {PALETTE_COLORS.map(c => (
                     <button

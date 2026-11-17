@@ -139,11 +139,11 @@ export default function ProductionTransferForm() {
       <form id="transfer-form" onSubmit={handleSubmit} className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm">
           <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Target Warehouse</label>
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Target Warehouse</label>
             <div className="relative">
               <select 
                 required
-                className="w-full pl-4 pr-10 py-3 bg-white dark:bg-slate-900 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none appearance-none font-bold text-emerald-700"
+                className="w-full pl-4 pr-10 py-3 bg-white dark:bg-slate-900 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none appearance-none font-semibold text-emerald-700"
                 value={formData.target_warehouse_id}
                 onChange={e => setFormData({...formData, target_warehouse_id: e.target.value})}
               >
@@ -156,10 +156,10 @@ export default function ProductionTransferForm() {
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Related Plan</label>
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Related Plan</label>
             <div className="relative">
               <select 
-                className="w-full pl-4 pr-10 py-3 bg-white dark:bg-slate-900 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none appearance-none font-bold"
+                className="w-full pl-4 pr-10 py-3 bg-white dark:bg-slate-900 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none appearance-none font-semibold"
                 value={formData.plan_id}
                 onChange={e => setFormData({...formData, plan_id: e.target.value})}
               >
@@ -172,13 +172,13 @@ export default function ProductionTransferForm() {
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
               <Calendar size={16} className="text-indigo-500" /> Transfer Date
             </label>
             <input 
               type="date" 
               required
-              className="w-full px-4 py-3 bg-white dark:bg-slate-900 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold"
+              className="w-full px-4 py-3 bg-white dark:bg-slate-900 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-semibold"
               value={formData.transfer_date}
               onChange={e => setFormData({...formData, transfer_date: e.target.value})}
             
@@ -186,7 +186,7 @@ export default function ProductionTransferForm() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Remarks</label>
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Remarks</label>
             <input 
               type="text" 
               className="w-full px-4 py-3 bg-white dark:bg-slate-900 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
@@ -220,11 +220,11 @@ export default function ProductionTransferForm() {
                 className="group grid grid-cols-1 md:grid-cols-12 gap-4 bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-emerald-200 transition-all shadow-sm"
               >
                 <div className="md:col-span-6 space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Finished Product</label>
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-tight">Finished Product</label>
                   <div className="relative">
                     <select 
                       required
-                      className="w-full pl-3 pr-8 py-2.5 bg-white dark:bg-slate-900 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none appearance-none text-sm font-bold"
+                      className="w-full pl-3 pr-8 py-2.5 bg-white dark:bg-slate-900 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none appearance-none text-sm font-semibold"
                       value={item.item_id}
                       onChange={e => updateItem(index, 'item_id', e.target.value)}
                     >
@@ -238,19 +238,19 @@ export default function ProductionTransferForm() {
                 </div>
 
                 <div className="md:col-span-3 space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Qty Transferred</label>
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-tight">Qty Transferred</label>
                   <input 
                     type="number" 
                     step="0.001"
                     required
-                    className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-bold text-center"
+                    className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold text-center"
                     value={item.qty}
                     onChange={e => updateItem(index, 'qty', e.target.value)}
                   />
                 </div>
 
                 <div className="md:col-span-2 space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">UOM</label>
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-tight">UOM</label>
                   <input 
                     type="text" 
                     disabled

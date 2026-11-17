@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 import { Activity, Clock, CheckCircle2, Navigation } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { Table, Button, Space, Modal, Form, Input, Select, Tag, message, DatePicker } from "antd";
@@ -92,8 +93,31 @@ export default function TripsList() {
 
   return (
     <div className="space-y-4">
-            {/* Metric Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            
+
+      <div className="card">
+        <div className="card-header bg-brand text-white rounded-t-lg flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold dark:text-brand-300">
+              Trips & Dispatch
+            </h1>
+            <p className="hidden sm:block text-sm mt-1">
+              Manage and track all transport trips
+            </p>
+          </div>
+          <div className="grid grid-cols-2 sm:flex gap-2">
+            <Link to="/transport" className="btn btn-secondary">
+              Return to Menu
+            </Link>
+            <button className="btn-success" onClick={() => navigate("/transport/trips/new")}>
+              <PlusOutlined /> Dispatch Trip
+            </button>
+          </div>
+        </div>
+
+      {/* Metric Stats Cards Carousel */}
+      {/* Metric Stats Cards */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="md:grid-cols-4" gapClass="gap-4">
         {[
           {
             label: "Active Dispatched Trips",
@@ -120,7 +144,7 @@ export default function TripsList() {
             color: "bg-emerald-600 text-white",
           },
         ].map((stat, i) => (
-          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+          <div key={i} className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
             <div>
               <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 {stat.label}
@@ -134,27 +158,9 @@ export default function TripsList() {
             </div>
           </div>
         ))}
-      </div>
+      </MobileMovingCarousel>
 
-      <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold dark:text-brand-300">
-              Trips & Dispatch
-            </h1>
-            <p className="text-sm mt-1">
-              Manage and track all transport trips
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Link to="/transport" className="btn btn-secondary">
-              Return to Menu
-            </Link>
-            <button className="btn-success" onClick={() => navigate("/transport/trips/new")}>
-              <PlusOutlined /> Dispatch Trip
-            </button>
-          </div>
-        </div>
+
       </div>
       <div className="card">
         <div className="card-body p-0">

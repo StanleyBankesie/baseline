@@ -103,7 +103,7 @@ export default function RatioAnalysisReportPage() {
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex flex-wrap items-center gap-4 bg-slate-50 dark:bg-slate-800/50">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-slate-600 dark:text-slate-400">Analysis Date:</span>
+            <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">Analysis Date:</span>
             <input
               className="input input-bordered input-sm focus:ring-brand focus:border-brand"
               type="date"

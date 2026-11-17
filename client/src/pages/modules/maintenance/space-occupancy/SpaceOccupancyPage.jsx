@@ -736,7 +736,7 @@ export default function SpaceOccupancyPage() {
                     step="0.1"
                     value={tenantForm.allocated_space_sqm}
                     onChange={(e) => setTenantForm({ ...tenantForm, allocated_space_sqm: parseFloat(e.target.value) })}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs font-mono font-bold"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs font-mono font-semibold"
                     required
                   />
                 </div>
@@ -768,7 +768,7 @@ export default function SpaceOccupancyPage() {
                     type="number"
                     value={tenantForm.monthly_service_charge}
                     onChange={(e) => setTenantForm({ ...tenantForm, monthly_service_charge: parseFloat(e.target.value) })}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs font-mono font-bold"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs font-mono font-semibold"
                   />
                 </div>
               </div>

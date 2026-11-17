@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Briefcase, DollarSign, Clock, CheckCircle2, Calendar, User, AlertTriangle, Loader2, Activity, Layout, Flag } from "lucide-react";
+import { ArrowLeft, Briefcase, DollarSign, Clock, CheckCircle2, Calendar, User, AlertTriangle, Loader2, Activity, Layout, Flag, Layers } from "lucide-react";
 import { api } from "../../../../api/client.js";
 import { toast } from "react-toastify";
 
@@ -167,6 +167,64 @@ export default function ProjectDetailDashboard() {
         </div>
       </div>
 
+      {/* Project Scope & Work Breakdown Structure (WBS) Section */}
+      <div className="card p-6 sm:p-8 space-y-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-brand-50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400">
+              <Layers size={22} />
+            </div>
+            <div>
+              <h2 className="font-bold text-base text-slate-900 dark:text-slate-100">Project Scope & Project Work Plan/WBS Breakdown</h2>
+              <p className="text-xs text-slate-500">Structured deliverables, project work plans/wbs, and task allocation</p>
+            </div>
+          </div>
+          <Link
+            to={`/project-management/projects/${id}/edit`}
+            className="btn btn-secondary text-xs px-3.5 py-1.5 self-start sm:self-auto font-semibold"
+          >
+            Configure Scope
+          </Link>
+        </div>
+
+        {(!project.scopes || project.scopes.length === 0) ? (
+          <div className="p-6 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-400">
+            No explicit scopes configured yet. Edit this project to set Project Scope, project work plans/wbs, and execution tasks.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {project.scopes.map((s, idx) => {
+              const scopeTasks = s.tasks || tasks.filter(t => t.scope_name && t.scope_name.toLowerCase() === (s.name || s.title || '').toLowerCase());
+              return (
+                <div key={idx} className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-2.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                      {s.name || s.title || `Scope #${idx + 1}`}
+                    </span>
+                    {s.wbs_code && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-brand-100 text-brand-800 dark:bg-brand-900/50 dark:text-brand-300 shrink-0">
+                        Work Plan/WBS: {s.wbs_code}
+                      </span>
+                    )}
+                  </div>
+                  {s.description && (
+                    <p className="text-xs text-slate-500 line-clamp-2">{s.description}</p>
+                  )}
+                  <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-200/60 dark:border-slate-700/60 text-slate-500">
+                    <span className="font-semibold text-brand-700 dark:text-brand-300">
+                      📋 {scopeTasks.length} {scopeTasks.length === 1 ? 'task' : 'tasks'}
+                    </span>
+                    <span className="font-bold text-[10px] uppercase px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700">
+                      {s.status || 'PENDING'}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       {/* Task List */}
       <div className="card p-8 space-y-6">
         <h2 className="font-bold uppercase text-xs tracking-wider text-brand-600 border-b border-slate-50 dark:border-slate-700 pb-3">Tasks</h2>
@@ -178,9 +236,10 @@ export default function ProjectDetailDashboard() {
               <thead>
                 <tr className="bg-slate-50/50 dark:bg-slate-900/30">
                   <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Task</th>
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Scope & Work Plan/WBS</th>
                   <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 text-center">Status</th>
                   <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 text-center">Completion</th>
-                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 text-right">Hours</th>
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 text-right">Duration</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
@@ -190,6 +249,14 @@ export default function ProjectDetailDashboard() {
                       <div className="flex items-center gap-2">
                         <div className={`w-2 h-2 rounded-full ${t.status === 'COMPLETED' ? 'bg-emerald-500' : t.status === 'IN_PROGRESS' ? 'bg-blue-500' : t.status === 'BLOCKED' ? 'bg-rose-500' : 'bg-slate-300'}`} />
                         <span className="font-medium text-sm text-slate-900 dark:text-white">{t.task_title}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">{t.scope_name || "General Scope"}</span>
+                        {t.wbs_code && (
+                          <span className="text-[10px] font-bold text-brand-700 dark:text-brand-300">Work Plan/WBS: {t.wbs_code}</span>
+                        )}
                       </div>
                     </td>
                     <td className="px-4 py-3 text-center"><span className="text-xs font-bold text-slate-500 uppercase">{t.status?.replace('_', ' ')}</span></td>

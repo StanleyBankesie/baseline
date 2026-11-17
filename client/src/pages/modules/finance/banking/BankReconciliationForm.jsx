@@ -174,7 +174,7 @@ export default function BankReconciliationForm() {
         <div className="card-body p-4">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
             <div className="form-control">
-              <label className="label text-xs font-bold text-slate-500 uppercase">
+              <label className="label text-xs font-semibold text-slate-500 uppercase">
                 Statement From
               </label>
               <input
@@ -194,7 +194,7 @@ export default function BankReconciliationForm() {
               />
             </div>
             <div className="form-control">
-              <label className="label text-xs font-bold text-slate-500 uppercase">
+              <label className="label text-xs font-semibold text-slate-500 uppercase">
                 Statement To
               </label>
               <input
@@ -214,7 +214,7 @@ export default function BankReconciliationForm() {
               />
             </div>
             <div className="form-control">
-              <label className="label text-xs font-bold text-slate-500 uppercase">
+              <label className="label text-xs font-semibold text-slate-500 uppercase">
                 Ending Balance
               </label>
               <input
@@ -234,7 +234,7 @@ export default function BankReconciliationForm() {
               />
             </div>
             <div className="form-control">
-              <label className="label text-xs font-bold text-slate-500 uppercase">
+              <label className="label text-xs font-semibold text-slate-500 uppercase">
                 Status
               </label>
               <select
@@ -309,7 +309,7 @@ export default function BankReconciliationForm() {
           <div className="flex items-center gap-4">
             <h2 className="text-lg font-bold">Bank Transactions</h2>
             <div className="flex items-center gap-2 bg-white border border-slate-300 rounded-lg px-3 py-1.5">
-              <span className="text-xs font-bold text-slate-500 uppercase">
+              <span className="text-xs font-semibold text-slate-500 uppercase">
                 Voucher Status:
               </span>
               <select

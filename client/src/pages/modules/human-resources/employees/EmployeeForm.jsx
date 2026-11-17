@@ -1162,7 +1162,7 @@ export default function EmployeeForm() {
                             </div>
                           </div>
                           {t.isGroup && t.groupIds.length > 1 && (
-                            <span className="text-[10px] font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full uppercase tracking-wide whitespace-nowrap">
+                            <span className="text-[10px] font-semibold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full uppercase tracking-wide whitespace-nowrap">
                               {t.groupIds.length} brackets
                             </span>
                           )}

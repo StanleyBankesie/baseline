@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '../../../../api/client.js';
 import { toast } from 'react-toastify';
-import { Loader2, Calendar, Layout, ListTree, User, Clock, CheckCircle, MapPin, ArrowLeft, FolderKanban } from 'lucide-react';
+import { Loader2, Calendar, Layout, ListTree, User, Clock, CheckCircle, MapPin, ArrowLeft, FolderKanban, Layers, CheckSquare } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { Link, useSearchParams } from 'react-router-dom';
 
@@ -13,7 +13,7 @@ export default function ProjectMilestonesTimeline() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchingTasks, setFetchingTasks] = useState(false);
-  const [viewMode, setViewMode] = useState('STEP'); // 'STEP' or 'GANTT'
+  const [viewMode, setViewMode] = useState('SCOPE'); // 'STEP' or 'GANTT'
 
   useEffect(() => {
     async function loadProjects() {
@@ -88,11 +88,11 @@ export default function ProjectMilestonesTimeline() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
-              <MapPin size={26} className="text-brand-900 dark:text-brand-400" />
-              Project Milestones
+              <Layers size={26} className="text-brand-900 dark:text-brand-400" />
+              Project Scope & Project Work Plan/WBS
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-              Graphical visualization of project progress and task stages
+              Project work plan/wbs, project scopes, and task timeline
             </p>
           </div>
         </div>
@@ -105,22 +105,29 @@ export default function ProjectMilestonesTimeline() {
             <FolderKanban size={15} /> Assign Tasks (Kanban)
           </Link>
           <Link to="/project-management/tasks/new" className="btn btn-primary inline-flex items-center gap-2 text-sm font-semibold shadow-sm">
-            + New Task / Milestone
+            + New Task / Scope Deliverable
           </Link>
           <div className="flex items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
+            <button 
+              type="button"
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-2 transition-colors ${viewMode === 'SCOPE' ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/20 dark:text-brand-300' : 'text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+              onClick={() => setViewMode('SCOPE')}
+            >
+              <Layers size={15} /> Scope & Work Plan/WBS
+            </button>
             <button 
               type="button"
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-2 transition-colors ${viewMode === 'STEP' ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/20 dark:text-brand-300' : 'text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
               onClick={() => setViewMode('STEP')}
             >
-              <ListTree size={15} /> Chronological
+              <ListTree size={15} /> Timeline
             </button>
             <button 
               type="button"
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-2 transition-colors ${viewMode === 'GANTT' ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/20 dark:text-brand-300' : 'text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
               onClick={() => setViewMode('GANTT')}
             >
-              <Layout size={15} /> Gantt Schedule
+              <Layout size={15} /> Gantt
             </button>
           </div>
         </div>
@@ -128,7 +135,7 @@ export default function ProjectMilestonesTimeline() {
 
       <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center gap-4">
         <div className="flex-1 max-w-sm">
-          <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+          <label className="text-xs font-semibold text-slate-500 uppercase block mb-1">
             Project <span className="text-red-500">*</span>
           </label>
           {loading ? (
@@ -165,6 +172,100 @@ export default function ProjectMilestonesTimeline() {
           <div className="lg:col-span-2">
             <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm p-4 overflow-x-auto">
               
+              {viewMode === 'SCOPE' && (
+                <div className="space-y-6">
+                  {(() => {
+                    const scopesMap = {};
+                    sortedTasks.forEach((t) => {
+                      const scopeKey = t.scope_name || 'Primary Project Scope';
+                      if (!scopesMap[scopeKey]) {
+                        scopesMap[scopeKey] = {
+                          name: scopeKey,
+                          wbs_code: t.wbs_code ? t.wbs_code.split('.')[0] + '.0' : '1.0',
+                          tasks: []
+                        };
+                      }
+                      scopesMap[scopeKey].tasks.push(t);
+                    });
+
+                    return Object.values(scopesMap).map((scopeGroup, sIdx) => {
+                      const completedCount = scopeGroup.tasks.filter(t => t.status === 'COMPLETED' || t.progress_percentage === 100).length;
+                      const scopePct = scopeGroup.tasks.length ? Math.round((completedCount / scopeGroup.tasks.length) * 100) : 0;
+
+                      return (
+                        <div key={sIdx} className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 p-4 space-y-3">
+                          {/* Scope Header */}
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
+                            <div className="flex items-center gap-2.5">
+                              <span className="w-7 h-7 rounded-lg bg-brand-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                                {sIdx + 1}
+                              </span>
+                              <div>
+                                <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                                  {scopeGroup.name}
+                                  <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-brand-100 text-brand-800 dark:bg-brand-900/50 dark:text-brand-300">
+                                    Work Plan/WBS: {scopeGroup.wbs_code}
+                                  </span>
+                                </h3>
+                                <p className="text-xs text-slate-500">
+                                  {scopeGroup.tasks.length} {scopeGroup.tasks.length === 1 ? 'task' : 'tasks'} under this project scope
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <div className="text-right">
+                                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{scopePct}% Done</span>
+                                <div className="w-24 bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden mt-1">
+                                  <div className="bg-brand-500 h-full rounded-full" style={{ width: `${scopePct}%` }} />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Tasks under this Scope */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                            {scopeGroup.tasks.map((t) => (
+                              <div
+                                key={t.id}
+                                onClick={() => setSelectedTask(t)}
+                                className={`p-3.5 rounded-xl border bg-white dark:bg-slate-800 transition-all cursor-pointer hover:shadow-md ${
+                                  selectedTask?.id === t.id ? 'border-brand-500 shadow-md ring-2 ring-brand-500/20' : 'border-slate-200 dark:border-slate-700'
+                                }`}
+                              >
+                                <div className="flex items-start justify-between gap-2 mb-1.5">
+                                  <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
+                                    Work Plan/WBS: {t.wbs_code || '1.1'}
+                                  </span>
+                                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${
+                                    t.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-700' :
+                                    t.status === 'IN_PROGRESS' ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-600'
+                                  }`}>
+                                    {t.status || 'PENDING'}
+                                  </span>
+                                </div>
+
+                                <h4 className="font-semibold text-sm text-slate-900 dark:text-slate-100 mb-1 leading-snug">
+                                  {t.task_title}
+                                </h4>
+
+                                <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+                                  <span className="truncate max-w-[120px]">
+                                    👤 {t.assigned_to_name || 'Unassigned'}
+                                  </span>
+                                  <span>
+                                    {t.end_date ? format(new Date(t.end_date), 'MMM d, yyyy') : 'No due date'}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              )}
+
               {viewMode === 'STEP' && (
                 <div className="relative py-8">
                   {/* Vertical line connecting steps */}
@@ -189,8 +290,22 @@ export default function ProjectMilestonesTimeline() {
                           </div>
                           
                           <div className={`flex-1 p-4 rounded-xl border transition-all ${selectedTask?.id === t.id ? 'border-brand-500 shadow-md bg-brand-50/30 dark:bg-brand-900/10' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 group-hover:border-slate-300'}`}>
-                            <div className="flex justify-between items-start mb-2">
-                              <h4 className="font-bold text-slate-800 dark:text-slate-100">{t.task_title}</h4>
+                            <div className="flex justify-between items-start mb-1.5">
+                              <div>
+                                <h4 className="font-bold text-slate-800 dark:text-slate-100">{t.task_title}</h4>
+                                <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                                  {t.wbs_code && (
+                                    <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-brand-50 text-brand-800 dark:bg-brand-900/50 dark:text-brand-300 border border-brand-200 dark:border-brand-800">
+                                      Work Plan/WBS: {t.wbs_code}
+                                    </span>
+                                  )}
+                                  {t.scope_name && (
+                                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                                      Scope: {t.scope_name}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
                               <span className={`text-xs font-bold px-2 py-0.5 rounded-full uppercase
                                 ${t.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-700' : 
                                   t.status === 'IN_PROGRESS' ? 'bg-brand-100 text-brand-700' : 
@@ -278,6 +393,18 @@ export default function ProjectMilestonesTimeline() {
                 </div>
                 
                 <div className="space-y-4">
+                  {/* Scope & WBS in Detail Panel */}
+                  <div className="grid grid-cols-2 gap-2 p-2.5 bg-brand-50/40 dark:bg-slate-800/60 rounded-xl border border-brand-100 dark:border-slate-700 text-xs">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase">Project Scope</p>
+                      <p className="font-bold text-slate-800 dark:text-slate-200 truncate">{selectedTask.scope_name || 'General Scope'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase">Project Work Plan/WBS</p>
+                      <p className="font-mono font-bold text-brand-700 dark:text-brand-300">{selectedTask.wbs_code || 'N/A'}</p>
+                    </div>
+                  </div>
+
                   <div>
                     <p className="text-xs font-bold text-slate-500 uppercase mb-1">Status</p>
                     <span className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full uppercase
@@ -316,8 +443,8 @@ export default function ProjectMilestonesTimeline() {
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500"><Clock size={14} /></div>
                       <div>
-                        <p className="text-xs text-slate-500">Est. Hours</p>
-                        <p className="font-medium text-sm text-slate-800 dark:text-slate-200">{selectedTask.estimated_hours || 0} hrs</p>
+                        <p className="text-xs text-slate-500">Est. Duration</p>
+                        <p className="font-medium text-sm text-slate-800 dark:text-slate-200">{selectedTask.estimated_hours || 0}</p>
                       </div>
                     </div>
                   </div>

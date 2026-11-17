@@ -124,7 +124,7 @@ export default function ProductionCostingPage() {
             <select
               value={selectedOrderId}
               onChange={handleOrderChange}
-              className="input bg-brand-950 border-brand-700 text-white w-full py-2.5 font-bold focus:ring-brand-500"
+              className="input bg-brand-950 border-brand-700 text-white w-full py-2.5 font-semibold focus:ring-brand-500"
             >
               {workOrders.map((wo) => (
                 <option key={wo.id} value={wo.id}>

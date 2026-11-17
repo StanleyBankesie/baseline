@@ -18,18 +18,22 @@ import defaultLogo from "../../../../assets/resources/OMNISUITE_LOGO_FILL.png";
 import { toast } from "react-toastify";
 import { usePermission } from "../../../../auth/PermissionContext.jsx";
 import Swal from "sweetalert2";
-import TaxPricingModal, { TaxModeRadioSelector } from "@/components/common/TaxPricingModal.jsx";
+import TaxPricingModal, {
+  TaxModeRadioSelector,
+} from "@/components/common/TaxPricingModal.jsx";
 
 /**
  *  component
- * 
+ *
  * @returns {JSX.Element} The rendered component
  */
 export default function InvoiceForm() {
-  const { canEditDiscount, canAccessPath, hasExceptional, isModuleEnabled } = usePermission();
+  const { canEditDiscount, canAccessPath, hasExceptional, isModuleEnabled } =
+    usePermission();
   const canAccessProjects = Boolean(
     canAccessPath?.("/project-management") ||
-      (typeof isModuleEnabled === "function" && isModuleEnabled("project-management")),
+    (typeof isModuleEnabled === "function" &&
+      isModuleEnabled("project-management")),
   );
   const navigate = useNavigate();
   const { id } = useParams();
@@ -326,10 +330,12 @@ export default function InvoiceForm() {
 
   const fetchSalespersons = async () => {
     try {
-      const response = await api.get('/sales/sales-persons');
-      setSalespersons(Array.isArray(response.data?.items) ? response.data.items : []);
+      const response = await api.get("/sales/sales-persons");
+      setSalespersons(
+        Array.isArray(response.data?.items) ? response.data.items : [],
+      );
     } catch (error) {
-      console.error('Error fetching salespersons:', error);
+      console.error("Error fetching salespersons:", error);
     }
   };
 
@@ -403,13 +409,17 @@ export default function InvoiceForm() {
           .filter((v) => v !== undefined && v !== null)
           .map((v) => String(v)),
       );
-      let filtered = baseOrders.filter((o) => o.status === "POSTED" && !usedSoIds.has(String(o.id)));
+      let filtered = baseOrders.filter(
+        (o) => o.status === "POSTED" && !usedSoIds.has(String(o.id)),
+      );
       if (isEdit && form.sales_order_id) {
         const sid = String(form.sales_order_id);
         const exists = filtered.some((o) => String(o.id) === sid);
         if (!exists) {
           try {
-            const res = await api.get(`/projects/project-orders/${form.sales_order_id}`);
+            const res = await api.get(
+              `/projects/project-orders/${form.sales_order_id}`,
+            );
             const item = res.data?.item;
             if (item) {
               filtered = [item, ...filtered];
@@ -426,12 +436,15 @@ export default function InvoiceForm() {
   const fetchWarehouses = async () => {
     try {
       const response = await api.get("/inventory/warehouses");
-      const list = Array.isArray(response.data?.items) ? response.data.items : [];
+      const list = Array.isArray(response.data?.items)
+        ? response.data.items
+        : [];
       setWarehouses(list);
       if (!isEdit) {
         setForm((prev) => {
           if (prev.warehouse_id) return prev;
-          const defaultWh = list.find((w) => w.is_default || w.is_primary) || list[0];
+          const defaultWh =
+            list.find((w) => w.is_default || w.is_primary) || list[0];
           return {
             ...prev,
             warehouse_id: defaultWh ? defaultWh.id : "",
@@ -471,17 +484,22 @@ export default function InvoiceForm() {
   const fetchPriceTypes = async () => {
     try {
       const response = await api.get("/sales/price-types");
-      const list = Array.isArray(response.data?.items) ? response.data.items : [];
+      const list = Array.isArray(response.data?.items)
+        ? response.data.items
+        : [];
       setPriceTypes(list);
       if (!isEdit) {
         setForm((prev) => {
           if (prev.price_type && prev.price_type !== "RETAIL") return prev;
           const retailPt = list.find(
-            (pt) => String(pt.name || pt.price_type || "").toUpperCase() === "RETAIL",
+            (pt) =>
+              String(pt.name || pt.price_type || "").toUpperCase() === "RETAIL",
           );
           return {
             ...prev,
-            price_type: retailPt ? retailPt.name || retailPt.id || "RETAIL" : "RETAIL",
+            price_type: retailPt
+              ? retailPt.name || retailPt.id || "RETAIL"
+              : "RETAIL",
           };
         });
       }
@@ -569,7 +587,11 @@ export default function InvoiceForm() {
           const amt = Math.round((((i.net || 0) * rate) / 100) * 100) / 100;
           const name = c.component_name;
           if (!compTotals[name])
-            compTotals[name] = { amount: 0, rate, sort_order: c.sort_order || 0 };
+            compTotals[name] = {
+              amount: 0,
+              rate,
+              sort_order: c.sort_order || 0,
+            };
           compTotals[name].amount += amt;
         });
       } else {
@@ -580,7 +602,7 @@ export default function InvoiceForm() {
         const rate = Number(
           i.tax_rate !== undefined && i.tax_rate !== null
             ? i.tax_rate
-            : (form.tax_rate || 0),
+            : form.tax_rate || 0,
         );
         const amt = Number(i.taxAmt || 0);
         if (name && amt > 0) {
@@ -598,7 +620,8 @@ export default function InvoiceForm() {
         sort_order: compTotals[name].sort_order,
       }))
       .sort((a, b) => a.sort_order - b.sort_order);
-    const taxTotal = Math.round(components.reduce((s, c) => s + c.amount, 0) * 100) / 100;
+    const taxTotal =
+      Math.round(components.reduce((s, c) => s + c.amount, 0) * 100) / 100;
     const total = sub + taxTotal;
     return { sub, components, taxTotal, total };
   };
@@ -628,13 +651,15 @@ export default function InvoiceForm() {
     };
   };
   const calcAggregates = () => {
-    const isInclusive = String(form.tax_mode || "").toUpperCase() === "INCLUSIVE";
+    const isInclusive =
+      String(form.tax_mode || "").toUpperCase() === "INCLUSIVE";
     const grossSub = lines.reduce((s, i) => s + (i.sub || 0), 0);
     const discountTotal = lines.reduce((s, i) => s + (i.discAmt || 0), 0);
     const netSub = lines.reduce((s, i) => s + (i.net || 0), 0);
     const lineTax = lines.reduce((s, i) => s + Number(i.taxAmt || 0), 0);
     const tc = calcTaxComponentsTotals();
-    const taxTotal = tc.taxTotal > 0 ? tc.taxTotal : Math.round(lineTax * 100) / 100;
+    const taxTotal =
+      tc.taxTotal > 0 ? tc.taxTotal : Math.round(lineTax * 100) / 100;
     const grand = isInclusive
       ? lines.reduce((s, i) => s + (i.total || 0), 0)
       : Math.round((netSub + taxTotal) * 100) / 100;
@@ -642,7 +667,9 @@ export default function InvoiceForm() {
     const subtotal = isInclusive ? netSub : grossSub;
     const components = [...tc.components];
     if (components.length === 0 && taxTotal > 0) {
-      const name = form.tax_component_name || (form.tax_rate ? `Tax (${form.tax_rate}%)` : "Tax");
+      const name =
+        form.tax_component_name ||
+        (form.tax_rate ? `Tax (${form.tax_rate}%)` : "Tax");
       const rate = form.tax_rate || 0;
       components.push({ name, amount: taxTotal, rate, sort_order: 1 });
     }
@@ -719,7 +746,8 @@ export default function InvoiceForm() {
     if (form.auto_receipt) {
       setForm((prev) => ({
         ...prev,
-        paid_amount: computedGrandTotal > 0 ? computedGrandTotal.toFixed(2) : "",
+        paid_amount:
+          computedGrandTotal > 0 ? computedGrandTotal.toFixed(2) : "",
       }));
     }
   }, [computedGrandTotal, form.auto_receipt]);
@@ -1072,8 +1100,10 @@ export default function InvoiceForm() {
         uom: String(prod?.uom || "") || defaultUomCode,
         tax_mode: currentTaxMode,
         tax_type: form.tax_type || prev.tax_type || "",
-        tax_rate: form.tax_rate !== undefined ? form.tax_rate : (prev.tax_rate || 0),
-        tax_component_name: form.tax_component_name || prev.tax_component_name || "",
+        tax_rate:
+          form.tax_rate !== undefined ? form.tax_rate : prev.tax_rate || 0,
+        tax_component_name:
+          form.tax_component_name || prev.tax_component_name || "",
       }));
       if (value) {
         {
@@ -1106,8 +1136,10 @@ export default function InvoiceForm() {
           setNewItem((prev) => ({
             ...prev,
             tax_type: form.tax_type || prev.tax_type,
-            tax_rate: form.tax_rate !== undefined ? form.tax_rate : prev.tax_rate,
-            tax_component_name: form.tax_component_name || prev.tax_component_name,
+            tax_rate:
+              form.tax_rate !== undefined ? form.tax_rate : prev.tax_rate,
+            tax_component_name:
+              form.tax_component_name || prev.tax_component_name,
             tax_mode: currentMode,
           }));
         } else {
@@ -1121,8 +1153,9 @@ export default function InvoiceForm() {
                   taxes.find((t) => t.code === tax.tax_code)?.value ||
                   null;
                 const resolvedTaxRate = resolvedTaxType
-                  ? taxes.find((t) => String(t.value) === String(resolvedTaxType))
-                      ?.rate
+                  ? taxes.find(
+                      (t) => String(t.value) === String(resolvedTaxType),
+                    )?.rate
                   : null;
                 setNewItem((prev) => ({
                   ...prev,
@@ -1192,7 +1225,7 @@ export default function InvoiceForm() {
           tax_mode: newMode,
         };
         return { ...updated, ...calcItemTotals(updated) };
-      })
+      }),
     );
   };
 
@@ -1213,8 +1246,12 @@ export default function InvoiceForm() {
       ...newItem,
       tax_mode: currentTaxMode,
       tax_type: newItem.tax_type || form.tax_type || "",
-      tax_rate: newItem.tax_rate !== undefined && newItem.tax_rate !== null ? newItem.tax_rate : (form.tax_rate || 0),
-      tax_component_name: newItem.tax_component_name || form.tax_component_name || "",
+      tax_rate:
+        newItem.tax_rate !== undefined && newItem.tax_rate !== null
+          ? newItem.tax_rate
+          : form.tax_rate || 0,
+      tax_component_name:
+        newItem.tax_component_name || form.tax_component_name || "",
     };
     const calculations = calcItemTotals(lineItemData);
     setLines((prev) => [
@@ -1234,9 +1271,11 @@ export default function InvoiceForm() {
       unit_price: "",
       discount_percent: "",
       tax_type: form.tax_type || newItem.tax_type || "",
-      tax_rate: form.tax_rate !== undefined ? form.tax_rate : (newItem.tax_rate || 0),
+      tax_rate:
+        form.tax_rate !== undefined ? form.tax_rate : newItem.tax_rate || 0,
       tax_mode: currentTaxMode,
-      tax_component_name: form.tax_component_name || newItem.tax_component_name || "",
+      tax_component_name:
+        form.tax_component_name || newItem.tax_component_name || "",
       remarks: "",
       available_qty: undefined,
       uom: defaultUomCode,
@@ -1354,16 +1393,25 @@ export default function InvoiceForm() {
     const discAmt = Math.round(((sub * disc) / 100) * 100) / 100;
     const discountedGross = Math.round((sub - discAmt) * 100) / 100;
 
-    const effectiveMode = String(itm.tax_mode || form.tax_mode || "").toUpperCase();
+    const effectiveMode = String(
+      itm.tax_mode || form.tax_mode || "",
+    ).toUpperCase();
     const isInclusive = effectiveMode === "INCLUSIVE";
 
-    const fallbackRate = form.tax_rate !== undefined && form.tax_rate !== null ? Number(form.tax_rate) : 0;
+    const fallbackRate =
+      form.tax_rate !== undefined && form.tax_rate !== null
+        ? Number(form.tax_rate)
+        : 0;
     const taxRate =
-      itm.tax_rate !== undefined && itm.tax_rate !== null && Number(itm.tax_rate) > 0
+      itm.tax_rate !== undefined &&
+      itm.tax_rate !== null &&
+      Number(itm.tax_rate) > 0
         ? Number(itm.tax_rate)
-        : (fallbackRate > 0
-            ? fallbackRate
-            : (taxes.find((t) => String(t.value) === String(itm.tax_type || form.tax_type))?.rate ?? fallbackRate));
+        : fallbackRate > 0
+          ? fallbackRate
+          : (taxes.find(
+              (t) => String(t.value) === String(itm.tax_type || form.tax_type),
+            )?.rate ?? fallbackRate);
 
     let net = discountedGross;
     let taxAmt = 0;
@@ -1375,7 +1423,7 @@ export default function InvoiceForm() {
       taxAmt = Math.round((total - net) * 100) / 100;
     } else if (!isInclusive && taxRate > 0) {
       net = discountedGross;
-      taxAmt = Math.round((discountedGross * (taxRate / 100)) * 100) / 100;
+      taxAmt = Math.round(discountedGross * (taxRate / 100) * 100) / 100;
       total = Math.round((discountedGross + taxAmt) * 100) / 100;
     } else {
       net = discountedGross;
@@ -1383,7 +1431,16 @@ export default function InvoiceForm() {
       total = discountedGross;
     }
 
-    return { sub, discAmt, net, taxAmt, total, line_total: total, tax_mode: isInclusive ? "INCLUSIVE" : "EXCLUSIVE", isInclusive };
+    return {
+      sub,
+      discAmt,
+      net,
+      taxAmt,
+      total,
+      line_total: total,
+      tax_mode: isInclusive ? "INCLUSIVE" : "EXCLUSIVE",
+      isInclusive,
+    };
   }
 
   useEffect(() => {
@@ -1409,7 +1466,8 @@ export default function InvoiceForm() {
   }, [form.warehouse_id, newItem.item_id]);
 
   function calcGrandTotal() {
-    const isInclusive = String(form.tax_mode || "").toUpperCase() === "INCLUSIVE";
+    const isInclusive =
+      String(form.tax_mode || "").toUpperCase() === "INCLUSIVE";
     const sub = lines.reduce((s, l) => s + Number(l.net || 0), 0);
     const tax = lines.reduce((s, l) => s + Number(l.taxAmt || 0), 0);
     const total = isInclusive
@@ -1474,11 +1532,15 @@ export default function InvoiceForm() {
       }
       if (form.auto_receipt) {
         if (!form.deposit_account_id) {
-          toast.error("Please select a receiving / deposit account for Paid Upon Invoicing.");
+          toast.error(
+            "Please select a receiving / deposit account for Paid Upon Invoicing.",
+          );
           return;
         }
         if (!(Number(form.paid_amount || 0) > 0)) {
-          toast.error("Please enter a valid Amount Paid for Paid Upon Invoicing.");
+          toast.error(
+            "Please enter a valid Amount Paid for Paid Upon Invoicing.",
+          );
           return;
         }
       }
@@ -1500,35 +1562,44 @@ export default function InvoiceForm() {
       if (form.customer_id && !form.auto_receipt) {
         let creditStatus = null;
         try {
-          const statusRes = await api.get(`/sales/customers/${form.customer_id}/credit-status`);
+          const statusRes = await api.get(
+            `/sales/customers/${form.customer_id}/credit-status`,
+          );
           creditStatus = statusRes.data || null;
         } catch (cErr) {
           console.warn("Credit limit verification API notice:", cErr);
         }
 
-        const selectedCust = customers.find((c) => String(c.id) === String(form.customer_id));
+        const selectedCust = customers.find(
+          (c) => String(c.id) === String(form.customer_id),
+        );
         const isEnforced = Boolean(
           creditStatus?.enforce_credit_limit ||
           Number(selectedCust?.enforce_credit_limit) === 1 ||
           selectedCust?.enforce_credit_limit === true ||
           String(selectedCust?.enforce_credit_limit) === "true" ||
-          String(selectedCust?.enforce_credit_limit) === "1"
+          String(selectedCust?.enforce_credit_limit) === "1",
         );
 
         if (isEnforced) {
           const effectiveLimit = Number(
             creditStatus?.effective_credit_limit !== undefined
               ? creditStatus.effective_credit_limit
-              : (selectedCust?.credit_limit || 0)
+              : selectedCust?.credit_limit || 0,
           );
           const currentBal = Number(creditStatus?.outstanding_balance || 0);
           const newInvoiceAmt = Math.round(Number(sums.total || 0) * 100) / 100;
           const projectedBal = currentBal + newInvoiceAmt;
 
           if (projectedBal > effectiveLimit) {
-            const canOverride = typeof hasExceptional === "function" && hasExceptional("SALES.CREDIT_LIMIT.OVERRIDE");
+            const canOverride =
+              typeof hasExceptional === "function" &&
+              hasExceptional("SALES.CREDIT_LIMIT.OVERRIDE");
             const excess = projectedBal - effectiveLimit;
-            const custName = creditStatus?.customer_name || selectedCust?.customer_name || "Customer";
+            const custName =
+              creditStatus?.customer_name ||
+              selectedCust?.customer_name ||
+              "Customer";
 
             setCreditModal({
               isOpen: true,
@@ -1564,7 +1635,10 @@ export default function InvoiceForm() {
   async function handleConfirmCreditLimitIncrease() {
     if (!creditModal.customerId || !creditModal.tempLimitInput) return;
     const newLim = Number(creditModal.tempLimitInput);
-    if (!Number.isFinite(newLim) || newLim < Number(creditModal.projectedTotal)) {
+    if (
+      !Number.isFinite(newLim) ||
+      newLim < Number(creditModal.projectedTotal)
+    ) {
       toast.error(
         `Temporary limit must be at least ${Number(creditModal.projectedTotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
       );
@@ -1572,15 +1646,21 @@ export default function InvoiceForm() {
     }
     setCreditModal((p) => ({ ...p, submitting: true }));
     try {
-      await api.post(`/sales/customers/${creditModal.customerId}/temp-credit-limit`, {
-        new_credit_limit: newLim,
-      });
+      await api.post(
+        `/sales/customers/${creditModal.customerId}/temp-credit-limit`,
+        {
+          new_credit_limit: newLim,
+        },
+      );
       toast.success("Customer credit limit increased for today.");
       const { workingLines, sums, invoiceNo } = creditModal;
       setCreditModal((p) => ({ ...p, isOpen: false, submitting: false }));
       await executeSaveInvoice(workingLines, sums, invoiceNo);
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to increase temporary credit limit");
+      toast.error(
+        err?.response?.data?.message ||
+          "Failed to increase temporary credit limit",
+      );
       setCreditModal((p) => ({ ...p, submitting: false }));
     }
   }
@@ -1604,16 +1684,28 @@ export default function InvoiceForm() {
         total_amount: Math.round(Number(sums.total || 0) * 100) / 100,
         tax_amount: Math.round(Number(sums.tax || 0) * 100) / 100,
         net_amount: Math.round(Number(sums.sub || 0) * 100) / 100,
-        project_id: canAccessProjects && form.project_id ? Number(form.project_id) : null,
+        project_id:
+          canAccessProjects && form.project_id ? Number(form.project_id) : null,
         auto_delivery: Boolean(autoDelivery),
         auto_receipt: Boolean(form.auto_receipt),
         payment_method: form.auto_receipt ? form.payment_method : null,
-        deposit_account_id: form.auto_receipt ? Number(form.deposit_account_id) : null,
-        payment_account_id: form.auto_receipt ? Number(form.deposit_account_id) : null,
+        deposit_account_id: form.auto_receipt
+          ? Number(form.deposit_account_id)
+          : null,
+        payment_account_id: form.auto_receipt
+          ? Number(form.deposit_account_id)
+          : null,
         payment_reference: form.auto_receipt ? form.payment_reference : null,
-        cheque_date: form.auto_receipt && isChequeLike && form.cheque_date ? toYmd(form.cheque_date) : null,
-        paid_amount: form.auto_receipt ? Number(form.paid_amount || sums.total) : null,
-        received_amount: form.auto_receipt ? Number(form.paid_amount || sums.total) : null,
+        cheque_date:
+          form.auto_receipt && isChequeLike && form.cheque_date
+            ? toYmd(form.cheque_date)
+            : null,
+        paid_amount: form.auto_receipt
+          ? Number(form.paid_amount || sums.total)
+          : null,
+        received_amount: form.auto_receipt
+          ? Number(form.paid_amount || sums.total)
+          : null,
         ...(form.sales_order_id
           ? { sales_order_id: Number(form.sales_order_id) }
           : {}),
@@ -1653,7 +1745,7 @@ export default function InvoiceForm() {
       } else {
         resp = await api.post("/sales/invoices", payload);
       }
-      
+
       if (resp?.data?.receipt_voucher_no) {
         toast.success(
           `Invoice ${invoiceNo} saved & Receipt Voucher ${resp.data.receipt_voucher_no} created (${resp.data.receipt_voucher_status || "APPROVED"})`,
@@ -1662,7 +1754,9 @@ export default function InvoiceForm() {
         toast.success(`Invoice ${invoiceNo} saved successfully`);
       }
       if (resp?.data?.delivery_no) {
-        toast.success(`Delivery ${resp.data.delivery_no} created automatically`);
+        toast.success(
+          `Delivery ${resp.data.delivery_no} created automatically`,
+        );
       }
       navigate("/sales/invoices");
     } catch (err) {
@@ -1772,7 +1866,10 @@ export default function InvoiceForm() {
               <p className="text-sm mt-1">Create and manage sales invoices</p>
             </div>
             <div className="flex gap-2 items-center">
-              <button onClick={() => window.history.back()} className="btn-success">
+              <button
+                onClick={() => window.history.back()}
+                className="btn-success"
+              >
                 Back
               </button>
             </div>
@@ -1803,7 +1900,10 @@ export default function InvoiceForm() {
                   value={form.invoice_date}
                   onChange={(e) => update("invoice_date", e.target.value)}
                   required
-                  disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+                  disabled={
+                    readOnly ||
+                    (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))
+                  }
                 />
               </div>
               <div className="relative">
@@ -1943,7 +2043,11 @@ export default function InvoiceForm() {
                 >
                   <option value="">Select Order (Optional)</option>
                   {orders
-                    .filter((o) => !form.project_id || String(o.project_id) === String(form.project_id))
+                    .filter(
+                      (o) =>
+                        !form.project_id ||
+                        String(o.project_id) === String(form.project_id),
+                    )
                     .map((o) => (
                       <option key={o.id} value={o.id}>
                         {o.order_no}
@@ -2165,13 +2269,13 @@ export default function InvoiceForm() {
                         const query = itemQuery.trim();
                         const results = query
                           ? filterByPrefix(itemsCatalog, {
-                            query,
-                            searchFields: [
-                              "item_code",
-                              "item_name",
-                              "barcode",
-                            ],
-                          })
+                              query,
+                              searchFields: [
+                                "item_code",
+                                "item_name",
+                                "barcode",
+                              ],
+                            })
                           : [];
                         return results.length && !newItem.item_id
                           ? (() => {
@@ -2229,9 +2333,7 @@ export default function InvoiceForm() {
                     >
                       {(Array.isArray(uoms) ? uoms : []).map((u) => (
                         <option key={u.id} value={u.uom_code}>
-                          {u.uom_name
-                            ? `${u.uom_name} (${u.uom_code})`
-                            : u.uom_code}
+                          {u.uom_code}
                         </option>
                       ))}
                     </select>
@@ -2318,8 +2420,8 @@ export default function InvoiceForm() {
                     <input
                       type="text"
                       value={(
-                        (Number(newItem.qty || 0) * Number(newItem.unit_price || 0)) ||
-                        0
+                        Number(newItem.qty || 0) *
+                          Number(newItem.unit_price || 0) || 0
                       ).toFixed(2)}
                       className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-slate-900 font-semibold text-slate-800"
                       readOnly
@@ -2361,13 +2463,23 @@ export default function InvoiceForm() {
                       title="Click to select tax code"
                     >
                       <span className="truncate text-xs text-slate-800 dark:text-slate-200">
-                        {newItem.tax_component_name || (newItem.tax_type ? taxes.find(t => String(t.value) === String(newItem.tax_type))?.label : '') || (newItem.tax_rate ? `Tax (${newItem.tax_rate}%)` : 'Select Tax')}
+                        {newItem.tax_component_name ||
+                          (newItem.tax_type
+                            ? taxes.find(
+                                (t) =>
+                                  String(t.value) === String(newItem.tax_type),
+                              )?.label
+                            : "") ||
+                          (newItem.tax_rate
+                            ? `Tax (${newItem.tax_rate}%)`
+                            : "Select Tax")}
                       </span>
-                      {newItem.tax_rate !== undefined && Number(newItem.tax_rate) > 0 && (
-                        <span className="text-[11px] font-bold text-brand-600 bg-brand-50 dark:bg-brand-900/30 px-1.5 py-0.5 rounded shrink-0 ml-1">
-                          {Number(newItem.tax_rate)}%
-                        </span>
-                      )}
+                      {newItem.tax_rate !== undefined &&
+                        Number(newItem.tax_rate) > 0 && (
+                          <span className="text-[11px] font-bold text-brand-600 bg-brand-50 dark:bg-brand-900/30 px-1.5 py-0.5 rounded shrink-0 ml-1">
+                            {Number(newItem.tax_rate)}%
+                          </span>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -2496,9 +2608,7 @@ export default function InvoiceForm() {
                               >
                                 {(Array.isArray(uoms) ? uoms : []).map((u) => (
                                   <option key={u.id} value={u.uom_code}>
-                                    {u.uom_name
-                                      ? `${u.uom_name} (${u.uom_code})`
-                                      : u.uom_code}
+                                    {u.uom_code}
                                   </option>
                                 ))}
                               </select>
@@ -2643,21 +2753,55 @@ export default function InvoiceForm() {
                                 title="Click to change tax component or mode"
                               >
                                 <div className="font-semibold text-slate-800 dark:text-slate-200 truncate">
-                                  {i.tax_component_name || form.tax_component_name || (taxes.find((t) => String(t.value) === String(i.tax_type || form.tax_type))?.label) || (i.tax_rate ? `Tax (${i.tax_rate}%)` : '-')}
+                                  {i.tax_component_name ||
+                                    form.tax_component_name ||
+                                    taxes.find(
+                                      (t) =>
+                                        String(t.value) ===
+                                        String(i.tax_type || form.tax_type),
+                                    )?.label ||
+                                    (i.tax_rate ? `Tax (${i.tax_rate}%)` : "-")}
                                 </div>
                                 <div className="text-[10px] text-slate-500 flex items-center justify-between gap-1 mt-0.5">
-                                  <span className={`px-1 rounded text-[9px] font-bold ${(i.tax_mode || form.tax_mode) === 'INCLUSIVE' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-                                    {(i.tax_mode || form.tax_mode) === 'INCLUSIVE' ? 'Incl' : 'Excl'}
+                                  <span
+                                    className={`px-1 rounded text-[9px] font-bold ${(i.tax_mode || form.tax_mode) === "INCLUSIVE" ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700"}`}
+                                  >
+                                    {(i.tax_mode || form.tax_mode) ===
+                                    "INCLUSIVE"
+                                      ? "Incl"
+                                      : "Excl"}
                                   </span>
                                   <span className="font-bold text-brand-600">
-                                    {Number(i.tax_rate !== undefined && i.tax_rate !== null ? i.tax_rate : (form.tax_rate !== undefined && form.tax_rate !== null ? form.tax_rate : (taxes.find((t) => String(t.value) === String(i.tax_type || form.tax_type))?.rate || 0)))}%
+                                    {Number(
+                                      i.tax_rate !== undefined &&
+                                        i.tax_rate !== null
+                                        ? i.tax_rate
+                                        : form.tax_rate !== undefined &&
+                                            form.tax_rate !== null
+                                          ? form.tax_rate
+                                          : taxes.find(
+                                              (t) =>
+                                                String(t.value) ===
+                                                String(
+                                                  i.tax_type || form.tax_type,
+                                                ),
+                                            )?.rate || 0,
+                                    )}
+                                    %
                                   </span>
                                 </div>
                               </div>
                             ) : (
                               <span>
-                                {i.tax_component_name || (taxes.find((t) => String(t.value) === String(i.tax_type))?.label) || ''}
-                                {i.tax_mode ? ` [${i.tax_mode === 'INCLUSIVE' ? 'Incl' : 'Excl'}]` : ''}
+                                {i.tax_component_name ||
+                                  taxes.find(
+                                    (t) =>
+                                      String(t.value) === String(i.tax_type),
+                                  )?.label ||
+                                  ""}
+                                {i.tax_mode
+                                  ? ` [${i.tax_mode === "INCLUSIVE" ? "Incl" : "Excl"}]`
+                                  : ""}
                               </span>
                             )}
                           </td>
@@ -2782,7 +2926,7 @@ export default function InvoiceForm() {
                     />
                     <label
                       htmlFor="auto_receipt"
-                      className="font-bold text-slate-800 dark:text-slate-100 text-base cursor-pointer select-none"
+                      className="font-semibold text-slate-800 dark:text-slate-100 text-base cursor-pointer select-none"
                     >
                       Paid Upon Invoicing
                     </label>
@@ -2796,7 +2940,9 @@ export default function InvoiceForm() {
                       <select
                         className="input"
                         value={form.payment_method}
-                        onChange={(e) => update("payment_method", e.target.value)}
+                        onChange={(e) =>
+                          update("payment_method", e.target.value)
+                        }
                         disabled={readOnly || loading}
                       >
                         <option value="Cash">Cash</option>
@@ -2808,11 +2954,15 @@ export default function InvoiceForm() {
                     </div>
 
                     <div>
-                      <label className="label">Receiving / Deposit Account *</label>
+                      <label className="label">
+                        Receiving / Deposit Account *
+                      </label>
                       <select
                         className="input"
                         value={form.deposit_account_id}
-                        onChange={(e) => update("deposit_account_id", e.target.value)}
+                        onChange={(e) =>
+                          update("deposit_account_id", e.target.value)
+                        }
                         disabled={readOnly || loading}
                         required
                       >
@@ -2834,7 +2984,9 @@ export default function InvoiceForm() {
                         type="text"
                         className="input"
                         value={form.payment_reference || ""}
-                        onChange={(e) => update("payment_reference", e.target.value)}
+                        onChange={(e) =>
+                          update("payment_reference", e.target.value)
+                        }
                         placeholder="e.g. TR-9481 / Cheque #"
                         disabled={readOnly || loading}
                       />
@@ -2847,7 +2999,9 @@ export default function InvoiceForm() {
                           type="date"
                           className="input"
                           value={form.cheque_date}
-                          onChange={(e) => update("cheque_date", e.target.value)}
+                          onChange={(e) =>
+                            update("cheque_date", e.target.value)
+                          }
                           disabled={readOnly || loading}
                         />
                       </div>
@@ -2873,7 +3027,10 @@ export default function InvoiceForm() {
             )}
 
             <div className="flex justify-end gap-3 pb-28">
-              <button onClick={() => window.history.back()} className="btn-success">
+              <button
+                onClick={() => window.history.back()}
+                className="btn-success"
+              >
                 Cancel
               </button>
               <label className="flex items-center gap-2 mr-4">
@@ -3281,11 +3438,15 @@ export default function InvoiceForm() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className={`p-4 flex items-center justify-between text-white ${creditModal.isAuthorized ? "bg-amber-600 dark:bg-amber-700" : "bg-rose-600 dark:bg-rose-700"}`}>
+            <div
+              className={`p-4 flex items-center justify-between text-white ${creditModal.isAuthorized ? "bg-amber-600 dark:bg-amber-700" : "bg-rose-600 dark:bg-rose-700"}`}
+            >
               <div className="flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-white" />
                 <h3 className="text-base font-bold tracking-tight">
-                  {creditModal.isAuthorized ? "Credit Limit Exceeded - Daily Override" : "Credit Limit Exceeded"}
+                  {creditModal.isAuthorized
+                    ? "Credit Limit Exceeded - Daily Override"
+                    : "Credit Limit Exceeded"}
                 </h3>
               </div>
               <button
@@ -3301,33 +3462,60 @@ export default function InvoiceForm() {
             <div className="p-6 space-y-4">
               <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-lg border border-slate-200 dark:border-slate-700 space-y-2.5 text-sm">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 dark:text-slate-400">Customer:</span>
-                  <span className="font-semibold text-slate-800 dark:text-slate-100">{creditModal.customerName}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-500 dark:text-slate-400">Current Credit Limit:</span>
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">
-                    {Number(creditModal.effectiveLimit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  <span className="text-slate-500 dark:text-slate-400">
+                    Customer:
+                  </span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-100">
+                    {creditModal.customerName}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 dark:text-slate-400">Current Outstanding:</span>
+                  <span className="text-slate-500 dark:text-slate-400">
+                    Current Credit Limit:
+                  </span>
                   <span className="font-semibold text-slate-700 dark:text-slate-300">
-                    {Number(creditModal.currentBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    {Number(creditModal.effectiveLimit || 0).toLocaleString(
+                      undefined,
+                      { minimumFractionDigits: 2 },
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 dark:text-slate-400">New Invoice Total:</span>
+                  <span className="text-slate-500 dark:text-slate-400">
+                    Current Outstanding:
+                  </span>
                   <span className="font-semibold text-slate-700 dark:text-slate-300">
-                    {Number(creditModal.invoiceTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    {Number(creditModal.currentBalance || 0).toLocaleString(
+                      undefined,
+                      { minimumFractionDigits: 2 },
+                    )}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 dark:text-slate-400">
+                    New Invoice Total:
+                  </span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">
+                    {Number(creditModal.invoiceTotal || 0).toLocaleString(
+                      undefined,
+                      { minimumFractionDigits: 2 },
+                    )}
                   </span>
                 </div>
                 <div className="border-t border-slate-200 dark:border-slate-700 pt-2.5 flex justify-between items-center text-rose-600 dark:text-rose-400 font-bold">
                   <span>Total Projected:</span>
                   <span>
-                    {Number(creditModal.projectedTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}{" "}
+                    {Number(creditModal.projectedTotal || 0).toLocaleString(
+                      undefined,
+                      { minimumFractionDigits: 2 },
+                    )}{" "}
                     <span className="text-xs font-normal">
-                      (Exceeds limit by {Number(creditModal.excess || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })})
+                      (Exceeds limit by{" "}
+                      {Number(creditModal.excess || 0).toLocaleString(
+                        undefined,
+                        { minimumFractionDigits: 2 },
+                      )}
+                      )
                     </span>
                   </span>
                 </div>
@@ -3336,7 +3524,10 @@ export default function InvoiceForm() {
               {creditModal.isAuthorized ? (
                 <div className="space-y-3">
                   <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg border border-amber-200 dark:border-amber-900 text-amber-800 dark:text-amber-300">
-                    As an authorized user, you can <strong>increase the credit limit for today only</strong> so this invoice can be completed. The limit will automatically revert back tomorrow.
+                    As an authorized user, you can{" "}
+                    <strong>increase the credit limit for today only</strong> so
+                    this invoice can be completed. The limit will automatically
+                    revert back tomorrow.
                   </p>
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
@@ -3348,7 +3539,12 @@ export default function InvoiceForm() {
                       min={Math.ceil(creditModal.projectedTotal || 0)}
                       className="input w-full font-semibold"
                       value={creditModal.tempLimitInput}
-                      onChange={(e) => setCreditModal((p) => ({ ...p, tempLimitInput: e.target.value }))}
+                      onChange={(e) =>
+                        setCreditModal((p) => ({
+                          ...p,
+                          tempLimitInput: e.target.value,
+                        }))
+                      }
                       placeholder={`Enter at least ${Number(creditModal.projectedTotal || 0).toFixed(2)}`}
                     />
                   </div>
@@ -3357,7 +3553,9 @@ export default function InvoiceForm() {
                 <div className="p-3.5 bg-rose-50 dark:bg-rose-950/40 rounded-lg border border-rose-200 dark:border-rose-900 text-xs text-rose-700 dark:text-rose-300 leading-relaxed flex items-start gap-2.5">
                   <ShieldAlert className="w-5 h-5 flex-shrink-0 text-rose-500 mt-0.5" />
                   <div>
-                    You do not have exceptional permission to override or increase customer credit limits. Please contact a manager or system administrator.
+                    You do not have exceptional permission to override or
+                    increase customer credit limits. Please contact a manager or
+                    system administrator.
                   </div>
                 </div>
               )}
@@ -3381,10 +3579,13 @@ export default function InvoiceForm() {
                   disabled={
                     creditModal.submitting ||
                     !creditModal.tempLimitInput ||
-                    Number(creditModal.tempLimitInput) < Number(creditModal.projectedTotal)
+                    Number(creditModal.tempLimitInput) <
+                      Number(creditModal.projectedTotal)
                   }
                 >
-                  {creditModal.submitting ? "Applying..." : "Increase for Today & Save"}
+                  {creditModal.submitting
+                    ? "Applying..."
+                    : "Increase for Today & Save"}
                 </button>
               )}
             </div>
@@ -3403,13 +3604,13 @@ export default function InvoiceForm() {
         }}
         taxMode={
           editingLineTaxIdx !== null && lines[editingLineTaxIdx]
-            ? (lines[editingLineTaxIdx].tax_mode || form.tax_mode || 'EXCLUSIVE')
-            : (form.tax_mode || 'EXCLUSIVE')
+            ? lines[editingLineTaxIdx].tax_mode || form.tax_mode || "EXCLUSIVE"
+            : form.tax_mode || "EXCLUSIVE"
         }
         price={
           editingLineTaxIdx !== null && lines[editingLineTaxIdx]
-            ? (lines[editingLineTaxIdx].unit_price || 0)
-            : (newItem.unit_price || 0)
+            ? lines[editingLineTaxIdx].unit_price || 0
+            : newItem.unit_price || 0
         }
         selectedComponent={
           editingLineTaxIdx !== null && lines[editingLineTaxIdx]
@@ -3425,10 +3626,10 @@ export default function InvoiceForm() {
               }
         }
         onSelectComponent={(comp) => {
-          const compLabel = `${comp.name}${comp.rate !== undefined ? ` (${comp.rate}%)` : ''}`;
+          const compLabel = `${comp.name}${comp.rate !== undefined ? ` (${comp.rate}%)` : ""}`;
           const taxTypeId = comp.taxCodeId || comp.originalId || comp.id;
           const taxRate = comp.rate;
-          const currentMode = form.tax_mode || 'EXCLUSIVE';
+          const currentMode = form.tax_mode || "EXCLUSIVE";
 
           setForm((prev) => ({
             ...prev,
@@ -3456,7 +3657,7 @@ export default function InvoiceForm() {
                 tax_mode: currentMode,
               };
               return { ...updated, ...calcItemTotals(updated) };
-            })
+            }),
           );
 
           if (taxTypeId) {

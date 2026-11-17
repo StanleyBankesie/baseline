@@ -208,7 +208,7 @@ export default function ProspectConversion() {
       <div className="card">
         <div className="card-body">
           <div className="max-w-md">
-            <label className="label font-bold text-brand">
+            <label className="label font-semibold text-brand">
               Select Prospect to Convert
             </label>
             <select

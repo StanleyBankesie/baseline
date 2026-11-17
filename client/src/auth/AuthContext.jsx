@@ -268,6 +268,7 @@ export function AuthProvider({ children }) {
       if (typeof localStorage !== "undefined") {
         localStorage.removeItem("active_branch_id");
         localStorage.removeItem("active_company_id");
+    localStorage.removeItem("notified_notification_ids");
       }
       window.location.href = "/login";
     }

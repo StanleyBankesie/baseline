@@ -532,7 +532,7 @@ export default function UtilitiesEnergyPage() {
                     placeholder="e.g. 10450"
                     value={readingForm.current_reading}
                     onChange={(e) => setReadingForm({ ...readingForm, current_reading: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs text-slate-800 dark:text-white font-mono font-bold"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs text-slate-800 dark:text-white font-mono font-semibold"
                     required
                   />
                 </div>
@@ -660,7 +660,7 @@ export default function UtilitiesEnergyPage() {
                     max="100"
                     value={genForm.current_fuel_level_percent}
                     onChange={(e) => setGenForm({ ...genForm, current_fuel_level_percent: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2 text-xs font-mono font-bold"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2 text-xs font-mono font-semibold"
                   />
                 </div>
               </div>
@@ -707,7 +707,7 @@ export default function UtilitiesEnergyPage() {
             <form onSubmit={handleSubmitMeter} className="p-6 space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Property Site <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -726,7 +726,7 @@ export default function UtilitiesEnergyPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Meter Code <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -740,7 +740,7 @@ export default function UtilitiesEnergyPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Utility Type</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Utility Type</label>
                   <select
                     value={meterForm.utility_type}
                     onChange={(e) => setMeterForm({ ...meterForm, utility_type: e.target.value })}
@@ -756,7 +756,7 @@ export default function UtilitiesEnergyPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Meter Serial Number</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Meter Serial Number</label>
                   <input
                     type="text"
                     placeholder="e.g. ECG-SN-99824"
@@ -767,7 +767,7 @@ export default function UtilitiesEnergyPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Unit of Measure</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Unit of Measure</label>
                   <input
                     type="text"
                     placeholder="e.g. kWh, m³, Liters"
@@ -778,7 +778,7 @@ export default function UtilitiesEnergyPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Tariff Rate (GHS/Unit)</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Tariff Rate (GHS/Unit)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -790,7 +790,7 @@ export default function UtilitiesEnergyPage() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Physical Location / Tag</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Physical Location / Tag</label>
                   <input
                     type="text"
                     placeholder="e.g. Main Power Substation, Block B Distribution Board"
@@ -845,7 +845,7 @@ export default function UtilitiesEnergyPage() {
             <form onSubmit={handleSubmitBill} className="p-6 space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Property Site <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -864,7 +864,7 @@ export default function UtilitiesEnergyPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Utility Type</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Utility Type</label>
                   <select
                     value={billForm.utility_type}
                     onChange={(e) => setBillForm({ ...billForm, utility_type: e.target.value })}
@@ -879,7 +879,7 @@ export default function UtilitiesEnergyPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Service Provider</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Service Provider</label>
                   <input
                     type="text"
                     placeholder="e.g. Electricity Company of Ghana (ECG)"
@@ -890,7 +890,7 @@ export default function UtilitiesEnergyPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Bill Reference / Invoice # <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -904,7 +904,7 @@ export default function UtilitiesEnergyPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Billing Month</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Billing Month</label>
                   <input
                     type="month"
                     value={billForm.billing_month}
@@ -914,7 +914,7 @@ export default function UtilitiesEnergyPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Bill Amount (GHS) <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -923,13 +923,13 @@ export default function UtilitiesEnergyPage() {
                     placeholder="e.g. 18450.00"
                     value={billForm.bill_amount}
                     onChange={(e) => setBillForm({ ...billForm, bill_amount: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 font-bold font-mono"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 font-semibold font-mono"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Total Consumption</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Total Consumption</label>
                   <input
                     type="number"
                     step="0.1"
@@ -941,7 +941,7 @@ export default function UtilitiesEnergyPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Payment Status</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Payment Status</label>
                   <select
                     value={billForm.payment_status}
                     onChange={(e) => setBillForm({ ...billForm, payment_status: e.target.value })}

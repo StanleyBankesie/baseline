@@ -3554,10 +3554,11 @@ export const trialBalanceReport = async (req, res, next) => {
     const to = req.query.to ? String(req.query.to) : null;
     const groupId = req.query.groupId ? Number(req.query.groupId) : null;
     const accountId = req.query.accountId ? Number(req.query.accountId) : null;
+    const projectId = req.query.projectId && req.query.projectId !== 'all' ? Number(req.query.projectId) : null;
 
     // Build WHERE clauses dynamically for optional filters
     let whereClause = "WHERE a.company_id = :companyId";
-    const params = { companyId, branchId, branchIdsStr };
+    const params = { companyId, branchId, branchIdsStr, projectId };
 
     if (from) {
       params.from = from;
@@ -3588,20 +3589,21 @@ export const trialBalanceReport = async (req, res, next) => {
         ag.name AS account_category,
         ag.nature AS account_type,
         -- Opening Balances (before from date)
-        (COALESCE(SUM(CASE WHEN v.voucher_date < :from THEN vl.debit ELSE 0 END), 0) + COALESCE(ob.opening_debit, 0)) AS opening_debit,
-        (COALESCE(SUM(CASE WHEN v.voucher_date < :from THEN vl.credit ELSE 0 END), 0) + COALESCE(ob.opening_credit, 0)) AS opening_credit,
+        (COALESCE(SUM(CASE WHEN v.voucher_date < :from THEN vl.debit ELSE 0 END), 0) + (CASE WHEN :projectId IS NULL THEN COALESCE(ob.opening_debit, 0) ELSE 0 END)) AS opening_debit,
+        (COALESCE(SUM(CASE WHEN v.voucher_date < :from THEN vl.credit ELSE 0 END), 0) + (CASE WHEN :projectId IS NULL THEN COALESCE(ob.opening_credit, 0) ELSE 0 END)) AS opening_credit,
         -- Movement (between from and to dates)
         COALESCE(SUM(CASE WHEN v.voucher_date >= :from AND v.voucher_date <= :to THEN vl.debit ELSE 0 END), 0) AS movement_debit,
         COALESCE(SUM(CASE WHEN v.voucher_date >= :from AND v.voucher_date <= :to THEN vl.credit ELSE 0 END), 0) AS movement_credit,
         -- Closing Balances (up to to date)
-        (COALESCE(SUM(CASE WHEN v.voucher_date <= :to THEN vl.debit ELSE 0 END), 0) + COALESCE(ob.opening_debit, 0)) AS closing_debit,
-        (COALESCE(SUM(CASE WHEN v.voucher_date <= :to THEN vl.credit ELSE 0 END), 0) + COALESCE(ob.opening_credit, 0)) AS closing_credit
+        (COALESCE(SUM(CASE WHEN v.voucher_date <= :to THEN vl.debit ELSE 0 END), 0) + (CASE WHEN :projectId IS NULL THEN COALESCE(ob.opening_debit, 0) ELSE 0 END)) AS closing_debit,
+        (COALESCE(SUM(CASE WHEN v.voucher_date <= :to THEN vl.credit ELSE 0 END), 0) + (CASE WHEN :projectId IS NULL THEN COALESCE(ob.opening_credit, 0) ELSE 0 END)) AS closing_credit
       FROM fin_accounts a
       JOIN fin_account_groups ag ON ag.id = a.group_id
       LEFT JOIN fin_voucher_lines vl ON vl.account_id = a.id
       LEFT JOIN fin_vouchers v ON v.id = vl.voucher_id 
         AND COALESCE(v.status, 'DRAFT') NOT IN ('REVERSED', 'CANCELLED')
         AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(v.branch_id, :branchIdsStr)) OR v.branch_id IS NULL)
+        AND (:projectId IS NULL OR v.project_id = :projectId OR v.id IN (SELECT voucher_id FROM pm_expenses WHERE project_id = :projectId AND voucher_id IS NOT NULL))
       LEFT JOIN fin_account_opening_balances ob ON ob.account_id = a.id AND ob.company_id = a.company_id
       ${whereClause}
       GROUP BY a.id, a.code, a.name, ag.name, ag.nature, ob.opening_debit, ob.opening_credit
@@ -4916,6 +4918,7 @@ export const cashFlowReport = async (req, res, next) => {
     const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
     const from = req.query.from ? String(req.query.from) : null;
     const to = req.query.to ? String(req.query.to) : null;
+    const projectId = req.query.projectId && req.query.projectId !== 'all' ? Number(req.query.projectId) : null;
 
     // Query cash flow from fin_vouchers joined with fin_voucher_lines and bank accounts
     const items = await query(
@@ -4935,13 +4938,14 @@ export const cashFlowReport = async (req, res, next) => {
        LEFT JOIN fin_vouchers v ON v.id = vl.voucher_id
           AND v.company_id = :companyId
           AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(v.branch_id, :branchIdsStr)))
+          AND (:projectId IS NULL OR v.project_id = :projectId OR v.id IN (SELECT voucher_id FROM pm_expenses WHERE project_id = :projectId AND voucher_id IS NOT NULL))
           AND (:from IS NULL OR v.voucher_date >= :from)
           AND (:to IS NULL OR v.voucher_date <= :to)
           AND v.status = 'POSTED'
        WHERE ba.company_id = :companyId
        GROUP BY ba.id, ba.bank_name, ba.account_number, a.id, a.code, a.name
        ORDER BY ba.bank_name ASC`,
-      { companyId, branchId: branchId || null, branchIdsStr, from, to },
+      { companyId, branchId: branchId || null, branchIdsStr, from, to, projectId },
     );
 
     // Calculate totals
@@ -4996,6 +5000,7 @@ export const balanceSheetReport = async (req, res, next) => {
     });
     // 3. Fetch voucher movements up to asOfDate
     const filterBranchId = req.query.branchId && req.query.branchId !== 'all' ? Number(req.query.branchId) : null;
+    const filterProjectId = req.query.projectId && req.query.projectId !== 'all' ? Number(req.query.projectId) : null;
 
     const movements = await query(
       `SELECT a.id as account_id, a.code as account_code, a.name as account_name, a.group_id, g.nature,
@@ -5003,12 +5008,14 @@ export const balanceSheetReport = async (req, res, next) => {
                        AND v.company_id = :companyId 
                        AND v.status = 'POSTED'
                        AND (:filterBranchId IS NULL OR v.branch_id = :filterBranchId OR v.branch_id IS NULL)
+                       AND (:filterProjectId IS NULL OR v.project_id = :filterProjectId OR v.id IN (SELECT voucher_id FROM pm_expenses WHERE project_id = :filterProjectId AND voucher_id IS NOT NULL))
                        AND DATE(v.voucher_date) <= :asOfDate
                   THEN COALESCE(vl.debit, 0) ELSE 0 END) AS mv_debit,
               SUM(CASE WHEN v.id IS NOT NULL 
                        AND v.company_id = :companyId 
                        AND v.status = 'POSTED'
                        AND (:filterBranchId IS NULL OR v.branch_id = :filterBranchId OR v.branch_id IS NULL)
+                       AND (:filterProjectId IS NULL OR v.project_id = :filterProjectId OR v.id IN (SELECT voucher_id FROM pm_expenses WHERE project_id = :filterProjectId AND voucher_id IS NOT NULL))
                        AND DATE(v.voucher_date) <= :asOfDate
                   THEN COALESCE(vl.credit, 0) ELSE 0 END) AS mv_credit
        FROM fin_accounts a
@@ -5020,7 +5027,7 @@ export const balanceSheetReport = async (req, res, next) => {
          AND g.nature IN ('ASSET', 'LIABILITY', 'EQUITY')
        GROUP BY a.id, a.code, a.name, a.group_id, g.nature
        ORDER BY a.code ASC`,
-      { companyId, filterBranchId, asOfDate },
+      { companyId, filterBranchId, filterProjectId, asOfDate },
     );
 
     // 4. Build the hierarchical tree per section
@@ -5051,7 +5058,7 @@ export const balanceSheetReport = async (req, res, next) => {
       });
 
       filteredAccounts.forEach((a) => {
-        const ob = obMap.get(Number(a.account_id)) || { debit: 0, credit: 0 };
+        const ob = filterProjectId ? { debit: 0, credit: 0 } : (obMap.get(Number(a.account_id)) || { debit: 0, credit: 0 });
         const totalDebit = Number(a.mv_debit || 0) + ob.debit;
         const totalCredit = Number(a.mv_credit || 0) + ob.credit;
         // For ASSET: positive balance = debit > credit
@@ -5144,6 +5151,7 @@ export const profitAndLossReport = async (req, res, next) => {
 
     const from = req.query.from ? String(req.query.from) : null;
     const to = req.query.to ? String(req.query.to) : null;
+    const filterProjectId = req.query.projectId && req.query.projectId !== 'all' ? Number(req.query.projectId) : null;
 
     // 1. Fetch all INCOME and EXPENSE groups
     const groups = await query(
@@ -5187,6 +5195,7 @@ export const profitAndLossReport = async (req, res, next) => {
                          (:filterBranchId IS NOT NULL AND (v.branch_id = :filterBranchId OR v.branch_id IS NULL))
                          OR (:filterBranchId IS NULL AND (:isRestricted = 0 OR FIND_IN_SET(v.branch_id, :branchIdsStr) OR v.branch_id IS NULL))
                        )
+                       AND (:filterProjectId IS NULL OR v.project_id = :filterProjectId OR v.id IN (SELECT voucher_id FROM pm_expenses WHERE project_id = :filterProjectId AND voucher_id IS NOT NULL))
                        AND (:from IS NULL OR DATE(v.voucher_date) >= :from)
                        AND (:to IS NULL OR DATE(v.voucher_date) <= :to)
                   THEN COALESCE(vl.debit, 0) ELSE 0 END) AS debit,
@@ -5197,6 +5206,7 @@ export const profitAndLossReport = async (req, res, next) => {
                          (:filterBranchId IS NOT NULL AND (v.branch_id = :filterBranchId OR v.branch_id IS NULL))
                          OR (:filterBranchId IS NULL AND (:isRestricted = 0 OR FIND_IN_SET(v.branch_id, :branchIdsStr) OR v.branch_id IS NULL))
                        )
+                       AND (:filterProjectId IS NULL OR v.project_id = :filterProjectId OR v.id IN (SELECT voucher_id FROM pm_expenses WHERE project_id = :filterProjectId AND voucher_id IS NOT NULL))
                        AND (:from IS NULL OR DATE(v.voucher_date) >= :from)
                        AND (:to IS NULL OR DATE(v.voucher_date) <= :to)
                   THEN COALESCE(vl.credit, 0) ELSE 0 END) AS credit
@@ -5209,7 +5219,7 @@ export const profitAndLossReport = async (req, res, next) => {
          AND g.nature IN ('INCOME', 'EXPENSE')
        GROUP BY a.id, a.code, a.name, a.group_id, g.nature
        ORDER BY a.code ASC`,
-      { companyId, filterBranchId, isRestricted: isRestrictedUser ? 1 : 0, branchIdsStr, from, to },
+      { companyId, filterBranchId, filterProjectId, isRestricted: isRestrictedUser ? 1 : 0, branchIdsStr, from, to },
     );
 
     const buildTree = (nature) => {
@@ -5241,7 +5251,7 @@ export const profitAndLossReport = async (req, res, next) => {
       });
 
       filteredAccounts.forEach((a) => {
-        const ob = obMap.get(Number(a.account_id)) || { debit: 0, credit: 0 };
+        const ob = filterProjectId ? { debit: 0, credit: 0 } : (obMap.get(Number(a.account_id)) || { debit: 0, credit: 0 });
         const totalDebit = Number(a.debit || 0) + ob.debit;
         const totalCredit = Number(a.credit || 0) + ob.credit;
 
@@ -6327,6 +6337,7 @@ export const generalLedgerReport = async (req, res, next) => {
     const to = req.query.to ? String(req.query.to) : null;
     const accountId = req.query.accountId ? Number(req.query.accountId) : null;
     const groupId = req.query.groupId ? Number(req.query.groupId) : null;
+    const projectId = req.query.projectId && req.query.projectId !== 'all' ? Number(req.query.projectId) : null;
 
     let accountFilter = "";
     if (accountId) {
@@ -6338,7 +6349,7 @@ export const generalLedgerReport = async (req, res, next) => {
     const orderBy = accountId
       ? "v.voucher_date ASC, v.id ASC, vl.line_no ASC"
       : "a.code ASC, v.voucher_date ASC, v.id ASC, vl.line_no ASC";
-    const params = { companyId, branchId: branchId || null, branchIdsStr, from, to, accountId, groupId };
+    const params = { companyId, branchId: branchId || null, branchIdsStr, from, to, accountId, groupId, projectId };
 
     let account = null;
     let openingBalance = 0;
@@ -6395,10 +6406,11 @@ export const generalLedgerReport = async (req, res, next) => {
            JOIN fin_voucher_lines vl ON vl.voucher_id = v.id
           WHERE v.company_id = :companyId
             AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(v.branch_id, :branchIdsStr)) OR v.branch_id IS NULL)
+            AND (:projectId IS NULL OR v.project_id = :projectId OR v.id IN (SELECT voucher_id FROM pm_expenses WHERE project_id = :projectId AND voucher_id IS NOT NULL))
             AND (:from IS NULL OR v.voucher_date < :from)
             AND vl.account_id = :accountId
             AND COALESCE(v.status, 'DRAFT') NOT IN ('REVERSED', 'CANCELLED')`,
-        { companyId, branchId, branchIdsStr, from, accountId },
+        { companyId, branchId, branchIdsStr, from, accountId, projectId },
       );
       const voucherPrior = Number(openingRows?.[0]?.voucher_prior || 0);
 
@@ -6410,9 +6422,10 @@ export const generalLedgerReport = async (req, res, next) => {
            JOIN fin_voucher_lines vl ON vl.voucher_id = v.id
           WHERE v.company_id = :companyId
             AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(v.branch_id, :branchIdsStr)) OR v.branch_id IS NULL)
+            AND (:projectId IS NULL OR v.project_id = :projectId OR v.id IN (SELECT voucher_id FROM pm_expenses WHERE project_id = :projectId AND voucher_id IS NOT NULL))
             AND vl.account_id = :accountId
             AND COALESCE(v.status, 'DRAFT') NOT IN ('REVERSED', 'CANCELLED')`,
-        { companyId, branchId, branchIdsStr, accountId },
+        { companyId, branchId, branchIdsStr, accountId, projectId },
       );
       currentNet = initialOpeningBalance + Number(netRows?.[0]?.current_net || 0);
 
@@ -6469,14 +6482,21 @@ export const generalLedgerReport = async (req, res, next) => {
            JOIN fin_voucher_lines vl ON vl.voucher_id = v.id
           WHERE v.company_id = :companyId
             AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(v.branch_id, :branchIdsStr)) OR v.branch_id IS NULL)
+            AND (:projectId IS NULL OR v.project_id = :projectId OR v.id IN (SELECT voucher_id FROM pm_expenses WHERE project_id = :projectId AND voucher_id IS NOT NULL))
             AND v.voucher_date < :from
             AND COALESCE(v.status, 'DRAFT') NOT IN ('REVERSED', 'CANCELLED')
           GROUP BY vl.account_id`,
-        { companyId, branchId, branchIdsStr, from },
+        { companyId, branchId, branchIdsStr, from, projectId },
       );
       (priorRows || []).forEach((r) => {
         priorMovementsMap.set(Number(r.account_id), Number(r.prior_net || 0));
       });
+    }
+
+    if (projectId) {
+      initialOpeningBalance = 0;
+      openingBalance = (typeof voucherPrior !== 'undefined' ? voucherPrior : 0);
+      obMap.clear();
     }
 
     const itemsRaw = await query(
@@ -6495,6 +6515,7 @@ export const generalLedgerReport = async (req, res, next) => {
          LEFT JOIN fin_currencies lc ON lc.id = vl.currency_id AND lc.company_id = v.company_id
         WHERE v.company_id = :companyId
           AND (:branchId IS NULL OR (:branchIdsStr = '' OR FIND_IN_SET(v.branch_id, :branchIdsStr)) OR v.branch_id IS NULL)
+          AND (:projectId IS NULL OR v.project_id = :projectId OR v.id IN (SELECT voucher_id FROM pm_expenses WHERE project_id = :projectId AND voucher_id IS NOT NULL))
           AND (:from IS NULL OR v.voucher_date >= :from)
           AND (:to IS NULL OR v.voucher_date <= :to)
           ${accountFilter}

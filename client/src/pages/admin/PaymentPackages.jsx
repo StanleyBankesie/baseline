@@ -347,7 +347,7 @@ export default function PaymentPackages() {
                   <input
                     type="number"
                     step="any"
-                    className="w-full border-2 border-primary-200 rounded p-2 bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-white font-bold"
+                    className="w-full border-2 border-primary-200 rounded p-2 bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-white font-semibold"
                     placeholder="0.00"
                     value={formData.amount ?? ""}
                     onChange={(e) =>

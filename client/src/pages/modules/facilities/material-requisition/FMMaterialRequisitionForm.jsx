@@ -19,7 +19,7 @@ function normalizeDate(v) {
 
 /**
  *  component
- * 
+ *
  * @returns {JSX.Element} The rendered component
  */
 export default function FMMaterialRequisitionForm() {
@@ -66,37 +66,59 @@ export default function FMMaterialRequisitionForm() {
   useEffect(() => {
     let mounted = true;
 
-    api.get("/facilities/properties").then(res => {
-      if (!mounted) return;
-      setProperties(Array.isArray(res.data?.items) ? res.data.items : []);
-    }).catch(() => {});
+    api
+      .get("/facilities/properties")
+      .then((res) => {
+        if (!mounted) return;
+        setProperties(Array.isArray(res.data?.items) ? res.data.items : []);
+      })
+      .catch(() => {});
 
-    api.get("/admin/users", { params: { active: 1 } }).then(res => {
-      if (!mounted) return;
-      const items = (res?.data && res.data.data && Array.isArray(res.data.data.items) && res.data.data.items) ||
-        (Array.isArray(res?.data?.items) && res.data.items) || [];
-      setUsers(items);
-    }).catch(() => {});
+    api
+      .get("/admin/users", { params: { active: 1 } })
+      .then((res) => {
+        if (!mounted) return;
+        const items =
+          (res?.data &&
+            res.data.data &&
+            Array.isArray(res.data.data.items) &&
+            res.data.data.items) ||
+          (Array.isArray(res?.data?.items) && res.data.items) ||
+          [];
+        setUsers(items);
+      })
+      .catch(() => {});
 
-    api.get("/inventory/warehouses").then(res => {
-      if (!mounted) return;
-      setWarehouses(Array.isArray(res.data?.items) ? res.data.items : []);
-    }).catch(() => {});
+    api
+      .get("/inventory/warehouses")
+      .then((res) => {
+        if (!mounted) return;
+        setWarehouses(Array.isArray(res.data?.items) ? res.data.items : []);
+      })
+      .catch(() => {});
 
-    api.get("/admin/departments").then(res => {
-      if (!mounted) return;
-      setDepartments(Array.isArray(res.data?.items) ? res.data.items : []);
-    }).catch(() => {});
+    api
+      .get("/admin/departments")
+      .then((res) => {
+        if (!mounted) return;
+        setDepartments(Array.isArray(res.data?.items) ? res.data.items : []);
+      })
+      .catch(() => {});
 
-    api.get("/inventory/items").then(res => {
-      if (!mounted) return;
-      setAvailableItems(Array.isArray(res.data?.items) ? res.data.items : []);
-    }).catch(e => {
-      if (!mounted) return;
-      setError(e?.response?.data?.message || "Failed to load items");
-    });
+    api
+      .get("/inventory/items")
+      .then((res) => {
+        if (!mounted) return;
+        setAvailableItems(Array.isArray(res.data?.items) ? res.data.items : []);
+      })
+      .catch((e) => {
+        if (!mounted) return;
+        setError(e?.response?.data?.message || "Failed to load items");
+      });
 
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -105,61 +127,84 @@ export default function FMMaterialRequisitionForm() {
     setLoading(true);
     setError("");
 
-    api.get(`/facilities/material-requisitions/${id}`).then(res => {
-      if (!mounted) return;
-      const r = res.data?.item;
-      const details = Array.isArray(res.data?.details) ? res.data.details : [];
-      if (!r) return;
+    api
+      .get(`/facilities/material-requisitions/${id}`)
+      .then((res) => {
+        if (!mounted) return;
+        const r = res.data?.item;
+        const details = Array.isArray(res.data?.details)
+          ? res.data.details
+          : [];
+        if (!r) return;
 
-      setFormData({
-        requisitionDate: normalizeDate(r.requisition_date),
-        propertyId: r.property_id || "",
-        warehouseId: r.warehouse_id || "",
-        departmentId: r.department_id || "",
-        priority: r.priority || "MEDIUM",
-        requestedBy: r.requested_by || "",
-        remarks: r.remarks || "",
-        status: r.status || "DRAFT",
+        setFormData({
+          requisitionDate: normalizeDate(r.requisition_date),
+          propertyId: r.property_id || "",
+          warehouseId: r.warehouse_id || "",
+          departmentId: r.department_id || "",
+          priority: r.priority || "MEDIUM",
+          requestedBy: r.requested_by || "",
+          remarks: r.remarks || "",
+          status: r.status || "DRAFT",
+        });
+
+        setItems(
+          details.length
+            ? details.map((d) => ({
+                id: d.id || Date.now() + Math.random(),
+                item_id: d.item_id ? String(d.item_id) : "",
+                itemCode: d.item_code || "",
+                itemName: d.item_name || "",
+                qtyRequested: Number(d.qty_requested) || 0,
+                qtyReceived: Number(d.qty_received) || 0,
+                uom: d.uom || "PCS",
+                batchNo: d.batch_no || "",
+              }))
+            : [
+                {
+                  id: 1,
+                  item_id: "",
+                  itemCode: "",
+                  itemName: "",
+                  qtyRequested: 0,
+                  qtyReceived: 0,
+                  uom: "PCS",
+                },
+              ],
+        );
+
+        const initQueries = {};
+        (details.length ? details : [{ id: 1 }]).forEach((d) => {
+          initQueries[d.id || 1] = d.item_name || "";
+        });
+        setItemQueries(initQueries);
+      })
+      .catch((e) => {
+        if (!mounted) return;
+        setError(
+          e?.response?.data?.message || "Failed to load material requisition",
+        );
+      })
+      .finally(() => {
+        if (!mounted) return;
+        setLoading(false);
       });
 
-      setItems(details.length ? details.map(d => ({
-        id: d.id || Date.now() + Math.random(),
-        item_id: d.item_id ? String(d.item_id) : "",
-        itemCode: d.item_code || "",
-        itemName: d.item_name || "",
-        qtyRequested: Number(d.qty_requested) || 0,
-        qtyReceived: Number(d.qty_received) || 0,
-        uom: d.uom || "PCS",
-        batchNo: d.batch_no || "",
-      })) : [{
-        id: 1, item_id: "", itemCode: "", itemName: "",
-        qtyRequested: 0, qtyReceived: 0, uom: "PCS",
-      }]);
-
-      const initQueries = {};
-      (details.length ? details : [{ id: 1 }]).forEach(d => {
-        initQueries[d.id || 1] = d.item_name || "";
-      });
-      setItemQueries(initQueries);
-    }).catch(e => {
-      if (!mounted) return;
-      setError(e?.response?.data?.message || "Failed to load material requisition");
-    }).finally(() => {
-      if (!mounted) return;
-      setLoading(false);
-    });
-
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [id, isNew]);
 
   const normalizedDetails = useMemo(() => {
-    return items.filter(r => r.item_id).map(r => ({
-      item_id: Number(r.item_id),
-      qty_requested: Math.max(0, parseInt(r.qtyRequested, 10) || 0),
-      qty_received: Math.max(0, parseInt(r.qtyReceived, 10) || 0),
-      uom: r.uom || "PCS",
-      batch_no: r.batchNo || null,
-    }));
+    return items
+      .filter((r) => r.item_id)
+      .map((r) => ({
+        item_id: Number(r.item_id),
+        qty_requested: Math.max(0, parseInt(r.qtyRequested, 10) || 0),
+        qty_received: Math.max(0, parseInt(r.qtyReceived, 10) || 0),
+        uom: r.uom || "PCS",
+        batch_no: r.batchNo || null,
+      }));
   }, [items]);
 
   const statusColors = {
@@ -196,9 +241,13 @@ export default function FMMaterialRequisitionForm() {
         await api.put(`/facilities/material-requisitions/${id}`, payload);
       }
 
-      navigate("/facilities/material-requisitions", { state: { refresh: true } });
+      navigate("/facilities/material-requisitions", {
+        state: { refresh: true },
+      });
     } catch (e2) {
-      setError(e2?.response?.data?.message || "Failed to save material requisition");
+      setError(
+        e2?.response?.data?.message || "Failed to save material requisition",
+      );
     } finally {
       setSaving(false);
     }
@@ -206,25 +255,41 @@ export default function FMMaterialRequisitionForm() {
 
   const addItem = () => {
     const newId = Date.now();
-    setItems([...items, {
-      id: newId, item_id: "", itemCode: "", itemName: "",
-      qtyRequested: 0, qtyReceived: 0, uom: "PCS", batchNo: "",
-    }]);
-    setItemQueries(prev => ({ ...prev, [newId]: "" }));
+    setItems([
+      ...items,
+      {
+        id: newId,
+        item_id: "",
+        itemCode: "",
+        itemName: "",
+        qtyRequested: 0,
+        qtyReceived: 0,
+        uom: "PCS",
+        batchNo: "",
+      },
+    ]);
+    setItemQueries((prev) => ({ ...prev, [newId]: "" }));
   };
 
   const handleSelectItem = (rowId, item) => {
-    setItems(items.map(i =>
-      i.id === rowId ? {
-        ...i, item_id: String(item.id), itemCode: item.item_code || "",
-        itemName: item.item_name || "", uom: item.uom || "PCS",
-      } : i,
-    ));
-    setItemQueries(prev => ({ ...prev, [rowId]: item.item_name || "" }));
+    setItems(
+      items.map((i) =>
+        i.id === rowId
+          ? {
+              ...i,
+              item_id: String(item.id),
+              itemCode: item.item_code || "",
+              itemName: item.item_name || "",
+              uom: item.uom || "PCS",
+            }
+          : i,
+      ),
+    );
+    setItemQueries((prev) => ({ ...prev, [rowId]: item.item_name || "" }));
   };
 
   const removeItem = (id) => {
-    setItems(items.filter(item => item.id !== id));
+    setItems(items.filter((item) => item.id !== id));
   };
 
   return (
@@ -234,11 +299,20 @@ export default function FMMaterialRequisitionForm() {
           <div className="flex justify-between items-center text-white">
             <div>
               <h1 className="text-2xl font-bold dark:text-brand-300">
-                {isNew ? "New FM Material Requisition" : "Edit FM Material Requisition"}
+                {isNew
+                  ? "New FM Material Requisition"
+                  : "Edit FM Material Requisition"}
               </h1>
-              <p className="text-sm mt-1">Request materials for your facilities operations</p>
+              <p className="text-sm mt-1">
+                Request materials for your facilities operations
+              </p>
             </div>
-            <button onClick={() => window.history.back()} className="btn-success">Back</button>
+            <button
+              onClick={() => window.history.back()}
+              className="btn-success"
+            >
+              Back
+            </button>
           </div>
         </div>
         <div className="card-body">
@@ -249,23 +323,47 @@ export default function FMMaterialRequisitionForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <label className="label">Requisition Date *</label>
-                <input type="date" className="input" value={formData.requisitionDate}
-                  onChange={e => setFormData({ ...formData, requisitionDate: e.target.value })} required 
+                <input
+                  type="date"
+                  className="input"
+                  value={formData.requisitionDate}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      requisitionDate: e.target.value,
+                    })
+                  }
+                  required
                   disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
                 />
               </div>
               <div>
                 <label className="label">Property *</label>
-                <select className="input" value={formData.propertyId}
-                  onChange={e => setFormData({ ...formData, propertyId: e.target.value })} required>
+                <select
+                  className="input"
+                  value={formData.propertyId}
+                  onChange={(e) =>
+                    setFormData({ ...formData, propertyId: e.target.value })
+                  }
+                  required
+                >
                   <option value="">Select Property</option>
-                  {properties.map(p => <option key={p.id} value={p.id}>{p.property_name}</option>)}
+                  {properties.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.property_name}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
                 <label className="label">Priority</label>
-                <select className="input" value={formData.priority}
-                  onChange={e => setFormData({ ...formData, priority: e.target.value })}>
+                <select
+                  className="input"
+                  value={formData.priority}
+                  onChange={(e) =>
+                    setFormData({ ...formData, priority: e.target.value })
+                  }
+                >
                   <option value="LOW">Low</option>
                   <option value="MEDIUM">Medium</option>
                   <option value="HIGH">High</option>
@@ -275,7 +373,9 @@ export default function FMMaterialRequisitionForm() {
               <div>
                 <label className="label">Status</label>
                 <div className="pt-2">
-                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${statusColors[formData.status] || "bg-gray-500 text-white"}`}>
+                  <span
+                    className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${statusColors[formData.status] || "bg-gray-500 text-white"}`}
+                  >
                     {formData.status}
                   </span>
                 </div>
@@ -285,41 +385,83 @@ export default function FMMaterialRequisitionForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <label className="label">Source Warehouse</label>
-                <select className="input" value={formData.warehouseId}
-                  onChange={e => setFormData({ ...formData, warehouseId: e.target.value })}>
+                <select
+                  className="input"
+                  value={formData.warehouseId}
+                  onChange={(e) =>
+                    setFormData({ ...formData, warehouseId: e.target.value })
+                  }
+                >
                   <option value="">Select Warehouse</option>
-                  {warehouses.map(w => <option key={w.id} value={w.id}>{w.warehouse_name || w.name}</option>)}
+                  {warehouses.map((w) => (
+                    <option key={w.id} value={w.id}>
+                      {w.warehouse_name || w.name}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
                 <label className="label">Destination Department</label>
-                <select className="input" value={formData.departmentId}
-                  onChange={e => setFormData({ ...formData, departmentId: e.target.value })}>
+                <select
+                  className="input"
+                  value={formData.departmentId}
+                  onChange={(e) =>
+                    setFormData({ ...formData, departmentId: e.target.value })
+                  }
+                >
                   <option value="">Select Department</option>
-                  {departments.map(d => <option key={d.id} value={d.id}>{d.department_name || d.name}</option>)}
+                  {departments.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.department_name || d.name}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
                 <label className="label">Requested By *</label>
-                <select className="input" value={formData.requestedBy}
-                  onChange={e => setFormData({ ...formData, requestedBy: e.target.value })} required>
+                <select
+                  className="input"
+                  value={formData.requestedBy}
+                  onChange={(e) =>
+                    setFormData({ ...formData, requestedBy: e.target.value })
+                  }
+                  required
+                >
                   <option value="">Select User</option>
-                  {users.map(u => <option key={u.id} value={u.id || u.username}>{u.full_name || u.username || `User #${u.id}`}</option>)}
+                  {users.map((u) => (
+                    <option key={u.id} value={u.id || u.username}>
+                      {u.full_name || u.username || `User #${u.id}`}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
 
             <div>
               <label className="label">Remarks</label>
-              <textarea className="input w-full" rows="3" value={formData.remarks}
-                onChange={e => setFormData({ ...formData, remarks: e.target.value })}
-                placeholder="Enter any additional notes..."></textarea>
+              <textarea
+                className="input w-full"
+                rows="3"
+                value={formData.remarks}
+                onChange={(e) =>
+                  setFormData({ ...formData, remarks: e.target.value })
+                }
+                placeholder="Enter any additional notes..."
+              ></textarea>
             </div>
 
             <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Items</h3>
-                <button type="button" onClick={addItem} className="btn-success text-sm">+ Add Item</button>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                  Items
+                </h3>
+                <button
+                  type="button"
+                  onClick={addItem}
+                  className="btn-success text-sm"
+                >
+                  + Add Item
+                </button>
               </div>
 
               <div className="overflow-x-auto">
@@ -336,82 +478,183 @@ export default function FMMaterialRequisitionForm() {
                   <tbody>
                     {items.map((item) => {
                       const itemQuery = itemQueries[item.id] || "";
-                      const showQuery = item.item_id ? item.itemName : itemQuery;
-                      const searchResults = itemQuery.trim() && !item.item_id
-                        ? filterByPrefix(availableItems, { query: itemQuery, searchFields: ["item_code", "item_name", "barcode"] })
-                        : [];
+                      const showQuery = item.item_id
+                        ? item.itemName
+                        : itemQuery;
+                      const searchResults =
+                        itemQuery.trim() && !item.item_id
+                          ? filterByPrefix(availableItems, {
+                              query: itemQuery,
+                              searchFields: [
+                                "item_code",
+                                "item_name",
+                                "barcode",
+                              ],
+                            })
+                          : [];
                       return (
                         <tr key={item.id}>
                           <td>
                             <div className="relative">
-                              <input id={`fm-mr-item-search-${item.id}`} autoComplete="off"
-                                className="input w-full" placeholder="Type to search items"
+                              <input
+                                id={`fm-mr-item-search-${item.id}`}
+                                autoComplete="off"
+                                className="input w-full"
+                                placeholder="Type to search items"
                                 value={showQuery}
-                                onChange={e => {
+                                onChange={(e) => {
                                   const val = e.target.value;
-                                  setItemQueries(prev => ({ ...prev, [item.id]: val }));
+                                  setItemQueries((prev) => ({
+                                    ...prev,
+                                    [item.id]: val,
+                                  }));
                                   if (item.item_id) {
-                                    setItems(items.map(i =>
-                                      i.id === item.id ? { ...i, item_id: "", itemCode: "", itemName: "" } : i,
-                                    ));
+                                    setItems(
+                                      items.map((i) =>
+                                        i.id === item.id
+                                          ? {
+                                              ...i,
+                                              item_id: "",
+                                              itemCode: "",
+                                              itemName: "",
+                                            }
+                                          : i,
+                                      ),
+                                    );
                                   }
                                 }}
-                                onKeyDown={e => {
+                                onKeyDown={(e) => {
                                   if (e.key === "Enter") {
-                                    const query = (itemQueries[item.id] || "").trim();
+                                    const query = (
+                                      itemQueries[item.id] || ""
+                                    ).trim();
                                     if (!query || !searchResults.length) return;
                                     handleSelectItem(item.id, searchResults[0]);
                                   }
                                 }}
                               />
-                              {searchResults.length ? (() => {
-                                const el = document.getElementById(`fm-mr-item-search-${item.id}`);
-                                const r = el ? el.getBoundingClientRect() : { bottom: 0, left: 0, width: 0 };
-                                return (
-                                  <div className="bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-auto"
-                                    style={{ position: 'fixed', top: `${r.bottom + 4}px`, left: `${r.left}px`, width: `${r.width}px`, zIndex: 9999 }}>
-                                    {searchResults.map(o => (
-                                      <button type="button" key={o.id}
-                                        className="block w-full text-left px-3 py-2 hover:bg-slate-50 text-xs"
-                                        onClick={() => handleSelectItem(item.id, o)}>
-                                        {o.item_code} - {o.item_name}
-                                      </button>
-                                    ))}
-                                  </div>
-                                );
-                              })() : null}
+                              {searchResults.length
+                                ? (() => {
+                                    const el = document.getElementById(
+                                      `fm-mr-item-search-${item.id}`,
+                                    );
+                                    const r = el
+                                      ? el.getBoundingClientRect()
+                                      : { bottom: 0, left: 0, width: 0 };
+                                    return (
+                                      <div
+                                        className="bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-auto"
+                                        style={{
+                                          position: "fixed",
+                                          top: `${r.bottom + 4}px`,
+                                          left: `${r.left}px`,
+                                          width: `${r.width}px`,
+                                          zIndex: 9999,
+                                        }}
+                                      >
+                                        {searchResults.map((o) => (
+                                          <button
+                                            type="button"
+                                            key={o.id}
+                                            className="block w-full text-left px-3 py-2 hover:bg-slate-50 text-xs"
+                                            onClick={() =>
+                                              handleSelectItem(item.id, o)
+                                            }
+                                          >
+                                            {o.item_code} - {o.item_name}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    );
+                                  })()
+                                : null}
                             </div>
                           </td>
                           <td>
-                            <input type="number" className="input" value={item.qtyRequested}
-                              onChange={e => {
-                                setItems(items.map(i =>
-                                  i.id === item.id ? { ...i, qtyRequested: Math.max(0, parseInt(e.target.value, 10) || 0) } : i,
-                                ));
-                              }} min="0" step="1" inputMode="numeric" pattern="[0-9]*" />
+                            <input
+                              type="number"
+                              className="input"
+                              value={item.qtyRequested}
+                              onChange={(e) => {
+                                setItems(
+                                  items.map((i) =>
+                                    i.id === item.id
+                                      ? {
+                                          ...i,
+                                          qtyRequested: Math.max(
+                                            0,
+                                            parseInt(e.target.value, 10) || 0,
+                                          ),
+                                        }
+                                      : i,
+                                  ),
+                                );
+                              }}
+                              min="0"
+                              step="1"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                            />
                           </td>
                           <td>
-                            <select className="input" value={item.uom || ""}
-                              onChange={e => {
-                                setItems(items.map(i => i.id === item.id ? { ...i, uom: e.target.value } : i));
-                              }}>
+                            <select
+                              className="input"
+                              value={item.uom || ""}
+                              onChange={(e) => {
+                                setItems(
+                                  items.map((i) =>
+                                    i.id === item.id
+                                      ? { ...i, uom: e.target.value }
+                                      : i,
+                                  ),
+                                );
+                              }}
+                            >
                               <option value="">UOM</option>
-                              {(Array.isArray(uoms) && uoms.length ? uoms.map(u => ({ code: u.uom_code || u.code || "", name: u.uom_name || u.name || "" }))
-                                : [{ code: "EA", name: "EA" }, { code: "PCS", name: "PCS" }, { code: "KG", name: "KG" }, { code: "LTR", name: "LTR" }, { code: "MTR", name: "MTR" }]
-                              ).map(u => (
-                                <option key={u.code} value={u.code}>{u.name ? `${u.name} (${u.code})` : u.code}</option>
+                              {(Array.isArray(uoms) && uoms.length
+                                ? uoms.map((u) => ({
+                                    code: u.uom_code || u.code || "",
+                                    name: u.uom_name || u.name || "",
+                                  }))
+                                : [
+                                    { code: "EA", name: "EA" },
+                                    { code: "PCS", name: "PCS" },
+                                    { code: "KG", name: "KG" },
+                                    { code: "LTR", name: "LTR" },
+                                    { code: "MTR", name: "MTR" },
+                                  ]
+                              ).map((u) => (
+                                <option key={u.code} value={u.code}>
+                                  {u.code}
+                                </option>
                               ))}
                             </select>
                           </td>
                           <td>
-                            <input type="text" className="input" placeholder="Batch No" value={item.batchNo || ""}
-                              onChange={e => {
-                                setItems(items.map(i => i.id === item.id ? { ...i, batchNo: e.target.value } : i));
-                              }} />
+                            <input
+                              type="text"
+                              className="input"
+                              placeholder="Batch No"
+                              value={item.batchNo || ""}
+                              onChange={(e) => {
+                                setItems(
+                                  items.map((i) =>
+                                    i.id === item.id
+                                      ? { ...i, batchNo: e.target.value }
+                                      : i,
+                                  ),
+                                );
+                              }}
+                            />
                           </td>
                           <td>
-                            <button type="button" onClick={() => removeItem(item.id)}
-                              className="text-red-600 hover:text-red-800 text-sm font-medium">Remove</button>
+                            <button
+                              type="button"
+                              onClick={() => removeItem(item.id)}
+                              className="text-red-600 hover:text-red-800 text-sm font-medium"
+                            >
+                              Remove
+                            </button>
                           </td>
                         </tr>
                       );
@@ -422,7 +665,12 @@ export default function FMMaterialRequisitionForm() {
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-              <button onClick={() => window.history.back()} className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors">Cancel</button>
+              <button
+                onClick={() => window.history.back()}
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+              >
+                Cancel
+              </button>
               <button type="submit" className="btn-success" disabled={saving}>
                 {saving ? "Saving..." : "Save"}
               </button>

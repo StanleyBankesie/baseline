@@ -317,7 +317,7 @@ export default function AppBackgroundControlSection() {
           {/* Preset Cards Grid */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                 <Layers className="w-3.5 h-3.5 text-indigo-500" />
                 <span>Curated Abstract Presets</span>
               </label>
@@ -571,7 +571,7 @@ export default function AppBackgroundControlSection() {
                         const v = Math.max(0, Math.min(100, Number(e.target.value) || 0));
                         handleOpacityChange(v);
                       }}
-                      className="w-14 text-center font-mono font-bold text-xs py-0.5 px-1 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                      className="w-14 text-center font-mono font-semibold text-xs py-0.5 px-1 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-500"
                     />
                     <span className="text-xs font-bold text-slate-500">%</span>
                   </div>

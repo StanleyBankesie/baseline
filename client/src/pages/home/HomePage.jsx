@@ -13,7 +13,77 @@ import { toast } from "react-toastify";
 import { getModuleDashboards } from "../../data/modulesRegistry.js";
 import { DASHBOARD_CARDS } from "../../data/dashboardCards.js";
 import { getAssignedPagesForModule } from "../../data/modulePagesRegistry.js";
-import { ArrowRight, ChevronRight, CheckCircle, X } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronRight,
+  CheckCircle,
+  CheckCircle2,
+  X,
+  History,
+  Eye,
+  Clock,
+  User,
+  Building2,
+  Calendar,
+  ShieldCheck,
+  MessageSquare,
+  ClipboardCheck,
+  Star,
+  Archive,
+  Banknote,
+  ShoppingCart,
+  ShoppingBag,
+  Users,
+  Calculator,
+  Wrench,
+  Landmark,
+  Layers,
+  Truck,
+  Factory,
+  Boxes,
+  BarChart3,
+  FileText,
+} from "lucide-react";
+import GoldenBellIcon from "../../components/GoldenBellIcon.jsx";
+import MobileMovingCarousel from "../../components/MobileMovingCarousel.jsx";
+import { getFavoritePages, getFrequentPages } from "../../utils/favorites.js";
+
+function renderFavIcon(iconKey) {
+  switch (iconKey) {
+    case "Archive":
+      return <Archive size={16} />;
+    case "Banknote":
+      return <Banknote size={16} />;
+    case "ShoppingCart":
+      return <ShoppingCart size={16} />;
+    case "ShoppingBag":
+      return <ShoppingBag size={16} />;
+    case "Users":
+      return <Users size={16} />;
+    case "Calculator":
+      return <Calculator size={16} />;
+    case "ClipboardCheck":
+      return <ClipboardCheck size={16} />;
+    case "Wrench":
+      return <Wrench size={16} />;
+    case "Landmark":
+      return <Landmark size={16} />;
+    case "Building2":
+      return <Building2 size={16} />;
+    case "Layers":
+      return <Layers size={16} />;
+    case "Truck":
+      return <Truck size={16} />;
+    case "Factory":
+      return <Factory size={16} />;
+    case "Boxes":
+      return <Boxes size={16} />;
+    case "BarChart3":
+      return <BarChart3 size={16} />;
+    default:
+      return <FileText size={16} />;
+  }
+}
 
 /**
  * HomePage component
@@ -38,6 +108,8 @@ export default function HomePage() {
   const [pendingItems, setPendingItems] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [sentDocuments, setSentDocuments] = useState([]);
+  const [actionTab, setActionTab] = useState("pending");
+  const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [showPostAlerts, setShowPostAlerts] = useState(false);
   const [postAlerts, setPostAlerts] = useState([]);
   const [postAlertsLoading, setPostAlertsLoading] = useState(false);
@@ -377,26 +449,39 @@ export default function HomePage() {
       .trim()
       .toUpperCase()
       .replace(/\s+/g, "_");
+  const toTitleCase = (str) => {
+    if (!str) return "";
+    return String(str)
+      .replace(/[_-]+/g, " ")
+      .trim()
+      .split(/\s+/)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(" ");
+  };
   const displayType = (s) => {
     const t = normalizeType(s);
     if (t === "PAYROLL" || t === "SALARY_PROCESSING" || t === "HR_PAYROLL") return "Payroll";
     if (t === "FM_HELPDESK_TICKET" || t === "FM_HELPDESK" || t === "HELPDESK_TICKET") return "FM Helpdesk";
     if (t === "MATERIAL_REQUISITION") return "Material Requisition";
+    if (t === "GENERAL_REQUISITION") return "General Requisition";
+    if (t === "CREDIT_NOTE") return "Credit Note";
+    if (t === "DEBIT_NOTE") return "Debit Note";
+    if (t === "TRANSPORT_BILLING") return "Transport Billing";
     if (t === "RETURN_TO_STORES") return "Return to Stores";
     if (t === "SALES_ORDER") return "Sales Order";
+    if (t === "STOCK_ADJUSTMENT") return "Stock Adjustment";
     if (t === "JOURNAL_VOUCHER" || t === "JV") return "Journal Voucher";
     if (t === "PAYMENT_VOUCHER" || t === "PV") return "Payment Voucher";
     if (t === "RECEIPT_VOUCHER" || t === "RV") return "Receipt Voucher";
     if (t === "CONTRA_VOUCHER" || t === "CV") return "Contra Voucher";
+    if (t === "PETTY_CASH" || t === "PETTY_CASH_BOOK") return "Petty Cash";
     if (t.startsWith("PURCHASE_ORDER:")) {
       const sub = t.split(":")[1];
       if (sub === "LOCAL") return "Purchase Order - Local";
       if (sub === "IMPORT") return "Purchase Order - Import";
       return "Purchase Order";
     }
-    if (t === "GOODS_RECEIPT") return "GRN";
-    if (t === "GRN") return "GRN";
-    if (t === "GOODS_RECEIPT_NOTE") return "GRN";
+    if (t === "GOODS_RECEIPT" || t === "GRN" || t === "GOODS_RECEIPT_NOTE") return "GRN";
     if (
       t === "GOODS_RECEIPT:LOCAL" ||
       t === "GRN:LOCAL" ||
@@ -409,7 +494,7 @@ export default function HomePage() {
       t === "GOODS_RECEIPT_NOTE:IMPORT"
     )
       return "GRN Import";
-    return String(s || "Document");
+    return toTitleCase(s || "Document");
   };
   const typeKey = (it) => {
     const base = normalizeType(it.document_type);
@@ -473,6 +558,109 @@ export default function HomePage() {
     return `${t} — ${ref}`;
   };
 
+  const formattedTodayDate = useMemo(() => {
+    return new Date().toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  }, []);
+
+  const [favorites, setFavorites] = useState(() => getFavoritePages(user?.id));
+  const [frequentPages, setFrequentPages] = useState(() => getFrequentPages(user?.id, 8));
+
+  useEffect(() => {
+    const handleFavChange = () => {
+      setFavorites(getFavoritePages(user?.id));
+      setFrequentPages(getFrequentPages(user?.id, 8));
+    };
+    handleFavChange();
+    window.addEventListener("omnisuite_favorites_changed", handleFavChange);
+    window.addEventListener("omnisuite_page_visits_changed", handleFavChange);
+    return () => {
+      window.removeEventListener("omnisuite_favorites_changed", handleFavChange);
+      window.removeEventListener("omnisuite_page_visits_changed", handleFavChange);
+    };
+  }, [user?.id]);
+
+  const displayPages = useMemo(() => {
+    if (favorites && favorites.length > 0) {
+      return favorites.slice(0, 8);
+    }
+    return frequentPages.slice(0, 8);
+  }, [favorites, frequentPages]);
+
+  const approvedNotifications = useMemo(() => {
+    const uid = Number(user?.sub || user?.id);
+    const filtered = notifications.filter((n) => {
+      const msg = String(n?.message || "").toLowerCase();
+      const isApproved = msg.includes("approved");
+      const candidates = [
+        Number(n.user_id),
+        Number(n.target_user_id),
+        Number(n.recipient_id),
+        Number(n.assigned_user_id),
+        Number(n.request_user_id),
+      ];
+      const rid = candidates.find((x) => Number.isFinite(x) && x > 0) ?? null;
+      const belongs =
+        Number.isFinite(uid) && uid > 0 ? rid == null || rid === uid : true;
+      return isApproved && belongs;
+    });
+    return filtered;
+  }, [notifications, user?.sub, user?.id]);
+
+  const approvedList = useMemo(() => {
+    const notifItems = approvedNotifications.map((n) => {
+      const match = String(n.link || "").match(/approvals\/(\d+)/);
+      const instanceId = match ? match[1] : null;
+      return {
+        id: `notif-${n.id}`,
+        title: n.title || n.message || "Approved Document",
+        subtitle: n.message || "Document approved",
+        date: n.created_at,
+        instanceId,
+        link: n.link || (instanceId ? `/administration/workflows/approvals/${instanceId}` : "/administration/workflows/approved"),
+        initiator: n.initiator || "System",
+      };
+    });
+
+    const sentApproved = sentDocuments
+      .filter((d) => String(d.status).toUpperCase() === "APPROVED")
+      .map((d) => ({
+        id: `sent-${d.id || d.workflow_instance_id}`,
+        title: d.doc_title || d.title || `${d.document_type || "Document"} #${d.document_id || d.id}`,
+        subtitle: "Document approved",
+        date: d.submitted_at || d.created_at,
+        instanceId: d.workflow_instance_id || d.instance_id,
+        link: d.workflow_instance_id ? `/administration/workflows/approvals/${d.workflow_instance_id}` : "/administration/workflows/sent",
+        initiator: user?.full_name || "You",
+      }));
+
+    const seen = new Set();
+    const merged = [];
+    for (const item of [...sentApproved, ...notifItems]) {
+      const key = item.instanceId || item.title;
+      if (!seen.has(key)) {
+        seen.add(key);
+        merged.push(item);
+      }
+    }
+    return merged;
+  }, [approvedNotifications, sentDocuments, user?.full_name]);
+
+  const itemsToDisplay = useMemo(() => {
+    if (actionTab === "pending") {
+      if (selectedCategory === "ALL") return uniquePending;
+      return groupedPending[selectedCategory] || [];
+    } else if (actionTab === "approved") {
+      return approvedList;
+    } else {
+      return sentDocuments;
+    }
+  }, [actionTab, selectedCategory, uniquePending, groupedPending, approvedList, sentDocuments]);
+
   const openApprovalModal = async (id) => {
     setShowApprovalModal(true);
     setModalInstanceId(id);
@@ -497,6 +685,49 @@ export default function HomePage() {
       setModalData(null);
     } finally {
       setModalLoading(false);
+    }
+  };
+
+  const [docHistoryModalOpen, setDocHistoryModalOpen] = useState(false);
+  const [selectedDocItem, setSelectedDocItem] = useState(null);
+  const [docHistoryLoading, setDocHistoryLoading] = useState(false);
+  const [docWorkflowData, setDocWorkflowData] = useState(null);
+
+  const handleOpenDocHistory = async (item, tabType) => {
+    setSelectedDocItem({ ...item, _tabType: tabType });
+    setDocHistoryModalOpen(true);
+    setDocHistoryLoading(true);
+    setDocWorkflowData(null);
+
+    const instanceId = item.workflow_instance_id || item.instanceId || extractInstanceIdFromLink(item.link);
+    if (instanceId) {
+      try {
+        const res = await client.get(`/workflows/approvals/instance/${instanceId}`);
+        setDocWorkflowData(res.data?.item || null);
+      } catch (e) {
+        console.error("Failed to fetch workflow history:", e);
+      } finally {
+        setDocHistoryLoading(false);
+      }
+    } else {
+      setDocHistoryLoading(false);
+    }
+  };
+
+  const handleViewDocDetails = (item) => {
+    if (!item) return;
+    setDocHistoryModalOpen(false);
+    if (item.link) {
+      navigate(item.link);
+    } else if (item.workflow_instance_id || item.instanceId) {
+      const id = item.workflow_instance_id || item.instanceId;
+      navigate(`/administration/workflows/approvals/${id}`);
+    } else if (item._tabType === "sent") {
+      navigate("/administration/workflows/sent");
+    } else if (item._tabType === "approved") {
+      navigate("/administration/workflows/approved");
+    } else {
+      navigate("/administration/workflows/approvals");
     }
   };
 
@@ -791,26 +1022,6 @@ export default function HomePage() {
 
   // Quick Actions section removed per request
 
-  const approvedNotifications = useMemo(() => {
-    const uid = Number(user?.sub || user?.id);
-    const filtered = notifications.filter((n) => {
-      const msg = String(n?.message || "").toLowerCase();
-      const isApproved = msg.includes("approved");
-      const candidates = [
-        Number(n.user_id),
-        Number(n.target_user_id),
-        Number(n.recipient_id),
-        Number(n.assigned_user_id),
-        Number(n.request_user_id),
-      ];
-      const rid = candidates.find((x) => Number.isFinite(x) && x > 0) ?? null;
-      const belongs =
-        Number.isFinite(uid) && uid > 0 ? rid == null || rid === uid : true;
-      return isApproved && belongs;
-    });
-    return filtered;
-  }, [notifications, user?.sub, user?.id]);
-
   const sentSummary = useMemo(() => {
     const total = sentDocuments.length;
     const pending = sentDocuments.filter((d) => d.status === "PENDING" || !d.status).length;
@@ -891,11 +1102,11 @@ export default function HomePage() {
     <div className="min-h-screen p-2 md:p-3 font-sans text-slate-900 bg-transparent">
       <div className="max-w-7xl mx-auto space-y-4 fullbleed-sm">
         {/* Header Section */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-brand-900 to-brand-800 p-8 shadow-erp text-white">
-          <div className="relative z-10 flex items-start gap-5">
-            <div className="relative shrink-0">
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-r from-brand-900 via-brand-850 to-brand-800 p-5 sm:p-6 md:p-8 shadow-smoky-lg text-white flex flex-col md:flex-row md:items-center justify-between gap-4 mx-0.5 sm:mx-0">
+          <div className="relative z-10 flex items-center gap-4 min-w-0">
+            <div className="relative shrink-0 hidden sm:block">
               <div
-                className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center overflow-hidden ring-2 ring-white/30 cursor-pointer"
+                className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center overflow-hidden ring-2 ring-white/30 cursor-pointer shadow-xs hover:ring-white/50 transition-all"
                 onClick={() => setShowPhotoMenu((v) => !v)}
               >
                 {profileData?.profile_picture_url ? (
@@ -905,7 +1116,7 @@ export default function HomePage() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-2xl font-semibold text-white/70">
+                  <span className="text-xl font-bold text-white/80">
                     {fullName.charAt(0).toUpperCase()}
                   </span>
                 )}
@@ -916,27 +1127,29 @@ export default function HomePage() {
                 )}
               </div>
               {showPhotoMenu && (
-                <div className="absolute top-full mt-2 left-0 flex flex-col gap-1 min-w-[140px] z-50">
+                <div className="absolute top-full mt-2 left-0 flex flex-col gap-1 min-w-[140px] z-50 bg-slate-900 border border-slate-700 rounded-xl shadow-xl p-2 text-white">
                   <button
                     type="button"
-                    className="text-left text-sm text-white/90 hover:text-white"
+                    className="text-left text-xs font-medium text-white/90 hover:bg-white/10 p-1.5 rounded-lg transition"
                     onClick={() => {
                       setShowPhotoMenu(false);
                       photoInputRef.current?.click();
                     }}
                   >
-                    {profileData?.profile_picture_url ? "Replace" : "Upload"}
+                    {profileData?.profile_picture_url ? "Replace Photo" : "Upload Photo"}
                   </button>
-                  <button
-                    type="button"
-                    className="text-left text-sm text-red-300 hover:text-red-200"
-                    onClick={() => {
-                      setShowPhotoMenu(false);
-                      handlePhotoRemove();
-                    }}
-                  >
-                    Remove
-                  </button>
+                  {profileData?.profile_picture_url && (
+                    <button
+                      type="button"
+                      className="text-left text-xs font-medium text-red-300 hover:bg-red-900/40 p-1.5 rounded-lg transition"
+                      onClick={() => {
+                        setShowPhotoMenu(false);
+                        handlePhotoRemove();
+                      }}
+                    >
+                      Remove
+                    </button>
+                  )}
                 </div>
               )}
               <input
@@ -948,49 +1161,64 @@ export default function HomePage() {
               />
             </div>
             <div className="min-w-0">
-              <h1 className="text-3xl font-bold tracking-tight">
-                Welcome back, {fullName}!
-              </h1>
-              {profileData?.role_name && (
-                <p className="hidden sm:block mt-1 text-brand-200 text-sm font-medium">
-                  {profileData.role_name}
-                </p>
-              )}
-              {(displayCompanyName || displayBranchName) && (
-                <p className="hidden sm:block mt-1 text-brand-200 text-sm">
-                  {[displayCompanyName, displayBranchName]
-                    .filter(Boolean)
-                    .join(" — ")}
-                </p>
-              )}
-              <p className="hidden sm:block mt-2 text-brand-100 text-lg max-w-2xl">
-                Here's an overview of your business performance and pending
-                tasks today.
-              </p>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h1 className="text-2xl sm:text-[26px] font-bold text-white tracking-tight">
+                  Welcome back, {fullName}
+                </h1>
+                {(profileData?.role_name || user?.role_name) && (
+                  <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-semibold bg-white/15 backdrop-blur-md text-white border border-white/20 shadow-2xs">
+                    <ShieldCheck size={14} className="text-sky-300" />
+                    {profileData?.role_name || user?.role_name}
+                  </span>
+                )}
+              </div>
+              <div className="hidden sm:flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-1.5 text-xs text-brand-200">
+                {(displayCompanyName || displayBranchName) && (
+                  <div className="flex items-center gap-1.5">
+                    <Building2 size={15} className="text-brand-300 shrink-0" />
+                    <span className="text-white/90 font-medium">
+                      {displayCompanyName || "OmniSuite ERP"}
+                    </span>
+                    {displayBranchName && (
+                      <>
+                        <span className="text-brand-300">•</span>
+                        <span className="text-white font-bold">
+                          {displayBranchName}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                )}
+                <div className="flex items-center gap-1.5">
+                  <Calendar size={15} className="text-brand-300 shrink-0" />
+                  <span className="text-white/80 font-medium">
+                    {formattedTodayDate}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="absolute right-0 top-0 h-full w-1/3 bg-white/5 skew-x-12 transform translate-x-20" />
+          <div className="absolute right-0 top-0 h-full w-1/3 bg-white/5 skew-x-12 transform translate-x-20 pointer-events-none" />
           <button
             type="button"
             onClick={() => navigate("/notifications")}
-            className="hidden md:flex absolute top-4 right-4 z-20 bg-white/10 hover:bg-white/20 text-white rounded-full px-3 py-2 items-center gap-2"
+            className="hidden sm:flex self-start md:self-center px-4 py-2 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 text-white text-xs font-medium items-center gap-2 transition shadow-2xs shrink-0 relative z-10"
           >
-            <span>🔔</span>
-            <span className="relative inline-flex items-center">
-              <span className="sr-only">Unread</span>
-              <span className="ml-1 text-sm">Notifications</span>
-              {notifications.filter((n) => Number(n.is_read) !== 1).length >
-                0 && (
-                <span className="absolute -top-2 -right-3 bg-red-600 text-white text-xs font-bold rounded-full px-2 py-0.5">
-                  {notifications.filter((n) => Number(n.is_read) !== 1).length}
-                </span>
-              )}
-            </span>
+            <GoldenBellIcon size={20} />
+            <span>Notifications</span>
+            {notifications.filter((n) => Number(n.is_read) !== 1).length > 0 && (
+              <span className="bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.2">
+                {notifications.filter((n) => Number(n.is_read) !== 1).length}
+              </span>
+            )}
           </button>
         </div>
 
-        {/* Tickers / Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-3 md:px-0">
+        {/* Tickers / Stats Grid - Mobile Moving Carousel & Medium 2-Grid Columns */}
+        <MobileMovingCarousel data-home-carousel gridColsClass="md:grid-cols-2 lg:grid-cols-4"
+          gapClass="gap-4 md:gap-6"
+          autoInterval={3500}
+        >
           {visibleMetrics.map((metric, index) => {
             const cardType = index % 4;
             if (cardType === 0) {
@@ -998,27 +1226,26 @@ export default function HomePage() {
               return (
                 <div
                   key={index}
-
-                  className="relative overflow-hidden rounded-[24px] p-6 shadow-[0_15px_30px_-5px_rgba(178,110,23,0.3)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(178,110,23,0.5)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#b26e17] text-white"
+                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] p-5 sm:p-7 shadow-smoky-lg border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(178,110,23,0.55)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#b26e17] text-white"
                 >
                   <div className="flex flex-col h-full justify-between">
                     <div className="flex justify-end min-h-[22px]">
                       {metric.badge ? (
-                        <span className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-white/90 border border-white/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] leading-none flex items-center gap-1">
+                        <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-white/15 backdrop-blur-md text-white/90 border border-white/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] leading-none flex items-center gap-1">
                           {metric.badge}
                         </span>
                       ) : null}
                     </div>
-                    <div className="mt-6">
+                    <div className="mt-4 sm:mt-6">
                       <div
-                        className="text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)]"
+                        className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)] truncate"
                         style={{
                           textShadow: "0 0 12px rgba(255, 255, 255, 0.45)",
                         }}
                       >
                         {metric.value}
                       </div>
-                      <div className="mt-2.5 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none">
+                      <div className="mt-2 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none truncate">
                         {metric.label}
                       </div>
                     </div>
@@ -1031,25 +1258,24 @@ export default function HomePage() {
               return (
                 <div
                   key={index}
-
-                  className="relative overflow-hidden rounded-[24px] p-6 shadow-[0_15px_30px_-5px_rgba(36,82,109,0.3)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(36,82,109,0.5)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#24526d] text-white"
+                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] p-5 sm:p-7 shadow-smoky-lg border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(36,82,109,0.55)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#24526d] text-white"
                 >
                   <div className="flex flex-col h-full justify-between">
                     <div className="flex justify-end min-h-[22px]">
                       {metric.badge ? (
-                        <span className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/20 backdrop-blur-md text-amber-200 border border-amber-400/20 shadow-sm leading-none flex items-center gap-1">
+                        <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-amber-500/20 backdrop-blur-md text-amber-200 border border-amber-400/20 shadow-sm leading-none flex items-center gap-1">
                           {metric.badge}
                         </span>
                       ) : null}
                     </div>
-                    <div className="mt-6">
-                      <div className="text-3xl font-extrabold text-white tracking-tight">
+                    <div className="mt-4 sm:mt-6">
+                      <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight truncate">
                         {metric.value}
                       </div>
-                      <div className="mt-2.5 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none flex items-center">
-                        <span>{metric.label}</span>
+                      <div className="mt-2 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none flex items-center justify-between">
+                        <span className="truncate">{metric.label}</span>
                         <svg
-                          className="w-8 h-4 text-white/20 ml-2 group-hover:text-white/40 transition-colors"
+                          className="w-7 sm:w-8 h-4 text-white/20 ml-2 group-hover:text-white/40 transition-colors shrink-0"
                           viewBox="0 0 50 20"
                           fill="none"
                           stroke="currentColor"
@@ -1072,22 +1298,21 @@ export default function HomePage() {
               return (
                 <div
                   key={index}
-
-                  className="relative overflow-hidden rounded-[24px] p-6 shadow-[0_15px_30px_-5px_rgba(24,117,92,0.3)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(24,117,92,0.5)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#18755c] text-white"
+                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] p-5 sm:p-7 shadow-smoky-lg border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(24,117,92,0.55)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#18755c] text-white"
                 >
                   <div className="flex flex-col h-full justify-between">
                     <div className="flex justify-end min-h-[22px]">
                       {metric.badge ? (
-                        <span className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-white/90 border border-white/15 shadow-sm leading-none flex items-center gap-1">
+                        <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-white/15 backdrop-blur-md text-white/90 border border-white/15 shadow-sm leading-none flex items-center gap-1">
                           {metric.badge}
                         </span>
                       ) : null}
                     </div>
-                    <div className="mt-6">
-                      <div className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-1.5">
-                        <span>{metric.value}</span>
+                    <div className="mt-4 sm:mt-6">
+                      <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-1.5 truncate">
+                        <span className="truncate">{metric.value}</span>
                         <svg
-                          className="w-5 h-5 text-white/40 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+                          className="w-4 sm:w-5 h-4 sm:h-5 text-white/40 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0"
                           fill="none"
                           stroke="currentColor"
                           strokeWidth="2"
@@ -1100,7 +1325,7 @@ export default function HomePage() {
                           />
                         </svg>
                       </div>
-                      <div className="mt-2.5 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none">
+                      <div className="mt-2 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none truncate">
                         {metric.label}
                       </div>
                     </div>
@@ -1113,22 +1338,21 @@ export default function HomePage() {
               return (
                 <div
                   key={index}
-
-                  className="relative overflow-hidden rounded-[24px] p-6 shadow-[0_15px_30px_-5px_rgba(0,0,0,0.2)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.5)] border border-white/5 hover:border-white/15 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#1d1f22] bg-[radial-gradient(#ffffff06_1px,transparent_1px)] [background-size:8px_8px] text-white"
+                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] p-5 sm:p-7 shadow-smoky-lg border border-white/5 hover:border-white/15 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.55)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#1d1f22] bg-[radial-gradient(#ffffff06_1px,transparent_1px)] [background-size:8px_8px] text-white"
                 >
                   <div className="flex flex-col h-full justify-between">
                     <div className="flex justify-end min-h-[22px]">
                       {metric.badge ? (
-                        <span className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-white border border-white/20 shadow-sm leading-none flex items-center gap-1">
+                        <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-white/15 backdrop-blur-md text-white border border-white/20 shadow-sm leading-none flex items-center gap-1">
                           {metric.badge}
                         </span>
                       ) : null}
                     </div>
-                    <div className="mt-6">
-                      <div className="text-3xl font-extrabold text-white tracking-tight">
+                    <div className="mt-4 sm:mt-6">
+                      <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight truncate">
                         {metric.value}
                       </div>
-                      <div className="mt-2.5 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none">
+                      <div className="mt-2 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none truncate">
                         {metric.label}
                       </div>
                     </div>
@@ -1156,465 +1380,477 @@ export default function HomePage() {
               );
             }
           })}
-        </div>
+        </MobileMovingCarousel>
 
         {!isBasicMode ? (
           <>
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-6">
-            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.03)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] p-6 border border-slate-100 dark:border-slate-800/80 hover:border-slate-200/80 dark:hover:border-slate-700/80 hover:shadow-[0_12px_40px_rgb(0,0,0,0.06)] dark:hover:shadow-[0_12px_40px_rgb(0,0,0,0.25)] transition-all duration-300 relative overflow-hidden ">
-              <button
-                type="button"
-                onClick={() => navigate("/social-feed")}
-                className="absolute top-4 left-4 bg-brand text-white rounded-full px-3 py-2 text-xs hover:bg-brand-700"
-              >
-                Post History
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  const next = !showPostAlerts;
-                  setShowPostAlerts(next);
-                  if (next) await loadPostAlerts();
-                }}
-                className="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-full px-3 py-2 flex items-center gap-2"
-              >
-                <span>🔔</span>
-                <span className="relative inline-flex items-center">
-                  <span className="sr-only">Post alerts</span>
-                  <span className="ml-1 text-sm">Posts</span>
-                  {postNotificationsUnread.length > 0 && (
-                    <span className="absolute -top-2 -right-3 bg-red-600 text-white text-xs font-bold rounded-full px-2 py-0.5">
-                      {postNotificationsUnread.length}
-                    </span>
-                  )}
-                </span>
-              </button>
-              {showPostAlerts && (
-                <div className="absolute top-14 right-4 z-30 w-96 max-w-[calc(100%-2rem)] rounded-lg border border-slate-200 bg-white shadow-erp-lg">
-                  <div className="p-3 border-b border-slate-200 flex items-center justify-between">
-                    <div className="text-sm font-semibold text-slate-800">
-                      Post Notifications
+            {/* Main Content Grid: Action Center (Left) & Company Notice Board (Right) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              {/* Left Column: Action Center */}
+              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-smoky p-6 border border-slate-200/90 dark:border-slate-800 flex flex-col">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800/80 mb-3.5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 flex items-center justify-center shrink-0 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
+                      <ClipboardCheck size={16} />
                     </div>
+                    <div>
+                      <h2 className="text-base font-bold text-slate-900 dark:text-white leading-none">
+                        Action Center
+                      </h2>
+                    </div>
+                  </div>
+
+                  {/* Tabs: Pending vs Approved vs Sent */}
+                  <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800/80 rounded-full border border-slate-200/60 dark:border-slate-700/60 shadow-smoky-card self-start sm:self-center">
                     <button
                       type="button"
-                      onClick={() => setShowPostAlerts(false)}
-                      className="text-slate-600 hover:text-slate-900 text-xs"
+                      onClick={() => {
+                        setActionTab("pending");
+                        setSelectedCategory("ALL");
+                      }}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                        actionTab === "pending"
+                          ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      }`}
                     >
-                      Close
+                      <span>Pending</span>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                          actionTab === "pending"
+                            ? "bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900"
+                            : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
+                        }`}
+                      >
+                        {filteredPending.length}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActionTab("approved");
+                        setSelectedCategory("ALL");
+                      }}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                        actionTab === "approved"
+                          ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                    >
+                      <span>Approved</span>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                          actionTab === "approved"
+                            ? "bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900"
+                            : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
+                        }`}
+                      >
+                        {approvedList.length}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActionTab("sent");
+                        setSelectedCategory("ALL");
+                      }}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                        actionTab === "sent"
+                          ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                    >
+                      <span>Sent</span>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                          actionTab === "sent"
+                            ? "bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900"
+                            : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
+                        }`}
+                      >
+                        {sentDocuments.length}
+                      </span>
                     </button>
                   </div>
-                  <div className="max-h-80 overflow-auto">
-                    {postAlertsLoading ? (
-                      <div className="p-4 text-sm text-slate-600">Loading…</div>
-                    ) : postAlerts.length === 0 ? (
-                      <div className="p-4 text-sm text-slate-600">
-                        No post alerts found.
-                      </div>
-                    ) : (
-                      postAlerts.map((p) => (
-                        <button
-                          key={p.id}
-                          type="button"
-                          onClick={async () => {
-                            setShowPostAlerts(false);
-                            try {
-                              const related = notifications.filter(
-                                (n) =>
-                                  Number(n.is_read) !== 1 &&
-                                  String(n.link || "").startsWith(
-                                    `/social-feed/${p.id}`,
-                                  ),
-                              );
-                              for (const n of related) {
-                                try {
-                                  await client.put(
-                                    `/workflows/notifications/${n.id}/read`,
-                                  );
-                                } catch {}
-                              }
-                              setNotifications((prev) =>
-                                prev.map((n) =>
-                                  String(n.link || "").startsWith(
-                                    `/social-feed/${p.id}`,
-                                  )
-                                    ? { ...n, is_read: 1 }
-                                    : n,
-                                ),
-                              );
-                            } catch {}
-                            navigate(`/social-feed/${p.id}`);
-                          }}
-                          className="w-full text-left px-4 py-3 mb-2 last:mb-0 rounded-lg bg-gradient-to-r from-brand-800 to-brand-700 text-white shadow-erp-sm hover:shadow-erp-md transition-all"
-                        >
-                          <div className="flex items-center gap-3">
-                            <img
-                              src={
-                                p.profile_picture_url || "/default-avatar.png"
-                              }
-                              alt={String(p.full_name || "User")}
-                              className="w-8 h-8 rounded-full border border-white/40"
-                            />
-                            <div className="flex-1">
-                              <div className="text-sm font-semibold">
-                                {String(p.full_name || p.username || "User")}
-                              </div>
-                              <div className="text-xs text-white/90">
-                                {String(p.content || "")
-                                  .replace(/\s+/g, " ")
-                                  .trim()
-                                  .slice(0, 100)}
-                                {String(p.content || "").length > 100
-                                  ? "…"
-                                  : ""}
-                              </div>
-                              <div className="text-[11px] text-white/70 mt-1">
-                                {p.created_at
-                                  ? new Date(p.created_at).toLocaleString()
-                                  : ""}
-                              </div>
-                            </div>
-                            <div className="text-white/80 text-sm">View →</div>
-                          </div>
-                        </button>
-                      ))
-                    )}
-                  </div>
                 </div>
-              )}
-              <div ref={postRef}>
-                <CompanyFeed compact />
-              </div>
-            </div>
-          </div>
-          <div className="space-y-6">
-            <div
-              className="bg-white dark:bg-slate-900 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.03)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] p-6 border border-slate-100 dark:border-slate-800/80 hover:border-slate-200/80 dark:hover:border-slate-700/80 hover:shadow-[0_12px_40px_rgb(0,0,0,0.06)] dark:hover:shadow-[0_12px_40px_rgb(0,0,0,0.25)] transition-all duration-300 relative overflow-hidden "
-              style={{
-                height: pendingHeight ? `${pendingHeight}px` : undefined,
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                  <span className="text-blue-500">✅</span> Pending Approvals
-                </h2>
-                <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-full">
-                  {filteredPending.length} Pending
-                </span>
-              </div>
-              <div className="flex-1 min-h-0 overflow-y-auto">
-                {uniquePending.length > 0 ? (
-                  <div className="space-y-4">
-                    {orderedGroups.map((key) => (
-                      <div key={key}>
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="text-sm font-bold text-slate-700">
-                            {displayType(key)}
-                          </div>
-                          <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-full">
-                            {groupedPending[key].length}
-                          </span>
-                        </div>
-                        <div className="divide-y divide-slate-100">
-                          {groupedPending[key].map((item) => (
-                            <div
-                              key={item.workflow_instance_id}
-                              className="py-3 flex items-center justify-between hover:bg-slate-50 rounded-lg px-2 transition-colors"
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-sm font-bold text-slate-600">
-                                  {item.initiator
-                                    ? item.initiator.charAt(0)
-                                    : "U"}
-                                </div>
-                                <div>
-                                  <p className="text-sm font-medium text-slate-900">
-                                    {docLabel(item)}
-                                  </p>
-                                  <p className="text-xs text-slate-500">
-                                    {item.submitted_at
-                                      ? new Date(
-                                          item.submitted_at,
-                                        ).toLocaleString()
-                                      : "Just now"}{" "}
-                                    •{" "}
-                                    {item.workflow_name || "Approval Required"}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() =>
-                                    openApprovalModal(item.workflow_instance_id)
-                                  }
-                                  className="px-3 py-1 text-xs font-medium text-green-700 bg-green-50 hover:bg-green-100 rounded-md transition-colors"
-                                >
-                                  Approve
-                                </button>
 
-                                <button
-                                  onClick={() =>
-                                    navigate(
-                                      `/administration/workflows/approvals/${item.workflow_instance_id}`,
-                                    )
-                                  }
-                                  className="px-3 py-1 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md transition-colors"
-                                >
-                                  Review
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-slate-500 text-sm bg-slate-50/50 rounded-lg border border-dashed border-slate-200">
-                    No pending approvals found. You're all caught up! 🎉
+                {/* Filter Badges for Pending tab */}
+                {actionTab === "pending" && (
+                  <div className="flex flex-wrap items-center gap-1.5 mb-4 p-1 rounded-xl bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/50 shadow-smoky-card">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCategory("ALL")}
+                      className={`px-2.5 py-1 rounded-full text-xs transition-all shadow-smoky-card ${
+                        selectedCategory === "ALL"
+                          ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-semibold"
+                          : "border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 font-medium"
+                      }`}
+                    >
+                      All ({filteredPending.length})
+                    </button>
+                    {orderedGroups.map((key) => {
+                      const count = groupedPending[key]?.length || 0;
+                      const label = displayType(key);
+                      const isSel = selectedCategory === key;
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => setSelectedCategory(key)}
+                          className={`px-2.5 py-1 rounded-full text-xs transition-all shadow-smoky-card ${
+                            isSel
+                              ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-semibold"
+                              : "border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 font-medium"
+                          }`}
+                        >
+                          {label} ({count})
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.03)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] p-6 border border-slate-100 dark:border-slate-800/80 hover:border-slate-200/80 dark:hover:border-slate-700/80 hover:shadow-[0_12px_40px_rgb(0,0,0,0.06)] dark:hover:shadow-[0_12px_40px_rgb(0,0,0,0.25)] transition-all duration-300 relative overflow-visible ">
-            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <span className="text-purple-500">📑</span> Reports
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {((getEnabledModules && getEnabledModules()) || reportsModules || []).map((mk) => {
-                const label = String(mk)
-                  .split("-")
-                  .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-                  .join(" ");
-                const colors = [
-                  "bg-emerald-500",
-                  "bg-blue-500",
-                  "bg-purple-500",
-                  "bg-orange-500",
-                  "bg-pink-500",
-                  "bg-teal-500",
-                  "bg-rose-500",
-                ];
-                const idx =
-                  Math.abs(
-                    mk.split("").reduce((a, c) => a + c.charCodeAt(0), 0),
-                  ) % colors.length;
-                return (
-                  <div
-                    key={mk}
-                    className="relative"
-                    onMouseEnter={() => setActiveModule(mk)}
-                    onMouseLeave={() =>
-                      setActiveModule((curr) => (curr === mk ? null : curr))
-                    }
-                  >
+                {/* Items List */}
+                <div className="flex-1 min-h-0 space-y-2">
+                  {actionTab === "pending" ? (
+                    itemsToDisplay.length > 0 ? (
+                      <div className="space-y-2">
+                        {itemsToDisplay.map((item) => (
+                          <div
+                            key={item.workflow_instance_id || item.id}
+                            onClick={() => handleOpenDocHistory(item, "pending")}
+                            className="p-3.5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 shadow-smoky-card hover:shadow-smoky transition-all flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.99]"
+                            title="Click to view document history and user actions"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs font-semibold text-slate-700 dark:text-slate-300 shrink-0 shadow-2xs">
+                                {item.initiator ? item.initiator.charAt(0).toUpperCase() : "U"}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 truncate group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
+                                  {docLabel(item)}
+                                </p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                  By {item.initiator || "System"} •{" "}
+                                  {item.submitted_at
+                                    ? new Date(item.submitted_at).toLocaleDateString("en-US", {
+                                        month: "short",
+                                        day: "numeric",
+                                        hour: "numeric",
+                                        minute: "2-digit",
+                                      })
+                                    : "Recently"}{" "}
+                                  • {item.workflow_name || item.step_name || "Approval Required"}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                type="button"
+                                onClick={() => openApprovalModal(item.workflow_instance_id)}
+                                className="px-4 py-1.5 text-xs font-semibold text-white bg-[#0E3646] hover:bg-[#173d50] rounded-xl transition shadow-smoky-card active:scale-95"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  navigate(
+                                    item.workflow_instance_id
+                                      ? `/administration/workflows/approvals/${item.workflow_instance_id}`
+                                      : `/administration/workflows/approvals`
+                                  )
+                                }
+                                className="px-4 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl transition shadow-smoky-card"
+                              >
+                                Review
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12 text-slate-500 text-xs bg-slate-50/50 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                        No pending approvals found. You're all caught up! 🎉
+                      </div>
+                    )
+                  ) : actionTab === "approved" ? (
+                    itemsToDisplay.length > 0 ? (
+                      <div className="space-y-2">
+                        {itemsToDisplay.map((item, idx) => (
+                          <div
+                            key={item.id || idx}
+                            onClick={() => handleOpenDocHistory(item, "approved")}
+                            className="p-3.5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 shadow-smoky-card hover:shadow-smoky transition-all flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.99]"
+                            title="Click to view document history and user actions"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-9 h-9 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 flex items-center justify-center text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0 shadow-2xs">
+                                <CheckCircle size={15} />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 truncate group-hover:text-emerald-600 transition-colors">
+                                  {item.title}
+                                </p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                  Approved •{" "}
+                                  {item.date
+                                    ? new Date(item.date).toLocaleDateString("en-US", {
+                                        month: "short",
+                                        day: "numeric",
+                                        year: "numeric",
+                                      })
+                                    : "Recently"}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60">
+                                Approved
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleViewDocDetails(item)}
+                                className="px-3.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl transition shadow-2xs"
+                              >
+                                View
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12 text-slate-500 text-xs bg-slate-50/50 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                        No approved documents found.
+                      </div>
+                    )
+                  ) : (
+                    /* Sent Tab */
+                    itemsToDisplay.length > 0 ? (
+                      <div className="space-y-2">
+                        {itemsToDisplay.map((item, idx) => (
+                          <div
+                            key={item.id || idx}
+                            onClick={() => handleOpenDocHistory(item, "sent")}
+                            className="p-3.5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 shadow-smoky-card hover:shadow-smoky transition-all flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.99]"
+                            title="Click to view document history and user actions"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs font-semibold text-slate-700 dark:text-slate-300 shrink-0 shadow-2xs">
+                                {user?.full_name ? user.full_name.charAt(0).toUpperCase() : "U"}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 truncate group-hover:text-brand-600 transition-colors">
+                                  {item.doc_title || item.title || `${item.document_type || "Document"} #${item.document_id || item.id}`}
+                                </p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                  Sent • {item.submitted_at || item.created_at ? new Date(item.submitted_at || item.created_at).toLocaleDateString() : "Recent"}
+                                  {" • "}
+                                  <span className={item.status === "APPROVED" ? "text-emerald-600 font-semibold" : "text-amber-600 font-semibold"}>
+                                    {item.status || "PENDING"}
+                                  </span>
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                type="button"
+                                onClick={() => handleViewDocDetails(item)}
+                                className="px-4 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 rounded-xl transition shadow-smoky-card shrink-0"
+                              >
+                                View
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12 text-slate-500 text-xs bg-slate-50/50 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                        No sent documents found.
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+
+              {/* Right Column: Company Notice Board & Favourite Pages */}
+              <div className="flex flex-col gap-6">
+                {/* Company Notice Board */}
+                <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-smoky p-6 border border-slate-200/90 dark:border-slate-800 flex flex-col relative">
+                {/* Header */}
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800/80 mb-4">
+                  <div className="flex items-center gap-2.5">
                     <button
                       type="button"
-                      className={`rounded-xl px-4 py-3 text-left text-white hover:opacity-90 transition ${colors[idx]} h-20 w-full flex flex-col justify-center`}
-                      title={`Show ${label} reports and dashboards`}
-                      onClick={() =>
-                        setActiveModule((curr) => (curr === mk ? null : mk))
-                      }
+                      onClick={async () => {
+                        const next = !showPostAlerts;
+                        setShowPostAlerts(next);
+                        if (next) await loadPostAlerts();
+                      }}
+                      className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-800/50 relative transition active:scale-95 cursor-pointer"
+                      title="Post Alerts"
+                      aria-label="Toggle Post Alerts"
                     >
-                      <div className="text-sm font-semibold truncate tracking-tight">
-                        {label}
+                      <GoldenBellIcon size={21} />
+                      {postNotificationsUnread.length > 0 && (
+                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-600 rounded-full ring-2 ring-white dark:ring-slate-900 animate-pulse" />
+                      )}
+                    </button>
+                    <div>
+                      <h2 className="text-base font-bold text-slate-900 dark:text-white leading-none">
+                        Company Notice Board
+                      </h2>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        Corporate bulletins & communications
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => navigate("/social-feed")}
+                      className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-white bg-brand hover:bg-brand-700 transition shadow-smoky-card"
+                    >
+                      History
+                    </button>
+                  </div>
+                </div>
+
+                {/* Post Alerts Dropdown if toggled */}
+                {showPostAlerts && (
+                  <div className="absolute top-16 left-6 z-30 w-80 max-w-[calc(100%-3rem)] rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl p-3">
+                    <div className="pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                      <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                        Post Notifications
                       </div>
-                      <div className="text-xs text-white/90 mt-0.5 truncate">
-                        Reports
+                      <button
+                        type="button"
+                        onClick={() => setShowPostAlerts(false)}
+                        className="text-slate-400 hover:text-slate-600 text-xs"
+                      >
+                        Close
+                      </button>
+                    </div>
+                    <div className="max-h-64 overflow-auto mt-2 space-y-1.5">
+                      {postAlertsLoading ? (
+                        <div className="p-3 text-xs text-slate-500">Loading…</div>
+                      ) : postAlerts.length === 0 ? (
+                        <div className="p-3 text-xs text-slate-500">No post alerts found.</div>
+                      ) : (
+                        postAlerts.map((p) => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={async () => {
+                              setShowPostAlerts(false);
+                              try {
+                                const related = notifications.filter(
+                                  (n) =>
+                                    Number(n.is_read) !== 1 &&
+                                    String(n.link || "").startsWith(`/social-feed/${p.id}`)
+                                );
+                                for (const n of related) {
+                                  try {
+                                    await client.put(`/workflows/notifications/${n.id}/read`);
+                                  } catch {}
+                                }
+                                setNotifications((prev) =>
+                                  prev.map((n) =>
+                                    String(n.link || "").startsWith(`/social-feed/${p.id}`)
+                                      ? { ...n, is_read: 1 }
+                                      : n
+                                  )
+                                );
+                              } catch {}
+                              navigate(`/social-feed/${p.id}`);
+                            }}
+                            className="w-full text-left p-2 rounded-lg bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 transition"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <img
+                                src={p.profile_picture_url || "/default-avatar.png"}
+                                alt=""
+                                className="w-7 h-7 rounded-full object-cover shrink-0"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="text-xs font-semibold truncate">
+                                  {String(p.full_name || p.username || "User")}
+                                </div>
+                                <div className="text-[11px] text-slate-500 truncate">
+                                  {String(p.content || "").replace(/\s+/g, " ").trim().slice(0, 60)}
+                                </div>
+                              </div>
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Company Feed Content */}
+                <div ref={postRef} className="flex-1 min-h-0 overflow-y-auto">
+                  <CompanyFeed compact />
+                </div>
+              </div>
+
+              {/* Favourite Pages Section */}
+              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-smoky p-6 border border-slate-200/90 dark:border-slate-800 flex flex-col">
+                {/* Header */}
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800/80 mb-4">
+                  <div className="flex items-center gap-2.5">
+                    <Star size={18} className="text-[#FBBE23] fill-[#FBBE23] shrink-0" />
+                    <div>
+                      <h2 className="text-base font-bold text-slate-900 dark:text-white leading-none">
+                        Favourite Pages
+                      </h2>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        Quick access to your pinned workspaces
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Squared Cards Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {displayPages.map((page, idx) => (
+                    <button
+                      key={page.path || idx}
+                      type="button"
+                      onClick={() => navigate(page.path)}
+                      className="relative aspect-square p-3.5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/70 hover:border-amber-400/60 dark:hover:border-amber-400/50 shadow-smoky-card transition-all duration-200 flex flex-col justify-between text-left group active:scale-95"
+                      title={`Open ${page.title}`}
+                    >
+                      <div className="flex items-start justify-between w-full">
+                        <div className="w-8 h-8 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200/60 dark:border-slate-700/60 flex items-center justify-center text-slate-700 dark:text-slate-300 group-hover:scale-105 group-hover:text-amber-600 transition-all shadow-2xs">
+                          {renderFavIcon(page.iconKey)}
+                        </div>
+                        <Star
+                          size={16}
+                          className={`w-4 h-4 transition-transform group-hover:scale-110 ${
+                            favorites.some((f) => f.path === page.path)
+                              ? "text-[#FBBE23] fill-[#FBBE23]"
+                              : "text-slate-300 dark:text-slate-600 fill-none"
+                          }`}
+                        />
+                      </div>
+                      <div className="min-w-0 mt-2">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 block truncate">
+                          {page.module || "General"}
+                        </span>
+                        <h3 className="text-xs font-semibold text-slate-900 dark:text-white line-clamp-2 leading-tight mt-0.5 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                          {page.title}
+                        </h3>
                       </div>
                     </button>
-                    {activeModule === mk
-                      ? (() => {
-                          const modKey = String(activeModule);
-                          const reportsFromFeatures = allFeatures
-                            .filter((f) => {
-                              const sameModule =
-                                String(f.module_key) === modKey;
-                              const p = String(f.path || "");
-                              const isReportPath = p.startsWith(
-                                `/${modKey}/reports`,
-                              );
-                              const isDashboardType =
-                                String(f.type || "").toLowerCase() ===
-                                "dashboard";
-                              return (
-                                sameModule && (isReportPath || isDashboardType)
-                              );
-                            })
-                            .map((f) => ({
-                              label: f.label || "Entry",
-                              path: f.path || "/",
-                            }));
-                          const curated =
-                            Array.isArray(moduleReportsMap?.[mk]) &&
-                            moduleReportsMap[mk].map((r) => ({
-                              label: r.label || r.name || "Report",
-                              path: r.path || "/",
-                            }));
-                          const regDash = Array.isArray(
-                            getModuleDashboards?.(mk),
-                          )
-                            ? getModuleDashboards(mk).map((d) => ({
-                                label: d.label,
-                                path: d.path,
-                              }))
-                            : [];
-                          const preferredDash =
-                            moduleDashboardPath[mk] ||
-                            (Array.isArray(getModuleDashboards?.(mk)) &&
-                              getModuleDashboards(mk)[0]?.path) ||
-                            null;
-                          const dashEntry =
-                            preferredDash && canAccessPath(preferredDash)
-                              ? [{ label: "Dashboard", path: preferredDash }]
-                              : [];
-                          const byPath = new Map();
-                          [
-                            ...dashEntry,
-                            ...reportsFromFeatures,
-                            ...(curated || []),
-                            ...regDash,
-                          ].forEach((e) => {
-                            const p = String(e.path || "");
-                            if (!p) return;
-                            if (!byPath.has(p)) byPath.set(p, e);
-                          });
-                          const hiddenPaths = new Set([
-                            "/administration/reports",
-                            "/administration/system-overview",
-                            "/administration/user-activity",
-                            "/sales/reports",
-                            "/sales/revenue-analytics",
-                            "/sales/sales-overview",
-                            "/sales/customer-analytics",
-                            "/purchase/procurement-overview",
-                            "/purchase/supplier-analytics",
-                            "/inventory/inventory-overview",
-                            "/inventory/stock-analytics",
-                            "/finance/financial-overview",
-                            "/finance/cash-flow",
-                            "/finance/budget-analysis",
-                            "/human-resources/hr-overview",
-                            "/human-resources/attendance-dashboard",
-                            "/human-resources/payroll-dashboard",
-                            "/production/production-overview",
-                            "/production/efficiency-analytics",
-                            "/maintenance/maintenance-overview",
-                            "/maintenance/asset-analytics",
-                            "/project-management/project-overview",
-                            "/project-management/resource-utilization",
-                          ]);
-                          const entries = Array.from(byPath.values()).filter(
-                            (e) => {
-                              const p = e?.path || "";
-                              if (!p || hiddenPaths.has(p)) return false;
-                              if (canAccessPath(p)) return true;
-                              const dashboards = getModuleDashboards?.(mk) || [];
-                              return dashboards.some((d) => d.path === p);
-                            },
-                          );
-                          return (
-                            <div className="absolute left-0 top-full mt-2 sm:left-full sm:top-0 sm:ml-2 z-50 w-56 max-h-80 overflow-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md shadow-2xl p-1 transition-all duration-200 scale-100 opacity-80">
-                              {entries.map((e) => (
-                                <button
-                                  key={e.path || e.label}
-                                  type="button"
-                                  onClick={() => navigate(e.path)}
-                                  className="block w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition rounded-lg"
-                                  title={e.path}
-                                >
-                                  <div className="text-sm font-medium text-slate-800 dark:text-slate-100">
-                                    {e.label}
-                                  </div>
-                                </button>
-                              ))}
-                              {entries.length === 0 ? (
-                                <div className="p-3 text-sm text-slate-600">
-                                  No entries available for your role.
-                                </div>
-                              ) : null}
-                            </div>
-                          );
-                        })()
-                      : null}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.03)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] p-6 border border-slate-100 dark:border-slate-800/80 hover:border-slate-200/80 dark:hover:border-slate-700/80 hover:shadow-[0_12px_40px_rgb(0,0,0,0.06)] dark:hover:shadow-[0_12px_40px_rgb(0,0,0,0.25)] transition-all duration-300 relative overflow-hidden ">
-            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <span className="text-brand-500">🔔</span> Notifications
-            </h2>
-            <div className="space-y-4">
-              <div className="rounded-lg border border-slate-200 p-4 flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-bold text-slate-800">
-                    Approved Documents
-                  </div>
-                  <div className="text-xs text-slate-500">
-                    {approvedNotifications.length} Approved
-                  </div>
+                  ))}
                 </div>
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  onClick={() => navigate("/administration/workflows/approved")}
-                >
-                  View Details
-                </button>
-              </div>
-
-              <div className="rounded-lg border border-slate-200 p-4 flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-bold text-slate-800">
-                    Sent Documents
-                  </div>
-                  <div className="text-xs text-slate-500">
-                    {sentDocuments.length} Sent ({sentSummary.approved} Approved, {sentSummary.pending} In Review)
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  onClick={() => navigate("/administration/workflows/sent")}
-                >
-                  View Details
-                </button>
-              </div>
-
-              <div className="rounded-lg border border-slate-200 p-4 flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-bold text-slate-800">
-                    Pending Documents
-                  </div>
-                  <div className="text-xs text-slate-500">
-                    {filteredPending.length} Pending
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  onClick={() =>
-                    navigate("/administration/workflows/approvals")
-                  }
-                >
-                  View Details
-                </button>
               </div>
             </div>
           </div>
-        </div>
-      </>
-    ) : (
+        </>
+      ) : (
           /* Basic Mode: Assigned Modules & Primary Pages */
           <div className="space-y-6">
             {assignedModulesWithPages.length === 0 ? (
@@ -1624,11 +1860,15 @@ export default function HomePage() {
                 <p className="text-xs text-slate-500 mt-1">Please contact your administrator to assign module permissions to your user role.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <MobileMovingCarousel
+                gridColsClass="md:grid-cols-2 xl:grid-cols-3"
+                gapClass="gap-6"
+                autoInterval={4000}
+              >
                 {assignedModulesWithPages.map((mod) => (
                   <div
                     key={mod.key}
-                    className="relative rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/90 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden group"
+                    className="w-full h-full relative rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/90 shadow-smoky hover:shadow-smoky-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden group"
                   >
                     {/* Ambient Glow on Hover */}
                     <div className={`absolute -right-12 -top-12 w-32 h-32 bg-gradient-to-br ${mod.color || "from-brand-500 to-brand-700"} opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 rounded-full blur-2xl transition-opacity duration-500 pointer-events-none`} />
@@ -1656,7 +1896,7 @@ export default function HomePage() {
                       <button
                         type="button"
                         onClick={() => navigate(mod.path)}
-                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-brand-600 hover:text-white dark:bg-slate-800 dark:hover:bg-brand-600 text-slate-700 dark:text-slate-200 transition-all flex items-center gap-1.5 shrink-0 shadow-2xs"
+                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-brand-600 hover:text-white dark:bg-slate-800 dark:hover:bg-brand-600 text-slate-700 dark:text-slate-200 transition-all flex items-center gap-1.5 shrink-0 shadow-smoky-card"
                         title={`Open ${mod.label} Module`}
                       >
                         <span>Explore</span>
@@ -1694,7 +1934,7 @@ export default function HomePage() {
                     </div>
                   </div>
                 ))}
-              </div>
+              </MobileMovingCarousel>
             )}
           </div>
         )}
@@ -1816,14 +2056,14 @@ export default function HomePage() {
             <div className="px-6 py-3.5 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2 bg-slate-50 dark:bg-slate-800/50 shrink-0">
               <button
                 type="button"
-                className="px-4 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="px-4 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shadow-smoky-card"
                 onClick={closeApprovalModal}
               >
                 Cancel
               </button>
               <button
                 type="button"
-                className="px-4 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl shadow-sm transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl shadow-smoky-card transition-colors disabled:opacity-50"
                 onClick={() => handleModalAction("APPROVE")}
                 disabled={modalProcessing}
               >
@@ -1833,7 +2073,7 @@ export default function HomePage() {
               </button>
               <button
                 type="button"
-                className="px-4 py-2 text-xs font-semibold bg-amber-600 hover:bg-amber-500 text-white rounded-xl shadow-sm transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-xs font-semibold bg-amber-600 hover:bg-amber-500 text-white rounded-xl shadow-smoky-card transition-colors disabled:opacity-50"
                 onClick={() => handleModalAction("RETURN")}
                 disabled={modalProcessing}
               >
@@ -1841,11 +2081,217 @@ export default function HomePage() {
               </button>
               <button
                 type="button"
-                className="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white rounded-xl shadow-sm transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white rounded-xl shadow-smoky-card transition-colors disabled:opacity-50"
                 onClick={() => handleModalAction("REJECT")}
                 disabled={modalProcessing}
               >
                 Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Document History & Audit Modal */}
+      {docHistoryModalOpen && selectedDocItem && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn"
+          onClick={() => setDocHistoryModalOpen(false)}
+        >
+          <div
+            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-xl max-h-[85vh] shadow-smoky-lg flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-800/40">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-brand-50 dark:bg-brand-950/70 border border-brand-200 dark:border-brand-800 flex items-center justify-center text-brand-600 shadow-2xs">
+                  <History size={20} />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white line-clamp-1">
+                    {docLabel(selectedDocItem) || selectedDocItem.title || "Document History"}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Document History &amp; User Action Trail
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDocHistoryModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto space-y-5 flex-1">
+              {/* Document Overview Card */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800 shadow-smoky-card space-y-3">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="text-xs font-semibold text-slate-500">
+                    Document Type:{" "}
+                    <span className="font-bold text-slate-800 dark:text-slate-200 uppercase">
+                      {selectedDocItem.document_type || selectedDocItem.type || "Document"}
+                    </span>
+                  </div>
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      (selectedDocItem.status === "APPROVED" || selectedDocItem._tabType === "approved")
+                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                        : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+                    }`}
+                  >
+                    {selectedDocItem.status || (selectedDocItem._tabType === "approved" ? "APPROVED" : "PENDING")}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-xs pt-2 border-t border-slate-200/60 dark:border-slate-700/60">
+                  <div>
+                    <span className="text-slate-400 block mb-0.5">Initiator / Created By</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                      <User size={13} className="text-slate-400" />
+                      {selectedDocItem.initiator || user?.full_name || "System"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block mb-0.5">Submitted / Logged Date</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                      <Calendar size={13} className="text-slate-400" />
+                      {selectedDocItem.submitted_at || selectedDocItem.date || selectedDocItem.created_at
+                        ? new Date(selectedDocItem.submitted_at || selectedDocItem.date || selectedDocItem.created_at).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })
+                        : "Recent"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Trail & User History */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                  <Clock size={14} className="text-brand-600" /> Users Involved &amp; Actions Taken
+                </h4>
+
+                {docHistoryLoading ? (
+                  <div className="p-8 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+                    <span>Loading document action history...</span>
+                  </div>
+                ) : docWorkflowData?.logs && docWorkflowData.logs.length > 0 ? (
+                  <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800">
+                    {docWorkflowData.logs.map((log, idx) => (
+                      <div key={idx} className="relative group">
+                        {/* Dot on timeline */}
+                        <div className="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-brand-600 border-2 border-white dark:border-slate-900 shadow-xs" />
+                        <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 shadow-smoky-card space-y-1.5">
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                              <User size={13} className="text-brand-600" />
+                              {log.actor_name || "Reviewer"}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-mono">
+                              {log.created_at ? new Date(log.created_at).toLocaleString() : ""}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
+                              Action: {log.action || "REVIEW"}
+                            </span>
+                          </div>
+                          {log.comments && (
+                            <p className="text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/60 p-2 rounded-xl border border-slate-100 dark:border-slate-800 italic">
+                              &ldquo;{log.comments}&rdquo;
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  /* Synthesized Audit History when workflow logs are empty or direct transaction */
+                  <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800">
+                    <div className="relative">
+                      <div className="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-brand-600 border-2 border-white dark:border-slate-900 shadow-xs" />
+                      <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 shadow-smoky-card space-y-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-bold text-slate-900 dark:text-white">
+                            {selectedDocItem.initiator || user?.full_name || "Originator"}
+                          </span>
+                          <span className="text-[10px] text-slate-400">
+                            {selectedDocItem.submitted_at || selectedDocItem.date
+                              ? new Date(selectedDocItem.submitted_at || selectedDocItem.date).toLocaleDateString()
+                              : "Logged"}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-600 dark:text-slate-300">
+                          Created and submitted document for review and verification.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="relative">
+                      <div
+                        className={`absolute -left-6 top-1 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-900 shadow-xs ${
+                          (selectedDocItem.status === "APPROVED" || selectedDocItem._tabType === "approved")
+                            ? "bg-emerald-600"
+                            : "bg-amber-500"
+                        }`}
+                      />
+                      <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 shadow-smoky-card space-y-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-bold text-slate-900 dark:text-white">
+                            {(selectedDocItem.status === "APPROVED" || selectedDocItem._tabType === "approved")
+                              ? "Document Approval"
+                              : "Pending Review"}
+                          </span>
+                          <span
+                            className={`text-[10px] font-bold uppercase ${
+                              (selectedDocItem.status === "APPROVED" || selectedDocItem._tabType === "approved")
+                                ? "text-emerald-600"
+                                : "text-amber-600"
+                            }`}
+                          >
+                            {(selectedDocItem.status === "APPROVED" || selectedDocItem._tabType === "approved")
+                              ? "Completed"
+                              : "Awaiting Action"}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-600 dark:text-slate-300">
+                          {(selectedDocItem.status === "APPROVED" || selectedDocItem._tabType === "approved")
+                            ? "The document has completed all workflow requirements and has been formally approved."
+                            : "Document is currently circulating among designated department approvers."}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-800/40">
+              <button
+                type="button"
+                onClick={() => setDocHistoryModalOpen(false)}
+                className="btn btn-secondary text-xs px-4 py-2 rounded-xl shadow-smoky-card font-semibold"
+              >
+                Close
+              </button>
+
+              {/* View Details Button */}
+              <button
+                type="button"
+                onClick={() => handleViewDocDetails(selectedDocItem)}
+                className="btn btn-primary text-xs px-4 py-2 rounded-xl font-semibold inline-flex items-center gap-1.5 shadow-smoky-card"
+              >
+                <Eye size={14} />
+                <span>View Details</span>
               </button>
             </div>
           </div>

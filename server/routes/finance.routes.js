@@ -13,6 +13,7 @@ import {
 import { requirePermission } from "../middleware/requirePermission.js";
 import * as financeController from "../controllers/finance.controller.js";
 import * as budgetController from "../controllers/finance.budget.controller.js";
+import * as pettyCashController from "../controllers/pettyCash.controller.js";
 import { upload } from "../middleware/upload.js";
 
 const router = express.Router();
@@ -950,6 +951,86 @@ router.get(
   requireAuth,
   requireCompanyScope,
   budgetController.getTransactionDrilldown,
+);
+
+// =========================================================================
+// PETTY CASH BOOK ROUTES
+// =========================================================================
+router.get(
+  "/petty-cash/accounts",
+  requireAuth,
+  requireCompanyScope,
+  pettyCashController.getPettyCashAccounts
+);
+
+router.post(
+  "/petty-cash/accounts",
+  requireAuth,
+  requireCompanyScope,
+  pettyCashController.savePettyCashAccount
+);
+
+router.get(
+  "/petty-cash/accounts/:id/balance",
+  requireAuth,
+  requireCompanyScope,
+  pettyCashController.getAccountBalanceDetails
+);
+
+router.get(
+  "/petty-cash/transactions",
+  requireAuth,
+  requireCompanyScope,
+  pettyCashController.getPettyCashTransactions
+);
+
+router.get(
+  "/petty-cash/transactions/:id",
+  requireAuth,
+  requireCompanyScope,
+  pettyCashController.getPettyCashTransactionById
+);
+
+router.post(
+  "/petty-cash/disburse",
+  requireAuth,
+  requireCompanyScope,
+  pettyCashController.recordDisbursement
+);
+
+router.post(
+  "/petty-cash/transactions/:id/confirm",
+  requireAuth,
+  requireCompanyScope,
+  pettyCashController.confirmDisbursement
+);
+
+router.post(
+  "/petty-cash/transactions/:id/reverse",
+  requireAuth,
+  requireCompanyScope,
+  pettyCashController.reverseDisbursement
+);
+
+router.post(
+  "/petty-cash/transactions/:id/attachments",
+  requireAuth,
+  requireCompanyScope,
+  pettyCashController.addTransactionAttachment
+);
+
+router.get(
+  "/petty-cash/reports",
+  requireAuth,
+  requireCompanyScope,
+  pettyCashController.getPettyCashReports
+);
+
+router.post(
+  "/petty-cash/sync-funding",
+  requireAuth,
+  requireCompanyScope,
+  pettyCashController.manualSyncFunding
 );
 
 export default router;

@@ -31,7 +31,7 @@ function toISODate(v) {
 
 /**
  *  component
- * 
+ *
  * @returns {JSX.Element} The rendered component
  */
 export default function GRNLocalForm() {
@@ -595,7 +595,7 @@ export default function GRNLocalForm() {
             };
           }),
         }));
-        
+
         const newQueries = {};
         details.forEach((d, idx) => {
           const it = items.find((i) => String(i.id) === String(d.item_id));
@@ -702,7 +702,7 @@ export default function GRNLocalForm() {
         workflow_id: candidateWorkflow ? candidateWorkflow.id : null,
         target_user_id: targetApproverId || null,
         comments: forwardComments,
-        });
+      });
       setFormData((prev) => ({ ...prev, status: newStatus }));
       setShowForwardModal(false);
       toast.success("GRN submitted for approval successfully");
@@ -878,7 +878,10 @@ export default function GRNLocalForm() {
                 Goods receipt note for local purchases
               </p>
             </div>
-            <button onClick={() => window.history.back()} className="btn-success">
+            <button
+              onClick={() => window.history.back()}
+              className="btn-success"
+            >
               Back to List
             </button>
           </div>
@@ -920,12 +923,15 @@ export default function GRNLocalForm() {
                           setFormData({ ...formData, grn_date: e.target.value })
                         }
                         required
-                        disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
+                        disabled={
+                          !isNew && !hasExceptional("DOCUMENT.EDIT_DATE")
+                        }
                       />
                     </div>
                     <div>
                       <label className="label">Warehouse</label>
-                      <select required
+                      <select
+                        required
                         className="input w-80"
                         value={formData.warehouse_id}
                         onChange={(e) =>
@@ -1034,8 +1040,10 @@ export default function GRNLocalForm() {
                           })
                         }
                         required
-                      
-                        disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+                        disabled={
+                          readOnly ||
+                          (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))
+                        }
                       />
                     </div>
                     <div>
@@ -1050,8 +1058,10 @@ export default function GRNLocalForm() {
                             invoice_due_date: e.target.value,
                           })
                         }
-                      
-                        disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+                        disabled={
+                          readOnly ||
+                          (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))
+                        }
                       />
                     </div>
                     <div>
@@ -1080,8 +1090,10 @@ export default function GRNLocalForm() {
                             delivery_date: e.target.value,
                           })
                         }
-                      
-                        disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+                        disabled={
+                          readOnly ||
+                          (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))
+                        }
                       />
                     </div>
                   </div>
@@ -1188,7 +1200,13 @@ export default function GRNLocalForm() {
                                     autoComplete="off"
                                     className="input min-w-[256px] w-[384px]"
                                     placeholder="Scan barcode or type item name"
-                                    value={itemQueries[idx] !== undefined ? itemQueries[idx] : (it ? it.item_name || it.name || "" : "")}
+                                    value={
+                                      itemQueries[idx] !== undefined
+                                        ? itemQueries[idx]
+                                        : it
+                                          ? it.item_name || it.name || ""
+                                          : ""
+                                    }
                                     onChange={(e) => {
                                       const val = e.target.value;
                                       setItemQueries((prev) => ({
@@ -1289,9 +1307,7 @@ export default function GRNLocalForm() {
                                     {(Array.isArray(uoms) ? uoms : []).map(
                                       (u) => (
                                         <option key={u.id} value={u.uom_code}>
-                                          {u.uom_name
-                                            ? `${u.uom_name} (${u.uom_code})`
-                                            : u.uom_code}
+                                          {u.uom_code}
                                         </option>
                                       ),
                                     )}
@@ -1445,8 +1461,11 @@ export default function GRNLocalForm() {
                                       mfg_date: e.target.value,
                                     })
                                   }
-                                
-                                  disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+                                  disabled={
+                                    readOnly ||
+                                    (isEdit &&
+                                      !hasExceptional("DOCUMENT.EDIT_DATE"))
+                                  }
                                 />
                               </td>
                               <td>
@@ -1459,8 +1478,11 @@ export default function GRNLocalForm() {
                                       expiry_date: e.target.value,
                                     })
                                   }
-                                
-                                  disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+                                  disabled={
+                                    readOnly ||
+                                    (isEdit &&
+                                      !hasExceptional("DOCUMENT.EDIT_DATE"))
+                                  }
                                 />
                               </td>
                               <td>
@@ -1509,7 +1531,10 @@ export default function GRNLocalForm() {
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-                <button onClick={() => window.history.back()} className="btn-secondary">
+                <button
+                  onClick={() => window.history.back()}
+                  className="btn-secondary"
+                >
                   Cancel
                 </button>
                 <button
@@ -1553,29 +1578,28 @@ export default function GRNLocalForm() {
       </div>
       {showForwardModal ? (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-start p-4 sm:p-6 md:p-10 z-50 animate-fadeIn">
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden my-auto sm:my-8 transition-all">
-              <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/30 text-brand-900 dark:text-brand-400 flex items-center justify-center font-bold flex-shrink-0 border border-brand-200/50 dark:border-brand-800/50">
-                    <Send size={20} />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                      Forward GRN for Approval
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                      Submit Goods Receipt Note into the approval workflow
-                    </p>
-                  </div>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden my-auto sm:my-8 transition-all">
+            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/30 text-brand-900 dark:text-brand-400 flex items-center justify-center font-bold flex-shrink-0 border border-brand-200/50 dark:border-brand-800/50">
+                  <Send size={20} />
                 </div>
-                <button
-                  type="button"
-                  
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                >
-                  <LucideX size={18} />
-                </button>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                    Forward GRN for Approval
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Submit Goods Receipt Note into the approval workflow
+                  </p>
+                </div>
               </div>
+              <button
+                type="button"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              >
+                <LucideX size={18} />
+              </button>
+            </div>
             <div className="p-4 space-y-3">
               <div className="text-sm text-slate-700">
                 Document No:{" "}

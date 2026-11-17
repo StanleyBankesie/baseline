@@ -85,14 +85,14 @@ export default function DowntimeAnalysisReport() {
             <Calendar size={16} className="text-indigo-500" />
             <input 
               type="date" 
-              className="bg-transparent border-none outline-none text-xs font-bold text-slate-600 dark:text-slate-300"
+              className="bg-transparent border-none outline-none text-xs font-semibold text-slate-600 dark:text-slate-300"
               value={filters.start_date}
               onChange={e => setFilters({...filters, start_date: e.target.value})}
             />
             <span className="text-slate-300 font-bold">to</span>
             <input 
               type="date" 
-              className="bg-transparent border-none outline-none text-xs font-bold text-slate-600 dark:text-slate-300"
+              className="bg-transparent border-none outline-none text-xs font-semibold text-slate-600 dark:text-slate-300"
               value={filters.end_date}
               onChange={e => setFilters({...filters, end_date: e.target.value})}
             />

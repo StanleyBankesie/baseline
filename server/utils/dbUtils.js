@@ -4029,6 +4029,7 @@ export async function ensurePMInvoiceTables() {
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         invoice_id BIGINT UNSIGNED NOT NULL,
         item_id BIGINT UNSIGNED NOT NULL,
+        item_name VARCHAR(255) NULL,
         qty DECIMAL(18,4) NOT NULL DEFAULT 0,
         unit_price DECIMAL(18,4) NOT NULL DEFAULT 0,
         discount_percent DECIMAL(5,2) NOT NULL DEFAULT 0,

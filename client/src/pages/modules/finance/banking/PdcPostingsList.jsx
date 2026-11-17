@@ -205,7 +205,7 @@ export default function PdcPostingsList() {
             <form onSubmit={create} className="p-8 space-y-6 bg-base-100 flex-1 flex flex-col justify-between">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="form-control">
-                  <label className="label text-xs font-bold text-slate-500 uppercase pb-1">
+                  <label className="label text-xs font-semibold text-slate-500 uppercase pb-1">
                     Voucher <span className="text-error">*</span>
                   </label>
                   <select
@@ -240,7 +240,7 @@ export default function PdcPostingsList() {
                 </div>
 
                 <div className="form-control">
-                  <label className="label text-xs font-bold text-slate-500 uppercase pb-1">
+                  <label className="label text-xs font-semibold text-slate-500 uppercase pb-1">
                     Bank Account
                   </label>
                   <select
@@ -258,7 +258,7 @@ export default function PdcPostingsList() {
                 </div>
 
                 <div className="form-control">
-                  <label className="label text-xs font-bold text-slate-500 uppercase pb-1">
+                  <label className="label text-xs font-semibold text-slate-500 uppercase pb-1">
                     Cheque No <span className="text-error">*</span>
                   </label>
                   <input
@@ -271,7 +271,7 @@ export default function PdcPostingsList() {
                 </div>
 
                 <div className="form-control">
-                  <label className="label text-xs font-bold text-slate-500 uppercase pb-1">
+                  <label className="label text-xs font-semibold text-slate-500 uppercase pb-1">
                     Cheque Date <span className="text-error">*</span>
                   </label>
                   <input
@@ -310,7 +310,7 @@ export default function PdcPostingsList() {
                 </h2>
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase">
+                    <span className="text-[10px] font-semibold text-slate-500 uppercase">
                       From:
                     </span>
                     <input
@@ -321,7 +321,7 @@ export default function PdcPostingsList() {
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase">
+                    <span className="text-[10px] font-semibold text-slate-500 uppercase">
                       To:
                     </span>
                     <input
@@ -332,7 +332,7 @@ export default function PdcPostingsList() {
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase">
+                    <span className="text-[10px] font-semibold text-slate-500 uppercase">
                       Bank:
                     </span>
                     <select
@@ -349,7 +349,7 @@ export default function PdcPostingsList() {
                     </select>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase">
+                    <span className="text-[10px] font-semibold text-slate-500 uppercase">
                       Status:
                     </span>
                     <select

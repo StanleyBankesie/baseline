@@ -11,6 +11,7 @@ import { api } from "api/client";
 import { useUoms } from "@/hooks/useUoms";
 import { filterByPrefix } from "@/utils/searchUtils.js";
 import { usePermission } from "@/auth/PermissionContext.jsx";
+import { toast } from "react-toastify";
 
 function normalizeDate(v) {
   if (!v) return new Date().toISOString().split("T")[0];
@@ -20,7 +21,7 @@ function normalizeDate(v) {
 
 /**
  *  component
- * 
+ *
  * @returns {JSX.Element} The rendered component
  */
 export default function MaterialUtilizationForm() {
@@ -83,10 +84,11 @@ export default function MaterialUtilizationForm() {
       .catch(() => {});
 
     api
-      .get("/inventory/warehouses")
+      .get("/projects/setup/temporal-warehouses")
       .then((res) => {
         if (!mounted) return;
-        setWarehouses(Array.isArray(res.data?.items) ? res.data.items : []);
+        const list = Array.isArray(res.data?.items) ? res.data.items : [];
+        setWarehouses(list);
       })
       .catch(() => {});
 
@@ -192,14 +194,27 @@ export default function MaterialUtilizationForm() {
   }, [items]);
 
   const statusColors = {
-    DRAFT: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700",
-    SUBMITTED: "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800",
-    CONFIRMED: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800",
-    CANCELLED: "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200 dark:border-rose-800",
+    DRAFT:
+      "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700",
+    SUBMITTED:
+      "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800",
+    CONFIRMED:
+      "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800",
+    CANCELLED:
+      "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200 dark:border-rose-800",
   };
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
+
+    if (!formData.warehouseId) {
+      setError("Please select a temporal storage location before saving.");
+      toast.error("Please select a temporal storage location before saving.");
+      const el = document.getElementById("temporalStorageSelect");
+      if (el) el.focus();
+      return;
+    }
+
     setSaving(true);
     setError("");
 
@@ -347,7 +362,10 @@ export default function MaterialUtilizationForm() {
           </button>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
-              <Wrench size={26} className="text-brand-900 dark:text-brand-400" />
+              <Wrench
+                size={26}
+                className="text-brand-900 dark:text-brand-400"
+              />
               {isNew ? "New Material Utilization" : "Edit Material Utilization"}
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
@@ -366,8 +384,15 @@ export default function MaterialUtilizationForm() {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={saving}
-            className="btn btn-primary inline-flex items-center gap-2 text-sm font-semibold shadow-sm"
+            disabled={saving || !formData.warehouseId}
+            title={
+              !formData.warehouseId
+                ? "Please select a temporal storage location before saving"
+                : "Save Utilization"
+            }
+            className={`btn btn-primary inline-flex items-center gap-2 text-sm font-semibold shadow-sm ${
+              !formData.warehouseId ? "opacity-60 cursor-not-allowed" : ""
+            }`}
           >
             <Save size={16} /> {saving ? "Saving..." : "Save Utilization"}
           </button>
@@ -375,368 +400,387 @@ export default function MaterialUtilizationForm() {
       </div>
 
       <div className="card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {loading ? <div className="text-sm">Loading...</div> : null}
-            {error ? <div className="text-sm text-red-600">{error}</div> : null}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {loading ? <div className="text-sm">Loading...</div> : null}
+          {error ? <div className="text-sm text-red-600">{error}</div> : null}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
-                <label className="label">Utilization Date *</label>
-                <input
-                  type="date"
-                  className="input"
-                  value={formData.utilizationDate}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      utilizationDate: e.target.value,
-                    })
-                  }
-                  required
-                
-                  disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
-                />
-              </div>
-              <div>
-                <label className="label">Project *</label>
-                <select
-                  className="input"
-                  value={formData.projectId}
-                  onChange={(e) => onProjectChange(e.target.value)}
-                  required
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label className="label">Utilization Date *</label>
+              <input
+                type="date"
+                className="input"
+                value={formData.utilizationDate}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    utilizationDate: e.target.value,
+                  })
+                }
+                required
+                disabled={!isNew && !hasExceptional("DOCUMENT.EDIT_DATE")}
+              />
+            </div>
+            <div>
+              <label className="label">Project *</label>
+              <select
+                className="input"
+                value={formData.projectId}
+                onChange={(e) => onProjectChange(e.target.value)}
+                required
+              >
+                <option value="">Select Project</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.project_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="label">Task</label>
+              <select
+                className="input"
+                value={formData.taskId}
+                onChange={(e) => {
+                  setFormData({ ...formData, taskId: e.target.value });
+                  const t = tasks.find(
+                    (tt) => String(tt.id) === e.target.value,
+                  );
+                  if (t)
+                    setFormData((prev) => ({
+                      ...prev,
+                      taskId: e.target.value,
+                      taskSummary: t.task_title,
+                    }));
+                }}
+              >
+                <option value="">Select Task</option>
+                {tasks.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.task_title}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="label">Status</label>
+              <div className="pt-2">
+                <span
+                  className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${statusColors[formData.status] || "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700"}`}
                 >
-                  <option value="">Select Project</option>
-                  {projects.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.project_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="label">Task</label>
-                <select
-                  className="input"
-                  value={formData.taskId}
-                  onChange={(e) => {
-                    setFormData({ ...formData, taskId: e.target.value });
-                    const t = tasks.find(
-                      (tt) => String(tt.id) === e.target.value,
-                    );
-                    if (t)
-                      setFormData((prev) => ({
-                        ...prev,
-                        taskId: e.target.value,
-                        taskSummary: t.task_title,
-                      }));
-                  }}
-                >
-                  <option value="">Select Task</option>
-                  {tasks.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.task_title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="label">Status</label>
-                <div className="pt-2">
-                  <span
-                    className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${statusColors[formData.status] || "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700"}`}
-                  >
-                    {formData.status}
-                  </span>
-                </div>
+                  {formData.status}
+                </span>
               </div>
             </div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
-                <label className="label">Task Summary</label>
-                <input
-                  type="text"
-                  className="input"
-                  value={formData.taskSummary}
-                  onChange={(e) =>
-                    setFormData({ ...formData, taskSummary: e.target.value })
-                  }
-                />
-              </div>
-              <div>
-                <label className="label">Temporal Storage / Warehouse</label>
-                <select
-                  className="input"
-                  value={formData.warehouseId}
-                  onChange={(e) => onWarehouseChange(e.target.value)}
-                >
-                  <option value="">Select Warehouse</option>
-                  {warehouses.filter(w => w.is_active === 1 || w.is_active === "1" || w.is_active === true || w.is_active === null || w.is_active === undefined).map((w) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label className="label">Task Summary</label>
+              <input
+                type="text"
+                className="input"
+                value={formData.taskSummary}
+                onChange={(e) =>
+                  setFormData({ ...formData, taskSummary: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <label className="label" htmlFor="temporalStorageSelect">
+                Temporal Storage / Warehouse <span className="text-red-500 font-semibold">*</span>
+              </label>
+              <select
+                id="temporalStorageSelect"
+                className={`input ${!formData.warehouseId ? "border-amber-400 focus:border-brand-500" : ""}`}
+                value={formData.warehouseId}
+                onChange={(e) => onWarehouseChange(e.target.value)}
+                required
+              >
+                <option value="">Select Temporal Storage</option>
+                {warehouses
+                  .filter(
+                    (w) =>
+                      w.is_active === 1 ||
+                      w.is_active === "1" ||
+                      w.is_active === true ||
+                      w.is_active === null ||
+                      w.is_active === undefined,
+                  )
+                  .map((w) => (
                     <option key={w.id} value={w.id}>
                       {w.warehouse_name}
                     </option>
                   ))}
-                </select>
-              </div>
+              </select>
+              {!formData.warehouseId && (
+                <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium mt-1 block">
+                  Temporal storage must be selected before saving
+                </span>
+              )}
             </div>
+          </div>
 
-            <div>
-              <label className="label">Remarks</label>
-              <textarea
-                className="input w-full"
-                rows="3"
-                value={formData.remarks}
-                onChange={(e) =>
-                  setFormData({ ...formData, remarks: e.target.value })
-                }
-                placeholder="Enter any additional notes..."
-              ></textarea>
-            </div>
+          <div>
+            <label className="label">Remarks</label>
+            <textarea
+              className="input w-full"
+              rows="3"
+              value={formData.remarks}
+              onChange={(e) =>
+                setFormData({ ...formData, remarks: e.target.value })
+              }
+              placeholder="Enter any additional notes..."
+            ></textarea>
+          </div>
 
-            <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                  Items Consumed
-                </h3>
-                <button
-                  type="button"
-                  onClick={addItem}
-                  className="btn btn-secondary text-xs inline-flex items-center gap-1.5"><Plus size={14} /> Add Item
-                </button>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="table w-full">
-                  <thead>
-                    <tr>
-                      <th className="w-1/2 min-w-[300px]">Item Name</th>
-                      <th className="w-24 min-w-[100px]">Available Qty</th>
-                      <th className="w-32 min-w-[110px]">Required Qty</th>
-                      <th className="w-24 min-w-[80px]">UOM</th>
-                      <th className="w-32 min-w-[120px]">Cost Price</th>
-                      <th className="w-20">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {items.map((item) => {
-                      const itemQuery = itemQueries[item.id] || "";
-                      const showQuery = item.item_id
-                        ? item.itemName
-                        : itemQuery;
-                      const searchResults =
-                        itemQuery.trim() && !item.item_id
-                          ? filterByPrefix(availableItems, {
-                              query: itemQuery,
-                              searchFields: [
-                                "item_code",
-                                "item_name",
-                                "barcode",
-                              ],
-                            })
-                          : [];
-                      return (
-                        <tr key={item.id}>
-                          <td>
-                            <div className="relative">
-                              <input
-                                id={`pm-util-item-search-${item.id}`}
-                                autoComplete="off"
-                                className="input w-full"
-                                placeholder="Type to search items"
-                                value={showQuery}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setItemQueries((prev) => ({
-                                    ...prev,
-                                    [item.id]: val,
-                                  }));
-                                  if (item.item_id) {
-                                    setItems(
-                                      items.map((i) =>
-                                        i.id === item.id
-                                          ? {
-                                              ...i,
-                                              item_id: "",
-                                              itemCode: "",
-                                              itemName: "",
-                                            }
-                                          : i,
-                                      ),
-                                    );
-                                  }
-                                }}
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter") {
-                                    const query = (
-                                      itemQueries[item.id] || ""
-                                    ).trim();
-                                    if (!query || !searchResults.length) return;
-                                    handleSelectItem(item.id, searchResults[0]);
-                                  }
-                                }}
-                              />
-                              {searchResults.length
-                                ? (() => {
-                                    const el = document.getElementById(
-                                      `pm-util-item-search-${item.id}`,
-                                    );
-                                    const r = el
-                                      ? el.getBoundingClientRect()
-                                      : { bottom: 0, left: 0, width: 0 };
-                                    return (
-                                      <div
-                                        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-md max-h-48 overflow-auto"
-                                        style={{
-                                          position: "fixed",
-                                          top: `${r.bottom + 4}px`,
-                                          left: `${r.left}px`,
-                                          width: `${r.width}px`,
-                                          zIndex: 9999,
-                                        }}
-                                      >
-                                        {searchResults.map((o) => (
-                                          <button
-                                            type="button"
-                                            key={o.id}
-                                            className="block w-full text-left px-3 py-2 hover:bg-slate-50 text-xs"
-                                            onClick={() =>
-                                              handleSelectItem(item.id, o)
-                                            }
-                                          >
-                                            {o.item_code} - {o.item_name}
-                                          </button>
-                                        ))}
-                                      </div>
-                                    );
-                                  })()
-                                : null}
-                            </div>
-                          </td>
-                          <td>
-                            <input
-                              type="number"
-                              className="input bg-white dark:bg-slate-900"
-                              value={item.availableQty}
-                              readOnly
-                              tabIndex={-1}
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="number"
-                              className="input"
-                              value={item.requiredQty}
-                              onChange={(e) => {
-                                setItems(
-                                  items.map((i) =>
-                                    i.id === item.id
-                                      ? {
-                                          ...i,
-                                          requiredQty: Math.max(
-                                            0,
-                                            parseInt(e.target.value, 10) || 0,
-                                          ),
-                                        }
-                                      : i,
-                                  ),
-                                );
-                              }}
-                              min="0"
-                              step="1"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                            />
-                          </td>
-                          <td>
-                            <select
-                              className="input"
-                              value={item.uom || ""}
-                              onChange={(e) => {
-                                setItems(
-                                  items.map((i) =>
-                                    i.id === item.id
-                                      ? { ...i, uom: e.target.value }
-                                      : i,
-                                  ),
-                                );
-                              }}
-                            >
-                              <option value="">UOM</option>
-                              {(Array.isArray(uoms) && uoms.length
-                                ? uoms.map((u) => ({
-                                    code: u.uom_code || u.code || "",
-                                    name: u.uom_name || u.name || "",
-                                  }))
-                                : [
-                                    { code: "EA", name: "EA" },
-                                    { code: "PCS", name: "PCS" },
-                                    { code: "KG", name: "KG" },
-                                    { code: "LTR", name: "LTR" },
-                                    { code: "MTR", name: "MTR" },
-                                  ]
-                              ).map((u) => (
-                                <option key={u.code} value={u.code}>
-                                  {u.name ? `${u.name} (${u.code})` : u.code}
-                                </option>
-                              ))}
-                            </select>
-                          </td>
-                          <td>
-                            <input
-                              type="number"
-                              step="0.01"
-                              className="input"
-                              value={item.costPrice}
-                              onChange={(e) => {
-                                setItems(
-                                  items.map((i) =>
-                                    i.id === item.id
-                                      ? {
-                                          ...i,
-                                          costPrice:
-                                            Number(e.target.value) || 0,
-                                        }
-                                      : i,
-                                  ),
-                                );
-                              }}
-                              min="0"
-                            />
-                          </td>
-                          <td>
-                            <button
-                              type="button"
-                              onClick={() => removeItem(item.id)}
-                              className="text-red-600 hover:text-red-800 text-sm font-medium"
-                            >
-                              Remove
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-6 border-t border-slate-200 dark:border-slate-800">
+          <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                Items Consumed
+              </h3>
               <button
                 type="button"
-                onClick={() => window.history.back()}
-                className="btn btn-secondary text-sm"
+                onClick={addItem}
+                className="btn btn-secondary text-xs inline-flex items-center gap-1.5"
               >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="btn btn-primary inline-flex items-center gap-2 text-sm font-semibold shadow-sm"
-                disabled={saving}
-              >
-                <Save size={16} /> {saving ? "Saving..." : "Save Utilization"}
+                <Plus size={14} /> Add Item
               </button>
             </div>
-          </form>
+
+            <div className="overflow-x-auto">
+              <table className="table w-full">
+                <thead>
+                  <tr>
+                    <th className="w-1/2 min-w-[300px]">Item Name</th>
+                    <th className="w-24 min-w-[100px]">Available Qty</th>
+                    <th className="w-32 min-w-[110px]">Required Qty</th>
+                    <th className="w-24 min-w-[80px]">UOM</th>
+                    <th className="w-32 min-w-[120px]">Cost Price</th>
+                    <th className="w-20">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((item) => {
+                    const itemQuery = itemQueries[item.id] || "";
+                    const showQuery = item.item_id ? item.itemName : itemQuery;
+                    const searchResults =
+                      itemQuery.trim() && !item.item_id
+                        ? filterByPrefix(availableItems, {
+                            query: itemQuery,
+                            searchFields: ["item_code", "item_name", "barcode"],
+                          })
+                        : [];
+                    return (
+                      <tr key={item.id}>
+                        <td>
+                          <div className="relative">
+                            <input
+                              id={`pm-util-item-search-${item.id}`}
+                              autoComplete="off"
+                              className="input w-full"
+                              placeholder="Type to search items"
+                              value={showQuery}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setItemQueries((prev) => ({
+                                  ...prev,
+                                  [item.id]: val,
+                                }));
+                                if (item.item_id) {
+                                  setItems(
+                                    items.map((i) =>
+                                      i.id === item.id
+                                        ? {
+                                            ...i,
+                                            item_id: "",
+                                            itemCode: "",
+                                            itemName: "",
+                                          }
+                                        : i,
+                                    ),
+                                  );
+                                }
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  const query = (
+                                    itemQueries[item.id] || ""
+                                  ).trim();
+                                  if (!query || !searchResults.length) return;
+                                  handleSelectItem(item.id, searchResults[0]);
+                                }
+                              }}
+                            />
+                            {searchResults.length
+                              ? (() => {
+                                  const el = document.getElementById(
+                                    `pm-util-item-search-${item.id}`,
+                                  );
+                                  const r = el
+                                    ? el.getBoundingClientRect()
+                                    : { bottom: 0, left: 0, width: 0 };
+                                  return (
+                                    <div
+                                      className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-md max-h-48 overflow-auto"
+                                      style={{
+                                        position: "fixed",
+                                        top: `${r.bottom + 4}px`,
+                                        left: `${r.left}px`,
+                                        width: `${r.width}px`,
+                                        zIndex: 9999,
+                                      }}
+                                    >
+                                      {searchResults.map((o) => (
+                                        <button
+                                          type="button"
+                                          key={o.id}
+                                          className="block w-full text-left px-3 py-2 hover:bg-slate-50 text-xs"
+                                          onClick={() =>
+                                            handleSelectItem(item.id, o)
+                                          }
+                                        >
+                                          {o.item_code} - {o.item_name}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  );
+                                })()
+                              : null}
+                          </div>
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            className="input bg-white dark:bg-slate-900"
+                            value={item.availableQty}
+                            readOnly
+                            tabIndex={-1}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            className="input"
+                            value={item.requiredQty}
+                            onChange={(e) => {
+                              setItems(
+                                items.map((i) =>
+                                  i.id === item.id
+                                    ? {
+                                        ...i,
+                                        requiredQty: Math.max(
+                                          0,
+                                          parseInt(e.target.value, 10) || 0,
+                                        ),
+                                      }
+                                    : i,
+                                ),
+                              );
+                            }}
+                            min="0"
+                            step="1"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                          />
+                        </td>
+                        <td>
+                          <select
+                            className="input"
+                            value={item.uom || ""}
+                            onChange={(e) => {
+                              setItems(
+                                items.map((i) =>
+                                  i.id === item.id
+                                    ? { ...i, uom: e.target.value }
+                                    : i,
+                                ),
+                              );
+                            }}
+                          >
+                            <option value="">UOM</option>
+                            {(Array.isArray(uoms) && uoms.length
+                              ? uoms.map((u) => ({
+                                  code: u.uom_code || u.code || "",
+                                  name: u.uom_name || u.name || "",
+                                }))
+                              : [
+                                  { code: "EA", name: "EA" },
+                                  { code: "PCS", name: "PCS" },
+                                  { code: "KG", name: "KG" },
+                                  { code: "LTR", name: "LTR" },
+                                  { code: "MTR", name: "MTR" },
+                                ]
+                            ).map((u) => (
+                              <option key={u.code} value={u.code}>
+                                {u.code}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            step="0.01"
+                            className="input"
+                            value={item.costPrice}
+                            onChange={(e) => {
+                              setItems(
+                                items.map((i) =>
+                                  i.id === item.id
+                                    ? {
+                                        ...i,
+                                        costPrice: Number(e.target.value) || 0,
+                                      }
+                                    : i,
+                                ),
+                              );
+                            }}
+                            min="0"
+                          />
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            onClick={() => removeItem(item.id)}
+                            className="text-red-600 hover:text-red-800 text-sm font-medium"
+                          >
+                            Remove
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-6 border-t border-slate-200 dark:border-slate-800">
+            <button
+              type="button"
+              onClick={() => window.history.back()}
+              className="btn btn-secondary text-sm"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className={`btn btn-primary inline-flex items-center gap-2 text-sm font-semibold shadow-sm ${
+                !formData.warehouseId ? "opacity-60 cursor-not-allowed" : ""
+              }`}
+              disabled={saving || !formData.warehouseId}
+              title={
+                !formData.warehouseId
+                  ? "Please select a temporal storage location before saving"
+                  : "Save Utilization"
+              }
+            >
+              <Save size={16} /> {saving ? "Saving..." : "Save Utilization"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

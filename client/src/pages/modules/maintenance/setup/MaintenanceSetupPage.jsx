@@ -925,34 +925,34 @@ export default function MaintenanceSetupPage() {
               <GenericModal open={providerModal} onClose={() => setProviderModal(false)} title={editingProvider ? "Edit Service Provider" : "New Service Provider"}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="sm:col-span-2">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Provider Name *</label>
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Provider Name *</label>
                     <input type="text" className="input w-full" placeholder="Company Name" value={providerForm.supplier_name} onChange={e => setProviderForm(p => ({ ...p, supplier_name: e.target.value }))} />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Provider Type</label>
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Provider Type</label>
                     <select className="select w-full" value={providerForm.supplier_type} onChange={e => setProviderForm(p => ({ ...p, supplier_type: e.target.value }))}>
                       <option value="LOCAL">LOCAL</option>
                       <option value="FOREIGN">FOREIGN</option>
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Contact Person</label>
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Contact Person</label>
                     <input type="text" className="input w-full" placeholder="John Doe" value={providerForm.contact_person} onChange={e => setProviderForm(p => ({ ...p, contact_person: e.target.value }))} />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Email</label>
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Email</label>
                     <input type="email" className="input w-full" placeholder="contact@example.com" value={providerForm.email} onChange={e => setProviderForm(p => ({ ...p, email: e.target.value }))} />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Phone</label>
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Phone</label>
                     <PhoneInput value={providerForm.phone} onChange={v => setProviderForm(p => ({ ...p, phone: v }))} />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Tax ID / TIN</label>
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Tax ID / TIN</label>
                     <input type="text" className="input w-full" placeholder="Tax ID" value={providerForm.tax_id} onChange={e => setProviderForm(p => ({ ...p, tax_id: e.target.value }))} />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Address</label>
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Address</label>
                     <input type="text" className="input w-full" placeholder="123 Street Name" value={providerForm.address} onChange={e => setProviderForm(p => ({ ...p, address: e.target.value }))} />
                   </div>
                   <div className="sm:col-span-2 pt-2 border-t flex justify-end gap-2 mt-4">
@@ -1051,13 +1051,13 @@ export default function MaintenanceSetupPage() {
                                 <input type="checkbox" className="rounded border-slate-300 text-brand-600 focus:ring-brand-500" checked={Boolean(item.assign_work)} onChange={e => {
                                    setSectionUsers(prev => prev.map(en => en.id === item.id ? { ...en, assign_work: e.target.checked } : en));
                                 }} />
-                                <span className="text-[10px] font-bold uppercase text-slate-500">Assign</span>
+                                <span className="text-[10px] font-semibold uppercase text-slate-500">Assign</span>
                              </label>
                              <label className="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" className="rounded border-slate-300 text-brand-600 focus:ring-brand-500" checked={Boolean(item.is_active)} onChange={e => {
                                    setSectionUsers(prev => prev.map(en => en.id === item.id ? { ...en, is_active: e.target.checked } : en));
                                 }} />
-                                <span className="text-[10px] font-bold uppercase text-slate-500">Active</span>
+                                <span className="text-[10px] font-semibold uppercase text-slate-500">Active</span>
                              </label>
                            </div>
                         </td>

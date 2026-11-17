@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 import { Activity, Clock, CheckCircle2, ClipboardList } from "lucide-react";
 /**
  * @fileoverview ServiceOrdersList component.
@@ -70,8 +71,30 @@ export default function ServiceOrdersList() {
 
   return (
     <div className="p-6 space-y-6">
-            {/* Metric Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            
+
+      <div className="card">
+        <div className="card-header bg-brand text-white rounded-t-lg">
+          <div className="flex justify-between items-center">
+            <div className="font-semibold">Service Orders</div>
+            <div className="grid grid-cols-2 sm:flex gap-2">
+              <Link to="/service-management?section=Reports%20%26%20Parameters" className="btn btn-secondary">
+                Return to Menu
+              </Link>
+              <Link
+                to="/service-management/service-orders/new"
+                className="btn-success"
+              >
+                + New Order
+              </Link>
+            </div>
+          </div>
+        </div>
+        </div>
+
+      {/* Metric Stats Cards Carousel */}
+      {/* Metric Stats Cards */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="md:grid-cols-4" gapClass="gap-4">
         {[
           {
             label: "Active Service Field Orders",
@@ -98,7 +121,7 @@ export default function ServiceOrdersList() {
             color: "bg-emerald-600 text-white",
           },
         ].map((stat, i) => (
-          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+          <div key={i} className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
             <div>
               <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 {stat.label}
@@ -112,25 +135,9 @@ export default function ServiceOrdersList() {
             </div>
           </div>
         ))}
-      </div>
+      </MobileMovingCarousel>
 
       <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg">
-          <div className="flex justify-between items-center">
-            <div className="font-semibold">Service Orders</div>
-            <div className="flex gap-2">
-              <Link to="/service-management?section=Reports%20%26%20Parameters" className="btn btn-secondary">
-                Return to Menu
-              </Link>
-              <Link
-                to="/service-management/service-orders/new"
-                className="btn-success"
-              >
-                + New Order
-              </Link>
-            </div>
-          </div>
-        </div>
         <div className="card-body">
           {successMsg ? (
             <div className="mb-3 p-3 rounded bg-green-50 border border-green-200 text-green-700 text-sm">

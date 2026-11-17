@@ -918,7 +918,7 @@ export default function FMHelpdeskPage() {
                         sla_target_hours: num === "" ? "" : (unit === "DAYS" ? num * 24 : num),
                       });
                     }}
-                    className="w-32 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs font-bold"
+                    className="w-32 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs font-semibold"
                   >
                     <option value="HOURS">Hours</option>
                     <option value="DAYS">Days</option>
@@ -1310,7 +1310,7 @@ export default function FMHelpdeskPage() {
               })()}
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Comments / Notes for Approver (Optional)
                 </label>
                 <textarea

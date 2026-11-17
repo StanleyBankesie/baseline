@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 /**
  * @fileoverview MaintenanceMaterialRequisitionList component.
  * Provides functionality for MaintenanceMaterialRequisitionList.
@@ -90,8 +91,30 @@ export default function MaintenanceMaterialRequisitionList() {
 
   return (
     <div className="space-y-6">
-            {/* Metric Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            
+
+      <div className="card">
+        <div className="card-header bg-brand text-white rounded-t-lg">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 text-white">
+            <div>
+              <h1 className="text-2xl font-bold dark:text-brand-300">
+                Material Requisitions
+              </h1>
+              <p className="hidden sm:block text-sm mt-1">
+                Request materials for maintenance operations
+              </p>
+            </div>
+            <div className="grid grid-cols-2 sm:flex gap-2">
+              <Link to="/maintenance?section=Resource Management" className="btn btn-secondary flex items-center gap-1.5"><ArrowLeft size={16} /> Back</Link>
+              <Link to="/maintenance/material-requisitions/new" className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700">+ New Requisition</Link>
+            </div>
+          </div>
+        </div>
+        </div>
+
+      {/* Metric Stats Cards Carousel */}
+      {/* Metric Stats Cards */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="md:grid-cols-4" gapClass="gap-4">
         {[
           {
             label: "Active Spares Requisitions",
@@ -118,7 +141,7 @@ export default function MaintenanceMaterialRequisitionList() {
             color: "bg-emerald-600 text-white",
           },
         ].map((stat, i) => (
-          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+          <div key={i} className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
             <div>
               <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 {stat.label}
@@ -132,25 +155,9 @@ export default function MaintenanceMaterialRequisitionList() {
             </div>
           </div>
         ))}
-      </div>
+      </MobileMovingCarousel>
 
       <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg">
-          <div className="flex justify-between items-center text-white">
-            <div>
-              <h1 className="text-2xl font-bold dark:text-brand-300">
-                Material Requisitions
-              </h1>
-              <p className="text-sm mt-1">
-                Request materials for maintenance operations
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Link to="/maintenance?section=Resource Management" className="btn btn-secondary flex items-center gap-1.5"><ArrowLeft size={16} /> Back</Link>
-              <Link to="/maintenance/material-requisitions/new" className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700">+ New Requisition</Link>
-            </div>
-          </div>
-        </div>
         <div className="card-body">
           {loading ? <div className="text-sm mb-4">Loading...</div> : null}
           {error ? (

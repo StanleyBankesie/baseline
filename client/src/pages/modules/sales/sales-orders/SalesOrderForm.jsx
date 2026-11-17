@@ -40,7 +40,7 @@ import {
 
 /**
  *  component
- * 
+ *
  * @returns {JSX.Element} The rendered component
  */
 export default function SalesOrderForm() {
@@ -505,17 +505,22 @@ export default function SalesOrderForm() {
   const fetchPriceTypes = async () => {
     try {
       const response = await api.get("/sales/price-types");
-      const list = Array.isArray(response.data?.items) ? response.data.items : [];
+      const list = Array.isArray(response.data?.items)
+        ? response.data.items
+        : [];
       setPriceTypes(list);
       if (isNew) {
         setFormData((prev) => {
           if (prev.price_type && prev.price_type !== "RETAIL") return prev;
           const retailPt = list.find(
-            (pt) => String(pt.name || pt.price_type || "").toUpperCase() === "RETAIL",
+            (pt) =>
+              String(pt.name || pt.price_type || "").toUpperCase() === "RETAIL",
           );
           return {
             ...prev,
-            price_type: retailPt ? retailPt.name || retailPt.id || "RETAIL" : "RETAIL",
+            price_type: retailPt
+              ? retailPt.name || retailPt.id || "RETAIL"
+              : "RETAIL",
           };
         });
       }
@@ -838,10 +843,12 @@ export default function SalesOrderForm() {
   };
 
   const repriceOrderLinesByPriceType = async (newPriceType, newCustomerId) => {
-    const pType = newPriceType !== undefined ? newPriceType : formData.price_type;
-    const cId = newCustomerId !== undefined ? newCustomerId : formData.customer_id;
+    const pType =
+      newPriceType !== undefined ? newPriceType : formData.price_type;
+    const cId =
+      newCustomerId !== undefined ? newCustomerId : formData.customer_id;
     const dateStr = formData.order_date;
-    
+
     const fetchPrice = async (prodId) => {
       try {
         const res = await api.post("/sales/prices/best-price", {
@@ -902,7 +909,9 @@ export default function SalesOrderForm() {
         updatedData.price_type = String(cust.price_type_id);
       }
       setFormData((prev) => ({ ...prev, ...updatedData }));
-      const priceTypeToUse = cust?.price_type_id ? String(cust.price_type_id) : formData.price_type;
+      const priceTypeToUse = cust?.price_type_id
+        ? String(cust.price_type_id)
+        : formData.price_type;
       void repriceOrderLinesByPriceType(priceTypeToUse, value);
       return;
     }
@@ -1232,8 +1241,7 @@ export default function SalesOrderForm() {
     }
   };
 
-  const isApproved =
-    String(formData.status || "").toUpperCase() === "APPROVED";
+  const isApproved = String(formData.status || "").toUpperCase() === "APPROVED";
   const viewLocked = isViewMode && isApproved;
   return (
     <>
@@ -1418,7 +1426,10 @@ export default function SalesOrderForm() {
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0E3646]"
                       required
-                      disabled={isViewMode || (isEditMode && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+                      disabled={
+                        isViewMode ||
+                        (isEditMode && !hasExceptional("DOCUMENT.EDIT_DATE"))
+                      }
                     />
                   </div>
                   <div className="relative">
@@ -1432,8 +1443,9 @@ export default function SalesOrderForm() {
                       required={!formData.customer_id}
                       disabled={isViewMode}
                       value={
-                        customers.find((c) => String(c.id) === String(formData.customer_id))?.customer_name ||
-                        customerSearch
+                        customers.find(
+                          (c) => String(c.id) === String(formData.customer_id),
+                        )?.customer_name || customerSearch
                       }
                       onChange={(e) => {
                         const val = e.target.value;
@@ -1451,14 +1463,21 @@ export default function SalesOrderForm() {
                         }));
                       }}
                     />
-                    {!isViewMode && customerSearch && (
+                    {!isViewMode &&
+                      customerSearch &&
                       (() => {
                         const q = customerSearch.toLowerCase();
-                        const matched = customers.filter(
-                          (c) =>
-                            String(c.customer_name || "").toLowerCase().includes(q) ||
-                            String(c.customer_code || "").toLowerCase().includes(q)
-                        ).slice(0, 10);
+                        const matched = customers
+                          .filter(
+                            (c) =>
+                              String(c.customer_name || "")
+                                .toLowerCase()
+                                .includes(q) ||
+                              String(c.customer_code || "")
+                                .toLowerCase()
+                                .includes(q),
+                          )
+                          .slice(0, 10);
                         return matched.length > 0 ? (
                           <div className="absolute z-30 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 max-h-52 overflow-y-auto">
                             {matched.map((c) => (
@@ -1481,8 +1500,14 @@ export default function SalesOrderForm() {
                                   setCustomerSearch("");
                                 }}
                               >
-                                <div className="font-medium text-slate-800 text-sm">{c.customer_name}</div>
-                                {c.customer_code && <div className="text-xs text-slate-500">{c.customer_code}</div>}
+                                <div className="font-medium text-slate-800 text-sm">
+                                  {c.customer_name}
+                                </div>
+                                {c.customer_code && (
+                                  <div className="text-xs text-slate-500">
+                                    {c.customer_code}
+                                  </div>
+                                )}
                               </button>
                             ))}
                           </div>
@@ -1501,14 +1526,14 @@ export default function SalesOrderForm() {
                             </div>
                           </div>
                         ) : null;
-                      })()
-                    )}
+                      })()}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Warehouse
                     </label>
-                    <select required
+                    <select
+                      required
                       name="warehouse_id"
                       value={formData.warehouse_id}
                       onChange={handleInputChange}
@@ -1548,14 +1573,20 @@ export default function SalesOrderForm() {
                       onChange={(e) => {
                         const val = e.target.value;
                         if (!val) {
-                          setFormData({ ...formData, sales_person_id: "", salesperson: "" });
+                          setFormData({
+                            ...formData,
+                            sales_person_id: "",
+                            salesperson: "",
+                          });
                           return;
                         }
-                        const sp = salespersons.find(s => String(s.id) === String(val));
+                        const sp = salespersons.find(
+                          (s) => String(s.id) === String(val),
+                        );
                         setFormData({
-                           ...formData,
-                           sales_person_id: sp ? sp.id : "",
-                           salesperson: sp ? sp.name : ""
+                          ...formData,
+                          sales_person_id: sp ? sp.id : "",
+                          salesperson: sp ? sp.name : "",
                         });
                       }}
                     >
@@ -1596,7 +1627,9 @@ export default function SalesOrderForm() {
                     >
                       <option value="">Select price type</option>
                       {priceTypes.map((pt) => (
-                        <option key={pt.id} value={pt.name}>{pt.name}</option>
+                        <option key={pt.id} value={pt.name}>
+                          {pt.name}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -1639,7 +1672,10 @@ export default function SalesOrderForm() {
                         onChange={handleInputChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0E3646]"
                         required={formData.payment_type === "CREDIT"}
-                        disabled={isViewMode || (isEditMode && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+                        disabled={
+                          isViewMode ||
+                          (isEditMode && !hasExceptional("DOCUMENT.EDIT_DATE"))
+                        }
                       />
                     </div>
                   )}
@@ -1719,12 +1755,21 @@ export default function SalesOrderForm() {
                                 const results = query
                                   ? filterByPrefix(inventoryItems, {
                                       query,
-                                      searchFields: ["item_code", "item_name", "barcode"],
+                                      searchFields: [
+                                        "item_code",
+                                        "item_name",
+                                        "barcode",
+                                      ],
                                     })
                                   : [];
                                 if (!query || !results.length) return;
                                 e.preventDefault();
-                                handleNewItemChange({ target: { name: "item_id", value: results[0].id } });
+                                handleNewItemChange({
+                                  target: {
+                                    name: "item_id",
+                                    value: results[0].id,
+                                  },
+                                });
                                 setItemQuery(results[0].item_name);
                               }
                             }}
@@ -1734,35 +1779,54 @@ export default function SalesOrderForm() {
                             const results = query
                               ? filterByPrefix(inventoryItems, {
                                   query,
-                                  searchFields: ["item_code", "item_name", "barcode"],
+                                  searchFields: [
+                                    "item_code",
+                                    "item_name",
+                                    "barcode",
+                                  ],
                                 })
                               : [];
-                            return results.length && !newItem.item_id ? (
-                              (() => {
-                                const el = document.getElementById("sales-order-item-search");
-                                const r = el ? el.getBoundingClientRect() : { bottom: 0, left: 0, width: 0 };
-                                return (
-                                  <div
-                                    className="bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-auto"
-                                    style={{ position: 'fixed', top: `${r.bottom + 4}px`, left: `${r.left}px`, width: `${r.width}px`, zIndex: 9999 }}
-                                  >
-                                    {results.map((o) => (
-                                      <button
-                                        type="button"
-                                        key={o.id}
-                                        className="block w-full text-left px-3 py-2 hover:bg-gray-50 text-xs"
-                                        onClick={() => {
-                                          handleNewItemChange({ target: { name: "item_id", value: o.id } });
-                                          setItemQuery(o.item_name);
-                                        }}
-                                      >
-                                        {o.item_code} - {o.item_name}
-                                      </button>
-                                    ))}
-                                  </div>
-                                );
-                              })()
-                            ) : null;
+                            return results.length && !newItem.item_id
+                              ? (() => {
+                                  const el = document.getElementById(
+                                    "sales-order-item-search",
+                                  );
+                                  const r = el
+                                    ? el.getBoundingClientRect()
+                                    : { bottom: 0, left: 0, width: 0 };
+                                  return (
+                                    <div
+                                      className="bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-auto"
+                                      style={{
+                                        position: "fixed",
+                                        top: `${r.bottom + 4}px`,
+                                        left: `${r.left}px`,
+                                        width: `${r.width}px`,
+                                        zIndex: 9999,
+                                      }}
+                                    >
+                                      {results.map((o) => (
+                                        <button
+                                          type="button"
+                                          key={o.id}
+                                          className="block w-full text-left px-3 py-2 hover:bg-gray-50 text-xs"
+                                          onClick={() => {
+                                            handleNewItemChange({
+                                              target: {
+                                                name: "item_id",
+                                                value: o.id,
+                                              },
+                                            });
+                                            setItemQuery(o.item_name);
+                                          }}
+                                        >
+                                          {o.item_code} - {o.item_name}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  );
+                                })()
+                              : null;
                           })()}
                         </div>
                         {(() => {
@@ -1809,9 +1873,7 @@ export default function SalesOrderForm() {
                         >
                           {(Array.isArray(uoms) ? uoms : []).map((u) => (
                             <option key={u.id} value={u.uom_code}>
-                              {u.uom_name
-                                ? `${u.uom_name} (${u.uom_code})`
-                                : u.uom_code}
+                              {u.uom_code}
                             </option>
                           ))}
                         </select>
@@ -1864,8 +1926,8 @@ export default function SalesOrderForm() {
                         <input
                           type="text"
                           value={(
-                            (Number(newItem.qty || 0) * Number(newItem.unit_price || 0)) ||
-                            0
+                            Number(newItem.qty || 0) *
+                              Number(newItem.unit_price || 0) || 0
                           ).toFixed(2)}
                           className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white dark:bg-slate-900 font-semibold text-slate-800"
                           readOnly
@@ -2098,7 +2160,9 @@ export default function SalesOrderForm() {
 
             {/* Form Actions */}
             <div className="flex justify-end gap-3 mt-8 pt-6 border-t pb-28 print:hidden">
-              <button onClick={() => window.history.back()} className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+              <button
+                onClick={() => window.history.back()}
+                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
               >
                 Cancel
               </button>
@@ -2456,22 +2520,41 @@ export default function SalesOrderForm() {
         }}
       />
       {showCustomerModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowCustomerModal(false)}>
-          <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-6 max-w-sm mx-4 w-full" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">Customer not found</h3>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setShowCustomerModal(false)}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl border border-gray-200 p-6 max-w-sm mx-4 w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">
+              Customer not found
+            </h3>
             <p className="text-sm text-slate-600 mb-6">
-              Customer cannot be found in the system. Would you like to add a new customer?
+              Customer cannot be found in the system. Would you like to add a
+              new customer?
             </p>
             <div className="flex gap-3 justify-end">
-              <button type="button" className="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50" onClick={() => setShowCustomerModal(false)}>Back</button>
-              <button type="button" className="px-4 py-2 text-sm rounded-lg bg-brand-900 text-white hover:bg-brand-800" onClick={() => {
-                setShowCustomerModal(false);
-                if (!canAccessPath("/sales/customers/new")) {
-                  setShowPermModal(true);
-                } else {
-                  navigate("/sales/customers/new");
-                }
-              }}>
+              <button
+                type="button"
+                className="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50"
+                onClick={() => setShowCustomerModal(false)}
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                className="px-4 py-2 text-sm rounded-lg bg-brand-900 text-white hover:bg-brand-800"
+                onClick={() => {
+                  setShowCustomerModal(false);
+                  if (!canAccessPath("/sales/customers/new")) {
+                    setShowPermModal(true);
+                  } else {
+                    navigate("/sales/customers/new");
+                  }
+                }}
+              >
                 Add Customer
               </button>
             </div>
@@ -2479,14 +2562,28 @@ export default function SalesOrderForm() {
         </div>
       )}
       {showPermModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowPermModal(false)}>
-          <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-6 max-w-sm mx-4 w-full" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">Access Denied</h3>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setShowPermModal(false)}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl border border-gray-200 p-6 max-w-sm mx-4 w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">
+              Access Denied
+            </h3>
             <p className="text-sm text-slate-600 mb-6">
               You do not have permission to access this page.
             </p>
             <div className="flex justify-end">
-              <button type="button" className="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50" onClick={() => setShowPermModal(false)}>Back</button>
+              <button
+                type="button"
+                className="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50"
+                onClick={() => setShowPermModal(false)}
+              >
+                Back
+              </button>
             </div>
           </div>
         </div>

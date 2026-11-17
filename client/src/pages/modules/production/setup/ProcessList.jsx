@@ -726,7 +726,7 @@ export default function ProcessList() {
                 <div className="space-y-5 animate-in fade-in duration-200">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                         Process Name *
                       </label>
                       <input
@@ -747,7 +747,7 @@ export default function ProcessList() {
                         onChange={(e) => setCurrentProcess({ ...currentProcess, is_active: e.target.checked })}
                         className="w-5 h-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                       />
-                      <label htmlFor="modalProcActive" className="text-sm font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                      <label htmlFor="modalProcActive" className="text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
                         Active for Production Line
                       </label>
                     </div>
@@ -756,7 +756,7 @@ export default function ProcessList() {
                   {/* Department & Output Type Setup Dropdowns */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-850 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
                     <div>
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 flex items-center gap-1">
+                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 flex items-center gap-1">
                         <Building2 size={14} className="text-brand-600" /> Production Department
                       </label>
                       <select
@@ -775,7 +775,7 @@ export default function ProcessList() {
                     </div>
 
                     <div>
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 flex items-center gap-1">
+                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 flex items-center gap-1">
                         <Layers size={14} className="text-purple-600" /> BOM Output Type
                       </label>
                       <select
@@ -795,7 +795,7 @@ export default function ProcessList() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                       Description & Standard Operating Procedures (SOP)
                     </label>
                     <textarea
@@ -835,7 +835,7 @@ export default function ProcessList() {
                       {currentProcess.inputs.map((row, idx) => (
                         <div key={idx} className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
                           <div className="md:col-span-3">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase">Item Name / Code</label>
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase">Item Name / Code</label>
                             <input
                               type="text"
                               value={row.item_name || ""}
@@ -854,7 +854,7 @@ export default function ProcessList() {
                           </div>
 
                           <div className="md:col-span-2">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase">Required Qty</label>
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase">Required Qty</label>
                             <input
                               type="number"
                               step="any"
@@ -865,19 +865,19 @@ export default function ProcessList() {
                           </div>
 
                           <div className="md:col-span-2">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase">Unit Cost</label>
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase">Unit Cost</label>
                             <input
                               type="number"
                               step="any"
                               value={row.cost_value === 0 || row.cost_value === "0" ? "" : (row.cost_value ?? "")}
                               onChange={(e) => updateInputRow(idx, "cost_value", parseFloat(e.target.value) || 0)}
                               placeholder="0.00"
-                              className="input w-full py-1.5 text-xs font-mono font-bold text-slate-900 dark:text-white"
+                              className="input w-full py-1.5 text-xs font-mono font-semibold text-slate-900 dark:text-white"
                             />
                           </div>
 
                           <div className="md:col-span-2">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase">UOM</label>
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase">UOM</label>
                             <input
                               type="text"
                               value={row.uom || ""}
@@ -888,7 +888,7 @@ export default function ProcessList() {
                           </div>
 
                           <div className="md:col-span-2">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase">Scrap % / Notes</label>
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase">Scrap % / Notes</label>
                             <input
                               type="text"
                               value={row.notes ?? `${defaultScrapPct}% Default Scrap`}
@@ -941,7 +941,7 @@ export default function ProcessList() {
                       {currentProcess.output_items.map((row, idx) => (
                         <div key={idx} className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
                           <div className="md:col-span-4">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase">Output Item Name</label>
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase">Output Item Name</label>
                             <input
                               type="text"
                               value={row.item_name || ""}
@@ -960,7 +960,7 @@ export default function ProcessList() {
                           </div>
 
                           <div className="md:col-span-2">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase">Output Qty</label>
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase">Output Qty</label>
                             <input
                               type="number"
                               step="any"
@@ -971,7 +971,7 @@ export default function ProcessList() {
                           </div>
 
                           <div className="md:col-span-2">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase">UOM</label>
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase">UOM</label>
                             <input
                               type="text"
                               value={row.uom || ""}
@@ -982,7 +982,7 @@ export default function ProcessList() {
                           </div>
 
                           <div className="md:col-span-3">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase">Output Classification</label>
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase">Output Classification</label>
                             <select
                               value={row.output_tag || "Main Output"}
                               onChange={(e) => updateOutputRow(idx, "output_tag", e.target.value)}
@@ -1038,7 +1038,7 @@ export default function ProcessList() {
                       {currentProcess.by_products.map((row, idx) => (
                         <div key={idx} className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
                           <div className="md:col-span-4">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase">By-Product / Waste Name</label>
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase">By-Product / Waste Name</label>
                             <input
                               type="text"
                               value={row.item_name || ""}
@@ -1057,7 +1057,7 @@ export default function ProcessList() {
                           </div>
 
                           <div className="md:col-span-2">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase">Expected Qty</label>
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase">Expected Qty</label>
                             <input
                               type="number"
                               step="any"
@@ -1068,7 +1068,7 @@ export default function ProcessList() {
                           </div>
 
                           <div className="md:col-span-2">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase">UOM</label>
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase">UOM</label>
                             <input
                               type="text"
                               value={row.uom || ""}
@@ -1079,7 +1079,7 @@ export default function ProcessList() {
                           </div>
 
                           <div className="md:col-span-2">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase">Expected Cost ($)</label>
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase">Expected Cost ($)</label>
                             <input
                               type="number"
                               step="any"
@@ -1091,7 +1091,7 @@ export default function ProcessList() {
                           </div>
 
                           <div className="md:col-span-3">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase">Scrap Value / Notes ($)</label>
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase">Scrap Value / Notes ($)</label>
                             <input
                               type="number"
                               step="any"
@@ -1145,7 +1145,7 @@ export default function ProcessList() {
                       {currentProcess.overheads.map((row, idx) => (
                         <div key={idx} className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
                           <div className="md:col-span-4">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase">Overhead Category / Description</label>
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase">Overhead Category / Description</label>
                             <input
                               type="text"
                               value={row.overhead_name || ""}
@@ -1164,7 +1164,7 @@ export default function ProcessList() {
                           </div>
 
                           <div className="md:col-span-3">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase">Allocation Basis</label>
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase">Allocation Basis</label>
                             <select
                               value={row.allocation_basis || "per Hour"}
                               onChange={(e) => updateOverheadRow(idx, "allocation_basis", e.target.value)}
@@ -1178,7 +1178,7 @@ export default function ProcessList() {
                           </div>
 
                           <div className="md:col-span-4">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase">Cost Rate ($)</label>
+                            <label className="text-[10px] font-semibold text-slate-500 uppercase">Cost Rate ($)</label>
                             <input
                               type="number"
                               step="any"
@@ -1238,7 +1238,7 @@ export default function ProcessList() {
                         return (
                           <div key={idx} className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
                             <div className="md:col-span-7">
-                              <label className="text-[10px] font-bold text-slate-500 uppercase">Machine / Workstation Name</label>
+                              <label className="text-[10px] font-semibold text-slate-500 uppercase">Machine / Workstation Name</label>
                               <input
                                 type="text"
                                 value={rowName}
@@ -1257,7 +1257,7 @@ export default function ProcessList() {
                             </div>
 
                             <div className="md:col-span-4">
-                              <label className="text-[10px] font-bold text-slate-500 uppercase">Status</label>
+                              <label className="text-[10px] font-semibold text-slate-500 uppercase">Status</label>
                               <input
                                 type="text"
                                 value={typeof row === 'object' ? (row.status || "Active") : "Active"}

@@ -127,7 +127,7 @@ export default function ProjectList() {
               <Briefcase size={24} className="text-brand-900 dark:text-brand-400" /> Project Portfolio
             </h1>
             <p className="text-slate-500 text-sm mt-0.5">
-              Strategic execution, milestones, contracts, and delivery management
+              Strategic execution, project scope, work plans/wbs, contracts, and delivery management
             </p>
           </div>
         </div>
@@ -175,7 +175,7 @@ export default function ProjectList() {
               <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 {stat.label}
               </p>
-              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+              <p className="text-xl font-bold text-slate-900 dark:text-white mt-1">
                 {stat.val}
               </p>
             </div>
@@ -250,7 +250,7 @@ export default function ProjectList() {
                   className="text-center"
                 />
                 <SortableHeader
-                  label="Budget (GH₵)"
+                  label="Budget"
                   sortKey="budget"
                   currentKey={sortKey}
                   direction={sortDir}
@@ -277,7 +277,7 @@ export default function ProjectList() {
                           <div className="font-semibold text-slate-900 dark:text-slate-100 truncate max-w-[200px]">
                             {item.project_name}
                           </div>
-                          <div className="text-xs font-mono text-slate-400 mt-0.5">
+                          <div className="text-xs text-slate-500 mt-0.5 font-medium">
                             {item.project_code}
                           </div>
                           {item.project_priority === "HIGH" && (
@@ -312,7 +312,7 @@ export default function ProjectList() {
 
                     {/* Progress */}
                     <td className="text-center py-3 px-4">
-                      <div className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 font-mono">
+                      <div className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                         {Number(item.completion_percent || 0).toFixed(0)}%
                       </div>
                       <div className="w-20 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mx-auto">
@@ -326,8 +326,18 @@ export default function ProjectList() {
                     </td>
 
                     {/* Budget */}
-                    <td className="text-right font-bold font-mono whitespace-nowrap py-3 px-4">
-                      GH₵ {Number(item.budget || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    <td className="text-right font-semibold whitespace-nowrap py-3 px-4">
+                      {item.currency === "USD"
+                        ? "$"
+                        : item.currency === "EUR"
+                        ? "€"
+                        : item.currency === "GBP"
+                        ? "£"
+                        : item.currency === "NGN"
+                        ? "₦"
+                        : item.currency === "GHS" || !item.currency
+                        ? "GH₵"
+                        : `${item.currency} `} {Number(item.budget || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </td>
 
 

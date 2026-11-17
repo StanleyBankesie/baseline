@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 /**
  * @fileoverview MaterialReceiptList component.
  * Provides functionality for MaterialReceiptList.
@@ -64,8 +65,30 @@ export default function MaterialReceiptList() {
 
   return (
     <div className="space-y-4">
-            {/* Metric Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            
+
+      <div className="card">
+        <div className="card-header bg-brand text-white rounded-t-lg">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold">Materials Receipt</h1>
+              <p className="hidden sm:block text-sm mt-1">Receive materials issued from Inventory (Project Management department)</p>
+            </div>
+            <div className="grid grid-cols-2 sm:flex gap-2">
+              <Link to="/maintenance?section=Resource Management" className="btn btn-secondary flex items-center gap-1.5"><ArrowLeft size={16} /> Back</Link>
+              <button onClick={loadData} className="btn btn-secondary p-2" title="Refresh"><RefreshCw size={16} /></button>
+              <Link to="/maintenance/material-receipts/new" className="btn-success flex items-center gap-2"><Plus size={16} />Receive{pendingIssues > 0 ? ` (${pendingIssues})` : ""}</Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="card">
+        </div>
+
+      {/* Metric Stats Cards Carousel */}
+      {/* Metric Stats Cards */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="md:grid-cols-4" gapClass="gap-4">
         {[
           {
             label: "Active Spares Received",
@@ -92,7 +115,7 @@ export default function MaterialReceiptList() {
             color: "bg-emerald-600 text-white",
           },
         ].map((stat, i) => (
-          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+          <div key={i} className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
             <div>
               <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 {stat.label}
@@ -106,23 +129,7 @@ export default function MaterialReceiptList() {
             </div>
           </div>
         ))}
-      </div>
-
-      <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold">Materials Receipt</h1>
-              <p className="text-sm mt-1">Receive materials issued from Inventory (Project Management department)</p>
-            </div>
-            <div className="flex gap-2">
-              <Link to="/maintenance?section=Resource Management" className="btn btn-secondary flex items-center gap-1.5"><ArrowLeft size={16} /> Back</Link>
-              <button onClick={loadData} className="btn btn-secondary p-2" title="Refresh"><RefreshCw size={16} /></button>
-              <Link to="/maintenance/material-receipts/new" className="btn-success flex items-center gap-2"><Plus size={16} />Receive{pendingIssues > 0 ? ` (${pendingIssues})` : ""}</Link>
-            </div>
-          </div>
-        </div>
-      </div>
+      </MobileMovingCarousel>
 
       <div className="card">
         <div className="card-body">

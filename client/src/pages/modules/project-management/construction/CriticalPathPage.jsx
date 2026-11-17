@@ -204,7 +204,7 @@ export default function CriticalPathPage() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-3xl font-black font-mono text-slate-900 dark:text-white leading-none">
+                  <p className="text-3xl font-black text-slate-900 dark:text-white leading-none">
                     {kpi.value}
                   </p>
                   <p className="text-xs text-slate-400 mt-1.5 font-medium">{kpi.sub}</p>
@@ -237,15 +237,18 @@ export default function CriticalPathPage() {
                     <React.Fragment key={task.id}>
                       <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs min-w-[170px] shadow-sm">
                         <div className="flex justify-between items-center mb-1">
-                          <span className="font-mono font-bold text-rose-700 dark:text-rose-400">
-                            {task.wbs_code || `T-${task.id}`}
+                          <span className="font-bold text-rose-700 dark:text-rose-400">
+                            {task.wbs_code ? `Work Plan/WBS: ${task.wbs_code}` : `T-${task.id}`}
                           </span>
                           <span className="badge badge-error text-xs px-1.5">TF: 0d</span>
                         </div>
+                        {task.scope_name && (
+                          <p className="text-[10px] font-semibold text-slate-500 mb-0.5">{task.scope_name}</p>
+                        )}
                         <p className="font-bold text-slate-900 dark:text-white truncate" title={task.task_title}>
                           {task.task_title}
                         </p>
-                        <div className="mt-2 text-[11px] text-slate-500 font-mono flex justify-between">
+                        <div className="mt-2 text-[11px] text-slate-500 font-semibold flex justify-between">
                           <span>{task.duration_days}d</span>
                           <span>{task.early_finish}</span>
                         </div>
@@ -305,7 +308,7 @@ export default function CriticalPathPage() {
                 <table className="table text-xs w-full">
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 text-slate-500 font-semibold uppercase tracking-wider">
-                      <th className="py-3 px-4">WBS / Task</th>
+                      <th className="py-3 px-4">Work Plan/WBS / Task</th>
                       <th className="py-3 px-4 text-center">Duration</th>
                       <th className="py-3 px-4 text-center">Early Start</th>
                       <th className="py-3 px-4 text-center">Early Finish</th>

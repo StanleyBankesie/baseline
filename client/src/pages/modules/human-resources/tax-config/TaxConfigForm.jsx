@@ -317,7 +317,7 @@ export default function TaxConfigForm() {
                         />
                         <div className="flex items-center gap-1.5">
                           <span className="text-sm font-medium">{c.component_name || c.name}</span>
-                          <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-500">
+                          <span className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-500">
                             {c.component_type || "Allowance"}
                           </span>
                         </div>

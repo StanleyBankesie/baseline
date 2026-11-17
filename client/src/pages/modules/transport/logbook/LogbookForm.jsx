@@ -344,7 +344,7 @@ export default function LogbookForm() {
             </div>
             
             <div className="form-group">
-              <label className="form-label font-bold text-brand-700">Ending Mileage</label>
+              <label className="form-label font-semibold text-brand-700">Ending Mileage</label>
               <div className="flex">
                 <input type="number" step="0.01" name="ending_mileage" value={formData.ending_mileage} onChange={handleChange} className="input border-brand-500 focus:ring-brand-500 rounded-r-none border-r-0 flex-1" />
                 <select value={uom} onChange={e => setUom(e.target.value)} className="select bg-white dark:bg-slate-900 rounded-l-none border-l border-brand-500 w-24">
@@ -355,10 +355,10 @@ export default function LogbookForm() {
             </div>
             
             <div className="form-group md:col-span-2">
-              <label className="form-label font-bold text-brand-700">Distance Travelled (Auto-Calculated)</label>
+              <label className="form-label font-semibold text-brand-700">Distance Travelled (Auto-Calculated)</label>
               <div className="flex">
-                <input type="text" readOnly className="input bg-brand-50 font-bold text-lg text-brand-800 rounded-r-none border-r-0 flex-1" value={distanceTravelled.toFixed(2)} />
-                <select value={uom} onChange={e => setUom(e.target.value)} className="select bg-brand-100 font-bold text-brand-800 rounded-l-none border-l border-brand-200 w-24">
+                <input type="text" readOnly className="input bg-brand-50 font-semibold text-lg text-brand-800 rounded-r-none border-r-0 flex-1" value={distanceTravelled.toFixed(2)} />
+                <select value={uom} onChange={e => setUom(e.target.value)} className="select bg-brand-100 font-semibold text-brand-800 rounded-l-none border-l border-brand-200 w-24">
                   <option value="KM">KM</option>
                   <option value="Miles">Miles</option>
                 </select>

@@ -247,21 +247,21 @@ export default function OperatorList() {
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Operator Full Name *
                 </label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. John Doe / Machine Operator 1"
-                  className="input w-full font-bold"
+                  className="input w-full font-semibold"
                   value={currentOperator.operator_name}
                   onChange={(e) => setCurrentOperator({ ...currentOperator, operator_name: e.target.value })}
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Employee Code / Badge No
                 </label>
                 <input
@@ -275,11 +275,11 @@ export default function OperatorList() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
                     <Cpu size={13} /> Default Machine
                   </label>
                   <select
-                    className="input w-full font-bold"
+                    className="input w-full font-semibold"
                     value={currentOperator.machine_id || ""}
                     onChange={(e) => setCurrentOperator({ ...currentOperator, machine_id: e.target.value })}
                   >
@@ -291,11 +291,11 @@ export default function OperatorList() {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
                     <Clock size={13} /> Default Shift
                   </label>
                   <select
-                    className="input w-full font-bold"
+                    className="input w-full font-semibold"
                     value={currentOperator.shift_id || ""}
                     onChange={(e) => setCurrentOperator({ ...currentOperator, shift_id: e.target.value })}
                   >
@@ -308,7 +308,7 @@ export default function OperatorList() {
               </div>
 
               <div className="pt-2 border-t border-slate-100 dark:border-slate-700">
-                <label className="flex items-center gap-2 cursor-pointer font-bold text-slate-700 dark:text-slate-300">
+                <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700 dark:text-slate-300">
                   <input
                     type="checkbox"
                     className="checkbox"

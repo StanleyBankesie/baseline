@@ -1562,7 +1562,7 @@ export default function DirectPurchase() {
                       }
                     }}
                   />
-                  <span className="font-bold text-base text-brand dark:text-brand-300">
+                  <span className="font-semibold text-base text-brand dark:text-brand-300">
                     Paid Upon Purchase
                   </span>
                 </label>

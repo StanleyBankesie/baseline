@@ -481,7 +481,7 @@ export default function LoanDisbursementPage() {
                     step="0.01"
                     required
                     placeholder="e.g. 5000.00"
-                    className="input w-full font-mono text-base font-bold text-slate-900 dark:text-white"
+                    className="input w-full font-mono text-base font-semibold text-slate-900 dark:text-white"
                     value={formData.amount}
                     onChange={(e) =>
                       setFormData({ ...formData, amount: e.target.value })

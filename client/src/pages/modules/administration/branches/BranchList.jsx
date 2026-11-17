@@ -175,7 +175,7 @@ function UserAssignmentTab({ branches, companies, onUpdate }) {
             <form onSubmit={handleAssign}>
               <div className="branch-modal-body">
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                  <label className="block text-gray-700 text-sm font-semibold mb-2">
                     Company
                   </label>
                   <select
@@ -199,7 +199,7 @@ function UserAssignmentTab({ branches, companies, onUpdate }) {
                   </select>
                 </div>
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                  <label className="block text-gray-700 text-sm font-semibold mb-2">
                     Branches
                   </label>
                   <div className="space-y-2 max-h-64 overflow-auto border rounded-md p-2">
@@ -566,7 +566,7 @@ export default function BranchList() {
                 )}
 
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                  <label className="block text-gray-700 text-sm font-semibold mb-2">
                     Company *
                   </label>
                   <select
@@ -587,7 +587,7 @@ export default function BranchList() {
                 </div>
 
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                  <label className="block text-gray-700 text-sm font-semibold mb-2">
                     Code *
                   </label>
                   <input
@@ -602,7 +602,7 @@ export default function BranchList() {
                 </div>
 
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                  <label className="block text-gray-700 text-sm font-semibold mb-2">
                     Name *
                   </label>
                   <input
@@ -617,7 +617,7 @@ export default function BranchList() {
                 </div>
 
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                  <label className="block text-gray-700 text-sm font-semibold mb-2">
                     Status
                   </label>
                   <select
@@ -663,7 +663,7 @@ export default function BranchList() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                    <label className="block text-gray-700 text-sm font-semibold mb-2">
                       Address
                     </label>
                     <input
@@ -676,7 +676,7 @@ export default function BranchList() {
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                    <label className="block text-gray-700 text-sm font-semibold mb-2">
                       Location
                     </label>
                     <input
@@ -689,7 +689,7 @@ export default function BranchList() {
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                    <label className="block text-gray-700 text-sm font-semibold mb-2">
                       City
                     </label>
                     <input
@@ -702,7 +702,7 @@ export default function BranchList() {
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                    <label className="block text-gray-700 text-sm font-semibold mb-2">
                       State
                     </label>
                     <input
@@ -715,7 +715,7 @@ export default function BranchList() {
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                    <label className="block text-gray-700 text-sm font-semibold mb-2">
                       Postal Code
                     </label>
                     <input
@@ -731,7 +731,7 @@ export default function BranchList() {
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                    <label className="block text-gray-700 text-sm font-semibold mb-2">
                       Country
                     </label>
                     <input
@@ -744,7 +744,7 @@ export default function BranchList() {
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                    <label className="block text-gray-700 text-sm font-semibold mb-2">
                       Telephone
                     </label>
                     <input
@@ -760,7 +760,7 @@ export default function BranchList() {
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                    <label className="block text-gray-700 text-sm font-semibold mb-2">
                       Email
                     </label>
                     <input
@@ -773,7 +773,7 @@ export default function BranchList() {
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                    <label className="block text-gray-700 text-sm font-semibold mb-2">
                       Remarks
                     </label>
                     <textarea

@@ -159,7 +159,7 @@ export default function PortalForgotPassword() {
                   onChange={(e) => setOtp(e.target.value)}
                   placeholder="Enter 6-digit code"
                   required
-                  className="w-full text-center tracking-widest text-lg font-bold py-2 bg-slate-950/70 border border-slate-700/80 rounded-xl text-teal-400 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
+                  className="w-full text-center tracking-widest text-lg font-semibold py-2 bg-slate-950/70 border border-slate-700/80 rounded-xl text-teal-400 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
                 />
               </div>
 

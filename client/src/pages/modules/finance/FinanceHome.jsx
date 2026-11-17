@@ -70,6 +70,10 @@ export const financeSections = [
           <ActionButton key="view" label="View" path="/finance/contra-voucher" type="outline" featureKey="finance:contra-voucher" action="view" />,
           <ActionButton key="add" label="Add" path="/finance/contra-voucher/create" type="primary" featureKey="finance:contra-voucher" action="create" />
         ], },
+      { title: "Petty Cash Book", path: "/finance/petty-cash", description: "Controlled cash disbursement register with automated Payment Voucher posting", icon: "💵" , actions: [
+          <ActionButton key="view" label="View" path="/finance/petty-cash" type="outline" featureKey="finance:petty-cash" action="view" />,
+          <ActionButton key="add" label="Disburse" path="/finance/petty-cash?tab=disburse" type="primary" featureKey="finance:petty-cash" action="create" />
+        ], },
       { title: "Import Vouchers", path: "/finance/vouchers/import", description: "Bulk import vouchers from Excel template", icon: "📥" , actions: [
           <ActionButton key="view" label="View" path="/finance/vouchers/import" type="outline" featureKey="finance:import-vouchers" action="view" />,
           <ActionButton key="add" label="Add" path="/finance/vouchers/import" type="primary" featureKey="finance:import-vouchers" action="create" />
@@ -181,6 +185,10 @@ export const financeSections = [
   {
     title: "Banking",
     items: [
+      { title: "Petty Cash Book", path: "/finance/petty-cash", description: "Controlled cash disbursement register with automated Payment Voucher posting", icon: "💵" , actions: [
+          <ActionButton key="view" label="View" path="/finance/petty-cash" type="outline" featureKey="finance:petty-cash" action="view" />,
+          <ActionButton key="add" label="Disburse" path="/finance/petty-cash?tab=disburse" type="primary" featureKey="finance:petty-cash" action="create" />
+        ], },
       { title: "Bank Reconciliation", path: "/finance/bank-reconciliation", description: "Match bank statements with ledger, mark cleared", icon: "🏦" , actions: [
           <ActionButton key="view" label="View" path="/finance/bank-reconciliation" type="outline" featureKey="finance:bank-reconciliation" action="view" />,
           <ActionButton key="add" label="Add" path="/finance/bank-reconciliation/create" type="primary" featureKey="finance:bank-reconciliation" action="create" />
@@ -339,6 +347,12 @@ export const financeFeatures = [
     module_key: "finance",
     label: "Account Transfer",
     path: "/finance/contra-voucher",
+    type: "feature",
+  },
+  {
+    module_key: "finance",
+    label: "Petty Cash Book",
+    path: "/finance/petty-cash",
     type: "feature",
   },
   {

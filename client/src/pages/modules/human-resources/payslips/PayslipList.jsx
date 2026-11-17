@@ -363,7 +363,7 @@ export default function PayslipList() {
         <div className="card-body">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <div>
-              <label className="text-[10px] font-bold uppercase text-slate-400 block mb-1">
+              <label className="text-[10px] font-semibold uppercase text-slate-400 block mb-1">
                 Period
               </label>
               <select
@@ -380,7 +380,7 @@ export default function PayslipList() {
               </select>
             </div>
             <div>
-              <label className="text-[10px] font-bold uppercase text-slate-400 block mb-1">
+              <label className="text-[10px] font-semibold uppercase text-slate-400 block mb-1">
                 Search Employee
               </label>
               <input
@@ -392,7 +392,7 @@ export default function PayslipList() {
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold uppercase text-slate-400 block mb-1">
+              <label className="text-[10px] font-semibold uppercase text-slate-400 block mb-1">
                 Department
               </label>
               <select
@@ -409,7 +409,7 @@ export default function PayslipList() {
               </select>
             </div>
             <div>
-              <label className="text-[10px] font-bold uppercase text-slate-400 block mb-1">
+              <label className="text-[10px] font-semibold uppercase text-slate-400 block mb-1">
                 Location
               </label>
               <select

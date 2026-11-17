@@ -206,6 +206,26 @@ export default function DocumentReview() {
           setDocDetails([]);
         })
         .finally(() => setDocLoading(false));
+    } else if (
+      t === "DAILY_SITE_REPORT" ||
+      t === "DAILY_PROJECT_REPORT" ||
+      t === "DAILY SITE REPORT" ||
+      t === "DAILY PROJECT REPORT"
+    ) {
+      setDocLoading(true);
+      client
+        .get(`/construction/daily-reports/${data.document_id}`)
+        .then((res) => {
+          setDocHeader(res.data?.item || null);
+          setDocDetails(
+            Array.isArray(res.data?.activities) ? res.data.activities : [],
+          );
+        })
+        .catch(() => {
+          setDocHeader(null);
+          setDocDetails([]);
+        })
+        .finally(() => setDocLoading(false));
     } else {
       setDocHeader(null);
       setDocDetails([]);
@@ -635,6 +655,114 @@ export default function DocumentReview() {
               <div className="text-slate-500">Remarks</div>
               <div className="text-slate-700 dark:text-slate-300">
                 {docHeader.remarks}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+    if (
+      docType === "DAILY_SITE_REPORT" ||
+      docType === "DAILY_PROJECT_REPORT" ||
+      docType === "DAILY SITE REPORT" ||
+      docType === "DAILY PROJECT REPORT"
+    ) {
+      return (
+        <div className="mt-6 space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+            <div>
+              <div className="text-slate-500 text-xs">Report Number</div>
+              <div className="font-bold font-mono text-brand-600 dark:text-brand-400">
+                {docHeader?.report_number || docHeader?.report_no || "-"}
+              </div>
+            </div>
+            <div>
+              <div className="text-slate-500 text-xs">Project</div>
+              <div className="font-semibold text-slate-800 dark:text-slate-200">
+                {docHeader?.project_name || "-"}
+              </div>
+            </div>
+            <div>
+              <div className="text-slate-500 text-xs">Report Date</div>
+              <div className="font-medium">
+                {docHeader?.report_date
+                  ? String(docHeader.report_date).split("T")[0]
+                  : "-"}
+              </div>
+            </div>
+            <div>
+              <div className="text-slate-500 text-xs">Site Engineer / Lead</div>
+              <div className="font-medium">
+                {docHeader?.site_engineer_name ||
+                  docHeader?.reporting_officer_name ||
+                  "-"}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div className="font-semibold mb-2 text-slate-800 dark:text-slate-200 text-sm">
+              Executed Activities & Tasks ({docDetails.length})
+            </div>
+            {docDetails.length > 0 ? (
+              <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-lg">
+                <table className="table-standard w-full text-xs">
+                  <thead className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                    <tr>
+                      <th className="py-2 px-3 text-left">Task / Description</th>
+                      <th className="py-2 px-3 text-left">Location / Grid</th>
+                      <th className="py-2 px-3 text-right">Quantity</th>
+                      <th className="py-2 px-3 text-left">UOM</th>
+                      <th className="py-2 px-3 text-right">Progress</th>
+                      <th className="py-2 px-3 text-left">Remarks</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {docDetails.map((a, idx) => (
+                      <tr key={a.id || idx}>
+                        <td className="py-2 px-3 font-medium text-slate-800 dark:text-slate-200">
+                          {a.description || a.activity_name || "-"}
+                        </td>
+                        <td className="py-2 px-3 text-slate-600 dark:text-slate-400">
+                          {a.location_grid || a.location || "-"}
+                        </td>
+                        <td className="py-2 px-3 text-right font-mono">
+                          {a.quantity_completed != null
+                            ? a.quantity_completed
+                            : "-"}
+                        </td>
+                        <td className="py-2 px-3 text-slate-600 dark:text-slate-400">
+                          {a.unit || a.uom || "-"}
+                        </td>
+                        <td className="py-2 px-3 text-right font-mono">
+                          {a.progress_percent != null
+                            ? `${a.progress_percent}%`
+                            : "-"}
+                        </td>
+                        <td className="py-2 px-3 text-slate-500">
+                          {a.remarks || "-"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-sm text-slate-500 italic p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
+                No individual activity line items recorded
+              </div>
+            )}
+          </div>
+
+          {(docHeader?.general_remarks ||
+            docHeader?.supervisor_comments) && (
+            <div className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-800 text-sm">
+              <div className="text-xs text-slate-500 font-medium mb-1">
+                General Remarks & Observations
+              </div>
+              <div className="text-slate-700 dark:text-slate-300">
+                {docHeader.general_remarks ||
+                  docHeader.supervisor_comments}
               </div>
             </div>
           )}

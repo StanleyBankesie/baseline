@@ -146,13 +146,13 @@ export default function RoutingForm() {
         <div className="card p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                 Target Product / Item *
               </label>
               <select 
                 required
                 disabled={!!id}
-                className="input w-full font-bold disabled:opacity-60"
+                className="input w-full font-semibold disabled:opacity-60"
                 value={formData.item_id}
                 onChange={e => setFormData({...formData, item_id: e.target.value})}
               >
@@ -164,13 +164,13 @@ export default function RoutingForm() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                 Routing Name / Version *
               </label>
               <input 
                 type="text" 
                 required
-                className="input w-full font-bold"
+                className="input w-full font-semibold"
                 value={formData.routing_name}
                 onChange={e => setFormData({...formData, routing_name: e.target.value})}
                 placeholder="e.g. Fanta Routes / Standard Assembly V1"
@@ -179,7 +179,7 @@ export default function RoutingForm() {
           </div>
 
           <div className="pt-2 border-t border-slate-100 dark:border-slate-700">
-            <label className="flex items-center gap-2 cursor-pointer font-bold text-xs text-slate-700 dark:text-slate-300">
+            <label className="flex items-center gap-2 cursor-pointer font-semibold text-xs text-slate-700 dark:text-slate-300">
               <input 
                 type="checkbox" 
                 className="checkbox"
@@ -218,10 +218,10 @@ export default function RoutingForm() {
                       {index + 1}
                     </span>
                     <div className="flex-1 max-w-xs">
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Process Operation *</label>
+                      <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Process Operation *</label>
                       <select 
                         required
-                        className="input w-full font-bold text-xs"
+                        className="input w-full font-semibold text-xs"
                         value={step.process_id}
                         onChange={e => updateStep(index, 'process_id', e.target.value)}
                       >
@@ -235,33 +235,33 @@ export default function RoutingForm() {
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 flex-1">
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                      <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
                         <Clock size={10} /> Setup Time (Mins)
                       </label>
                       <input 
                         type="number" 
                         min="0"
-                        className="input w-full font-bold text-xs"
+                        className="input w-full font-semibold text-xs"
                         value={step.setup_time_mins}
                         onChange={e => updateStep(index, 'setup_time_mins', e.target.value)}
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                      <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
                         <Activity size={10} /> Cycle Time (Mins)
                       </label>
                       <input 
                         type="number" 
                         min="0"
-                        className="input w-full font-bold text-xs"
+                        className="input w-full font-semibold text-xs"
                         value={step.cycle_time_mins}
                         onChange={e => updateStep(index, 'cycle_time_mins', e.target.value)}
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Work Center / Machine</label>
+                      <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Work Center / Machine</label>
                       <select 
-                        className="input w-full font-bold text-xs"
+                        className="input w-full font-semibold text-xs"
                         value={step.machine_id || ""}
                         onChange={e => updateStep(index, 'machine_id', e.target.value)}
                       >
@@ -272,9 +272,9 @@ export default function RoutingForm() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Work Shift</label>
+                      <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Work Shift</label>
                       <select 
-                        className="input w-full font-bold text-xs"
+                        className="input w-full font-semibold text-xs"
                         value={step.shift_id || ""}
                         onChange={e => updateStep(index, 'shift_id', e.target.value)}
                       >

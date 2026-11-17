@@ -3182,7 +3182,7 @@ export default function ReceiptVoucherForm() {
                 )}
                 {(isPAYV || isRV || isCV || isSV || isPV) && (
                   <div className="md:col-span-3">
-                    <label className="label font-bold text-brand">
+                    <label className="label font-semibold text-brand">
                       Narration *
                     </label>
                     <input

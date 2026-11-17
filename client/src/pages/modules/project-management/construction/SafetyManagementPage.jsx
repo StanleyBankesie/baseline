@@ -359,7 +359,7 @@ export default function SafetyManagementPage() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Project <span className="text-red-500">*</span>
               </label>
               <select
@@ -377,7 +377,7 @@ export default function SafetyManagementPage() {
               </select>
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Incident Date <span className="text-red-500">*</span>
               </label>
               <input
@@ -392,7 +392,7 @@ export default function SafetyManagementPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Classification <span className="text-red-500">*</span>
               </label>
               <select
@@ -410,7 +410,7 @@ export default function SafetyManagementPage() {
               </select>
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Severity Rating
               </label>
               <select
@@ -428,7 +428,7 @@ export default function SafetyManagementPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Location / Grid</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Location / Grid</label>
               <input
                 type="text"
                 placeholder="e.g. Scaffolding Bay 3, Level 2 Slab"
@@ -438,7 +438,7 @@ export default function SafetyManagementPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Injured / Involved Person</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Injured / Involved Person</label>
               <input
                 type="text"
                 placeholder="e.g. Worker Name / Subcontractor Trade"
@@ -450,7 +450,7 @@ export default function SafetyManagementPage() {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Incident Description <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -464,7 +464,7 @@ export default function SafetyManagementPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Lost Workdays (Man-Days)</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Lost Workdays (Man-Days)</label>
               <input
                 type="number"
                 min="0"
@@ -475,7 +475,7 @@ export default function SafetyManagementPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Statutory Regulatory Notification</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Statutory Regulatory Notification</label>
               <select
                 className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
                 value={incidentForm.reported_to_authority}
@@ -503,7 +503,7 @@ export default function SafetyManagementPage() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Project <span className="text-red-500">*</span>
               </label>
               <select
@@ -521,7 +521,7 @@ export default function SafetyManagementPage() {
               </select>
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Briefing Date <span className="text-red-500">*</span>
               </label>
               <input
@@ -535,7 +535,7 @@ export default function SafetyManagementPage() {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Safety Topic <span className="text-red-500">*</span>
             </label>
             <input
@@ -550,7 +550,7 @@ export default function SafetyManagementPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Attendees Count <span className="text-red-500">*</span>
               </label>
               <input
@@ -564,7 +564,7 @@ export default function SafetyManagementPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Conductor / Speaker
               </label>
               <input
@@ -578,7 +578,7 @@ export default function SafetyManagementPage() {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Key Discussion Points & Operative Feedback
             </label>
             <textarea

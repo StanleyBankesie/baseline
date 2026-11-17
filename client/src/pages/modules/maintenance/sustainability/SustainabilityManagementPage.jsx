@@ -327,7 +327,7 @@ export default function SustainabilityManagementPage() {
                     step="0.1"
                     value={initiativeForm.estimated_annual_co2_reduction_tons}
                     onChange={(e) => setInitiativeForm({ ...initiativeForm, estimated_annual_co2_reduction_tons: parseFloat(e.target.value) })}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2 text-xs font-mono font-bold"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2 text-xs font-mono font-semibold"
                   />
                 </div>
                 <div>
@@ -336,7 +336,7 @@ export default function SustainabilityManagementPage() {
                     type="number"
                     value={initiativeForm.estimated_annual_cost_savings}
                     onChange={(e) => setInitiativeForm({ ...initiativeForm, estimated_annual_cost_savings: parseFloat(e.target.value) })}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2 text-xs font-mono font-bold"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2 text-xs font-mono font-semibold"
                   />
                 </div>
               </div>

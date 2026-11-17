@@ -11,12 +11,25 @@ import { isWhatsAppConfigured, sendWhatsApp } from "../utils/whatsapp.js";
 import { sendDocumentForwardNotification } from "../utils/documentNotification.js";
 import { checkAndSendAutomaticNotification } from "../utils/externalNotification.js";
 import { sendPushToUser } from "../routes/push.routes.js";
-import { createCreditNoteForReturnApprovalTx, createPostedSalesVoucherForInvoiceTx } from "../routes/sales.route.js";
+import {
+  createCreditNoteForReturnApprovalTx,
+  createPostedSalesVoucherForInvoiceTx,
+} from "../routes/sales.route.js";
 import { createDebitNoteForReturnApprovalTx } from "../routes/purchase.routes.js";
 
 const toNumber = (v, fallback = null) => {
   const n = Number(v);
   return Number.isFinite(n) ? n : fallback;
+};
+
+const parseBoolFlag = (value, fallback = true) => {
+  if (value === undefined || value === null || value === "") return fallback;
+  if (typeof value === "boolean") return value ? 1 : 0;
+  if (typeof value === "number") return value === 0 ? 0 : 1;
+  const normalized = String(value).trim().toLowerCase();
+  if (["false", "0", "no", "off"].includes(normalized)) return 0;
+  if (["true", "1", "yes", "on"].includes(normalized)) return 1;
+  return fallback;
 };
 
 const hasColumn = async (tableName, columnName) => {
@@ -136,7 +149,11 @@ async function applyAutoApprovalToLinkedDocument(instance) {
       `UPDATE fin_vouchers SET status = 'APPROVED' WHERE id = :id AND company_id = :companyId`,
       { id: documentId, companyId },
     );
-    if (docType === "PAYMENT_VOUCHER" || docType === "PAYMENT VOUCHER" || docType === "PV") {
+    if (
+      docType === "PAYMENT_VOUCHER" ||
+      docType === "PAYMENT VOUCHER" ||
+      docType === "PV"
+    ) {
       try {
         await query(
           `UPDATE trans_expense_logs 
@@ -145,7 +162,7 @@ async function applyAutoApprovalToLinkedDocument(instance) {
              SELECT expense_log_id FROM trn_transport_expenses 
              WHERE voucher_id = :id AND company_id = :companyId AND expense_log_id IS NOT NULL
            ) AND company_id = :companyId`,
-          { id: documentId, companyId }
+          { id: documentId, companyId },
         );
       } catch (e) {}
     }
@@ -173,7 +190,8 @@ async function applyAutoApprovalToLinkedDocument(instance) {
         await createCreditNoteForReturnApprovalTx(conn, {
           id: documentId,
           companyId,
-          branchId, branchIdsStr: header.branch_id,
+          branchId,
+          branchIdsStr: header.branch_id,
         });
         await conn.commit();
       } catch (err) {
@@ -207,7 +225,8 @@ async function applyAutoApprovalToLinkedDocument(instance) {
         await createDebitNoteForReturnApprovalTx(conn, {
           id: documentId,
           companyId,
-          branchId, branchIdsStr: header.branch_id,
+          branchId,
+          branchIdsStr: header.branch_id,
         });
         await conn.commit();
       } catch (err) {
@@ -242,10 +261,32 @@ async function applyAutoApprovalToLinkedDocument(instance) {
     );
     return;
   }
-  if (docType === "PURCHASE_REQUISITION" || docType === "Purchase Requisition" || docType === "PM_PURCHASE_REQUISITION") {
+  if (
+    docType === "PURCHASE_REQUISITION" ||
+    docType === "Purchase Requisition" ||
+    docType === "PM_PURCHASE_REQUISITION"
+  ) {
     await query(
       `UPDATE pm_purchase_requisitions SET status = 'APPROVED' WHERE id = :id AND company_id = :companyId`,
       { id: documentId, companyId },
+    );
+    return;
+  }
+
+  if (
+    docType === "DAILY_SITE_REPORT" ||
+    docType === "DAILY_PROJECT_REPORT" ||
+    docType === "DAILY SITE REPORT" ||
+    docType === "DAILY PROJECT REPORT"
+  ) {
+    await query(
+      `UPDATE pm_daily_site_reports 
+       SET status = 'APPROVED', 
+           approved_by_name = COALESCE(approved_by_name, 'System Workflow'), 
+           approved_at = NOW(),
+           forwarded_to_username = NULL
+       WHERE id = :id OR report_no = :docIdStr`,
+      { id: Number(documentId) || 0, docIdStr: String(documentId) },
     );
     return;
   }
@@ -534,7 +575,10 @@ export const reverseApproval = async (req, res, next) => {
         comments: "Approval reversed by exceptional permission",
       },
     );
-    const isTargetDraft = req.body?.target_status === "DRAFT" || instance.status === "PENDING" || instance.status === "PENDING_APPROVAL";
+    const isTargetDraft =
+      req.body?.target_status === "DRAFT" ||
+      instance.status === "PENDING" ||
+      instance.status === "PENDING_APPROVAL";
     const newStatus = isTargetDraft ? "DRAFT" : "REVERSED";
 
     // Set workflow state to returned/draft and unassign
@@ -549,7 +593,11 @@ export const reverseApproval = async (req, res, next) => {
     ) {
       await query(
         `UPDATE inv_stock_adjustments SET status = :status WHERE id = :id AND company_id = :companyId`,
-        { id: instance.document_id, companyId: instance.company_id, status: newStatus },
+        {
+          id: instance.document_id,
+          companyId: instance.company_id,
+          status: newStatus,
+        },
       );
     } else if (
       instance.document_type === "PURCHASE_ORDER" ||
@@ -557,7 +605,11 @@ export const reverseApproval = async (req, res, next) => {
     ) {
       await query(
         `UPDATE pur_orders SET status = :status WHERE id = :id AND company_id = :companyId`,
-        { id: instance.document_id, companyId: instance.company_id, status: newStatus },
+        {
+          id: instance.document_id,
+          companyId: instance.company_id,
+          status: newStatus,
+        },
       );
     } else if (
       instance.document_type === "GOODS_RECEIPT" ||
@@ -707,9 +759,7 @@ export const reverseApproval = async (req, res, next) => {
           { id: instance.document_id, companyId: instance.company_id },
         );
       } catch {}
-    } else if (
-      instance.document_type === "MAINT_MATERIAL_REQUISITION"
-    ) {
+    } else if (instance.document_type === "MAINT_MATERIAL_REQUISITION") {
       try {
         await query(
           `UPDATE maint_material_requisitions SET status = 'REVERSED' WHERE id = :id AND company_id = :companyId`,
@@ -734,6 +784,27 @@ export const reverseApproval = async (req, res, next) => {
         await query(
           `UPDATE pm_purchase_requisitions SET status = 'REVERSED' WHERE id = :id AND company_id = :companyId`,
           { id: instance.document_id, companyId: instance.company_id },
+        );
+      } catch {}
+    } else if (
+      instance.document_type === "DAILY_SITE_REPORT" ||
+      instance.document_type === "DAILY_PROJECT_REPORT" ||
+      instance.document_type === "Daily Project Report" ||
+      instance.document_type === "Daily Site Report"
+    ) {
+      try {
+        await query(
+          `UPDATE pm_daily_site_reports 
+           SET status = 'DRAFT', 
+               forwarded_to_username = NULL, 
+               approved_by_name = NULL,
+               reversal_remarks = COALESCE(:reason, reversal_remarks) 
+           WHERE id = :id OR report_no = :docIdStr`,
+          { 
+            id: Number(instance.document_id) || 0, 
+            docIdStr: String(instance.document_id),
+            reason: reason || "Workflow reversed" 
+          },
         );
       } catch {}
     }
@@ -845,13 +916,18 @@ export const reverseByDocument = async (req, res, next) => {
         SERVICE_REQUEST: "srv_service_requests",
         CUSTOMER_PROSPECT: "sal_prospect_customers",
         FM_PURCHASE_REQUISITION: "fm_purchase_requisitions",
-        "FM PURCHASE REQUISITION": "fm_purchase_requisitions"
+        "FM PURCHASE REQUISITION": "fm_purchase_requisitions",
       };
       const tableName = tableMap[docTypeRaw.toUpperCase()];
       if (tableName) {
         // Fallback for manually approved documents without workflow
-        await query(`UPDATE ${tableName} SET status = 'DRAFT' WHERE id = :docId AND company_id = :companyId`, { docId, companyId });
-        return res.json({ message: "Document reversed to DRAFT (manual approval)" });
+        await query(
+          `UPDATE ${tableName} SET status = 'DRAFT' WHERE id = :docId AND company_id = :companyId`,
+          { docId, companyId },
+        );
+        return res.json({
+          message: "Document reversed to DRAFT (manual approval)",
+        });
       }
       throw httpError(404, "NOT_FOUND", "Workflow instance not found");
     }
@@ -1271,8 +1347,13 @@ export const startWorkflow = async (req, res, next) => {
   try {
     await ensureWorkflowTables();
     const { companyId = null } = req.scope || {};
-    const { workflow_id, document_id, document_type, target_user_id, comments } =
-      req.body;
+    const {
+      workflow_id,
+      document_id,
+      document_type,
+      target_user_id,
+      comments,
+    } = req.body;
 
     const workflows = await query(
       `SELECT *,
@@ -1366,7 +1447,7 @@ export const startWorkflow = async (req, res, next) => {
         id: result.insertId,
         step: firstStep.step_order,
         userId: req.user.sub,
-        comments: comments || 'Workflow started'
+        comments: comments || "Workflow started",
       },
     );
     // Global interception in pool.js handles workflow forwarding notifications automatically
@@ -1397,7 +1478,7 @@ export const getLatestComment = async (req, res, next) => {
          AND l.comments != 'Workflow started'
        ORDER BY l.id DESC
        LIMIT 1`,
-      { documentType, documentId, companyId }
+      { documentType, documentId, companyId },
     );
 
     if (logs.length > 0) {
@@ -1425,7 +1506,7 @@ export const getPendingApprovals = async (req, res, next) => {
           dw.created_at as submitted_at,
           w.workflow_name,
           ws.step_name,
-          COALESCE(so.order_no, fv.voucher_no, po.po_no, mr.requisition_no, rts.rts_no, sa.adjustment_no, grn.grn_no, pm_ord.order_no, pm_pr.requisition_no, gr.requisition_no, inv.invoice_no) as doc_ref,
+          COALESCE(so.order_no, fv.voucher_no, po.po_no, mr.requisition_no, rts.rts_no, sa.adjustment_no, grn.grn_no, pm_ord.order_no, pm_pr.requisition_no, gr.requisition_no, inv.invoice_no, dsr.report_no) as doc_ref,
           po.po_type as po_type,
           u.username as initiator,
           (
@@ -1492,6 +1573,9 @@ export const getPendingApprovals = async (req, res, next) => {
               dw.document_type = 'Credit Note' OR
               dw.document_type = 'CN'
             ) AND fv.id = dw.document_id
+         LEFT JOIN pm_daily_site_reports dsr
+           ON (dw.document_type = 'DAILY_SITE_REPORT' OR dw.document_type = 'DAILY_PROJECT_REPORT' OR dw.document_type = 'Daily Project Report' OR dw.document_type = 'Daily Site Report')
+          AND (dsr.id = dw.document_id OR dsr.report_no = dw.document_id)
          LEFT JOIN adm_users u ON u.id = (
              SELECT actor_user_id FROM adm_workflow_logs 
              WHERE document_workflow_id = dw.id AND action = 'SUBMIT' LIMIT 1
@@ -1524,7 +1608,7 @@ export const getSentApprovals = async (req, res, next) => {
           dw.created_at as submitted_at,
           w.workflow_name,
           ws.step_name,
-          COALESCE(so.order_no, fv.voucher_no, po.po_no, mr.requisition_no, rts.rts_no, sa.adjustment_no, grn.grn_no, pm_ord.order_no, pm_pr.requisition_no, gr.requisition_no, inv.invoice_no) as doc_ref,
+          COALESCE(so.order_no, fv.voucher_no, po.po_no, mr.requisition_no, rts.rts_no, sa.adjustment_no, grn.grn_no, pm_ord.order_no, pm_pr.requisition_no, gr.requisition_no, inv.invoice_no, dsr.report_no) as doc_ref,
           po.po_type as po_type,
           u.username as initiator,
           assigned_u.username as assigned_to
@@ -1588,6 +1672,9 @@ export const getSentApprovals = async (req, res, next) => {
             dw.document_type = 'Credit Note' OR
             dw.document_type = 'CN'
           ) AND fv.id = dw.document_id
+         LEFT JOIN pm_daily_site_reports dsr
+           ON (dw.document_type = 'DAILY_SITE_REPORT' OR dw.document_type = 'DAILY_PROJECT_REPORT' OR dw.document_type = 'Daily Project Report' OR dw.document_type = 'Daily Site Report')
+          AND (dsr.id = dw.document_id OR dsr.report_no = dw.document_id)
          LEFT JOIN adm_users u ON u.id = (
              SELECT actor_user_id FROM adm_workflow_logs 
              WHERE document_workflow_id = dw.id AND action = 'SUBMIT' LIMIT 1
@@ -1857,9 +1944,18 @@ export const performAction = async (req, res, next) => {
           const emailFlag = wfRows.length ? wfRows[0].email_notify : 1;
           const smsFlag = wfRows.length ? wfRows[0].sms_notify : 1;
           const whatsappFlag = wfRows.length ? wfRows[0].whatsapp_notify : 1;
-          const emailEnabled = (emailFlag === null || emailFlag === undefined ? 1 : Number(emailFlag)) === 1;
-          const smsEnabled = (smsFlag === null || smsFlag === undefined ? 1 : Number(smsFlag)) === 1;
-          const whatsappEnabled = (whatsappFlag === null || whatsappFlag === undefined ? 1 : Number(whatsappFlag)) === 1;
+          const emailEnabled =
+            (emailFlag === null || emailFlag === undefined
+              ? 1
+              : Number(emailFlag)) === 1;
+          const smsEnabled =
+            (smsFlag === null || smsFlag === undefined
+              ? 1
+              : Number(smsFlag)) === 1;
+          const whatsappEnabled =
+            (whatsappFlag === null || whatsappFlag === undefined
+              ? 1
+              : Number(whatsappFlag)) === 1;
           const forceEmail = envTrue(process.env.WORKFLOW_FORCE_EMAIL);
 
           if (!emailEnabled && !forceEmail) return;
@@ -1873,9 +1969,11 @@ export const performAction = async (req, res, next) => {
               { uid: targetUserId },
             );
             if (prefRows.length) {
-              userEmailEnabled = Number(prefRows[0].email_enabled) === 1 ? 1 : 0;
+              userEmailEnabled =
+                Number(prefRows[0].email_enabled) === 1 ? 1 : 0;
               userSmsEnabled = Number(prefRows[0].sms_enabled) === 1 ? 1 : 0;
-              userWhatsappEnabled = Number(prefRows[0].whatsapp_enabled) === 1 ? 1 : 0;
+              userWhatsappEnabled =
+                Number(prefRows[0].whatsapp_enabled) === 1 ? 1 : 0;
             }
           } catch {}
 
@@ -1891,7 +1989,8 @@ export const performAction = async (req, res, next) => {
           const to = userRes[0].email;
           const subject = "Workflow Document - Action Required";
           const docType = instance.document_type || "Workflow Document";
-          const refNo = instance.document_id != null ? String(instance.document_id) : "-";
+          const refNo =
+            instance.document_id != null ? String(instance.document_id) : "-";
 
           const senderRows = await query(
             "SELECT username AS name FROM adm_users WHERE id = :id LIMIT 1",
@@ -1955,7 +2054,12 @@ export const performAction = async (req, res, next) => {
             }
           }
 
-          if (phone && isWhatsAppConfigured() && whatsappEnabled && userWhatsappEnabled) {
+          if (
+            phone &&
+            isWhatsAppConfigured() &&
+            whatsappEnabled &&
+            userWhatsappEnabled
+          ) {
             try {
               const waText = `*Action Required*\n${docType} ${refNo} needs your ${actionLabel}.\n\nView Document:\n${linkAbs}`;
               await sendWhatsApp({ to: phone, message: waText });
@@ -2045,20 +2149,49 @@ export const performAction = async (req, res, next) => {
             assigned_to: nextAssigned,
           },
         );
+        if (
+          instance.document_type === "DAILY_SITE_REPORT" ||
+          instance.document_type === "DAILY_PROJECT_REPORT" ||
+          instance.document_type === "Daily Project Report" ||
+          instance.document_type === "Daily Site Report"
+        ) {
+          try {
+            const nextUserRow = await query(`SELECT username FROM adm_users WHERE id = :id LIMIT 1`, { id: nextAssigned });
+            const nextName = nextUserRow.length ? nextUserRow[0].username : "Approver";
+            await query(
+              `UPDATE pm_daily_site_reports 
+               SET status = 'PENDING_APPROVAL', 
+                   forwarded_to_username = :nextName 
+               WHERE id = :id OR report_no = :docIdStr`,
+              { 
+                id: Number(instance.document_id) || 0, 
+                docIdStr: String(instance.document_id),
+                nextName 
+              },
+            );
+          } catch (e) {}
+        }
         setImmediate(() => {
           notifyUser(
             nextAssigned,
             "Approval Required",
             `Document #${instance.document_id} requires your approval.`,
-          ).catch((err) => console.error("Error in background notifyUser:", err));
+          ).catch((err) =>
+            console.error("Error in background notifyUser:", err),
+          );
 
           import("../services/notifications/workflowNotify.js")
             .then(({ notifyWorkflowForward }) => {
-              query("SELECT username AS name FROM adm_users WHERE id = :id LIMIT 1", {
-                id: req.user?.sub || null,
-              })
+              query(
+                "SELECT username AS name FROM adm_users WHERE id = :id LIMIT 1",
+                {
+                  id: req.user?.sub || null,
+                },
+              )
                 .then((senderRows) => {
-                  const senderName = senderRows.length ? senderRows[0].name : "System";
+                  const senderName = senderRows.length
+                    ? senderRows[0].name
+                    : "System";
                   return notifyWorkflowForward({
                     companyId: req.scope.companyId,
                     userId: nextAssigned,
@@ -2072,9 +2205,13 @@ export const performAction = async (req, res, next) => {
                     req: req,
                   });
                 })
-                .catch((err) => console.error("Error sending forward notifications:", err));
+                .catch((err) =>
+                  console.error("Error sending forward notifications:", err),
+                );
             })
-            .catch((err) => console.error("Error importing workflowNotify:", err));
+            .catch((err) =>
+              console.error("Error importing workflowNotify:", err),
+            );
         });
       } else {
         await query(
@@ -2095,9 +2232,7 @@ export const performAction = async (req, res, next) => {
             { id: instance.document_id, companyId: instance.company_id },
           );
         }
-        if (
-          instance.document_type === "MAINT_MATERIAL_REQUISITION"
-        ) {
+        if (instance.document_type === "MAINT_MATERIAL_REQUISITION") {
           await query(
             `UPDATE maint_material_requisitions SET status = 'APPROVED' WHERE id = :id AND company_id = :companyId`,
             { id: instance.document_id, companyId: instance.company_id },
@@ -2122,6 +2257,29 @@ export const performAction = async (req, res, next) => {
           );
         }
         if (
+          instance.document_type === "DAILY_SITE_REPORT" ||
+          instance.document_type === "DAILY_PROJECT_REPORT" ||
+          instance.document_type === "Daily Project Report" ||
+          instance.document_type === "Daily Site Report"
+        ) {
+          const approverName = req.user?.username || req.user?.name || "Reviewer";
+          await query(
+            `UPDATE pm_daily_site_reports 
+             SET status = 'APPROVED', 
+                 approved_by_name = COALESCE(:approverName, approved_by_name),
+                 approved_at = NOW(),
+                 forwarded_to_username = NULL,
+                 reviewer_comments = COALESCE(:comments, reviewer_comments)
+             WHERE id = :id OR report_no = :docIdStr`,
+            { 
+              id: Number(instance.document_id) || 0, 
+              docIdStr: String(instance.document_id),
+              approverName,
+              comments: req.body?.comments || null,
+            },
+          );
+        }
+        if (
           instance.document_type === "SALES_ORDER" ||
           instance.document_type === "Sales Order"
         ) {
@@ -2140,17 +2298,17 @@ export const performAction = async (req, res, next) => {
             const companyId = instance.company_id;
             const invoices = await query(
               "SELECT id, invoice_no, invoice_date, customer_id, branch_id, net_amount, balance_amount, status, currency_id, exchange_rate, remarks, tax_components FROM sal_invoices WHERE id = :id AND company_id = :companyId LIMIT 1",
-              { id: invoiceId, companyId }
+              { id: invoiceId, companyId },
             );
             if (invoices.length) {
               const inv = invoices[0];
               const branchId = inv.branch_id || null;
-              const branchIdsStr = branchId ? String(branchId) : '';
+              const branchIdsStr = branchId ? String(branchId) : "";
               const details = await query(
                 "SELECT item_id, quantity, unit_price, discount_percent, total_amount, net_amount, tax_amount, tax_type FROM sal_invoice_details WHERE invoice_id = :id",
-                { id: invoiceId }
+                { id: invoiceId },
               );
-              
+
               let subTotal = 0;
               let taxTotal = 0;
               let grandTotal = 0;
@@ -2169,8 +2327,11 @@ export const performAction = async (req, res, next) => {
                 discountTotal += discount;
               }
 
-              const bal = Number(inv.balance_amount || inv.net_amount || grandTotal);
-              const paymentStatus = bal <= 0 ? "PAID" : bal > 0 ? "UNPAID" : "PARTIALLY_PAID";
+              const bal = Number(
+                inv.balance_amount || inv.net_amount || grandTotal,
+              );
+              const paymentStatus =
+                bal <= 0 ? "PAID" : bal > 0 ? "UNPAID" : "PARTIALLY_PAID";
 
               await conn.beginTransaction();
               await conn.execute(
@@ -2190,18 +2351,22 @@ export const performAction = async (req, res, next) => {
                   totalAmount: grandTotal,
                   netAmount: grandTotal,
                   taxAmount: taxTotal,
-                }
+                },
               );
 
               let parsedTaxes = [];
-              try { parsedTaxes = JSON.parse(inv.tax_components || "[]"); } catch (e) {}
+              try {
+                parsedTaxes = JSON.parse(inv.tax_components || "[]");
+              } catch (e) {}
 
               await createPostedSalesVoucherForInvoiceTx(conn, {
                 companyId,
-                branchId, branchIdsStr,
+                branchId,
+                branchIdsStr,
                 invoiceId,
                 invoiceNo: String(inv.invoice_no || ""),
-                invoiceDate: inv.invoice_date || new Date().toISOString().slice(0, 10),
+                invoiceDate:
+                  inv.invoice_date || new Date().toISOString().slice(0, 10),
                 customerId: Number(inv.customer_id || 0),
                 grandTotal,
                 baseTotal: subTotal,
@@ -2223,24 +2388,33 @@ export const performAction = async (req, res, next) => {
               await conn.commit();
             }
           } catch (e) {
-            console.error("Error creating sales voucher from workflow approval:", e);
-            try { await conn.rollback(); } catch {}
+            console.error(
+              "Error creating sales voucher from workflow approval:",
+              e,
+            );
+            try {
+              await conn.rollback();
+            } catch {}
             throw e;
           } finally {
             conn.release();
           }
         }
-        getInitiator().then((initiatorId) => {
-          if (initiatorId) {
-            setImmediate(() => {
-              notifyUser(
-                initiatorId,
-                "Document Approved",
-                `Your document #${instance.document_id} has been fully approved.`,
-              ).catch((err) => console.error("Error in background notifyUser:", err));
-            });
-          }
-        }).catch(() => {});
+        getInitiator()
+          .then((initiatorId) => {
+            if (initiatorId) {
+              setImmediate(() => {
+                notifyUser(
+                  initiatorId,
+                  "Document Approved",
+                  `Your document #${instance.document_id} has been fully approved.`,
+                ).catch((err) =>
+                  console.error("Error in background notifyUser:", err),
+                );
+              });
+            }
+          })
+          .catch(() => {});
       }
     } else if (action === "REJECT") {
       await query(
@@ -2349,9 +2523,7 @@ export const performAction = async (req, res, next) => {
             { id: instance.document_id, companyId: instance.company_id },
           );
         } catch (e) {}
-      } else if (
-        instance.document_type === "MAINT_MATERIAL_REQUISITION"
-      ) {
+      } else if (instance.document_type === "MAINT_MATERIAL_REQUISITION") {
         try {
           await query(
             `UPDATE maint_material_requisitions SET status = 'REJECTED' WHERE id = :id AND company_id = :companyId`,
@@ -2376,6 +2548,26 @@ export const performAction = async (req, res, next) => {
           await query(
             `UPDATE pm_purchase_requisitions SET status = 'REJECTED' WHERE id = :id AND company_id = :companyId`,
             { id: instance.document_id, companyId: instance.company_id },
+          );
+        } catch (e) {}
+      } else if (
+        instance.document_type === "DAILY_SITE_REPORT" ||
+        instance.document_type === "DAILY_PROJECT_REPORT" ||
+        instance.document_type === "Daily Project Report" ||
+        instance.document_type === "Daily Site Report"
+      ) {
+        try {
+          await query(
+            `UPDATE pm_daily_site_reports 
+             SET status = 'REJECTED', 
+                 forwarded_to_username = NULL,
+                 reviewer_comments = COALESCE(:comments, reviewer_comments) 
+             WHERE id = :id OR report_no = :docIdStr`,
+            { 
+              id: Number(instance.document_id) || 0, 
+              docIdStr: String(instance.document_id),
+              comments: req.body?.comments || null,
+            },
           );
         } catch (e) {}
       }
@@ -2523,9 +2715,7 @@ export const performAction = async (req, res, next) => {
             { id: instance.document_id, companyId: instance.company_id },
           );
         } catch (e) {}
-      } else if (
-        instance.document_type === "MAINT_MATERIAL_REQUISITION"
-      ) {
+      } else if (instance.document_type === "MAINT_MATERIAL_REQUISITION") {
         try {
           await query(
             `UPDATE maint_material_requisitions SET status = 'DRAFT' WHERE id = :id AND company_id = :companyId`,
@@ -2550,6 +2740,26 @@ export const performAction = async (req, res, next) => {
           await query(
             `UPDATE pm_purchase_requisitions SET status = 'DRAFT' WHERE id = :id AND company_id = :companyId`,
             { id: instance.document_id, companyId: instance.company_id },
+          );
+        } catch (e) {}
+      } else if (
+        instance.document_type === "DAILY_SITE_REPORT" ||
+        instance.document_type === "DAILY_PROJECT_REPORT" ||
+        instance.document_type === "Daily Project Report" ||
+        instance.document_type === "Daily Site Report"
+      ) {
+        try {
+          await query(
+            `UPDATE pm_daily_site_reports 
+             SET status = 'DRAFT', 
+                 forwarded_to_username = NULL, 
+                 reversal_remarks = COALESCE(:comments, reversal_remarks) 
+             WHERE id = :id OR report_no = :docIdStr`,
+            { 
+              id: Number(instance.document_id) || 0, 
+              docIdStr: String(instance.document_id),
+              comments: req.body?.comments || null,
+            },
           );
         } catch (e) {}
       }
@@ -2596,7 +2806,8 @@ export const performAction = async (req, res, next) => {
               if (itemId && Number.isFinite(qtyChange) && qtyChange !== 0) {
                 await recordMovementTx(conn, {
                   companyId: wf.company_id,
-                  branchId, branchIdsStr: upHdr.branch_id || 1,
+                  branchId,
+                  branchIdsStr: upHdr.branch_id || 1,
                   warehouseId: upHdr.warehouse_id,
                   itemId,
                   transactionType: "STOCK_UPDATION",
@@ -2655,7 +2866,8 @@ export const performAction = async (req, res, next) => {
               if (itemId && Number.isFinite(qtyChange) && qtyChange !== 0) {
                 await recordMovementTx(conn, {
                   companyId: wf.company_id,
-                  branchId, branchIdsStr: verHdr.branch_id || 1,
+                  branchId,
+                  branchIdsStr: verHdr.branch_id || 1,
                   warehouseId: verHdr.warehouse_id,
                   itemId,
                   transactionType: "STOCK_VERIFICATION",
@@ -2764,7 +2976,8 @@ export const performAction = async (req, res, next) => {
               await createCreditNoteForReturnApprovalTx(conn, {
                 id: header.id,
                 companyId: wf.company_id,
-                branchId, branchIdsStr: header.branch_id,
+                branchId,
+                branchIdsStr: header.branch_id,
               });
               await conn.commit();
             } catch (err) {
@@ -2807,7 +3020,8 @@ export const performAction = async (req, res, next) => {
               await createDebitNoteForReturnApprovalTx(conn, {
                 id: header.id,
                 companyId: wf.company_id,
-                branchId, branchIdsStr: header.branch_id,
+                branchId,
+                branchIdsStr: header.branch_id,
               });
               await conn.commit();
             } catch (err) {
@@ -2876,7 +3090,8 @@ export const performAction = async (req, res, next) => {
               for (const d of details) {
                 await recordMovementTx(conn, {
                   companyId: wf.company_id,
-                  branchId, branchIdsStr: wf.branch_id || 1,
+                  branchId,
+                  branchIdsStr: wf.branch_id || 1,
                   warehouseId: rtsHdr.warehouse_id || null,
                   itemId: d.item_id,
                   transactionType: "RTS",
@@ -2934,7 +3149,8 @@ export const performAction = async (req, res, next) => {
               if (itemId && Number.isFinite(qtyAccepted) && qtyAccepted > 0) {
                 await recordMovementTx(conn, {
                   companyId: wf.company_id,
-                  branchId, branchIdsStr,
+                  branchId,
+                  branchIdsStr,
                   warehouseId,
                   itemId,
                   transactionType: "GRN",
@@ -2993,7 +3209,8 @@ export const performAction = async (req, res, next) => {
                   if (itemId && Number.isFinite(qtyDiff) && qtyDiff !== 0) {
                     await recordMovementTx(conn, {
                       companyId: wf.company_id,
-                      branchId, branchIdsStr,
+                      branchId,
+                      branchIdsStr,
                       warehouseId,
                       itemId,
                       transactionType: "STOCK_ADJUSTMENT",
@@ -3050,7 +3267,8 @@ export const performAction = async (req, res, next) => {
                 if (itemId && Number.isFinite(qtyChange) && qtyChange !== 0) {
                   await recordMovementTx(conn, {
                     companyId: wf.company_id,
-                    branchId, branchIdsStr: upHdr.branch_id || 1,
+                    branchId,
+                    branchIdsStr: upHdr.branch_id || 1,
                     warehouseId: upHdr.warehouse_id,
                     itemId,
                     transactionType: "STOCK_UPDATION",
@@ -3098,7 +3316,8 @@ export const performAction = async (req, res, next) => {
               );
               await applyStockVerificationApprovalTx(conn, {
                 companyId: wf.company_id,
-                branchId, branchIdsStr: verHdr.branch_id || 1,
+                branchId,
+                branchIdsStr: verHdr.branch_id || 1,
                 verificationId: wf.document_id,
                 warehouseId: verHdr.warehouse_id,
                 createdBy: null,
@@ -3235,7 +3454,7 @@ export const performAction = async (req, res, next) => {
                      SELECT expense_log_id FROM trn_transport_expenses 
                      WHERE voucher_id = :id AND company_id = :companyId AND expense_log_id IS NOT NULL
                    ) AND company_id = :companyId`,
-                  { id: wf.document_id, companyId: wf.company_id }
+                  { id: wf.document_id, companyId: wf.company_id },
                 );
               } catch (e) {}
             }
@@ -3294,6 +3513,33 @@ export const performAction = async (req, res, next) => {
         } catch (e) {}
       } else if (
         wf.status === "APPROVED" &&
+        (wf.document_type === "DAILY_SITE_REPORT" ||
+          wf.document_type === "DAILY_PROJECT_REPORT" ||
+          wf.document_type === "Daily Project Report" ||
+          wf.document_type === "Daily Site Report")
+      ) {
+        try {
+          const approverName = req.user?.username || req.user?.name || "Reviewer";
+          await query(
+            `UPDATE pm_daily_site_reports 
+             SET status = 'APPROVED', 
+                 approved_by_name = COALESCE(:approverName, approved_by_name),
+                 approved_at = NOW(),
+                 forwarded_to_username = NULL,
+                 reviewer_comments = COALESCE(:comments, reviewer_comments) 
+             WHERE id = :id OR report_no = :docIdStr`,
+            { 
+              id: Number(wf.document_id) || 0, 
+              docIdStr: String(wf.document_id),
+              approverName,
+              comments: req.body?.comments || null,
+            },
+          );
+        } catch (e) {
+          console.error("Error finalizing daily site report approval:", e);
+        }
+      } else if (
+        wf.status === "APPROVED" &&
         (wf.document_type === "STOCK_UPDATION" ||
           wf.document_type === "Stock Updation")
       ) {
@@ -3333,7 +3579,8 @@ export const performAction = async (req, res, next) => {
                 if (itemId && qty > 0) {
                   await recordMovementTx(conn, {
                     companyId: wf.company_id,
-                    branchId, branchIdsStr,
+                    branchId,
+                    branchIdsStr,
                     warehouseId,
                     itemId,
                     transactionType: "STOCK_UPDATION",
@@ -3384,7 +3631,8 @@ export const performAction = async (req, res, next) => {
               await conn.beginTransaction();
               await applyStockVerificationApprovalTx(conn, {
                 companyId: wf.company_id,
-                branchId, branchIdsStr,
+                branchId,
+                branchIdsStr,
                 verificationId: ver.id,
                 warehouseId,
                 createdBy: null,
@@ -3404,22 +3652,28 @@ export const performAction = async (req, res, next) => {
     }
     const finalStatusCheck = await query(
       `SELECT status, document_type, document_id, company_id FROM adm_document_workflows WHERE id = :id`,
-      { id: instance.id }
+      { id: instance.id },
     );
     const finalWf = finalStatusCheck[0];
 
     if (finalWf.status === "APPROVED" || finalWf.status === "POSTED") {
       // In workflow finalization, document_type can be "SALES_ORDER", "Sales Order", etc.
-      let normalizedModuleCode = String(finalWf.document_type || "").toUpperCase().replace(/ /g, '_');
+      let normalizedModuleCode = String(finalWf.document_type || "")
+        .toUpperCase()
+        .replace(/ /g, "_");
       let triggerStat = finalWf.status;
-      if (normalizedModuleCode === "PAYMENT_VOUCHER" || normalizedModuleCode === "RECEIPT_VOUCHER") triggerStat = "POSTED";
-      
+      if (
+        normalizedModuleCode === "PAYMENT_VOUCHER" ||
+        normalizedModuleCode === "RECEIPT_VOUCHER"
+      )
+        triggerStat = "POSTED";
+
       await checkAndSendAutomaticNotification({
         companyId: finalWf.company_id,
         moduleCode: normalizedModuleCode,
         statusTrigger: triggerStat,
         documentId: finalWf.document_id,
-      }).catch(err => console.error("Auto notification error:", err));
+      }).catch((err) => console.error("Auto notification error:", err));
     }
 
     res.json({ message: "Action processed successfully" });

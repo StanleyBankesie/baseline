@@ -518,7 +518,7 @@ export default function ServiceConfirmationForm() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <label className="label font-bold text-xs uppercase tracking-wider text-slate-600">
+                        <label className="label font-semibold text-xs uppercase tracking-wider text-slate-600">
                           DATE *
                         </label>
                         <input
@@ -537,7 +537,7 @@ export default function ServiceConfirmationForm() {
                         />
                       </div>
                       <div className="relative flex flex-col gap-1">
-                        <label className="label font-bold text-xs uppercase tracking-wider text-slate-600">
+                        <label className="label font-semibold text-xs uppercase tracking-wider text-slate-600">
                           SUPPLIER *
                         </label>
                         <input
@@ -603,7 +603,7 @@ export default function ServiceConfirmationForm() {
                           })()}
                       </div>
                       <div>
-                        <label className="label font-bold text-xs uppercase tracking-wider text-slate-600">
+                        <label className="label font-semibold text-xs uppercase tracking-wider text-slate-600">
                           TIME
                         </label>
                         <input
@@ -631,7 +631,7 @@ export default function ServiceConfirmationForm() {
                     </div>
 
                     <div>
-                      <label className="label font-bold text-xs uppercase tracking-wider text-slate-600">
+                      <label className="label font-semibold text-xs uppercase tracking-wider text-slate-600">
                         PROCUREMENT SERVICE REQUEST *
                       </label>
                       <select
@@ -927,7 +927,7 @@ export default function ServiceConfirmationForm() {
                     </div>
 
                     <div className="pt-2">
-                      <label className="label font-bold text-xs uppercase tracking-wider text-slate-600">
+                      <label className="label font-semibold text-xs uppercase tracking-wider text-slate-600">
                         Overall Satisfaction *
                       </label>
                       <div className="flex flex-wrap gap-2.5 mt-1">
@@ -959,7 +959,7 @@ export default function ServiceConfirmationForm() {
                     </div>
 
                     <div>
-                      <label className="label font-bold text-xs uppercase tracking-wider text-slate-600">
+                      <label className="label font-semibold text-xs uppercase tracking-wider text-slate-600">
                         Inspection Feedback (Optional)
                       </label>
                       <textarea
@@ -1009,7 +1009,7 @@ export default function ServiceConfirmationForm() {
                       Additional Information
                     </div>
                     <div>
-                      <label className="label font-bold text-xs uppercase tracking-wider text-slate-600">
+                      <label className="label font-semibold text-xs uppercase tracking-wider text-slate-600">
                         Remarks
                       </label>
                       <textarea
@@ -1097,7 +1097,7 @@ export default function ServiceConfirmationForm() {
             </div>
             <div className="card-body space-y-3 p-4">
               <div>
-                <label className="label font-bold text-xs uppercase tracking-wider text-slate-600">
+                <label className="label font-semibold text-xs uppercase tracking-wider text-slate-600">
                   Reason for Rejection *
                 </label>
                 <textarea

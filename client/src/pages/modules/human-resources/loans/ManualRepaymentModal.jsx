@@ -294,7 +294,7 @@ export default function ManualRepaymentModal({ open, onClose, loan, onSuccess })
         {/* Deposit Account Section - Balance removed */}
         <div className="bg-slate-50 dark:bg-slate-800/40 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700/60 space-y-3">
           <div className="flex items-center justify-between">
-            <label className="label text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5 mb-0">
+            <label className="label text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5 mb-0">
               <Wallet className="w-4 h-4 text-brand-600 dark:text-brand-400" />
               Deposit Account (Debit) <span className="text-red-500">*</span>
             </label>

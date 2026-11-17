@@ -311,8 +311,11 @@ export const FEATURES_REGISTRY = {
       { feature_key: "project-management:project-expense-income-report", type: "feature", label: "Project Expense and Income Report", path: "/project-management/reports/project-expense-income" },
       { feature_key: "project-management:tenders", type: "feature", label: "Tenders & Bidding", path: "/project-management/tenders" },
       { feature_key: "project-management:boqs", type: "feature", label: "Bill of Quantities (BOQ)", path: "/project-management/boqs" },
-      { feature_key: "project-management:cost-control", type: "feature", label: "Cost Control & EVM", path: "/project-management/cost-control" },
-      { feature_key: "project-management:gantt-schedule", type: "feature", label: "Planning & CPM Schedule", path: "/project-management/schedule" },
+      { feature_key: "project-management:costing", type: "feature", label: "Project Costing & Estimation", path: "/project-management/costing" },
+      { feature_key: "project-management:cost-categories", type: "feature", label: "Cost Categories", path: "/project-management/cost-categories" },
+      { feature_key: "project-management:cost-control", type: "feature", label: "Project Cost Control & Budget Management", path: "/project-management/cost-control" },
+      { feature_key: "project-management:gantt", type: "feature", label: "Gantt Chart", path: "/project-management/gantt" },
+      { feature_key: "project-management:task-calendar", type: "feature", label: "Task Calendar", path: "/project-management/calendar" },
       { feature_key: "project-management:daily-reports", type: "feature", label: "Daily Site Diary (DSR)", path: "/project-management/daily-reports" },
       { feature_key: "project-management:subcontractors", type: "feature", label: "Subcontractors & IPCs", path: "/project-management/subcontracts" },
       { feature_key: "project-management:client-valuations", type: "feature", label: "Client Valuations", path: "/project-management/client-valuations" },
@@ -453,7 +456,103 @@ export const FEATURES_REGISTRY = {
           { feature_key: "transport:trans-active-vehicles", type: "dashboard", label: "Active Vehicles", path: "/transport/reports/trans-active-vehicles" },
       { feature_key: "transport:trans-ongoing-trips", type: "dashboard", label: "Ongoing Trips", path: "/transport/reports/trans-ongoing-trips" },
       { feature_key: "transport:trans-pending-maint", type: "dashboard", label: "Pending Fleet Maintenance", path: "/transport/reports/trans-pending-maint" },
-],
+    ],
+  },
+
+  facilities: {
+    features: [
+      { feature_key: "facilities:properties", type: "feature", label: "Properties & Sites", path: "/facilities/properties" },
+      { feature_key: "facilities:onboarding", type: "feature", label: "Property Onboarding", path: "/facilities/onboarding" },
+      { feature_key: "facilities:space-occupancy", type: "feature", label: "Space & Tenancy", path: "/facilities/space-occupancy" },
+      { feature_key: "facilities:assets", type: "feature", label: "Facility Assets", path: "/facilities/assets" },
+      { feature_key: "facilities:equipment", type: "feature", label: "Equipment & Systems", path: "/facilities/equipment" },
+      { feature_key: "facilities:meters", type: "feature", label: "Utility Submeters", path: "/facilities/meters" },
+      { feature_key: "facilities:compliance", type: "feature", label: "Statutory Compliance", path: "/facilities/compliance" },
+      { feature_key: "facilities:sustainability", type: "feature", label: "Sustainability", path: "/facilities/sustainability" },
+      { feature_key: "facilities:service-requests", type: "feature", label: "Service Requests", path: "/facilities/service-requests" },
+      { feature_key: "facilities:work-orders", type: "feature", label: "Work Orders", path: "/facilities/work-orders" },
+      { feature_key: "facilities:maintenance-contracts", type: "feature", label: "Vendor Contracts", path: "/facilities/maintenance-contracts" },
+      { feature_key: "facilities:inspections", type: "feature", label: "FM Inspections", path: "/facilities/inspections" },
+      { feature_key: "facilities:service-bills", type: "feature", label: "Tenant Service Bills", path: "/facilities/service-bills" },
+      { feature_key: "facilities:energy-consumption", type: "feature", label: "Energy & Utilities", path: "/facilities/energy-consumption" },
+      { feature_key: "facilities:sanitation-waste", type: "feature", label: "Sanitation & Waste", path: "/facilities/sanitation-waste" },
+      { feature_key: "facilities:security-guards", type: "feature", label: "Security & Guarding", path: "/facilities/security-guards" },
+      { feature_key: "facilities:visitors", type: "feature", label: "Visitor Management", path: "/facilities/visitors" },
+      { feature_key: "facilities:setup", type: "feature", label: "Facilities Setup", path: "/facilities/setup" },
+    ],
+    dashboards: [
+      { feature_key: "facilities:fm-total-properties", type: "dashboard", label: "Total Properties", path: "/facilities/reports/fm-total-properties" },
+      { feature_key: "facilities:fm-active-leases", type: "dashboard", label: "Active Leases", path: "/facilities/reports/fm-active-leases" },
+      { feature_key: "facilities:fm-open-work-orders", type: "dashboard", label: "Open Work Orders", path: "/facilities/reports/fm-open-work-orders" },
+      { feature_key: "facilities:fm-compliance-rate", type: "dashboard", label: "Compliance Rate", path: "/facilities/reports/fm-compliance-rate" },
+    ],
+  },
+
+  assets: {
+    features: [
+      { feature_key: "assets:register", type: "feature", label: "Asset Register", path: "/assets/register" },
+      { feature_key: "assets:categories", type: "feature", label: "Asset Categories", path: "/assets/categories" },
+      { feature_key: "assets:depreciation", type: "feature", label: "Depreciation Engine", path: "/assets/depreciation" },
+      { feature_key: "assets:transfers", type: "feature", label: "Asset Transfers", path: "/assets/transfers" },
+      { feature_key: "assets:disposals", type: "feature", label: "Asset Disposals", path: "/assets/disposals" },
+      { feature_key: "assets:revaluations", type: "feature", label: "Asset Revaluations", path: "/assets/revaluations" },
+      { feature_key: "assets:setup", type: "feature", label: "Master Setup", path: "/assets/setup" },
+      { feature_key: "assets:reports", type: "feature", label: "Asset Reports", path: "/assets/reports/schedule" },
+    ],
+    dashboards: [
+      { feature_key: "assets:total-fixed-assets", type: "dashboard", label: "Total Fixed Assets", path: "/assets/reports/total" },
+      { feature_key: "assets:monthly-depreciation", type: "dashboard", label: "Monthly Depreciation", path: "/assets/reports/depr" },
+    ],
+  },
+
+  "environmental-health-safety": {
+    features: [
+      { feature_key: "environmental-health-safety:safety", type: "feature", label: "Safety Management (HSE)", path: "/environmental-health-safety/safety" },
+      { feature_key: "environmental-health-safety:incidents", type: "feature", label: "Incident Register & Near Misses", path: "/environmental-health-safety/incidents" },
+      { feature_key: "environmental-health-safety:toolbox-talks", type: "feature", label: "Toolbox Talks & Briefings", path: "/environmental-health-safety/toolbox-talks" },
+      { feature_key: "environmental-health-safety:hsa-compliance", type: "feature", label: "Health, Safety & Compliance", path: "/environmental-health-safety/hsa-compliance" },
+      { feature_key: "environmental-health-safety:compliance", type: "feature", label: "Statutory Obligations & Hazards", path: "/environmental-health-safety/compliance" },
+      { feature_key: "environmental-health-safety:sustainability", type: "feature", label: "Sustainability & Environmental", path: "/environmental-health-safety/sustainability" },
+    ],
+    dashboards: [
+      { feature_key: "environmental-health-safety:ehs-incident-rate", type: "dashboard", label: "Incident Frequency Rate", path: "/environmental-health-safety/reports/incident-rate" },
+      { feature_key: "environmental-health-safety:ehs-active-permits", type: "dashboard", label: "Active Permits to Work", path: "/environmental-health-safety/reports/permits" },
+      { feature_key: "environmental-health-safety:ehs-compliance-score", type: "dashboard", label: "Statutory Compliance Score", path: "/environmental-health-safety/reports/compliance" },
+    ],
+  },
+
+  hse: {
+    features: [
+      { feature_key: "hse:safety", type: "feature", label: "Safety Management (HSE)", path: "/environmental-health-safety/safety" },
+      { feature_key: "hse:incidents", type: "feature", label: "Incident Register & Near Misses", path: "/environmental-health-safety/incidents" },
+      { feature_key: "hse:toolbox-talks", type: "feature", label: "Toolbox Talks & Briefings", path: "/environmental-health-safety/toolbox-talks" },
+      { feature_key: "hse:hsa-compliance", type: "feature", label: "Health, Safety & Compliance", path: "/environmental-health-safety/hsa-compliance" },
+      { feature_key: "hse:compliance", type: "feature", label: "Statutory Obligations & Hazards", path: "/environmental-health-safety/compliance" },
+      { feature_key: "hse:sustainability", type: "feature", label: "Sustainability & Environmental", path: "/environmental-health-safety/sustainability" },
+    ],
+    dashboards: [
+      { feature_key: "hse:ehs-incident-rate", type: "dashboard", label: "Incident Frequency Rate", path: "/environmental-health-safety/reports/incident-rate" },
+      { feature_key: "hse:ehs-active-permits", type: "dashboard", label: "Active Permits to Work", path: "/environmental-health-safety/reports/permits" },
+      { feature_key: "hse:ehs-compliance-score", type: "dashboard", label: "Statutory Compliance Score", path: "/environmental-health-safety/reports/compliance" },
+    ],
+  },
+
+  system: {
+    features: [
+      { feature_key: "system:companies", type: "feature", label: "Companies Setup", path: "/system-configuration/companies" },
+      { feature_key: "system:branches", type: "feature", label: "Branches Setup", path: "/system-configuration/branches" },
+      { feature_key: "system:admin-permissions", type: "feature", label: "Admin Permissions", path: "/system-configuration/admin-permissions" },
+      { feature_key: "system:backups", type: "feature", label: "System Backups", path: "/system-configuration/backups" },
+      { feature_key: "system:licenses", type: "feature", label: "Software Licenses", path: "/system-configuration/licenses" },
+      { feature_key: "system:payment-packages", type: "feature", label: "Payment Packages", path: "/system-configuration/payment-packages" },
+      { feature_key: "system:general-settings", type: "feature", label: "General Settings", path: "/system-configuration/general-settings" },
+      { feature_key: "system:license-renewal", type: "feature", label: "License Renewal Access", path: "/system-configuration/licenses" },
+    ],
+    dashboards: [
+      { feature_key: "system:sys-cpu-usage", type: "dashboard", label: "System CPU Usage", path: "/system-configuration/reports/cpu" },
+      { feature_key: "system:sys-memory-usage", type: "dashboard", label: "System Memory Usage", path: "/system-configuration/reports/memory" },
+      { feature_key: "system:sys-active-sessions", type: "dashboard", label: "Active User Sessions", path: "/system-configuration/reports/sessions" },
+    ],
   },
 };
 

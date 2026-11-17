@@ -549,7 +549,7 @@ const WorkflowForm = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center gap-4 mb-6">
         <button
           onClick={() => navigate("/administration/workflows")}
@@ -568,10 +568,11 @@ const WorkflowForm = () => {
           <h2 className="text-lg font-semibold text-gray-700 border-b pb-2">
             Basic Information
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* 3-column row: Workflow Name, Module Key, and Document Type (Workflow Code hidden from frontend) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Workflow Name
+                Workflow Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -579,25 +580,14 @@ const WorkflowForm = () => {
                 required
                 value={formData.workflow_name}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                placeholder="e.g. Daily Project Report Workflow"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm"
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Workflow Code
-              </label>
-              <input
-                type="text"
-                name="workflow_code"
-                required
-                value={formData.workflow_code}
-                readOnly
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-white dark:bg-slate-900 text-gray-500 cursor-not-allowed"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Module Key
+                Module Key <span className="text-red-500">*</span>
               </label>
               <select
                 name="module_key"
@@ -613,7 +603,7 @@ const WorkflowForm = () => {
                     document_route: "",
                   }));
                 }}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm"
               >
                 <option value="">Select Module</option>
                 {docTypes.length === 0 ? (
@@ -644,10 +634,21 @@ const WorkflowForm = () => {
                 )}
               </select>
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Document Type
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium text-gray-700">
+                  Document Type <span className="text-red-500">*</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={fetchTransactionDocTypes}
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                  title="Refresh document types"
+                >
+                  Refresh Types
+                </button>
+              </div>
               <select
                 name="document_type"
                 required
@@ -679,7 +680,7 @@ const WorkflowForm = () => {
                     }));
                   }
                 }}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm"
               >
                 <option value="">Select Document Type</option>
                 {docTypes.length === 0 ? (
@@ -712,28 +713,25 @@ const WorkflowForm = () => {
                     ))
                 )}
               </select>
-              <div className="mt-2">
-                <button
-                  type="button"
-                  onClick={fetchTransactionDocTypes}
-                  className="btn btn-sm btn-secondary"
-                >
-                  Refresh Types
-                </button>
-              </div>
             </div>
-            <div className="flex items-center mt-6">
+          </div>
+
+          {/* Checkboxes Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-3 border-t border-gray-100">
+            <div className="flex items-center gap-2">
               <input
+                id="is_active"
                 type="checkbox"
                 name="is_active"
                 checked={formData.is_active}
                 onChange={handleChange}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
               />
-              <label className="ml-2 block text-sm text-gray-900">
+              <label htmlFor="is_active" className="text-sm font-medium text-gray-900 cursor-pointer">
                 Is Active
               </label>
             </div>
+
             <div className="flex items-center gap-2">
               <input
                 id="email_notify"
@@ -741,12 +739,13 @@ const WorkflowForm = () => {
                 name="email_notify"
                 checked={!!formData.email_notify}
                 onChange={handleChange}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
               />
-              <label htmlFor="email_notify" className="text-sm text-gray-700">
+              <label htmlFor="email_notify" className="text-sm text-gray-700 cursor-pointer">
                 Send email notifications to approvers
               </label>
             </div>
-            
+
             <div className="flex items-center gap-2">
               <input
                 id="sms_notify"
@@ -754,12 +753,13 @@ const WorkflowForm = () => {
                 name="sms_notify"
                 checked={!!formData.sms_notify}
                 onChange={handleChange}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
               />
-              <label htmlFor="sms_notify" className="text-sm text-gray-700">
+              <label htmlFor="sms_notify" className="text-sm text-gray-700 cursor-pointer">
                 Send SMS notifications to approvers
               </label>
             </div>
-            
+
             <div className="flex items-center gap-2">
               <input
                 id="whatsapp_notify"
@@ -767,8 +767,9 @@ const WorkflowForm = () => {
                 name="whatsapp_notify"
                 checked={!!formData.whatsapp_notify}
                 onChange={handleChange}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
               />
-              <label htmlFor="whatsapp_notify" className="text-sm text-gray-700">
+              <label htmlFor="whatsapp_notify" className="text-sm text-gray-700 cursor-pointer">
                 Send WhatsApp notifications to approvers
               </label>
             </div>

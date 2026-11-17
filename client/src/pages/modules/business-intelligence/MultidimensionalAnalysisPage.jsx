@@ -211,7 +211,7 @@ export default function MultidimensionalAnalysisPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Measure Selector */}
             <div>
-              <label className="text-xs font-bold text-slate-600 dark:text-slate-400 block mb-1">
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">
                 1. Analytical Measure
               </label>
               <select
@@ -227,7 +227,7 @@ export default function MultidimensionalAnalysisPage() {
 
             {/* Dimension Selector */}
             <div>
-              <label className="text-xs font-bold text-slate-600 dark:text-slate-400 block mb-1">
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">
                 2. Primary Dimension
               </label>
               <select
@@ -243,7 +243,7 @@ export default function MultidimensionalAnalysisPage() {
 
             {/* Comparison Selector */}
             <div>
-              <label className="text-xs font-bold text-slate-600 dark:text-slate-400 block mb-1">
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">
                 3. Comparison Period
               </label>
               <select
@@ -259,7 +259,7 @@ export default function MultidimensionalAnalysisPage() {
 
             {/* View Mode */}
             <div>
-              <label className="text-xs font-bold text-slate-600 dark:text-slate-400 block mb-1">
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">
                 4. Visualization Layout
               </label>
               <select

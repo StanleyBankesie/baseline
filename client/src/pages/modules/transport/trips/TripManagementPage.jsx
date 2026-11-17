@@ -418,7 +418,7 @@ export default function TripManagementPage() {
               <PlayCircleOutlined /> Start Trip Execution
             </h3>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 block">
+              <label className="text-xs font-semibold text-slate-300 block">
                 Current Odometer Reading <span className="text-rose-500">*</span>
               </label>
               <input 
@@ -455,7 +455,7 @@ export default function TripManagementPage() {
               <CheckCircleOutlined /> End Trip Execution
             </h3>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 block">
+              <label className="text-xs font-semibold text-slate-300 block">
                 Ending Odometer Reading <span className="text-rose-500">*</span>
               </label>
               <input 
@@ -493,7 +493,7 @@ export default function TripManagementPage() {
             </h3>
             
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 block">
+              <label className="text-xs font-semibold text-slate-300 block">
                 Select Target Driver <span className="text-rose-500">*</span>
               </label>
               <select

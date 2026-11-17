@@ -3657,7 +3657,7 @@ export default function FacilitiesSetupPage() {
             <form onSubmit={handleSavePersonnel} className="p-6 space-y-5 text-xs">
               {/* HR Module Employee Link Helper Banner */}
               <div className="bg-emerald-50 dark:bg-emerald-950/40 p-4 rounded-xl border border-emerald-200 dark:border-emerald-800/60">
-                <label className="block text-emerald-900 dark:text-emerald-300 font-bold mb-1.5 flex items-center gap-1.5">
+                <label className="block text-emerald-900 dark:text-emerald-300 font-semibold mb-1.5 flex items-center gap-1.5">
                   <UserPlus size={15} /> Link Employee from HR Module (Recommended)
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -3682,7 +3682,7 @@ export default function FacilitiesSetupPage() {
               {/* Form Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Personnel Full Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -3696,7 +3696,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Employee / Staff Code</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Employee / Staff Code</label>
                   <input
                     type="text"
                     placeholder="e.g. ST0002 or PER-001"
@@ -3707,7 +3707,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Service Category</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Service Category</label>
                   <select
                     value={personnelForm.category}
                     onChange={(e) => setPersonnelForm({ ...personnelForm, category: e.target.value })}
@@ -3722,7 +3722,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Assigned Operational Shift</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Assigned Operational Shift</label>
                   <select
                     value={personnelForm.shift_id}
                     onChange={(e) => setPersonnelForm({ ...personnelForm, shift_id: e.target.value })}
@@ -3738,7 +3738,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Direct Supervisor</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Direct Supervisor</label>
                   <select
                     value={personnelForm.supervisor_id}
                     onChange={(e) => setPersonnelForm({ ...personnelForm, supervisor_id: e.target.value })}
@@ -3754,7 +3754,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Position / Job Role</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Position / Job Role</label>
                   <select
                     value={personnelForm.position}
                     onChange={(e) => setPersonnelForm({ ...personnelForm, position: e.target.value })}
@@ -3770,7 +3770,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Contact Phone</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Contact Phone</label>
                   <input
                     type="text"
                     placeholder="e.g. 0244123456"
@@ -3781,7 +3781,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Specialties & Operative Notes</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Specialties & Operative Notes</label>
                   <input
                     type="text"
                     placeholder="e.g. High-level window cleaning certified, hazardous chemical handler..."
@@ -3799,7 +3799,7 @@ export default function FacilitiesSetupPage() {
                     onChange={(e) => setPersonnelForm({ ...personnelForm, is_active: e.target.checked })}
                     className="w-4 h-4 text-emerald-600 rounded"
                   />
-                  <label htmlFor="pers_active" className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                  <label htmlFor="pers_active" className="text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
                     Active for task dispatch
                   </label>
                 </div>
@@ -3850,7 +3850,7 @@ export default function FacilitiesSetupPage() {
 
             <form onSubmit={handleSaveSupervisor} className="p-6 space-y-4 text-xs">
               <div className="bg-purple-50 dark:bg-purple-950/40 p-4 rounded-xl border border-purple-200 dark:border-purple-800/60">
-                <label className="block text-purple-900 dark:text-purple-300 font-bold mb-1.5 flex items-center gap-1.5">
+                <label className="block text-purple-900 dark:text-purple-300 font-semibold mb-1.5 flex items-center gap-1.5">
                   <UserPlus size={15} /> Link Employee from HR Module
                 </label>
                 <select
@@ -3869,7 +3869,7 @@ export default function FacilitiesSetupPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Supervisor Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -3883,7 +3883,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Employee Code</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Employee Code</label>
                   <input
                     type="text"
                     placeholder="e.g. SUP-001"
@@ -3894,7 +3894,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Assigned Operational Shift</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Assigned Operational Shift</label>
                   <select
                     value={supervisorForm.shift_id}
                     onChange={(e) => setSupervisorForm({ ...supervisorForm, shift_id: e.target.value })}
@@ -3910,7 +3910,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Department / Division</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Department / Division</label>
                   <input
                     type="text"
                     value={supervisorForm.department}
@@ -3920,7 +3920,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Contact Phone</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Contact Phone</label>
                   <input
                     type="text"
                     placeholder="e.g. 0244123456"
@@ -3931,7 +3931,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Email Address</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Email Address</label>
                   <input
                     type="email"
                     placeholder="e.g. supervisor@company.com"
@@ -3942,7 +3942,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Role / Inspection Notes</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Role / Inspection Notes</label>
                   <input
                     type="text"
                     placeholder="e.g. Senior Facilities Officer, Health & Safety Auditor..."
@@ -3999,7 +3999,7 @@ export default function FacilitiesSetupPage() {
             <form onSubmit={handleSaveShift} className="p-6 space-y-4 text-xs">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Shift Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -4013,7 +4013,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Shift Code</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Shift Code</label>
                   <input
                     type="text"
                     placeholder="e.g. MORNING"
@@ -4024,7 +4024,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Start Time <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -4037,7 +4037,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     End Time <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -4050,7 +4050,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Description / Focus Areas</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Description / Focus Areas</label>
                   <input
                     type="text"
                     placeholder="e.g. Early morning deep clean, restroom restock, security opening"
@@ -4068,7 +4068,7 @@ export default function FacilitiesSetupPage() {
                     onChange={(e) => setShiftForm({ ...shiftForm, is_active: e.target.checked })}
                     className="w-4 h-4 text-blue-600 rounded"
                   />
-                  <label htmlFor="shift_active" className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                  <label htmlFor="shift_active" className="text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
                     Active Shift
                   </label>
                 </div>
@@ -4118,7 +4118,7 @@ export default function FacilitiesSetupPage() {
             <form onSubmit={handleSaveChecklist} className="p-6 space-y-5 text-xs">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="lg:col-span-2">
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Template Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -4132,7 +4132,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Template Code</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Template Code</label>
                   <input
                     type="text"
                     placeholder="e.g. TPL-JAN-01"
@@ -4143,7 +4143,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Service Line <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -4160,7 +4160,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div className="lg:col-span-2">
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Description & Scope</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Description & Scope</label>
                   <input
                     type="text"
                     placeholder="e.g. Standard morning shift quality verification checklist for operatives"
@@ -4273,7 +4273,7 @@ export default function FacilitiesSetupPage() {
                                 onChange={(e) => handleUpdateChecklistItem(idx, "is_critical", e.target.checked)}
                                 className="w-3.5 h-3.5 text-red-600 rounded"
                               />
-                              <span className={item.is_critical ? "text-red-600 dark:text-red-400 font-bold" : ""}>
+                              <span className={item.is_critical ? "text-red-600 dark:text-red-400 font-semibold" : ""}>
                                 Critical Check (Triggers Corrective Work Order if Failed)
                               </span>
                             </label>
@@ -4519,7 +4519,7 @@ export default function FacilitiesSetupPage() {
             <form onSubmit={handleSaveContractor} className="p-6 space-y-5 text-xs">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Contractor / Provider Name *
                   </label>
                   <input
@@ -4533,7 +4533,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Provider Type
                   </label>
                   <select
@@ -4548,7 +4548,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Contact Person
                   </label>
                   <input
@@ -4561,7 +4561,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Tax Identification / TIN
                   </label>
                   <input
@@ -4574,7 +4574,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Phone Number
                   </label>
                   <input
@@ -4587,7 +4587,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Email Address
                   </label>
                   <input
@@ -4600,7 +4600,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Office / Workshop Address
                   </label>
                   <input
@@ -4658,7 +4658,7 @@ export default function FacilitiesSetupPage() {
             <form onSubmit={handleSaveSpace} className="p-6 space-y-5 text-xs">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Room / Space Name *
                   </label>
                   <input
@@ -4672,7 +4672,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Space Code / Identifier
                   </label>
                   <input
@@ -4685,7 +4685,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Property / Facility
                   </label>
                   <select
@@ -4703,7 +4703,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Space Type
                   </label>
                   <select
@@ -4722,7 +4722,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Floor / Zone
                   </label>
                   <input
@@ -4736,7 +4736,7 @@ export default function FacilitiesSetupPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                       Seating Capacity
                     </label>
                     <input
@@ -4749,7 +4749,7 @@ export default function FacilitiesSetupPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                       Area (m²)
                     </label>
                     <input
@@ -4819,7 +4819,7 @@ export default function FacilitiesSetupPage() {
 
             <form onSubmit={handleSaveCategory} className="p-6 space-y-4 text-xs">
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                   Category Name <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -4842,7 +4842,7 @@ export default function FacilitiesSetupPage() {
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                   Category Code (System ID)
                 </label>
                 <input
@@ -4855,7 +4855,7 @@ export default function FacilitiesSetupPage() {
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                   Operational Description / Scope
                 </label>
                 <textarea
@@ -4923,7 +4923,7 @@ export default function FacilitiesSetupPage() {
             <form onSubmit={handleSaveClient} className="p-6 space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                     Client / Organization Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -4937,7 +4937,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                     Client Code
                   </label>
                   <input
@@ -4950,7 +4950,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                     Client Type
                   </label>
                   <select
@@ -4966,7 +4966,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                     Contact Person
                   </label>
                   <input
@@ -4979,7 +4979,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                     Email Address
                   </label>
                   <input
@@ -4992,7 +4992,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                     Phone Number
                   </label>
                   <PhoneInput
@@ -5002,7 +5002,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                     Payment Terms
                   </label>
                   <input
@@ -5015,7 +5015,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                     Street Address
                   </label>
                   <input
@@ -5028,7 +5028,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                     City
                   </label>
                   <input
@@ -5041,7 +5041,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                     State / Region
                   </label>
                   <input
@@ -5054,7 +5054,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">
                     Country
                   </label>
                   <input
@@ -5345,7 +5345,7 @@ export default function FacilitiesSetupPage() {
 
             <form onSubmit={handleSaveSanitation} className="p-6 space-y-4 text-xs">
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                   Checkpoint Name <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -5368,7 +5368,7 @@ export default function FacilitiesSetupPage() {
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                   Checkpoint Code / Identifier
                 </label>
                 <input
@@ -5381,7 +5381,7 @@ export default function FacilitiesSetupPage() {
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                   Operational Scope & Hygiene Description
                 </label>
                 <textarea
@@ -5446,7 +5446,7 @@ export default function FacilitiesSetupPage() {
 
             <form onSubmit={handleSaveWasteStream} className="p-6 space-y-4 text-xs">
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                   Waste Stream / Type Name <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -5470,7 +5470,7 @@ export default function FacilitiesSetupPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Stream Code (System Key)
                   </label>
                   <input
@@ -5482,7 +5482,7 @@ export default function FacilitiesSetupPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Default Measurement Unit
                   </label>
                   <select
@@ -5499,7 +5499,7 @@ export default function FacilitiesSetupPage() {
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                   Hazard Classification Level
                 </label>
                 <select
@@ -5514,7 +5514,7 @@ export default function FacilitiesSetupPage() {
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                   Handling Guidelines & Description
                 </label>
                 <textarea
@@ -5585,7 +5585,7 @@ export default function FacilitiesSetupPage() {
 
             <form onSubmit={handleSavePosition} className="p-6 space-y-4 text-xs">
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                   Position Title <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -5600,7 +5600,7 @@ export default function FacilitiesSetupPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Position Code
                   </label>
                   <input
@@ -5613,7 +5613,7 @@ export default function FacilitiesSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Department
                   </label>
                   <input
@@ -5627,7 +5627,7 @@ export default function FacilitiesSetupPage() {
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                   Description & Key Responsibilities
                 </label>
                 <textarea

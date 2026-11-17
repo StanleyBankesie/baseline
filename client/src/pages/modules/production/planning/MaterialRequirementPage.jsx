@@ -345,7 +345,7 @@ export default function MaterialRequirementPage() {
             <select
               value={selectedOrderId}
               onChange={(e) => setSelectedOrderId(e.target.value)}
-              className="input bg-brand-950 border-brand-800 text-white w-full py-2.5 font-bold text-xs"
+              className="input bg-brand-950 border-brand-800 text-white w-full py-2.5 font-semibold text-xs"
             >
               <option value="ALL_ORDERS">🌐 ALL Active Orders & Plans (Aggregate)</option>
               {workOrders.map((wo) => (
@@ -360,7 +360,7 @@ export default function MaterialRequirementPage() {
             <select
               value={selectedWarehouseId}
               onChange={(e) => setSelectedWarehouseId(e.target.value)}
-              className="input bg-brand-950 border-brand-800 text-white w-full py-2.5 font-bold text-xs"
+              className="input bg-brand-950 border-brand-800 text-white w-full py-2.5 font-semibold text-xs"
             >
               <option value="">All Warehouses (Company Stock)</option>
               {warehouses.map((w) => (

@@ -286,7 +286,9 @@ export function calculateCPM(tasks = [], projectStartDate = new Date(), dependen
       node.ff = Math.max(0, Math.min(node.tf, minSuccES - node.ef));
     }
 
-    node.is_critical = node.tf === 0 ? 1 : 0;
+    // Completed tasks have no remaining schedule variance and cannot be on the active critical path
+    const isCompleted = node.status === "COMPLETED" || Number(node.completion_percent || 0) >= 100;
+    node.is_critical = (!isCompleted && node.tf === 0) ? 1 : 0;
   }
 
   // 6. Format Dates and Critical Path Sequence

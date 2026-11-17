@@ -686,7 +686,7 @@ export default function DeliveryForm() {
                   type="number"
                   readOnly
                   value={formData.invoice_amount}
-                  className="w-full border rounded p-2 bg-white dark:bg-slate-900 font-bold"
+                  className="w-full border rounded p-2 bg-white dark:bg-slate-900 font-semibold"
                 />
               </div>
             </div>

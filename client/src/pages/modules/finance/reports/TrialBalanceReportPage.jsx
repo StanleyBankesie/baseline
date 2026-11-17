@@ -7,6 +7,8 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { api } from "api/client";
 import { Link } from "react-router-dom";
+import useSort from "@/hooks/useSort.js";
+import SortableHeader from "@/components/SortableHeader.jsx";
 import {
   fetchReportHeader,
   applyPdfHeader,
@@ -37,6 +39,8 @@ export default function TrialBalanceReportPage() {
   const [groups, setGroups] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [accountId, setAccountId] = useState("");
+  const [projects, setProjects] = useState([]);
+  const [selectedProjectId, setSelectedProjectId] = useState("");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [controlBreak, setControlBreak] = useState(true);
@@ -78,6 +82,7 @@ export default function TrialBalanceReportPage() {
           to: to || null,
           groupId: groupId ? Number(groupId) : null,
           accountId: accountId ? Number(accountId) : null,
+          projectId: selectedProjectId || null,
         },
       });
       setItems(res.data?.items || []);
@@ -110,14 +115,30 @@ export default function TrialBalanceReportPage() {
     }
   }
 
+  async function loadProjects() {
+    try {
+      const res = await api.get("/projects");
+      const list = Array.isArray(res.data?.data)
+        ? res.data.data
+        : Array.isArray(res.data?.items)
+        ? res.data.items
+        : Array.isArray(res.data)
+        ? res.data
+        : [];
+      setProjects(list);
+    } catch {
+      setProjects([]);
+    }
+  }
+
   useEffect(() => {
-    Promise.all([loadGroups(), loadAccounts()]);
+    Promise.all([loadGroups(), loadAccounts(), loadProjects()]);
   }, []);
 
   useEffect(() => {
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, to, groupId, accountId, pollingCounter]);
+  }, [from, to, groupId, accountId, selectedProjectId, pollingCounter]);
 
   // Transform data for new column format
   const transformedItems = items.map((r) => {
@@ -243,6 +264,21 @@ export default function TrialBalanceReportPage() {
               </button>
             </div>
             <div>
+              <label className="label">Project (Optional)</label>
+              <select
+                className="input"
+                value={selectedProjectId}
+                onChange={(e) => setSelectedProjectId(e.target.value)}
+              >
+                <option value="">All Projects (Company-wide)</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.project_code ? `${p.project_code} - ` : ""}{p.project_name || p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
               <label className="label">Account Group</label>
               <select
                 className="input"
@@ -288,9 +324,11 @@ export default function TrialBalanceReportPage() {
                 onClick={async () => {
                   if (!transformedItems.length) return;
                   const headerInfo = await fetchReportHeader(api);
+                  const selProj = selectedProjectId ? projects.find(p => String(p.id) === String(selectedProjectId)) : null;
+                  const projStr = selProj ? ` | Project: ${selProj.project_name}` : "";
                   const headerRows = buildExcelHeaderRows(headerInfo, {
                     title: "TRIAL BALANCE REPORT",
-                    period: `${from || "Beginning"} to ${to || "Today"}`,
+                    period: `${from || "Beginning"} to ${to || "Today"}${projStr}`,
                   });
                   const exportData = transformedItems.map((r) => ({
                     Account_Code: r.account_code,
@@ -326,7 +364,7 @@ export default function TrialBalanceReportPage() {
 
                   let y = applyPdfHeader(doc, headerInfo, {
                     title: "TRIAL BALANCE REPORT",
-                    subtitle: `Period: ${from || "Beginning"} to ${to || "Today"}`,
+                    subtitle: `Period: ${from || "Beginning"} to ${to || "Today"}${selProj ? ` | Project: ${selProj.project_name}` : ""}`,
                     kpis: [
                       { label: "OPENING (DR / CR)", value: `${headerInfo.currPrefix}${totals.opening_dr.toLocaleString()} / ${totals.opening_cr.toLocaleString()}`, color: [59, 130, 246] },
                       { label: "TOTAL MOVEMENT", value: `${headerInfo.currPrefix}${totals.debit_amount.toLocaleString()}`, color: [16, 185, 129] },

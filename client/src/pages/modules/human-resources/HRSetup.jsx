@@ -361,7 +361,7 @@ export default function HRSetup() {
               {/* Editor */}
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
                     Email Subject Line
                   </label>
                   <input
@@ -373,7 +373,7 @@ export default function HRSetup() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
                     Email Message Content
                   </label>
                   <textarea
@@ -388,7 +388,7 @@ export default function HRSetup() {
 
               {/* Live Preview */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
                   Live Preview (Simulated with Sample Employee)
                 </label>
                 <div className="border border-slate-300 dark:border-slate-600 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-900 shadow-xs">

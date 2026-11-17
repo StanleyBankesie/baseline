@@ -564,7 +564,7 @@ export default function OpeningBalancesPage() {
 
           <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
             <div className="flex items-center gap-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
                 Fiscal Period:
               </label>
               <select
@@ -587,7 +587,7 @@ export default function OpeningBalancesPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
                 Opening Date:
               </label>
               <input
@@ -649,7 +649,7 @@ export default function OpeningBalancesPage() {
                     {/* Currency Selector */}
                     <td className="py-3 px-3">
                       <select
-                        className="input text-xs font-bold py-1.5 px-2 w-full"
+                        className="input text-xs font-semibold py-1.5 px-2 w-full"
                         value={r.currencyId}
                         onChange={(e) => setValue(r.id, "currencyId", e.target.value)}
                       >
@@ -667,7 +667,7 @@ export default function OpeningBalancesPage() {
                         className={`input text-right font-mono text-xs py-1.5 px-2 w-full ${
                           r.isBase 
                             ? "bg-white dark:bg-slate-900 text-slate-400 cursor-not-allowed" 
-                            : "font-bold text-indigo-600 dark:text-indigo-400 border-indigo-300"
+                            : "font-semibold text-indigo-600 dark:text-indigo-400 border-indigo-300"
                         }`}
                         type="number"
                         min="0.000001"

@@ -119,10 +119,10 @@ export default function ClientValuationList() {
   }, []);
 
   useEffect(() => {
-    const prj = projects.find((p) => String(p.id) === String(selectedProjectId));
+    const prj = Array.isArray(projects) ? projects.find((p) => String(p.id) === String(selectedProjectId)) : null;
     setActiveProject(prj || null);
     fetchValuations();
-  }, [selectedProjectId]);
+  }, [selectedProjectId, projects]);
 
   useEffect(() => {
     let cancelled = false;
@@ -300,7 +300,7 @@ export default function ClientValuationList() {
       toast.warning("Please select a project first");
       return;
     }
-    const curProj = projects.find((p) => String(p.id) === String(targetProjId)) || activeProject;
+    const curProj = (Array.isArray(projects) ? projects : []).find((p) => String(p.id) === String(targetProjId)) || activeProject;
 
     try {
       // Fetch baseline from server
@@ -528,10 +528,10 @@ export default function ClientValuationList() {
 
       if (formData.id) {
         await api.put(`/construction/client-valuations/${formData.id}`, payload);
-        toast.success("Client Valuation updated successfully");
+        toast.success("Client Progress Assessment updated successfully");
       } else {
         await api.post("/construction/client-valuations", payload);
-        toast.success("Client Valuation saved successfully");
+        toast.success("Client Progress Assessment saved successfully");
       }
       setShowModal(false);
       fetchValuations();
@@ -608,7 +608,7 @@ export default function ClientValuationList() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Calculator size={24} className="text-brand-900 dark:text-brand-400" /> Client Valuations
+              <Calculator size={24} className="text-brand-900 dark:text-brand-400" /> Client Progress Assessments
             </h1>
             <p className="text-slate-500 text-sm mt-0.5">
               Physical work measurement, contract BOQ items, site materials, variations, and assessed value
@@ -616,46 +616,9 @@ export default function ClientValuationList() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <select
-            className="input text-sm py-1.5 h-auto min-w-[200px]"
-            value={selectedProjectId}
-            onChange={(e) => setSelectedProjectId(e.target.value)}
-          >
-            <option value="">All Projects</option>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.project_code} - {p.project_name}
-              </option>
-            ))}
-          </select>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input
-              type="text"
-              placeholder="Search valuations..."
-              className="input pl-9 pr-3 py-1.5 text-sm h-auto w-48"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <select
-            className="input text-sm py-1.5 h-auto w-32"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="ALL">All Status</option>
-            <option value="DRAFT">Draft</option>
-            <option value="SUBMITTED">Submitted</option>
-            <option value="UNDER_REVIEW">Under Review</option>
-            <option value="APPROVED">Approved</option>
-            <option value="REJECTED">Rejected</option>
-          </select>
-          <button onClick={fetchValuations} className="btn btn-secondary p-2" title="Refresh">
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-          </button>
+        <div className="flex items-center gap-2">
           <button onClick={openNewValuationModal} className="btn btn-primary inline-flex items-center gap-2">
-            <Plus size={16} /> New Valuation
+            <Plus size={16} /> New Assessment
           </button>
         </div>
       </div>
@@ -664,13 +627,13 @@ export default function ClientValuationList() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
           {
-            label: "Total Valuations",
+            label: "Total Assessments",
             val: valuations.length,
             icon: <FileText size={20} className="stroke-[2.5]" />,
             color: "bg-sky-600 dark:bg-sky-500 text-white",
           },
           {
-            label: "Certified Valuations",
+            label: "Certified Assessments",
             val: valuations.filter((v) => v.status === "CERTIFIED" || v.status === "APPROVED").length,
             icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
             color: "bg-emerald-600 text-white",
@@ -682,7 +645,7 @@ export default function ClientValuationList() {
             color: "bg-amber-500 text-white",
           },
           {
-            label: "Draft Valuations",
+            label: "Draft Assessments",
             val: valuations.filter((v) => v.status === "DRAFT" || !v.status).length,
             icon: <Briefcase size={20} className="stroke-[2.5]" />,
             color: "bg-brand-900 dark:bg-brand-700 text-white",
@@ -704,22 +667,69 @@ export default function ClientValuationList() {
         ))}
       </div>
 
+      {/* Search and Filters (Moved below cards) */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-sm">
+        <div className="flex flex-wrap items-center gap-3 flex-1">
+          <select
+            className="input text-sm py-1.5 h-auto min-w-[220px]"
+            value={selectedProjectId}
+            onChange={(e) => setSelectedProjectId(e.target.value)}
+          >
+            <option value="">All Projects</option>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.project_code ? `${p.project_code} - ` : ""}{p.project_name}
+              </option>
+            ))}
+          </select>
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input
+              type="text"
+              placeholder="Search progress assessments..."
+              className="input pl-9 pr-3 py-1.5 text-sm h-auto w-full"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <select
+            className="input text-sm py-1.5 h-auto min-w-[140px]"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="ALL">All Status</option>
+            <option value="DRAFT">Draft</option>
+            <option value="SUBMITTED">Submitted</option>
+            <option value="UNDER_REVIEW">Under Review</option>
+            <option value="APPROVED">Approved</option>
+            <option value="REJECTED">Rejected</option>
+          </select>
+        </div>
+        <button
+          onClick={fetchValuations}
+          className="btn btn-secondary py-1.5 px-3 inline-flex items-center gap-1.5 text-xs font-semibold"
+          title="Refresh"
+        >
+          <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
+        </button>
+      </div>
+
       {/* Valuations Register Table */}
       <div className="card overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
         <div className="p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
           <h2 className="font-bold text-sm uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
             <FileSpreadsheet size={16} className="text-brand-700 dark:text-brand-400" />
-            Client Valuations Register ({filteredValuations.length})
+            Client Progress Assessments Register ({filteredValuations.length})
           </h2>
         </div>
         <div className="overflow-x-auto">
           <table className="table w-full text-sm">
             <thead>
               <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">
-                <th className="py-3 px-4 text-left">Valuation #</th>
+                <th className="py-3 px-4 text-left">Assessment #</th>
                 <th className="py-3 px-4 text-left">Project</th>
                 <th className="py-3 px-4 text-left">Period</th>
-                <th className="py-3 px-4 text-left">Valuation Date</th>
+                <th className="py-3 px-4 text-left">Assessment Date</th>
                 <th className="py-3 px-4 text-right">Gross Assessed (GH₵)</th>
                 <th className="py-3 px-4 text-right">Retention</th>
                 <th className="py-3 px-4 text-right">Advance Rec</th>
@@ -733,8 +743,8 @@ export default function ClientValuationList() {
                 <tr>
                   <td colSpan={10} className="p-8 text-center text-slate-400 italic">
                     {valuations.length === 0
-                      ? 'No client valuations created yet. Click "+ New Valuation" to measure project work.'
-                      : "No valuations match your search or filter."}
+                      ? 'No client progress assessments created yet. Click "+ New Assessment" to measure project work.'
+                      : "No progress assessments match your search or filter."}
                   </td>
                 </tr>
               ) : (
@@ -877,12 +887,12 @@ export default function ClientValuationList() {
         onClose={() => setShowModal(false)}
         title={
           modalMode === "CREATE"
-            ? "New Client Valuation Measurement"
+            ? "New Client Progress Assessment Measurement"
             : modalMode === "EDIT"
-            ? `Edit Valuation ${formData.valuation_no}`
-            : `Valuation Assessment: ${formData.valuation_no}`
+            ? `Edit Progress Assessment ${formData.valuation_no}`
+            : `Client Progress Assessment: ${formData.valuation_no}`
         }
-        subtitle="Measure physical work completed, calculate earned values against BOQ, and assess net period valuation"
+        subtitle="Measure physical work completed, calculate earned values against BOQ, and assess net period progress valuation"
         icon={Calculator}
         maxWidth="max-w-6xl"
         showFooter={false}
@@ -895,7 +905,7 @@ export default function ClientValuationList() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                   Valuation Number <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -909,7 +919,7 @@ export default function ClientValuationList() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                   Project <span className="text-rose-500">*</span>
                 </label>
                 <select
@@ -962,7 +972,7 @@ export default function ClientValuationList() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Contract Ref</label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Contract Ref</label>
                 <input
                   type="text"
                   readOnly={modalMode === "VIEW"}
@@ -973,7 +983,7 @@ export default function ClientValuationList() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Client Name</label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Client Name</label>
                 <input
                   type="text"
                   readOnly
@@ -985,7 +995,7 @@ export default function ClientValuationList() {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Valuation Date</label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Valuation Date</label>
                 <input
                   type="date"
                   readOnly={modalMode === "VIEW"}
@@ -995,7 +1005,7 @@ export default function ClientValuationList() {
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Period From</label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Period From</label>
                 <input
                   type="date"
                   readOnly={modalMode === "VIEW"}
@@ -1005,7 +1015,7 @@ export default function ClientValuationList() {
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Period To</label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Period To</label>
                 <input
                   type="date"
                   readOnly={modalMode === "VIEW"}
@@ -1015,7 +1025,7 @@ export default function ClientValuationList() {
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Valuation Type</label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Valuation Type</label>
                 <select
                   disabled={modalMode === "VIEW"}
                   className="input text-sm w-full"
@@ -1031,7 +1041,7 @@ export default function ClientValuationList() {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Related BOQ</label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Related BOQ</label>
                 <input
                   type="text"
                   readOnly
@@ -1040,7 +1050,7 @@ export default function ClientValuationList() {
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                   Previous Valuation Ref
                 </label>
                 <input
@@ -1051,7 +1061,7 @@ export default function ClientValuationList() {
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Prepared By</label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Prepared By</label>
                 <input
                   type="text"
                   readOnly={modalMode === "VIEW"}
@@ -1061,7 +1071,7 @@ export default function ClientValuationList() {
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Status</label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Status</label>
                 <select
                   disabled={modalMode === "VIEW"}
                   className="input text-sm font-semibold w-full"
@@ -1287,7 +1297,7 @@ export default function ClientValuationList() {
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                   <div>
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                       Approved Variations Claim Amount (GH₵)
                     </label>
                     <input
@@ -1323,7 +1333,7 @@ export default function ClientValuationList() {
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
                   <div>
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                       Assessed Materials on Site Value (GH₵)
                     </label>
                     <input
@@ -1338,7 +1348,7 @@ export default function ClientValuationList() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                       Approved Dayworks Total (GH₵)
                     </label>
                     <input
@@ -1351,7 +1361,7 @@ export default function ClientValuationList() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                       Other Contractual Adjustments (GH₵)
                     </label>
                     <input
@@ -1377,7 +1387,7 @@ export default function ClientValuationList() {
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 space-y-2">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
                       Retention Rate (%)
                     </label>
                     <input
@@ -1396,7 +1406,7 @@ export default function ClientValuationList() {
                   </div>
 
                   <div className="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 space-y-2">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
                       Advance Mobilisation Recovery Rate (%)
                     </label>
                     <input
@@ -1417,7 +1427,7 @@ export default function ClientValuationList() {
                   </div>
 
                   <div className="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 space-y-2">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
                       Other Statutory / Penalty Deductions (GH₵)
                     </label>
                     <input
@@ -1436,7 +1446,7 @@ export default function ClientValuationList() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
                     Valuation Remarks / Site Notes
                   </label>
                   <textarea

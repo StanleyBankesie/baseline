@@ -22,11 +22,14 @@ import crypto from "crypto";
 async function resolveTaxSummary(items, companyId) {
   const summary = {}; // name -> { amount, rate }
   // Calculate tax code ids present in the items to minimize queries
-  const taxCodeIds = [...new Set(items.map((i) => i.tax_code_id).filter(Boolean))];
+  const taxCodeIds = [
+    ...new Set(items.map((i) => i.tax_code_id).filter(Boolean)),
+  ];
   if (taxCodeIds.length === 0) return [];
 
   // Fetch all active tax components for these codes
-  const compRows = await query(`SELECT c.tax_code_id, td.component_name as name, c.rate_percent as rate, c.compound_level,
+  const compRows = await query(
+    `SELECT c.tax_code_id, td.component_name as name, c.rate_percent as rate, c.compound_level,
           c.created_at,
           u.username AS created_by_name
          FROM fin_tax_components c
@@ -105,9 +108,13 @@ Handlebars.registerHelper("salary_slip_amount", function (val) {
 });
 Handlebars.registerHelper("taxTotal", function (...args) {
   const options = args[args.length - 1];
-  const items = args.length > 1 ? args[0] : (this?.items || this?.sales_order?.items || []);
+  const items =
+    args.length > 1 ? args[0] : this?.items || this?.sales_order?.items || [];
   const arr = Array.isArray(items) ? items : [];
-  const sum = arr.reduce((s, it) => s + Number(it.tax || it.tax_amount || 0), 0);
+  const sum = arr.reduce(
+    (s, it) => s + Number(it.tax || it.tax_amount || 0),
+    0,
+  );
   if (options && options.fn) {
     return options.fn({ taxTotal: sum });
   }
@@ -140,6 +147,18 @@ function canonicalDocumentType(type) {
   ) {
     return "sales-order";
   }
+  if (t === "project" || t === "project-profile" || t === "project_profile") {
+    return "project";
+  }
+  if (
+    t === "boq" ||
+    t === "bill-of-quantities" ||
+    t === "bill of quantities" ||
+    t === "bill_of_quantities" ||
+    t === "boq-manager"
+  ) {
+    return "boq";
+  }
   if (
     t === "invoice" ||
     t === "sales-invoice" ||
@@ -158,6 +177,14 @@ function canonicalDocumentType(type) {
   }
   if (t === "quotation" || t === "sales-quotation" || t === "quote") {
     return "quotation";
+  }
+  if (
+    t === "project-quotation" ||
+    t === "project_quotation" ||
+    t === "project quotation" ||
+    t === "prj-quotation"
+  ) {
+    return "project-quotation";
   }
   if (
     t === "payment-voucher" ||
@@ -235,14 +262,34 @@ function canonicalDocumentType(type) {
   ) {
     return "direct-purchase";
   }
-  if (t === "maintenance-bill" || t === "maintenance bill" || t === "maintenance_bill") {
+  if (
+    t === "maintenance-bill" ||
+    t === "maintenance bill" ||
+    t === "maintenance_bill"
+  ) {
     return "maintenance-bill";
   }
   if (t === "service-bill" || t === "service bill" || t === "service_bill") {
     return "service-bill";
   }
-  if (t === "supplier-quotation" || t === "supplier quotation" || t === "supplier_quotation") {
+  if (
+    t === "supplier-quotation" ||
+    t === "supplier quotation" ||
+    t === "supplier_quotation"
+  ) {
     return "supplier-quotation";
+  }
+  if (
+    t === "maintenance-rfq" ||
+    t === "maintenance rfq" ||
+    t === "maintenance_rfq" ||
+    t === "rfq" ||
+    t === "maint-rfq" ||
+    t === "maint_rfq" ||
+    t === "MAINTENANCE_RFQ" ||
+    t === "RFQ"
+  ) {
+    return "maintenance-rfq";
   }
   return t;
 }
@@ -253,6 +300,16 @@ function canonicalDocumentType(type) {
  */
 function expandDocumentTypeAliases(type) {
   const c = canonicalDocumentType(type);
+  if (c === "boq") {
+    return [
+      "boq",
+      "bill-of-quantities",
+      "bill of quantities",
+      "bill_of_quantities",
+      "boqs",
+      "boq-manager",
+    ];
+  }
   if (c === "general-template") {
     return [
       "general-template",
@@ -272,6 +329,15 @@ function expandDocumentTypeAliases(type) {
       "SALES-ORDER",
       "Sales Order",
       "SO",
+    ];
+  }
+  if (c === "project") {
+    return [
+      "project",
+      "PROJECT",
+      "project-profile",
+      "project_profile",
+      "Project",
     ];
   }
   if (c === "invoice") {
@@ -303,6 +369,16 @@ function expandDocumentTypeAliases(type) {
       "quotes",
       "sales-quotation",
       "Sales Quotation",
+    ];
+  }
+  if (c === "project-quotation") {
+    return [
+      "project-quotation",
+      "project quotation",
+      "project_quotation",
+      "Project Quotation",
+      "prj-quotation",
+      "PROJECT_QUOTATION",
     ];
   }
   if (c === "payment-voucher") {
@@ -373,13 +449,34 @@ function expandDocumentTypeAliases(type) {
     ];
   }
   if (c === "maintenance-bill") {
-    return ["maintenance-bill", "maintenance bill", "Maintenance Bill", "MAINTENANCE_BILL"];
+    return [
+      "maintenance-bill",
+      "maintenance bill",
+      "Maintenance Bill",
+      "MAINTENANCE_BILL",
+    ];
   }
   if (c === "service-bill") {
     return ["service-bill", "service bill", "Service Bill", "SERVICE_BILL"];
   }
   if (c === "supplier-quotation") {
-    return ["supplier-quotation", "supplier quotation", "Supplier Quotation", "SUPPLIER_QUOTATION"];
+    return [
+      "supplier-quotation",
+      "supplier quotation",
+      "Supplier Quotation",
+      "SUPPLIER_QUOTATION",
+    ];
+  }
+  if (c === "maintenance-rfq") {
+    return [
+      "maintenance-rfq",
+      "maintenance rfq",
+      "Maintenance RFQ",
+      "MAINTENANCE_RFQ",
+      "rfq",
+      "RFQ",
+      "maint-rfq",
+    ];
   }
   return [c];
 }
@@ -392,8 +489,6 @@ function docTypeSynonymsLower(type) {
     String(v).trim().toLowerCase(),
   );
 }
-
-
 
 // Browser singleton for PDF rendering
 let _browser = null;
@@ -521,12 +616,283 @@ async function getCompanyLogoDataUri(companyId) {
   }
 }
 
+const defaultProjectQuotationHtml = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  @page { size: A4; margin: 12mm 15mm; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #1e293b; margin: 0; padding: 20px; font-size: 13px; line-height: 1.5; background: #fff; }
+  .header-container { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 18px; border-bottom: 2px solid #0f172a; margin-bottom: 22px; }
+  .company-title { font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 4px 0; }
+  .company-meta { font-size: 11px; color: #64748b; line-height: 1.4; }
+  .doc-title-badge { display: inline-block; background-color: #0f172a; color: #ffffff; padding: 6px 14px; border-radius: 6px; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .doc-no { margin-top: 8px; font-size: 16px; font-weight: 800; color: #0f172a; font-family: monospace; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 22px; }
+  .card-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; }
+  .card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 10px; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+  .meta-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; }
+  .meta-label { color: #64748b; font-weight: 500; }
+  .meta-val { color: #0f172a; font-weight: 600; }
+  .section-title { font-size: 13px; font-weight: 700; color: #0f172a; margin: 20px 0 8px 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .scope-box { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; font-size: 12px; line-height: 1.6; white-space: pre-wrap; margin-bottom: 18px; }
+  table.data-table { width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 20px; }
+  table.data-table th { background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 700; text-transform: uppercase; text-align: left; padding: 8px 10px; border: 1px solid #e2e8f0; }
+  table.data-table td { padding: 8px 10px; border: 1px solid #e2e8f0; font-size: 12px; }
+  .num { text-align: right; }
+  .totals-box { display: flex; justify-content: flex-end; margin-top: 10px; }
+  .totals-table { width: 320px; border-collapse: collapse; }
+  .totals-table td { padding: 6px 10px; border: 1px solid #e2e8f0; }
+  .totals-table tr.grand-total { background: #f8fafc; font-weight: 800; font-size: 14px; color: #0f172a; }
+  .signatures-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 45px; padding-top: 15px; }
+  .sign-line { border-top: 1px dashed #94a3b8; text-align: center; padding-top: 8px; font-size: 11px; color: #64748b; font-weight: 600; }
+  .status-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; background: #e0f2fe; color: #0369a1; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div class="header-container">
+  <div>
+    <h1 class="company-title">{{company.name}}</h1>
+    <div class="company-meta">
+      {{#if company.address}}{{company.address}}<br/>{{/if}}
+      {{#if company.city}}{{company.city}}, {{company.state}} {{company.country}}<br/>{{/if}}
+      {{#if company.telephone}}Tel: {{company.telephone}} &nbsp;|&nbsp; {{/if}}
+      {{#if company.email}}Email: {{company.email}}{{/if}}
+    </div>
+  </div>
+  <div style="text-align: right;">
+    <div class="doc-title-badge">Project Quotation</div>
+    <div class="doc-no">{{quotation.number}}</div>
+    <div style="margin-top: 4px;"><span class="status-badge">{{quotation.status}}</span></div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card-box">
+    <div class="card-title">Client Details</div>
+    <div class="meta-row"><span class="meta-label">Customer:</span><span class="meta-val">{{customer.name}}</span></div>
+    {{#if customer.address}}<div class="meta-row"><span class="meta-label">Address:</span><span class="meta-val">{{customer.address}}</span></div>{{/if}}
+    {{#if customer.city}}<div class="meta-row"><span class="meta-label">City/Country:</span><span class="meta-val">{{customer.city}}{{#if customer.country}}, {{customer.country}}{{/if}}</span></div>{{/if}}
+    {{#if customer.phone}}<div class="meta-row"><span class="meta-label">Phone:</span><span class="meta-val">{{customer.phone}}</span></div>{{/if}}
+    {{#if customer.email}}<div class="meta-row"><span class="meta-label">Email:</span><span class="meta-val">{{customer.email}}</span></div>{{/if}}
+  </div>
+  <div class="card-box">
+    <div class="card-title">Project & Quotation Summary</div>
+    <div class="meta-row"><span class="meta-label">Project:</span><span class="meta-val">{{quotation.project_name}}</span></div>
+    {{#if quotation.project_manager}}<div class="meta-row"><span class="meta-label">Project Manager:</span><span class="meta-val">{{quotation.project_manager}}</span></div>{{/if}}
+    <div class="meta-row"><span class="meta-label">Quotation Date:</span><span class="meta-val">{{quotation.date}}</span></div>
+    {{#if quotation.valid_until}}<div class="meta-row"><span class="meta-label">Valid Until:</span><span class="meta-val">{{quotation.valid_until}}</span></div>{{/if}}
+    {{#if quotation.payment_type}}<div class="meta-row"><span class="meta-label">Payment Type:</span><span class="meta-val">{{quotation.payment_type}}</span></div>{{/if}}
+  </div>
+</div>
+
+{{#if quotation.scope_of_work}}
+<div class="section-title">Scope of Work</div>
+<div class="scope-box">{{quotation.scope_of_work}}</div>
+{{/if}}
+
+<div class="section-title">Deliverables & Phase Schedule</div>
+<table class="data-table">
+  <thead>
+    <tr>
+      <th style="width: 30px;">#</th>
+      <th>Phase / Milestone</th>
+      <th>Description</th>
+      <th class="num" style="width: 60px;">Hours</th>
+      <th class="num" style="width: 90px;">Rate</th>
+      <th class="num" style="width: 60px;">Disc%</th>
+      <th class="num" style="width: 90px;">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each quotation.items}}
+    <tr>
+      <td>{{@index}}</td>
+      <td><strong>{{phase_name}}</strong></td>
+      <td>{{description}}</td>
+      <td class="num">{{quantity}}</td>
+      <td class="num">{{price}}</td>
+      <td class="num">{{discount}}%</td>
+      <td class="num"><strong>{{amount}}</strong></td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+
+<div class="totals-box">
+  <table class="totals-table">
+    <tr>
+      <td>Subtotal:</td>
+      <td class="num">{{quotation.sub_total}}</td>
+    </tr>
+    {{#if quotation.discount_total}}
+    <tr>
+      <td>Discount:</td>
+      <td class="num">-{{quotation.discount_total}}</td>
+    </tr>
+    {{/if}}
+    {{#if quotation.tax_total}}
+    <tr>
+      <td>Taxes:</td>
+      <td class="num">{{quotation.tax_total}}</td>
+    </tr>
+    {{/if}}
+    <tr class="grand-total">
+      <td>Total Amount:</td>
+      <td class="num">{{quotation.total}}</td>
+    </tr>
+  </table>
+</div>
+
+{{#if quotation.terms_and_conditions}}
+<div class="section-title">Terms & Conditions</div>
+<div class="scope-box" style="font-size: 11px;">{{quotation.terms_and_conditions}}</div>
+{{/if}}
+
+{{#if quotation.remarks}}
+<div class="section-title">Remarks</div>
+<div class="scope-box" style="font-size: 11px;">{{quotation.remarks}}</div>
+{{/if}}
+
+<div class="signatures-grid">
+  <div>
+    <div style="height: 45px;"></div>
+    <div class="sign-line">Prepared By: {{prepared_by}}</div>
+  </div>
+  <div>
+    <div style="height: 45px;"></div>
+    <div class="sign-line">Client Acceptance Signature</div>
+  </div>
+</div>
+</body>
+</html>`;
+
+const defaultMaintenanceRFQHtml = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  @page { size: A4; margin: 12mm 15mm; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #1e293b; margin: 0; padding: 20px; font-size: 13px; line-height: 1.5; background: #fff; }
+  .header-container { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 18px; border-bottom: 2px solid #0f172a; margin-bottom: 22px; }
+  .company-title { font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 4px 0; }
+  .company-meta { font-size: 11px; color: #64748b; line-height: 1.4; }
+  .doc-title-badge { display: inline-block; background-color: #0f172a; color: #ffffff; padding: 6px 14px; border-radius: 6px; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .doc-no { margin-top: 8px; font-size: 16px; font-weight: 800; color: #0f172a; font-family: monospace; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 22px; }
+  .card-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; }
+  .card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 10px; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+  .meta-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; }
+  .meta-label { color: #64748b; font-weight: 500; }
+  .meta-val { color: #0f172a; font-weight: 600; }
+  .section-title { font-size: 13px; font-weight: 700; color: #0f172a; margin: 20px 0 8px 0; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .scope-box { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; font-size: 12px; line-height: 1.6; white-space: pre-wrap; margin-bottom: 18px; }
+  table.data-table { width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 20px; }
+  table.data-table th { background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 700; text-transform: uppercase; text-align: left; padding: 8px 10px; border: 1px solid #e2e8f0; }
+  table.data-table td { padding: 8px 10px; border: 1px solid #e2e8f0; font-size: 12px; }
+  .signatures-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 45px; padding-top: 15px; }
+  .sign-line { border-top: 1px dashed #94a3b8; text-align: center; padding-top: 8px; font-size: 11px; color: #64748b; font-weight: 600; }
+  .status-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; background: #e0f2fe; color: #0369a1; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div class="header-container">
+  <div>
+    <h1 class="company-title">{{company.name}}</h1>
+    <div class="company-meta">
+      {{#if company.address}}{{company.address}}<br/>{{/if}}
+      {{#if company.telephone}}Tel: {{company.telephone}} &nbsp;|&nbsp; {{/if}}
+      {{#if company.email}}Email: {{company.email}}{{/if}}
+    </div>
+  </div>
+  <div style="text-align: right;">
+    <div class="doc-title-badge">Request For Quotation</div>
+    <div class="doc-no">{{rfq.rfq_no}}</div>
+    <div style="margin-top: 4px; font-size: 11px; color: #64748b;">Date: <strong>{{rfq.date}}</strong></div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card-box">
+    <div class="card-title">RFQ Details</div>
+    <div class="meta-row"><span class="meta-label">RFQ Number:</span><span class="meta-val">{{rfq.rfq_no}}</span></div>
+    <div class="meta-row"><span class="meta-label">RFQ Date:</span><span class="meta-val">{{rfq.date}}</span></div>
+    <div class="meta-row"><span class="meta-label">Submission Deadline:</span><span class="meta-val" style="color: #b91c1c;">{{rfq.response_deadline}}</span></div>
+    <div class="meta-row"><span class="meta-label">Status:</span><span class="status-badge">{{rfq.status}}</span></div>
+    {{#if rfq.request_no}}<div class="meta-row"><span class="meta-label">Maintenance Request Ref:</span><span class="meta-val">{{rfq.request_no}}</span></div>{{/if}}
+    {{#if rfq.asset_name}}<div class="meta-row"><span class="meta-label">Target Asset:</span><span class="meta-val">{{rfq.asset_name}}</span></div>{{/if}}
+  </div>
+  <div class="card-box">
+    <div class="card-title">Invited Service Providers</div>
+    <div style="font-size: 12px; color: #334155; line-height: 1.6;">
+      {{#if rfq.suppliers.length}}
+        <ul style="margin: 0; padding-left: 18px;">
+          {{#each rfq.suppliers}}
+            <li><strong>{{name}}</strong> {{#if phone}}({{phone}}){{/if}} {{#if email}}- {{email}}{{/if}}</li>
+          {{/each}}
+        </ul>
+      {{else}}
+        <em>{{rfq.supplier_names}}</em>
+      {{/if}}
+    </div>
+  </div>
+</div>
+
+<div class="section-title">Scope of Work & Technical Specifications</div>
+<div class="scope-box">{{rfq.scope_of_work}}</div>
+
+{{#if rfq.notes}}
+<div class="section-title">Special Instructions & Guidelines</div>
+<div class="scope-box" style="background: #f8fafc;">{{rfq.notes}}</div>
+{{/if}}
+
+{{#if rfq.suppliers.length}}
+<div class="section-title">Invited Contractors / Suppliers Schedule</div>
+<table class="data-table">
+  <thead>
+    <tr>
+      <th style="width: 35px;">#</th>
+      <th>Supplier / Contractor</th>
+      <th>Contact Person</th>
+      <th>Phone</th>
+      <th>Email</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each rfq.suppliers}}
+    <tr>
+      <td>{{index}}</td>
+      <td><strong>{{name}}</strong></td>
+      <td>{{contact_person}}</td>
+      <td>{{phone}}</td>
+      <td>{{email}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+{{/if}}
+
+<div class="signatures-grid">
+  <div>
+    <div class="sign-line">Prepared By: {{rfq.created_by_name}}</div>
+  </div>
+  <div>
+    <div class="sign-line">Maintenance Engineer / Supervisor</div>
+  </div>
+  <div>
+    <div class="sign-line">Procurement / Facilities Head</div>
+  </div>
+</div>
+</body>
+</html>`;
+
 /**
  * Returns mock/dummy preview data for various document types.
  * Used when generating a template preview before a real document exists.
  */
 async function loadPreviewData(type, companyId, branchId) {
-  const [company] = await query(`
+  const [company] = await query(
+    `
     SELECT id, name, address, city, state, postal_code, country, telephone, email, website,
           created_at,
           u.username AS created_by_name
@@ -537,6 +903,35 @@ async function loadPreviewData(type, companyId, branchId) {
     `,
     { companyId },
   ).catch(() => []);
+
+  if (type === "boq") {
+    const [boq] = await query(
+      `SELECT b.*,
+              p.project_name, p.project_code,
+              COALESCE(b.client_name, p.client_name) AS client_name,
+              COALESCE(b.site_location, p.site_address) AS site_location,
+              u.username AS created_by_username
+       FROM pm_boqs b
+       LEFT JOIN pm_projects p ON p.id = b.project_id
+       LEFT JOIN adm_users u ON u.id = b.created_by
+       WHERE b.id = :id AND (b.company_id = :companyId OR :companyId IS NULL)`,
+      { id, companyId },
+    );
+    if (!boq) throw httpError(404, "NOT_FOUND", "BOQ not found");
+
+    const items = await query(
+      `SELECT * FROM pm_boq_items WHERE boq_id = :id ORDER BY item_order ASC, id ASC`,
+      { id },
+    );
+    const company = await loadCompany(companyId);
+    return {
+      boq: {
+        ...boq,
+        items: (items || []).map((it, idx) => ({ ...it, index: idx + 1 })),
+      },
+      company: company || {},
+    };
+  }
 
   if (type === "sales-order") {
     return {
@@ -584,9 +979,7 @@ async function loadPreviewData(type, companyId, branchId) {
             tax: 25,
             uom: "PCS",
             tax_code_id: 1,
-            tax_components: [
-              { name: "VAT", rate: "12.5", amount: "25.00" },
-            ],
+            tax_components: [{ name: "VAT", rate: "12.5", amount: "25.00" }],
           },
           {
             name: "Sample Item 2",
@@ -601,11 +994,34 @@ async function loadPreviewData(type, companyId, branchId) {
             tax: 6.25,
             uom: "PCS",
             tax_code_id: 1,
-            tax_components: [
-              { name: "VAT", rate: "12.5", amount: "6.25" },
-            ],
+            tax_components: [{ name: "VAT", rate: "12.5", amount: "6.25" }],
           },
         ],
+      },
+    };
+  }
+  if (type === "project") {
+    return {
+      company: company || {},
+      project: {
+        project_code: "PRJ-2026-001",
+        project_name: "Sample Project",
+        project_type: "GENERAL",
+        client_name: "Sample Client",
+        manager_name: "Project Manager",
+        project_status: "IN_PROGRESS",
+        project_priority: "MEDIUM",
+        start_date: new Date().toISOString().slice(0, 10),
+        end_date: "",
+        completion_percent: 35,
+        remarks: "Project scope and notes appear here.",
+        site_address: "",
+        site_city: "",
+        contract_ref_no: "",
+        budget: 0,
+        contract_sum: 0,
+        revised_contract_sum: 0,
+        is_active: "Y",
       },
     };
   }
@@ -680,6 +1096,267 @@ async function loadPreviewData(type, companyId, branchId) {
       },
     };
   }
+  if (type === "project-quotation") {
+    const [q] = await query(
+      `
+      SELECT
+        q.id,
+        q.quotation_no,
+        q.quotation_date,
+        q.project_id,
+        q.project_name,
+        q.project_manager,
+        q.start_date,
+        q.end_date,
+        q.scope_of_work,
+        q.customer_id,
+        q.created_by,
+        q.price_type,
+        q.payment_type,
+        q.currency_id,
+        q.exchange_rate,
+        q.status,
+        q.total_amount,
+        q.net_amount,
+        q.tax_amount,
+        q.remarks,
+        q.valid_until,
+        q.valid_days,
+        q.terms_and_conditions,
+        COALESCE(NULLIF(q.customer_name, ''), c.customer_name, '') AS customer_name,
+        COALESCE(NULLIF(q.customer_address, ''), c.address, '') AS customer_address,
+        COALESCE(NULLIF(q.customer_city, ''), c.city, '') AS customer_city,
+        COALESCE(NULLIF(q.customer_state, ''), c.state, '') AS customer_state,
+        COALESCE(NULLIF(q.customer_country, ''), c.country, '') AS customer_country,
+        COALESCE(c.phone, '') AS customer_phone,
+        COALESCE(c.email, '') AS customer_email,
+        q.created_at,
+        u.username AS created_by_name
+       FROM prj_quotations q
+      LEFT JOIN sal_customers c
+        ON c.id = q.customer_id AND c.company_id = q.company_id
+      LEFT JOIN adm_users u ON u.id = q.created_by
+       WHERE q.id = :id AND q.company_id = :companyId AND (:branchIdsStr = '' OR FIND_IN_SET(q.branch_id, :branchIdsStr))
+      LIMIT 1
+      `,
+      { id, companyId, branchId },
+    ).catch(() => []);
+    if (!q) throw httpError(404, "NOT_FOUND", "Document not found");
+    let employee = null;
+    if (q.created_by) {
+      const [u] = await query(
+        `SELECT id, username, email, full_name FROM adm_users WHERE id = :uid LIMIT 1`,
+        { uid: q.created_by },
+      ).catch(() => []);
+      if (u) {
+        employee = {
+          id: u.id,
+          username: u.username,
+          email: u.email,
+          name: u.full_name || u.username,
+        };
+      }
+    }
+    const details = await query(
+      `
+      SELECT
+        d.id,
+        d.item_id,
+        d.qty AS quantity,
+        d.unit_price,
+        d.discount_percent,
+        d.total_amount,
+        d.net_amount,
+        d.tax_amount,
+        d.uom,
+        d.tax_type AS tax_code_id,
+        d.phase_name,
+        d.description,
+        COALESCE(NULLIF(d.phase_name, ''), it.item_name, 'Phase / Milestone') AS item_name,
+        it.item_code
+       FROM prj_quotation_details d
+      LEFT JOIN inv_items it
+        ON it.id = d.item_id AND it.company_id = :companyId
+       WHERE d.quotation_id = :id
+      ORDER BY d.id ASC
+      `,
+      { id, companyId },
+    ).catch(() => []);
+
+    const [company] = await query(
+      `
+      SELECT id, name, address, city, state, postal_code, country, telephone, email, website
+       FROM adm_companies
+       WHERE id = :companyId
+      LIMIT 1
+      `,
+      { companyId },
+    ).catch(() => []);
+
+    const extra = await query(
+      `
+      SELECT cur.code AS currency_code
+       FROM adm_companies ac
+      LEFT JOIN fin_currencies cur
+        ON cur.id = :cid
+       WHERE ac.id = :companyId
+      LIMIT 1
+      `,
+      { companyId, cid: q.currency_id || null },
+    ).catch(() => []);
+    const extraRow = extra?.[0] || {};
+    const items = Array.isArray(details) ? details : [];
+
+    const qCompsRows = await query(
+      `SELECT c.tax_code_id, td.component_name as name, c.rate_percent as rate, c.compound_level
+       FROM fin_tax_components c
+       JOIN fin_tax_details td ON td.id = c.tax_detail_id
+       WHERE c.company_id = :companyId AND c.is_active = 1
+       ORDER BY c.compound_level ASC, c.sort_order ASC`,
+      { companyId },
+    ).catch(() => []);
+    const qCompsByCode = {};
+    qCompsRows.forEach((c) => {
+      if (!qCompsByCode[c.tax_code_id]) qCompsByCode[c.tax_code_id] = [];
+      qCompsByCode[c.tax_code_id].push(c);
+    });
+
+    const qTemplateItems = items.map((d) => {
+      const itemComps = [];
+      const comps = qCompsByCode[d.tax_code_id] || [];
+      const netAmt = Number(d.net_amount) || Number(d.total_amount) || 0;
+      if (comps.length > 0 && netAmt > 0) {
+        const levels = {};
+        comps.forEach((c) => {
+          const lvl = c.compound_level || 0;
+          if (!levels[lvl]) levels[lvl] = [];
+          levels[lvl].push(c);
+        });
+        const sortedLvls = Object.keys(levels)
+          .map(Number)
+          .sort((a, b) => a - b);
+        let base = netAmt;
+        sortedLvls.forEach((lvl) => {
+          levels[lvl].forEach((c) => {
+            const tax = base * (Number(c.rate) / 100);
+            itemComps.push({
+              name: c.name,
+              rate: c.rate,
+              amount: tax.toFixed(2),
+            });
+            base += tax;
+          });
+        });
+      }
+      const itemValue = Number(d.quantity || 0) * Number(d.unit_price || 0);
+      const name = d.phase_name || d.item_name || "Phase / Milestone";
+      return {
+        name,
+        phase_name: d.phase_name || name,
+        description: d.description || name,
+        item_name: name,
+        code: d.item_code || "",
+        quantity: d.quantity,
+        est_hours: d.quantity,
+        price: d.unit_price,
+        rate: d.unit_price,
+        unit_price: d.unit_price,
+        value: itemValue,
+        discount: d.discount_percent,
+        discount_percent: d.discount_percent,
+        amount: d.total_amount,
+        line_total: d.total_amount,
+        net: d.net_amount,
+        tax: d.tax_amount,
+        tax_amount: d.tax_amount,
+        uom: d.uom || "HRS",
+        tax_code_id: d.tax_code_id,
+        tax_components: itemComps,
+      };
+    });
+
+    const computedSubTotal = qTemplateItems.reduce(
+      (s, i) => s + Number(i.value || 0),
+      0,
+    );
+    const computedDiscountTotal = qTemplateItems.reduce((s, i) => {
+      const v = Number(i.value || 0);
+      return s + v * (Number(i.discount || 0) / 100);
+    }, 0);
+    const computedTaxTotal = qTemplateItems.reduce(
+      (s, i) => s + Number(i.tax || 0),
+      0,
+    );
+    const computedGrandTotal =
+      computedSubTotal - computedDiscountTotal + computedTaxTotal;
+
+    const taxCompMap = {};
+    qTemplateItems.forEach((item) => {
+      (item.tax_components || []).forEach((tc) => {
+        if (!taxCompMap[tc.name])
+          taxCompMap[tc.name] = { name: tc.name, rate: tc.rate, amount: 0 };
+        taxCompMap[tc.name].amount += Number(tc.amount || 0);
+      });
+    });
+    const tax_summary = Object.values(taxCompMap).map((tc) => ({
+      ...tc,
+      amount: tc.amount.toFixed(2),
+    }));
+
+    const qObj = {
+      company: company || {},
+      customer: {
+        name: q.customer_name,
+        address: q.customer_address,
+        city: q.customer_city,
+        state: q.customer_state,
+        country: q.customer_country,
+        phone: q.customer_phone,
+        email: q.customer_email,
+      },
+      employee: employee || undefined,
+      prepared_by: employee?.username || employee?.name || undefined,
+      quotation: {
+        id: q.id,
+        number: q.quotation_no,
+        date: q.quotation_date,
+        status: q.status,
+        project_name: q.project_name || "",
+        project_manager: q.project_manager || "",
+        start_date: q.start_date || "",
+        end_date: q.end_date || "",
+        scope_of_work: q.scope_of_work || "",
+        price_type: q.price_type || null,
+        payment_type: q.payment_type || null,
+        currency_id: q.currency_id || null,
+        currency_code: extraRow?.currency_code || null,
+        exchange_rate: q.exchange_rate || null,
+        sub_total: computedSubTotal,
+        discount_total: computedDiscountTotal,
+        tax_total: computedTaxTotal,
+        grand_total: computedGrandTotal,
+        total: q.total_amount,
+        remarks: q.remarks,
+        valid_until: q.valid_until || null,
+        valid_days: q.valid_days || null,
+        terms_and_conditions: q.terms_and_conditions || "",
+        tax_summary,
+        items: qTemplateItems,
+      },
+    };
+    try {
+      const qrPayload = encodeURIComponent(
+        `PRJ_QUOTATION|${q.id}|${q.quotation_no || ""}|${q.quotation_date || ""}|${q.customer_name || ""}|${q.total_amount || ""}`,
+      );
+      qObj.quotation.qr_code = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${qrPayload}`;
+    } catch {}
+    qObj.tax_summary = tax_summary;
+    qObj.document = qObj.quotation;
+    qObj.quote = qObj.quotation;
+    qObj.project_quotation = qObj.quotation;
+    qObj.items = qTemplateItems;
+    return qObj;
+  }
   if (type === "payment-voucher") {
     return {
       company: company || {},
@@ -753,6 +1430,74 @@ async function loadPreviewData(type, companyId, branchId) {
             net: 50,
             tax: 0,
             uom: "PCS",
+          },
+        ],
+      },
+    };
+  }
+  if (type === "project-quotation") {
+    return {
+      company: company || {},
+      customer: {
+        name: "Acme Corporation",
+        address: "123 Business Avenue",
+        city: "Accra",
+        state: "Greater Accra",
+        country: "Ghana",
+        phone: "+233 55 123 4567",
+        email: "contact@acmecorp.com",
+      },
+      quotation: {
+        id: 0,
+        number: "PQ-000001",
+        date: new Date().toDateString(),
+        status: "DRAFT",
+        project_name: "Corporate Headquarters Renovation",
+        project_manager: "Kwame Mensah",
+        scope_of_work:
+          "Full civil, architectural and electrical restructuring.",
+        sub_total: 15000,
+        discount_total: 0,
+        tax_total: 0,
+        grand_total: 15000,
+        total: 15000,
+        remarks: "Payment terms: 50% advance, 50% upon completion.",
+        valid_until: null,
+        terms_and_conditions:
+          "Standard enterprise project delivery terms apply.",
+        items: [
+          {
+            name: "Phase 1 - Demolition & Clearing",
+            phase_name: "Phase 1 - Demolition & Clearing",
+            description: "Site clearance and preliminary civil preparations",
+            quantity: 40,
+            est_hours: 40,
+            price: 150,
+            rate: 150,
+            value: 6000,
+            discount: 0,
+            amount: 6000,
+            line_total: 6000,
+            net: 6000,
+            tax: 0,
+            uom: "HRS",
+          },
+          {
+            name: "Phase 2 - Electrical & Structural Works",
+            phase_name: "Phase 2 - Electrical & Structural Works",
+            description:
+              "Conduit wiring, reinforcement, and architectural framing",
+            quantity: 60,
+            est_hours: 60,
+            price: 150,
+            rate: 150,
+            value: 9000,
+            discount: 0,
+            amount: 9000,
+            line_total: 9000,
+            net: 9000,
+            tax: 0,
+            uom: "HRS",
           },
         ],
       },
@@ -968,7 +1713,10 @@ async function loadPreviewData(type, companyId, branchId) {
   }
   if (type === "grn") {
     return {
-      company: { ...(company || {}), logo: `/api/admin/companies/${companyId}/logo` },
+      company: {
+        ...(company || {}),
+        logo: `/api/admin/companies/${companyId}/logo`,
+      },
       vendor: {
         name: "Sample Supplier Ltd",
         address: "Industrial Area",
@@ -998,9 +1746,36 @@ async function loadPreviewData(type, companyId, branchId) {
         carrier: "Swift Transport Ltd",
         delivery_condition: "Good",
         items: [
-          { code: "RM001", name: "Raw Material Alpha", po_quantity: 5, received_quantity: 5, rejected_quantity: 0, accepted_quantity: 5, unit: "KGS", condition: "ACCEPTED" },
-          { code: "RM002", name: "Raw Material Beta", po_quantity: 3, received_quantity: 3, rejected_quantity: 1, accepted_quantity: 2, unit: "KGS", condition: "PARTIAL" },
-          { code: "PK001", name: "Packaging Box", po_quantity: 1, received_quantity: 1, rejected_quantity: 0, accepted_quantity: 1, unit: "PCS", condition: "ACCEPTED" },
+          {
+            code: "RM001",
+            name: "Raw Material Alpha",
+            po_quantity: 5,
+            received_quantity: 5,
+            rejected_quantity: 0,
+            accepted_quantity: 5,
+            unit: "KGS",
+            condition: "ACCEPTED",
+          },
+          {
+            code: "RM002",
+            name: "Raw Material Beta",
+            po_quantity: 3,
+            received_quantity: 3,
+            rejected_quantity: 1,
+            accepted_quantity: 2,
+            unit: "KGS",
+            condition: "PARTIAL",
+          },
+          {
+            code: "PK001",
+            name: "Packaging Box",
+            po_quantity: 1,
+            received_quantity: 1,
+            rejected_quantity: 0,
+            accepted_quantity: 1,
+            unit: "PCS",
+            condition: "ACCEPTED",
+          },
         ],
       },
       received_by: "Kofi Mensah",
@@ -1008,6 +1783,120 @@ async function loadPreviewData(type, companyId, branchId) {
       store_manager: "Ama Serwaa",
     };
   }
+  if (type === "maintenance-rfq") {
+    return {
+      company: company || {},
+      rfq: {
+        id: 101,
+        rfq_no: "RFQ-2026-0001",
+        date: new Date().toISOString().slice(0, 10),
+        response_deadline: new Date(Date.now() + 7 * 86400000)
+          .toISOString()
+          .slice(0, 10),
+        status: "SENT",
+        scope_of_work:
+          "Comprehensive overhaul and servicing of 500kVA Cummins Backup Diesel Generator, including oil filter replacement, fuel line flushing, valve timing check, and 2-hour full load test.",
+        notes:
+          "Suppliers must include all labor, spare parts, and warranty terms in their formal quotation.",
+        request_no: "MR-2026-0042",
+        asset_name: "Diesel Generator - Cummins 500kVA",
+        priority: "HIGH",
+        request_description:
+          "Periodic preventative maintenance and emergency run check.",
+        created_by_name: "Chief Engineer",
+        created_at: new Date().toISOString(),
+        suppliers: [
+          {
+            index: 1,
+            name: "Apex Power & Engineering Ltd",
+            address: "14 Industrial Area, Accra",
+            phone: "+233 24 123 4567",
+            email: "info@apexpower.com",
+            contact_person: "Kwame Boateng",
+          },
+          {
+            index: 2,
+            name: "VoltMech Industrial Services",
+            address: "8 Harbour Road, Tema",
+            phone: "+233 20 987 6543",
+            email: "sales@voltmech.com",
+            contact_person: "Abena Mansa",
+          },
+        ],
+        supplier_names:
+          "Apex Power & Engineering Ltd, VoltMech Industrial Services",
+      },
+    };
+  }
+  if (canonicalDocumentType(type) === "boq") {
+    return {
+      boq: {
+        id: 1,
+        boq_reference: "BOQ-PRJ01-2026-001",
+        boq_title:
+          "Commercial Complex Construction - Substructure & Superstructure",
+        boq_date: "2026-10-24",
+        version: "1.0",
+        currency: "GHS",
+        subtotal: 154500.0,
+        contingency_percent: 5.0,
+        contingency_amount: 7725.0,
+        tax_code: "VAT-STD",
+        tax_percent: 20.0,
+        tax_amount: 32445.0,
+        other_charges: 2500.0,
+        total_amount: 197170.0,
+        status: "APPROVED",
+        project_name: "Greater Accra Trade Centre",
+        project_code: "PRJ-GATC-01",
+        client_name: "Ministry of Infrastructure",
+        site_location: "Airport City, Accra",
+        prepared_by_name: "Ing. Kwame Mensah",
+        reviewed_by_name: "Arch. Sarah Adams",
+        approved_by_name: "Director John Taylor",
+        items: [
+          {
+            index: 1,
+            item_code: "PRJ-001",
+            item_description:
+              "Excavation and earthworks for foundations in ordinary soil",
+            cost_category: "LABOUR",
+            uom: "M3",
+            quantity: 350,
+            unit_rate: 45.0,
+            amount: 15750.0,
+            remarks: "SMM7 Section D20",
+          },
+          {
+            index: 2,
+            item_code: "PRJ-002",
+            item_description:
+              "Reinforced concrete grade 25/30 in strip and pad footings",
+            cost_category: "MATERIALS",
+            uom: "M3",
+            quantity: 120,
+            unit_rate: 650.0,
+            amount: 78000.0,
+            remarks: "BS 8110 Specification",
+          },
+          {
+            index: 3,
+            item_code: "PRJ-003",
+            item_description:
+              "High yield deformed steel reinforcement bars (Y12, Y16, Y20)",
+            cost_category: "MATERIALS",
+            uom: "TON",
+            quantity: 12.5,
+            unit_rate: 4860.0,
+            amount: 60750.0,
+            remarks: "Bending schedules to BS 4466",
+          },
+        ],
+      },
+      company: company || {},
+    };
+  }
+
   if (canonicalDocumentType(type) === "general-template") {
     return { company: company || {} };
   }
@@ -1016,7 +1905,8 @@ async function loadPreviewData(type, companyId, branchId) {
 
 async function loadData(type, id, companyId, branchId) {
   if (type === "sales-order") {
-    const [order] = await query(`
+    const [order] = await query(
+      `
       SELECT
         o.id,
         o.order_no,
@@ -1062,7 +1952,8 @@ async function loadData(type, id, companyId, branchId) {
     if (!order) throw httpError(404, "NOT_FOUND", "Document not found");
     let employee = null;
     if (order.created_by) {
-      const [u] = await query(`
+      const [u] = await query(
+        `
         SELECT id, username, email, full_name,
           created_at,
           u.username AS created_by_name
@@ -1082,7 +1973,8 @@ async function loadData(type, id, companyId, branchId) {
         };
       }
     }
-    const details = await query(`
+    const details = await query(
+      `
       SELECT
         d.id,
         d.item_id,
@@ -1109,7 +2001,8 @@ async function loadData(type, id, companyId, branchId) {
     ).catch(() => []);
 
     const tax_summary = await resolveTaxSummary(details, companyId);
-    const [company] = await query(`
+    const [company] = await query(
+      `
       SELECT id, name, address, city, state, postal_code, country, telephone, email, website,
           created_at,
           u.username AS created_by_name
@@ -1120,7 +2013,8 @@ async function loadData(type, id, companyId, branchId) {
       `,
       { companyId },
     ).catch(() => []);
-    const extra = await query(`
+    const extra = await query(
+      `
       SELECT 
         w.warehouse_name,
         cur.code AS currency_code,
@@ -1143,7 +2037,8 @@ async function loadData(type, id, companyId, branchId) {
     ).catch(() => []);
     const extraRow = extra?.[0] || {};
     const items = Array.isArray(details) ? details : [];
-    const compRows = await query(`SELECT c.tax_code_id, td.component_name as name, c.rate_percent as rate, c.compound_level
+    const compRows = await query(
+      `SELECT c.tax_code_id, td.component_name as name, c.rate_percent as rate, c.compound_level
        FROM fin_tax_components c
        JOIN fin_tax_details td ON td.id = c.tax_detail_id
        WHERE c.company_id = :companyId AND c.is_active = 1
@@ -1166,12 +2061,18 @@ async function loadData(type, id, companyId, branchId) {
           if (!levels[lvl]) levels[lvl] = [];
           levels[lvl].push(c);
         });
-        const sortedLvls = Object.keys(levels).map(Number).sort((a, b) => a - b);
+        const sortedLvls = Object.keys(levels)
+          .map(Number)
+          .sort((a, b) => a - b);
         let base = netAmt;
         sortedLvls.forEach((lvl) => {
           levels[lvl].forEach((c) => {
             const tax = base * (Number(c.rate) / 100);
-            itemComps.push({ name: c.name, rate: c.rate, amount: tax.toFixed(2) });
+            itemComps.push({
+              name: c.name,
+              rate: c.rate,
+              amount: tax.toFixed(2),
+            });
             base += tax;
           });
         });
@@ -1194,7 +2095,10 @@ async function loadData(type, id, companyId, branchId) {
         tax_components: itemComps,
       };
     });
-    const totalDiscountAmt = templateItems.reduce((s, it) => s + Number(it.discount_amount || 0), 0);
+    const totalDiscountAmt = templateItems.reduce(
+      (s, it) => s + Number(it.discount_amount || 0),
+      0,
+    );
     const soObj = {
       company: company || {},
       customer: {
@@ -1212,13 +2116,20 @@ async function loadData(type, id, companyId, branchId) {
       sales_order: {
         id: order.id,
         number: order.order_no,
-        date: order.order_date ? ((order.order_date) instanceof Date ? (order.order_date).toISOString().slice(0, 10) : String(order.order_date).slice(0, 10)) : null,
+        date: order.order_date
+          ? order.order_date instanceof Date
+            ? order.order_date.toISOString().slice(0, 10)
+            : String(order.order_date).slice(0, 10)
+          : null,
         status: order.status,
         expected_delivery_date: order.expected_delivery_date,
         actual_delivery_date: order.actual_delivery_date,
         payment_terms: order.payment_terms,
         priority: order.priority,
-        sub_total: Math.round(templateItems.reduce((s, it) => s + Number(it.value || 0), 0) * 100) / 100,
+        sub_total:
+          Math.round(
+            templateItems.reduce((s, it) => s + Number(it.value || 0), 0) * 100,
+          ) / 100,
         discount_amount: Math.round(totalDiscountAmt * 100) / 100,
         tax_amount: order.tax_amount,
         total: 0,
@@ -1238,9 +2149,13 @@ async function loadData(type, id, companyId, branchId) {
         items: templateItems,
       },
     };
-    soObj.sales_order.total = Math.round(
-      (soObj.sales_order.sub_total - soObj.sales_order.discount_amount + Number(soObj.sales_order.tax_amount || 0)) * 100
-    ) / 100;
+    soObj.sales_order.total =
+      Math.round(
+        (soObj.sales_order.sub_total -
+          soObj.sales_order.discount_amount +
+          Number(soObj.sales_order.tax_amount || 0)) *
+          100,
+      ) / 100;
     soObj.sales_order.net_amount = soObj.sales_order.total;
     try {
       const qrPayload = encodeURIComponent(
@@ -1255,8 +2170,38 @@ async function loadData(type, id, companyId, branchId) {
     soObj.items = templateItems;
     return soObj;
   }
+  if (type === "project") {
+    const [project] = await query(
+      `SELECT p.* FROM pm_projects p
+       WHERE p.id = :id AND p.company_id = :companyId
+         AND (:branchId IS NULL OR p.branch_id = :branchId)
+       LIMIT 1`,
+      { id, companyId, branchId: branchId || null },
+    ).catch(() => []);
+    if (!project) throw httpError(404, "NOT_FOUND", "Project not found");
+    const [company] = await query(
+      `SELECT id, name, address, city, state, postal_code, country, telephone, email, website
+       FROM adm_companies WHERE id = :companyId LIMIT 1`,
+      { companyId },
+    ).catch(() => []);
+    return {
+      company: company || {},
+      project: {
+        ...project,
+        project_type: String(project.project_type || "").replace(/_/g, " "),
+        project_status: String(project.project_status || "").replace(/_/g, " "),
+        project_priority: String(project.project_priority || "").replace(
+          /_/g,
+          " ",
+        ),
+        is_active: project.is_active === "N" ? "Inactive" : "Active",
+      },
+      document: project,
+    };
+  }
   if (type === "invoice") {
-    const [inv] = await query(`
+    const [inv] = await query(
+      `
       SELECT
         i.id,
         i.invoice_no,
@@ -1294,7 +2239,8 @@ async function loadData(type, id, companyId, branchId) {
     if (!inv) throw httpError(404, "NOT_FOUND", "Document not found");
     let employee = null;
     if (inv.created_by) {
-      const [u] = await query(`
+      const [u] = await query(
+        `
         SELECT id, username, email, full_name,
           created_at,
           u.username AS created_by_name
@@ -1314,7 +2260,8 @@ async function loadData(type, id, companyId, branchId) {
         };
       }
     }
-    const details = await query(`
+    const details = await query(
+      `
       SELECT
         d.id,
         d.item_id,
@@ -1341,7 +2288,8 @@ async function loadData(type, id, companyId, branchId) {
     ).catch(() => []);
     const tax_summary = await resolveTaxSummary(details || [], companyId);
 
-    const [company] = await query(`
+    const [company] = await query(
+      `
       SELECT id, name, address, city, state, postal_code, country, telephone, email, website,
           created_at,
           u.username AS created_by_name
@@ -1352,7 +2300,8 @@ async function loadData(type, id, companyId, branchId) {
       `,
       { companyId },
     ).catch(() => []);
-    const extra = await query(`
+    const extra = await query(
+      `
       SELECT 
         w.warehouse_name,
         cur.code AS currency_code,
@@ -1375,7 +2324,10 @@ async function loadData(type, id, companyId, branchId) {
     ).catch(() => []);
     const extraRow = extra?.[0] || {};
     const items = Array.isArray(details) ? details : [];
-    const invSubTotal = items.reduce((s, d) => s + Number(d.unit_price || 0) * Number(d.quantity || 0), 0);
+    const invSubTotal = items.reduce(
+      (s, d) => s + Number(d.unit_price || 0) * Number(d.quantity || 0),
+      0,
+    );
     const invDiscountAmount = items.reduce((s, d) => {
       const lineTotal = Number(d.unit_price || 0) * Number(d.quantity || 0);
       return s + lineTotal * (Number(d.discount_percent || 0) / 100);
@@ -1397,7 +2349,11 @@ async function loadData(type, id, companyId, branchId) {
       invoice: {
         id: inv.id,
         number: inv.invoice_no,
-        date: inv.invoice_date ? ((inv.invoice_date) instanceof Date ? (inv.invoice_date).toISOString().slice(0, 10) : String(inv.invoice_date).slice(0, 10)) : null,
+        date: inv.invoice_date
+          ? inv.invoice_date instanceof Date
+            ? inv.invoice_date.toISOString().slice(0, 10)
+            : String(inv.invoice_date).slice(0, 10)
+          : null,
         payment_term: inv.payment_type || null,
         status: inv.status,
         payment_status: inv.payment_status,
@@ -1442,13 +2398,14 @@ async function loadData(type, id, companyId, branchId) {
     return invObj;
   }
   if (type === "purchase-order") {
-    const [po] = await query(`
+    const [po] = await query(
+      `
       SELECT 
         p.id, p.po_no, p.po_date, p.status, p.po_type,
         p.supplier_id, s.supplier_name, s.address AS supplier_address, s.city AS supplier_city, s.state AS supplier_state, s.country AS supplier_country, s.phone AS supplier_phone, s.email AS supplier_email,
         p.currency, p.exchange_rate, p.warehouse_id, p.remarks, p.total_amount, p.delivery_date, p.payment_type,
-          p.created_at,
-          u.username AS created_by_name
+          COALESCE(p.created_at, NOW()) AS created_at,
+          COALESCE(u.full_name, u.username, 'System Admin') AS created_by_name
          FROM pur_orders p
       LEFT JOIN pur_suppliers s ON s.id = p.supplier_id
         LEFT JOIN adm_users u ON u.id = p.created_by
@@ -1458,7 +2415,8 @@ async function loadData(type, id, companyId, branchId) {
       { id, companyId, branchId },
     ).catch(() => []);
     if (!po) throw httpError(404, "NOT_FOUND", "Document not found");
-    const details = await query(`
+    const details = await query(
+      `
       SELECT d.id, d.item_id, d.qty, d.uom, d.unit_price, d.discount_percent, d.tax_percent, d.line_total, i.item_code, i.item_name,
           d.created_at,
           u.username AS created_by_name
@@ -1470,7 +2428,8 @@ async function loadData(type, id, companyId, branchId) {
       `,
       { id },
     ).catch(() => []);
-    const [company] = await query(`
+    const [company] = await query(
+      `
       SELECT id, name, address, city, state, postal_code, country, telephone, email, website,
           created_at,
           u.username AS created_by_name
@@ -1503,7 +2462,11 @@ async function loadData(type, id, companyId, branchId) {
       purchase_order: {
         id: po.id,
         number: po.po_no,
-        date: po.po_date ? ((po.po_date) instanceof Date ? (po.po_date).toISOString().slice(0, 10) : String(po.po_date).slice(0, 10)) : null,
+        date: po.po_date
+          ? po.po_date instanceof Date
+            ? po.po_date.toISOString().slice(0, 10)
+            : String(po.po_date).slice(0, 10)
+          : null,
         status: po.status,
         remarks: po.remarks || "",
         delivery_date: po.delivery_date || null,
@@ -1529,7 +2492,9 @@ async function loadData(type, id, companyId, branchId) {
       },
     };
     try {
-      const qrPayload = encodeURIComponent(`PURCHASE_ORDER|${po.id}|${po.po_no || ""}|${po.po_date || ""}|${po.supplier_name || ""}`);
+      const qrPayload = encodeURIComponent(
+        `PURCHASE_ORDER|${po.id}|${po.po_no || ""}|${po.po_date || ""}|${po.supplier_name || ""}`,
+      );
       poObj.purchase_order.qr_code = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${qrPayload}`;
     } catch {}
     poObj.document = poObj.purchase_order;
@@ -1537,7 +2502,8 @@ async function loadData(type, id, companyId, branchId) {
     return poObj;
   }
   if (type === "direct-purchase") {
-    const [hdr] = await query(`
+    const [hdr] = await query(
+      `
       SELECT h.*, s.supplier_name, s.address AS supplier_address, s.phone AS supplier_phone, s.email AS supplier_email,
           h.created_at,
           u.username AS created_by_name
@@ -1550,7 +2516,8 @@ async function loadData(type, id, companyId, branchId) {
       { id, companyId, branchId },
     ).catch(() => []);
     if (!hdr) throw httpError(404, "NOT_FOUND", "Document not found");
-    const details = await query(`
+    const details = await query(
+      `
       SELECT d.id, d.item_id, d.qty, d.uom, d.unit_price, d.discount_percent, d.tax_percent, d.line_total, d.tax_code_id, d.line_total AS net_amount, i.item_code, i.item_name,
           d.created_at,
           u.username AS created_by_name
@@ -1562,9 +2529,10 @@ async function loadData(type, id, companyId, branchId) {
       `,
       { id },
     ).catch(() => []);
-    
+
     const tax_summary = await resolveTaxSummary(details || [], companyId);
-    const [company] = await query(`
+    const [company] = await query(
+      `
       SELECT id, name, address, city, state, postal_code, country, telephone, email, website,
           created_at,
           u.username AS created_by_name
@@ -1575,12 +2543,18 @@ async function loadData(type, id, companyId, branchId) {
       `,
       { companyId },
     ).catch(() => []);
-    const whRow = await query(`SELECT warehouse_name FROM inv_warehouses WHERE id = :wid AND company_id = :companyId LIMIT 1`, { wid: hdr.warehouse_id, companyId }).catch(() => []);
+    const whRow = await query(
+      `SELECT warehouse_name FROM inv_warehouses WHERE id = :wid AND company_id = :companyId LIMIT 1`,
+      { wid: hdr.warehouse_id, companyId },
+    ).catch(() => []);
     const warehouseName = whRow?.[0]?.warehouse_name || "";
     const items = Array.isArray(details) ? details : [];
     const itemCount = items.length;
     const totalQuantity = items.reduce((s, d) => s + Number(d.qty || 0), 0);
-    const computedSubTotal = items.reduce((s, d) => s + Number(d.qty || 0) * Number(d.unit_price || 0), 0);
+    const computedSubTotal = items.reduce(
+      (s, d) => s + Number(d.qty || 0) * Number(d.unit_price || 0),
+      0,
+    );
     const dpObj = {
       company: company || {},
       supplier: {
@@ -1592,9 +2566,17 @@ async function loadData(type, id, companyId, branchId) {
       direct_purchase: {
         id: hdr.id,
         number: hdr.dp_no,
-        date: hdr.dp_date ? ((hdr.dp_date) instanceof Date ? (hdr.dp_date).toISOString().slice(0, 10) : String(hdr.dp_date).slice(0, 10)) : null,
+        date: hdr.dp_date
+          ? hdr.dp_date instanceof Date
+            ? hdr.dp_date.toISOString().slice(0, 10)
+            : String(hdr.dp_date).slice(0, 10)
+          : null,
         status: hdr.status,
-        invoice_date: hdr.supplier_invoice_date ? ((hdr.supplier_invoice_date) instanceof Date ? (hdr.supplier_invoice_date).toISOString().slice(0, 10) : String(hdr.supplier_invoice_date).slice(0, 10)) : null,
+        invoice_date: hdr.supplier_invoice_date
+          ? hdr.supplier_invoice_date instanceof Date
+            ? hdr.supplier_invoice_date.toISOString().slice(0, 10)
+            : String(hdr.supplier_invoice_date).slice(0, 10)
+          : null,
         supplier_invoice_no: hdr.supplier_invoice_number || "",
         warehouse: warehouseName,
         sub_total: Number(hdr.subtotal) || computedSubTotal,
@@ -1623,7 +2605,9 @@ async function loadData(type, id, companyId, branchId) {
       },
     };
     try {
-      const qrPayload = encodeURIComponent(`DIRECT_PURCHASE|${hdr.id}|${hdr.dp_no || ""}|${hdr.dp_date || ""}|${hdr.supplier_name || ""}`);
+      const qrPayload = encodeURIComponent(
+        `DIRECT_PURCHASE|${hdr.id}|${hdr.dp_no || ""}|${hdr.dp_date || ""}|${hdr.supplier_name || ""}`,
+      );
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${qrPayload}`;
       dpObj.qr_code = qrUrl;
       dpObj.direct_purchase.qr_code = qrUrl;
@@ -1634,7 +2618,8 @@ async function loadData(type, id, companyId, branchId) {
     return dpObj;
   }
   if (type === "purchase-bill") {
-    const [hdr] = await query(`
+    const [hdr] = await query(
+      `
       SELECT b.*, s.supplier_name, s.address AS supplier_address, s.city AS supplier_city, s.state AS supplier_state, s.country AS supplier_country, s.phone AS supplier_phone, s.email AS supplier_email,
           b.created_at,
           u.username AS created_by_name
@@ -1647,7 +2632,8 @@ async function loadData(type, id, companyId, branchId) {
       { id, companyId, branchId },
     ).catch(() => []);
     if (!hdr) throw httpError(404, "NOT_FOUND", "Document not found");
-    const details = await query(`
+    const details = await query(
+      `
       SELECT d.id, d.item_id, d.qty, d.uom, d.unit_price, d.tax_amount, d.discount_percent, d.line_total, d.tax_code_id, i.item_code, i.item_name,
           d.created_at,
           u.username AS created_by_name
@@ -1659,9 +2645,10 @@ async function loadData(type, id, companyId, branchId) {
       `,
       { id },
     ).catch(() => []);
-    
+
     const tax_summary = await resolveTaxSummary(details || [], companyId);
-    const [company] = await query(`
+    const [company] = await query(
+      `
       SELECT id, name, address, city, state, postal_code, country, telephone, email, website,
           created_at,
           u.username AS created_by_name
@@ -1694,7 +2681,11 @@ async function loadData(type, id, companyId, branchId) {
       purchase_bill: {
         id: hdr.id,
         number: hdr.bill_no,
-        date: hdr.bill_date ? ((hdr.bill_date) instanceof Date ? (hdr.bill_date).toISOString().slice(0, 10) : String(hdr.bill_date).slice(0, 10)) : null,
+        date: hdr.bill_date
+          ? hdr.bill_date instanceof Date
+            ? hdr.bill_date.toISOString().slice(0, 10)
+            : String(hdr.bill_date).slice(0, 10)
+          : null,
         status: hdr.status,
         remarks: hdr.remarks || "",
         sub_total: hdr.total_amount || 0,
@@ -1713,12 +2704,15 @@ async function loadData(type, id, companyId, branchId) {
           price: d.unit_price,
           discount: d.discount_percent || 0,
           tax: d.tax_amount || 0,
-          amount: d.line_total || (Number(d.qty || 0) * Number(d.unit_price || 0)),
+          amount:
+            d.line_total || Number(d.qty || 0) * Number(d.unit_price || 0),
         })),
       },
     };
     try {
-      const qrPayload = encodeURIComponent(`PURCHASE_BILL|${hdr.id}|${hdr.bill_no || ""}|${hdr.bill_date || ""}|${hdr.supplier_name || ""}`);
+      const qrPayload = encodeURIComponent(
+        `PURCHASE_BILL|${hdr.id}|${hdr.bill_no || ""}|${hdr.bill_date || ""}|${hdr.supplier_name || ""}`,
+      );
       billObj.purchase_bill.qr_code = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${qrPayload}`;
     } catch {}
     billObj.document = billObj.purchase_bill;
@@ -1727,7 +2721,8 @@ async function loadData(type, id, companyId, branchId) {
     return billObj;
   }
   if (type === "grn") {
-    const [hdr] = await query(`
+    const [hdr] = await query(
+      `
       SELECT g.*, s.supplier_name, s.address AS supplier_address, s.phone AS supplier_phone, s.email AS supplier_email,
           g.created_at,
           u.username AS created_by_name
@@ -1740,7 +2735,8 @@ async function loadData(type, id, companyId, branchId) {
       { id, companyId, branchId },
     ).catch(() => []);
     if (!hdr) throw httpError(404, "NOT_FOUND", "Document not found");
-    const details = await query(`
+    const details = await query(
+      `
       SELECT d.id, d.item_id, d.qty_ordered, d.qty_received, d.qty_accepted, d.uom, d.unit_price, d.line_amount, i.item_code, i.item_name,
           d.created_at,
           u.username AS created_by_name
@@ -1752,7 +2748,8 @@ async function loadData(type, id, companyId, branchId) {
       `,
       { id },
     ).catch(() => []);
-    const [company] = await query(`
+    const [company] = await query(
+      `
       SELECT id, name, address, city, state, postal_code, country, telephone, email, website,
           created_at,
           u.username AS created_by_name
@@ -1775,7 +2772,11 @@ async function loadData(type, id, companyId, branchId) {
       grn: {
         id: hdr.id,
         number: hdr.grn_no,
-        date: hdr.grn_date ? ((hdr.grn_date) instanceof Date ? (hdr.grn_date).toISOString().slice(0, 10) : String(hdr.grn_date).slice(0, 10)) : null,
+        date: hdr.grn_date
+          ? hdr.grn_date instanceof Date
+            ? hdr.grn_date.toISOString().slice(0, 10)
+            : String(hdr.grn_date).slice(0, 10)
+          : null,
         status: hdr.status,
         remarks: hdr.remarks || "",
         total: hdr.net_amount || 0,
@@ -1796,7 +2797,9 @@ async function loadData(type, id, companyId, branchId) {
       },
     };
     try {
-      const qrPayload = encodeURIComponent(`GRN|${hdr.id}|${hdr.grn_no || ""}|${hdr.grn_date || ""}|${hdr.supplier_name || ""}`);
+      const qrPayload = encodeURIComponent(
+        `GRN|${hdr.id}|${hdr.grn_no || ""}|${hdr.grn_date || ""}|${hdr.supplier_name || ""}`,
+      );
       grnObj.grn.qr_code = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${qrPayload}`;
     } catch {}
     grnObj.document = grnObj.grn;
@@ -1804,7 +2807,8 @@ async function loadData(type, id, companyId, branchId) {
     return grnObj;
   }
   if (type === "delivery-note") {
-    const [dn] = await query(`
+    const [dn] = await query(
+      `
       SELECT
         d.id,
         d.delivery_no,
@@ -1841,7 +2845,8 @@ async function loadData(type, id, companyId, branchId) {
     if (!dn) throw httpError(404, "NOT_FOUND", "Document not found");
     let employee = null;
     if (dn.created_by) {
-      const [u] = await query(`
+      const [u] = await query(
+        `
         SELECT id, username, email, full_name,
           created_at,
           u.username AS created_by_name
@@ -1861,7 +2866,8 @@ async function loadData(type, id, companyId, branchId) {
         };
       }
     }
-    const details = await query(`
+    const details = await query(
+      `
       SELECT
         dd.id,
         dd.item_id,
@@ -1881,7 +2887,8 @@ async function loadData(type, id, companyId, branchId) {
       `,
       { id, companyId },
     ).catch(() => []);
-    const [company] = await query(`
+    const [company] = await query(
+      `
       SELECT id, name, address, city, state, postal_code, country, telephone, email, website,
           created_at,
           u.username AS created_by_name
@@ -1892,7 +2899,8 @@ async function loadData(type, id, companyId, branchId) {
       `,
       { companyId },
     ).catch(() => []);
-    const dnExtra = await query(`
+    const dnExtra = await query(
+      `
       SELECT 
         COALESCE(i.currency_id, o.currency_id) AS currency_id,
         COALESCE(i.exchange_rate, o.exchange_rate) AS exchange_rate,
@@ -1911,7 +2919,8 @@ async function loadData(type, id, companyId, branchId) {
       { id },
     ).catch(() => []);
     const ex = dnExtra?.[0] || {};
-    const extra = await query(`
+    const extra = await query(
+      `
       SELECT 
         w.warehouse_name,
         cur.code AS currency_code,
@@ -1936,7 +2945,8 @@ async function loadData(type, id, companyId, branchId) {
     const items = Array.isArray(details) ? details : [];
     let orderMeta = {};
     if (dn.sales_order_id) {
-      const [ord] = await query(`
+      const [ord] = await query(
+        `
         SELECT order_no, vehicle_number, driver_name, delivery_instructions,
           created_at,
           u.username AS created_by_name
@@ -1951,7 +2961,8 @@ async function loadData(type, id, companyId, branchId) {
     }
     let invoiceMeta = {};
     if (dn.invoice_id) {
-      const [invh] = await query(`
+      const [invh] = await query(
+        `
         SELECT invoice_no,
           created_at,
           u.username AS created_by_name
@@ -1966,7 +2977,8 @@ async function loadData(type, id, companyId, branchId) {
     }
     let orderedQtyMap = new Map();
     if (dn.sales_order_id) {
-      const ordRows = await query(`
+      const ordRows = await query(
+        `
         SELECT item_id, qty,
           created_at,
           u.username AS created_by_name
@@ -2015,7 +3027,8 @@ async function loadData(type, id, companyId, branchId) {
         vehicle_number: orderMeta?.vehicle_number || null,
         driver_name: orderMeta?.driver_name || null,
         invoice_ref: invoiceMeta?.invoice_no || null,
-        instructions: dn.delivery_instructions || orderMeta?.delivery_instructions || null,
+        instructions:
+          dn.delivery_instructions || orderMeta?.delivery_instructions || null,
         terms_and_conditions: dn.terms_and_conditions || null,
         total_tax: dn.total_tax || 0,
         invoice_amount: dn.invoice_amount || 0,
@@ -2057,7 +3070,8 @@ async function loadData(type, id, companyId, branchId) {
     return dnObj;
   }
   if (type === "purchase-order") {
-    const [po] = await query(`
+    const [po] = await query(
+      `
       SELECT h.*, s.supplier_name, s.address AS supplier_address, s.email AS supplier_email, s.telephone AS supplier_phone,
           s.city, s.state, s.country,
           h.created_at,
@@ -2071,7 +3085,8 @@ async function loadData(type, id, companyId, branchId) {
       { id, companyId, branchId },
     ).catch(() => []);
     if (!po) throw httpError(404, "NOT_FOUND", "Purchase Order not found");
-    const details = await query(`
+    const details = await query(
+      `
       SELECT d.*, it.item_code, it.item_name,
           d.created_at,
           u.username AS created_by_name
@@ -2083,10 +3098,11 @@ async function loadData(type, id, companyId, branchId) {
       `,
       { id },
     ).catch(() => []);
-    
+
     const tax_summary = await resolveTaxSummary(details || [], companyId);
 
-    const [company] = await query(`SELECT *,
+    const [company] = await query(
+      `SELECT *,
           created_at,
           u.username AS created_by_name
          FROM adm_companies
@@ -2105,7 +3121,7 @@ async function loadData(type, id, companyId, branchId) {
         city: po.city,
         state: po.state,
         country: po.country,
-        county: po.country
+        county: po.country,
       },
       vendor_name: po.supplier_name,
       address: po.supplier_address,
@@ -2142,7 +3158,8 @@ async function loadData(type, id, companyId, branchId) {
     return poObj;
   }
   if (type === "grn") {
-    const [grn] = await query(`
+    const [grn] = await query(
+      `
       SELECT h.*, s.supplier_name, s.address AS supplier_address, s.email AS supplier_email, s.telephone AS supplier_phone,
           h.created_at,
           u.username AS created_by_name
@@ -2155,7 +3172,8 @@ async function loadData(type, id, companyId, branchId) {
       { id, companyId, branchId },
     ).catch(() => []);
     if (!grn) throw httpError(404, "NOT_FOUND", "GRN not found");
-    const details = await query(`
+    const details = await query(
+      `
       SELECT d.*, it.item_code, it.item_name,
           d.created_at,
           u.username AS created_by_name
@@ -2167,7 +3185,8 @@ async function loadData(type, id, companyId, branchId) {
       `,
       { id },
     ).catch(() => []);
-    const [company] = await query(`SELECT *,
+    const [company] = await query(
+      `SELECT *,
           created_at,
           u.username AS created_by_name
          FROM adm_companies
@@ -2206,7 +3225,8 @@ async function loadData(type, id, companyId, branchId) {
     return grnObj;
   }
   if (type === "direct-purchase") {
-    const [dp] = await query(`
+    const [dp] = await query(
+      `
       SELECT h.*, s.supplier_name, s.address AS supplier_address, s.email AS supplier_email, s.telephone AS supplier_phone,
           h.created_at,
           u.username AS created_by_name
@@ -2219,7 +3239,8 @@ async function loadData(type, id, companyId, branchId) {
       { id, companyId, branchId },
     ).catch(() => []);
     if (!dp) throw httpError(404, "NOT_FOUND", "Direct Purchase not found");
-    const details = await query(`
+    const details = await query(
+      `
       SELECT d.*, it.item_code, it.item_name,
           d.created_at,
           u.username AS created_by_name
@@ -2231,7 +3252,8 @@ async function loadData(type, id, companyId, branchId) {
       `,
       { id },
     ).catch(() => []);
-    const [company] = await query(`SELECT *,
+    const [company] = await query(
+      `SELECT *,
           created_at,
           u.username AS created_by_name
          FROM adm_companies
@@ -2273,7 +3295,8 @@ async function loadData(type, id, companyId, branchId) {
     return dpObj;
   }
   if (type === "quotation") {
-    const [q] = await query(`
+    const [q] = await query(
+      `
       SELECT
         q.id,
         q.quotation_no,
@@ -2312,7 +3335,8 @@ async function loadData(type, id, companyId, branchId) {
     if (!q) throw httpError(404, "NOT_FOUND", "Document not found");
     let employee = null;
     if (q.created_by) {
-      const [u] = await query(`
+      const [u] = await query(
+        `
         SELECT id, username, email, full_name,
           created_at,
           u.username AS created_by_name
@@ -2332,7 +3356,8 @@ async function loadData(type, id, companyId, branchId) {
         };
       }
     }
-    const details = await query(`
+    const details = await query(
+      `
       SELECT
         d.id,
         d.item_id,
@@ -2358,7 +3383,8 @@ async function loadData(type, id, companyId, branchId) {
       { id, companyId },
     ).catch(() => []);
 
-    const [company] = await query(`
+    const [company] = await query(
+      `
       SELECT id, name, address, city, state, postal_code, country, telephone, email, website,
           created_at,
           u.username AS created_by_name
@@ -2369,7 +3395,8 @@ async function loadData(type, id, companyId, branchId) {
       `,
       { companyId },
     ).catch(() => []);
-    const extra = await query(`
+    const extra = await query(
+      `
       SELECT 
         w.warehouse_name,
         cur.code AS currency_code,
@@ -2392,7 +3419,8 @@ async function loadData(type, id, companyId, branchId) {
     ).catch(() => []);
     const extraRow = extra?.[0] || {};
     const items = Array.isArray(details) ? details : [];
-    const qCompsRows = await query(`SELECT c.tax_code_id, td.component_name as name, c.rate_percent as rate, c.compound_level
+    const qCompsRows = await query(
+      `SELECT c.tax_code_id, td.component_name as name, c.rate_percent as rate, c.compound_level
        FROM fin_tax_components c
        JOIN fin_tax_details td ON td.id = c.tax_detail_id
        WHERE c.company_id = :companyId AND c.is_active = 1
@@ -2415,12 +3443,18 @@ async function loadData(type, id, companyId, branchId) {
           if (!levels[lvl]) levels[lvl] = [];
           levels[lvl].push(c);
         });
-        const sortedLvls = Object.keys(levels).map(Number).sort((a, b) => a - b);
+        const sortedLvls = Object.keys(levels)
+          .map(Number)
+          .sort((a, b) => a - b);
         let base = netAmt;
         sortedLvls.forEach((lvl) => {
           levels[lvl].forEach((c) => {
             const tax = base * (Number(c.rate) / 100);
-            itemComps.push({ name: c.name, rate: c.rate, amount: tax.toFixed(2) });
+            itemComps.push({
+              name: c.name,
+              rate: c.rate,
+              amount: tax.toFixed(2),
+            });
             base += tax;
           });
         });
@@ -2442,17 +3476,25 @@ async function loadData(type, id, companyId, branchId) {
         tax_components: itemComps,
       };
     });
-    const computedSubTotal = qTemplateItems.reduce((s, i) => s + Number(i.value || 0), 0);
+    const computedSubTotal = qTemplateItems.reduce(
+      (s, i) => s + Number(i.value || 0),
+      0,
+    );
     const computedDiscountTotal = qTemplateItems.reduce((s, i) => {
       const v = Number(i.value || 0);
       return s + v * (Number(i.discount || 0) / 100);
     }, 0);
-    const computedTaxTotal = qTemplateItems.reduce((s, i) => s + Number(i.tax || 0), 0);
-    const computedGrandTotal = (computedSubTotal - computedDiscountTotal) + computedTaxTotal;
+    const computedTaxTotal = qTemplateItems.reduce(
+      (s, i) => s + Number(i.tax || 0),
+      0,
+    );
+    const computedGrandTotal =
+      computedSubTotal - computedDiscountTotal + computedTaxTotal;
     const taxCompMap = {};
     qTemplateItems.forEach((item) => {
       (item.tax_components || []).forEach((tc) => {
-        if (!taxCompMap[tc.name]) taxCompMap[tc.name] = { name: tc.name, rate: tc.rate, amount: 0 };
+        if (!taxCompMap[tc.name])
+          taxCompMap[tc.name] = { name: tc.name, rate: tc.rate, amount: 0 };
         taxCompMap[tc.name].amount += Number(tc.amount || 0);
       });
     });
@@ -2498,9 +3540,22 @@ async function loadData(type, id, companyId, branchId) {
         _debug: {
           qCompsRowsCount: qCompsRows.length,
           qCompsByCodeKeys: Object.keys(qCompsByCode).join(","),
-          detailsCount: (details||[]).length,
-          details: JSON.stringify((details||[]).map(d=>({ item_id: d.item_id, tax_type: d.tax_code_id, net_amount: d.net_amount, total_amount: d.total_amount }))),
-          itemsTC: JSON.stringify(qTemplateItems.map(i=>({ code: i.code, tc: i.tax_components, netAmt: i.net }))),
+          detailsCount: (details || []).length,
+          details: JSON.stringify(
+            (details || []).map((d) => ({
+              item_id: d.item_id,
+              tax_type: d.tax_code_id,
+              net_amount: d.net_amount,
+              total_amount: d.total_amount,
+            })),
+          ),
+          itemsTC: JSON.stringify(
+            qTemplateItems.map((i) => ({
+              code: i.code,
+              tc: i.tax_components,
+              netAmt: i.net,
+            })),
+          ),
         },
       },
     };
@@ -2518,7 +3573,8 @@ async function loadData(type, id, companyId, branchId) {
     return qObj;
   }
   if (type === "payment-voucher") {
-    const [voucher] = await query(`
+    const [voucher] = await query(
+      `
       SELECT 
         v.id,
         v.voucher_no,
@@ -2548,7 +3604,8 @@ async function loadData(type, id, companyId, branchId) {
     if (!voucher) throw httpError(404, "NOT_FOUND", "Document not found");
     let employee = null;
     if (voucher.created_by) {
-      const [u] = await query(`
+      const [u] = await query(
+        `
         SELECT id, username, email, full_name,
           created_at,
           u.username AS created_by_name
@@ -2568,7 +3625,8 @@ async function loadData(type, id, companyId, branchId) {
         };
       }
     }
-    const lines = await query(`
+    const lines = await query(
+      `
       SELECT 
         l.id,
         l.line_no,
@@ -2589,7 +3647,8 @@ async function loadData(type, id, companyId, branchId) {
       `,
       { id },
     ).catch(() => []);
-    const [company] = await query(`SELECT id, name, address, city, state, postal_code, country, telephone, email, website,
+    const [company] = await query(
+      `SELECT id, name, address, city, state, postal_code, country, telephone, email, website,
           created_at,
           u.username AS created_by_name
          FROM adm_companies
@@ -2598,7 +3657,8 @@ async function loadData(type, id, companyId, branchId) {
       { companyId },
     ).catch(() => []);
     const narration = String(voucher.narration || "");
-    const firstPaymentMethod = (lines || []).find((l) => l.payment_method)?.payment_method || "";
+    const firstPaymentMethod =
+      (lines || []).find((l) => l.payment_method)?.payment_method || "";
     const voucherObj = {
       company: company || {},
       employee: employee || undefined,
@@ -2608,7 +3668,9 @@ async function loadData(type, id, companyId, branchId) {
         id: voucher.id,
         number: voucher.voucher_no,
         date: voucher.voucher_date
-          ? ((voucher.voucher_date) instanceof Date ? (voucher.voucher_date).toISOString().slice(0, 10) : String(voucher.voucher_date).slice(0, 10))
+          ? voucher.voucher_date instanceof Date
+            ? voucher.voucher_date.toISOString().slice(0, 10)
+            : String(voucher.voucher_date).slice(0, 10)
           : null,
         narration: narration,
         total_debit: voucher.total_debit,
@@ -2639,7 +3701,8 @@ async function loadData(type, id, companyId, branchId) {
     return voucherObj;
   }
   if (type === "receipt-voucher") {
-    const [voucher] = await query(`
+    const [voucher] = await query(
+      `
       SELECT 
         v.id,
         v.voucher_no,
@@ -2669,7 +3732,8 @@ async function loadData(type, id, companyId, branchId) {
     if (!voucher) throw httpError(404, "NOT_FOUND", "Document not found");
     let employee = null;
     if (voucher.created_by) {
-      const [u] = await query(`
+      const [u] = await query(
+        `
         SELECT id, username, email, full_name,
           created_at,
           u.username AS created_by_name
@@ -2689,7 +3753,8 @@ async function loadData(type, id, companyId, branchId) {
         };
       }
     }
-    const lines = await query(`
+    const lines = await query(
+      `
       SELECT 
         l.id,
         l.line_no,
@@ -2710,7 +3775,8 @@ async function loadData(type, id, companyId, branchId) {
       `,
       { id },
     ).catch(() => []);
-    const [company] = await query(`SELECT id, name, address, city, state, postal_code, country, telephone, email, website,
+    const [company] = await query(
+      `SELECT id, name, address, city, state, postal_code, country, telephone, email, website,
           created_at,
           u.username AS created_by_name
          FROM adm_companies
@@ -2724,7 +3790,8 @@ async function loadData(type, id, companyId, branchId) {
       const m = narration.match(re);
       return m ? m[1].trim() : "";
     };
-    const firstPaymentMethod = (lines || []).find((l) => l.payment_method)?.payment_method || "";
+    const firstPaymentMethod =
+      (lines || []).find((l) => l.payment_method)?.payment_method || "";
     const voucherObj = {
       company: company || {},
       employee: employee || undefined,
@@ -2734,14 +3801,19 @@ async function loadData(type, id, companyId, branchId) {
         id: voucher.id,
         number: voucher.voucher_no,
         date: voucher.voucher_date
-          ? ((voucher.voucher_date) instanceof Date ? (voucher.voucher_date).toISOString().slice(0, 10) : String(voucher.voucher_date).slice(0, 10))
+          ? voucher.voucher_date instanceof Date
+            ? voucher.voucher_date.toISOString().slice(0, 10)
+            : String(voucher.voucher_date).slice(0, 10)
           : null,
         narration: narration,
         total_debit: voucher.total_debit,
         total_credit: voucher.total_credit,
         type_code: voucher.voucher_type_code,
         type_name: voucher.voucher_type_name,
-        received_from: parseToken("Received from") || (lines || []).find((l) => Number(l.credit || 0) > 0)?.account_name || "",
+        received_from:
+          parseToken("Received from") ||
+          (lines || []).find((l) => Number(l.credit || 0) > 0)?.account_name ||
+          "",
         payment_mode: firstPaymentMethod,
         currency: voucher.currency_code || "",
         items: (lines || [])
@@ -2766,20 +3838,79 @@ async function loadData(type, id, companyId, branchId) {
     return voucherObj;
   }
   if (type === "salary-slip") {
-    const [payslip] = await query(`
+    const amountToGhanaCedisWords = (amount) => {
+      const num = Math.abs(Number(amount || 0));
+      if (isNaN(num) || num === 0) return "Zero Ghana Cedis Only";
+
+      const ones = [
+        "", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
+        "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen",
+        "Seventeen", "Eighteen", "Nineteen",
+      ];
+      const tens = [
+        "", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety",
+      ];
+
+      function convertUnderThousand(n) {
+        let str = "";
+        if (n >= 100) {
+          str += ones[Math.floor(n / 100)] + " Hundred";
+          n %= 100;
+          if (n > 0) str += " and ";
+        }
+        if (n >= 20) {
+          str += tens[Math.floor(n / 10)] + (n % 10 > 0 ? " " + ones[n % 10] : "");
+        } else if (n > 0) {
+          str += ones[n];
+        }
+        return str.trim();
+      }
+
+      const intPart = Math.floor(num);
+      const decimalPart = Math.round((num - intPart) * 100);
+
+      let words = "";
+      if (intPart === 0) {
+        words = "Zero";
+      } else {
+        const billions = Math.floor(intPart / 1000000000);
+        const millions = Math.floor((intPart % 1000000000) / 1000000);
+        const thousands = Math.floor((intPart % 1000000) / 1000);
+        const remainder = intPart % 1000;
+
+        const parts = [];
+        if (billions > 0) parts.push(convertUnderThousand(billions) + " Billion");
+        if (millions > 0) parts.push(convertUnderThousand(millions) + " Million");
+        if (thousands > 0) parts.push(convertUnderThousand(thousands) + " Thousand");
+        if (remainder > 0) {
+          if (parts.length > 0 && remainder < 100) {
+            parts.push("and " + convertUnderThousand(remainder));
+          } else {
+            parts.push(convertUnderThousand(remainder));
+          }
+        }
+        words = parts.join(" ");
+      }
+
+      words += " Ghana Cedis";
+      if (decimalPart > 0) {
+        words += ", " + convertUnderThousand(decimalPart) + " Pesewas";
+      }
+      return words + " Only";
+    };
+
+    const [payslip] = await query(
+      `
       SELECT
-        p.id, p.period_id, p.status, p.paid_at, p.remarks,
-        p.basic_salary, p.allowances, p.deductions, p.net_salary,
-        p.ssf_employee, p.tier3_employee, p.income_tax, p.loan_deductions_total,
-        p.working_days, p.days_present, p.leave_taken,
+        p.*,
         e.emp_code, e.first_name, e.last_name, e.email, e.joining_date,
         e.ssnit_no, e.tin, e.bank_name, e.bank_account_no,
         d.dept_name AS dept_name,
         b.name AS branch_name,
         pos.pos_name AS position_name,
         per.period_name AS period_name,
-          p.created_at,
-          u.username AS created_by_name
+          COALESCE(p.created_at, NOW()) AS created_at,
+          COALESCE(u.full_name, u.username, 'System Admin') AS created_by_name
          FROM hr_payslips p
       JOIN hr_employees e ON e.id = p.employee_id AND e.company_id = :companyId
       LEFT JOIN hr_departments d ON d.id = e.dept_id
@@ -2793,7 +3924,18 @@ async function loadData(type, id, companyId, branchId) {
       { id, companyId },
     ).catch(() => []);
     if (!payslip) throw httpError(404, "NOT_FOUND", "Payslip not found");
-    const [company] = await query(`SELECT id, name, address, address2, city, state, postal_code, country, telephone, email, website, logo,
+
+    // Guard: ensure payroll for this period is approved before viewing/printing
+    const [payrollCheck] = await query(
+      `SELECT status FROM hr_payroll WHERE period_id = :periodId AND company_id = :companyId ORDER BY id DESC LIMIT 1`,
+      { periodId: payslip.period_id, companyId }
+    ).catch(() => []);
+    const prStatus = String(payrollCheck?.status || '').toUpperCase();
+    if (!['APPROVED', 'CLOSED'].includes(prStatus)) {
+      throw httpError(403, "FORBIDDEN", "Cannot view or print payslip: Processed salary for this period has not been approved yet.");
+    }
+    const [company] = await query(
+      `SELECT id, name, address, address2, city, state, postal_code, country, telephone, email, website, logo,
           created_at,
           u.username AS created_by_name
          FROM adm_companies
@@ -2809,12 +3951,41 @@ async function loadData(type, id, companyId, branchId) {
         amount: Number(payslip.basic_salary),
       });
     }
-    if (Number(payslip.allowances) > 0) {
+    const employeeComponents = await query(
+      `SELECT column_name, label, component_type, is_earning, display_order
+         FROM hr_salary_components
+        WHERE company_id = :companyId AND is_active = 1
+          AND column_name REGEXP '^employee_component_[0-9]+$'
+        ORDER BY display_order ASC, label ASC`,
+      { companyId },
+    ).catch(() => []);
+    const activeEmployeeComponents = employeeComponents
+      .filter((component) =>
+        /^employee_component_\d+$/.test(String(component.column_name)),
+      )
+      .map((component) => ({
+        ...component,
+        amount: Number(payslip[component.column_name] || 0),
+      }))
+      .filter((component) => component.amount > 0);
+    const employeeEarningsTotal = activeEmployeeComponents
+      .filter((component) => Number(component.is_earning) === 1)
+      .reduce((sum, component) => sum + component.amount, 0);
+    const otherAllowances = Math.max(
+      0,
+      Number(payslip.allowances || 0) - employeeEarningsTotal,
+    );
+    if (otherAllowances > 0) {
       earnings.push({
         label: "Allowances",
-        amount: Number(payslip.allowances),
+        amount: otherAllowances,
       });
     }
+    activeEmployeeComponents
+      .filter((component) => Number(component.is_earning) === 1)
+      .forEach((component) =>
+        earnings.push({ label: component.label, amount: component.amount }),
+      );
 
     let deductions = [];
     if (Number(payslip.ssf_employee) > 0) {
@@ -2841,6 +4012,28 @@ async function loadData(type, id, companyId, branchId) {
         amount: Number(payslip.loan_deductions_total),
       });
     }
+    activeEmployeeComponents
+      .filter((component) => Number(component.is_earning) !== 1)
+      .forEach((component) =>
+        deductions.push({ label: component.label, amount: component.amount }),
+      );
+    const employeeComponentDeductionTotal = activeEmployeeComponents
+      .filter((component) => Number(component.is_earning) !== 1)
+      .reduce((sum, component) => sum + component.amount, 0);
+    const otherDeductions = Math.max(
+      0,
+      Number(payslip.deductions || 0) -
+        Number(payslip.income_tax || 0) -
+        Number(payslip.ssf_employee || 0) -
+        Number(payslip.tier3_employee || 0) -
+        Number(payslip.loan_deductions_total || 0) -
+        employeeComponentDeductionTotal,
+    );
+    if (otherDeductions > 0) {
+      deductions.push({ label: "Other Deductions", amount: otherDeductions });
+    }
+    const totalEarnings =
+      Number(payslip.basic_salary || 0) + Number(payslip.allowances || 0);
 
     earnings = earnings.filter((e) => e.amount > 0);
     deductions = deductions.filter((d) => d.amount > 0);
@@ -2876,7 +4069,9 @@ async function loadData(type, id, companyId, branchId) {
         designation: payslip.position_name || "-",
         job_title: payslip.position_name || "-",
         joining_date: payslip.joining_date
-          ? ((payslip.joining_date) instanceof Date ? (payslip.joining_date).toISOString().slice(0, 10) : String(payslip.joining_date).slice(0, 10))
+          ? payslip.joining_date instanceof Date
+            ? payslip.joining_date.toISOString().slice(0, 10)
+            : String(payslip.joining_date).slice(0, 10)
           : null,
         ssnit_no: payslip.ssnit_no || "-",
         tin: payslip.tin || "-",
@@ -2891,11 +4086,10 @@ async function loadData(type, id, companyId, branchId) {
         basic_salary: Number(payslip.basic_salary || 0).toFixed(2),
         allowances: Number(payslip.allowances || 0).toFixed(2),
         deductions: Number(payslip.deductions || 0).toFixed(2),
-        gross_pay: (
-          Number(payslip.basic_salary || 0) + Number(payslip.allowances || 0)
-        ).toFixed(2),
+        tax_relief: Number(payslip.tax_relief || 0).toFixed(2),
+        gross_pay: totalEarnings.toFixed(2),
         net_salary: Number(payslip.net_salary || 0).toFixed(2),
-        net_in_words: "",
+        net_in_words: amountToGhanaCedisWords(payslip.net_salary),
         status: payslip.status,
         working_days: payslip.working_days || 0,
         days_present: payslip.days_present || 0,
@@ -2917,17 +4111,17 @@ async function loadData(type, id, companyId, branchId) {
           name: String(d.label || ""),
           amount: Number(d.amount || 0).toFixed(2),
         })),
-        total_earnings: (
-          Number(payslip.basic_salary || 0) + Number(payslip.allowances || 0)
-        ).toFixed(2),
+        total_earnings: totalEarnings.toFixed(2),
         total_deductions: Number(payslip.deductions || 0).toFixed(2),
+        tax_relief: Number(payslip.tax_relief || 0).toFixed(2),
         net_pay: Number(payslip.net_salary || 0).toFixed(2),
-        net_pay_in_words: "",
+        net_pay_in_words: amountToGhanaCedisWords(payslip.net_salary),
       },
     };
   }
   if (type === "maintenance-bill") {
-    const [hdr] = await query(`
+    const [hdr] = await query(
+      `
       SELECT b.*, s.supplier_name, s.address AS supplier_address, s.phone AS supplier_phone, s.email AS supplier_email,
           b.created_at,
           u.username AS created_by_name
@@ -2940,7 +4134,8 @@ async function loadData(type, id, companyId, branchId) {
       { id, companyId, branchId },
     ).catch(() => []);
     if (!hdr) throw httpError(404, "NOT_FOUND", "Document not found");
-    const details = await query(`SELECT *,
+    const details = await query(
+      `SELECT *,
           created_at,
           u.username AS created_by_name
          FROM maint_bill_lines
@@ -2948,7 +4143,8 @@ async function loadData(type, id, companyId, branchId) {
          WHERE bill_id = :id ORDER BY id ASC`,
       { id },
     ).catch(() => []);
-    const [company] = await query(`SELECT *,
+    const [company] = await query(
+      `SELECT *,
           created_at,
           u.username AS created_by_name
          FROM adm_companies
@@ -2968,7 +4164,11 @@ async function loadData(type, id, companyId, branchId) {
       maintenance_bill: {
         id: hdr.id,
         number: hdr.bill_no,
-        date: hdr.bill_date ? ((hdr.bill_date) instanceof Date ? (hdr.bill_date).toISOString().slice(0, 10) : String(hdr.bill_date).slice(0, 10)) : null,
+        date: hdr.bill_date
+          ? hdr.bill_date instanceof Date
+            ? hdr.bill_date.toISOString().slice(0, 10)
+            : String(hdr.bill_date).slice(0, 10)
+          : null,
         status: hdr.status,
         remarks: hdr.notes || "",
         sub_total: hdr.subtotal || 0,
@@ -2988,7 +4188,8 @@ async function loadData(type, id, companyId, branchId) {
     };
   }
   if (type === "service-bill") {
-    const [hdr] = await query(`
+    const [hdr] = await query(
+      `
       SELECT b.*,
           b.created_at,
           u.username AS created_by_name
@@ -3000,7 +4201,8 @@ async function loadData(type, id, companyId, branchId) {
       { id, companyId, branchId },
     ).catch(() => []);
     if (!hdr) throw httpError(404, "NOT_FOUND", "Document not found");
-    const details = await query(`SELECT *,
+    const details = await query(
+      `SELECT *,
           created_at,
           u.username AS created_by_name
          FROM pur_service_bill_details
@@ -3008,7 +4210,8 @@ async function loadData(type, id, companyId, branchId) {
          WHERE bill_id = :id ORDER BY id ASC`,
       { id },
     ).catch(() => []);
-    const [company] = await query(`SELECT *,
+    const [company] = await query(
+      `SELECT *,
           created_at,
           u.username AS created_by_name
          FROM adm_companies
@@ -3029,7 +4232,11 @@ async function loadData(type, id, companyId, branchId) {
       service_bill: {
         id: hdr.id,
         number: hdr.bill_no,
-        date: hdr.bill_date ? ((hdr.bill_date) instanceof Date ? (hdr.bill_date).toISOString().slice(0, 10) : String(hdr.bill_date).slice(0, 10)) : null,
+        date: hdr.bill_date
+          ? hdr.bill_date instanceof Date
+            ? hdr.bill_date.toISOString().slice(0, 10)
+            : String(hdr.bill_date).slice(0, 10)
+          : null,
         status: hdr.status,
         remarks: hdr.notes || "",
         sub_total: hdr.subtotal || 0,
@@ -3049,7 +4256,8 @@ async function loadData(type, id, companyId, branchId) {
     };
   }
   if (type === "supplier-quotation") {
-    const [hdr] = await query(`
+    const [hdr] = await query(
+      `
       SELECT q.*, s.supplier_name, s.address AS supplier_address, s.phone AS supplier_phone, s.email AS supplier_email,
           q.created_at,
           u.username AS created_by_name
@@ -3062,7 +4270,8 @@ async function loadData(type, id, companyId, branchId) {
       { id, companyId, branchId },
     ).catch(() => []);
     if (!hdr) throw httpError(404, "NOT_FOUND", "Document not found");
-    const details = await query(`SELECT *,
+    const details = await query(
+      `SELECT *,
           created_at,
           u.username AS created_by_name
          FROM maint_quotation_lines
@@ -3070,7 +4279,8 @@ async function loadData(type, id, companyId, branchId) {
          WHERE quotation_id = :id ORDER BY id ASC`,
       { id },
     ).catch(() => []);
-    const [company] = await query(`SELECT *,
+    const [company] = await query(
+      `SELECT *,
           created_at,
           u.username AS created_by_name
          FROM adm_companies
@@ -3090,7 +4300,11 @@ async function loadData(type, id, companyId, branchId) {
       supplier_quotation: {
         id: hdr.id,
         number: hdr.quotation_no,
-        date: hdr.quotation_date ? ((hdr.quotation_date) instanceof Date ? (hdr.quotation_date).toISOString().slice(0, 10) : String(hdr.quotation_date).slice(0, 10)) : null,
+        date: hdr.quotation_date
+          ? hdr.quotation_date instanceof Date
+            ? hdr.quotation_date.toISOString().slice(0, 10)
+            : String(hdr.quotation_date).slice(0, 10)
+          : null,
         status: hdr.status,
         remarks: hdr.notes || "",
         sub_total: hdr.subtotal || 0,
@@ -3109,6 +4323,80 @@ async function loadData(type, id, companyId, branchId) {
       },
     };
   }
+  if (type === "maintenance-rfq") {
+    const [hdr] = await query(
+      `
+      SELECT r.*,
+        mr.request_no, mr.asset_name, mr.priority, mr.request_description,
+        (SELECT username FROM adm_users WHERE id = r.created_by) AS created_by_name
+      FROM maint_rfqs r
+      LEFT JOIN maint_requests mr ON mr.id = r.request_id
+      WHERE r.id = :id AND r.company_id = :companyId
+      LIMIT 1
+    `,
+      { id, companyId },
+    ).catch(() => []);
+    if (!hdr) throw httpError(404, "NOT_FOUND", "RFQ not found");
+
+    const suppliers = await query(
+      `
+      SELECT s.id, s.supplier_id, s.supplier_name,
+        ps.address AS supplier_address, ps.phone AS supplier_phone, ps.email AS supplier_email, ps.contact_person
+      FROM maint_rfq_suppliers s
+      LEFT JOIN pur_suppliers ps ON ps.id = s.supplier_id
+      WHERE s.rfq_id = :id ORDER BY s.id ASC
+    `,
+      { id },
+    ).catch(() => []);
+
+    const [company] = await query(
+      `
+      SELECT c.* FROM adm_companies c WHERE c.id = :companyId LIMIT 1
+    `,
+      { companyId },
+    ).catch(() => []);
+
+    const supplierNames = suppliers
+      .map((s) => s.supplier_name)
+      .filter(Boolean)
+      .join(", ");
+
+    return {
+      company: company || {},
+      rfq: {
+        id: hdr.id,
+        rfq_no: hdr.rfq_no,
+        date: hdr.rfq_date
+          ? hdr.rfq_date instanceof Date
+            ? hdr.rfq_date.toISOString().slice(0, 10)
+            : String(hdr.rfq_date).slice(0, 10)
+          : null,
+        response_deadline: hdr.response_deadline
+          ? hdr.response_deadline instanceof Date
+            ? hdr.response_deadline.toISOString().slice(0, 10)
+            : String(hdr.response_deadline).slice(0, 10)
+          : null,
+        status: hdr.status,
+        scope_of_work: hdr.scope_of_work || "",
+        notes: hdr.notes || "",
+        request_no: hdr.request_no || "",
+        asset_name: hdr.asset_name || "",
+        priority: hdr.priority || "",
+        request_description: hdr.request_description || "",
+        created_by_name: hdr.created_by_name || "",
+        created_at: hdr.created_at,
+        suppliers: (suppliers || []).map((s, idx) => ({
+          index: idx + 1,
+          name: s.supplier_name,
+          address: s.supplier_address || "",
+          phone: s.supplier_phone || "",
+          email: s.supplier_email || "",
+          contact_person: s.contact_person || "",
+        })),
+        supplier_names: supplierNames,
+      },
+    };
+  }
   throw httpError(400, "VALIDATION_ERROR", "Unsupported document type");
 }
 
@@ -3121,7 +4409,7 @@ router.get(
   async (req, res, next) => {
     try {
       await ensureTemplateTables();
-      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
       const type = canonicalDocumentType(String(req.params.type || "").trim());
       const id = toNumber(req.params.id);
       if (!type || !id)
@@ -3137,7 +4425,8 @@ router.get(
 
       // Explicit template override
       if (templateId && Number.isFinite(templateId)) {
-        const [row] = await query(`SELECT id, html_content,
+        const [row] = await query(
+          `SELECT id, html_content,
                   header_logo_url, header_name, header_address, header_address2, header_phone, header_email, header_website,
                   document_type,
           created_at,
@@ -3168,7 +4457,8 @@ router.get(
             canonical === "payment-voucher"
               ? "Default payment-voucher"
               : "Sales Order";
-          const [namedRow] = await query(`SELECT id, html_content,
+          const [namedRow] = await query(
+            `SELECT id, html_content,
                     header_logo_url, header_name, header_address, header_address2, header_phone, header_email, header_website,
                     document_type,
           created_at,
@@ -3201,7 +4491,8 @@ router.get(
       const strictName = nameMap[type] || null;
 
       if (strictName) {
-        const [rowByName] = await query(`SELECT id, html_content,
+        const [rowByName] = await query(
+          `SELECT id, html_content,
                   header_logo_url, header_name, header_address, header_address2, header_phone, header_email, header_website,
                   document_type, name,
           created_at,
@@ -3223,7 +4514,8 @@ router.get(
         const placeholders = aliasesLower.map((_, i) => `:dt${i}`).join(", ");
         const params = { companyId };
         aliasesLower.forEach((val, i) => (params[`dt${i}`] = val));
-        const items = await query(`SELECT id, html_content,
+        const items = await query(
+          `SELECT id, html_content,
                   header_logo_url, header_name, header_address, header_address2, header_phone, header_email, header_website,
           created_at,
           u.username AS created_by_name
@@ -3242,7 +4534,8 @@ router.get(
         const placeholders = aliasesLower.map((_, i) => `:dtx${i}`).join(", ");
         const paramsAny = { companyId };
         aliasesLower.forEach((val, i) => (paramsAny[`dtx${i}`] = val));
-        const anyItems = await query(`SELECT id, html_content,
+        const anyItems = await query(
+          `SELECT id, html_content,
                   header_logo_url, header_name, header_address, header_address2, header_phone, header_email, header_website,
                   document_type, is_default, updated_at,
           created_at,
@@ -3255,6 +4548,23 @@ router.get(
           paramsAny,
         ).catch(() => []);
         if (Array.isArray(anyItems) && anyItems.length) tplObj = anyItems[0];
+      }
+
+      if (!tplObj && canonical === "project-quotation") {
+        tplObj = {
+          id: 0,
+          document_type: "project-quotation",
+          name: "Default Project Quotation",
+          html_content: defaultProjectQuotationHtml,
+        };
+      }
+      if (!tplObj && canonical === "maintenance-rfq") {
+        tplObj = {
+          id: 0,
+          document_type: "maintenance-rfq",
+          name: "Default Maintenance RFQ",
+          html_content: defaultMaintenanceRFQHtml,
+        };
       }
 
       // If still no template, return blank
@@ -3316,28 +4626,14 @@ router.get(
           : await getCompanyLogoDataUri(companyId);
         const merged = {
           ...data.company,
-          name:
-            tplObj.header_name || data.company.name,
-          address:
-            tplObj.header_address ||
-            data.company.address,
-          address2:
-            tplObj.header_address2 ||
-            data.company.address2,
+          name: tplObj.header_name || data.company.name,
+          address: tplObj.header_address || data.company.address,
+          address2: tplObj.header_address2 || data.company.address2,
           phone:
-            tplObj.header_phone ||
-            data.company.telephone ||
-            data.company.phone,
-          email:
-            tplObj.header_email ||
-            data.company.email,
-          website:
-            tplObj.header_website ||
-            data.company.website,
-          logo:
-            embeddedLogo ||
-            tplObj.header_logo_url ||
-            logoDefault,
+            tplObj.header_phone || data.company.telephone || data.company.phone,
+          email: tplObj.header_email || data.company.email,
+          website: tplObj.header_website || data.company.website,
+          logo: embeddedLogo || tplObj.header_logo_url || logoDefault,
         };
         data.company = { ...merged, telephone: merged.phone };
       }
@@ -3545,7 +4841,7 @@ router.post(
   async (req, res, next) => {
     try {
       await ensureTemplateTables();
-      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
       const type = canonicalDocumentType(String(req.params.type || "").trim());
       const id = toNumber(req.params.id);
       if (!type || !id)
@@ -3561,7 +4857,8 @@ router.post(
 
       // Explicit template override
       if (templateId && Number.isFinite(templateId)) {
-        const [row] = await query(`SELECT id, html_content,
+        const [row] = await query(
+          `SELECT id, html_content,
                   header_logo_url, header_name, header_address, header_address2, header_phone, header_email, header_website,
                   document_type,
           created_at,
@@ -3611,7 +4908,8 @@ router.post(
         const placeholders = aliasesLower.map((_, i) => `:dt${i}`).join(", ");
         const params = { companyId };
         aliasesLower.forEach((val, i) => (params[`dt${i}`] = val));
-        const items = await query(`SELECT id, html_content,
+        const items = await query(
+          `SELECT id, html_content,
                   header_logo_url, header_name, header_address, header_address2, header_phone, header_email, header_website,
                   document_type, name,
           created_at,
@@ -3633,7 +4931,8 @@ router.post(
             canonical === "payment-voucher"
               ? "Default payment-voucher"
               : "Sales Order";
-          const [namedRow] = await query(`SELECT id, html_content,
+          const [namedRow] = await query(
+            `SELECT id, html_content,
                     header_logo_url, header_name, header_address, header_address2, header_phone, header_email, header_website,
                     document_type,
           created_at,
@@ -3658,6 +4957,7 @@ router.post(
           "payment-voucher": "Payment voucher",
           "receipt-voucher": "Receipt Voucher",
           quotation: "Quotation",
+          "project-quotation": "Project Quotation",
           "purchase-bill": "Purchase Bill",
           grn: "Goods Receipt Note",
           "purchase-order": "Purchase Order",
@@ -3666,7 +4966,8 @@ router.post(
         };
         const strictName = nameMap[canonical] || null;
         if (strictName) {
-          const [rowByName] = await query(`SELECT id, html_content,
+          const [rowByName] = await query(
+            `SELECT id, html_content,
                     header_logo_url, header_name, header_address, header_address2, header_phone, header_email, header_website,
                     document_type, name,
             created_at,
@@ -3688,7 +4989,8 @@ router.post(
         const placeholders = aliasesLower.map((_, i) => `:dtx${i}`).join(", ");
         const paramsAny = { companyId };
         aliasesLower.forEach((val, i) => (paramsAny[`dtx${i}`] = val));
-        const anyItems = await query(`SELECT id, html_content,
+        const anyItems = await query(
+          `SELECT id, html_content,
                   header_logo_url, header_name, header_address, header_address2, header_phone, header_email, header_website,
                   document_type, is_default, updated_at,
           created_at,
@@ -3701,6 +5003,23 @@ router.post(
           paramsAny,
         ).catch(() => []);
         if (Array.isArray(anyItems) && anyItems.length) tplObj = anyItems[0];
+      }
+
+      if (!tplObj && canonical === "project-quotation") {
+        tplObj = {
+          id: 0,
+          document_type: "project-quotation",
+          name: "Default Project Quotation",
+          html_content: defaultProjectQuotationHtml,
+        };
+      }
+      if (!tplObj && canonical === "maintenance-rfq") {
+        tplObj = {
+          id: 0,
+          document_type: "maintenance-rfq",
+          name: "Default Maintenance RFQ",
+          html_content: defaultMaintenanceRFQHtml,
+        };
       }
 
       // If still no template, return blank
@@ -3860,7 +5179,7 @@ router.post(
   async (req, res, next) => {
     try {
       await ensureTemplateTables();
-      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
       const type = String(req.params.type || "").trim();
       if (!type) throw httpError(400, "VALIDATION_ERROR", "Invalid request");
 
@@ -3901,7 +5220,8 @@ router.post(
         const placeholders = aliasesLower.map((_, i) => `:dt${i}`).join(", ");
         const params = { companyId };
         aliasesLower.forEach((val, i) => (params[`dt${i}`] = val));
-        const items = await query(`SELECT id, html_content,
+        const items = await query(
+          `SELECT id, html_content,
                   header_logo_url, header_name, header_address, header_address2, header_phone, header_email, header_website,
                   document_type, name,
           created_at,
@@ -3922,7 +5242,8 @@ router.post(
             canonical === "payment-voucher"
               ? "Default payment-voucher"
               : "Sales Order";
-          const [namedRow] = await query(`SELECT id, html_content,
+          const [namedRow] = await query(
+            `SELECT id, html_content,
                     header_logo_url, header_name, header_address, header_address2, header_phone, header_email, header_website,
             created_at,
             u.username AS created_by_name
@@ -3946,6 +5267,7 @@ router.post(
           "payment-voucher": "Payment voucher",
           "receipt-voucher": "Receipt Voucher",
           quotation: "Quotation",
+          "project-quotation": "Project Quotation",
           "purchase-bill": "Purchase Bill",
           grn: "Goods Receipt Note",
           "purchase-order": "Purchase Order",
@@ -3955,7 +5277,8 @@ router.post(
         const strictName = nameMap[canonical] || null;
 
         if (strictName) {
-          const [rowByName] = await query(`SELECT id, html_content,
+          const [rowByName] = await query(
+            `SELECT id, html_content,
                     header_logo_url, header_name, header_address, header_address2, header_phone, header_email, header_website,
                     document_type, name,
             created_at,
@@ -3977,7 +5300,8 @@ router.post(
         const placeholders = aliasesLower.map((_, i) => `:dt${i}`).join(", ");
         const params = { companyId };
         aliasesLower.forEach((val, i) => (params[`dt${i}`] = val));
-        const items = await query(`SELECT id, html_content,
+        const items = await query(
+          `SELECT id, html_content,
                   header_logo_url, header_name, header_address, header_address2, header_phone, header_email, header_website,
           created_at,
           u.username AS created_by_name
@@ -4010,8 +5334,14 @@ router.post(
               margin: { top: "0", bottom: "0", left: "0", right: "0" },
             });
             res.setHeader("Content-Type", "application/pdf");
-            res.setHeader("Content-Length", Buffer.byteLength(Buffer.from(pdf)));
-            res.setHeader("Content-Disposition", `attachment; filename="${canonical}-preview.pdf"`);
+            res.setHeader(
+              "Content-Length",
+              Buffer.byteLength(Buffer.from(pdf)),
+            );
+            res.setHeader(
+              "Content-Disposition",
+              `attachment; filename="${canonical}-preview.pdf"`,
+            );
             res.send(Buffer.from(pdf));
             return;
           } finally {
@@ -4032,30 +5362,15 @@ router.post(
           : await getCompanyLogoDataUri(companyId);
         const merged = {
           ...data.company,
-          name:
-            tplObj.header_name || data.company.name,
-          address:
-            tplObj.header_address ||
-            data.company.address,
-          address2:
-            tplObj.header_address2 ||
-            data.company.address2,
+          name: tplObj.header_name || data.company.name,
+          address: tplObj.header_address || data.company.address,
+          address2: tplObj.header_address2 || data.company.address2,
           phone:
-            tplObj.header_phone ||
-            data.company.telephone ||
-            data.company.phone,
-          email:
-            tplObj.header_email ||
-            data.company.email,
-          website:
-            tplObj.header_website ||
-            data.company.website,
+            tplObj.header_phone || data.company.telephone || data.company.phone,
+          email: tplObj.header_email || data.company.email,
+          website: tplObj.header_website || data.company.website,
           logo:
-            embeddedLogo ||
-            absolutize(
-            tplObj.header_logo_url ||
-              logoDefault,
-          ),
+            embeddedLogo || absolutize(tplObj.header_logo_url || logoDefault),
         };
         data.company = { ...merged, telephone: merged.phone };
       }
@@ -4143,27 +5458,33 @@ async function ensureDocumentAttachmentsTable() {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
   if (!(await hasColumn("adm_document_attachments", "title"))) {
-    await query(`ALTER TABLE adm_document_attachments ADD COLUMN title VARCHAR(255) NULL AFTER file_name`,
+    await query(
+      `ALTER TABLE adm_document_attachments ADD COLUMN title VARCHAR(255) NULL AFTER file_name`,
     );
   }
   if (!(await hasColumn("adm_document_attachments", "description"))) {
-    await query(`ALTER TABLE adm_document_attachments ADD COLUMN description TEXT NULL AFTER title`,
+    await query(
+      `ALTER TABLE adm_document_attachments ADD COLUMN description TEXT NULL AFTER title`,
     );
   }
   if (!(await hasColumn("adm_document_attachments", "category"))) {
-    await query(`ALTER TABLE adm_document_attachments ADD COLUMN category VARCHAR(100) NULL AFTER description`,
+    await query(
+      `ALTER TABLE adm_document_attachments ADD COLUMN category VARCHAR(100) NULL AFTER description`,
     );
   }
   if (!(await hasColumn("adm_document_attachments", "tags"))) {
-    await query(`ALTER TABLE adm_document_attachments ADD COLUMN tags TEXT NULL AFTER category`,
+    await query(
+      `ALTER TABLE adm_document_attachments ADD COLUMN tags TEXT NULL AFTER category`,
     );
   }
   if (!(await hasColumn("adm_document_attachments", "mime_type"))) {
-    await query(`ALTER TABLE adm_document_attachments ADD COLUMN mime_type VARCHAR(100) NULL AFTER tags`,
+    await query(
+      `ALTER TABLE adm_document_attachments ADD COLUMN mime_type VARCHAR(100) NULL AFTER tags`,
     );
   }
   if (!(await hasColumn("adm_document_attachments", "file_size"))) {
-    await query(`ALTER TABLE adm_document_attachments ADD COLUMN file_size BIGINT NULL AFTER mime_type`,
+    await query(
+      `ALTER TABLE adm_document_attachments ADD COLUMN file_size BIGINT NULL AFTER mime_type`,
     );
   }
 }
@@ -4176,12 +5497,13 @@ router.get(
   async (req, res, next) => {
     try {
       await ensureDocumentAttachmentsTable();
-      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
       const type = String(req.params.type || "").trim();
       const id = toNumber(req.params.id);
       if (!type || !id)
         throw httpError(400, "VALIDATION_ERROR", "Invalid request");
-      const rawItems = await query(`
+      const rawItems = await query(
+        `
         SELECT id, file_url, file_name, uploaded_by, created_at,
                title, description, category, tags, mime_type, file_size,
           created_at,
@@ -4229,7 +5551,7 @@ router.post(
   async (req, res, next) => {
     try {
       await ensureDocumentAttachmentsTable();
-      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
       const type = String(req.params.type || "").trim();
       const id = toNumber(req.params.id);
       if (!type || !id)
@@ -4247,7 +5569,8 @@ router.post(
       const fileSize = body.file_size != null ? Number(body.file_size) : null;
       const uploadedBy = req.user?.sub ? Number(req.user.sub) : null;
       if (!fileUrl) throw httpError(400, "VALIDATION_ERROR", "url required");
-      const result = await query(`
+      const result = await query(
+        `
         INSERT INTO adm_document_attachments
           (company_id, branch_id, document_type, document_id, file_url, file_name, uploaded_by, title, description, category, tags, mime_type, file_size)
         VALUES
@@ -4255,7 +5578,8 @@ router.post(
         `,
         {
           companyId,
-          branchId, branchIdsStr,
+          branchId,
+          branchIdsStr,
           type,
           id,
           fileUrl,
@@ -4294,13 +5618,14 @@ router.delete(
   async (req, res, next) => {
     try {
       await ensureDocumentAttachmentsTable();
-      const { companyId, branchId = null, branchIdsStr = '' } = req.scope || {};
+      const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
       const type = String(req.params.type || "").trim();
       const id = toNumber(req.params.id);
       const attId = toNumber(req.params.attId);
       if (!type || !id || !attId)
         throw httpError(400, "VALIDATION_ERROR", "Invalid request");
-      const rows = await query(`
+      const rows = await query(
+        `
         SELECT file_url,
           created_at,
           u.username AS created_by_name
@@ -4316,7 +5641,8 @@ router.delete(
         { attId, companyId, branchId, branchIdsStr, type, id },
       );
       const fileUrl = rows?.[0]?.file_url || null;
-      await query(`
+      await query(
+        `
         DELETE FROM adm_document_attachments
         WHERE id = :attId
           AND company_id = :companyId
@@ -4334,7 +5660,8 @@ router.delete(
           /^https?:\/\/res\.cloudinary\.com\//i.test(String(fileUrl))
         ) {
           async function getSetting(key) {
-            const r = await query(`
+            const r = await query(
+              `
               SELECT setting_value,
           created_at,
           u.username AS created_by_name
@@ -4449,7 +5776,11 @@ router.post("/raw-html-to-pdf", requireAuth, async (req, res, next) => {
       });
     } catch (err) {
       console.error("raw-html-to-pdf error:", err);
-      throw httpError(500, "RENDER_ERROR", `PDF generation failed: ${err.message}`);
+      throw httpError(
+        500,
+        "RENDER_ERROR",
+        `PDF generation failed: ${err.message}`,
+      );
     } finally {
       if (page) await page.close().catch(() => {});
     }
@@ -4464,4 +5795,3 @@ router.post("/raw-html-to-pdf", requireAuth, async (req, res, next) => {
 });
 
 export default router;
-

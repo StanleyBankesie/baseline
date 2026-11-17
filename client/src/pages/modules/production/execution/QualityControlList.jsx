@@ -141,7 +141,7 @@ export default function QualityControlList() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="input text-xs font-bold w-auto"
+            className="input text-xs font-semibold w-auto"
           >
             <option value="ALL">All Statuses</option>
             <option value="PASSED">Passed Only</option>

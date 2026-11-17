@@ -354,7 +354,7 @@ export default function InventoryStockJournalForm() {
             
             {/* Journal Type */}
             <div className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Journal Purpose / Type
               </label>
               <select
@@ -373,7 +373,7 @@ export default function InventoryStockJournalForm() {
 
             {/* Posting Date */}
             <div className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                 <Calendar size={15} className="text-brand-600" /> Posting Date
               </label>
               <input
@@ -394,7 +394,7 @@ export default function InventoryStockJournalForm() {
               
               {/* Source Warehouse */}
               <div className="space-y-1.5">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                   <Warehouse size={15} className="text-rose-600" /> Source Warehouse (Outflow)
                 </label>
                 <select
@@ -412,7 +412,7 @@ export default function InventoryStockJournalForm() {
 
               {/* Destination Warehouse */}
               <div className="space-y-1.5">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                   <Warehouse size={15} className="text-emerald-600" /> Destination Warehouse (Inflow)
                 </label>
                 <select
@@ -432,7 +432,7 @@ export default function InventoryStockJournalForm() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-2 border-t border-slate-100 dark:border-slate-700/60">
               <div className="space-y-1.5">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                   <Warehouse size={15} className="text-brand-600" /> Warehouse Location
                 </label>
                 <select
@@ -551,7 +551,7 @@ export default function InventoryStockJournalForm() {
                             step="0.001"
                             required
                             disabled={isViewMode}
-                            className="input text-sm font-mono font-bold text-right w-full text-rose-600"
+                            className="input text-sm font-mono font-semibold text-right w-full text-rose-600"
                             value={item.qty}
                             onChange={(e) => updateItemField(item.originalIndex, "qty", e.target.value)}
                           />
@@ -690,7 +690,7 @@ export default function InventoryStockJournalForm() {
                             step="0.001"
                             required
                             disabled={isViewMode}
-                            className="input text-sm font-mono font-bold text-right w-full text-emerald-600"
+                            className="input text-sm font-mono font-semibold text-right w-full text-emerald-600"
                             value={item.qty}
                             onChange={(e) => updateItemField(item.originalIndex, "qty", e.target.value)}
                           />
@@ -731,7 +731,7 @@ export default function InventoryStockJournalForm() {
 
         {/* Section 3: Journal Remarks / Document Reference (Textarea placed below Stock Receipt section) */}
         <div className="card p-6 bg-white dark:bg-slate-800 space-y-2 shadow-xs">
-          <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
             <FileText size={16} className="text-brand-600" />
             Journal Remarks / Document Reference
           </label>

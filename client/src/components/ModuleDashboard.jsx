@@ -46,6 +46,7 @@ import { ArrowLeft, ChevronDown, ChevronRight, ArrowRight, Sparkles } from "luci
 import { usePermission } from "../auth/PermissionContext.jsx";
 import { MODULES_REGISTRY } from "../data/modulesRegistry.js";
 import { ModuleTopNavBar } from "./ModuleLayout.jsx";
+import MobileMovingCarousel from "./MobileMovingCarousel.jsx";
 
 // ─── Module Top Navigation Dropdown Component ───────────────────
 function ModuleNavDropdown({ section, location, navigate }) {
@@ -146,6 +147,7 @@ const slug = (s) =>
 const ModuleDashboard = ({
   title,
   description,
+  icon,
   stats = [],
   quickActions = [],
   sections = [],
@@ -159,6 +161,9 @@ const ModuleDashboard = ({
   const [activeSection, setActiveSection] = React.useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const currentModuleKey = moduleKey || (location.pathname.split("/").filter(Boolean)[0] || "");
+  const moduleInfo = MODULES_REGISTRY[currentModuleKey] || null;
 
   const {
     canAccessPath,
@@ -182,6 +187,14 @@ const ModuleDashboard = ({
   }, [isBasicMode, moduleSectionViewEnabled]);
 
 
+
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+    if (typeof document !== "undefined") {
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
+  }, [location.pathname]);
 
   React.useEffect(() => {
     const searchParams = new URLSearchParams(location.search || "");
@@ -552,57 +565,72 @@ const ModuleDashboard = ({
       </div>
 
       <div className="space-y-8">
-        {/* Header */}
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-brand-900 dark:text-white tracking-tight mb-2">
-            {title}
-          </h1>
-          {description && (
-            <p className="text-slate-500 dark:text-slate-400 text-lg max-w-3xl">
-              {description}
-            </p>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          {shouldShowSectionCardsFirst && !searchTerm && activeSection !== null && (
-            <button 
-              type="button"
-              onClick={() => {
-                setActiveSection(null);
-                const searchParams = new URLSearchParams(location.search || "");
-                searchParams.delete("section");
-                navigate({ pathname: location.pathname, search: searchParams.toString() }, { replace: true });
-              }}
-              className="btn btn-secondary flex items-center gap-2 shadow-xs hover:shadow transition-all font-semibold"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              <span>Back to Sections</span>
-            </button>
-          )}
-          {resolvedHeaderActions.map((a, i) => (
-            <button
-              key={i}
-              onClick={(e) => handleNavigate(a.path, e)}
-              className={a.className || ((!a.variant && (String(a.label || a.title || "").toLowerCase().includes("dashboard") || String(a.path || "").toLowerCase().includes("dashboard"))) ? "btn-dashboard" : "btn btn-primary")}
-              data-action={(!a.variant && (String(a.label || a.title || "").toLowerCase().includes("dashboard") || String(a.path || "").toLowerCase().includes("dashboard"))) ? "dashboard" : undefined}
-              title={a.title || a.label}
-            >
-              {(a.icon || (!a.variant && (String(a.label || a.title || "").toLowerCase().includes("dashboard") || String(a.path || "").toLowerCase().includes("dashboard")) ? "📊" : null)) ? (
-                <span className="mr-2">
-                  {typeof (a.icon || "📊") === "string" ? (a.icon || "📊") : React.createElement(a.icon, { className: "w-4 h-4 inline" })}
-                </span>
-              ) : null}
-              {a.label || "Open"}
-            </button>
-          ))}
-        </div>
-      </div>
+        {/* Apple Design Translucent Liquid Glass Module Title Banner */}
+        <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-white/95 via-slate-50/90 to-slate-100/80 dark:from-slate-900/95 dark:via-slate-900/90 dark:to-slate-950/95 p-5 sm:p-7 border border-slate-200/80 dark:border-white/10 shadow-[0_4px_24px_-4px_rgba(15,23,42,0.08),0_1px_3px_rgba(15,23,42,0.04)] dark:shadow-[0_12px_40px_-10px_rgba(0,0,0,0.7)] backdrop-blur-2xl transition-all mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+            <div className="min-w-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-brand-50/80 dark:bg-brand-950/60 border border-brand-200/60 dark:border-brand-700/50 flex items-center justify-center text-xl sm:text-2xl shadow-inner shrink-0">
+                  {typeof icon === "string" ? icon : (typeof moduleInfo?.icon === "string" ? moduleInfo.icon : "📂")}
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+                    {title}
+                  </h1>
+                </div>
+              </div>
+              {description && (
+                <p className="hidden sm:block text-slate-500 dark:text-slate-400 text-sm sm:text-base mt-2 max-w-3xl leading-relaxed">
+                  {description}
+                </p>
+              )}
+            </div>
 
-      {/* Search Field */}
-      <div className="mb-6">
+            <div className="flex items-center gap-2 shrink-0">
+              {shouldShowSectionCardsFirst && !searchTerm && activeSection !== null && (
+                <button 
+                  type="button"
+                  onClick={() => {
+                    setActiveSection(null);
+                    const searchParams = new URLSearchParams(location.search || "");
+                    searchParams.delete("section");
+                    navigate({ pathname: location.pathname, search: searchParams.toString() }, { replace: true });
+                  }}
+                  className="btn btn-secondary flex items-center gap-2 shadow-sm hover:shadow transition-all font-semibold rounded-xl text-xs sm:text-sm active:scale-95"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  <span>Back to Sections</span>
+                </button>
+              )}
+              {resolvedHeaderActions.map((a, i) => (
+                <button
+                  key={i}
+                  onClick={(e) => handleNavigate(a.path, e)}
+                  className={`btn font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition-all active:scale-95 flex items-center gap-2 ${
+                    a.className || ((!a.variant && (String(a.label || a.title || "").toLowerCase().includes("dashboard") || String(a.path || "").toLowerCase().includes("dashboard"))) ? "btn-dashboard" : "btn btn-primary")
+                  }`}
+                  data-action={(!a.variant && (String(a.label || a.title || "").toLowerCase().includes("dashboard") || String(a.path || "").toLowerCase().includes("dashboard"))) ? "dashboard" : undefined}
+                  title={a.title || a.label}
+                >
+                  {(a.icon || (!a.variant && (String(a.label || a.title || "").toLowerCase().includes("dashboard") || String(a.path || "").toLowerCase().includes("dashboard")) ? "📊" : null)) ? (
+                    <span>
+                      {typeof (a.icon || "📊") === "string" ? (a.icon || "📊") : React.createElement(a.icon, { className: "w-4 h-4 inline" })}
+                    </span>
+                  ) : null}
+                  <span>{a.label || "Open"}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          {/* Subtle Apple ambient glass glow decoration */}
+          <div className="absolute -right-12 -top-12 w-44 h-44 bg-brand-500/10 dark:bg-brand-400/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute left-1/3 -bottom-10 w-36 h-36 bg-sky-500/10 dark:bg-sky-400/10 rounded-full blur-2xl pointer-events-none" />
+        </div>
+
+      {/* Search Field - hidden on mobile / small devices */}
+      <div className="hidden sm:block mb-6">
         <div className="max-w-md">
           <div className="relative">
             <input
@@ -645,7 +673,9 @@ const ModuleDashboard = ({
           <h2 className="text-xl font-semibold text-brand-800 dark:text-brand-200 mb-4 flex items-center gap-2">
             <span>📈</span> Business Overview
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <MobileMovingCarousel data-module-carousel gridColsClass="md:grid-cols-2 lg:grid-cols-4" gapClass="gap-4 sm:gap-6"
+            autoInterval={3500}
+          >
             {stats
               .filter((stat) => {
                 if (!canShowItem(stat)) return false;
@@ -675,26 +705,26 @@ const ModuleDashboard = ({
                     <div
                       key={index}
                       onClick={() => isClickable && handleNavigate(stat.path)}
-                      className={`relative overflow-hidden rounded-[24px] p-6 shadow-[0_15px_30px_-5px_rgba(178,110,23,0.3)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(178,110,23,0.5)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#b26e17] text-white ${
+                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] p-5 sm:p-7 shadow-[0_15px_30px_-5px_rgba(178,110,23,0.3)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(178,110,23,0.5)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#b26e17] text-white ${
                         isClickable ? "cursor-pointer" : ""
                       }`}
                     >
                       <div className="flex flex-col h-full justify-between">
                         <div className="flex justify-end min-h-[22px]">
                           {(stat.change || stat.trend) && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-white/90 border border-white/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] leading-none flex items-center gap-1">
+                            <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-white/15 backdrop-blur-md text-white/90 border border-white/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] leading-none flex items-center gap-1">
                               {stat.change || stat.trend}
                             </span>
                           )}
                         </div>
-                        <div className="mt-6">
+                        <div className="mt-4 sm:mt-6">
                           <div 
-                            className="text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)]"
+                            className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)] truncate"
                             style={{ textShadow: "0 0 12px rgba(255, 255, 255, 0.45)" }}
                           >
                             {stat.value}
                           </div>
-                          <div className="mt-2.5 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none">
+                          <div className="mt-2 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none truncate">
                             {stat.label}
                           </div>
                         </div>
@@ -708,25 +738,25 @@ const ModuleDashboard = ({
                     <div
                       key={index}
                       onClick={() => isClickable && handleNavigate(stat.path)}
-                      className={`relative overflow-hidden rounded-[24px] p-6 shadow-[0_15px_30px_-5px_rgba(36,82,109,0.3)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(36,82,109,0.5)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#24526d] text-white ${
+                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] p-5 sm:p-7 shadow-[0_15px_30px_-5px_rgba(36,82,109,0.3)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(36,82,109,0.5)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#24526d] text-white ${
                         isClickable ? "cursor-pointer" : ""
                       }`}
                     >
                       <div className="flex flex-col h-full justify-between">
                         <div className="flex justify-end min-h-[22px]">
                           {(stat.change || stat.trend) && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/20 backdrop-blur-md text-amber-200 border border-amber-400/20 shadow-sm leading-none flex items-center gap-1">
+                            <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-amber-500/20 backdrop-blur-md text-amber-200 border border-amber-400/20 shadow-sm leading-none flex items-center gap-1">
                               {stat.change || stat.trend}
                             </span>
                           )}
                         </div>
-                        <div className="mt-6">
-                          <div className="text-3xl font-extrabold text-white tracking-tight">
+                        <div className="mt-4 sm:mt-6">
+                          <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight truncate">
                             {stat.value}
                           </div>
-                          <div className="mt-2.5 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none flex items-center justify-between">
-                            <span>{stat.label}</span>
-                            <svg className="w-8 h-4 text-white/30 ml-2 group-hover:text-white/50 transition-colors" viewBox="0 0 50 20" fill="none" stroke="currentColor" strokeWidth="2">
+                          <div className="mt-2 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none flex items-center justify-between">
+                            <span className="truncate">{stat.label}</span>
+                            <svg className="w-7 sm:w-8 h-4 text-white/30 ml-2 group-hover:text-white/50 transition-colors shrink-0" viewBox="0 0 50 20" fill="none" stroke="currentColor" strokeWidth="2">
                               <path d="M0 15 L10 12 L20 18 L30 8 L40 10 L50 2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           </div>
@@ -741,7 +771,7 @@ const ModuleDashboard = ({
                     <div
                       key={index}
                       onClick={() => isClickable && handleNavigate(stat.path)}
-                      className={`relative overflow-hidden rounded-[24px] p-6 shadow-[0_15px_30px_-5px_rgba(24,117,92,0.3)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(24,117,92,0.5)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#18755c] text-white ${
+                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] p-5 sm:p-7 shadow-[0_15px_30px_-5px_rgba(24,117,92,0.3)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(24,117,92,0.5)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#18755c] text-white ${
                         isClickable ? "cursor-pointer" : ""
                       }`}
                     >
@@ -753,14 +783,14 @@ const ModuleDashboard = ({
                             </span>
                           )}
                         </div>
-                        <div className="mt-6">
-                          <div className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-1.5">
-                            <span>{stat.value}</span>
-                            <svg className="w-5 h-5 text-white/40 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <div className="mt-4 sm:mt-6">
+                          <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-1.5 truncate">
+                            <span className="truncate">{stat.value}</span>
+                            <svg className="w-4 sm:w-5 h-4 sm:h-5 text-white/40 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
                             </svg>
                           </div>
-                          <div className="mt-2.5 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none">
+                          <div className="mt-2 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none truncate">
                             {stat.label}
                           </div>
                         </div>
@@ -774,7 +804,7 @@ const ModuleDashboard = ({
                     <div
                       key={index}
                       onClick={() => isClickable && handleNavigate(stat.path)}
-                      className={`relative overflow-hidden rounded-[24px] p-6 shadow-[0_15px_30px_-5px_rgba(0,0,0,0.2)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.5)] border border-white/5 hover:border-white/15 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#1d1f22] bg-[radial-gradient(#ffffff06_1px,transparent_1px)] [background-size:8px_8px] text-white ${
+                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] p-5 sm:p-7 shadow-[0_15px_30px_-5px_rgba(0,0,0,0.2)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.5)] border border-white/5 hover:border-white/15 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#1d1f22] bg-[radial-gradient(#ffffff06_1px,transparent_1px)] [background-size:8px_8px] text-white ${
                         isClickable ? "cursor-pointer" : ""
                       }`}
                     >
@@ -786,11 +816,11 @@ const ModuleDashboard = ({
                             </span>
                           )}
                         </div>
-                        <div className="mt-6">
-                          <div className="text-3xl font-extrabold text-white tracking-tight">
+                        <div className="mt-4 sm:mt-6">
+                          <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight truncate">
                             {stat.value}
                           </div>
-                          <div className="mt-2.5 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none">
+                          <div className="mt-2 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none truncate">
                             {stat.label}
                           </div>
                         </div>
@@ -804,7 +834,7 @@ const ModuleDashboard = ({
                   );
                 }
               })}
-          </div>
+          </MobileMovingCarousel>
         </div>
       )}
 
@@ -876,7 +906,11 @@ const ModuleDashboard = ({
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+            <MobileMovingCarousel
+              gridColsClass="md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              gapClass="gap-4 sm:gap-5"
+              autoInterval={4000}
+            >
               {visibleSectionsList.map(({ section, sectionIndex, visibleSectionItems }) => {
                 const sectionTitle = section.title || section.category || "Pages";
                 const sectionIcon = getSectionIcon(section, sectionIndex);
@@ -893,7 +927,7 @@ const ModuleDashboard = ({
                         { replace: true }
                       );
                     }}
-                    className="relative overflow-hidden rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-5 border border-slate-200/80 dark:border-slate-800/90 shadow-sm hover:shadow-xl hover:-translate-y-1.5 hover:border-brand-400/80 dark:hover:border-brand-500/60 transition-all duration-300 group cursor-pointer flex flex-col justify-between"
+                    className="w-full h-full relative overflow-hidden rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-5 border border-slate-200/80 dark:border-slate-800/90 shadow-sm hover:shadow-xl hover:-translate-y-1.5 hover:border-brand-400/80 dark:hover:border-brand-500/60 transition-all duration-300 group cursor-pointer flex flex-col justify-between"
                   >
                     {/* Ambient Hover Glow */}
                     <div className="absolute -right-10 -top-10 w-28 h-28 bg-gradient-to-br from-brand-500/10 to-indigo-500/10 group-hover:from-brand-500/25 group-hover:to-indigo-500/25 rounded-full blur-xl transition-all duration-500 pointer-events-none" />
@@ -948,7 +982,7 @@ const ModuleDashboard = ({
                   </div>
                 );
               })}
-            </div>
+            </MobileMovingCarousel>
           </div>
         ) : (
           <>

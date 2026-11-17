@@ -73,11 +73,11 @@ export default function ExecOutstandingPayablesPage() {
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex flex-wrap items-center gap-4 bg-slate-50 dark:bg-slate-800/50">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-slate-600 dark:text-slate-400">From:</span>
+            <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">From:</span>
             <input className="input input-bordered input-sm" type="date" value={from} onChange={e => setFrom(e.target.value)} />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-slate-600 dark:text-slate-400">To:</span>
+            <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">To:</span>
             <input className="input input-bordered input-sm" type="date" value={to} onChange={e => setTo(e.target.value)} />
           </div>
           {loading && <span className="loading loading-spinner loading-sm text-brand"></span>}
