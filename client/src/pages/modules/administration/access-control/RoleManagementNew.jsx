@@ -24,6 +24,7 @@ import SortableHeader from "@/components/SortableHeader.jsx";
  * @returns {JSX.Element} The rendered component
  */
 export default function RoleManagementNew() {
+  const { user } = useAuth();
   const [roles, setRoles] = useState([]);
   const [exclusiveFeatures, setExclusiveFeatures] = useState(new Set());
   const {

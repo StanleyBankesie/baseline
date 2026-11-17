@@ -705,7 +705,7 @@ const ModuleDashboard = ({
                     <div
                       key={index}
                       onClick={() => isClickable && handleNavigate(stat.path)}
-                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] p-5 sm:p-7 shadow-[0_15px_30px_-5px_rgba(178,110,23,0.3)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(178,110,23,0.5)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#b26e17] text-white ${
+                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-[0_15px_30px_-5px_rgba(178,110,23,0.3)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(178,110,23,0.5)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#b26e17] text-white ${
                         isClickable ? "cursor-pointer" : ""
                       }`}
                     >
@@ -738,7 +738,7 @@ const ModuleDashboard = ({
                     <div
                       key={index}
                       onClick={() => isClickable && handleNavigate(stat.path)}
-                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] p-5 sm:p-7 shadow-[0_15px_30px_-5px_rgba(36,82,109,0.3)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(36,82,109,0.5)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#24526d] text-white ${
+                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-[0_15px_30px_-5px_rgba(36,82,109,0.3)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(36,82,109,0.5)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#24526d] text-white ${
                         isClickable ? "cursor-pointer" : ""
                       }`}
                     >
@@ -771,7 +771,7 @@ const ModuleDashboard = ({
                     <div
                       key={index}
                       onClick={() => isClickable && handleNavigate(stat.path)}
-                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] p-5 sm:p-7 shadow-[0_15px_30px_-5px_rgba(24,117,92,0.3)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(24,117,92,0.5)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#18755c] text-white ${
+                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-[0_15px_30px_-5px_rgba(24,117,92,0.3)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(24,117,92,0.5)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#18755c] text-white ${
                         isClickable ? "cursor-pointer" : ""
                       }`}
                     >
@@ -804,7 +804,7 @@ const ModuleDashboard = ({
                     <div
                       key={index}
                       onClick={() => isClickable && handleNavigate(stat.path)}
-                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] p-5 sm:p-7 shadow-[0_15px_30px_-5px_rgba(0,0,0,0.2)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.5)] border border-white/5 hover:border-white/15 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#1d1f22] bg-[radial-gradient(#ffffff06_1px,transparent_1px)] [background-size:8px_8px] text-white ${
+                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-[0_15px_30px_-5px_rgba(0,0,0,0.2)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.5)] border border-white/5 hover:border-white/15 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#1d1f22] bg-[radial-gradient(#ffffff06_1px,transparent_1px)] [background-size:8px_8px] text-white ${
                         isClickable ? "cursor-pointer" : ""
                       }`}
                     >

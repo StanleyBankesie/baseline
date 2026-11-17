@@ -47,10 +47,21 @@ export default function UserLoginActivityReportPage() {
   async function run() {
     try {
       setLoading(true);
-      const res = await api.get("/admin/user-login-activities", {
-        params: { from: from || null, to: to || null, userId: userId || null },
-      });
-      setItems(res.data?.items || []);
+      let res;
+      try {
+        res = await api.get("/admin/reports/user-login-activity", {
+          params: { from: from || null, to: to || null, userId: userId || null, user_id: userId || null },
+        });
+      } catch (firstErr) {
+        if (firstErr?.response?.status === 404) {
+          res = await api.get("/admin/user-login-activities", {
+            params: { from: from || null, to: to || null, userId: userId || null, user_id: userId || null },
+          });
+        } else {
+          throw firstErr;
+        }
+      }
+      setItems(res?.data?.items || []);
     } catch (e) {
       toast.error(e?.response?.data?.message || "Failed to load activities");
     } finally {

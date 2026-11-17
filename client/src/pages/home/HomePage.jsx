@@ -3,11 +3,12 @@
  * Serves as the main landing dashboard for users, displaying metrics, pending approvals, and notifications.
  */
 
-import React, { useEffect, useState, useMemo, useRef } from "react";
+import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import { usePermission } from "../../auth/PermissionContext.jsx";
 import client from "../../api/client";
+import useSocket from "../../hooks/useSocket.js";
 import CompanyFeed from "../../components/CompanyFeed/CompanyFeed";
 import { toast } from "react-toastify";
 import { getModuleDashboards } from "../../data/modulesRegistry.js";
@@ -47,6 +48,7 @@ import {
 import GoldenBellIcon from "../../components/GoldenBellIcon.jsx";
 import MobileMovingCarousel from "../../components/MobileMovingCarousel.jsx";
 import { getFavoritePages, getFrequentPages } from "../../utils/favorites.js";
+import SocialFeedPage from "../social/SocialFeedPage.jsx";
 
 function renderFavIcon(iconKey) {
   switch (iconKey) {
@@ -113,6 +115,9 @@ export default function HomePage() {
   const [showPostAlerts, setShowPostAlerts] = useState(false);
   const [postAlerts, setPostAlerts] = useState([]);
   const [postAlertsLoading, setPostAlertsLoading] = useState(false);
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [historyModalFocusId, setHistoryModalFocusId] = useState(null);
   const [overview, setOverview] = useState(null);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [modalInstanceId, setModalInstanceId] = useState(null);
@@ -1028,6 +1033,78 @@ export default function HomePage() {
     const approved = sentDocuments.filter((d) => d.status === "APPROVED").length;
     return { total, pending, approved };
   }, [sentDocuments]);
+  const loadChatUnread = useCallback(async () => {
+    try {
+      const res = await client.get("/chat/unread-count");
+      setUnreadChatCount(Number(res?.data?.unread || 0));
+    } catch {
+      setUnreadChatCount(0);
+    }
+  }, []);
+
+  const socket = useSocket();
+  useEffect(() => {
+    loadChatUnread();
+  }, [loadChatUnread]);
+
+  useEffect(() => {
+    if (!socket) return;
+    const onNewNotif = (notif) => {
+      if (!notif) return;
+      setNotifications((prev) => {
+        if (prev.some((n) => Number(n.id) === Number(notif.id))) return prev;
+        return [notif, ...prev];
+      });
+    };
+    const onNewPost = () => {
+      client
+        .get("/workflows/notifications")
+        .then((res) => {
+          if (Array.isArray(res.data?.items)) setNotifications(res.data.items);
+        })
+        .catch(() => {});
+    };
+    const onRecvMsg = () => {
+      loadChatUnread();
+      client
+        .get("/workflows/notifications")
+        .then((res) => {
+          if (Array.isArray(res.data?.items)) setNotifications(res.data.items);
+        })
+        .catch(() => {});
+    };
+
+    socket.on("notifications:new", onNewNotif);
+    socket.on("new_post", onNewPost);
+    socket.on("receive_message", onRecvMsg);
+    socket.on("message_read", onRecvMsg);
+
+    return () => {
+      socket.off("notifications:new", onNewNotif);
+      socket.off("new_post", onNewPost);
+      socket.off("receive_message", onRecvMsg);
+      socket.off("message_read", onRecvMsg);
+    };
+  }, [socket, loadChatUnread]);
+
+  useEffect(() => {
+    const onRefresh = () => {
+      loadChatUnread();
+      client
+        .get("/workflows/notifications")
+        .then((res) => {
+          if (Array.isArray(res.data?.items)) setNotifications(res.data.items);
+        })
+        .catch(() => {});
+    };
+    window.addEventListener("omni.chat.unread.refresh", onRefresh);
+    window.addEventListener("omni.chat.sent", onRefresh);
+    return () => {
+      window.removeEventListener("omni.chat.unread.refresh", onRefresh);
+      window.removeEventListener("omni.chat.sent", onRefresh);
+    };
+  }, [loadChatUnread]);
+
   const postNotificationsUnread = useMemo(
     () =>
       notifications.filter(
@@ -1037,6 +1114,41 @@ export default function HomePage() {
       ),
     [notifications],
   );
+
+  const unreadMessageNotifications = useMemo(
+    () =>
+      notifications.filter(
+        (n) =>
+          Number(n.is_read) !== 1 &&
+          (String(n.link || "").startsWith("/social-feed") ||
+            String(n.link || "").startsWith("/chat") ||
+            String(n.link || "").includes("chat")),
+      ),
+    [notifications],
+  );
+
+  const totalNoticeAndMessageUnread = useMemo(() => {
+    const notifCount = unreadMessageNotifications.length;
+    return Math.max(notifCount, postNotificationsUnread.length + unreadChatCount);
+  }, [unreadMessageNotifications, postNotificationsUnread.length, unreadChatCount]);
+
+  const unreadNoticeList = useMemo(() => {
+    const unreadNotifs = notifications.filter(
+      (n) => Number(n.is_read) !== 1 && String(n.link || "").startsWith("/social-feed")
+    );
+    return unreadNotifs.map((n) => {
+      const matchPostId = Number(String(n.link || "").replace("/social-feed/", "")) || null;
+      const matched = matchPostId ? postAlerts.find((p) => Number(p.id) === matchPostId) : null;
+      return {
+        notifId: n.id,
+        postId: matchPostId,
+        userName: matched?.full_name || matched?.username || n.title?.replace("New post from ", "") || "User",
+        avatar: matched?.profile_picture_url || "/default-avatar.png",
+        snippet: matched?.content || n.message || "New message",
+        created_at: n.created_at || matched?.created_at,
+      };
+    });
+  }, [notifications, postAlerts]);
   const postNotificationsAll = useMemo(
     () =>
       notifications.filter((n) =>
@@ -1226,7 +1338,7 @@ export default function HomePage() {
               return (
                 <div
                   key={index}
-                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] p-5 sm:p-7 shadow-smoky-lg border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(178,110,23,0.55)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#b26e17] text-white"
+                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-smoky-lg border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(178,110,23,0.55)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#b26e17] text-white"
                 >
                   <div className="flex flex-col h-full justify-between">
                     <div className="flex justify-end min-h-[22px]">
@@ -1258,7 +1370,7 @@ export default function HomePage() {
               return (
                 <div
                   key={index}
-                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] p-5 sm:p-7 shadow-smoky-lg border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(36,82,109,0.55)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#24526d] text-white"
+                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-smoky-lg border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(36,82,109,0.55)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#24526d] text-white"
                 >
                   <div className="flex flex-col h-full justify-between">
                     <div className="flex justify-end min-h-[22px]">
@@ -1298,7 +1410,7 @@ export default function HomePage() {
               return (
                 <div
                   key={index}
-                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] p-5 sm:p-7 shadow-smoky-lg border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(24,117,92,0.55)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#18755c] text-white"
+                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-smoky-lg border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(24,117,92,0.55)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#18755c] text-white"
                 >
                   <div className="flex flex-col h-full justify-between">
                     <div className="flex justify-end min-h-[22px]">
@@ -1338,7 +1450,7 @@ export default function HomePage() {
               return (
                 <div
                   key={index}
-                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] p-5 sm:p-7 shadow-smoky-lg border border-white/5 hover:border-white/15 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.55)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#1d1f22] bg-[radial-gradient(#ffffff06_1px,transparent_1px)] [background-size:8px_8px] text-white"
+                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-smoky-lg border border-white/5 hover:border-white/15 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.55)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#1d1f22] bg-[radial-gradient(#ffffff06_1px,transparent_1px)] [background-size:8px_8px] text-white"
                 >
                   <div className="flex flex-col h-full justify-between">
                     <div className="flex justify-end min-h-[22px]">
@@ -1689,12 +1801,14 @@ export default function HomePage() {
                         if (next) await loadPostAlerts();
                       }}
                       className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-800/50 relative transition active:scale-95 cursor-pointer"
-                      title="Post Alerts"
+                      title={totalNoticeAndMessageUnread > 0 ? `${totalNoticeAndMessageUnread} new messages / alerts` : "Post Alerts"}
                       aria-label="Toggle Post Alerts"
                     >
                       <GoldenBellIcon size={21} />
-                      {postNotificationsUnread.length > 0 && (
-                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-600 rounded-full ring-2 ring-white dark:ring-slate-900 animate-pulse" />
+                      {totalNoticeAndMessageUnread > 0 && (
+                        <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] px-1 bg-red-600 text-white text-[11px] font-bold rounded-full flex items-center justify-center ring-2 ring-white dark:ring-slate-900 shadow-sm pointer-events-none">
+                          {totalNoticeAndMessageUnread > 99 ? "99+" : totalNoticeAndMessageUnread}
+                        </span>
                       )}
                     </button>
                     <div>
@@ -1709,76 +1823,144 @@ export default function HomePage() {
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => navigate("/social-feed")}
-                      className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-white bg-brand hover:bg-brand-700 transition shadow-smoky-card"
+                      onClick={() => {
+                        setHistoryModalFocusId(null);
+                        setShowHistoryModal(true);
+                      }}
+                      className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-white bg-brand hover:bg-brand-700 transition shadow-smoky-card cursor-pointer"
                     >
                       History
                     </button>
                   </div>
                 </div>
 
-                {/* Post Alerts Dropdown if toggled */}
+                {/* Post Alerts & Messages Dropdown if toggled */}
                 {showPostAlerts && (
-                  <div className="absolute top-16 left-6 z-30 w-80 max-w-[calc(100%-3rem)] rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl p-3">
-                    <div className="pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                      <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-                        Post Notifications
+                  <div className="absolute top-16 left-6 z-30 w-84 max-w-[calc(100%-3rem)] rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl p-3.5 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="pb-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-100">
+                          Messages & Bulletin Alerts
+                        </span>
+                        {totalNoticeAndMessageUnread > 0 && (
+                          <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400">
+                            {totalNoticeAndMessageUnread} new
+                          </span>
+                        )}
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setShowPostAlerts(false)}
-                        className="text-slate-400 hover:text-slate-600 text-xs"
-                      >
-                        Close
-                      </button>
-                    </div>
-                    <div className="max-h-64 overflow-auto mt-2 space-y-1.5">
-                      {postAlertsLoading ? (
-                        <div className="p-3 text-xs text-slate-500">Loading…</div>
-                      ) : postAlerts.length === 0 ? (
-                        <div className="p-3 text-xs text-slate-500">No post alerts found.</div>
-                      ) : (
-                        postAlerts.map((p) => (
+                      <div className="flex items-center gap-2">
+                        {totalNoticeAndMessageUnread > 0 && (
                           <button
-                            key={p.id}
                             type="button"
                             onClick={async () => {
-                              setShowPostAlerts(false);
                               try {
-                                const related = notifications.filter(
+                                const unreadList = notifications.filter(
                                   (n) =>
                                     Number(n.is_read) !== 1 &&
-                                    String(n.link || "").startsWith(`/social-feed/${p.id}`)
+                                    (String(n.link || "").startsWith("/social-feed") ||
+                                      String(n.link || "").startsWith("/chat")),
                                 );
-                                for (const n of related) {
+                                for (const n of unreadList) {
                                   try {
                                     await client.put(`/workflows/notifications/${n.id}/read`);
                                   } catch {}
                                 }
                                 setNotifications((prev) =>
                                   prev.map((n) =>
-                                    String(n.link || "").startsWith(`/social-feed/${p.id}`)
+                                    String(n.link || "").startsWith("/social-feed") ||
+                                    String(n.link || "").startsWith("/chat")
                                       ? { ...n, is_read: 1 }
-                                      : n
-                                  )
+                                      : n,
+                                  ),
+                                );
+                                setUnreadChatCount(0);
+                              } catch {}
+                            }}
+                            className="text-[11px] text-brand-600 hover:text-brand-700 font-medium cursor-pointer"
+                          >
+                            Mark all read
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setShowPostAlerts(false)}
+                          className="p-1 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer"
+                          title="Close"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="max-h-72 overflow-y-auto mt-2 space-y-1.5 divide-y divide-slate-100 dark:divide-slate-800/40">
+                      {/* Unread Chat Messages Shortcut if any */}
+                      {unreadChatCount > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowPostAlerts(false);
+                            window.dispatchEvent(new CustomEvent("omni.chat.open"));
+                          }}
+                          className="w-full text-left p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800/50 text-emerald-900 dark:text-emerald-100 transition cursor-pointer flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">
+                              💬
+                            </div>
+                            <div>
+                              <div className="text-xs font-bold">Unread Chat Messages</div>
+                              <div className="text-[11px] text-emerald-700 dark:text-emerald-300">
+                                You have {unreadChatCount} unread message{unreadChatCount > 1 ? "s" : ""}
+                              </div>
+                            </div>
+                          </div>
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold">
+                            Open
+                          </span>
+                        </button>
+                      )}
+
+                      {postAlertsLoading ? (
+                        <div className="p-4 text-center text-xs text-slate-500">Loading alerts…</div>
+                      ) : unreadNoticeList.length === 0 && unreadChatCount === 0 ? (
+                        <div className="p-4 text-center text-xs text-slate-400 italic">
+                          All caught up! No new or unread messages.
+                        </div>
+                      ) : (
+                        unreadNoticeList.map((item) => (
+                          <button
+                            key={item.notifId}
+                            type="button"
+                            onClick={async () => {
+                              setShowPostAlerts(false);
+                              try {
+                                await client.put(`/workflows/notifications/${item.notifId}/read`);
+                                setNotifications((prev) =>
+                                  prev.map((n) =>
+                                    n.id === item.notifId ? { ...n, is_read: 1 } : n,
+                                  ),
                                 );
                               } catch {}
-                              navigate(`/social-feed/${p.id}`);
+                              setHistoryModalFocusId(item.postId);
+                              setShowHistoryModal(true);
                             }}
-                            className="w-full text-left p-2 rounded-lg bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 transition"
+                            className="w-full text-left p-2.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 hover:bg-blue-100/80 dark:hover:bg-blue-900/50 border border-blue-200/80 dark:border-blue-800/40 transition cursor-pointer"
                           >
                             <div className="flex items-center gap-2.5">
                               <img
-                                src={p.profile_picture_url || "/default-avatar.png"}
+                                src={item.avatar || "/default-avatar.png"}
                                 alt=""
-                                className="w-7 h-7 rounded-full object-cover shrink-0"
+                                className="w-7 h-7 rounded-full object-cover shrink-0 ring-1 ring-slate-200 dark:ring-slate-700"
                               />
                               <div className="flex-1 min-w-0">
-                                <div className="text-xs font-semibold truncate">
-                                  {String(p.full_name || p.username || "User")}
+                                <div className="flex items-center justify-between">
+                                  <div className="text-xs font-semibold truncate text-slate-900 dark:text-slate-100">
+                                    {item.userName}
+                                  </div>
+                                  <span className="w-2 h-2 rounded-full bg-red-600 shrink-0" />
                                 </div>
-                                <div className="text-[11px] text-slate-500 truncate">
-                                  {String(p.content || "").replace(/\s+/g, " ").trim().slice(0, 60)}
+                                <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                  {String(item.snippet || "").replace(/\s+/g, " ").trim().slice(0, 60)}
                                 </div>
                               </div>
                             </div>
@@ -2297,6 +2479,19 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      {/* Post History Modal */}
+      {showHistoryModal && (
+        <SocialFeedPage
+          isModal={true}
+          focusPostId={historyModalFocusId}
+          onClose={() => {
+            setShowHistoryModal(false);
+            setHistoryModalFocusId(null);
+          }}
+        />
+      )}
+
       {/* chat v2 floating widget is mounted globally in AppShell */}
     </div>
   );

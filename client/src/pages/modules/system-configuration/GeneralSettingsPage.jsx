@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../../api/client.js";
 import { toast } from "react-toastify";
 import { useAuth } from "../../../auth/AuthContext.jsx";
-import { Brain, Sparkles, CheckCircle, ShieldCheck, Clock, Save, ArrowLeft } from "lucide-react";
+import { Brain, Sparkles, CheckCircle, ShieldCheck, Clock, Save, ArrowLeft, Database, ExternalLink, RefreshCw, Key, Check, Copy, Eye, EyeOff, Server } from "lucide-react";
 import BranchDataSharingSection from "../../../components/BranchDataSharingSection.jsx";
 import ExecutiveOverviewIsolationSection from "../../../components/ExecutiveOverviewIsolationSection.jsx";
 import BiIsolationSection from "../../../components/BiIsolationSection.jsx";
@@ -85,6 +85,155 @@ export default function GeneralSettingsPage() {
   const [retentionDays, setRetentionDays] = useState(30);
   const [retentionSaving, setRetentionSaving] = useState(false);
   const [chatHistoryStats, setChatHistoryStats] = useState(null);
+
+  // Neon PostgreSQL Cloud Database State
+  const [neonSettings, setNeonSettings] = useState({
+    apiKey: "",
+    maskedApiKey: "",
+    hasApiKey: false,
+    projectId: "soft-firefly-41205475",
+    orgId: "org-floral-violet-64520038",
+    branch: "production",
+    neonBranchId: "",
+    databaseUrl: "",
+    maskedDatabaseUrl: "",
+    hasDatabaseUrl: false,
+    databaseUrlUnpooled: "",
+    maskedDatabaseUrlUnpooled: "",
+    hasDatabaseUrlUnpooled: false,
+    consoleUrl: "",
+  });
+  const [neonLoading, setNeonLoading] = useState(false);
+  const [neonSaving, setNeonSaving] = useState(false);
+  const [neonTesting, setNeonTesting] = useState(false);
+  const [neonPulling, setNeonPulling] = useState(false);
+  const [neonTestResult, setNeonTestResult] = useState(null);
+  const [showDatabaseUrl, setShowDatabaseUrl] = useState(false);
+  const [showDatabaseUrlUnpooled, setShowDatabaseUrlUnpooled] = useState(false);
+  const [copiedField, setCopiedField] = useState(null);
+
+  const loadNeonSettings = async () => {
+    try {
+      setNeonLoading(true);
+      const res = await api.get("/admin/settings/neon");
+      if (res?.data?.success) {
+        setNeonSettings((prev) => ({
+          ...prev,
+          ...res.data,
+          apiKey: res.data.maskedApiKey || "",
+          databaseUrl: res.data.maskedDatabaseUrl || "",
+          databaseUrlUnpooled: res.data.maskedDatabaseUrlUnpooled || "",
+        }));
+      }
+    } catch (err) {
+      console.warn("Could not load Neon settings:", err?.response?.data?.message || err.message);
+    } finally {
+      setNeonLoading(false);
+    }
+  };
+
+  const isMaskedSecret = (val) => {
+    if (!val) return false;
+    const s = String(val);
+    return (
+      s.includes("••••") ||
+      s.includes("********") ||
+      s.includes("%E2%80%A2") ||
+      /:\*{3,}@/.test(s) ||
+      /:•{3,}@/.test(s)
+    );
+  };
+
+  const saveNeonSettings = async () => {
+    try {
+      setNeonSaving(true);
+      setNeonTestResult(null);
+      const payload = {
+        apiKey: isMaskedSecret(neonSettings.apiKey) ? undefined : neonSettings.apiKey.trim(),
+        projectId: neonSettings.projectId.trim(),
+        orgId: neonSettings.orgId.trim(),
+        branch: neonSettings.branch.trim(),
+        databaseUrl: isMaskedSecret(neonSettings.databaseUrl) ? undefined : neonSettings.databaseUrl.trim(),
+        databaseUrlUnpooled: isMaskedSecret(neonSettings.databaseUrlUnpooled) ? undefined : neonSettings.databaseUrlUnpooled.trim(),
+      };
+      const res = await api.post("/admin/settings/neon", payload);
+      toast.success(res?.data?.message || "Neon settings saved successfully");
+      await loadNeonSettings();
+
+      // Automatically test connection after saving
+      await testNeonConnection();
+    } catch (err) {
+      const errorMsg =
+        err?.response?.data?.message ||
+        (err?.response?.data?.error === "NOT_FOUND"
+          ? "Server endpoint not found. Please ensure the backend server has reloaded."
+          : err?.response?.data?.error) ||
+        err.message ||
+        "Failed to save Neon settings";
+      toast.error(errorMsg);
+      setNeonTestResult({
+        success: false,
+        error: errorMsg,
+      });
+    } finally {
+      setNeonSaving(false);
+    }
+  };
+
+  const testNeonConnection = async () => {
+    try {
+      setNeonTesting(true);
+      setNeonTestResult(null);
+      const res = await api.post("/admin/settings/neon/test", {
+        databaseUrl: isMaskedSecret(neonSettings.databaseUrl) ? undefined : neonSettings.databaseUrl.trim(),
+      });
+      if (res?.data?.success) {
+        setNeonTestResult({
+          success: true,
+          message: res.data.message,
+          database: res.data.database,
+          user: res.data.user,
+          version: res.data.version,
+          latencyMs: res.data.latencyMs,
+        });
+        toast.success(`Connected to Neon (${res.data.database}) in ${res.data.latencyMs}ms!`);
+      }
+    } catch (err) {
+      const rawError = err?.response?.data?.error || err?.response?.data?.message || err.message;
+      const errorMsg =
+        rawError === "NOT_FOUND"
+          ? "Backend route not found. Please ensure the backend server is reloaded."
+          : rawError || "Failed to connect to Neon database";
+      setNeonTestResult({
+        success: false,
+        error: errorMsg,
+      });
+      toast.error(errorMsg);
+    } finally {
+      setNeonTesting(false);
+    }
+  };
+
+  const pullNeonCredentials = async () => {
+    try {
+      setNeonPulling(true);
+      const res = await api.post("/admin/settings/neon/pull");
+      toast.success(res?.data?.message || "Successfully pulled latest credentials from Neon CLI");
+      await loadNeonSettings();
+    } catch (err) {
+      toast.error(err?.response?.data?.error || err.message || "Failed to pull from Neon CLI");
+    } finally {
+      setNeonPulling(false);
+    }
+  };
+
+  const copyToClipboard = (text, fieldName) => {
+    if (!text) return;
+    navigator.clipboard?.writeText(text);
+    setCopiedField(fieldName);
+    toast.info(`Copied ${fieldName} to clipboard`);
+    setTimeout(() => setCopiedField(null), 2500);
+  };
 
   async function toggleBanksAi(checked) {
     setBanksAiEnabled(checked);
@@ -202,6 +351,8 @@ export default function GeneralSettingsPage() {
         }
       } catch {}
     })();
+
+    loadNeonSettings();
 
     return () => { mounted = false; };
   }, []);
@@ -1079,6 +1230,275 @@ export default function GeneralSettingsPage() {
                 {envSaving ? "Saving..." : "Save Credentials"}
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Neon PostgreSQL Cloud Database Configuration */}
+        <div className="card border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900">
+          <div className="card-body space-y-5">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00E599]/20 to-[#00E599]/5 border border-[#00E599]/40 text-[#00E599] flex items-center justify-center shadow-inner">
+                  <Database size={22} className="text-[#00E599]" />
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <span>Neon PostgreSQL Cloud Database</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                      Serverless
+                    </span>
+                  </div>
+                  <div className="text-xs text-slate-500">
+                    Configure your Neon connection strings, API key, and project metadata for cloud database replication and workflows.
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {neonSettings.hasDatabaseUrl ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
+                    <CheckCircle size={13} className="text-emerald-500" />
+                    <span>Project Linked ({neonSettings.projectId || "Active"})</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 px-3 py-1 rounded-full border border-amber-300 dark:border-amber-800">
+                    Database Unconfigured
+                  </span>
+                )}
+
+                {neonSettings.consoleUrl && (
+                  <a
+                    href={neonSettings.consoleUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition"
+                  >
+                    <span>Neon Console</span>
+                    <ExternalLink size={12} />
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* Form Fields */}
+            {neonLoading ? (
+              <div className="text-sm text-slate-500 py-4">Loading Neon configurations...</div>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-1">
+                      Project ID
+                    </label>
+                    <input
+                      type="text"
+                      className="input w-full text-xs"
+                      placeholder="e.g. soft-firefly-41205475"
+                      value={neonSettings.projectId}
+                      onChange={(e) => setNeonSettings((p) => ({ ...p, projectId: e.target.value }))}
+                      disabled={neonSaving}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-1">
+                      Organization ID
+                    </label>
+                    <input
+                      type="text"
+                      className="input w-full text-xs"
+                      placeholder="e.g. org-floral-violet-64520038"
+                      value={neonSettings.orgId}
+                      onChange={(e) => setNeonSettings((p) => ({ ...p, orgId: e.target.value }))}
+                      disabled={neonSaving}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-1">
+                      Target Branch
+                    </label>
+                    <input
+                      type="text"
+                      className="input w-full text-xs"
+                      placeholder="production"
+                      value={neonSettings.branch}
+                      onChange={(e) => setNeonSettings((p) => ({ ...p, branch: e.target.value }))}
+                      disabled={neonSaving}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                      Neon API Key
+                    </label>
+                    <span className="text-[11px] text-slate-400">
+                      Generate keys at <a href="https://console.neon.tech/app/settings/api-keys" target="_blank" rel="noreferrer" className="text-brand-600 dark:text-brand-400 underline font-medium">console.neon.tech/app/settings/api-keys</a>
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="password"
+                      className="input w-full text-xs pr-10"
+                      placeholder={neonSettings.hasApiKey ? "•••••••••••• (API Key Configured)" : "Enter napi_... API Key"}
+                      value={neonSettings.apiKey}
+                      onChange={(e) => setNeonSettings((p) => ({ ...p, apiKey: e.target.value }))}
+                      disabled={neonSaving}
+                    />
+                    <div className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                      <Key size={15} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Connection Strings */}
+                <div className="space-y-3 pt-2">
+                  {/* Pooled Connection String */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                        <span>Pooled Connection String (DATABASE_URL)</span>
+                        <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.2 rounded-full border border-emerald-200 dark:border-emerald-800">Recommended</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowDatabaseUrl(!showDatabaseUrl)}
+                        className="text-[11px] text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center gap-1"
+                      >
+                        {showDatabaseUrl ? <EyeOff size={13} /> : <Eye size={13} />}
+                        <span>{showDatabaseUrl ? "Hide" : "Show"}</span>
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type={showDatabaseUrl ? "text" : "password"}
+                        className="input w-full text-xs pr-20 font-mono"
+                        placeholder="postgresql://neondb_owner:***@...-pooler.aws.neon.tech/neondb?sslmode=require"
+                        value={neonSettings.databaseUrl}
+                        onChange={(e) => setNeonSettings((p) => ({ ...p, databaseUrl: e.target.value }))}
+                        disabled={neonSaving}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(neonSettings.databaseUrl, "DATABASE_URL")}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 text-[11px] font-medium text-slate-600 dark:text-slate-300 hover:text-brand-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition flex items-center gap-1"
+                        title="Copy connection string"
+                      >
+                        {copiedField === "DATABASE_URL" ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+                        <span>{copiedField === "DATABASE_URL" ? "Copied" : "Copy"}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Direct Connection String (Unpooled) */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                        <span>Direct / Unpooled Connection String (DATABASE_URL_UNPOOLED)</span>
+                        <span className="text-[10px] text-slate-400">For migrations and administrative sessions</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowDatabaseUrlUnpooled(!showDatabaseUrlUnpooled)}
+                        className="text-[11px] text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center gap-1"
+                      >
+                        {showDatabaseUrlUnpooled ? <EyeOff size={13} /> : <Eye size={13} />}
+                        <span>{showDatabaseUrlUnpooled ? "Hide" : "Show"}</span>
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type={showDatabaseUrlUnpooled ? "text" : "password"}
+                        className="input w-full text-xs pr-20 font-mono"
+                        placeholder="postgresql://neondb_owner:***@...aws.neon.tech/neondb?sslmode=require"
+                        value={neonSettings.databaseUrlUnpooled}
+                        onChange={(e) => setNeonSettings((p) => ({ ...p, databaseUrlUnpooled: e.target.value }))}
+                        disabled={neonSaving}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(neonSettings.databaseUrlUnpooled, "DATABASE_URL_UNPOOLED")}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 text-[11px] font-medium text-slate-600 dark:text-slate-300 hover:text-brand-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition flex items-center gap-1"
+                        title="Copy direct connection string"
+                      >
+                        {copiedField === "DATABASE_URL_UNPOOLED" ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+                        <span>{copiedField === "DATABASE_URL_UNPOOLED" ? "Copied" : "Copy"}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Connection Test Result Banner */}
+                {neonTestResult && (
+                  <div
+                    className={`p-3.5 rounded-xl border text-xs flex items-start gap-2.5 transition-all ${
+                      neonTestResult.success
+                        ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-200"
+                        : "bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/60 text-rose-800 dark:text-rose-200"
+                    }`}
+                  >
+                    <div className="shrink-0 mt-0.5">
+                      {neonTestResult.success ? (
+                        <CheckCircle size={16} className="text-emerald-600 dark:text-emerald-400" />
+                      ) : (
+                        <ShieldCheck size={16} className="text-rose-600 dark:text-rose-400" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold">
+                        {neonTestResult.success ? "Connection Verified Successfully" : "Connection Failed"}
+                      </div>
+                      <div className="mt-0.5 leading-relaxed">
+                        {neonTestResult.success ? (
+                          <span>
+                            Connected to database <strong>{neonTestResult.database}</strong> as <strong>{neonTestResult.user}</strong> ({neonTestResult.version}) in <strong>{neonTestResult.latencyMs}ms</strong>.
+                          </span>
+                        ) : (
+                          <span>{neonTestResult.error}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      className="btn-primary inline-flex items-center gap-2 text-xs px-4 py-2"
+                      onClick={saveNeonSettings}
+                      disabled={neonSaving}
+                    >
+                      <Save size={14} />
+                      <span>{neonSaving ? "Saving..." : "Save Neon Credentials"}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="btn btn-secondary inline-flex items-center gap-2 text-xs px-4 py-2"
+                      onClick={testNeonConnection}
+                      disabled={neonTesting}
+                    >
+                      <Server size={14} />
+                      <span>{neonTesting ? "Testing Connection..." : "Test Connection"}</span>
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="btn btn-outline inline-flex items-center gap-1.5 text-xs px-3.5 py-2 text-slate-600 dark:text-slate-300"
+                    onClick={pullNeonCredentials}
+                    disabled={neonPulling}
+                    title="Pull latest connection strings from Neon CLI"
+                  >
+                    <RefreshCw size={13} className={neonPulling ? "animate-spin" : ""} />
+                    <span>{neonPulling ? "Syncing..." : "Sync from Neon CLI"}</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

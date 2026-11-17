@@ -1066,14 +1066,32 @@ export default function Setup() {
   };
 
   /* ── Clients ── */
+  /**
+   * Initializes the modal state for registering a new client entity.
+   * Auto-fetches next customer code and defaults revenue account from fin_accounts.
+   */
   const openClientAdd = async () => {
     setEditingClient(null);
-    setClientRevenueAccountSearch("");
     let nextCode = "";
     try {
       const response = await api.get("/sales/customers/next-code");
       if (response.data?.code) nextCode = response.data.code;
     } catch (err) {}
+
+    // Pre-populate with default sales revenue account from fin_accounts
+    const defAccount =
+      accounts.find((a) => /Sales Revenue - Local/i.test(a.name || "")) ||
+      accounts.find((a) => /Sales Revenue/i.test(a.name || "")) ||
+      accounts.find((a) => a.nature === "INCOME") ||
+      accounts.find((a) => /sales|revenue|income/i.test(a.name || "")) ||
+      accounts[0];
+
+    const defAccountId = defAccount ? String(defAccount.id) : "";
+    const defAccountName = defAccount
+      ? `${defAccount.name}${defAccount.code ? ` (${defAccount.code})` : ""}`
+      : "";
+    setClientRevenueAccountSearch(defAccountName);
+
     setClientForm({
       customer_name: "",
       customer_code: nextCode,
@@ -1088,21 +1106,26 @@ export default function Setup() {
       customer_type: "LOCAL",
       service_customer: true,
       is_active: 1,
-      sales_account_id: "",
+      sales_account_id: defAccountId,
       currency_id: baseCurrencyId,
     });
     setClientModal(true);
   };
+
+  /**
+   * Populates client modal state with existing customer record for updating.
+   * Resolves revenue account label from fin_accounts reference list.
+   *
+   * @param {Object} c - Existing client record
+   */
   const openClientEdit = (c) => {
     setEditingClient(c);
-    setClientRevenueAccountSearch(
-      c.sales_account_id
-        ? String(
-            accounts.find((a) => String(a.id) === String(c.sales_account_id))
-              ?.name || "",
-          )
-        : "",
-    );
+    const curAcc = accounts.find((a) => String(a.id) === String(c.sales_account_id));
+    const accLabel = curAcc
+      ? `${curAcc.name}${curAcc.code ? ` (${curAcc.code})` : ""}`
+      : "";
+    setClientRevenueAccountSearch(accLabel);
+
     setClientForm({
       customer_name: c.customer_name || "",
       customer_code: c.customer_code || "",
@@ -1118,17 +1141,50 @@ export default function Setup() {
       service_customer:
         c.service_customer === "Y" || c.service_customer === true,
       is_active: c.is_active ?? 1,
-      sales_account_id: c.sales_account_id || "",
+      sales_account_id: c.sales_account_id ? String(c.sales_account_id) : "",
       currency_id: c.currency_id || "",
     });
     setClientModal(true);
   };
 
+  /**
+   * Validates and persists client details. Enforces mandatory status on all fields
+   * except contact person, email, and address.
+   */
   const saveClient = async () => {
-    if (!clientForm.customer_name.trim()) {
+    if (!clientForm.customer_name?.trim()) {
       toast.error("Client name is required");
       return;
     }
+    if (!clientForm.customer_type) {
+      toast.error("Client type is required");
+      return;
+    }
+    if (!clientForm.phone || !String(clientForm.phone).trim()) {
+      toast.error("Phone number is required");
+      return;
+    }
+    if (!clientForm.city?.trim()) {
+      toast.error("City is required");
+      return;
+    }
+    if (!clientForm.state?.trim()) {
+      toast.error("State/Region is required");
+      return;
+    }
+    if (!clientForm.country?.trim()) {
+      toast.error("Country is required");
+      return;
+    }
+    if (!clientForm.sales_account_id) {
+      toast.error("Revenue account is required");
+      return;
+    }
+    if (!clientForm.currency_id) {
+      toast.error("Default currency is required");
+      return;
+    }
+
     setClientSaving(true);
     try {
       const payload = {

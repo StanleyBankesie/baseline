@@ -1,6 +1,7 @@
 /**
  * @fileoverview ProjectList component.
- * Provides functionality for ProjectList.
+ * Renders the Project Portfolio dashboard with high-level KPI summary cards (solid icons after text),
+ * real-time title/code search filter toolbar, responsive table view, and grid view toggling.
  */
 
 import React, { useState, useEffect } from "react";
@@ -10,6 +11,7 @@ import {
   Activity,
   Briefcase,
   CheckCircle2,
+  DollarSign,
   Clock,
   Printer,
   Paperclip,
@@ -79,6 +81,7 @@ export default function ProjectList() {
     sortDir,
     toggle,
   } = useSort(filteredItems, "created_at", "desc");
+  const totalBudget = items.reduce((a, c) => a + Number(c.budget || 0), 0);
 
   async function printProject(id) {
     try {
@@ -164,10 +167,10 @@ export default function ProjectList() {
             color: "bg-amber-500 text-white",
           },
           {
-            label: "Completed Projects",
-            val: items.filter((p) => p.project_status === "COMPLETED").length,
-            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
-            color: "bg-emerald-600 text-white",
+            label: "Total Budget",
+            val: `GH₵ ${totalBudget.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`,
+            icon: <DollarSign size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 dark:bg-emerald-500 text-white",
           },
         ].map((stat, i) => (
           <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">

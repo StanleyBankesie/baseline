@@ -4,15 +4,17 @@ import { formatDistanceToNow, parseISO } from "date-fns";
 import { useAuth } from "../../auth/AuthContext";
 import api from "../../api/client";
 import { resolveImageUrl } from "../../utils/imageUrl";
+import { X } from "lucide-react";
 
 /**
  * SocialFeedPage / Post History Page
  * Displays the historical company and branch posts with search, filter tabs, likers modal, and comment replies.
+ * Supports rendering either as a standalone route page or as an embedded modal dialog.
  */
-export default function SocialFeedPage() {
+export default function SocialFeedPage({ isModal = false, onClose = null, focusPostId = null }) {
   const navigate = useNavigate();
   const params = useParams();
-  const focusId = params?.id ? Number(params.id) : null;
+  const focusId = focusPostId || (params?.id ? Number(params.id) : null);
   const { user } = useAuth();
 
   const userId = Number(user?.sub || user?.id) || null;
@@ -312,8 +314,8 @@ export default function SocialFeedPage() {
     };
   }, [posts, userId]);
 
-  return (
-    <div className="max-w-4xl mx-auto space-y-5 pb-12">
+  const pageContent = (
+    <div className={isModal ? "p-4 md:p-6 overflow-y-auto max-h-[86vh] space-y-5" : "max-w-4xl mx-auto space-y-5 pb-12"}>
       {/* Top Banner & Header */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -335,18 +337,29 @@ export default function SocialFeedPage() {
             <button
               onClick={fetchPosts}
               disabled={loading}
-              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer"
               title="Refresh Feed"
             >
               <span className={loading ? "animate-spin" : ""}>🔄</span>
               Refresh
             </button>
-            <button
-              onClick={() => navigate("/")}
-              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl bg-brand text-white hover:bg-brand-700 shadow-sm transition"
-            >
-              ← Home
-            </button>
+            {isModal ? (
+              <button
+                type="button"
+                onClick={onClose}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition cursor-pointer shadow-xs"
+                title="Close Post History"
+              >
+                <X size={15} /> Close
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate("/")}
+                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl bg-brand text-white hover:bg-brand-700 shadow-sm transition"
+              >
+                ← Home
+              </button>
+            )}
           </div>
         </div>
 
@@ -680,7 +693,7 @@ export default function SocialFeedPage() {
       {/* Likers Modal */}
       {likesModalPost && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4"
           onClick={() => setLikesModalPost(null)}
         >
           <div
@@ -765,6 +778,23 @@ export default function SocialFeedPage() {
       )}
     </div>
   );
+
+  if (isModal) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-6 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose?.();
+        }}
+      >
+        <div className="bg-slate-50 dark:bg-slate-950 w-full max-w-4xl max-h-[92vh] rounded-3xl shadow-2xl border border-slate-200/90 dark:border-slate-800 overflow-hidden flex flex-col relative animate-in zoom-in-95 duration-150">
+          {pageContent}
+        </div>
+      </div>
+    );
+  }
+
+  return pageContent;
 }
 
 

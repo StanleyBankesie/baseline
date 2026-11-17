@@ -610,15 +610,23 @@
     min-height: 160px;
   }
 
-  /* Module home and homepage overview cards: +30% height */
-  [data-home-carousel] [data-carousel-card] > div,
-  [data-module-carousel] [data-carousel-card] > div {
-    min-height: 185px;
+  /* Module home and homepage overview cards: +30% height on mobile and tablet (< 1024px) */
+  @media (max-width: 639px) {
+    [data-home-carousel] [data-carousel-card] > div,
+    [data-module-carousel] [data-carousel-card] > div {
+      min-height: 185px;
+    }
   }
-  @media (min-width: 640px) {
+  @media (min-width: 640px) and (max-width: 1023px) {
     [data-home-carousel] [data-carousel-card] > div,
     [data-module-carousel] [data-carousel-card] > div {
       min-height: 210px;
+    }
+  }
+  @media (min-width: 1024px) {
+    [data-home-carousel] [data-carousel-card] > div,
+    [data-module-carousel] [data-carousel-card] > div {
+      min-height: 0 !important;
     }
   }
 
@@ -1169,6 +1177,12 @@
     .flex.gap-2 > .btn-outline,
     .flex.gap-2 > .btn-success {
       width: auto;
+    }
+
+    /* -- Card height changes on homepage and module homes do not affect large screens -- */
+    [data-home-carousel] [data-carousel-card] > div,
+    [data-module-carousel] [data-carousel-card] > div {
+      min-height: 0 !important;
     }
   }
 }

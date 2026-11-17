@@ -219,6 +219,14 @@ export default function ProjectForm() {
     };
   }, []);
 
+  /**
+   * Handles user keystrokes in the searchable Client / Organization input.
+   * Debounces client verification; if 2+ characters are entered without a matching
+   * client in the directory, triggers an interactive SweetAlert prompting the user
+   * to navigate to the Clients operational setup screen.
+   *
+   * @param {string} val - Input search text
+   */
   const handleClientInputChange = (val) => {
     setClientSearch(val);
     setIsClientOpen(true);
@@ -457,6 +465,12 @@ export default function ProjectForm() {
     };
   }, [form.project_name, form.start_date, isManualCode, isEdit]);
 
+  /**
+   * Handles form submission for both project creation (POST) and updates (PUT).
+   * Submits specifications, attachments, and synchronized milestone deliverables.
+   *
+   * @param {React.FormEvent} e - Form submission event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
