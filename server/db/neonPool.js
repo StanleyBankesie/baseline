@@ -4,12 +4,34 @@
  * Powers the Chat Messaging and Social Feed communication storage for OmniSuite ERP.
  */
 
-import pg from "pg";
 import fs from "fs";
 import path from "path";
 import "../utils/loadServerEnv.js";
 
-const { Pool } = pg;
+// Lazy-load PostgreSQL package so absence of 'pg' in production does not crash bootstrap
+let pgLib = null;
+let pgLoadPromise = null;
+
+async function ensurePg() {
+  if (pgLib) return pgLib;
+  if (!pgLoadPromise) {
+    pgLoadPromise = import("pg")
+      .then((m) => {
+        pgLib = m.default || m;
+        return pgLib;
+      })
+      .catch((err) => {
+        console.error(
+          "[NeonPool] WARNING: 'pg' package is not installed. Run 'npm install' in server directory.",
+          err.message
+        );
+        throw new Error(
+          "PostgreSQL package 'pg' is not installed. Please run 'npm install' in the server directory."
+        );
+      });
+  }
+  return pgLoadPromise;
+}
 
 // Helper to safely load environment variables from multiple fallback files
 function resolveEnvVar(key) {
@@ -58,10 +80,11 @@ let unpooledInstance = null;
 
 /**
  * Initializes and returns the primary Neon connection pool.
- * @returns {import('pg').Pool}
+ * @returns {Promise<import('pg').Pool>}
  */
-export function getNeonPool() {
+export async function getNeonPool() {
   if (!pooledInstance) {
+    const { Pool } = await ensurePg();
     const connStr = DATABASE_URL || resolveEnvVar("DATABASE_URL");
     if (!connStr) {
       throw new Error("[NeonPool] DATABASE_URL is not configured for Neon PostgreSQL.");
@@ -84,10 +107,11 @@ export function getNeonPool() {
 
 /**
  * Initializes and returns the direct unpooled Neon connection pool (for DDL/migrations).
- * @returns {import('pg').Pool}
+ * @returns {Promise<import('pg').Pool>}
  */
-export function getNeonDirectPool() {
+export async function getNeonDirectPool() {
   if (!unpooledInstance) {
+    const { Pool } = await ensurePg();
     const connStr = DATABASE_URL_UNPOOLED || resolveEnvVar("DATABASE_URL_UNPOOLED") || DATABASE_URL;
     if (!connStr) {
       throw new Error("[NeonPool] DATABASE_URL_UNPOOLED is not configured.");
@@ -163,7 +187,7 @@ export function formatNeonQuery(sql, params) {
  * @returns {Promise<Array>} Result rows
  */
 export async function neonQuery(sql, params) {
-  const pool = getNeonPool();
+  const pool = await getNeonPool();
   const { text, values } = formatNeonQuery(sql, params);
 
   const start = Date.now();
@@ -185,7 +209,7 @@ export async function neonQuery(sql, params) {
  * @returns {Promise<any>} Full pg Result object
  */
 export async function neonDirectQuery(sql, params) {
-  const pool = getNeonDirectPool();
+  const pool = await getNeonDirectPool();
   const { text, values } = formatNeonQuery(sql, params);
   return pool.query(text, values);
 }
@@ -198,7 +222,7 @@ export async function neonDirectQuery(sql, params) {
  * @returns {Promise<T>}
  */
 export async function withNeonTransaction(callback) {
-  const pool = getNeonPool();
+  const pool = await getNeonPool();
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -222,7 +246,7 @@ export async function withNeonTransaction(callback) {
 export async function testNeonHealth() {
   const start = Date.now();
   try {
-    const pool = getNeonPool();
+    const pool = await getNeonPool();
     const res = await pool.query("SELECT current_database() as db, current_user as usr, version()");
     const latencyMs = Date.now() - start;
     return {
