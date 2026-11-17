@@ -167,6 +167,37 @@ export const initializeSocket = (server) => {
       socket.leave(`post_${postId}`);
     });
 
+    // Chat Conversation Rooms & Real-time Events
+    socket.on("join_conversation", (conversationId) => {
+      if (conversationId) {
+        socket.join(`conv_${conversationId}`);
+      }
+    });
+
+    socket.on("leave_conversation", (conversationId) => {
+      if (conversationId) {
+        socket.leave(`conv_${conversationId}`);
+      }
+    });
+
+    socket.on("typing_start", ({ conversation_id }) => {
+      if (conversation_id) {
+        socket.to(`conv_${conversation_id}`).emit("typing_start", {
+          conversation_id,
+          user_id: userId,
+        });
+      }
+    });
+
+    socket.on("typing_stop", ({ conversation_id }) => {
+      if (conversation_id) {
+        socket.to(`conv_${conversation_id}`).emit("typing_stop", {
+          conversation_id,
+          user_id: userId,
+        });
+      }
+    });
+
     // Tracking Events
     socket.on("tracking:location_updated", (data) => {
       ioInstance.emit("tracking:location_updated", data);

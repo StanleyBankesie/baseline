@@ -1,4 +1,4 @@
-import { query } from "file:///c:/Users/stanl/demo/server/db/pool.js";
+import { query } from "../db/pool.js";
 
 export async function ensureQualityControlTables() {
   // 1. Quality Plans & Standards

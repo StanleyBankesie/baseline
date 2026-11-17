@@ -1110,7 +1110,7 @@ const triggerPostNotifications = async (
     // Insert notifications and send push notifications
     for (const targetUserId of targetUsers) {
       try {
-        await connection.query(
+        const [insResult] = await connection.query(
           `
           INSERT INTO adm_notifications (company_id, user_id, title, message, link, is_read)
           VALUES (?, ?, ?, ?, ?, 0)
@@ -1123,6 +1123,21 @@ const triggerPostNotifications = async (
             `/social-feed/${postId}`,
           ],
         );
+
+        // Real-time broadcast to recipient's socket room
+        const io = getIO();
+        if (io) {
+          io.to(`user_${targetUserId}`).emit("notifications:new", {
+            id: insResult?.insertId,
+            company_id: companyId,
+            user_id: targetUserId,
+            title: `New post from ${userName}`,
+            message: `${userName} posted a new update`,
+            link: `/social-feed/${postId}`,
+            is_read: 0,
+            created_at: new Date().toISOString(),
+          });
+        }
       } catch {}
 
       // Send push notification

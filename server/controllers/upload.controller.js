@@ -93,6 +93,68 @@ async function getCloudinaryConfig(scope) {
   return null;
 }
 
+export { getCloudinaryConfig };
+
+/**
+ * Uploads a file buffer directly to Cloudinary using authenticated signature.
+ *
+ * @param {object} options
+ * @param {Buffer} options.buffer - Raw file buffer
+ * @param {string} [options.mimetype] - MIME type
+ * @param {string} [options.folder] - Target folder
+ * @param {object} [options.scope] - Scope with companyId/branchId
+ * @returns {Promise<{url: string, public_id: string, resource_type: string}|null>}
+ */
+export async function uploadBufferToCloudinary({ buffer, mimetype, folder, scope }) {
+  const cfg = await getCloudinaryConfig(scope || {});
+  if (!cfg) return null;
+
+  const timestamp = Math.floor(Date.now() / 1000);
+  const paramsToSign = new URLSearchParams();
+  paramsToSign.append("timestamp", String(timestamp));
+  const finalFolder = folder || cfg.folder;
+  if (finalFolder) paramsToSign.append("folder", finalFolder);
+
+  const signatureBase = Array.from(paramsToSign.entries())
+    .sort(([a], [b]) => (a > b ? 1 : a < b ? -1 : 0))
+    .map(([k, v]) => `${k}=${v}`)
+    .join("&");
+
+  const signature = crypto
+    .createHash("sha1")
+    .update(signatureBase + cfg.api_secret)
+    .digest("hex");
+
+  const base64 = buffer.toString("base64");
+  const dataUri = `data:${mimetype || "application/octet-stream"};base64,${base64}`;
+
+  const form = new URLSearchParams();
+  form.append("file", dataUri);
+  form.append("api_key", cfg.api_key);
+  form.append("timestamp", String(timestamp));
+  form.append("signature", signature);
+  if (finalFolder) form.append("folder", finalFolder);
+
+  const endpoint = `https://api.cloudinary.com/v1_1/${cfg.cloud_name}/auto/upload`;
+  const resp = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: form.toString(),
+  });
+
+  if (!resp.ok) {
+    const t = await resp.text().catch(() => "");
+    throw new Error(`Cloudinary upload failed: ${resp.status} ${resp.statusText} ${t}`);
+  }
+
+  const data = await resp.json();
+  return {
+    url: data.secure_url || data.url || null,
+    public_id: data.public_id || null,
+    resource_type: data.resource_type || null,
+  };
+}
+
 /**
  * Handles file uploads, preferring Cloudinary if configured, otherwise falls back to local uploads directory.
  *

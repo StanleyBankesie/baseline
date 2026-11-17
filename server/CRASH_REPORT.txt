@@ -43845,3 +43845,1404 @@ Error: Reference 'value' not supported (reference to group function)
     at async query (file:///C:/Users/stanl/demo/server/db/pool.js:684:20)
     at async getDashboardMetrics (file:///C:/Users/stanl/demo/server/controllers/finance.controller.js:7715:22)
 --------------------------------------------------------------------------------
+
+[2026-11-17T06:57:15.934Z] HTTP_403
+Summary: Module access denied
+Request: GET /api/sales/dashboard-stats (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: GET
+url: /api/sales/dashboard-stats
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 16; Pixel 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Mobile Safari/537.36
+userId: 10
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Module access denied
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/middleware/access.js:137:21
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T06:57:16.353Z] HTTP_403
+Summary: Module access denied
+Request: GET /api/sales/dashboard-stats (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: GET
+url: /api/sales/dashboard-stats
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 16; Pixel 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Mobile Safari/537.36
+userId: 10
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Module access denied
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/middleware/access.js:137:21
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T06:57:17.004Z] HTTP_403
+Summary: Module access denied
+Request: GET /api/sales/dashboard-stats (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: GET
+url: /api/sales/dashboard-stats
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 16; Pixel 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Mobile Safari/537.36
+userId: 10
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Module access denied
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/middleware/access.js:137:21
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T06:57:18.117Z] HTTP_403
+Summary: Module access denied
+Request: GET /api/sales/dashboard-stats (status 403)
+Context:
+status: 403
+code: FORBIDDEN
+method: GET
+url: /api/sales/dashboard-stats
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Linux; Android 16; Pixel 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Mobile Safari/537.36
+userId: 10
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Module access denied
+    at httpError (file:///C:/Users/stanl/demo/server/utils/httpError.js:16:15)
+    at file:///C:/Users/stanl/demo/server/middleware/access.js:137:21
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T07:10:36.395Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 56705
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-17T10:03:21.340Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T10:05:47.261Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T10:52:52.736Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:16:54.048Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/adm/branches (status 404)
+Context:
+requestId: mwklkvbu-j36r5063
+durationMs: 5
+method: GET
+url: /api/adm/branches
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:16:54.296Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mwklkvin-kb6k0exl
+durationMs: 9
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:16:54.361Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mwklkvki-kf904tc3
+durationMs: 7
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:16:55.888Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/admin/settings/neon (status 404)
+Context:
+requestId: mwklkwr0-01a8q2r9
+durationMs: 4
+method: GET
+url: /api/admin/settings/neon
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:26:58.996Z] HTTP_404
+Summary: Request failed with status 404
+Request: POST /api/admin/settings/neon (status 404)
+Context:
+requestId: mwklxu40-ybnt7ela
+durationMs: 3
+method: POST
+url: /api/admin/settings/neon
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:38:56.182Z] HTTP_404
+Summary: Request failed with status 404
+Request: POST /api/admin/settings/neon (status 404)
+Context:
+requestId: mwkmd7hu-wbna50uo
+durationMs: 4
+method: POST
+url: /api/admin/settings/neon
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:39:04.288Z] HTTP_404
+Summary: Request failed with status 404
+Request: POST /api/admin/settings/neon/pull (status 404)
+Context:
+requestId: mwkmddr2-bqdt6lqd
+durationMs: 2
+method: POST
+url: /api/admin/settings/neon/pull
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:39:06.001Z] HTTP_404
+Summary: Request failed with status 404
+Request: POST /api/admin/settings/neon/test (status 404)
+Context:
+requestId: mwkmdf2n-j6xrmcci
+durationMs: 2
+method: POST
+url: /api/admin/settings/neon/test
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:39:08.939Z] HTTP_404
+Summary: Request failed with status 404
+Request: POST /api/admin/settings/neon (status 404)
+Context:
+requestId: mwkmdhca-38ux0xag
+durationMs: 1
+method: POST
+url: /api/admin/settings/neon
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:41:10.122Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/admin/settings/neon (status 404)
+Context:
+requestId: mwkmg2uf-exsvloko
+durationMs: 3
+method: GET
+url: /api/admin/settings/neon
+ip: ::1
+origin: 
+userAgent: curl/8.13.0
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:45:12.769Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:45:32.567Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 51145
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:46:05.755Z] HTTP_400
+Summary: Expected property name or '}' in JSON at position 1 (line 1 column 2)
+Request: POST /api/admin/settings/neon (status 400)
+Context:
+status: 400
+code: null
+method: POST
+url: /api/admin/settings/neon
+ip: ::1
+origin: 
+userAgent: curl/8.13.0
+userId: null
+companyId: null
+branchId: null
+body: {}
+query: {}
+Technical details:
+SyntaxError: Expected property name or '}' in JSON at position 1 (line 1 column 2)
+    at JSON.parse (<anonymous>)
+    at parse (C:\Users\stanl\demo\server\node_modules\body-parser\lib\types\json.js:96:19)
+    at C:\Users\stanl\demo\server\node_modules\body-parser\lib\read.js:128:18
+    at AsyncResource.runInAsyncScope (node:async_hooks:211:14)
+    at invokeCallback (C:\Users\stanl\demo\server\node_modules\raw-body\index.js:238:16)
+    at done (C:\Users\stanl\demo\server\node_modules\raw-body\index.js:227:7)
+    at IncomingMessage.onEnd (C:\Users\stanl\demo\server\node_modules\raw-body\index.js:287:7)
+    at IncomingMessage.emit (node:events:524:28)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:47:09.470Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mwkmns43-om8r9urx
+durationMs: 11
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:47:09.594Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mwkmns64-v9a5ylvs
+durationMs: 62
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:50:40.710Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/adm/branches (status 404)
+Context:
+requestId: mwkmsb42-2w0d8h6c
+durationMs: 4
+method: GET
+url: /api/adm/branches
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:50:40.807Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mwkmsb6r-wr6022bp
+durationMs: 4
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:50:40.883Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mwkmsb8r-vjgfp5lf
+durationMs: 8
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:50:51.111Z] HTTP_500
+Summary: Request failed with status 500
+Request: POST /api/admin/settings/neon/test (status 500)
+Context:
+requestId: mwkmshz7-54bbyrlr
+durationMs: 1507
+method: POST
+url: /api/admin/settings/neon/test
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+status: 500
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T11:52:23.328Z] HTTP_500
+Summary: Request failed with status 500
+Request: POST /api/admin/settings/neon/test (status 500)
+Context:
+requestId: mwkmuhdm-5a5b51gv
+durationMs: 1190
+method: POST
+url: /api/admin/settings/neon/test
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+status: 500
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T12:18:51.429Z] HTTP_500
+Summary: Request failed with status 500
+Request: POST /api/admin/settings/neon/test (status 500)
+Context:
+requestId: mwknsioh-lq10l5hm
+durationMs: 1299
+method: POST
+url: /api/admin/settings/neon/test
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: null
+branchId: null
+status: 500
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T12:21:22.817Z] HTTP_500
+Summary: Request failed with status 500
+Request: POST /api/admin/settings/neon/test (status 500)
+Context:
+requestId: mwknvr92-a1rk0vw8
+durationMs: 1611
+method: POST
+url: /api/admin/settings/neon/test
+ip: ::1
+origin: 
+userAgent: node
+userId: 1
+companyId: null
+branchId: null
+status: 500
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T12:22:35.393Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T12:22:54.101Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T12:50:58.585Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T12:51:26.106Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T12:52:01.032Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T12:57:37.568Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T13:04:13.648Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/adm/branches (status 404)
+Context:
+requestId: mwkpew5l-oy427j5n
+durationMs: 6
+method: GET
+url: /api/adm/branches
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T13:04:13.871Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/compliance (status 404)
+Context:
+requestId: mwkpewbq-sfakdk00
+durationMs: 9
+method: GET
+url: /api/transport/templates/compliance
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T13:04:14.075Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/transport/templates/servicing (status 404)
+Context:
+requestId: mwkpewhj-bvvwvhp1
+durationMs: 4
+method: GET
+url: /api/transport/templates/servicing
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T13:25:38.229Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T13:26:41.544Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T13:27:04.016Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 50731
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-17T13:31:46.562Z] HTTP_500
+Summary: ENOSPC: no space left on device, write
+Request: POST /api/chat/upload (status 500)
+Context:
+status: 500
+code: ENOSPC
+method: POST
+url: /api/chat/upload
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: ENOSPC: no space left on device, write
+--------------------------------------------------------------------------------
+
+[2026-11-17T13:32:03.640Z] HTTP_500
+Summary: ENOSPC: no space left on device, write
+Request: POST /api/chat/upload (status 500)
+Context:
+status: 500
+code: ENOSPC
+method: POST
+url: /api/chat/upload
+ip: ::ffff:127.0.0.1
+origin: http://localhost:5173
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: ENOSPC: no space left on device, write
+--------------------------------------------------------------------------------
+
+[2026-11-17T13:32:53.167Z] HTTP_500
+Summary: Request failed with status 500
+Request: GET /api/social-feed?offset=0&limit=200 (status 500)
+Context:
+requestId: mwkqffb9-rwdtp7he
+durationMs: 15082
+method: GET
+url: /api/social-feed?offset=0&limit=200
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: 1
+companyId: 1
+branchId: 1
+status: 500
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T13:55:01.857Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 59891
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-17T13:55:20.551Z] HTTP_500
+Summary: Multipart: Boundary not found
+Request: POST /api/chat/upload (status 500)
+Context:
+status: 500
+code: null
+method: POST
+url: /api/chat/upload
+ip: ::1
+origin: 
+userAgent: node
+userId: 1
+companyId: 1
+branchId: 1
+body: {}
+query: {}
+Technical details:
+Error: Multipart: Boundary not found
+    at new Multipart (C:\Users\stanl\demo\server\node_modules\busboy\lib\types\multipart.js:233:13)
+    at getInstance (C:\Users\stanl\demo\server\node_modules\busboy\lib\index.js:33:12)
+    at module.exports (C:\Users\stanl\demo\server\node_modules\busboy\lib\index.js:56:10)
+    at multerMiddleware (C:\Users\stanl\demo\server\node_modules\multer\lib\make-middleware.js:133:16)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\stanl\demo\server\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\stanl\demo\server\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\stanl\demo\server\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\stanl\demo\server\node_modules\express\lib\router\index.js:346:12)
+--------------------------------------------------------------------------------
+
+[2026-11-17T13:55:20.984Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 59930
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-17T13:58:40.985Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T13:59:02.428Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 65266
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-17T13:59:02.433Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 65287
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-17T14:10:01.979Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T14:10:29.301Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 53406
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-17T14:10:29.305Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 53412
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-17T14:16:53.991Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T14:17:18.563Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 56928
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-17T14:17:18.566Z] CLIENT_ERROR
+Summary: read ECONNRESET
+Context:
+remoteAddress: ::1
+remotePort: 56933
+Technical details:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+--------------------------------------------------------------------------------
+
+[2026-11-17T14:40:07.744Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030576062-421433513.png (status 404)
+Context:
+requestId: mwksu81m-e23hl1dl
+durationMs: 5
+method: GET
+url: /uploads/file-1771030576062-421433513.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T14:40:07.755Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030118738-58671421.png (status 404)
+Context:
+requestId: mwksu81w-f6cb7jar
+durationMs: 7
+method: GET
+url: /uploads/file-1771030118738-58671421.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T14:40:07.761Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771029994810-929577419.png (status 404)
+Context:
+requestId: mwksu81x-5b4arf1d
+durationMs: 12
+method: GET
+url: /uploads/file-1771029994810-929577419.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T14:40:07.765Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028914245-206760446.png (status 404)
+Context:
+requestId: mwksu81y-vv0yfank
+durationMs: 15
+method: GET
+url: /uploads/file-1771028914245-206760446.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T14:40:07.773Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028422235-642564131.png (status 404)
+Context:
+requestId: mwksu82f-azoe2wba
+durationMs: 6
+method: GET
+url: /uploads/file-1771028422235-642564131.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T14:40:07.778Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028320026-422022774.png (status 404)
+Context:
+requestId: mwksu82h-w59ggkam
+durationMs: 9
+method: GET
+url: /uploads/file-1771028320026-422022774.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T14:40:07.783Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771027409254-324391049.jpeg (status 404)
+Context:
+requestId: mwksu82h-g3pfcba2
+durationMs: 14
+method: GET
+url: /uploads/file-1771027409254-324391049.jpeg
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T14:40:07.787Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771019885707-783914769.png (status 404)
+Context:
+requestId: mwksu82o-eu4y5w0n
+durationMs: 11
+method: GET
+url: /uploads/file-1771019885707-783914769.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T14:45:52.289Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030576062-421433513.png (status 404)
+Context:
+requestId: mwkt1lwd-s83fy5nq
+durationMs: 3
+method: GET
+url: /uploads/file-1771030576062-421433513.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T15:17:38.473Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030576062-421433513.png (status 404)
+Context:
+requestId: mwku6gpy-madvo2li
+durationMs: 3
+method: GET
+url: /uploads/file-1771030576062-421433513.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T15:17:38.490Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771029994810-929577419.png (status 404)
+Context:
+requestId: mwku6gqb-1qp797v7
+durationMs: 7
+method: GET
+url: /uploads/file-1771029994810-929577419.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T15:17:38.497Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028914245-206760446.png (status 404)
+Context:
+requestId: mwku6gqd-ikns81aq
+durationMs: 12
+method: GET
+url: /uploads/file-1771028914245-206760446.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T15:17:38.502Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028422235-642564131.png (status 404)
+Context:
+requestId: mwku6gqe-ftza5f04
+durationMs: 16
+method: GET
+url: /uploads/file-1771028422235-642564131.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T15:17:38.507Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771030118738-58671421.png (status 404)
+Context:
+requestId: mwku6gq9-kz64wg0j
+durationMs: 26
+method: GET
+url: /uploads/file-1771030118738-58671421.png
+ip: ::1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T15:17:38.513Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771028320026-422022774.png (status 404)
+Context:
+requestId: mwku6gqg-g07okkv7
+durationMs: 25
+method: GET
+url: /uploads/file-1771028320026-422022774.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T15:17:38.519Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771027409254-324391049.jpeg (status 404)
+Context:
+requestId: mwku6gr2-e9rcge3h
+durationMs: 9
+method: GET
+url: /uploads/file-1771027409254-324391049.jpeg
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T15:17:38.524Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /uploads/file-1771019885707-783914769.png (status 404)
+Context:
+requestId: mwku6gr3-vtgec5pk
+durationMs: 13
+method: GET
+url: /uploads/file-1771019885707-783914769.png
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T15:24:03.641Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/admin/user-login-activities?from=2026-11-01&to=2026-11-17 (status 404)
+Context:
+requestId: mwkuepx1-znm37xvk
+durationMs: 4
+method: GET
+url: /api/admin/user-login-activities?from=2026-11-01&to=2026-11-17
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T15:24:19.538Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/admin/user-login-activities?from=2026-11-01&to=2026-11-17 (status 404)
+Context:
+requestId: mwkuf26l-b1c2tt9c
+durationMs: 4
+method: GET
+url: /api/admin/user-login-activities?from=2026-11-01&to=2026-11-17
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T15:24:34.420Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/admin/user-login-activities?from=2026-11-01&to=2026-11-17 (status 404)
+Context:
+requestId: mwkufdo1-9ni4aabo
+durationMs: 3
+method: GET
+url: /api/admin/user-login-activities?from=2026-11-01&to=2026-11-17
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T15:24:49.447Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/admin/user-login-activities?from=2026-11-01&to=2026-11-17 (status 404)
+Context:
+requestId: mwkufp9g-yr81ipr5
+durationMs: 3
+method: GET
+url: /api/admin/user-login-activities?from=2026-11-01&to=2026-11-17
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T15:25:09.385Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/adm/branches (status 404)
+Context:
+requestId: mwkug4nb-i75ce9t7
+durationMs: 2
+method: GET
+url: /api/adm/branches
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T15:25:12.169Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/adm/branches (status 404)
+Context:
+requestId: mwkug6sn-w6buz0pw
+durationMs: 2
+method: GET
+url: /api/adm/branches
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T15:25:15.436Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/adm/branches (status 404)
+Context:
+requestId: mwkug9be-hbehpdky
+durationMs: 2
+method: GET
+url: /api/adm/branches
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T15:25:22.722Z] HTTP_404
+Summary: Request failed with status 404
+Request: GET /api/adm/branches (status 404)
+Context:
+requestId: mwkugexr-d680uvni
+durationMs: 3
+method: GET
+url: /api/adm/branches
+ip: ::ffff:127.0.0.1
+origin: 
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36
+userId: null
+companyId: null
+branchId: null
+status: 404
+Technical details:
+(no stack)
+--------------------------------------------------------------------------------
+
+[2026-11-17T15:32:58.379Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------
+
+[2026-11-17T17:00:33.312Z] SERVER_ERROR
+Summary: listen EADDRINUSE: address already in use :::4002
+Technical details:
+Error: listen EADDRINUSE: address already in use :::4002
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at Server.listen (node:net:2099:7)
+    at file:///C:/Users/stanl/demo/server/index.js:1324:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+--------------------------------------------------------------------------------

@@ -256,6 +256,14 @@ async function ensureProjectTables(companyId, branchId) {
   } catch (e) {}
 }
 
+/**
+ * Retrieves a list of projects scoped to the authenticated tenant/company.
+ * Calculates total accrued expenses per project and parses JSON attachments/team arrays.
+ *
+ * @param {import('express').Request} req - Express request with multi-tenant scope (req.scope.companyId)
+ * @param {import('express').Response} res - Express response returning { items: Array<Project> }
+ * @param {import('express').NextFunction} next - Error propagation callback
+ */
 export const listProjects = async (req, res, next) => {
   try {
     const { companyId, branchId = null, branchIdsStr = "" } = req.scope || {};
@@ -297,6 +305,14 @@ export const listProjects = async (req, res, next) => {
   }
 };
 
+/**
+ * Retrieves full details for a single project by ID, including team members,
+ * WBS scope breakdown, synchronized DB tasks, and milestone deliverables.
+ *
+ * @param {import('express').Request} req - Express request with req.params.id and req.scope
+ * @param {import('express').Response} res - Express response returning { item: ProjectDetail }
+ * @param {import('express').NextFunction} next - Error propagation callback
+ */
 export const getProjectById = async (req, res, next) => {
   try {
     const { companyId, branchId = null } = req.scope || {};
@@ -604,6 +620,19 @@ export const getProjectById = async (req, res, next) => {
   }
 };
 
+/**
+ * Generates an automated, chronological project reference code based on project title and date.
+ * Format: [PREFIX]/[MM]/[YYYY]/[SEQ]
+ * - PREFIX: First letter of the first three words (e.g. "Kwame Nkrumah Interchange" -> "KNI")
+ * - MM: 2-digit zero-padded start month
+ * - YYYY: 4-digit start year
+ * - SEQ: Next available chronological 3-digit zero-padded sequence for this prefix/period
+ *
+ * @param {string} projectName - Project title
+ * @param {string|Date} startDate - Planned start date
+ * @param {number} companyId - Tenant company identifier
+ * @returns {Promise<string>} Next available sequential project code (e.g. 'KNI/11/2026/001')
+ */
 export async function generateProjectCode(projectName, startDate, companyId) {
   let prefix = "PRJ";
   if (projectName && projectName.trim()) {
@@ -652,6 +681,15 @@ export async function generateProjectCode(projectName, startDate, companyId) {
   return `${basePattern}${nextSeq}`;
 }
 
+/**
+ * Express endpoint handler that returns a dynamically computed project code suggestion.
+ * Called interactively by the frontend as the user types the title or selects dates.
+ *
+ * @route GET /api/projects/generate-code
+ * @param {import('express').Request} req - Query params: name, start_date
+ * @param {import('express').Response} res - Returns { code: string }
+ * @param {import('express').NextFunction} next - Error propagation callback
+ */
 export const getGeneratedProjectCode = async (req, res, next) => {
   try {
     const { companyId } = req.scope || {};
@@ -666,6 +704,15 @@ export const getGeneratedProjectCode = async (req, res, next) => {
   }
 };
 
+/**
+ * Creates a new project record, automatically computing the sequential code if omitted,
+ * persisting contract details, and synchronizing milestones into pm_milestones and pm_tasks.
+ *
+ * @route POST /api/projects/projects
+ * @param {import('express').Request} req - Request body containing project details and optional milestones
+ * @param {import('express').Response} res - Returns { id: number }
+ * @param {import('express').NextFunction} next - Error propagation callback
+ */
 export const createProject = async (req, res, next) => {
   try {
     const { companyId, branchId = null } = req.scope || {};
@@ -905,6 +952,15 @@ export const createProject = async (req, res, next) => {
   }
 };
 
+/**
+ * Updates an existing project record and synchronizes updated milestone deliverables
+ * into pm_milestones and pm_tasks for Gantt/Timeline representation.
+ *
+ * @route PUT /api/projects/projects/:id
+ * @param {import('express').Request} req - Request with req.params.id and updated form body
+ * @param {import('express').Response} res - Returns { ok: true }
+ * @param {import('express').NextFunction} next - Error propagation callback
+ */
 export const updateProject = async (req, res, next) => {
   try {
     const { companyId, branchId = null } = req.scope || {};
@@ -1706,6 +1762,15 @@ export const deleteProject = async (req, res, next) => {
 };
 
 // ===== PROJECT MANAGERS =====
+/**
+ * Retrieves active project managers by querying active users from the adm_users table,
+ * populating their user_id, username, full_name, and contact email.
+ *
+ * @route GET /api/projects/project-managers
+ * @param {import('express').Request} req - Express request with tenant scope
+ * @param {import('express').Response} res - Returns { items: Array<ManagerUser> }
+ * @param {import('express').NextFunction} next - Error propagation callback
+ */
 export const listProjectManagers = async (req, res, next) => {
   try {
     const { companyId } = req.scope || {};

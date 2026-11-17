@@ -6,6 +6,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../api/client";
 import useSocket from "../../hooks/useSocket";
 import { useAuth } from "../../auth/AuthContext";
+// Default OmniSuite Chat Background Wallpaper
 import defaultChatBg from "../../assets/resources/CHAT_BACKGROUND.png";
 import {
   Paperclip,

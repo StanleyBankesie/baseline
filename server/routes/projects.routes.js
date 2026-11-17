@@ -368,6 +368,11 @@ import {
 
 // ===== PROJECTS =====
 
+/**
+ * @route GET /api/projects
+ * @desc Retrieves all projects for the authenticated tenant company
+ * @access Private (PM.PROJECT.VIEW)
+ */
 router.get(
   ["/projects", "/"],
   requireAuth,
@@ -386,6 +391,11 @@ router.get(
   projectsController.getProjectById,
 );
 
+/**
+ * @route POST /api/projects
+ * @desc Creates a new project with auto-generated code, specifications, and milestones
+ * @access Private (PM.PROJECT.MANAGE)
+ */
 router.post(
   "/projects",
   requireAuth,
@@ -427,6 +437,11 @@ router.put(
   projectsController.updateProjectTeamLead,
 );
 
+/**
+ * @route GET /api/projects/generate-code
+ * @desc Dynamically computes and returns the next sequential project code based on title and start date
+ * @access Private (Authenticated, Company Scoped)
+ */
 router.get(
   "/generate-code",
   requireAuth,

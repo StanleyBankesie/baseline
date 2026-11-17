@@ -2634,13 +2634,14 @@ router.get("/reports/system-log-book", requireAuth, async (req, res, next) => {
 });
 
 router.get(
-  "/reports/user-login-activity",
+  ["/reports/user-login-activity", "/user-login-activities", "/reports/user-login-activities"],
   requireAuth,
   async (req, res, next) => {
     try {
       await ensureLoginLogsTable();
       await ensureSystemLogsTable();
-      const { from, to, user_id, filter } = req.query || {};
+      const { from, to, filter } = req.query || {};
+      const user_id = req.query?.user_id || req.query?.userId || null;
       const sysParams = {};
       const sysClauses = [];
       if (from) { sysClauses.push("s.event_time >= :from"); sysParams.from = new Date(String(from)); }
@@ -4379,6 +4380,293 @@ router.post("/settings/announcements", requireAuth, async (req, res, next) => {
     res.json({ success: true, announcements: JSON.parse(val) });
   } catch (err) {
     next(err);
+  }
+});
+
+// ─── Neon Cloud Database Integration Settings ─────────────────────
+function isMaskedSecret(val) {
+  if (!val) return true;
+  const s = String(val);
+  return (
+    s.includes("••••") ||
+    s.includes("********") ||
+    s.includes("%E2%80%A2") ||
+    /:\*{3,}@/.test(s) ||
+    /:•{3,}@/.test(s) ||
+    /:%E2%80%A2/.test(s)
+  );
+}
+
+function maskSecret(val) {
+  if (!val) return "";
+  const s = String(val);
+  if (s.length <= 8) return "********";
+  return s.slice(0, 4) + "********" + s.slice(-4);
+}
+
+function maskConnString(connStr) {
+  if (!connStr) return "";
+  let s = String(connStr).trim();
+  if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+    s = s.slice(1, -1);
+  }
+  return s.replace(/:([^@/:]+)@/, ":********@");
+}
+
+router.get("/settings/neon", requireAuth, async (req, res, next) => {
+  try {
+    const fs = await import("fs");
+    const path = await import("path");
+    
+    // Read from env paths in precedence order
+    const envPaths = [
+      path.resolve(process.cwd(), "server", ".env.local"),
+      path.resolve(process.cwd(), ".env.local"),
+      path.resolve(process.cwd(), "server", ".env"),
+      path.resolve(process.cwd(), ".env"),
+    ];
+
+    const fileVars = {};
+    for (const ep of envPaths) {
+      if (fs.existsSync(ep)) {
+        const content = fs.readFileSync(ep, "utf-8");
+        content.split(/\r?\n/).forEach((line) => {
+          const match = line.match(/^([^=]+)=(.*)$/);
+          if (match && !fileVars[match[1].trim()]) {
+            let val = match[2].trim();
+            if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+              val = val.substring(1, val.length - 1);
+            }
+            fileVars[match[1].trim()] = val;
+          }
+        });
+      }
+    }
+
+    const getVal = (k) => process.env[k] || fileVars[k] || "";
+
+    const apiKey = getVal("NEON_API_KEY");
+    const projectId = getVal("NEON_PROJECT_ID");
+    const orgId = getVal("NEON_ORG_ID");
+    const branch = getVal("NEON_BRANCH") || "production";
+    const databaseUrl = getVal("DATABASE_URL");
+    const databaseUrlUnpooled = getVal("DATABASE_URL_UNPOOLED");
+    const neonBranchId = getVal("NEON_BRANCH_ID");
+
+    return res.json({
+      success: true,
+      hasApiKey: Boolean(apiKey),
+      maskedApiKey: apiKey ? maskSecret(apiKey) : "",
+      projectId,
+      orgId,
+      branch,
+      neonBranchId,
+      hasDatabaseUrl: Boolean(databaseUrl),
+      maskedDatabaseUrl: maskConnString(databaseUrl),
+      hasDatabaseUrlUnpooled: Boolean(databaseUrlUnpooled),
+      maskedDatabaseUrlUnpooled: maskConnString(databaseUrlUnpooled),
+      consoleUrl: projectId ? `https://console.neon.tech/app/projects/${projectId}` : "",
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/settings/neon", requireAuth, async (req, res, next) => {
+  try {
+    const fs = await import("fs");
+    const path = await import("path");
+    const { exec } = await import("child_process");
+    const util = await import("util");
+    const execPromise = util.promisify(exec);
+
+    const {
+      apiKey,
+      projectId,
+      orgId,
+      branch,
+      databaseUrl,
+      databaseUrlUnpooled,
+    } = req.body || {};
+
+    const updates = {};
+    if (apiKey && !isMaskedSecret(apiKey)) updates.NEON_API_KEY = String(apiKey).trim();
+    if (projectId) updates.NEON_PROJECT_ID = String(projectId).trim();
+    if (orgId) updates.NEON_ORG_ID = String(orgId).trim();
+    if (branch) updates.NEON_BRANCH = String(branch).trim();
+    if (databaseUrl && !isMaskedSecret(databaseUrl)) {
+      let u = String(databaseUrl).trim();
+      if ((u.startsWith('"') && u.endsWith('"')) || (u.startsWith("'") && u.endsWith("'"))) u = u.slice(1, -1);
+      updates.DATABASE_URL = u;
+    }
+    if (databaseUrlUnpooled && !isMaskedSecret(databaseUrlUnpooled)) {
+      let u = String(databaseUrlUnpooled).trim();
+      if ((u.startsWith('"') && u.endsWith('"')) || (u.startsWith("'") && u.endsWith("'"))) u = u.slice(1, -1);
+      updates.DATABASE_URL_UNPOOLED = u;
+    }
+
+    // Update process.env in-memory
+    for (const [k, v] of Object.entries(updates)) {
+      process.env[k] = v;
+    }
+
+    // Write to environment files
+    const envPaths = [
+      path.resolve(process.cwd(), "server", ".env.local"),
+      path.resolve(process.cwd(), ".env.local"),
+      path.resolve(process.cwd(), "server", ".env"),
+      path.resolve(process.cwd(), ".env"),
+    ];
+
+    for (const ep of envPaths) {
+      let content = "";
+      if (fs.existsSync(ep)) {
+        content = fs.readFileSync(ep, "utf-8");
+      }
+      let lines = content.split(/\r?\n/);
+      for (const [k, v] of Object.entries(updates)) {
+        const idx = lines.findIndex((l) => l.startsWith(`${k}=`));
+        if (idx >= 0) {
+          lines[idx] = `${k}=${v}`;
+        } else {
+          lines.push(`${k}=${v}`);
+        }
+      }
+      try {
+        fs.writeFileSync(ep, lines.filter((l, i, arr) => !(l.trim() === "" && arr[i - 1]?.trim() === "")).join("\n"));
+      } catch (e) {
+        console.warn(`[Neon Settings] Failed writing to ${ep}:`, e.message);
+      }
+    }
+
+    // If apiKey was updated, sync with neon CLI profile
+    if (updates.NEON_API_KEY) {
+      try {
+        await execPromise(`neon profile create DEFAULT --api-key "${updates.NEON_API_KEY}"`);
+      } catch (e) {
+        console.warn("[Neon Settings] Failed syncing neon CLI profile:", e.message);
+      }
+    }
+
+    // If projectId/orgId are set and CLI is authenticated, link the project
+    if (updates.NEON_PROJECT_ID && updates.NEON_ORG_ID) {
+      try {
+        await execPromise(`neon link --org-id "${updates.NEON_ORG_ID}" --project-id "${updates.NEON_PROJECT_ID}" -y`);
+      } catch (e) {
+        console.warn("[Neon Settings] Failed linking via CLI:", e.message);
+      }
+    }
+
+    return res.json({
+      success: true,
+      message: "Neon settings updated successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/settings/neon/test", requireAuth, async (req, res, next) => {
+  try {
+    const { databaseUrl } = req.body || {};
+    let connStr = (databaseUrl && !isMaskedSecret(databaseUrl))
+      ? String(databaseUrl).trim()
+      : (process.env.DATABASE_URL || process.env.DATABASE_URL_UNPOOLED || "");
+
+    if (connStr && ((connStr.startsWith('"') && connStr.endsWith('"')) || (connStr.startsWith("'") && connStr.endsWith("'")))) {
+      connStr = connStr.slice(1, -1);
+    }
+
+    if (!connStr || isMaskedSecret(connStr)) {
+      const fs = await import("fs");
+      const path = await import("path");
+      const envPaths = [
+        path.resolve(process.cwd(), "server", ".env.local"),
+        path.resolve(process.cwd(), ".env.local"),
+        path.resolve(process.cwd(), "server", ".env"),
+        path.resolve(process.cwd(), ".env"),
+      ];
+      for (const ep of envPaths) {
+        if (fs.existsSync(ep)) {
+          const content = fs.readFileSync(ep, "utf-8");
+          const m = content.match(/^DATABASE_URL=(.*)$/m);
+          if (m) {
+            let val = m[1].trim();
+            if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) val = val.slice(1, -1);
+            if (val && !isMaskedSecret(val)) {
+              connStr = val;
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    if (!connStr) {
+      return res.status(400).json({ success: false, error: "No connection string configured to test." });
+    }
+
+    const { Client } = await import("pg");
+    const startTime = Date.now();
+    const client = new Client({
+      connectionString: connStr,
+      ssl: { rejectUnauthorized: false },
+    });
+
+    await client.connect();
+    const result = await client.query("SELECT version(), current_database(), current_user, now() as server_time");
+    await client.end();
+    const latencyMs = Date.now() - startTime;
+
+    const row = result.rows[0] || {};
+    return res.json({
+      success: true,
+      message: "Connected to Neon PostgreSQL successfully!",
+      database: row.current_database,
+      user: row.current_user,
+      serverTime: row.server_time,
+      version: row.version ? row.version.split(" ")[0] + " " + row.version.split(" ")[1] : "PostgreSQL",
+      latencyMs,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      error: err.message || "Failed to connect to Neon PostgreSQL database.",
+    });
+  }
+});
+
+router.post("/settings/neon/pull", requireAuth, async (req, res, next) => {
+  try {
+    const { exec } = await import("child_process");
+    const util = await import("util");
+    const execPromise = util.promisify(exec);
+    const fs = await import("fs");
+    const path = await import("path");
+
+    const orgId = process.env.NEON_ORG_ID || "org-floral-violet-64520038";
+    const projectId = process.env.NEON_PROJECT_ID || "soft-firefly-41205475";
+
+    const { stdout, stderr } = await execPromise(`neon link --org-id "${orgId}" --project-id "${projectId}" -y`);
+
+    // Read back updated values from .env.local
+    const localEnvPath = path.resolve(process.cwd(), ".env.local");
+    if (fs.existsSync(localEnvPath)) {
+      const content = fs.readFileSync(localEnvPath, "utf-8");
+      // Copy to server/.env.local
+      fs.writeFileSync(path.resolve(process.cwd(), "server", ".env.local"), content);
+    }
+
+    return res.json({
+      success: true,
+      message: "Pulled latest Neon connection strings and branch details from CLI successfully.",
+      output: stdout || stderr,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      error: err.message || "Failed pulling connection strings from Neon CLI.",
+    });
   }
 });
 
