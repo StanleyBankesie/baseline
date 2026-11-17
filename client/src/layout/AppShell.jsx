@@ -145,6 +145,8 @@ import FloatingChat from "../components/chat/FloatingChat.jsx";
 import BanksAiFloating from "../components/ai/BanksAiFloating.jsx";
 import FloatingCreateButton from "../components/FloatingCreateButton.jsx";
 import useSocket from "../hooks/useSocket.js";
+import { MODULES_REGISTRY } from "../data/modulesRegistry.js";
+import { MODULE_SECTIONS } from "../data/userAssignedSections.js";
 
 const AppRoutes = React.memo(function AppRoutes({ user }) {
   return (
@@ -230,98 +232,126 @@ const modules = [
   {
     key: "system-configuration",
     label: "System Configuration",
+    shortLabel: "Config",
     path: "/system-configuration",
     icon: <Settings />,
   },
   {
     key: "administration",
     label: "System Admin",
+    shortLabel: "Admin",
     path: "/administration",
     icon: <Settings />,
   },
   {
     key: "sales",
     label: "Sales Management",
+    shortLabel: "Sales",
     path: "/sales",
     icon: <Banknote />,
   },
   {
     key: "inventory",
     label: "Inventory Management",
+    shortLabel: "Inventory",
     path: "/inventory",
     icon: <Archive />,
   },
   {
     key: "purchase",
     label: "Procurement",
+    shortLabel: "Purchase",
     path: "/purchase",
     icon: <ShoppingCart />,
   },
-  { key: "finance", label: "Finance", path: "/finance", icon: <Landmark /> },
+  {
+    key: "finance",
+    label: "Finance",
+    shortLabel: "Finance",
+    path: "/finance",
+    icon: <Landmark />,
+  },
   {
     key: "human-resources",
     label: "Human Resources",
+    shortLabel: "HR",
     path: "/human-resources",
     icon: <Users />,
   },
   {
     key: "maintenance",
     label: "Maintenance",
+    shortLabel: "Maintenance",
     path: "/maintenance",
     icon: <Wrench />,
   },
   {
     key: "facilities",
     label: "Facilities Management",
+    shortLabel: "Facilities",
     path: "/facilities",
     icon: <Building2 />,
   },
   {
     key: "environmental-health-safety",
     label: "Health & Safety (EHS)",
+    shortLabel: "EHS",
     path: "/environmental-health-safety",
     icon: <ShieldAlert />,
   },
   {
     key: "assets",
     label: "Asset Management",
+    shortLabel: "Assets",
     path: "/assets",
     icon: <Calculator />,
   },
   {
     key: "project-management",
     label: "Project Management",
+    shortLabel: "Projects",
     path: "/project-management",
     icon: <Blocks />,
   },
   {
     key: "production",
     label: "Manufacturing",
+    shortLabel: "Production",
     path: "/production",
     icon: <Factory />,
   },
-  { key: "pos", label: "POS", path: "/pos", icon: <ShoppingBasket /> },
+  {
+    key: "pos",
+    label: "POS",
+    shortLabel: "POS",
+    path: "/pos",
+    icon: <ShoppingBasket />,
+  },
   {
     key: "business-intelligence",
     label: "Business Intelligence",
+    shortLabel: "BI",
     path: "/business-intelligence",
     icon: <AreaChart />,
   },
   {
     key: "service-management",
     label: "Field Service Management",
+    shortLabel: "Service",
     path: "/service-management",
     icon: <Headset />,
   },
   {
     key: "executive-overview",
     label: "Executive Overview",
+    shortLabel: "Executive",
     path: "/executive-overview",
     icon: <Presentation />,
   },
   {
     key: "transport",
     label: "Transport & Logistics",
+    shortLabel: "Transport",
     path: "/transport",
     icon: <Truck />,
   },
@@ -419,6 +449,9 @@ export default function AppShell() {
     basePathFrom,
     canAccessFeatureKey,
     appBackground,
+    roleFeatures,
+    permissions,
+    isSuper,
   } = usePermission();
   const { theme } = useTheme();
   const isDark =
@@ -429,6 +462,85 @@ export default function AppShell() {
     () => resolveBackgroundForTheme(appBackground, isDark),
     [appBackground, isDark],
   );
+
+  // Dynamic top 3 modules for mobile bottom navigation ordered by number of assigned pages
+  const topMobileModules = useMemo(() => {
+    // 1. Filter modules assigned / viewable to this user
+    const assigned = modules.filter((m) => {
+      if (m.key === "system-configuration") {
+        return Number(user?.id) === 1 || Number(user?.id) === 2;
+      }
+      return canViewModule(m.key);
+    });
+
+    // 2. Count accessible / assigned pages per module
+    const withPageCounts = assigned.map((m, index) => {
+      let pageCount = 0;
+      const modInfo = MODULES_REGISTRY[m.key] || {};
+      const regFeatures = (modInfo.features || []).filter(
+        (f) => f.type !== "dashboard"
+      );
+
+      // Unique page keys from MODULES_REGISTRY and MODULE_SECTIONS
+      const allPageKeys = new Set(regFeatures.map((f) => f.key));
+      const sections = MODULE_SECTIONS[m.key] || [];
+      sections.forEach((sec) => {
+        (sec.features || []).forEach((f) => {
+          if (f.type !== "dashboard" && f.key) {
+            allPageKeys.add(f.key);
+          }
+        });
+      });
+
+      // Count pages accessible to the user
+      allPageKeys.forEach((fKey) => {
+        if (canAccessFeatureKey(m.key, fKey)) {
+          pageCount++;
+        }
+      });
+
+      // Also account for any roleFeatures specific to this module that might not be in registry
+      if (roleFeatures && roleFeatures.size > 0) {
+        const prefix = `${m.key}:`;
+        roleFeatures.forEach((rf) => {
+          if (rf.startsWith(prefix)) {
+            const subKey = rf.slice(prefix.length);
+            if (!allPageKeys.has(subKey) && !subKey.includes("dashboard")) {
+              pageCount++;
+            }
+          }
+        });
+      }
+
+      return {
+        ...m,
+        pageCount,
+        originalIndex: index,
+      };
+    });
+
+    // Prefer modules that have at least 1 assigned page
+    const validModules = withPageCounts.filter((m) => m.pageCount > 0);
+    const candidates = validModules.length > 0 ? validModules : withPageCounts;
+
+    // Sort descending by number of assigned pages; tie-break by original index
+    candidates.sort((a, b) => {
+      if (b.pageCount !== a.pageCount) {
+        return b.pageCount - a.pageCount;
+      }
+      return a.originalIndex - b.originalIndex;
+    });
+
+    // Display the first three modules assigned to that user
+    return candidates.slice(0, 3);
+  }, [
+    user?.id,
+    canViewModule,
+    canAccessFeatureKey,
+    roleFeatures,
+    permissions,
+    isSuper,
+  ]);
   const { pending, failed, completed, items, lastEvent } = useOfflineQueue();
   const navigate = useNavigate();
   const location = useLocation();
@@ -2489,9 +2601,10 @@ export default function AppShell() {
           <span className="text-[11px] leading-tight">Home</span>
         </NavLink>
 
-        {canViewModule("inventory") && (
+        {topMobileModules.map((m) => (
           <NavLink
-            to="/inventory"
+            key={m.key}
+            to={m.path}
             className={({ isActive }) =>
               `flex flex-col items-center justify-center min-w-[56px] py-1 transition-all duration-150 active:scale-95 ${
                 isActive
@@ -2500,42 +2613,17 @@ export default function AppShell() {
               }`
             }
           >
-            <Archive className="w-5 h-5 mb-0.5" />
-            <span className="text-[11px] leading-tight">Inventory</span>
+            <span
+              className="w-5 h-5 mb-0.5 flex items-center justify-center shrink-0 [&>svg]:w-5 [&>svg]:h-5"
+              aria-hidden="true"
+            >
+              {m.icon}
+            </span>
+            <span className="text-[11px] leading-tight truncate max-w-[64px] text-center">
+              {m.shortLabel || m.label}
+            </span>
           </NavLink>
-        )}
-
-        {canViewModule("sales") && (
-          <NavLink
-            to="/sales"
-            className={({ isActive }) =>
-              `flex flex-col items-center justify-center min-w-[56px] py-1 transition-all duration-150 active:scale-95 ${
-                isActive
-                  ? "text-brand-900 dark:text-brand-300 font-semibold"
-                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-              }`
-            }
-          >
-            <Banknote className="w-5 h-5 mb-0.5" />
-            <span className="text-[11px] leading-tight">Sales</span>
-          </NavLink>
-        )}
-
-        {canViewModule("finance") && (
-          <NavLink
-            to="/finance"
-            className={({ isActive }) =>
-              `flex flex-col items-center justify-center min-w-[56px] py-1 transition-all duration-150 active:scale-95 ${
-                isActive
-                  ? "text-brand-900 dark:text-brand-300 font-semibold"
-                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-              }`
-            }
-          >
-            <Landmark className="w-5 h-5 mb-0.5" />
-            <span className="text-[11px] leading-tight">Finance</span>
-          </NavLink>
-        )}
+        ))}
 
         <button
           type="button"
