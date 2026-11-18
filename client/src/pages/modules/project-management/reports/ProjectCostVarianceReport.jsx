@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 /**
  * @fileoverview ProjectCostVarianceReport.jsx
  * Concise and simple Project Budget & Cost Variance Report.
@@ -178,10 +179,10 @@ export default function ProjectCostVarianceReport() {
               <PieChart size={24} />
             </div>
             <div>
-              <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
+              <h1 className="text-2xl font-bold md:text-2xl font-bold text-slate-900 dark:text-white">
                 Project Budget & Cost Variance Report
               </h1>
-              <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5 hidden">
                 Executive portfolio financial performance: approved budgets, actual expenditures, and remaining capital
               </p>
             </div>
@@ -189,22 +190,16 @@ export default function ProjectCostVarianceReport() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={fetchData}
-            disabled={loading}
-            className="btn btn-secondary text-xs flex items-center gap-1.5 px-3 py-2"
-          >
-            <RotateCcw size={14} className={loading ? "animate-spin" : ""} /> Refresh
-          </button>
+          
           <button
             onClick={exportExcel}
-            className="btn btn-secondary text-xs flex items-center gap-1.5 px-3 py-2"
+            className="btn btn-secondary text-sm flex items-center gap-1.5 px-3 py-2"
           >
             <FileSpreadsheet size={14} className="text-emerald-600" /> Excel
           </button>
           <button
             onClick={exportPDF}
-            className="btn btn-secondary text-xs flex items-center gap-1.5 px-3 py-2"
+            className="btn btn-secondary text-sm flex items-center gap-1.5 px-3 py-2"
           >
             <Download size={14} className="text-rose-600" /> PDF
           </button>
@@ -217,40 +212,52 @@ export default function ProjectCostVarianceReport() {
         </div>
       </div>
 
-      {/* Summary KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Approved Budget</span>
-          <p className="text-xl font-bold text-slate-900 dark:text-white mt-1.5">
-            GH₵ {totals.totalBudget.toLocaleString()}
-          </p>
-          <p className="text-[11px] text-slate-400 mt-0.5">Total capital allocation</p>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Actual Incurred</span>
-          <p className="text-xl font-bold text-slate-900 dark:text-white mt-1.5">
-            GH₵ {totals.totalActual.toLocaleString()}
-          </p>
-          <p className="text-[11px] text-slate-400 mt-0.5">Direct project expenses</p>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Net Variance</span>
-          <p className={`text-xl font-bold mt-1.5 ${totals.totalVariance >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
-            GH₵ {totals.totalVariance.toLocaleString()}
-          </p>
-          <p className="text-[11px] text-slate-400 mt-0.5">{totals.totalVariance >= 0 ? "Surplus remaining" : "Deficit / Cost Overrun"}</p>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Overruns / Alerts</span>
-          <p className={`text-xl font-bold mt-1.5 ${totals.overruns > 0 ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400"}`}>
-            {totals.overruns}
-          </p>
-          <p className="text-[11px] text-slate-400 mt-0.5">{totals.overruns > 0 ? "Projects requiring review" : "All projects healthy"}</p>
-        </div>
-      </div>
+      {/* Metric Stats Cards Carousel */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="md:grid-cols-4" gapClass="gap-4">
+        {[
+          {
+            label: "Approved Budget",
+            val: `GH₵ ${totals.totalBudget.toLocaleString()}`,
+            icon: <Briefcase size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Actual Incurred",
+            val: `GH₵ ${totals.totalActual.toLocaleString()}`,
+            icon: <TrendingUp size={20} className="stroke-[2.5]" />,
+            color: "bg-indigo-600 text-white",
+          },
+          {
+            label: "Net Variance",
+            val: `GH₵ ${totals.totalVariance.toLocaleString()}`,
+            icon: <DollarSign size={20} className="stroke-[2.5]" />,
+            color: totals.totalVariance >= 0 ? "bg-emerald-600 text-white" : "bg-rose-500 text-white",
+          },
+          {
+            label: "Overruns / Alerts",
+            val: totals.overruns,
+            icon: <AlertTriangle size={20} className="stroke-[2.5]" />,
+            color: totals.overruns > 0 ? "bg-rose-500 text-white" : "bg-emerald-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm"
+          >
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`p-3 rounded-full ${stat.color} shadow-sm`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
+      </MobileMovingCarousel>
 
       {/* Filter Surface */}
       <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-wrap items-center gap-3">
@@ -258,7 +265,7 @@ export default function ProjectCostVarianceReport() {
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            className="input w-full pl-9 text-xs"
+            className="input w-full pl-9 text-sm"
             placeholder="Search project code, name, or client..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -267,7 +274,7 @@ export default function ProjectCostVarianceReport() {
 
         <div className="w-full sm:w-48">
           <select
-            className="input w-full text-xs"
+            className="input w-full text-sm"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
@@ -283,7 +290,7 @@ export default function ProjectCostVarianceReport() {
       {/* Table Content */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
               <tr>
                 <th className="px-4 py-3 font-bold text-slate-600 dark:text-slate-300">Project & Client</th>

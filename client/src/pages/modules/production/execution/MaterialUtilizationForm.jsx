@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useEffect } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { 
   ArrowLeft, 
   Save, 
@@ -451,7 +452,7 @@ export default function MaterialUtilizationForm() {
         </div>
 
         {/* Utilized Materials Section */}
-        <div className="card p-6 bg-white dark:bg-slate-800 space-y-4 border-l-4 border-l-brand-600 shadow-xs">
+        <div className="card p-6 bg-white dark:bg-slate-800 space-y-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-smoky-card">
           <div className="flex flex-wrap justify-between items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-700">
             <div>
               <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">

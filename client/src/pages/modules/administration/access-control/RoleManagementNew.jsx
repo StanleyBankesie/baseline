@@ -23,7 +23,7 @@ import SortableHeader from "@/components/SortableHeader.jsx";
  * 
  * @returns {JSX.Element} The rendered component
  */
-export default function RoleManagementNew() {
+export default function RoleManagementNew({ initialCreate = false }) {
   const { user } = useAuth();
   const [roles, setRoles] = useState([]);
   const [exclusiveFeatures, setExclusiveFeatures] = useState(new Set());
@@ -39,7 +39,16 @@ export default function RoleManagementNew() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [showCreate, setShowCreate] = useState(false);
+  const [showCreate, setShowCreate] = useState(() => {
+    if (initialCreate) return true;
+    if (typeof window !== "undefined") {
+      return (
+        window.location.pathname.endsWith("/new") ||
+        new URLSearchParams(window.location.search).has("new")
+      );
+    }
+    return false;
+  });
   const [newRole, setNewRole] = useState({
     name: "",
     code: "",

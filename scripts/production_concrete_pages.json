@@ -1,0 +1,312 @@
+[
+  {
+    "name": "Production Home Hub",
+    "path": "/production",
+    "component": "ProductionLanding"
+  },
+  {
+    "name": "Dashboard",
+    "path": "/production/dashboard",
+    "component": "ProductionDashboardPage"
+  },
+  {
+    "name": "Dashboards",
+    "path": "/production/dashboards",
+    "component": "ProductionDashboardPage"
+  },
+  {
+    "name": "Boms",
+    "path": "/production/boms",
+    "component": "BomList"
+  },
+  {
+    "name": "Boms - New",
+    "path": "/production/boms/new",
+    "component": "BomForm"
+  },
+  {
+    "name": "Boms - Edit - :Id",
+    "path": "/production/boms/edit/1",
+    "component": "BomForm"
+  },
+  {
+    "name": "Work Orders",
+    "path": "/production/work-orders",
+    "component": "WorkOrderList"
+  },
+  {
+    "name": "Work Orders - New",
+    "path": "/production/work-orders/new",
+    "component": "WorkOrderForm"
+  },
+  {
+    "name": "Work Orders - :Id",
+    "path": "/production/work-orders/1",
+    "component": "WorkOrderForm"
+  },
+  {
+    "name": "Planning - Daily",
+    "path": "/production/planning/daily",
+    "component": "DailyPlanList"
+  },
+  {
+    "name": "Planning - Daily - New",
+    "path": "/production/planning/daily/new",
+    "component": "DailyPlanForm"
+  },
+  {
+    "name": "Planning - Daily - Edit - :Id",
+    "path": "/production/planning/daily/edit/1",
+    "component": "DailyPlanForm"
+  },
+  {
+    "name": "Planning - Daily - View - :Id",
+    "path": "/production/planning/daily/view/1",
+    "component": "DailyPlanForm"
+  },
+  {
+    "name": "Planning - Daily - :Id",
+    "path": "/production/planning/daily/1",
+    "component": "DailyPlanForm"
+  },
+  {
+    "name": "Planning - Requirements",
+    "path": "/production/planning/requirements",
+    "component": "MaterialRequirementPage"
+  },
+  {
+    "name": "Planning - Schedule",
+    "path": "/production/planning/schedule",
+    "component": "ProductionPlaceholder"
+  },
+  {
+    "name": "Routings",
+    "path": "/production/routings",
+    "component": "RoutingList"
+  },
+  {
+    "name": "Routings - New",
+    "path": "/production/routings/new",
+    "component": "RoutingForm"
+  },
+  {
+    "name": "Routings - Edit - :Id",
+    "path": "/production/routings/edit/1",
+    "component": "RoutingForm"
+  },
+  {
+    "name": "Execution - Job Cards",
+    "path": "/production/execution/job-cards",
+    "component": "JobCardList"
+  },
+  {
+    "name": "Execution - Job Cards - :Id",
+    "path": "/production/execution/job-cards/1",
+    "component": "JobCardExecution"
+  },
+  {
+    "name": "Execution - Qc",
+    "path": "/production/execution/qc",
+    "component": "QualityControlList"
+  },
+  {
+    "name": "Execution - Output",
+    "path": "/production/execution/output",
+    "component": "ProductionOutputPage"
+  },
+  {
+    "name": "Execution - Qc - New",
+    "path": "/production/execution/qc/new",
+    "component": "ProductionOutputPage"
+  },
+  {
+    "name": "Execution - Material Receipt",
+    "path": "/production/execution/material-receipt",
+    "component": "MaterialReceiptList"
+  },
+  {
+    "name": "Execution - Material Receipt - New",
+    "path": "/production/execution/material-receipt/new",
+    "component": "MaterialReceiptForm"
+  },
+  {
+    "name": "Execution - Material Requisition",
+    "path": "/production/execution/material-requisition",
+    "component": "MaterialRequisitionList"
+  },
+  {
+    "name": "Execution - Material Requisition - New",
+    "path": "/production/execution/material-requisition/new",
+    "component": "MaterialRequisitionForm"
+  },
+  {
+    "name": "Execution - Material Utilization",
+    "path": "/production/execution/material-utilization",
+    "component": "MaterialUtilizationList"
+  },
+  {
+    "name": "Execution - Material Utilization - New",
+    "path": "/production/execution/material-utilization/new",
+    "component": "MaterialUtilizationForm"
+  },
+  {
+    "name": "Execution - Material Utilization - :Id",
+    "path": "/production/execution/material-utilization/1",
+    "component": "MaterialUtilizationForm"
+  },
+  {
+    "name": "Execution - Transfer",
+    "path": "/production/execution/transfer",
+    "component": "ProductionTransferList"
+  },
+  {
+    "name": "Execution - Transfer - New",
+    "path": "/production/execution/transfer/new",
+    "component": "ProductionTransferForm"
+  },
+  {
+    "name": "Execution - Fg Transfer",
+    "path": "/production/execution/fg-transfer",
+    "component": "FinishedGoodsTransferList"
+  },
+  {
+    "name": "Execution - Fg Transfer - New",
+    "path": "/production/execution/fg-transfer/new",
+    "component": "FinishedGoodsTransferForm"
+  },
+  {
+    "name": "Reports",
+    "path": "/production/reports",
+    "component": "ProductionReports"
+  },
+  {
+    "name": "Reports - Production Detail",
+    "path": "/production/reports/production-detail",
+    "component": "ProductionDetailReportPage"
+  },
+  {
+    "name": "Reports - Efficiency",
+    "path": "/production/reports/efficiency",
+    "component": "EfficiencyReport"
+  },
+  {
+    "name": "Reports - Warehouse Stock",
+    "path": "/production/reports/warehouse-stock",
+    "component": "ProductionWarehouseStockReport"
+  },
+  {
+    "name": "Reports - Costing",
+    "path": "/production/reports/costing",
+    "component": "ProductionCostingPage"
+  },
+  {
+    "name": "Reports - Variance",
+    "path": "/production/reports/variance",
+    "component": "MaterialVarianceReport"
+  },
+  {
+    "name": "Reports - Bom Explosion",
+    "path": "/production/reports/bom-explosion",
+    "component": "BomExplosionReport"
+  },
+  {
+    "name": "Reports - Machines",
+    "path": "/production/reports/machines",
+    "component": "MachineUtilizationReport"
+  },
+  {
+    "name": "Reports - Summary",
+    "path": "/production/reports/summary",
+    "component": "ProductionSummaryReport"
+  },
+  {
+    "name": "Stock",
+    "path": "/production/stock",
+    "component": "ProductionStockPage"
+  },
+  {
+    "name": "Warehouse Stock",
+    "path": "/production/warehouse-stock",
+    "component": "ProductionStockPage"
+  },
+  {
+    "name": "Inventory - Journal",
+    "path": "/production/inventory/journal",
+    "component": "StockJournalList"
+  },
+  {
+    "name": "Inventory - Journal - New",
+    "path": "/production/inventory/journal/new",
+    "component": "StockJournalForm"
+  },
+  {
+    "name": "Inventory - Journal - :Id",
+    "path": "/production/inventory/journal/1",
+    "component": "StockJournalForm"
+  },
+  {
+    "name": "Stock Journal",
+    "path": "/production/stock-journal",
+    "component": "StockJournalList"
+  },
+  {
+    "name": "Stock Journal - New",
+    "path": "/production/stock-journal/new",
+    "component": "StockJournalForm"
+  },
+  {
+    "name": "Stock Journal - :Id",
+    "path": "/production/stock-journal/1",
+    "component": "StockJournalForm"
+  },
+  {
+    "name": "Inventory - Stock Journal",
+    "path": "/production/inventory/stock-journal",
+    "component": "StockJournalList"
+  },
+  {
+    "name": "Inventory - Stock Journal - New",
+    "path": "/production/inventory/stock-journal/new",
+    "component": "StockJournalForm"
+  },
+  {
+    "name": "Inventory - Stock Journal - :Id",
+    "path": "/production/inventory/stock-journal/1",
+    "component": "StockJournalForm"
+  },
+  {
+    "name": "Inventory - Updation",
+    "path": "/production/inventory/updation",
+    "component": "ProductionPlaceholder"
+  },
+  {
+    "name": "Setup",
+    "path": "/production/setup",
+    "component": "ProductionSetup"
+  },
+  {
+    "name": "Setup - Processes",
+    "path": "/production/setup/processes",
+    "component": "ProcessList"
+  },
+  {
+    "name": "Setup - Departments",
+    "path": "/production/setup/departments",
+    "component": "DepartmentList"
+  },
+  {
+    "name": "Setup - Bom Output Types",
+    "path": "/production/setup/bom-output-types",
+    "component": "BomOutputTypeList"
+  },
+  {
+    "name": "Setup - Machines",
+    "path": "/production/setup/machines",
+    "component": "MachineList"
+  },
+  {
+    "name": "Setup - Shifts",
+    "path": "/production/setup/shifts",
+    "component": "ShiftList"
+  }
+]

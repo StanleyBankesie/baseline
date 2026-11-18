@@ -513,7 +513,7 @@ export default function ProjectForm() {
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               {isEdit ? "Edit Project" : "New Project"}
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
+            <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm hidden">
               Portfolio Management Entry
             </p>
           </div>
@@ -572,7 +572,7 @@ export default function ProjectForm() {
               <div className="relative">
                 <input
                   type="text"
-                  className="input w-full font-semibold text-xs"
+                  className="input w-full font-semibold text-sm"
                   placeholder="Auto (e.g. KNI/11/2026/001)"
                   value={form.project_code}
                   onChange={(e) => {
@@ -855,7 +855,7 @@ export default function ProjectForm() {
                   Workflow Stage
                 </label>
                 <select
-                  className="input w-full font-semibold text-xs"
+                  className="input w-full font-semibold text-sm"
                   value={form.project_status}
                   onChange={(e) =>
                     setForm({ ...form, project_status: e.target.value })
@@ -1500,7 +1500,7 @@ export default function ProjectForm() {
                           </label>
                           <input
                             type="text"
-                            className="input w-full text-xs font-medium"
+                            className="input w-full text-sm font-medium"
                             placeholder="e.g. Substructure & Civil Foundations"
                             value={scope.name || scope.title || ""}
                             onChange={(e) => {
@@ -1522,7 +1522,7 @@ export default function ProjectForm() {
                           </label>
                           <input
                             type="text"
-                            className="input w-full text-xs"
+                            className="input w-full text-sm"
                             placeholder="Deliverables, quality criteria, scope specifications..."
                             value={scope.description || scope.remarks || ""}
                             onChange={(e) => {
@@ -1607,7 +1607,7 @@ export default function ProjectForm() {
                                       </span>
                                       <input
                                         type="text"
-                                        className="input text-xs font-semibold text-slate-800 dark:text-slate-200 flex-1 py-1"
+                                        className="input text-sm font-semibold text-slate-800 dark:text-slate-200 flex-1 py-1"
                                         placeholder="e.g. 1.1 Foundation Footings"
                                         value={wbsItem.wbs || ""}
                                         onChange={(e) => {
@@ -1638,7 +1638,7 @@ export default function ProjectForm() {
                                       </span>
                                       <input
                                         type="date"
-                                        className="input text-xs py-1 w-full"
+                                        className="input text-sm py-1 w-full"
                                         value={wbsItem.start_date || ""}
                                         onChange={(e) => {
                                           const val = e.target.value;
@@ -1671,7 +1671,7 @@ export default function ProjectForm() {
                                       </span>
                                       <input
                                         type="date"
-                                        className="input text-xs py-1 w-full"
+                                        className="input text-sm py-1 w-full"
                                         value={
                                           wbsItem.end_date ||
                                           wbsItem.due_date ||

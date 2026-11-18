@@ -564,10 +564,7 @@ export default function KPISetup() {
             <Layers size={16} />
             New Category
           </button>
-          <button onClick={loadAll} className="btn-secondary flex items-center gap-2 text-sm">
-            <RefreshCw size={16} />
-            Refresh
-          </button>
+          
         </div>
       </div>
 

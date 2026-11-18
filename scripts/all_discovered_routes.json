@@ -1,0 +1,5455 @@
+{
+  "forgot-password": [
+    {
+      "file": "client\\src\\App.jsx",
+      "path": "/forgot-password",
+      "component": "ErrorBoundary"
+    }
+  ],
+  "reset-password": [
+    {
+      "file": "client\\src\\App.jsx",
+      "path": "/reset-password",
+      "component": "ErrorBoundary"
+    }
+  ],
+  "privacy-policy": [
+    {
+      "file": "client\\src\\App.jsx",
+      "path": "/privacy-policy",
+      "component": "ErrorBoundary"
+    }
+  ],
+  "*": [
+    {
+      "file": "client\\src\\App.jsx",
+      "path": "*",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\executive-overview\\ExecutiveOverviewRoutes.jsx",
+      "path": "*",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "*",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "*",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "*",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "*",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "*",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "*",
+      "component": "Navigate"
+    }
+  ],
+  "root": [
+    {
+      "file": "client\\src\\examples\\FeatureProtectionExample.jsx",
+      "path": "/",
+      "component": "ExampleModuleHome"
+    },
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/",
+      "component": "HomePage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/",
+      "component": "AdministrationLanding"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\asset-management\\AssetManagementHome.jsx",
+      "path": "/",
+      "component": "AssetLanding"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/",
+      "component": "BIHub"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\environmental-health-safety\\EnvironmentalHealthSafetyHome.jsx",
+      "path": "/",
+      "component": "EHSLanding"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/",
+      "component": "FacilitiesLanding"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/",
+      "component": "MaintenanceLanding"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/",
+      "component": "PosLanding"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/",
+      "component": "ProjectManagementLanding"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/",
+      "component": "SalesModuleHome"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "/",
+      "component": "ServiceManagementLanding"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\system-configuration\\SystemConfigurationHome.jsx",
+      "path": "/",
+      "component": "SystemConfigurationLanding"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "/",
+      "component": "TransportLanding"
+    }
+  ],
+  "dashboard": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/dashboard",
+      "component": "DashboardPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/dashboard",
+      "component": "div"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/dashboard",
+      "component": "FacilitiesOperationsDashboard"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "dashboard",
+      "component": "FinanceDashboardPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/dashboard",
+      "component": "MaintenanceDashboardPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/dashboard",
+      "component": "PosDashboard"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "dashboard",
+      "component": "ProductionDashboardPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "dashboard",
+      "component": "ProjectManagementDashboardPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "dashboard",
+      "component": "TransportDashboard"
+    }
+  ],
+  "administration": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/administration/*",
+      "component": "AdministrationHome"
+    },
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/administration/access/dashboard-permissions",
+      "component": "DashboardPermissions"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/administration",
+      "component": "div"
+    }
+  ],
+  "sales": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/sales/*",
+      "component": "SalesHome"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/sales",
+      "component": "PosSalesEntry"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/sales/new",
+      "component": "PosSalesEntry"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/sales/:id",
+      "component": "PosSalesEntry"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/sales/*",
+      "component": "PosSalesEntry"
+    }
+  ],
+  "inventory": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/inventory/*",
+      "component": "InventoryHome"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/inventory",
+      "component": "div"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "inventory/journal",
+      "component": "StockJournalList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "inventory/journal/new",
+      "component": "StockJournalForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "inventory/journal/:id",
+      "component": "StockJournalForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "inventory/journal",
+      "component": "StockJournalList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "inventory/journal/new",
+      "component": "StockJournalForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "inventory/journal/:id",
+      "component": "StockJournalForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "inventory/stock-journal",
+      "component": "StockJournalList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "inventory/stock-journal/new",
+      "component": "StockJournalForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "inventory/stock-journal/:id",
+      "component": "StockJournalForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "inventory/updation",
+      "component": "ProductionPlaceholder"
+    }
+  ],
+  "purchase": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/purchase/*",
+      "component": "PurchaseHome"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/purchase",
+      "component": "div"
+    }
+  ],
+  "finance": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/finance/*",
+      "component": "FinanceRoutes"
+    }
+  ],
+  "human-resources": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/human-resources/*",
+      "component": "HumanResourcesHome"
+    }
+  ],
+  "maintenance": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/maintenance/*",
+      "component": "MaintenanceHome"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/maintenance",
+      "component": "div"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "maintenance",
+      "component": "MaintenanceList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "maintenance/new",
+      "component": "MaintenanceForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "maintenance/:id",
+      "component": "MaintenanceForm"
+    }
+  ],
+  "facilities": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/facilities/*",
+      "component": "FacilitiesHome"
+    }
+  ],
+  "environmental-health-safety": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/environmental-health-safety/*",
+      "component": "EnvironmentalHealthSafetyHome"
+    }
+  ],
+  "ehs": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/ehs/*",
+      "component": "Navigate"
+    }
+  ],
+  "hse": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/hse/*",
+      "component": "Navigate"
+    }
+  ],
+  "assets": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/assets/*",
+      "component": "AssetManagementHome"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/assets",
+      "component": "EquipmentList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/assets/new",
+      "component": "EquipmentForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/assets/:id",
+      "component": "EquipmentForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/assets",
+      "component": "EquipmentList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/assets/new",
+      "component": "EquipmentForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/assets/:id",
+      "component": "EquipmentForm"
+    }
+  ],
+  "asset-management": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/asset-management/*",
+      "component": "AssetManagementHome"
+    }
+  ],
+  "project-management": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/project-management/*",
+      "component": "ProjectManagementHome"
+    }
+  ],
+  "production": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/production/*",
+      "component": "ProductionHome"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/production",
+      "component": "div"
+    }
+  ],
+  "pos": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/pos/*",
+      "component": "PosHome"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/pos",
+      "component": "div"
+    }
+  ],
+  "business-intelligence": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/business-intelligence/*",
+      "component": "BusinessIntelligenceHome"
+    }
+  ],
+  "service-management": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/service-management/*",
+      "component": "ServiceManagementHome"
+    }
+  ],
+  "transport": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/transport/*",
+      "component": "TransportLayout"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/transport",
+      "component": "div"
+    }
+  ],
+  "executive-overview": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/executive-overview/*",
+      "component": "ExecutiveOverviewRoutes"
+    }
+  ],
+  "notifications": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/notifications",
+      "component": "NotificationsPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/notifications",
+      "component": "NotificationSettings"
+    }
+  ],
+  "social-feed": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/social-feed",
+      "component": "SocialFeedPage"
+    },
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/social-feed/:id",
+      "component": "SocialFeedPage"
+    }
+  ],
+  "admin": [
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/admin/roles",
+      "component": "RoleSetup"
+    },
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/admin/roles/new",
+      "component": "RoleSetup"
+    },
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/admin/roles/:id",
+      "component": "RoleSetup"
+    },
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/admin/user-permissions",
+      "component": "UserPermissions"
+    },
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/admin/reports/user-login-activity",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/admin/reports/user-activity",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/admin/reports/audit",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\layout\\AppShell.jsx",
+      "path": "/admin/user-activity",
+      "component": "Navigate"
+    }
+  ],
+  "users": [
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/users",
+      "component": "UserList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/users/new",
+      "component": "UserForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/users/:id",
+      "component": "UserForm"
+    }
+  ],
+  "branches": [
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/branches",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/branches/new",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/branches/:id",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "branches",
+      "component": "HRSetup"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\system-configuration\\SystemConfigurationHome.jsx",
+      "path": "/branches",
+      "component": "BranchList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\system-configuration\\SystemConfigurationHome.jsx",
+      "path": "/branches/new",
+      "component": "BranchForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\system-configuration\\SystemConfigurationHome.jsx",
+      "path": "/branches/:id",
+      "component": "BranchForm"
+    }
+  ],
+  "workflows": [
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/workflows",
+      "component": "WorkflowList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/workflows/new",
+      "component": "WorkflowForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/workflows/:id",
+      "component": "WorkflowForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/workflows/approvals",
+      "component": "MyApprovals"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/workflows/approved",
+      "component": "ApprovedDocuments"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/workflows/sent",
+      "component": "SentDocuments"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/workflows/approvals/:instanceId",
+      "component": "DocumentReview"
+    }
+  ],
+  "reports": [
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/reports/system-log-book",
+      "component": "SystemLogBookPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/reports/user-login-activity",
+      "component": "UserLoginActivityReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/reports/user-activity",
+      "component": "UserLoginActivityReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/reports/user-activity-and-audit",
+      "component": "UserLoginActivityReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/reports/audit",
+      "component": "UserLoginActivityReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\asset-management\\AssetManagementHome.jsx",
+      "path": "/reports/schedule",
+      "component": "FixedAssetScheduleReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\asset-management\\AssetManagementHome.jsx",
+      "path": "/reports",
+      "component": "FixedAssetScheduleReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/reports/sla-compliance",
+      "component": "FMSLAComplianceReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/reports/property-costs",
+      "component": "FMPropertyCostReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/reports/contract-profitability",
+      "component": "FMContractsReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/reports/soft-services",
+      "component": "FMSoftServicesReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/reports/checklist-inspections",
+      "component": "FMInspectionChecklistReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/reports/daily-assigned-runs",
+      "component": "FMDailyAssignedRunsReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/reports",
+      "component": "FMSLAComplianceReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/bank-reconciliations",
+      "component": "BankReconciliationsReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/bank-reconciliation-transactions",
+      "component": "BankReconciliationTransactionReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/voucher-register",
+      "component": "VoucherRegisterReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/voucher-register-report",
+      "component": "VoucherRegisterReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports",
+      "component": "VoucherRegisterReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/trial-balance",
+      "component": "TrialBalanceReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/journal",
+      "component": "JournalReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/journals",
+      "component": "JournalReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/general-ledger",
+      "component": "GeneralLedgerReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/creditors-ledger",
+      "component": "CreditorsLedgerReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/debtors-ledger",
+      "component": "DebtorsLedgerReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/supplier-outstanding",
+      "component": "SupplierOutstandingReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/customer-outstanding",
+      "component": "CustomerOutstandingReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/outstanding-receivables",
+      "component": "OutstandingReceivableReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/outstanding-receivable",
+      "component": "OutstandingReceivableReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/payment-due",
+      "component": "PaymentDueReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/audit-trail",
+      "component": "AuditTrailReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/ratio-analysis",
+      "component": "RatioAnalysisReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/profit-and-loss",
+      "component": "ProfitAndLossReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/profit-loss-oci",
+      "component": "StatementOfProfitLossOCIReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/balance-sheet",
+      "component": "BalanceSheetReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/cash-flow",
+      "component": "CashFlowReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/chart-of-accounts",
+      "component": "ChartOfAccountsReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/chart-of-accounts-graphical",
+      "component": "GraphicalChartOfAccountsPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "reports/budget-vs-actual",
+      "component": "BudgetVsActualReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "reports",
+      "component": "HRReports"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "reports/:reportId",
+      "component": "HRReports"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "reports",
+      "component": "InventoryReportsPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "reports/health-monitor",
+      "component": "InventoryHealthMonitorPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "reports/periodical-stock-summary",
+      "component": "PeriodicalStockSummaryPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "reports/periodical-stock-statement",
+      "component": "PeriodicalStockStatementPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "reports/issue-register",
+      "component": "IssueRegisterReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "reports/stock-transfer-register",
+      "component": "StockTransferRegisterReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "reports/stock-balances",
+      "component": "StockBalancesReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "reports/stock-value",
+      "component": "StockValueReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "reports/stock-adjustments",
+      "component": "StockAdjustmentReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "reports/material-returns",
+      "component": "MaterialReturnReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "reports/stock-verification",
+      "component": "StockVerificationReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "reports/stock-aging-analysis",
+      "component": "StockAgingAnalysisReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "reports/expired-items",
+      "component": "ExpiredItemsReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "reports/slow-moving",
+      "component": "SlowMovingReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "reports/fast-moving",
+      "component": "FastMovingReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "reports/non-moving",
+      "component": "NonMovingReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/reports",
+      "component": "MaintenanceReports"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/reports/downtime",
+      "component": "DowntimeAnalysisReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/reports/sla-compliance",
+      "component": "FMSLAComplianceReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/reports/property-costs",
+      "component": "FMPropertyCostReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/reports/contract-profitability",
+      "component": "FMContractsReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/reports/soft-services",
+      "component": "FMSoftServicesReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/reports/checklist-inspections",
+      "component": "FMInspectionChecklistReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/reports",
+      "component": "PosReports"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/reports/*",
+      "component": "PosReports"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "reports",
+      "component": "ProductionReports"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "reports/production-detail",
+      "component": "ProductionDetailReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "reports/efficiency",
+      "component": "EfficiencyReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "reports/warehouse-stock",
+      "component": "ProductionWarehouseStockReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "reports/costing",
+      "component": "ProductionCostingPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "reports/variance",
+      "component": "MaterialVarianceReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "reports/bom-explosion",
+      "component": "BomExplosionReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "reports/machines",
+      "component": "MachineUtilizationReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "reports/summary",
+      "component": "ProductionSummaryReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/reports",
+      "component": "ProjectReports"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/reports/task-management",
+      "component": "TaskExecutionReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/reports/task-management-execution",
+      "component": "TaskExecutionReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/reports/task-management-and-execution",
+      "component": "TaskExecutionReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/reports/task-execution",
+      "component": "TaskExecutionReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/reports/project-status",
+      "component": "ProjectStatusReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/reports/project-income",
+      "component": "ProjectIncomeReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/reports/project-expense",
+      "component": "ProjectExpenseReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/reports/project-expense-income",
+      "component": "ProjectExpenseIncomeReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/reports/temporal-warehouses",
+      "component": "TemporalWarehouseStockReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/reports/warehouse-stock",
+      "component": "TemporalWarehouseStockReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/reports/cost-variance",
+      "component": "ProjectCostVarianceReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/reports/budget-variance",
+      "component": "ProjectCostVarianceReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/reports/resource-allocation",
+      "component": "ResourceStatusReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/reports/resources",
+      "component": "ResourceStatusReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "reports/import-order-tracking",
+      "component": "ImportOrderTrackingReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "reports/local-order-tracking",
+      "component": "LocalOrderTrackingReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "reports/purchase-tracking",
+      "component": "PurchaseTrackingReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "reports/supplier-quotation-analysis",
+      "component": "SupplierQuotationAnalysisReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "reports/pending-grn-to-bill-local",
+      "component": "PendingGrnToBillLocalReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "reports/pending-grn-to-bill-import",
+      "component": "PendingGrnToBillImportReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "reports/import-order-list",
+      "component": "ImportOrderListReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "reports/pending-shipments",
+      "component": "PendingShipmentDetailsReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "reports/purchase-register",
+      "component": "PurchaseRegisterReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/reports/sales-return",
+      "component": "SalesReturnReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/reports/sales-register",
+      "component": "SalesRegisterReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/reports/delivery-register",
+      "component": "DeliveryRegisterReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/reports/debtors-balance",
+      "component": "DebtorsBalanceReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/reports/sales-profitability",
+      "component": "SalesProfitabilityReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/reports/sales-tracking",
+      "component": "SalesTrackingReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "reports",
+      "component": "ServiceReportsPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "reports/trip-execution",
+      "component": "TripExecutionReportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "reports/trip-history",
+      "component": "TripHistoryReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "reports/revenue",
+      "component": "TransportRevenueReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "reports/profitability",
+      "component": "TripProfitabilityReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "reports/fuel",
+      "component": "FuelConsumptionReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "reports/utilization",
+      "component": "VehicleUtilizationReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "reports/driver-performance",
+      "component": "DriverPerformanceReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "reports/delays",
+      "component": "TripDelaysReport"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "reports",
+      "component": "TransportReports"
+    }
+  ],
+  "settings": [
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/settings",
+      "component": "SettingsPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/settings/templates",
+      "component": "DocumentTemplatesPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/settings",
+      "component": "div"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "settings",
+      "component": "TransportSettings"
+    }
+  ],
+  "diagnostics": [
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/diagnostics",
+      "component": "DiagnosticsPage"
+    }
+  ],
+  "access": [
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/access/roles",
+      "component": "RoleManagement"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/access/roles/new",
+      "component": "RoleManagement"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/access/roles/:id",
+      "component": "RoleManagement"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/access/user-permissions",
+      "component": "UserPermissions"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/access/user-permissions/:id",
+      "component": "UserPermissions"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/access/dashboard-permissions",
+      "component": "DashboardPermissions"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/access/user-overrides",
+      "component": "UserOverrides"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/access/user-overrides/new",
+      "component": "UserOverrides"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/access/exceptional-permissions",
+      "component": "ExceptionalPermissionsList"
+    }
+  ],
+  "exceptional-permissions": [
+    {
+      "file": "client\\src\\pages\\modules\\administration\\AdministrationHome.jsx",
+      "path": "/exceptional-permissions",
+      "component": "ExceptionalPermissionsList"
+    }
+  ],
+  "register": [
+    {
+      "file": "client\\src\\pages\\modules\\asset-management\\AssetManagementHome.jsx",
+      "path": "/register",
+      "component": "AssetRegisterList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/register",
+      "component": "PosRegister"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/register/new",
+      "component": "PosRegister"
+    }
+  ],
+  "list": [
+    {
+      "file": "client\\src\\pages\\modules\\asset-management\\AssetManagementHome.jsx",
+      "path": "/list",
+      "component": "AssetRegisterList"
+    }
+  ],
+  "new": [
+    {
+      "file": "client\\src\\pages\\modules\\asset-management\\AssetManagementHome.jsx",
+      "path": "/new",
+      "component": "AssetRegisterForm"
+    }
+  ],
+  "categories": [
+    {
+      "file": "client\\src\\pages\\modules\\asset-management\\AssetManagementHome.jsx",
+      "path": "/categories",
+      "component": "AssetCategoriesPage"
+    }
+  ],
+  "depreciation": [
+    {
+      "file": "client\\src\\pages\\modules\\asset-management\\AssetManagementHome.jsx",
+      "path": "/depreciation",
+      "component": "DepreciationRunPage"
+    }
+  ],
+  "transfers": [
+    {
+      "file": "client\\src\\pages\\modules\\asset-management\\AssetManagementHome.jsx",
+      "path": "/transfers",
+      "component": "AssetTransfersPage"
+    }
+  ],
+  "disposals": [
+    {
+      "file": "client\\src\\pages\\modules\\asset-management\\AssetManagementHome.jsx",
+      "path": "/disposals",
+      "component": "AssetDisposalsPage"
+    }
+  ],
+  "revaluations": [
+    {
+      "file": "client\\src\\pages\\modules\\asset-management\\AssetManagementHome.jsx",
+      "path": "/revaluations",
+      "component": "AssetRevaluationPage"
+    }
+  ],
+  "setup": [
+    {
+      "file": "client\\src\\pages\\modules\\asset-management\\AssetManagementHome.jsx",
+      "path": "/setup",
+      "component": "AssetSetupPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/setup",
+      "component": "FacilitiesSetupPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "setup",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "setup/finance",
+      "component": "FinanceSetupPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "setup/petty-cash",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "setup/account-groups",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "setup/account-groups/*",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "setup/accounts",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "setup/accounts/*",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "setup/tax-codes",
+      "component": "TaxCodesPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "setup/currencies",
+      "component": "CurrenciesPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "setup/fiscal-years",
+      "component": "FiscalYearsPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "setup/cost-centers",
+      "component": "CostCentersPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "setup/opening-balances",
+      "component": "OpeningBalancesPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "setup/budget",
+      "component": "BudgetPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "setup",
+      "component": "HRSetup"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/setup",
+      "component": "MaintenanceSetupPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/setup",
+      "component": "PosSetup"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/setup/*",
+      "component": "PosSetup"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "setup",
+      "component": "ProductionSetup"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "setup/processes",
+      "component": "ProcessList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "setup/departments",
+      "component": "DepartmentList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "setup/bom-output-types",
+      "component": "BomOutputTypeList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "setup/machines",
+      "component": "MachineList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "setup/shifts",
+      "component": "ShiftList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/setup",
+      "component": "PMSetup"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "setup",
+      "component": "PurchaseSetupPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/setup",
+      "component": "SalesSetupPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "setup",
+      "component": "ServiceParametersPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "setup/parameters",
+      "component": "ServiceParametersPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "setup/*",
+      "component": "ServiceParametersPage"
+    }
+  ],
+  ":id": [
+    {
+      "file": "client\\src\\pages\\modules\\asset-management\\AssetManagementHome.jsx",
+      "path": "/:id",
+      "component": "AssetRegisterForm"
+    }
+  ],
+  "executive-dashboard": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/executive-dashboard",
+      "component": "div"
+    }
+  ],
+  "data-sources": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/data-sources",
+      "component": "div"
+    }
+  ],
+  "datasets": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/datasets",
+      "component": "div"
+    }
+  ],
+  "data-prep": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/data-prep",
+      "component": "div"
+    }
+  ],
+  "data-models": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/data-models",
+      "component": "div"
+    }
+  ],
+  "data-quality": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/data-quality",
+      "component": "div"
+    }
+  ],
+  "etl-pipelines": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/etl-pipelines",
+      "component": "div"
+    }
+  ],
+  "multidimensional": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/multidimensional",
+      "component": "div"
+    }
+  ],
+  "financial": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/financial",
+      "component": "div"
+    }
+  ],
+  "hr": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/hr",
+      "component": "div"
+    }
+  ],
+  "projects": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/projects",
+      "component": "div"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/projects",
+      "component": "ProjectList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/projects/new",
+      "component": "ProjectForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/projects/:id/edit",
+      "component": "ProjectForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/projects/:id",
+      "component": "ProjectForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/projects/:id/dashboard",
+      "component": "ProjectDetailDashboard"
+    }
+  ],
+  "service": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/service",
+      "component": "div"
+    }
+  ],
+  "cross-module": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/cross-module",
+      "component": "div"
+    }
+  ],
+  "kpi-center": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/kpi-center",
+      "component": "div"
+    }
+  ],
+  "data-explorer": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/data-explorer",
+      "component": "div"
+    }
+  ],
+  "insights": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/insights",
+      "component": "div"
+    }
+  ],
+  "ai-insights": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/ai-insights",
+      "component": "div"
+    }
+  ],
+  "banks-ai": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/banks-ai",
+      "component": "div"
+    }
+  ],
+  "alerts": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/alerts",
+      "component": "div"
+    }
+  ],
+  "dashboard-builder": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/dashboard-builder",
+      "component": "div"
+    }
+  ],
+  "dashboards": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/dashboards",
+      "component": "div"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/dashboards/new",
+      "component": "div"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/dashboards/:id/edit",
+      "component": "div"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "dashboards",
+      "component": "ProductionDashboardPage"
+    }
+  ],
+  "report-center": [
+    {
+      "file": "client\\src\\pages\\modules\\business-intelligence\\BusinessIntelligenceHome.jsx",
+      "path": "/report-center",
+      "component": "div"
+    }
+  ],
+  "safety": [
+    {
+      "file": "client\\src\\pages\\modules\\environmental-health-safety\\EnvironmentalHealthSafetyHome.jsx",
+      "path": "/safety",
+      "component": "SafetyManagementPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\environmental-health-safety\\EnvironmentalHealthSafetyHome.jsx",
+      "path": "/safety/incidents",
+      "component": "IncidentRegisterPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\environmental-health-safety\\EnvironmentalHealthSafetyHome.jsx",
+      "path": "/safety/toolbox-talks",
+      "component": "ToolboxTalksPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/safety",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/safety/incidents",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/safety/toolbox-talks",
+      "component": "Navigate"
+    }
+  ],
+  "incidents": [
+    {
+      "file": "client\\src\\pages\\modules\\environmental-health-safety\\EnvironmentalHealthSafetyHome.jsx",
+      "path": "/incidents",
+      "component": "IncidentRegisterPage"
+    }
+  ],
+  "toolbox-talks": [
+    {
+      "file": "client\\src\\pages\\modules\\environmental-health-safety\\EnvironmentalHealthSafetyHome.jsx",
+      "path": "/toolbox-talks",
+      "component": "ToolboxTalksPage"
+    }
+  ],
+  "hsa-compliance": [
+    {
+      "file": "client\\src\\pages\\modules\\environmental-health-safety\\EnvironmentalHealthSafetyHome.jsx",
+      "path": "/hsa-compliance",
+      "component": "HealthSafetyCompliancePage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/hsa-compliance",
+      "component": "Navigate"
+    }
+  ],
+  "compliance": [
+    {
+      "file": "client\\src\\pages\\modules\\environmental-health-safety\\EnvironmentalHealthSafetyHome.jsx",
+      "path": "/compliance",
+      "component": "FMCompliancePage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/compliance",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "compliance",
+      "component": "VehicleComplianceList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "compliance/new",
+      "component": "VehicleComplianceForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "compliance/:id",
+      "component": "VehicleComplianceForm"
+    }
+  ],
+  "sustainability": [
+    {
+      "file": "client\\src\\pages\\modules\\environmental-health-safety\\EnvironmentalHealthSafetyHome.jsx",
+      "path": "/sustainability",
+      "component": "SustainabilityManagementPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/sustainability",
+      "component": "Navigate"
+    }
+  ],
+  "outstanding-receivables": [
+    {
+      "file": "client\\src\\pages\\modules\\executive-overview\\ExecutiveOverviewRoutes.jsx",
+      "path": "outstanding-receivables",
+      "component": "ExecOutstandingReceivablesPage"
+    }
+  ],
+  "outstanding-payables": [
+    {
+      "file": "client\\src\\pages\\modules\\executive-overview\\ExecutiveOverviewRoutes.jsx",
+      "path": "outstanding-payables",
+      "component": "ExecOutstandingPayablesPage"
+    }
+  ],
+  "fast-moving-items": [
+    {
+      "file": "client\\src\\pages\\modules\\executive-overview\\ExecutiveOverviewRoutes.jsx",
+      "path": "fast-moving-items",
+      "component": "ExecFastMovingItemsPage"
+    }
+  ],
+  "slow-moving-items": [
+    {
+      "file": "client\\src\\pages\\modules\\executive-overview\\ExecutiveOverviewRoutes.jsx",
+      "path": "slow-moving-items",
+      "component": "ExecSlowMovingItemsPage"
+    }
+  ],
+  "sales-today": [
+    {
+      "file": "client\\src\\pages\\modules\\executive-overview\\ExecutiveOverviewRoutes.jsx",
+      "path": "sales-today",
+      "component": "ExecSalesTodayPage"
+    }
+  ],
+  "sales-this-month": [
+    {
+      "file": "client\\src\\pages\\modules\\executive-overview\\ExecutiveOverviewRoutes.jsx",
+      "path": "sales-this-month",
+      "component": "ExecSalesThisMonthPage"
+    }
+  ],
+  "sales-this-week": [
+    {
+      "file": "client\\src\\pages\\modules\\executive-overview\\ExecutiveOverviewRoutes.jsx",
+      "path": "sales-this-week",
+      "component": "ExecSalesThisWeekPage"
+    }
+  ],
+  "supplier-outstanding": [
+    {
+      "file": "client\\src\\pages\\modules\\executive-overview\\ExecutiveOverviewRoutes.jsx",
+      "path": "supplier-outstanding",
+      "component": "ExecSupplierOutstandingPage"
+    }
+  ],
+  "properties": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/properties",
+      "component": "PropertiesList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/properties",
+      "component": "PropertiesList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "properties",
+      "component": "PropertiesList"
+    }
+  ],
+  "onboarding": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/onboarding",
+      "component": "PropertyOnboardingPage"
+    }
+  ],
+  "equipment": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/equipment",
+      "component": "EquipmentList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/equipment/new",
+      "component": "EquipmentForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/equipment/:id",
+      "component": "EquipmentForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/equipment",
+      "component": "EquipmentList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/equipment/new",
+      "component": "EquipmentForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/equipment/:id",
+      "component": "EquipmentForm"
+    }
+  ],
+  "contracts": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/contracts",
+      "component": "FMContractsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/contracts",
+      "component": "MaintenanceContractList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/contracts/new",
+      "component": "MaintenanceContractForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/contracts/:id",
+      "component": "MaintenanceContractForm"
+    }
+  ],
+  "fm-contracts": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/fm-contracts",
+      "component": "FMContractsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/fm-contracts",
+      "component": "FMContractsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "fm-contracts",
+      "component": "FMContractsList"
+    }
+  ],
+  "sla-policies": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/sla-policies",
+      "component": "SLAPoliciesPage"
+    }
+  ],
+  "servicebilling": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/servicebilling",
+      "component": "ServiceBillingList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/servicebilling/new",
+      "component": "ServiceBillingForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/servicebilling/:id",
+      "component": "ServiceBillingForm"
+    }
+  ],
+  "service-billing": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/service-billing",
+      "component": "ServiceBillingList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/service-billing/new",
+      "component": "ServiceBillingForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/service-billing/:id",
+      "component": "ServiceBillingForm"
+    }
+  ],
+  "helpdesk": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/helpdesk",
+      "component": "FMHelpdeskPage"
+    }
+  ],
+  "soft-services": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/soft-services",
+      "component": "SoftServicesPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/soft-services",
+      "component": "SoftServicesPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "soft-services",
+      "component": "SoftServicesPage"
+    }
+  ],
+  "hard-services": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/hard-services",
+      "component": "HardServicesPage"
+    }
+  ],
+  "field-service": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/field-service",
+      "component": "FieldTechnicianJobCard"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/field-service",
+      "component": "FieldTechnicianJobCard"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "field-service",
+      "component": "FieldTechnicianJobCard"
+    }
+  ],
+  "tasks": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/tasks",
+      "component": "FMTaskList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/tasks/new",
+      "component": "FMTaskForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/tasks/:id",
+      "component": "FMTaskForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/tasks/execution",
+      "component": "FMTaskExecution"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/tasks",
+      "component": "TaskList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/tasks/assignment",
+      "component": "TaskAssignmentKanban"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/tasks/execution",
+      "component": "TaskExecution"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/tasks/new",
+      "component": "TaskForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/tasks/:id",
+      "component": "TaskForm"
+    }
+  ],
+  "purchase-requisitions": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/purchase-requisitions",
+      "component": "FMPurchaseRequisitionList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/purchase-requisitions/new",
+      "component": "FMPurchaseRequisitionForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/purchase-requisitions/:id",
+      "component": "FMPurchaseRequisitionForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/purchase-requisitions",
+      "component": "PMPurchaseRequisitionList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/purchase-requisitions/new",
+      "component": "PMPurchaseRequisitionForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/purchase-requisitions/:id",
+      "component": "PMPurchaseRequisitionForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/purchase-requisitions/:id/edit",
+      "component": "PMPurchaseRequisitionForm"
+    }
+  ],
+  "material-requisitions": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/material-requisitions",
+      "component": "FMMaterialRequisitionList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/material-requisitions/new",
+      "component": "FMMaterialRequisitionForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/material-requisitions/:id",
+      "component": "FMMaterialRequisitionForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "material-requisitions",
+      "component": "MaterialRequisitionList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "material-requisitions/:id",
+      "component": "MaterialRequisitionForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/material-requisitions",
+      "component": "MaintenanceMaterialRequisitionList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/material-requisitions/new",
+      "component": "MaintenanceMaterialRequisitionForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/material-requisitions/:id",
+      "component": "MaintenanceMaterialRequisitionForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/material-requisitions",
+      "component": "PMMaterialRequisitionList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/material-requisitions/new",
+      "component": "PMMaterialRequisitionForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/material-requisitions/:id",
+      "component": "PMMaterialRequisitionForm"
+    }
+  ],
+  "material-receipts": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/material-receipts",
+      "component": "FMMaterialReceiptList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/material-receipts/new",
+      "component": "FMMaterialReceiptForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/material-receipts/:id",
+      "component": "FMMaterialReceiptForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/material-receipts",
+      "component": "MaterialReceiptList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/material-receipts/new",
+      "component": "MaterialReceiptForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/material-receipts/:id",
+      "component": "MaterialReceiptForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/material-receipts",
+      "component": "PMMaterialReceiptList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/material-receipts/new",
+      "component": "PMMaterialReceiptForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/material-receipts/:id",
+      "component": "PMMaterialReceiptForm"
+    }
+  ],
+  "material-utilizations": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/material-utilizations",
+      "component": "FMMaterialUtilizationList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/material-utilizations/new",
+      "component": "FMMaterialUtilizationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/material-utilizations/:id",
+      "component": "FMMaterialUtilizationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/material-utilizations",
+      "component": "PMMaterialUtilizationList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/material-utilizations/new",
+      "component": "PMMaterialUtilizationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/material-utilizations/:id",
+      "component": "PMMaterialUtilizationForm"
+    }
+  ],
+  "inspections": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/inspections",
+      "component": "FMInspectionsPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "inspections",
+      "component": "InspectionsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "inspections/new",
+      "component": "InspectionForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "inspections/:id",
+      "component": "InspectionForm"
+    }
+  ],
+  "checklists": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/checklists",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/checklists",
+      "component": "ChecklistTemplatesList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "checklists",
+      "component": "ChecklistTemplatesList"
+    }
+  ],
+  "utilities-energy": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/utilities-energy",
+      "component": "UtilitiesEnergyPage"
+    }
+  ],
+  "security": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/security",
+      "component": "SecurityAccessPage"
+    }
+  ],
+  "workforce": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/workforce",
+      "component": "FMWorkforceRosterPage"
+    }
+  ],
+  "space-occupancy": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/space-occupancy",
+      "component": "SpaceOccupancyPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/space-occupancy/bookings",
+      "component": "RoomBookingsPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/space-occupancy/tenants",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/space-occupancy/spaces",
+      "component": "Navigate"
+    }
+  ],
+  "space-bookings": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/space-bookings",
+      "component": "RoomBookingsPage"
+    }
+  ],
+  "tenant-occupancy": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/tenant-occupancy",
+      "component": "Navigate"
+    }
+  ],
+  "spaces": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/spaces",
+      "component": "Navigate"
+    }
+  ],
+  "contractors-vendors": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/contractors-vendors",
+      "component": "ContractorVendorManagementPage"
+    }
+  ],
+  "budgeting-finance": [
+    {
+      "file": "client\\src\\pages\\modules\\facilities\\FacilitiesHome.jsx",
+      "path": "/budgeting-finance",
+      "component": "FacilitiesBudgetingFinancePage"
+    }
+  ],
+  "journal-voucher": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "journal-voucher",
+      "component": "JournalVoucherList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "journal-voucher/:id",
+      "component": "JournalVoucherForm"
+    }
+  ],
+  "payment-voucher": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "payment-voucher",
+      "component": "PaymentVoucherList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "payment-voucher/:id",
+      "component": "PaymentVoucherForm"
+    }
+  ],
+  "receipt-voucher": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "receipt-voucher",
+      "component": "ReceiptVoucherList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "receipt-voucher/:id",
+      "component": "ReceiptVoucherForm"
+    }
+  ],
+  "contra-voucher": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "contra-voucher",
+      "component": "ContraVoucherList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "contra-voucher/create",
+      "component": "ContraVoucherForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "contra-voucher/:id",
+      "component": "ContraVoucherForm"
+    }
+  ],
+  "petty-cash": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "petty-cash",
+      "component": "PettyCashPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "petty-cash/disburse",
+      "component": "PettyCashPage"
+    }
+  ],
+  "sales-voucher": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "sales-voucher",
+      "component": "SalesVoucherList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "sales-voucher/create",
+      "component": "SalesVoucherForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "sales-voucher/:id",
+      "component": "SalesVoucherForm"
+    }
+  ],
+  "purchase-voucher": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "purchase-voucher",
+      "component": "PurchaseVoucherList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "purchase-voucher/create",
+      "component": "PurchaseVoucherForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "purchase-voucher/:id",
+      "component": "PurchaseVoucherForm"
+    }
+  ],
+  "debit-note": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "debit-note",
+      "component": "DebitNoteList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "debit-note/create",
+      "component": "DebitNoteForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "debit-note/:id",
+      "component": "DebitNoteForm"
+    }
+  ],
+  "credit-note": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "credit-note",
+      "component": "CreditNoteList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "credit-note/create",
+      "component": "CreditNoteForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "credit-note/:id",
+      "component": "CreditNoteForm"
+    }
+  ],
+  "vouchers": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "vouchers/import",
+      "component": "VoucherImportPage"
+    }
+  ],
+  "import": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "import",
+      "component": "VoucherImportPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "import/create",
+      "component": "VoucherImportPage"
+    }
+  ],
+  "import-vouchers": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "import-vouchers",
+      "component": "VoucherImportPage"
+    }
+  ],
+  "finance-setup": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "finance-setup",
+      "component": "Navigate"
+    }
+  ],
+  "opening-balances": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "opening-balances",
+      "component": "OpeningBalancesPage"
+    }
+  ],
+  "accounts": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "accounts",
+      "component": "Navigate"
+    }
+  ],
+  "bank-reconciliation": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "bank-reconciliation",
+      "component": "BankReconciliationList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "bank-reconciliation/new",
+      "component": "BankReconciliationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "bank-reconciliation/create",
+      "component": "BankReconciliationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "bank-reconciliation/:id",
+      "component": "BankReconciliationForm"
+    }
+  ],
+  "pdc-postings": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "pdc-postings",
+      "component": "PdcPostingsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "pdc-postings/new",
+      "component": "PdcPostingForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "pdc-postings/create",
+      "component": "PdcPostingForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "pdc-postings/:id",
+      "component": "PdcPostingForm"
+    }
+  ],
+  "voucher-register": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "voucher-register",
+      "component": "VoucherRegisterReportPage"
+    }
+  ],
+  "budget-dashboard": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "budget-dashboard",
+      "component": "BudgetDashboardPage"
+    }
+  ],
+  "budgets": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "budgets/dashboard",
+      "component": "BudgetDashboardPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "budgets",
+      "component": "BudgetPage"
+    }
+  ],
+  "budget-vs-actual": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "budget-vs-actual",
+      "component": "BudgetVsActualReportPage"
+    }
+  ],
+  "budget": [
+    {
+      "file": "client\\src\\pages\\modules\\finance\\FinanceRoutes.jsx",
+      "path": "budget",
+      "component": "BudgetPage"
+    }
+  ],
+  "employees": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "employees",
+      "component": "EmployeeList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "employees/new",
+      "component": "EmployeeForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "employees/:id",
+      "component": "EmployeeForm"
+    }
+  ],
+  "work-schedules": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "work-schedules",
+      "component": "WorkScheduleManagement"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "work-schedules",
+      "component": "WorkScheduleManagement"
+    }
+  ],
+  "roster": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "roster",
+      "component": "RosterManagement"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "roster",
+      "component": "RosterManagement"
+    }
+  ],
+  "requisitions": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "requisitions",
+      "component": "RequisitionList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "requisitions/new",
+      "component": "RequisitionForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "requisitions/:id",
+      "component": "RequisitionForm"
+    }
+  ],
+  "candidates": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "candidates",
+      "component": "CandidatesList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "candidates/new",
+      "component": "CandidateForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "candidates/:id",
+      "component": "CandidateForm"
+    }
+  ],
+  "interviews": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "interviews",
+      "component": "InterviewsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "interviews/new",
+      "component": "InterviewForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "interviews/:id",
+      "component": "InterviewForm"
+    }
+  ],
+  "offers": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "offers",
+      "component": "OffersList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "offers/new",
+      "component": "OfferForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "offers/:id",
+      "component": "OfferForm"
+    }
+  ],
+  "payroll": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "payroll",
+      "component": "PayrollDashboard"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "payroll/process",
+      "component": "SalaryProcessing"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "payroll/manual-components",
+      "component": "ManualPayrollComponents"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "payroll/salary-posting",
+      "component": "SalaryPostingPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "payroll/salary-exemptions",
+      "component": "SalaryExemptionsPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "payroll/elements",
+      "component": "AllowanceList"
+    }
+  ],
+  "leave": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "leave",
+      "component": "LeaveManagementDashboard"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "leave/request",
+      "component": "LeaveApplication"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "leave/apply",
+      "component": "LeaveApplication"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "leave/scheduling",
+      "component": "LeaveScheduling"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "leave/roster",
+      "component": "LeaveRoster"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "leave/records",
+      "component": "LeaveRecords"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "leave/calendar",
+      "component": "LeaveCalendar"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "leave/balances",
+      "component": "LeaveBalances"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "leave/types",
+      "component": "LeaveSetupList"
+    }
+  ],
+  "leave-scheduling": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "leave-scheduling",
+      "component": "LeaveScheduling"
+    }
+  ],
+  "leave-roster": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "leave-roster",
+      "component": "LeaveRoster"
+    }
+  ],
+  "leave-balances": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "leave-balances",
+      "component": "LeaveBalances"
+    }
+  ],
+  "departments": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "departments",
+      "component": "HRSetup"
+    }
+  ],
+  "designations": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "designations",
+      "component": "HRSetup"
+    }
+  ],
+  "job-roles": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "job-roles",
+      "component": "HRSetup"
+    }
+  ],
+  "organogram": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "organogram",
+      "component": "OrganogramPage"
+    }
+  ],
+  "performance": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "performance/kpis",
+      "component": "KPISetup"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "performance/appraisal",
+      "component": "AppraisalForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "performance/appraisal/:id",
+      "component": "AppraisalForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "performance/submit",
+      "component": "SubmitAppraisals"
+    }
+  ],
+  "training": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "training",
+      "component": "TrainingPrograms"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "training/history",
+      "component": "TrainingHistory"
+    }
+  ],
+  "policies": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "policies",
+      "component": "PolicyList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "policies/new",
+      "component": "PolicyForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "policies/view",
+      "component": "PolicyViewer"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "policies/:id",
+      "component": "PolicyForm"
+    }
+  ],
+  "exit": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "exit/request",
+      "component": "ExitRequest"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "exit/clearance",
+      "component": "ClearanceTracking"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "exit/offboarding",
+      "component": "ClearanceTracking"
+    }
+  ],
+  "leave-setup": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "leave-setup",
+      "component": "LeaveSetupList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "leave-setup/new",
+      "component": "LeaveSetupForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "leave-setup/:id",
+      "component": "LeaveSetupForm"
+    }
+  ],
+  "shifts": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "shifts",
+      "component": "ShiftList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "shifts/new",
+      "component": "ShiftForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "shifts/:id",
+      "component": "ShiftForm"
+    }
+  ],
+  "attendance-policies": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "attendance-policies",
+      "component": "WorkScheduleManagement"
+    }
+  ],
+  "biometric-clock": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "biometric-clock",
+      "component": "BiometricClockPage"
+    }
+  ],
+  "biometric-devices": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "biometric-devices",
+      "component": "BiometricDevicesPage"
+    }
+  ],
+  "biometric-settings": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "biometric-settings",
+      "component": "Navigate"
+    }
+  ],
+  "biometric-analytics": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "biometric-analytics",
+      "component": "BiometricAnalyticsPage"
+    }
+  ],
+  "attendance": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "attendance",
+      "component": "AttendanceDashboard"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "attendance/new",
+      "component": "AttendanceForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "attendance/list",
+      "component": "AttendanceList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "attendance/bulk",
+      "component": "BulkAttendance"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "attendance/timesheet",
+      "component": "TimesheetView"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "attendance/:id",
+      "component": "AttendanceForm"
+    }
+  ],
+  "bulk-attendance": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "bulk-attendance",
+      "component": "BulkAttendance"
+    }
+  ],
+  "timesheet": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "timesheet",
+      "component": "TimesheetView"
+    }
+  ],
+  "timesheet-report": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "timesheet-report",
+      "component": "TimesheetReport"
+    }
+  ],
+  "salary-config": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "salary-config",
+      "component": "SalaryConfigList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "salary-config/base-salaries",
+      "component": "BaseSalariesPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "salary-config/structure",
+      "component": "SalaryStructurePage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "salary-config/new",
+      "component": "SalaryConfigForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "salary-config/:id",
+      "component": "SalaryConfigForm"
+    }
+  ],
+  "tax-config": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "tax-config",
+      "component": "TaxConfigList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "tax-config/new",
+      "component": "TaxConfigForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "tax-config/:id",
+      "component": "TaxConfigForm"
+    }
+  ],
+  "tax-reliefs": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "tax-reliefs",
+      "component": "TaxReliefList"
+    }
+  ],
+  "allowances": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "allowances",
+      "component": "AllowanceList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "allowances/new",
+      "component": "AllowanceForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "allowances/:id",
+      "component": "AllowanceForm"
+    }
+  ],
+  "loan-requests": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "loan-requests",
+      "component": "LoanRequestList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "loan-requests/new",
+      "component": "LoanRequestForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "loan-requests/:id",
+      "component": "LoanRequestForm"
+    }
+  ],
+  "loans": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "loans",
+      "component": "LoanList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "loans/new",
+      "component": "LoanDisbursementPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "loans/:id",
+      "component": "LoanForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "loans/:id/disburse",
+      "component": "LoanDisbursementPage"
+    }
+  ],
+  "payslips": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "payslips",
+      "component": "PayslipList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "payslips/new",
+      "component": "PayslipForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "payslips/:id",
+      "component": "PayslipForm"
+    }
+  ],
+  "promotions": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "promotions",
+      "component": "PromotionList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "promotions/new",
+      "component": "PromotionForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "promotions/:id",
+      "component": "PromotionForm"
+    }
+  ],
+  "medical-policies": [
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "medical-policies",
+      "component": "MedicalPolicyList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "medical-policies/new",
+      "component": "MedicalPolicyForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\human-resources\\HumanResourcesHome.jsx",
+      "path": "medical-policies/:id",
+      "component": "MedicalPolicyForm"
+    }
+  ],
+  "stock": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "stock",
+      "component": "StockBalancesPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "stock",
+      "component": "ProductionStockPage"
+    }
+  ],
+  "stock-balances": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "stock-balances",
+      "component": "StockBalancesPage"
+    }
+  ],
+  "stock-journal": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "stock-journal",
+      "component": "StockJournalList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "stock-journal/new",
+      "component": "StockJournalForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "stock-journal/:id",
+      "component": "StockJournalForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "stock-journal",
+      "component": "StockJournalList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "stock-journal/new",
+      "component": "StockJournalForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "stock-journal/:id",
+      "component": "StockJournalForm"
+    }
+  ],
+  "stock-ops": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "stock-ops",
+      "component": "StockUpdationAndVerificationPage"
+    }
+  ],
+  "stock-updation": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "stock-updation",
+      "component": "StockUpdationList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "stock-updation/:id",
+      "component": "StockUpdationForm"
+    }
+  ],
+  "stock-verification": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "stock-verification",
+      "component": "StockVerificationList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "stock-verification/:id",
+      "component": "StockVerificationForm"
+    }
+  ],
+  "return-to-stores": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "return-to-stores",
+      "component": "ReturnToStoresList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "return-to-stores/new",
+      "component": "ReturnToStoresForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "return-to-stores/:id",
+      "component": "ReturnToStoresForm"
+    }
+  ],
+  "stock-adjustments": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "stock-adjustments",
+      "component": "StockAdjustmentList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "stock-adjustments/new",
+      "component": "StockAdjustmentForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "stock-adjustments/:id",
+      "component": "StockAdjustmentForm"
+    }
+  ],
+  "issue-to-requirement": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "issue-to-requirement",
+      "component": "IssueToRequirementList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "issue-to-requirement/new",
+      "component": "IssueToRequirementForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "issue-to-requirement/:id",
+      "component": "IssueToRequirementForm"
+    }
+  ],
+  "stock-transfers": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "stock-transfers",
+      "component": "StockTransferList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "stock-transfers/:id",
+      "component": "StockTransferForm"
+    }
+  ],
+  "transfer-acceptance": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "transfer-acceptance",
+      "component": "TransferAcceptanceList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "transfer-acceptance/:id",
+      "component": "TransferAcceptanceForm"
+    }
+  ],
+  "stock-reorder": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "stock-reorder",
+      "component": "StockReorderPage"
+    }
+  ],
+  "stock-upload": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "stock-upload",
+      "component": "StockUploadPage"
+    }
+  ],
+  "daily-stock-take": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "daily-stock-take",
+      "component": "DailyStockTakeList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "daily-stock-take/:id",
+      "component": "DailyStockTakeForm"
+    }
+  ],
+  "physical-stock-take": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "physical-stock-take",
+      "component": "PhysicalStockTakeList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "physical-stock-take/:id",
+      "component": "PhysicalStockTakeForm"
+    }
+  ],
+  "stock-take": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "stock-take",
+      "component": "StockTakeList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "stock-take/:id",
+      "component": "StockTakeForm"
+    }
+  ],
+  "grn-local": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "grn-local",
+      "component": "GRNLocalList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "grn-local/:id",
+      "component": "GRNLocalForm"
+    }
+  ],
+  "grn-import": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "grn-import",
+      "component": "GRNImportList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "grn-import/:id",
+      "component": "GRNImportForm"
+    }
+  ],
+  "batches": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "batches",
+      "component": "ItemBatchesList"
+    }
+  ],
+  "items": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "items",
+      "component": "ItemsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "items/:id",
+      "component": "ItemForm"
+    }
+  ],
+  "item-groups": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "item-groups",
+      "component": "ItemGroupsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "item-groups/:id",
+      "component": "ItemGroupForm"
+    }
+  ],
+  "unit-conversions": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "unit-conversions",
+      "component": "UnitConversionsList"
+    }
+  ],
+  "warehouses": [
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "warehouses",
+      "component": "WarehousesList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\inventory\\InventoryHome.jsx",
+      "path": "warehouses/:id",
+      "component": "WarehouseForm"
+    }
+  ],
+  "maintenance-requests": [
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/maintenance-requests",
+      "component": "MaintenanceRequestsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/maintenance-requests/new",
+      "component": "MaintenanceRequestForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/maintenance-requests/:id",
+      "component": "MaintenanceRequestForm"
+    }
+  ],
+  "job-orders": [
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/job-orders",
+      "component": "MaintenanceJobOrdersList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/job-orders/new",
+      "component": "MaintenanceJobOrderForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/job-orders/:id",
+      "component": "MaintenanceJobOrderForm"
+    }
+  ],
+  "job-executions": [
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/job-executions",
+      "component": "JobExecutionList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/job-executions/new",
+      "component": "JobExecutionForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/job-executions/:id",
+      "component": "JobExecutionForm"
+    }
+  ],
+  "rfq": [
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/rfq",
+      "component": "MaintenanceRFQList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/rfq/new",
+      "component": "MaintenanceRFQForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/rfq/:id",
+      "component": "MaintenanceRFQForm"
+    }
+  ],
+  "rfqs": [
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/rfqs",
+      "component": "MaintenanceRFQList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/rfqs/new",
+      "component": "MaintenanceRFQForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/rfqs/:id",
+      "component": "MaintenanceRFQForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "rfqs",
+      "component": "RequestForQuotationList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "rfqs/new",
+      "component": "RequestForQuotationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "rfqs/:id",
+      "component": "RequestForQuotationForm"
+    }
+  ],
+  "supplier-quotations": [
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/supplier-quotations",
+      "component": "SupplierQuotationsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/supplier-quotations/new",
+      "component": "SupplierQuotationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/supplier-quotations/:id",
+      "component": "SupplierQuotationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "supplier-quotations",
+      "component": "SupplierQuotationsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "supplier-quotations/new",
+      "component": "SupplierQuotationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "supplier-quotations/:id",
+      "component": "SupplierQuotationForm"
+    }
+  ],
+  "bills": [
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/bills",
+      "component": "MaintenanceBillList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/bills/new",
+      "component": "MaintenanceBillForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/bills/:id",
+      "component": "MaintenanceBillForm"
+    }
+  ],
+  "maintenance-bills": [
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/maintenance-bills",
+      "component": "MaintenanceBillList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/maintenance-bills/new",
+      "component": "MaintenanceBillForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/maintenance-bills/:id",
+      "component": "MaintenanceBillForm"
+    }
+  ],
+  "schedules": [
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/schedules",
+      "component": "MaintenanceScheduleList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/schedules/new",
+      "component": "MaintenanceScheduleForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/schedules/:id",
+      "component": "MaintenanceScheduleForm"
+    }
+  ],
+  "rosters": [
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/rosters",
+      "component": "MaintenanceRosterList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/rosters/new",
+      "component": "MaintenanceRosterForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/rosters/:id",
+      "component": "MaintenanceRosterForm"
+    }
+  ],
+  "material-requisition": [
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/material-requisition",
+      "component": "MaintenanceMaterialRequisitionList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/material-requisition/new",
+      "component": "MaintenanceMaterialRequisitionForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/material-requisition/:id",
+      "component": "MaintenanceMaterialRequisitionForm"
+    }
+  ],
+  "material-receipt": [
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/material-receipt",
+      "component": "MaterialReceiptList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/material-receipt/new",
+      "component": "MaterialReceiptForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/material-receipt/:id",
+      "component": "MaterialReceiptForm"
+    }
+  ],
+  "pm-schedules": [
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/pm-schedules",
+      "component": "PmScheduleList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/pm-schedules/new",
+      "component": "PmScheduleForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/pm-schedules/:id",
+      "component": "PmScheduleForm"
+    }
+  ],
+  "facilities-dashboard": [
+    {
+      "file": "client\\src\\pages\\modules\\maintenance\\MaintenanceHome.jsx",
+      "path": "/facilities-dashboard",
+      "component": "FacilitiesOperationsDashboard"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "facilities-dashboard",
+      "component": "FacilitiesOperationsDashboard"
+    }
+  ],
+  "sales-entry": [
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/sales-entry",
+      "component": "PosSalesEntry"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/sales-entry/new",
+      "component": "PosSalesEntry"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/sales-entry/:id",
+      "component": "PosSalesEntry"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/sales-entry/*",
+      "component": "PosSalesEntry"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/sales-entry",
+      "component": "Navigate"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/sales-entry/*",
+      "component": "Navigate"
+    }
+  ],
+  "entry": [
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/entry",
+      "component": "PosSalesEntry"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/entry/new",
+      "component": "PosSalesEntry"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/entry/*",
+      "component": "PosSalesEntry"
+    }
+  ],
+  "returns": [
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/returns",
+      "component": "PosReturnForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/returns/new",
+      "component": "PosReturnForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/returns/:id",
+      "component": "PosReturnForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/returns",
+      "component": "SalesReturnList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/returns/new",
+      "component": "SalesReturnForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/returns/:id",
+      "component": "SalesReturnForm"
+    }
+  ],
+  "cash-collection": [
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/cash-collection",
+      "component": "CashCollectionDetails"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/cash-collection/new",
+      "component": "CashCollectionDetails"
+    }
+  ],
+  "invoices": [
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/invoices",
+      "component": "PosInvoiceList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/invoices/new",
+      "component": "PosInvoiceList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/invoices",
+      "component": "InvoiceList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/invoices/new",
+      "component": "InvoiceForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/invoices/:id",
+      "component": "InvoiceForm"
+    }
+  ],
+  "receipt-reprint": [
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/receipt-reprint",
+      "component": "PosInvoiceList"
+    }
+  ],
+  "post-to-finance": [
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/post-to-finance",
+      "component": "PosPostToFinance"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/post-to-finance/new",
+      "component": "PosPostToFinance"
+    }
+  ],
+  "day-management": [
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/day-management",
+      "component": "PosDayManagement"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/day-management/new",
+      "component": "PosDayManagement"
+    }
+  ],
+  "day": [
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/day",
+      "component": "PosDayManagement"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/day/new",
+      "component": "PosDayManagement"
+    }
+  ],
+  "customer-history": [
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/customer-history",
+      "component": "PosCustomerHistory"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/customer-history/new",
+      "component": "PosCustomerHistory"
+    }
+  ],
+  "holds": [
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/holds",
+      "component": "PosOnHold"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/holds/new",
+      "component": "PosOnHold"
+    }
+  ],
+  "reconciliation": [
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/reconciliation",
+      "component": "PosReconciliation"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\pos\\PosHome.jsx",
+      "path": "/reconciliation/new",
+      "component": "PosReconciliation"
+    }
+  ],
+  "boms": [
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "boms",
+      "component": "BomList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "boms/new",
+      "component": "BomForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "boms/edit/:id",
+      "component": "BomForm"
+    }
+  ],
+  "work-orders": [
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "work-orders",
+      "component": "WorkOrderList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "work-orders/new",
+      "component": "WorkOrderForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "work-orders/:id",
+      "component": "WorkOrderForm"
+    }
+  ],
+  "planning": [
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "planning/daily",
+      "component": "DailyPlanList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "planning/daily/new",
+      "component": "DailyPlanForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "planning/daily/edit/:id",
+      "component": "DailyPlanForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "planning/daily/view/:id",
+      "component": "DailyPlanForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "planning/daily/:id",
+      "component": "DailyPlanForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "planning/requirements",
+      "component": "MaterialRequirementPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "planning/schedule",
+      "component": "ProductionPlaceholder"
+    }
+  ],
+  "routings": [
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "routings",
+      "component": "RoutingList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "routings/new",
+      "component": "RoutingForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "routings/edit/:id",
+      "component": "RoutingForm"
+    }
+  ],
+  "execution": [
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "execution/job-cards",
+      "component": "JobCardList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "execution/job-cards/:id",
+      "component": "JobCardExecution"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "execution/qc",
+      "component": "QualityControlList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "execution/output",
+      "component": "ProductionOutputPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "execution/qc/new",
+      "component": "ProductionOutputPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "execution/material-receipt",
+      "component": "MaterialReceiptList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "execution/material-receipt/new",
+      "component": "MaterialReceiptForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "execution/material-requisition",
+      "component": "MaterialRequisitionList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "execution/material-requisition/new",
+      "component": "MaterialRequisitionForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "execution/material-utilization",
+      "component": "MaterialUtilizationList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "execution/material-utilization/new",
+      "component": "MaterialUtilizationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "execution/material-utilization/:id",
+      "component": "MaterialUtilizationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "execution/transfer",
+      "component": "ProductionTransferList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "execution/transfer/new",
+      "component": "ProductionTransferForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "execution/fg-transfer",
+      "component": "FinishedGoodsTransferList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "execution/fg-transfer/new",
+      "component": "FinishedGoodsTransferForm"
+    }
+  ],
+  "warehouse-stock": [
+    {
+      "file": "client\\src\\pages\\modules\\production\\ProductionHome.jsx",
+      "path": "warehouse-stock",
+      "component": "ProductionStockPage"
+    }
+  ],
+  "expenses": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/expenses",
+      "component": "ExpenseList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/expenses/new",
+      "component": "ExpenseList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "expenses",
+      "component": "TransportExpenseList"
+    }
+  ],
+  "income": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/income",
+      "component": "ProjectIncomeList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/income/new",
+      "component": "ProjectIncomeList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/income",
+      "component": "ProjectIncomeList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "income",
+      "component": "TransportIncomeList"
+    }
+  ],
+  "project-orders": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/project-orders",
+      "component": "ProjectOrderList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/project-orders/new",
+      "component": "ProjectOrderForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/project-orders/:id",
+      "component": "ProjectOrderForm"
+    }
+  ],
+  "quotations": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/quotations",
+      "component": "ProjectQuotationList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/quotations/new",
+      "component": "ProjectQuotationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/quotations/:id",
+      "component": "ProjectQuotationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/quotations",
+      "component": "QuotationList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/quotations/new",
+      "component": "QuotationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/quotations/:id",
+      "component": "QuotationForm"
+    }
+  ],
+  "project-invoices": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/project-invoices",
+      "component": "ProjectInvoiceList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/project-invoices/new",
+      "component": "ProjectInvoiceForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/project-invoices/:id",
+      "component": "ProjectInvoiceForm"
+    }
+  ],
+  "milestones": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/milestones",
+      "component": "ProjectMilestonesTimeline"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/milestones/new",
+      "component": "TaskForm"
+    }
+  ],
+  "scopes": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/scopes",
+      "component": "ProjectMilestonesTimeline"
+    }
+  ],
+  "project-scope": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/project-scope",
+      "component": "ProjectMilestonesTimeline"
+    }
+  ],
+  "resources": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/resources",
+      "component": "ResourceManagement"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/resources/new",
+      "component": "ResourceManagement"
+    }
+  ],
+  "costing": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/costing",
+      "component": "ProjectCostingEstimationPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/costing/categories",
+      "component": "CostCategoryPage"
+    }
+  ],
+  "boqs": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/boqs",
+      "component": "ProjectCostingEstimationPage"
+    }
+  ],
+  "cost-categories": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/cost-categories",
+      "component": "CostCategoryPage"
+    }
+  ],
+  "cost-control": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/cost-control",
+      "component": "CostControlDashboard"
+    }
+  ],
+  "timeline": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/timeline",
+      "component": "Navigate"
+    }
+  ],
+  "gantt": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/gantt",
+      "component": "GanttChartView"
+    }
+  ],
+  "calendar": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/calendar",
+      "component": "TaskCalendarView"
+    }
+  ],
+  "task-calendar": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/task-calendar",
+      "component": "TaskCalendarView"
+    }
+  ],
+  "schedule": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/schedule",
+      "component": "Navigate"
+    }
+  ],
+  "schedule-monitoring": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/schedule-monitoring",
+      "component": "Navigate"
+    }
+  ],
+  "critical-path": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/critical-path",
+      "component": "Navigate"
+    }
+  ],
+  "mindmap": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/mindmap",
+      "component": "ProjectMindmapPage"
+    }
+  ],
+  "execution-mindmap": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/execution-mindmap",
+      "component": "ProjectMindmapPage"
+    }
+  ],
+  "daily-reports": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/daily-reports",
+      "component": "DailySiteReportList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/daily-reports/new",
+      "component": "DailySiteReportForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/daily-reports/:id",
+      "component": "DailySiteReportForm"
+    }
+  ],
+  "subcontracts": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/subcontracts",
+      "component": "SubcontractorManager"
+    }
+  ],
+  "client-valuations": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/client-valuations",
+      "component": "PaymentClaimsPage"
+    }
+  ],
+  "client-progress-assessments": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/client-progress-assessments",
+      "component": "PaymentClaimsPage"
+    }
+  ],
+  "payment-claims": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/payment-claims",
+      "component": "PaymentClaimsPage"
+    }
+  ],
+  "claims": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/claims",
+      "component": "PaymentClaimsPage"
+    }
+  ],
+  "payment-applications": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/payment-applications",
+      "component": "Navigate"
+    }
+  ],
+  "progress-payment-claims": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/progress-payment-claims",
+      "component": "Navigate"
+    }
+  ],
+  "variations": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/variations",
+      "component": "VariationRegister"
+    }
+  ],
+  "quality-control": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/quality-control",
+      "component": "QualityControlPage"
+    }
+  ],
+  "snags": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/snags",
+      "component": "SnagPunchListPage"
+    }
+  ],
+  "snag-list": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/snag-list",
+      "component": "SnagPunchListPage"
+    }
+  ],
+  "punch-list": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/punch-list",
+      "component": "SnagPunchListPage"
+    }
+  ],
+  "issues": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/issues",
+      "component": "SnagPunchListPage"
+    }
+  ],
+  "documents": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/documents",
+      "component": "DocumentRegisterPage"
+    }
+  ],
+  "rfis": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/rfis",
+      "component": "DocumentRegisterPage"
+    }
+  ],
+  "equipment-logs": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/equipment-logs",
+      "component": "EquipmentLogsPage"
+    }
+  ],
+  "risk-management": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/risk-management",
+      "component": "RiskManagementPage"
+    }
+  ],
+  "risks": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/risks",
+      "component": "RiskManagementPage"
+    }
+  ],
+  "risk-assessment": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/risk-assessment",
+      "component": "RiskManagementPage"
+    }
+  ],
+  "closure": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/closure",
+      "component": "ProjectClosurePage"
+    }
+  ],
+  "final-accounts": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/final-accounts",
+      "component": "FinalAccountPage"
+    }
+  ],
+  "final-account": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/final-account",
+      "component": "FinalAccountPage"
+    }
+  ],
+  "retention-release": [
+    {
+      "file": "client\\src\\pages\\modules\\project-management\\ProjectManagementHome.jsx",
+      "path": "/retention-release",
+      "component": "FinalAccountPage"
+    }
+  ],
+  "direct-purchase": [
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "direct-purchase",
+      "component": "DirectPurchaseList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "direct-purchase/new",
+      "component": "DirectPurchase"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "direct-purchase/:id",
+      "component": "DirectPurchase"
+    }
+  ],
+  "general-requisitions": [
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "general-requisitions",
+      "component": "GeneralRequisitionList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "general-requisitions/new",
+      "component": "GeneralRequisitionForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "general-requisitions/:id",
+      "component": "GeneralRequisitionForm"
+    }
+  ],
+  "quotation-analysis": [
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "quotation-analysis",
+      "component": "QuotationAnalysis"
+    }
+  ],
+  "purchase-orders-local": [
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "purchase-orders-local",
+      "component": "PurchaseOrdersLocalList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "purchase-orders-local/new",
+      "component": "PurchaseOrdersLocalForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "purchase-orders-local/:id",
+      "component": "PurchaseOrdersLocalForm"
+    }
+  ],
+  "purchase-orders-import": [
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "purchase-orders-import",
+      "component": "PurchaseOrdersImportList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "purchase-orders-import/new",
+      "component": "PurchaseOrdersImportForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "purchase-orders-import/:id",
+      "component": "PurchaseOrdersImportForm"
+    }
+  ],
+  "shipping-advice": [
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "shipping-advice",
+      "component": "ShippingAdviceList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "shipping-advice/new",
+      "component": "ShippingAdviceForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "shipping-advice/:id",
+      "component": "ShippingAdviceForm"
+    }
+  ],
+  "port-clearances": [
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "port-clearances",
+      "component": "PortClearancesList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "port-clearances/new",
+      "component": "PortClearancesForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "port-clearances/:id",
+      "component": "PortClearancesForm"
+    }
+  ],
+  "purchase-bills-local": [
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "purchase-bills-local",
+      "component": "PurchaseBillsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "purchase-bills-local/new",
+      "component": "PurchaseBillsForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "purchase-bills-local/:id",
+      "component": "PurchaseBillsForm"
+    }
+  ],
+  "purchase-bills-import": [
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "purchase-bills-import",
+      "component": "PurchaseBillsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "purchase-bills-import/new",
+      "component": "PurchaseBillsForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "purchase-bills-import/:id",
+      "component": "PurchaseBillsForm"
+    }
+  ],
+  "purchase-upload": [
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "purchase-upload",
+      "component": "PurchaseUploadPage"
+    }
+  ],
+  "upload": [
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "upload",
+      "component": "PurchaseUploadPage"
+    }
+  ],
+  "purchase-returns": [
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "purchase-returns",
+      "component": "PurchaseReturnList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "purchase-returns/new",
+      "component": "PurchaseReturnForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "purchase-returns/:id",
+      "component": "PurchaseReturnForm"
+    }
+  ],
+  "suppliers": [
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "suppliers",
+      "component": "SuppliersList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "suppliers/new",
+      "component": "SupplierForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "suppliers/:id",
+      "component": "SupplierForm"
+    }
+  ],
+  "service-bills": [
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "service-bills",
+      "component": "ServiceBillsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "service-bills/new",
+      "component": "ServiceBillForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "service-bills/:id",
+      "component": "ServiceBillForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "service-bills",
+      "component": "ServiceBillsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "service-bills/new",
+      "component": "ServiceBillForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "service-bills/:id",
+      "component": "ServiceBillForm"
+    }
+  ],
+  "service-requests": [
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "service-requests",
+      "component": "ServiceRequestsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "service-requests/new",
+      "component": "ServiceRequestForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "service-requests/:id",
+      "component": "ServiceRequestForm"
+    }
+  ],
+  "service-confirmations": [
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "service-confirmations",
+      "component": "ServiceConfirmationsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "service-confirmations/new",
+      "component": "ServiceConfirmationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "service-confirmations/:id",
+      "component": "ServiceConfirmationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "service-confirmations",
+      "component": "ServiceConfirmationsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "service-confirmations/new",
+      "component": "ServiceConfirmationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "service-confirmations/:id",
+      "component": "ServiceConfirmationForm"
+    }
+  ],
+  "service-confirmation": [
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "service-confirmation",
+      "component": "ServiceConfirmationsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "service-confirmation/new",
+      "component": "ServiceConfirmationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\purchase\\PurchaseHome.jsx",
+      "path": "service-confirmation/:id",
+      "component": "ServiceConfirmationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "service-confirmation",
+      "component": "ServiceConfirmationsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "service-confirmation/new",
+      "component": "ServiceConfirmationForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "service-confirmation/:id",
+      "component": "ServiceConfirmationForm"
+    }
+  ],
+  "sales-orders": [
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/sales-orders",
+      "component": "SalesOrderList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/sales-orders/new",
+      "component": "SalesOrderForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/sales-orders/:id",
+      "component": "SalesOrderForm"
+    }
+  ],
+  "sales-upload": [
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/sales-upload",
+      "component": "SalesUploadPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "sales-upload",
+      "component": "SalesUploadPage"
+    }
+  ],
+  "delivery": [
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/delivery",
+      "component": "DeliveryList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/delivery/new",
+      "component": "DeliveryForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/delivery/:id",
+      "component": "DeliveryForm"
+    }
+  ],
+  "price-setup": [
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/price-setup",
+      "component": "PriceSetup"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/price-setup/*",
+      "component": "PriceSetup"
+    }
+  ],
+  "discount-schemes": [
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/discount-schemes",
+      "component": "CampaignHub"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/discount-schemes/list",
+      "component": "DiscountSchemeList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/discount-schemes/discount",
+      "component": "DiscountSchemeList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/discount-schemes/discount/new",
+      "component": "CampaignForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/discount-schemes/discount/edit/:id",
+      "component": "CampaignForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/discount-schemes/discount/:id",
+      "component": "CampaignForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/discount-schemes/new",
+      "component": "CampaignForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/discount-schemes/edit/:id",
+      "component": "CampaignForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/discount-schemes/purchase-reward",
+      "component": "PurchaseRewardCampaignList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/discount-schemes/purchase-reward/new",
+      "component": "PurchaseRewardCampaignForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/discount-schemes/purchase-reward/edit/:id",
+      "component": "PurchaseRewardCampaignForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/discount-schemes/purchase-reward/:id",
+      "component": "PurchaseRewardCampaignForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/discount-schemes/purchase-rewards",
+      "component": "PurchaseRewardCampaignList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/discount-schemes/purchase-rewards/new",
+      "component": "PurchaseRewardCampaignForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/discount-schemes/purchase-rewards/edit/:id",
+      "component": "PurchaseRewardCampaignForm"
+    }
+  ],
+  "customer-credit": [
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/customer-credit",
+      "component": "CustomerCreditList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/customer-credit/new",
+      "component": "CustomerCreditForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/customer-credit/:id",
+      "component": "CustomerCreditForm"
+    }
+  ],
+  "customers": [
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/customers",
+      "component": "CustomerList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/customers/new",
+      "component": "CustomerForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/customers/:id",
+      "component": "CustomerForm"
+    }
+  ],
+  "prospect-customers": [
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/prospect-customers",
+      "component": "PotentialCustomerList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/prospect-customers/new",
+      "component": "PotentialCustomerForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/prospect-customers/:id",
+      "component": "PotentialCustomerForm"
+    }
+  ],
+  "prospect-conversion": [
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/prospect-conversion",
+      "component": "ProspectConversion"
+    }
+  ],
+  "bulk-upload": [
+    {
+      "file": "client\\src\\pages\\modules\\sales\\SalesHome.jsx",
+      "path": "/bulk-upload",
+      "component": "BulkCustomerUpload"
+    }
+  ],
+  "customer-service-requests": [
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "customer-service-requests",
+      "component": "CustomerServiceRequestsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "customer-service-requests/new",
+      "component": "CustomerServiceRequestForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "customer-service-requests/:id",
+      "component": "CustomerServiceRequestForm"
+    }
+  ],
+  "supplier-service-requests": [
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "supplier-service-requests",
+      "component": "SupplierServiceRequestsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "supplier-service-requests/new",
+      "component": "SupplierServiceRequestForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "supplier-service-requests/:id",
+      "component": "SupplierServiceRequestForm"
+    }
+  ],
+  "service-orders": [
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "service-orders",
+      "component": "ServiceOrdersList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "service-orders/new",
+      "component": "ServiceOrderForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "service-orders/:id",
+      "component": "ServiceOrderForm"
+    }
+  ],
+  "service-executions": [
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "service-executions",
+      "component": "ServiceExecutionsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "service-executions/:id",
+      "component": "ServiceExecutionView"
+    }
+  ],
+  "service-execution": [
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "service-execution",
+      "component": "ServiceExecutionForm"
+    }
+  ],
+  "service-invoices": [
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "service-invoices",
+      "component": "ServiceInvoiceList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "service-invoices/new",
+      "component": "ServiceInvoiceForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\service-management\\ServiceManagementHome.jsx",
+      "path": "service-invoices/:id",
+      "component": "ServiceInvoiceForm"
+    }
+  ],
+  "companies": [
+    {
+      "file": "client\\src\\pages\\modules\\system-configuration\\SystemConfigurationHome.jsx",
+      "path": "/companies",
+      "component": "CompanyList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\system-configuration\\SystemConfigurationHome.jsx",
+      "path": "/companies/new",
+      "component": "CompanyForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\system-configuration\\SystemConfigurationHome.jsx",
+      "path": "/companies/:id",
+      "component": "CompanyForm"
+    }
+  ],
+  "admin-permissions": [
+    {
+      "file": "client\\src\\pages\\modules\\system-configuration\\SystemConfigurationHome.jsx",
+      "path": "/admin-permissions",
+      "component": "AdminPermissionsPage"
+    }
+  ],
+  "backups": [
+    {
+      "file": "client\\src\\pages\\modules\\system-configuration\\SystemConfigurationHome.jsx",
+      "path": "/backups",
+      "component": "BackupPage"
+    }
+  ],
+  "licenses": [
+    {
+      "file": "client\\src\\pages\\modules\\system-configuration\\SystemConfigurationHome.jsx",
+      "path": "/licenses",
+      "component": "LicenseManagement"
+    }
+  ],
+  "payment-packages": [
+    {
+      "file": "client\\src\\pages\\modules\\system-configuration\\SystemConfigurationHome.jsx",
+      "path": "/payment-packages",
+      "component": "PaymentPackages"
+    }
+  ],
+  "general-settings": [
+    {
+      "file": "client\\src\\pages\\modules\\system-configuration\\SystemConfigurationHome.jsx",
+      "path": "/general-settings",
+      "component": "GeneralSettingsPage"
+    }
+  ],
+  "requests": [
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "requests",
+      "component": "TransportRequests"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "requests/new",
+      "component": "TransportRequestForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "requests/:id",
+      "component": "TransportRequestForm"
+    }
+  ],
+  "vehicles": [
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "vehicles",
+      "component": "VehiclesList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "vehicles/new",
+      "component": "VehicleForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "vehicles/:id",
+      "component": "VehicleForm"
+    }
+  ],
+  "logbooks": [
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "logbooks",
+      "component": "LogbookList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "logbooks/new",
+      "component": "LogbookForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "logbooks/:id",
+      "component": "LogbookForm"
+    }
+  ],
+  "servicing": [
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "servicing",
+      "component": "VehicleServicingList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "servicing/new",
+      "component": "VehicleServicingForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "servicing/:id",
+      "component": "VehicleServicingForm"
+    }
+  ],
+  "drivers": [
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "drivers",
+      "component": "DriversList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "drivers/new",
+      "component": "DriverForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "drivers/:id",
+      "component": "DriverForm"
+    }
+  ],
+  "trips": [
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "trips",
+      "component": "TripsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "trips/new",
+      "component": "TripForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "trips/:id",
+      "component": "TripForm"
+    }
+  ],
+  "trip-management": [
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "trip-management",
+      "component": "TripManagementPage"
+    }
+  ],
+  "trip-returns": [
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "trip-returns",
+      "component": "TripReturnList"
+    }
+  ],
+  "tracking": [
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "tracking/:id",
+      "component": "TripTrackingPage"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "tracking",
+      "component": "TripTrackingPage"
+    }
+  ],
+  "fuel": [
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "fuel",
+      "component": "FuelLogsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "fuel/new",
+      "component": "FuelLogForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "fuel/:id",
+      "component": "FuelLogForm"
+    }
+  ],
+  "fuel-expenses": [
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "fuel-expenses",
+      "component": "FuelExpenseList"
+    }
+  ],
+  "fuel-bills": [
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "fuel-bills",
+      "component": "FuelBillsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "fuel-bills/new",
+      "component": "FuelBillForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "fuel-bills/:id",
+      "component": "FuelBillForm"
+    }
+  ],
+  "transportation-bills": [
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "transportation-bills",
+      "component": "TransportationBillsList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "transportation-bills/new",
+      "component": "TransportationBillForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "transportation-bills/:id",
+      "component": "TransportationBillForm"
+    }
+  ],
+  "billing": [
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "billing",
+      "component": "BillingList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "billing/new",
+      "component": "BillingForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "billing/:id",
+      "component": "BillingForm"
+    }
+  ],
+  "routes": [
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "routes",
+      "component": "RoutesList"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "routes/new",
+      "component": "RouteForm"
+    },
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "routes/:id",
+      "component": "RouteForm"
+    }
+  ],
+  "expense-logs": [
+    {
+      "file": "client\\src\\pages\\modules\\transport\\TransportLayout.jsx",
+      "path": "expense-logs",
+      "component": "ExpenseLogList"
+    }
+  ]
+}

@@ -407,15 +407,7 @@ export default function ProductionDashboardPage() {
           )}
 
           {/* Refresh button */}
-          <button
-            onClick={loadDashboard}
-            disabled={loading}
-            className="btn btn-sm btn-outline border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl flex items-center gap-1.5"
-            title="Refresh analytics data"
-          >
-            <RefreshCw size={14} className={loading ? "animate-spin text-brand-600" : ""} />
-            <span>Refresh</span>
-          </button>
+          
 
           {/* Print/Export */}
           <button

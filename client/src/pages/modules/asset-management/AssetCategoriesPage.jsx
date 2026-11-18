@@ -465,7 +465,7 @@ export default function AssetCategoriesPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Category Name *
                 </label>
                 <input
@@ -480,7 +480,7 @@ export default function AssetCategoriesPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Depreciation Method
                   </label>
                   <select
@@ -495,7 +495,7 @@ export default function AssetCategoriesPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Calculation Frequency
                   </label>
                   <select
@@ -513,7 +513,7 @@ export default function AssetCategoriesPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Default Useful Life (Years)
                   </label>
                   <input
@@ -526,7 +526,7 @@ export default function AssetCategoriesPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Depreciation Rate (% / year)
                   </label>
                   <input
@@ -552,7 +552,7 @@ export default function AssetCategoriesPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Asset Cost Account
                     </label>
                     <select
@@ -565,7 +565,7 @@ export default function AssetCategoriesPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Accumulated Depreciation
                     </label>
                     <select
@@ -578,7 +578,7 @@ export default function AssetCategoriesPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Depreciation Expense
                     </label>
                     <select
@@ -591,7 +591,7 @@ export default function AssetCategoriesPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Gain / Loss on Disposal
                     </label>
                     <select
@@ -606,7 +606,7 @@ export default function AssetCategoriesPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Description / Amortization Policy Notes
                 </label>
                 <textarea

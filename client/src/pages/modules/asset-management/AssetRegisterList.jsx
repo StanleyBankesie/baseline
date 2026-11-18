@@ -159,13 +159,7 @@ export default function AssetRegisterList() {
             <option value="UNDER_MAINTENANCE">In Maintenance</option>
           </select>
 
-          <button
-            onClick={fetchAssets}
-            className="p-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-600 dark:text-slate-300 transition-colors"
-            title="Refresh List"
-          >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-          </button>
+          
 
           <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
         </div>

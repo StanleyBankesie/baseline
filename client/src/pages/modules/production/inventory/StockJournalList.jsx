@@ -128,14 +128,7 @@ export default function ProductionStockJournalList() {
             <Link to="/production?section=Shop%20Floor%20%26%20Execution" className="font-sans btn btn-secondary text-sm">
               Return to Menu
             </Link>
-            <button
-              type="button"
-              className="btn-success flex items-center gap-1.5 text-sm font-bold"
-              onClick={fetchJournals}
-              disabled={loading}
-            >
-              <RotateCcw size={14} className={loading ? "animate-spin" : ""} /> Refresh
-            </button>
+            
             <Link to="/production/inventory/journal/new" className="btn-success flex items-center gap-1.5 text-sm font-bold">
               <Plus size={15} /> Create Production Journal
             </Link>

@@ -331,9 +331,7 @@ export default function TrainingPrograms() {
           </div>
         </div>
         <div className="flex gap-2">
-          <button onClick={handleRefresh} className="btn-secondary text-sm flex items-center gap-1">
-            <RefreshCw className="w-4 h-4" /> Refresh
-          </button>
+          
           <button onClick={openNewForm} className="btn-primary text-sm flex items-center gap-1">
             <Plus className="w-4 h-4" /> New Program
           </button>

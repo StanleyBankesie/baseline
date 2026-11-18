@@ -226,13 +226,7 @@ export default function AssetRevaluationPage() {
             <option value="IMPAIRMENT">Impairment Loss (-)</option>
             <option value="DECREASE">Value Reduction (-)</option>
           </select>
-          <button
-            onClick={fetchData}
-            className="p-2 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
-            title="Refresh list"
-          >
-            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-          </button>
+          
         </div>
       </div>
 
@@ -326,7 +320,7 @@ export default function AssetRevaluationPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Select Fixed Asset *
                 </label>
                 <select
@@ -359,7 +353,7 @@ export default function AssetRevaluationPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Adjustment Type *
                   </label>
                   <select
@@ -374,7 +368,7 @@ export default function AssetRevaluationPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Effective Valuation Date *
                   </label>
                   <input
@@ -389,7 +383,7 @@ export default function AssetRevaluationPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     New Valuation Amount
                   </label>
                   <input
@@ -404,7 +398,7 @@ export default function AssetRevaluationPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Adjustment Amount (Delta) *
                   </label>
                   <input
@@ -422,7 +416,7 @@ export default function AssetRevaluationPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Valuer / Appraisal Agency
                   </label>
                   <input
@@ -435,7 +429,7 @@ export default function AssetRevaluationPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Valuation Report Reference
                   </label>
                   <input
@@ -449,7 +443,7 @@ export default function AssetRevaluationPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Valuation Reason & Notes
                 </label>
                 <textarea

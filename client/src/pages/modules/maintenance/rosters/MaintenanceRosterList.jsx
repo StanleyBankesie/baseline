@@ -279,9 +279,7 @@ export default function MaintenanceRosterList() {
           </div>
           <div className="flex items-center gap-2">
             <Link to="/maintenance?section=Resource Management" className="btn btn-secondary flex items-center gap-1.5"><ArrowLeft size={16} /> Back</Link>
-            <button onClick={loadData} className="btn-secondary p-2" title="Refresh">
-              <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-            </button>
+            
             <Link to="/maintenance/rosters/new" className="btn-primary">+ New Roster</Link>
           </div>
         </div>

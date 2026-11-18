@@ -44,6 +44,7 @@ export default function FuelBillForm() {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
+  const isEdit = Boolean(id && id !== "new");
   const { getExchangeRate } = useExchangeRate();
   const readOnly =
     String(new URLSearchParams(location.search).get("mode") || "").toLowerCase() === "view";

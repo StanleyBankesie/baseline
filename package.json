@@ -2,5 +2,8 @@
   "dependencies": {
     "@neon/config": "^1.14.2",
     "@neon/env": "^2.1.5"
+  },
+  "devDependencies": {
+    "playwright": "^1.65.1"
   }
 }

@@ -161,12 +161,6 @@ export default function BankReconciliationForm() {
           >
             Back to List
           </button>
-          <button
-            onClick={load}
-            className="btn btn-sm btn-outline text-white border-white hover:bg-white/20"
-          >
-            Refresh
-          </button>
         </div>
       </div>
 

@@ -1,0 +1,739 @@
+{
+  "module": "Finance & Accounting",
+  "timestamp": "2026-11-18T05:06:47.159Z",
+  "pages": [
+    {
+      "name": "Finance Landing",
+      "path": "/finance",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "No heading",
+      "metrics": {
+        "buttons": 7,
+        "inputs": 1,
+        "tablesOrCards": 41
+      },
+      "screenshot": "tests/screenshots/finance/finance.png"
+    },
+    {
+      "name": "Finance Analytics Dashboard",
+      "path": "/finance/dashboard",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "—",
+      "metrics": {
+        "buttons": 7,
+        "inputs": 2,
+        "tablesOrCards": 15
+      },
+      "screenshot": "tests/screenshots/finance/finance_dashboard.png"
+    },
+    {
+      "name": "Journal Vouchers List",
+      "path": "/finance/journal-voucher",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Journal Entry",
+      "metrics": {
+        "buttons": 8,
+        "inputs": 4,
+        "tablesOrCards": 12
+      },
+      "screenshot": "tests/screenshots/finance/finance_journal_voucher.png"
+    },
+    {
+      "name": "Journal Voucher Create",
+      "path": "/finance/journal-voucher/create",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Journal Entry",
+      "metrics": {
+        "buttons": 14,
+        "inputs": 14,
+        "tablesOrCards": 5
+      },
+      "screenshot": "tests/screenshots/finance/finance_journal_voucher_create.png"
+    },
+    {
+      "name": "Payment Vouchers List",
+      "path": "/finance/payment-voucher",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Make Payment",
+      "metrics": {
+        "buttons": 8,
+        "inputs": 4,
+        "tablesOrCards": 12
+      },
+      "screenshot": "tests/screenshots/finance/finance_payment_voucher.png"
+    },
+    {
+      "name": "Payment Voucher Create",
+      "path": "/finance/payment-voucher/create",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Make Payment",
+      "metrics": {
+        "buttons": 15,
+        "inputs": 15,
+        "tablesOrCards": 15
+      },
+      "screenshot": "tests/screenshots/finance/finance_payment_voucher_create.png"
+    },
+    {
+      "name": "Receipt Vouchers List",
+      "path": "/finance/receipt-voucher",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Receive Payment",
+      "metrics": {
+        "buttons": 8,
+        "inputs": 4,
+        "tablesOrCards": 12
+      },
+      "screenshot": "tests/screenshots/finance/finance_receipt_voucher.png"
+    },
+    {
+      "name": "Receipt Voucher Create",
+      "path": "/finance/receipt-voucher/create",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Receive Payment",
+      "metrics": {
+        "buttons": 15,
+        "inputs": 15,
+        "tablesOrCards": 15
+      },
+      "screenshot": "tests/screenshots/finance/finance_receipt_voucher_create.png"
+    },
+    {
+      "name": "Contra Vouchers List",
+      "path": "/finance/contra-voucher",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Account Transfer",
+      "metrics": {
+        "buttons": 8,
+        "inputs": 4,
+        "tablesOrCards": 11
+      },
+      "screenshot": "tests/screenshots/finance/finance_contra_voucher.png"
+    },
+    {
+      "name": "Contra Voucher Create",
+      "path": "/finance/contra-voucher/create",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Account Transfer",
+      "metrics": {
+        "buttons": 11,
+        "inputs": 8,
+        "tablesOrCards": 6
+      },
+      "screenshot": "tests/screenshots/finance/finance_contra_voucher_create.png"
+    },
+    {
+      "name": "Sales Vouchers List",
+      "path": "/finance/sales-voucher",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Sales Voucher",
+      "metrics": {
+        "buttons": 8,
+        "inputs": 4,
+        "tablesOrCards": 12
+      },
+      "screenshot": "tests/screenshots/finance/finance_sales_voucher.png"
+    },
+    {
+      "name": "Sales Voucher Create",
+      "path": "/finance/sales-voucher/create",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Sales Voucher",
+      "metrics": {
+        "buttons": 14,
+        "inputs": 16,
+        "tablesOrCards": 7
+      },
+      "screenshot": "tests/screenshots/finance/finance_sales_voucher_create.png"
+    },
+    {
+      "name": "Purchase Vouchers List",
+      "path": "/finance/purchase-voucher",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Purchase Voucher",
+      "metrics": {
+        "buttons": 8,
+        "inputs": 4,
+        "tablesOrCards": 12
+      },
+      "screenshot": "tests/screenshots/finance/finance_purchase_voucher.png"
+    },
+    {
+      "name": "Purchase Voucher Create",
+      "path": "/finance/purchase-voucher/create",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Purchase Voucher",
+      "metrics": {
+        "buttons": 14,
+        "inputs": 16,
+        "tablesOrCards": 7
+      },
+      "screenshot": "tests/screenshots/finance/finance_purchase_voucher_create.png"
+    },
+    {
+      "name": "Debit Notes List",
+      "path": "/finance/debit-note",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Debit Note",
+      "metrics": {
+        "buttons": 8,
+        "inputs": 4,
+        "tablesOrCards": 12
+      },
+      "screenshot": "tests/screenshots/finance/finance_debit_note.png"
+    },
+    {
+      "name": "Debit Note Create",
+      "path": "/finance/debit-note/create",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Debit Note",
+      "metrics": {
+        "buttons": 14,
+        "inputs": 11,
+        "tablesOrCards": 6
+      },
+      "screenshot": "tests/screenshots/finance/finance_debit_note_create.png"
+    },
+    {
+      "name": "Credit Notes List",
+      "path": "/finance/credit-note",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Credit Note",
+      "metrics": {
+        "buttons": 8,
+        "inputs": 4,
+        "tablesOrCards": 12
+      },
+      "screenshot": "tests/screenshots/finance/finance_credit_note.png"
+    },
+    {
+      "name": "Credit Note Create",
+      "path": "/finance/credit-note/create",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Credit Note",
+      "metrics": {
+        "buttons": 12,
+        "inputs": 16,
+        "tablesOrCards": 11
+      },
+      "screenshot": "tests/screenshots/finance/finance_credit_note_create.png"
+    },
+    {
+      "name": "Petty Cash Operations",
+      "path": "/finance/petty-cash",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Petty Cash Book",
+      "metrics": {
+        "buttons": 11,
+        "inputs": 4,
+        "tablesOrCards": 11
+      },
+      "screenshot": "tests/screenshots/finance/finance_petty_cash.png"
+    },
+    {
+      "name": "Petty Cash Disburse Form",
+      "path": "/finance/petty-cash/disburse",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Petty Cash Book",
+      "metrics": {
+        "buttons": 11,
+        "inputs": 4,
+        "tablesOrCards": 11
+      },
+      "screenshot": "tests/screenshots/finance/finance_petty_cash_disburse.png"
+    },
+    {
+      "name": "Voucher Import Tool",
+      "path": "/finance/vouchers/import",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Import Vouchers",
+      "metrics": {
+        "buttons": 10,
+        "inputs": 1,
+        "tablesOrCards": 1
+      },
+      "screenshot": "tests/screenshots/finance/finance_vouchers_import.png"
+    },
+    {
+      "name": "Bank Reconciliation List",
+      "path": "/finance/bank-reconciliation",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Bank Reconciliation",
+      "metrics": {
+        "buttons": 11,
+        "inputs": 0,
+        "tablesOrCards": 6
+      },
+      "screenshot": "tests/screenshots/finance/finance_bank_reconciliation.png"
+    },
+    {
+      "name": "Bank Reconciliation Form",
+      "path": "/finance/bank-reconciliation/new",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Bank Reconciliation",
+      "metrics": {
+        "buttons": 10,
+        "inputs": 5,
+        "tablesOrCards": 11
+      },
+      "screenshot": "tests/screenshots/finance/finance_bank_reconciliation_new.png"
+    },
+    {
+      "name": "PDC Postings List",
+      "path": "/finance/pdc-postings",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Post-Dated Cheques (PDC)",
+      "metrics": {
+        "buttons": 11,
+        "inputs": 4,
+        "tablesOrCards": 6
+      },
+      "screenshot": "tests/screenshots/finance/finance_pdc_postings.png"
+    },
+    {
+      "name": "PDC Postings Form",
+      "path": "/finance/pdc-postings/new",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Edit PDC Posting",
+      "metrics": {
+        "buttons": 9,
+        "inputs": 0,
+        "tablesOrCards": 0
+      },
+      "screenshot": "tests/screenshots/finance/finance_pdc_postings_new.png"
+    },
+    {
+      "name": "Finance Setup Central",
+      "path": "/finance/setup",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Chart of Accounts & Groups",
+      "metrics": {
+        "buttons": 23,
+        "inputs": 4,
+        "tablesOrCards": 9
+      },
+      "screenshot": "tests/screenshots/finance/finance_setup.png"
+    },
+    {
+      "name": "Account Groups Setup",
+      "path": "/finance/setup/account-groups",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Chart of Accounts & Groups",
+      "metrics": {
+        "buttons": 17,
+        "inputs": 3,
+        "tablesOrCards": 8
+      },
+      "screenshot": "tests/screenshots/finance/finance_setup_account_groups.png"
+    },
+    {
+      "name": "Accounts Master Setup",
+      "path": "/finance/setup/accounts",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Chart of Accounts & Groups",
+      "metrics": {
+        "buttons": 23,
+        "inputs": 4,
+        "tablesOrCards": 9
+      },
+      "screenshot": "tests/screenshots/finance/finance_setup_accounts.png"
+    },
+    {
+      "name": "Tax Codes Setup",
+      "path": "/finance/setup/tax-codes",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Tax Codes & Deductions Setup",
+      "metrics": {
+        "buttons": 10,
+        "inputs": 0,
+        "tablesOrCards": 3
+      },
+      "screenshot": "tests/screenshots/finance/finance_setup_tax_codes.png"
+    },
+    {
+      "name": "Currencies Setup",
+      "path": "/finance/setup/currencies",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Currencies Setup",
+      "metrics": {
+        "buttons": 11,
+        "inputs": 8,
+        "tablesOrCards": 13
+      },
+      "screenshot": "tests/screenshots/finance/finance_setup_currencies.png"
+    },
+    {
+      "name": "Fiscal Years Setup",
+      "path": "/finance/setup/fiscal-years",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Fiscal Years Setup",
+      "metrics": {
+        "buttons": 9,
+        "inputs": 4,
+        "tablesOrCards": 12
+      },
+      "screenshot": "tests/screenshots/finance/finance_setup_fiscal_years.png"
+    },
+    {
+      "name": "Cost Centers Setup",
+      "path": "/finance/setup/cost-centers",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Cost Centers Setup",
+      "metrics": {
+        "buttons": 9,
+        "inputs": 0,
+        "tablesOrCards": 7
+      },
+      "screenshot": "tests/screenshots/finance/finance_setup_cost_centers.png"
+    },
+    {
+      "name": "Opening Balances Setup",
+      "path": "/finance/setup/opening-balances",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Opening Balances Setup",
+      "metrics": {
+        "buttons": 11,
+        "inputs": 3,
+        "tablesOrCards": 7
+      },
+      "screenshot": "tests/screenshots/finance/finance_setup_opening_balances.png"
+    },
+    {
+      "name": "Budget Setup",
+      "path": "/finance/setup/budget",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Budget Management",
+      "metrics": {
+        "buttons": 9,
+        "inputs": 3,
+        "tablesOrCards": 1
+      },
+      "screenshot": "tests/screenshots/finance/finance_setup_budget.png"
+    },
+    {
+      "name": "Budget Dashboard",
+      "path": "/finance/budget-dashboard",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Financial Budget vs. Actual Dashboard",
+      "metrics": {
+        "buttons": 8,
+        "inputs": 3,
+        "tablesOrCards": 11
+      },
+      "screenshot": "tests/screenshots/finance/finance_budget_dashboard.png"
+    },
+    {
+      "name": "Budget vs Actual Report",
+      "path": "/finance/reports/budget-vs-actual",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Budget vs. Actual Cost Report",
+      "metrics": {
+        "buttons": 11,
+        "inputs": 6,
+        "tablesOrCards": 9
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_budget_vs_actual.png"
+    },
+    {
+      "name": "Voucher Register Report",
+      "path": "/finance/reports/voucher-register",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Voucher Register",
+      "metrics": {
+        "buttons": 19,
+        "inputs": 3,
+        "tablesOrCards": 10
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_voucher_register.png"
+    },
+    {
+      "name": "Trial Balance Report",
+      "path": "/finance/reports/trial-balance",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Trial Balance",
+      "metrics": {
+        "buttons": 22,
+        "inputs": 6,
+        "tablesOrCards": 2
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_trial_balance.png"
+    },
+    {
+      "name": "General Journal Report",
+      "path": "/finance/reports/journal",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Journals Report",
+      "metrics": {
+        "buttons": 20,
+        "inputs": 2,
+        "tablesOrCards": 9
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_journal.png"
+    },
+    {
+      "name": "General Ledger Report",
+      "path": "/finance/reports/general-ledger",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "General Ledger",
+      "metrics": {
+        "buttons": 25,
+        "inputs": 6,
+        "tablesOrCards": 2
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_general_ledger.png"
+    },
+    {
+      "name": "Creditors Ledger Report",
+      "path": "/finance/reports/creditors-ledger",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Creditors Ledger",
+      "metrics": {
+        "buttons": 15,
+        "inputs": 3,
+        "tablesOrCards": 11
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_creditors_ledger.png"
+    },
+    {
+      "name": "Debtors Ledger Report",
+      "path": "/finance/reports/debtors-ledger",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Debtors Ledger",
+      "metrics": {
+        "buttons": 15,
+        "inputs": 3,
+        "tablesOrCards": 11
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_debtors_ledger.png"
+    },
+    {
+      "name": "Supplier Outstanding Report",
+      "path": "/finance/reports/supplier-outstanding",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Supplier Outstanding Analysis",
+      "metrics": {
+        "buttons": 13,
+        "inputs": 2,
+        "tablesOrCards": 7
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_supplier_outstanding.png"
+    },
+    {
+      "name": "Customer Outstanding Report",
+      "path": "/finance/reports/customer-outstanding",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Customer Outstanding Analysis",
+      "metrics": {
+        "buttons": 13,
+        "inputs": 3,
+        "tablesOrCards": 7
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_customer_outstanding.png"
+    },
+    {
+      "name": "Outstanding Receivables Report",
+      "path": "/finance/reports/outstanding-receivables",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Outstanding Receivable Report",
+      "metrics": {
+        "buttons": 20,
+        "inputs": 2,
+        "tablesOrCards": 5
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_outstanding_receivables.png"
+    },
+    {
+      "name": "Payment Due Report",
+      "path": "/finance/reports/payment-due",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Payment Due Report",
+      "metrics": {
+        "buttons": 20,
+        "inputs": 2,
+        "tablesOrCards": 5
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_payment_due.png"
+    },
+    {
+      "name": "Audit Trail Report",
+      "path": "/finance/reports/audit-trail",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Audit Trail Report",
+      "metrics": {
+        "buttons": 12,
+        "inputs": 2,
+        "tablesOrCards": 9
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_audit_trail.png"
+    },
+    {
+      "name": "Ratio Analysis Report",
+      "path": "/finance/reports/ratio-analysis",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Ratio Analysis",
+      "metrics": {
+        "buttons": 12,
+        "inputs": 1,
+        "tablesOrCards": 0
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_ratio_analysis.png"
+    },
+    {
+      "name": "Profit and Loss Statement",
+      "path": "/finance/reports/profit-and-loss",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Profit & Loss",
+      "metrics": {
+        "buttons": 13,
+        "inputs": 4,
+        "tablesOrCards": 5
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_profit_and_loss.png"
+    },
+    {
+      "name": "Statement of P&L and OCI",
+      "path": "/finance/reports/profit-loss-oci",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Statement of Profit or Loss & OCI",
+      "metrics": {
+        "buttons": 20,
+        "inputs": 3,
+        "tablesOrCards": 6
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_profit_loss_oci.png"
+    },
+    {
+      "name": "Balance Sheet Report",
+      "path": "/finance/reports/balance-sheet",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Balance Sheet",
+      "metrics": {
+        "buttons": 13,
+        "inputs": 3,
+        "tablesOrCards": 6
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_balance_sheet.png"
+    },
+    {
+      "name": "Cash Flow Statement",
+      "path": "/finance/reports/cash-flow",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Cash Flow",
+      "metrics": {
+        "buttons": 18,
+        "inputs": 3,
+        "tablesOrCards": 4
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_cash_flow.png"
+    },
+    {
+      "name": "Chart of Accounts Report",
+      "path": "/finance/reports/chart-of-accounts",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Chart of Accounts",
+      "metrics": {
+        "buttons": 10,
+        "inputs": 1,
+        "tablesOrCards": 1
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_chart_of_accounts.png"
+    },
+    {
+      "name": "Graphical Chart of Accounts",
+      "path": "/finance/reports/chart-of-accounts-graphical",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Financial Hierarchy",
+      "metrics": {
+        "buttons": 13,
+        "inputs": 1,
+        "tablesOrCards": 0
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_chart_of_accounts_graphical.png"
+    },
+    {
+      "name": "Bank Reconciliations Summary Report",
+      "path": "/finance/reports/bank-reconciliations",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Reconciled Bank Accounts",
+      "metrics": {
+        "buttons": 10,
+        "inputs": 1,
+        "tablesOrCards": 3
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_bank_reconciliations.png"
+    },
+    {
+      "name": "Bank Reconciliation Transactions Report",
+      "path": "/finance/reports/bank-reconciliation-transactions",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Bank Reconciliation Report",
+      "metrics": {
+        "buttons": 12,
+        "inputs": 6,
+        "tablesOrCards": 7
+      },
+      "screenshot": "tests/screenshots/finance/finance_reports_bank_reconciliation_transactions.png"
+    }
+  ],
+  "summary": {
+    "total": 56,
+    "passed": 56,
+    "failed": 0
+  }
+}

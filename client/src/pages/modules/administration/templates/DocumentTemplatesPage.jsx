@@ -861,13 +861,7 @@ export default function DocumentTemplatesPage() {
                 value={sampleId}
                 onChange={(e) => setSampleId(e.target.value)}
               />
-              <button
-                className="btn-outline"
-                disabled={loading}
-                onClick={() => loadTemplates()}
-              >
-                Refresh
-              </button>
+              
               <button className="btn-success" onClick={startNew}>
                 + New Template
               </button>

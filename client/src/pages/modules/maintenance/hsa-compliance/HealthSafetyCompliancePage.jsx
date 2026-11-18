@@ -167,7 +167,7 @@ export default function HealthSafetyCompliancePage() {
             <ArrowLeft size={14} /> Back
           </button>
           <div>
-            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <h1 className="text-2xl font-bold font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <ShieldAlert className="w-5 h-5 text-rose-600 dark:text-rose-400" />
               Health, Safety and Compliance
             </h1>
@@ -262,7 +262,7 @@ export default function HealthSafetyCompliancePage() {
             </h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300">
                 <tr>
                   <th className="px-4 py-3">Incident No</th>
@@ -325,7 +325,7 @@ export default function HealthSafetyCompliancePage() {
             </h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300">
                 <tr>
                   <th className="px-4 py-3">Permit No</th>
@@ -384,7 +384,7 @@ export default function HealthSafetyCompliancePage() {
             </h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300">
                 <tr>
                   <th className="px-4 py-3">Certificate No</th>
@@ -545,7 +545,7 @@ export default function HealthSafetyCompliancePage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold shadow-sm"
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-sm font-semibold shadow-sm"
                 >
                   {submitting ? "Logging..." : "Log Incident Report"}
                 </button>
@@ -667,7 +667,7 @@ export default function HealthSafetyCompliancePage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-semibold shadow-sm"
+                  className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-sm font-semibold shadow-sm"
                 >
                   {submitting ? "Issuing..." : "Issue Permit to Work"}
                 </button>
@@ -779,7 +779,7 @@ export default function HealthSafetyCompliancePage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-sm"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-semibold shadow-sm"
                 >
                   {submitting ? "Saving..." : "Save Certificate"}
                 </button>

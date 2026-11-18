@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 /**
  * @file VariationRegister.jsx
  * @description Project Change Management workspace for OmniSuite ERP.
@@ -483,17 +484,10 @@ export default function VariationRegister() {
 
         {/* Action Controls */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => loadChanges(selectedProjectId)}
-            disabled={loading}
-            className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-1.5 transition-colors disabled:opacity-50"
-          >
-            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-            Refresh
-          </button>
+          
           <button
             onClick={handleOpenNewChange}
-            className="px-3.5 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors"
+            className="px-3.5 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold flex items-center gap-1.5 shadow-xs transition-colors"
           >
             <Plus size={14} /> New Change Request
           </button>
@@ -534,80 +528,52 @@ export default function VariationRegister() {
         </div>
       )}
 
-      {/* KPI Highlights Ribbon - 4 Compact Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {/* Total Changes */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
-              Total Change Requests
-            </span>
-            <div className="text-xl font-black text-slate-900 dark:text-white mt-0.5">
-              {kpis.total}
+      {/* Metric Stats Cards Carousel */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="md:grid-cols-4" gapClass="gap-4">
+        {[
+          {
+            label: "Total Change Requests",
+            val: kpis.total,
+            icon: <GitBranch size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Pending Assessment",
+            val: kpis.pending,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Approved Cost Impact",
+            val: `+GH₵ ${kpis.totalApprovedCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+            icon: <DollarSign size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+          {
+            label: "Schedule Shift",
+            val: `+${kpis.totalDaysShift} Days`,
+            icon: <Timer size={20} className="stroke-[2.5]" />,
+            color: "bg-indigo-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm"
+          >
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
+                {stat.val}
+              </p>
             </div>
-            <span className="text-[10px] text-slate-500">
-              Across project portfolio
-            </span>
-          </div>
-          <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-            <GitBranch size={16} />
-          </div>
-        </div>
-
-        {/* Pending Review */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">
-              Pending Assessment
-            </span>
-            <div className="text-xl font-black text-amber-600 dark:text-amber-400 mt-0.5">
-              {kpis.pending}
+            <div className={`p-3 rounded-full ${stat.color} shadow-sm`}>
+              {stat.icon}
             </div>
-            <span className="text-[10px] text-amber-600/80 font-medium">
-              Awaiting review / signoff
-            </span>
           </div>
-          <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600">
-            <Clock size={16} />
-          </div>
-        </div>
-
-        {/* Approved Cost Impact */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">
-              Approved Cost Impact
-            </span>
-            <div className="text-lg font-black font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">
-              +GH₵ {kpis.totalApprovedCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-            </div>
-            <span className="text-[10px] text-slate-400">
-              {kpis.approvedCount} authorized changes
-            </span>
-          </div>
-          <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600">
-            <DollarSign size={16} />
-          </div>
-        </div>
-
-        {/* Schedule Shift Impact */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider block">
-              Schedule Shift
-            </span>
-            <div className="text-xl font-black font-mono text-blue-600 dark:text-blue-400 mt-0.5">
-              +{kpis.totalDaysShift} Days
-            </div>
-            <span className="text-[10px] text-slate-400">
-              Approved timeline variance
-            </span>
-          </div>
-          <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600">
-            <Timer size={16} />
-          </div>
-        </div>
-      </div>
+        ))}
+      </MobileMovingCarousel>
 
       {/* Control & Filter Strip */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
@@ -687,7 +653,7 @@ export default function VariationRegister() {
       {/* Main Change Register Table */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full text-left border-collapse text-sm">
             <thead>
               <tr className="bg-slate-50/70 dark:bg-slate-800/40 border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-400 font-semibold uppercase">
                 <th className="py-2.5 px-3 w-32">Ref #</th>
@@ -721,7 +687,7 @@ export default function VariationRegister() {
                     </p>
                     <button
                       onClick={handleOpenNewChange}
-                      className="mt-2 px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs inline-flex items-center gap-1"
+                      className="mt-2 px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm inline-flex items-center gap-1"
                     >
                       <Plus size={13} /> Create First Change Request
                     </button>
@@ -1192,14 +1158,14 @@ export default function VariationRegister() {
                     <button
                       type="button"
                       onClick={handleAddItem}
-                      className="px-2.5 py-1 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold inline-flex items-center gap-1 shadow-xs"
+                      className="px-2.5 py-1 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold inline-flex items-center gap-1 shadow-xs"
                     >
                       <Plus size={13} /> Add Item
                     </button>
                   </div>
 
                   <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
-                    <table className="w-full text-left border-collapse text-xs">
+                    <table className="w-full text-left border-collapse text-sm">
                       <thead className="bg-slate-50 dark:bg-slate-800/40 text-[11px] font-semibold text-slate-400 border-b border-slate-200 dark:border-slate-800">
                         <tr>
                           <th className="py-2 px-3">Description</th>

@@ -250,20 +250,13 @@ export default function DependencyManagerDrawer({
             <button
               onClick={handleDetectDependencies}
               disabled={detecting}
-              className="btn btn-secondary text-xs h-9 px-3 rounded-xl inline-flex items-center gap-1.5 font-semibold text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 hover:bg-emerald-100 dark:bg-emerald-950/40"
+              className="btn btn-secondary text-sm h-9 px-3 rounded-xl inline-flex items-center gap-1.5 font-semibold text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 hover:bg-emerald-100 dark:bg-emerald-950/40"
               title="Analyze Work Plan/WBS and detect logical dependencies"
             >
               <Sparkles size={14} className={detecting ? "animate-spin text-emerald-600" : "text-emerald-600 dark:text-emerald-400"} />
               <span>{detecting ? "Analyzing..." : "Detect Dependencies"}</span>
             </button>
-            <button
-              onClick={loadDependencies}
-              disabled={loading}
-              className="p-2 rounded-xl text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-              title="Refresh"
-            >
-              <RefreshCw size={16} className={loading ? "animate-spin text-blue-600" : ""} />
-            </button>
+            
             <button
               onClick={onClose}
               className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -493,7 +486,7 @@ export default function DependencyManagerDrawer({
 
               <div className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <table className="w-full text-left text-sm">
                     <thead>
                       <tr className="border-b border-slate-100 dark:border-slate-800 text-[11px] uppercase tracking-wider text-slate-400 bg-slate-50/50 dark:bg-slate-800/40 font-bold">
                         <th className="py-2.5 px-4">Predecessor</th>
@@ -610,12 +603,12 @@ export default function DependencyManagerDrawer({
 
               <form onSubmit={handleCreateDependency} className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Predecessor Task (Prerequisite) *
                   </label>
                   <select
                     required
-                    className="input text-xs h-9 w-full rounded-xl"
+                    className="input text-sm h-9 w-full rounded-xl"
                     value={createForm.predecessorId}
                     onChange={(e) => setCreateForm({ ...createForm, predecessorId: e.target.value })}
                   >
@@ -629,12 +622,12 @@ export default function DependencyManagerDrawer({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Successor Task (Dependent Activity) *
                   </label>
                   <select
                     required
-                    className="input text-xs h-9 w-full rounded-xl"
+                    className="input text-sm h-9 w-full rounded-xl"
                     value={createForm.taskId}
                     onChange={(e) => setCreateForm({ ...createForm, taskId: e.target.value })}
                   >
@@ -649,11 +642,11 @@ export default function DependencyManagerDrawer({
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                       Relationship Type
                     </label>
                     <select
-                      className="input text-xs h-9 w-full rounded-xl font-medium"
+                      className="input text-sm h-9 w-full rounded-xl font-medium"
                       value={createForm.dependencyType}
                       onChange={(e) => setCreateForm({ ...createForm, dependencyType: e.target.value })}
                     >
@@ -666,12 +659,12 @@ export default function DependencyManagerDrawer({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                       Lag (+) or Lead (-) Days
                     </label>
                     <input
                       type="number"
-                      className="input text-xs h-9 w-full rounded-xl font-mono"
+                      className="input text-sm h-9 w-full rounded-xl font-mono"
                       value={createForm.lagDays}
                       onChange={(e) => setCreateForm({ ...createForm, lagDays: e.target.value })}
                     />
@@ -679,13 +672,13 @@ export default function DependencyManagerDrawer({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Notes / Justification
                   </label>
                   <input
                     type="text"
                     placeholder="e.g. Concrete curing period mandatory before column shuttering"
-                    className="input text-xs h-9 w-full rounded-xl"
+                    className="input text-sm h-9 w-full rounded-xl"
                     value={createForm.notes}
                     onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })}
                   />
@@ -707,7 +700,7 @@ export default function DependencyManagerDrawer({
                   <button
                     type="submit"
                     disabled={creating}
-                    className="btn btn-primary text-xs h-9 px-5 rounded-xl font-semibold inline-flex items-center gap-1.5"
+                    className="btn btn-primary text-sm h-9 px-5 rounded-xl font-semibold inline-flex items-center gap-1.5"
                   >
                     {creating && <Loader2 size={13} className="animate-spin" />}
                     Establish Relationship
@@ -806,11 +799,11 @@ export default function DependencyManagerDrawer({
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                       Relationship Type
                     </label>
                     <select
-                      className="input text-xs h-9 w-full rounded-xl font-medium"
+                      className="input text-sm h-9 w-full rounded-xl font-medium"
                       value={editForm.dependencyType}
                       onChange={(e) => setEditForm({ ...editForm, dependencyType: e.target.value })}
                     >
@@ -823,12 +816,12 @@ export default function DependencyManagerDrawer({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                       Lag (+) / Lead (-) Days
                     </label>
                     <input
                       type="number"
-                      className="input text-xs h-9 w-full rounded-xl font-mono"
+                      className="input text-sm h-9 w-full rounded-xl font-mono"
                       value={editForm.lagDays}
                       onChange={(e) => setEditForm({ ...editForm, lagDays: e.target.value })}
                     />
@@ -836,14 +829,14 @@ export default function DependencyManagerDrawer({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Override Justification Reason *
                   </label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Expedited trade handover authorized by Project Manager"
-                    className="input text-xs h-9 w-full rounded-xl"
+                    className="input text-sm h-9 w-full rounded-xl"
                     value={editForm.overrideReason}
                     onChange={(e) => setEditForm({ ...editForm, overrideReason: e.target.value })}
                   />
@@ -860,7 +853,7 @@ export default function DependencyManagerDrawer({
                   <button
                     type="submit"
                     disabled={savingEdit}
-                    className="btn btn-primary text-xs h-9 px-5 rounded-xl font-semibold"
+                    className="btn btn-primary text-sm h-9 px-5 rounded-xl font-semibold"
                   >
                     {savingEdit && <Loader2 size={13} className="animate-spin" />}
                     Save Changes
@@ -883,13 +876,13 @@ export default function DependencyManagerDrawer({
               </p>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Reason for Rejection
                 </label>
                 <input
                   type="text"
                   placeholder="e.g. Tasks are independent subcontracts"
-                  className="input text-xs h-9 w-full rounded-xl"
+                  className="input text-sm h-9 w-full rounded-xl"
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
                 />
@@ -904,7 +897,7 @@ export default function DependencyManagerDrawer({
                 </button>
                 <button
                   onClick={handleRejectSuggested}
-                  className="btn btn-primary text-xs h-9 px-4 rounded-xl font-semibold bg-rose-600 hover:bg-rose-700 text-white"
+                  className="btn btn-primary text-sm h-9 px-4 rounded-xl font-semibold bg-rose-600 hover:bg-rose-700 text-white"
                 >
                   Confirm Rejection
                 </button>
@@ -920,7 +913,7 @@ export default function DependencyManagerDrawer({
           </div>
           <button
             onClick={onClose}
-            className="btn btn-secondary text-xs h-9 px-4 rounded-xl font-semibold"
+            className="btn btn-secondary text-sm h-9 px-4 rounded-xl font-semibold"
           >
             Close Workspace
           </button>

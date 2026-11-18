@@ -61,7 +61,7 @@ function ModalForm({ open, onClose, title, children }) {
                   />
                   Operations Setup
                 </h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 hidden">
                   Configure operational departments, temporal warehouses, and
                   service suppliers
                 </p>
@@ -106,7 +106,7 @@ function CrudSection({
         </div>
         <button
           onClick={onAdd}
-          className="btn btn-primary inline-flex items-center gap-1.5 text-xs py-1.5 px-3"
+          className="btn btn-primary inline-flex items-center gap-1.5 text-sm py-1.5 px-3"
         >
           <Plus size={14} /> Add
         </button>
@@ -1339,7 +1339,7 @@ export default function Setup() {
                 </h4>
                 <button
                   type="button"
-                  className="btn btn-secondary text-xs"
+                  className="btn btn-secondary text-sm"
                   onClick={() => addDailyReportOption(group)}
                 >
                   <Plus size={14} className="inline mr-1" /> Add option
@@ -1411,13 +1411,13 @@ export default function Setup() {
             isRowActive={(pt) => pt.is_active === 1 || pt.is_active === "Y"}
             renderRow={(pt) => (
               <>
-                <td className="px-4 py-3 font-mono font-bold text-xs text-brand-600 dark:text-brand-400">
+                <td className="px-4 py-3 font-mono font-bold text-sm text-brand-600 dark:text-brand-400">
                   {pt.type_code}
                 </td>
                 <td className="px-4 py-3 font-semibold text-sm text-slate-800 dark:text-slate-100">
                   {pt.type_name}
                 </td>
-                <td className="px-4 py-3 text-xs text-slate-500 max-w-xs truncate">
+                <td className="px-4 py-3 text-sm text-slate-500 max-w-xs truncate">
                   {pt.description || "—"}
                 </td>
                 <td className="px-4 py-3">
@@ -1495,7 +1495,7 @@ export default function Setup() {
                   Description
                 </label>
                 <textarea
-                  className="input w-full text-xs"
+                  className="input w-full text-sm"
                   rows={3}
                   placeholder="Brief description of work scope for this project type..."
                   value={ptForm.description}
@@ -2169,7 +2169,7 @@ export default function Setup() {
                 />
                 <label
                   htmlFor="sub_active"
-                  className="text-xs font-medium cursor-pointer"
+                  className="text-sm font-medium cursor-pointer"
                 >
                   Active Contractor / Subcontractor
                 </label>
@@ -2187,7 +2187,7 @@ export default function Setup() {
                 type="button"
                 onClick={saveSub}
                 disabled={subSaving}
-                className="btn btn-primary text-xs inline-flex items-center gap-1.5 shadow-sm"
+                className="btn btn-primary text-sm inline-flex items-center gap-1.5 shadow-sm"
               >
                 {subSaving ? (
                   <Loader2 size={14} className="animate-spin" />

@@ -79,13 +79,7 @@ export default function RoutingList() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <button 
-            onClick={fetchRoutings}
-            className="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all"
-            title="Refresh"
-          >
-            <RefreshCcw size={20} className={loading ? "animate-spin" : ""} />
-          </button>
+          
           <Link 
             to="/production/routings/new"
             className="btn-success flex items-center gap-2"

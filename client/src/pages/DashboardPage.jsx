@@ -128,7 +128,7 @@ export default function DashboardPage() {
             <p className="text-slate-600 dark:text-slate-400">
               Welcome back,{" "}
               <span className="font-semibold text-brand dark:text-brand-300">
-                {user?.email}
+                {user?.username || user?.user_name || user?.email}
               </span>
               .
             </p>

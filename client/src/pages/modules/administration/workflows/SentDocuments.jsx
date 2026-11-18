@@ -121,13 +121,7 @@ export default function SentDocuments() {
         </div>
 
         <div className="flex items-center gap-2.5">
-          <button
-            onClick={fetchSentDocuments}
-            className="btn-secondary inline-flex items-center gap-1.5 px-3 py-2 text-xs"
-            title="Refresh List"
-          >
-            <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
-          </button>
+          
           <Link to="/" className="btn btn-secondary text-xs">
             Return to Home
           </Link>

@@ -212,7 +212,13 @@ const AppRoutes = React.memo(function AppRoutes({ user }) {
         <Route path="/social-feed" element={<SocialFeedPage />} />
         <Route path="/social-feed/:id" element={<SocialFeedPage />} />
         <Route path="/admin/roles" element={<RoleSetup />} />
+        <Route path="/admin/roles/new" element={<RoleSetup />} />
+        <Route path="/admin/roles/:id" element={<RoleSetup />} />
         <Route path="/admin/user-permissions" element={<UserPermissions />} />
+        <Route path="/admin/reports/user-login-activity" element={<Navigate to="/administration/reports/user-login-activity" replace />} />
+        <Route path="/admin/reports/user-activity" element={<Navigate to="/administration/reports/user-login-activity" replace />} />
+        <Route path="/admin/reports/audit" element={<Navigate to="/administration/reports/system-log-book" replace />} />
+        <Route path="/admin/user-activity" element={<Navigate to="/administration/reports/user-login-activity" replace />} />
         <Route
           path="/system-configuration/*"
           element={
@@ -531,8 +537,8 @@ export default function AppShell() {
       return a.originalIndex - b.originalIndex;
     });
 
-    // Display the first three modules assigned to that user
-    return candidates.slice(0, 3);
+    // Return all assigned modules sorted by priority so user can slide through all modules on mobile & tablet
+    return candidates;
   }, [
     user?.id,
     canViewModule,
@@ -933,8 +939,22 @@ export default function AppShell() {
     };
   }, [socket]);
 
-  const [pushPromptVisible, setPushPromptVisible] = useState(false);
+  const [pushPromptAllowed, setPushPromptAllowed] = useState(false);
+  const [pushPromptRolledDown, setPushPromptRolledDown] = useState(false);
+
+  const dismissPushPrompt = () => {
+    setPushPromptRolledDown(false);
+    setPushPromptAllowed(false);
+  };
+
   useEffect(() => {
+    if (!token) {
+      setPushPromptAllowed(false);
+      setPushPromptRolledDown(false);
+      return;
+    }
+    let showTimer = null;
+    let hideTimer = null;
     try {
       const raw =
         typeof localStorage !== "undefined"
@@ -950,10 +970,33 @@ export default function AppShell() {
         "serviceWorker" in navigator &&
         "PushManager" in window &&
         "Notification" in window;
-      setPushPromptVisible(canPrompt && !enabled && perm !== "granted");
+
+      if (!canPrompt || enabled || perm === "granted") {
+        setPushPromptAllowed(false);
+        setPushPromptRolledDown(false);
+        return;
+      }
+
+      // Eligible: hidden on login, rolls down 5 seconds after login, stays for 3 seconds, then rolls up back
+      setPushPromptAllowed(true);
+      setPushPromptRolledDown(false);
+
+      showTimer = setTimeout(() => {
+        setPushPromptRolledDown(true);
+
+        hideTimer = setTimeout(() => {
+          setPushPromptRolledDown(false);
+        }, 3000);
+      }, 5000);
     } catch {
-      setPushPromptVisible(false);
+      setPushPromptAllowed(false);
+      setPushPromptRolledDown(false);
     }
+
+    return () => {
+      if (showTimer) clearTimeout(showTimer);
+      if (hideTimer) clearTimeout(hideTimer);
+    };
   }, [token]);
 
   async function enablePushNow() {
@@ -967,22 +1010,22 @@ export default function AppShell() {
         !("PushManager" in window) ||
         !("Notification" in window)
       ) {
-        setPushPromptVisible(false);
+        dismissPushPrompt();
         return;
       }
       if (window.Notification.permission === "denied") {
-        setPushPromptVisible(false);
+        dismissPushPrompt();
         return;
       }
       if (window.Notification.permission !== "granted") {
         try {
           const perm = await window.Notification.requestPermission();
           if (perm !== "granted") {
-            setPushPromptVisible(false);
+            dismissPushPrompt();
             return;
           }
         } catch {
-          setPushPromptVisible(false);
+          dismissPushPrompt();
           return;
         }
       }
@@ -995,7 +1038,7 @@ export default function AppShell() {
         publicKey = "";
       }
       if (!publicKey) {
-        setPushPromptVisible(false);
+        dismissPushPrompt();
         return;
       }
       function urlBase64ToUint8Array(base64String) {
@@ -1018,7 +1061,7 @@ export default function AppShell() {
             subscription: existing.toJSON(),
           });
         } catch {}
-        setPushPromptVisible(false);
+        dismissPushPrompt();
         return;
       }
       const sub = await reg.pushManager.subscribe({
@@ -1028,9 +1071,9 @@ export default function AppShell() {
       try {
         await api.post("/push/subscribe", { subscription: sub.toJSON() });
       } catch {}
-      setPushPromptVisible(false);
+      dismissPushPrompt();
     } catch {
-      setPushPromptVisible(false);
+      dismissPushPrompt();
     }
   }
 
@@ -2541,21 +2584,37 @@ export default function AppShell() {
             ref={listPageContentRef}
             className="relative z-10 w-full max-w-full 2xl:max-w-[1600px] mx-auto p-2 md:p-2 lg:p-3"
           >
-            {pushPromptVisible ? (
-              <div className="mb-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 flex items-center justify-between">
-                <div className="text-sm">
-                  Enable push notifications to receive approval alerts.
-                </div>
-                <div className="flex gap-2">
-                  <button className="btn" onClick={enablePushNow}>
-                    Enable Push
-                  </button>
-                  <button
-                    className="btn btn-secondary"
-                    onClick={() => setPushPromptVisible(false)}
-                  >
-                    Dismiss
-                  </button>
+            {pushPromptAllowed ? (
+              <div
+                className={`transition-all duration-700 ease-in-out overflow-hidden transform ${
+                  pushPromptRolledDown
+                    ? "max-h-28 opacity-100 translate-y-0 mb-3"
+                    : "max-h-0 opacity-0 -translate-y-4 mb-0 pointer-events-none"
+                }`}
+              >
+                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-3.5 px-4 flex items-center justify-between shadow-smoky-card">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xl">🔔</span>
+                    <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                      Enable push notifications to receive real-time approval and message alerts.
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      className="btn btn-primary text-xs font-semibold px-3.5 py-1.5 rounded-xl shadow-smoky-card cursor-pointer"
+                      onClick={enablePushNow}
+                    >
+                      Enable Push
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary text-xs font-medium px-3 py-1.5 rounded-xl shadow-smoky-card cursor-pointer"
+                      onClick={dismissPushPrompt}
+                    >
+                      Dismiss
+                    </button>
+                  </div>
                 </div>
               </div>
             ) : null}
@@ -2580,17 +2639,17 @@ export default function AppShell() {
       <FloatingChat />
       <BanksAiFloating />
 
-      {/* Apple-style Mobile Bottom Navigation Tab Bar (HIG compliant, >=44pt targets, tactile press) */}
+      {/* Apple-style Mobile Bottom Navigation Tab Bar for Small & Medium screens (< lg / 1024px) */}
       <nav
         aria-label="Mobile Navigation"
         data-rbac-exempt="true"
-        className="md:hidden fixed bottom-0 inset-x-0 h-16 bg-white/95 dark:bg-slate-950/95 backdrop-blur-lg border-t border-slate-200/90 dark:border-slate-800 z-40 flex items-center justify-around px-2 shadow-apple-dock pb-[env(safe-area-inset-bottom)]"
+        className="lg:hidden fixed bottom-0 inset-x-0 h-16 bg-white/95 dark:bg-slate-950/95 backdrop-blur-lg border-t border-slate-200/90 dark:border-slate-800 z-40 flex items-center px-2 shadow-apple-dock pb-[env(safe-area-inset-bottom)]"
       >
         <NavLink
           to="/"
           end
           className={({ isActive }) =>
-            `flex flex-col items-center justify-center min-w-[56px] py-1 transition-all duration-150 active:scale-95 ${
+            `flex flex-col items-center justify-center shrink-0 min-w-[54px] px-2 py-1 transition-all duration-150 active:scale-95 border-r border-slate-200/60 dark:border-slate-800/80 ${
               isActive
                 ? "text-brand-900 dark:text-brand-300 font-semibold"
                 : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
@@ -2601,36 +2660,46 @@ export default function AppShell() {
           <span className="text-[11px] leading-tight">Home</span>
         </NavLink>
 
-        {topMobileModules.map((m) => (
-          <NavLink
-            key={m.key}
-            to={m.path}
-            className={({ isActive }) =>
-              `flex flex-col items-center justify-center min-w-[56px] py-1 transition-all duration-150 active:scale-95 ${
-                isActive
-                  ? "text-brand-900 dark:text-brand-300 font-semibold"
-                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-              }`
-            }
-          >
-            <span
-              className="w-5 h-5 mb-0.5 flex items-center justify-center shrink-0 [&>svg]:w-5 [&>svg]:h-5"
-              aria-hidden="true"
+        {/* Horizontally Slideable/Scrollable Module Icons for Small & Medium devices */}
+        <div 
+          className="flex-1 flex items-center gap-1 overflow-x-auto scrollbar-none no-scrollbar px-1.5 py-1"
+          style={{
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+          }}
+        >
+          {topMobileModules.map((m) => (
+            <NavLink
+              key={m.key}
+              to={m.path}
+              className={({ isActive }) =>
+                `flex flex-col items-center justify-center shrink-0 min-w-[56px] px-2 py-1 rounded-xl transition-all duration-150 active:scale-95 ${
+                  isActive
+                    ? "text-brand-900 dark:text-brand-300 font-semibold bg-brand-50/60 dark:bg-brand-950/50"
+                    : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                }`
+              }
             >
-              {m.icon}
-            </span>
-            <span className="text-[11px] leading-tight truncate max-w-[64px] text-center">
-              {m.shortLabel || m.label}
-            </span>
-          </NavLink>
-        ))}
+              <span
+                className="w-5 h-5 mb-0.5 flex items-center justify-center shrink-0 [&>svg]:w-5 [&>svg]:h-5"
+                aria-hidden="true"
+              >
+                {m.icon}
+              </span>
+              <span className="text-[11px] leading-tight truncate max-w-[68px] text-center">
+                {m.shortLabel || m.label}
+              </span>
+            </NavLink>
+          ))}
+        </div>
 
         <button
           type="button"
           aria-label="Toggle all modules menu"
           data-rbac-exempt="true"
           onClick={() => setSidebarOpen((v) => !v)}
-          className={`flex flex-col items-center justify-center min-w-[56px] py-1 transition-all duration-150 active:scale-95 ${
+          className={`flex flex-col items-center justify-center shrink-0 min-w-[54px] px-2 py-1 border-l border-slate-200/60 dark:border-slate-800/80 transition-all duration-150 active:scale-95 ${
             sidebarOpen
               ? "text-brand-900 dark:text-brand-300 font-semibold"
               : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"

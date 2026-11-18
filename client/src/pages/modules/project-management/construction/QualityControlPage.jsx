@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 /**
  * @file QualityControlPage.jsx
  * @description General-purpose Enterprise Project Quality Assurance & Quality Control (QA/QC).
@@ -594,7 +595,7 @@ export default function QualityControlPage() {
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <ShieldCheck size={24} className="text-teal-600 dark:text-teal-400" /> Quality Assurance & Control (QA/QC)
             </h1>
-            <p className="text-slate-500 text-xs mt-0.5">
+            <p className="text-slate-500 text-xs mt-0.5 hidden">
               Standards compliance, inspections & testing, defect identification, non-conformance management, and CAPA.
             </p>
           </div>
@@ -624,9 +625,7 @@ export default function QualityControlPage() {
           <button onClick={handleExportData} className="btn btn-secondary inline-flex items-center gap-1.5 text-sm" title="Export current register to CSV">
             <Download size={15} /> Export
           </button>
-          <button onClick={fetchData} className="btn btn-secondary inline-flex items-center gap-1.5 text-sm" title="Refresh records">
-            <RefreshCw size={15} className={loading ? "animate-spin" : ""} /> Refresh
-          </button>
+          
         </div>
       </div>
 
@@ -678,47 +677,64 @@ export default function QualityControlPage() {
         </div>
       </div>
 
-      {/* 3. Compact KPI Dashboard (6 Cards) */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-sm">
-          <div className="text-xs font-medium text-slate-500">Total Inspections</div>
-          <div className="text-xl font-bold text-slate-900 dark:text-slate-100 mt-0.5">{kpis.totalInspections || 0}</div>
-          <div className="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
-            <span>Pass: {kpis.passedInspections || 0}</span>
-            <span className="text-rose-600 font-medium">Fail: {kpis.failedInspections || 0}</span>
+      {/* Metric Stats Cards Carousel */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="xl:grid-cols-6 md:grid-cols-3 sm:grid-cols-2" gapClass="gap-4">
+        {[
+          {
+            label: "Total Inspections",
+            val: kpis.totalInspections || 0,
+            icon: <CheckSquare size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Inspection Pass Rate",
+            val: `${kpis.passRate ?? 100}%`,
+            icon: <Award size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+          {
+            label: "Open Defects",
+            val: kpis.openDefects || 0,
+            icon: <AlertTriangle size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Open NCRs",
+            val: kpis.openNCRs || 0,
+            icon: <AlertOctagon size={20} className="stroke-[2.5]" />,
+            color: "bg-rose-500 text-white",
+          },
+          {
+            label: "Pending CAPA",
+            val: kpis.pendingCAPA || 0,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-indigo-600 text-white",
+          },
+          {
+            label: "Defect Resolution",
+            val: `${kpis.defectResolutionRate ?? 100}%`,
+            icon: <ShieldCheck size={20} className="stroke-[2.5]" />,
+            color: "bg-blue-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm"
+          >
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`p-3 rounded-full ${stat.color} shadow-sm`}>
+              {stat.icon}
+            </div>
           </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-sm">
-          <div className="text-xs font-medium text-slate-500">Inspection Pass Rate</div>
-          <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{kpis.passRate ?? 100}%</div>
-          <div className="text-[11px] text-slate-500 mt-1">Pending: {kpis.pendingInspections || 0}</div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-sm">
-          <div className="text-xs font-medium text-slate-500">Open Defects</div>
-          <div className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-0.5">{kpis.openDefects || 0}</div>
-          <div className="text-[11px] text-slate-500 mt-1">Total logged: {kpis.totalDefects || 0}</div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-sm">
-          <div className="text-xs font-medium text-slate-500">Open NCRs</div>
-          <div className="text-xl font-bold text-rose-600 dark:text-rose-400 mt-0.5">{kpis.openNCRs || 0}</div>
-          <div className="text-[11px] text-rose-600 font-medium mt-1">Critical: {kpis.criticalOpenIssues || 0}</div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-sm">
-          <div className="text-xs font-medium text-slate-500">Pending CAPA</div>
-          <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">{kpis.pendingCAPA || 0}</div>
-          <div className="text-[11px] text-slate-500 mt-1">Overdue: {kpis.overdueCAPA || 0}</div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-sm">
-          <div className="text-xs font-medium text-slate-500">Defect Resolution</div>
-          <div className="text-xl font-bold text-teal-600 dark:text-teal-400 mt-0.5">{kpis.defectResolutionRate ?? 100}%</div>
-          <div className="text-[11px] text-slate-500 mt-1">Active Plans: {kpis.activePlans || 0}</div>
-        </div>
-      </div>
+        ))}
+      </MobileMovingCarousel>
 
       {/* 4. Tab Navigation (5 Concise Sections) */}
       <div className="border-b border-slate-200 dark:border-slate-800">
@@ -902,12 +918,12 @@ export default function QualityControlPage() {
               <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Quality Plans & Standards Register</h2>
               <p className="text-xs text-slate-500">Project quality criteria, ISO / industry standards, and acceptance requirements.</p>
             </div>
-            <button onClick={handleOpenNewPlan} className="btn btn-primary text-xs inline-flex items-center gap-1.5">
+            <button onClick={handleOpenNewPlan} className="btn btn-primary text-sm inline-flex items-center gap-1.5">
               <Plus size={14} /> New Plan
             </button>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+            <table className="w-full text-left text-sm text-slate-700 dark:text-slate-300">
               <thead className="bg-slate-50 dark:bg-slate-800/60 uppercase font-semibold text-slate-500 border-b border-slate-200 dark:border-slate-800">
                 <tr>
                   <th className="py-2.5 px-3">Plan Reference</th>
@@ -956,12 +972,12 @@ export default function QualityControlPage() {
               <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Inspections & Testing Register</h2>
               <p className="text-xs text-slate-500">Routine checks, UAT, functional tests, checklists, and pass/fail evaluations.</p>
             </div>
-            <button onClick={handleOpenNewInspection} className="btn btn-primary text-xs inline-flex items-center gap-1.5">
+            <button onClick={handleOpenNewInspection} className="btn btn-primary text-sm inline-flex items-center gap-1.5">
               <Plus size={14} /> Schedule Inspection
             </button>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+            <table className="w-full text-left text-sm text-slate-700 dark:text-slate-300">
               <thead className="bg-slate-50 dark:bg-slate-800/60 uppercase font-semibold text-slate-500 border-b border-slate-200 dark:border-slate-800">
                 <tr>
                   <th className="py-2.5 px-3">Ref #</th>
@@ -1029,12 +1045,12 @@ export default function QualityControlPage() {
               <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Defects & Non-Conformances (NCR) Register</h2>
               <p className="text-xs text-slate-500">Quality non-conformances, defects, severity categorization, and root causes.</p>
             </div>
-            <button onClick={handleOpenNewDefect} className="btn btn-primary text-xs inline-flex items-center gap-1.5">
+            <button onClick={handleOpenNewDefect} className="btn btn-primary text-sm inline-flex items-center gap-1.5">
               <Plus size={14} /> Raise Defect / NCR
             </button>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+            <table className="w-full text-left text-sm text-slate-700 dark:text-slate-300">
               <thead className="bg-slate-50 dark:bg-slate-800/60 uppercase font-semibold text-slate-500 border-b border-slate-200 dark:border-slate-800">
                 <tr>
                   <th className="py-2.5 px-3">Issue Ref</th>
@@ -1112,12 +1128,12 @@ export default function QualityControlPage() {
               <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Corrective & Preventive Actions (CAPA) Register</h2>
               <p className="text-xs text-slate-500">Root cause elimination, preventive measures, verification of effectiveness, and closure.</p>
             </div>
-            <button onClick={handleOpenNewCAPA} className="btn btn-primary text-xs inline-flex items-center gap-1.5">
+            <button onClick={handleOpenNewCAPA} className="btn btn-primary text-sm inline-flex items-center gap-1.5">
               <Plus size={14} /> Create CAPA
             </button>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+            <table className="w-full text-left text-sm text-slate-700 dark:text-slate-300">
               <thead className="bg-slate-50 dark:bg-slate-800/60 uppercase font-semibold text-slate-500 border-b border-slate-200 dark:border-slate-800">
                 <tr>
                   <th className="py-2.5 px-3">CAPA Ref</th>
@@ -1310,7 +1326,7 @@ export default function QualityControlPage() {
                 <button type="button" onClick={() => setShowPlanModal(false)} className="btn btn-secondary text-xs">
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary text-xs">
+                <button type="submit" className="btn btn-primary text-sm">
                   Save Quality Plan
                 </button>
               </div>
@@ -1432,7 +1448,7 @@ export default function QualityControlPage() {
                   <button
                     type="button"
                     onClick={handleAddChecklistItem}
-                    className="text-xs text-teal-600 font-medium hover:underline inline-flex items-center gap-1"
+                    className="text-sm text-teal-600 font-medium hover:underline inline-flex items-center gap-1"
                   >
                     <Plus size={13} /> Add Checklist Item
                   </button>
@@ -1508,7 +1524,7 @@ export default function QualityControlPage() {
                     onChange={(e) => setInspectionForm({ ...inspectionForm, create_defect_now: e.target.checked })}
                     className="rounded text-teal-600"
                   />
-                  <label htmlFor="autoDefect" className="text-slate-700 dark:text-slate-300 text-xs cursor-pointer font-medium">
+                  <label htmlFor="autoDefect" className="text-slate-700 dark:text-slate-300 text-sm cursor-pointer font-medium">
                     Automatically raise Defect / NCR record if inspection fails
                   </label>
                 </div>
@@ -1529,7 +1545,7 @@ export default function QualityControlPage() {
                 <button type="button" onClick={() => setShowInspectionModal(false)} className="btn btn-secondary text-xs">
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary text-xs">
+                <button type="submit" className="btn btn-primary text-sm">
                   Save Inspection Record
                 </button>
               </div>
@@ -1663,7 +1679,7 @@ export default function QualityControlPage() {
                 <button type="button" onClick={() => setShowDefectModal(false)} className="btn btn-secondary text-xs">
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary text-xs bg-rose-600 hover:bg-rose-700 border-rose-600">
+                <button type="submit" className="btn btn-primary text-sm bg-rose-600 hover:bg-rose-700 border-rose-600">
                   Log Quality Issue
                 </button>
               </div>
@@ -1775,7 +1791,7 @@ export default function QualityControlPage() {
                 <button type="button" onClick={() => setShowCAPAModal(false)} className="btn btn-secondary text-xs">
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary text-xs bg-indigo-600 hover:bg-indigo-700 border-indigo-600">
+                <button type="submit" className="btn btn-primary text-sm bg-indigo-600 hover:bg-indigo-700 border-indigo-600">
                   Save CAPA Action
                 </button>
               </div>
@@ -1890,7 +1906,7 @@ export default function QualityControlPage() {
                 <button type="button" onClick={() => setShowCloseModal(false)} className="btn btn-secondary text-xs">
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary text-xs bg-emerald-600 hover:bg-emerald-700 border-emerald-600">
+                <button type="submit" className="btn btn-primary text-sm bg-emerald-600 hover:bg-emerald-700 border-emerald-600">
                   Verify & Close Issue
                 </button>
               </div>

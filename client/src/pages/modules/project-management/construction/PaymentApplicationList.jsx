@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 /**
  * @file PaymentApplicationList.jsx
  * @description Progress Payment Claims register, work valuation, materials on site,
@@ -897,7 +898,7 @@ export default function PaymentApplicationList() {
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <FileCheck2 size={24} className="text-brand-900 dark:text-brand-400" /> Progress Payment Claims
             </h1>
-            <p className="text-slate-500 text-sm mt-0.5">
+            <p className="text-slate-500 text-sm mt-0.5 hidden">
               Valuation of completed work, materials on site, contract retention, and financial settlement
             </p>
           </div>
@@ -914,9 +915,9 @@ export default function PaymentApplicationList() {
       </div>
 
       {/* 2. 5 Summary KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {/* Card 1: Total Applications */}
-        <div className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+      <MobileMovingCarousel data-page-carousel gridColsClass="grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" gapClass="gap-4">
+          {/* Card 1: Total Applications */}
+        <div className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-smoky-card hover:shadow-smoky-lg transition-all">
           <div>
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Total Applications
@@ -932,7 +933,7 @@ export default function PaymentApplicationList() {
         </div>
 
         {/* Card 2: Total Amount Claimed */}
-        <div className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+        <div className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-smoky-card hover:shadow-smoky-lg transition-all">
           <div>
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Total Amount Claimed
@@ -948,7 +949,7 @@ export default function PaymentApplicationList() {
         </div>
 
         {/* Card 3: Total Amount Certified */}
-        <div className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+        <div className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-smoky-card hover:shadow-smoky-lg transition-all">
           <div>
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Total Amount Certified
@@ -964,7 +965,7 @@ export default function PaymentApplicationList() {
         </div>
 
         {/* Card 4: Total Amount Paid */}
-        <div className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+        <div className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-smoky-card hover:shadow-smoky-lg transition-all">
           <div>
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Total Amount Paid
@@ -980,7 +981,7 @@ export default function PaymentApplicationList() {
         </div>
 
         {/* Card 5: Outstanding Amount */}
-        <div className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+        <div className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-smoky-card hover:shadow-smoky-lg transition-all">
           <div>
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Outstanding Amount
@@ -994,7 +995,7 @@ export default function PaymentApplicationList() {
             <Clock size={20} className="stroke-[2.5]" />
           </div>
         </div>
-      </div>
+      </MobileMovingCarousel>
 
       {/* 3. Search and Filters Toolbar BELOW the Cards */}
       <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
@@ -1071,7 +1072,7 @@ export default function PaymentApplicationList() {
               <span>Date:</span>
               <input
                 type="date"
-                className="input py-1 px-2 text-xs h-auto w-32 font-mono"
+                className="input py-1 px-2 text-sm h-auto w-32 font-mono"
                 value={dateFromFilter}
                 onChange={(e) => setDateFromFilter(e.target.value)}
                 title="Date From"
@@ -1079,7 +1080,7 @@ export default function PaymentApplicationList() {
               <span>to</span>
               <input
                 type="date"
-                className="input py-1 px-2 text-xs h-auto w-32 font-mono"
+                className="input py-1 px-2 text-sm h-auto w-32 font-mono"
                 value={dateToFilter}
                 onChange={(e) => setDateToFilter(e.target.value)}
                 title="Date To"
@@ -1104,13 +1105,6 @@ export default function PaymentApplicationList() {
                 Reset Filters
               </button>
             )}
-            <button
-              onClick={fetchApplications}
-              className="btn btn-secondary p-2"
-              title="Refresh applications list"
-            >
-              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-            </button>
           </div>
         </div>
       </div>
@@ -1166,16 +1160,16 @@ export default function PaymentApplicationList() {
                       <div className="font-semibold text-slate-900 dark:text-slate-100">{app.project_code || "-"}</div>
                       <div className="text-xs text-slate-400 truncate max-w-[130px]">{app.project_name}</div>
                     </td>
-                    <td className="py-3 px-3 font-mono text-xs text-slate-600 dark:text-slate-400">
+                    <td className="py-3 px-3 font-mono text-sm text-slate-600 dark:text-slate-400">
                       {app.contract_ref || "-"}
                     </td>
-                    <td className="py-3 px-3 text-xs text-slate-700 dark:text-slate-300 truncate max-w-[120px]">
+                    <td className="py-3 px-3 text-sm text-slate-700 dark:text-slate-300 truncate max-w-[120px]">
                       {app.contractor_name || "Contractor"}
                     </td>
-                    <td className="py-3 px-3 font-mono text-xs text-slate-600 dark:text-slate-400">
+                    <td className="py-3 px-3 font-mono text-sm text-slate-600 dark:text-slate-400">
                       {app.application_date ? String(app.application_date).split("T")[0] : "-"}
                     </td>
-                    <td className="py-3 px-3 font-mono text-xs text-slate-500">
+                    <td className="py-3 px-3 font-mono text-sm text-slate-500">
                       {app.period_from && app.period_to
                         ? `${String(app.period_from).split("T")[0]} to ${String(app.period_to).split("T")[0]}`
                         : "-"}
@@ -1336,7 +1330,7 @@ export default function PaymentApplicationList() {
             <div className="space-y-4">
               <div className="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Application / Claim Number <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -1350,7 +1344,7 @@ export default function PaymentApplicationList() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Project <span className="text-rose-500">*</span>
                   </label>
                   <select
@@ -1381,7 +1375,7 @@ export default function PaymentApplicationList() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Contract Reference
                   </label>
                   <input
@@ -1394,7 +1388,7 @@ export default function PaymentApplicationList() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Contractor / Subcontractor
                   </label>
                   <input
@@ -1407,7 +1401,7 @@ export default function PaymentApplicationList() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Client / Project Owner
                   </label>
                   <input
@@ -1419,7 +1413,7 @@ export default function PaymentApplicationList() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Currency
                   </label>
                   <select
@@ -1438,7 +1432,7 @@ export default function PaymentApplicationList() {
 
               <div className="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800 grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Application Date
                   </label>
                   <input
@@ -1451,7 +1445,7 @@ export default function PaymentApplicationList() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Valuation Period From
                   </label>
                   <input
@@ -1464,7 +1458,7 @@ export default function PaymentApplicationList() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Valuation Period To
                   </label>
                   <input
@@ -1477,7 +1471,7 @@ export default function PaymentApplicationList() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Payment Due Date
                   </label>
                   <input
@@ -1490,7 +1484,7 @@ export default function PaymentApplicationList() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Payment Terms
                   </label>
                   <input
@@ -1504,7 +1498,7 @@ export default function PaymentApplicationList() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Link Approved Client Valuation (Optional)
                   </label>
                   <select
@@ -1524,7 +1518,7 @@ export default function PaymentApplicationList() {
                 </div>
 
                 <div className="md:col-span-4">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Claim Description & Scope Remarks
                   </label>
                   <textarea
@@ -1556,7 +1550,7 @@ export default function PaymentApplicationList() {
                   <button
                     type="button"
                     onClick={addWorkItem}
-                    className="btn btn-secondary text-xs inline-flex items-center gap-1.5"
+                    className="btn btn-secondary text-sm inline-flex items-center gap-1.5"
                   >
                     <Plus size={14} /> Add Work Item
                   </button>
@@ -1564,7 +1558,7 @@ export default function PaymentApplicationList() {
               </div>
 
               <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl">
-                <table className="table w-full text-xs">
+                <table className="table w-full text-sm">
                   <thead>
                     <tr className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold uppercase tracking-wider">
                       <th className="py-2.5 px-3 text-left min-w-[200px]">Description</th>
@@ -1587,7 +1581,7 @@ export default function PaymentApplicationList() {
                           <input
                             type="text"
                             readOnly={modalMode === "VIEW"}
-                            className="input py-1 px-2 text-xs w-full"
+                            className="input py-1 px-2 text-sm w-full"
                             value={item.description}
                             onChange={(e) => handleWorkItemChange(idx, "description", e.target.value)}
                           />
@@ -1596,7 +1590,7 @@ export default function PaymentApplicationList() {
                           <input
                             type="text"
                             readOnly={modalMode === "VIEW"}
-                            className="input py-1 px-2 text-xs w-full font-mono"
+                            className="input py-1 px-2 text-sm w-full font-mono"
                             value={item.wbs_ref || ""}
                             onChange={(e) => handleWorkItemChange(idx, "wbs_ref", e.target.value)}
                           />
@@ -1615,7 +1609,7 @@ export default function PaymentApplicationList() {
                             type="number"
                             step="any"
                             readOnly={modalMode === "VIEW"}
-                            className="input py-1 px-2 text-xs w-full text-right font-mono"
+                            className="input py-1 px-2 text-sm w-full text-right font-mono"
                             value={item.contract_qty}
                             onChange={(e) => handleWorkItemChange(idx, "contract_qty", Number(e.target.value) || 0)}
                           />
@@ -1625,7 +1619,7 @@ export default function PaymentApplicationList() {
                             type="number"
                             step="any"
                             readOnly={modalMode === "VIEW"}
-                            className="input py-1 px-2 text-xs w-full text-right font-mono font-medium text-emerald-600"
+                            className="input py-1 px-2 text-sm w-full text-right font-mono font-medium text-emerald-600"
                             value={item.contract_rate}
                             onChange={(e) => handleWorkItemChange(idx, "contract_rate", Number(e.target.value) || 0)}
                           />
@@ -1635,7 +1629,7 @@ export default function PaymentApplicationList() {
                             type="number"
                             step="any"
                             readOnly={modalMode === "VIEW"}
-                            className="input py-1 px-2 text-xs w-full text-right font-mono text-slate-500"
+                            className="input py-1 px-2 text-sm w-full text-right font-mono text-slate-500"
                             value={item.previous_qty}
                             onChange={(e) => handleWorkItemChange(idx, "previous_qty", Number(e.target.value) || 0)}
                           />
@@ -1645,7 +1639,7 @@ export default function PaymentApplicationList() {
                             type="number"
                             step="any"
                             readOnly={modalMode === "VIEW"}
-                            className="input py-1 px-2 text-xs w-full text-right font-mono font-semibold text-brand-900 dark:text-brand-300"
+                            className="input py-1 px-2 text-sm w-full text-right font-mono font-semibold text-brand-900 dark:text-brand-300"
                             value={item.current_qty}
                             onChange={(e) => handleWorkItemChange(idx, "current_qty", Number(e.target.value) || 0)}
                           />
@@ -1709,7 +1703,7 @@ export default function PaymentApplicationList() {
                   <button
                     type="button"
                     onClick={addMaterialItem}
-                    className="btn btn-secondary text-xs inline-flex items-center gap-1.5"
+                    className="btn btn-secondary text-sm inline-flex items-center gap-1.5"
                   >
                     <Plus size={14} /> Add Material
                   </button>
@@ -1717,7 +1711,7 @@ export default function PaymentApplicationList() {
               </div>
 
               <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl">
-                <table className="table w-full text-xs">
+                <table className="table w-full text-sm">
                   <thead>
                     <tr className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold uppercase tracking-wider">
                       <th className="py-2.5 px-3 text-left min-w-[200px]">Material Description</th>
@@ -1746,7 +1740,7 @@ export default function PaymentApplicationList() {
                               type="text"
                               readOnly={modalMode === "VIEW"}
                               placeholder="e.g. Portland Cement Grade 42.5"
-                              className="input py-1 px-2 text-xs w-full"
+                              className="input py-1 px-2 text-sm w-full"
                               value={mat.description}
                               onChange={(e) => handleMaterialItemChange(idx, "description", e.target.value)}
                             />
@@ -1756,7 +1750,7 @@ export default function PaymentApplicationList() {
                               type="text"
                               readOnly={modalMode === "VIEW"}
                               placeholder="DN-9941"
-                              className="input py-1 px-2 text-xs w-full font-mono"
+                              className="input py-1 px-2 text-sm w-full font-mono"
                               value={mat.delivery_ref || ""}
                               onChange={(e) => handleMaterialItemChange(idx, "delivery_ref", e.target.value)}
                             />
@@ -1765,7 +1759,7 @@ export default function PaymentApplicationList() {
                             <input
                               type="date"
                               readOnly={modalMode === "VIEW"}
-                              className="input py-1 px-2 text-xs w-full font-mono"
+                              className="input py-1 px-2 text-sm w-full font-mono"
                               value={mat.delivery_date || ""}
                               onChange={(e) => handleMaterialItemChange(idx, "delivery_date", e.target.value)}
                             />
@@ -1775,7 +1769,7 @@ export default function PaymentApplicationList() {
                               type="number"
                               step="any"
                               readOnly={modalMode === "VIEW"}
-                              className="input py-1 px-2 text-xs w-full text-right font-mono"
+                              className="input py-1 px-2 text-sm w-full text-right font-mono"
                               value={mat.qty}
                               onChange={(e) => handleMaterialItemChange(idx, "qty", Number(e.target.value) || 0)}
                             />
@@ -1794,7 +1788,7 @@ export default function PaymentApplicationList() {
                               type="number"
                               step="any"
                               readOnly={modalMode === "VIEW"}
-                              className="input py-1 px-2 text-xs w-full text-right font-mono font-medium text-emerald-600"
+                              className="input py-1 px-2 text-sm w-full text-right font-mono font-medium text-emerald-600"
                               value={mat.unit_cost}
                               onChange={(e) => handleMaterialItemChange(idx, "unit_cost", Number(e.target.value) || 0)}
                             />
@@ -1807,7 +1801,7 @@ export default function PaymentApplicationList() {
                               type="text"
                               readOnly={modalMode === "VIEW"}
                               placeholder="Storage location / test note"
-                              className="input py-1 px-2 text-xs w-full"
+                              className="input py-1 px-2 text-sm w-full"
                               value={mat.notes || ""}
                               onChange={(e) => handleMaterialItemChange(idx, "notes", e.target.value)}
                             />
@@ -1860,7 +1854,7 @@ export default function PaymentApplicationList() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                       Retention Percentage (%)
                     </label>
                     <div className="relative">
@@ -1877,7 +1871,7 @@ export default function PaymentApplicationList() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                       Retention Cap / Maximum Limit (GH₵)
                     </label>
                     <input
@@ -1900,7 +1894,7 @@ export default function PaymentApplicationList() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                       Retention Amount for Current Claim (GH₵)
                     </label>
                     <input
@@ -1934,7 +1928,7 @@ export default function PaymentApplicationList() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                       Approved Variations Value (GH₵)
                     </label>
                     <input
@@ -1948,7 +1942,7 @@ export default function PaymentApplicationList() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                       Other Approved Additions (GH₵)
                     </label>
                     <input
@@ -1962,7 +1956,7 @@ export default function PaymentApplicationList() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                       Previous Certified Amount (GH₵)
                     </label>
                     <input
@@ -1976,7 +1970,7 @@ export default function PaymentApplicationList() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                       Advance Payment Recovery (GH₵)
                     </label>
                     <input
@@ -2000,7 +1994,7 @@ export default function PaymentApplicationList() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                       Penalties / Liquidated Damages (GH₵)
                     </label>
                     <input
@@ -2024,7 +2018,7 @@ export default function PaymentApplicationList() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                       Adjustments / Correction (+/- GH₵)
                     </label>
                     <input
@@ -2048,7 +2042,7 @@ export default function PaymentApplicationList() {
                       <button
                         type="button"
                         onClick={addDeductionItem}
-                        className="btn btn-secondary text-xs py-1 px-2.5 inline-flex items-center gap-1"
+                        className="btn btn-secondary text-sm py-1 px-2.5 inline-flex items-center gap-1"
                       >
                         <Plus size={12} /> Add Custom Deduction
                       </button>
@@ -2065,7 +2059,7 @@ export default function PaymentApplicationList() {
                             type="text"
                             readOnly={modalMode === "VIEW"}
                             placeholder="Deduction Description (e.g. Site Power & Water)"
-                            className="input py-1 px-2.5 text-xs flex-1"
+                            className="input py-1 px-2.5 text-sm flex-1"
                             value={ded.description}
                             onChange={(e) => handleDeductionItemChange(idx, "description", e.target.value)}
                           />
@@ -2073,7 +2067,7 @@ export default function PaymentApplicationList() {
                             type="text"
                             readOnly={modalMode === "VIEW"}
                             placeholder="Ref #"
-                            className="input py-1 px-2.5 text-xs w-28 font-mono"
+                            className="input py-1 px-2.5 text-sm w-28 font-mono"
                             value={ded.ref || ""}
                             onChange={(e) => handleDeductionItemChange(idx, "ref", e.target.value)}
                           />
@@ -2082,7 +2076,7 @@ export default function PaymentApplicationList() {
                             step="any"
                             readOnly={modalMode === "VIEW"}
                             placeholder="Amount (GH₵)"
-                            className="input py-1 px-2.5 text-xs w-32 font-mono text-right text-rose-600"
+                            className="input py-1 px-2.5 text-sm w-32 font-mono text-right text-rose-600"
                             value={ded.amount}
                             onChange={(e) => handleDeductionItemChange(idx, "amount", Number(e.target.value) || 0)}
                           />
@@ -2229,7 +2223,7 @@ export default function PaymentApplicationList() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                       Certificate Document Ref / IPC #
                     </label>
                     <input
@@ -2243,7 +2237,7 @@ export default function PaymentApplicationList() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                       Payment Voucher Ref
                     </label>
                     <input
@@ -2257,7 +2251,7 @@ export default function PaymentApplicationList() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                       Quantity Surveyor / Assessor Remarks
                     </label>
                     <textarea
@@ -2270,7 +2264,7 @@ export default function PaymentApplicationList() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                       Project Manager Sign-off Notes
                     </label>
                     <textarea
@@ -2372,7 +2366,7 @@ export default function PaymentApplicationList() {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Net Claimed (GH₵)
               </label>
               <input
@@ -2383,7 +2377,7 @@ export default function PaymentApplicationList() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Certified Amount (GH₵) <span className="text-rose-500">*</span>
               </label>
               <input
@@ -2405,7 +2399,7 @@ export default function PaymentApplicationList() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Certificate Document No / IPC Ref <span className="text-rose-500">*</span>
             </label>
             <input
@@ -2418,7 +2412,7 @@ export default function PaymentApplicationList() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Disputed / Rejected Adjustment Reason
             </label>
             <input
@@ -2431,7 +2425,7 @@ export default function PaymentApplicationList() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Quantity Surveyor / Engineer Notes
             </label>
             <textarea
@@ -2459,7 +2453,7 @@ export default function PaymentApplicationList() {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Payment Amount (GH₵) <span className="text-rose-500">*</span>
               </label>
               <input
@@ -2472,7 +2466,7 @@ export default function PaymentApplicationList() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Payment Date</label>
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">Payment Date</label>
               <input
                 type="date"
                 required
@@ -2485,7 +2479,7 @@ export default function PaymentApplicationList() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Receipt / Voucher Ref <span className="text-rose-500">*</span>
               </label>
               <input
@@ -2497,7 +2491,7 @@ export default function PaymentApplicationList() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Payment Method</label>
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">Payment Method</label>
               <select
                 className="input text-sm w-full"
                 value={paymentForm.payment_method}
@@ -2512,7 +2506,7 @@ export default function PaymentApplicationList() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Finance Notes / Bank Reference
             </label>
             <input

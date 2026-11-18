@@ -193,14 +193,7 @@ export default function ProductionStockPage() {
             >
               <Download size={14} /> Export CSV
             </button>
-            <button
-              type="button"
-              className="btn-success flex items-center gap-1.5 text-sm font-bold"
-              onClick={fetchProductionStock}
-              disabled={loading}
-            >
-              <RotateCcw size={14} className={loading ? "animate-spin" : ""} /> Refresh
-            </button>
+            
             <Link to="/production/execution/fg-transfer/new" className="btn-success flex items-center gap-1.5 text-sm font-bold">
               <Truck size={15} /> Transfer FG to Inventory
             </Link>
@@ -211,64 +204,52 @@ export default function ProductionStockPage() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        <div className="card p-4 bg-white dark:bg-slate-800 border-l-4 border-l-brand-600 shadow-xs">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Manufacturing SKUs</p>
-              <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
-                {stats.total_items}
-              </h3>
-            </div>
-            <div className="p-3 bg-brand-50 dark:bg-brand-950/60 rounded-xl text-brand-600">
-              <Boxes size={22} />
-            </div>
+        <div className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-smoky-card hover:shadow-smoky-lg transition-all">
+          <div>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Manufacturing SKUs</p>
+            <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+              {stats.total_items}
+            </p>
           </div>
-          <p className="text-[11px] text-slate-400 mt-2">Active production materials & outputs</p>
+          <div className="w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md bg-sky-600 dark:bg-sky-500">
+            <Boxes size={20} />
+          </div>
         </div>
 
-        <div className="card p-4 bg-white dark:bg-slate-800 border-l-4 border-l-blue-500 shadow-xs">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Raw Material Store</p>
-              <h3 className="text-2xl font-extrabold text-blue-600 dark:text-blue-400 mt-1">
-                {stats.raw_qty.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </h3>
-            </div>
-            <div className="p-3 bg-blue-50 dark:bg-blue-950/60 rounded-xl text-blue-600">
-              <Warehouse size={22} />
-            </div>
+        <div className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-smoky-card hover:shadow-smoky-lg transition-all">
+          <div>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Raw Material Store</p>
+            <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+              {stats.raw_qty.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
           </div>
-          <p className="text-[11px] text-slate-400 mt-2">Available for daily work orders</p>
+          <div className="w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md bg-brand-900 dark:bg-brand-700">
+            <Warehouse size={20} />
+          </div>
         </div>
 
-        <div className="card p-4 bg-white dark:bg-slate-800 border-l-4 border-l-amber-500 shadow-xs">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Work-in-Progress (WIP)</p>
-              <h3 className="text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-1">
-                {stats.wip_qty.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </h3>
-            </div>
-            <div className="p-3 bg-amber-50 dark:bg-amber-950/60 rounded-xl text-amber-600">
-              <Layers size={22} />
-            </div>
+        <div className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-smoky-card hover:shadow-smoky-lg transition-all">
+          <div>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Work-in-Progress (WIP)</p>
+            <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+              {stats.wip_qty.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
           </div>
-          <p className="text-[11px] text-slate-400 mt-2">In-process floor staging inventory</p>
+          <div className="w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md bg-amber-500">
+            <Layers size={20} />
+          </div>
         </div>
 
-        <div className="card p-4 bg-white dark:bg-slate-800 border-l-4 border-l-emerald-500 shadow-xs">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Finished Goods Stock</p>
-              <h3 className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
-                {stats.fg_qty.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </h3>
-            </div>
-            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/60 rounded-xl text-emerald-600">
-              <PackageCheck size={22} />
-            </div>
+        <div className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-smoky-card hover:shadow-smoky-lg transition-all">
+          <div>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Finished Goods Stock</p>
+            <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+              {stats.fg_qty.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
           </div>
-          <p className="text-[11px] text-slate-400 mt-2">Ready for inventory transfer</p>
+          <div className="w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md bg-emerald-600">
+            <PackageCheck size={20} />
+          </div>
         </div>
 
       </div>

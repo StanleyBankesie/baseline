@@ -66,14 +66,7 @@ export default function MaterialUtilizationList() {
             <Link to="/production?section=Shop%20Floor%20%26%20Execution" className="font-sans btn btn-secondary text-sm">
               Return to Menu
             </Link>
-            <button
-              type="button"
-              className="btn-success flex items-center gap-1.5 text-sm font-bold"
-              onClick={fetchItems}
-              disabled={loading}
-            >
-              <RotateCcw size={15} className={loading ? "animate-spin" : ""} /> Refresh
-            </button>
+            
             <Link to="/production/execution/material-utilization/new" className="btn-success flex items-center gap-1.5 text-sm font-bold">
               <Plus size={16} /> New Material Utilization
             </Link>

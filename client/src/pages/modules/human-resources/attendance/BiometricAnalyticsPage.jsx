@@ -114,13 +114,7 @@ export default function BiometricAnalyticsPage() {
           >
             <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-500" /> Export CSV
           </button>
-          <button
-            onClick={loadData}
-            disabled={loading}
-            className="btn-secondary text-xs flex items-center gap-1 px-3 py-2"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
-          </button>
+          
         </div>
       </div>
 

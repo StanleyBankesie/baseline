@@ -164,7 +164,7 @@ export default function ProductionCostingPage() {
 
         {/* Cost Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="card p-6 border-l-4 border-l-brand-600 space-y-2 shadow-sm">
+          <div className="card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-smoky-card hover:shadow-smoky-lg transition-all space-y-2">
             <p className="text-xs font-bold text-slate-500 uppercase">Material Cost</p>
             <p className="text-2xl font-bold text-slate-900 dark:text-white">
               {currencySymbol}{matCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
@@ -172,7 +172,7 @@ export default function ProductionCostingPage() {
             <p className="text-xs text-slate-400">Raw materials & component consumption</p>
           </div>
 
-          <div className="card p-6 border-l-4 border-l-blue-600 space-y-2 shadow-sm">
+          <div className="card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-smoky-card hover:shadow-smoky-lg transition-all space-y-2">
             <p className="text-xs font-bold text-slate-500 uppercase">Direct Labor Cost</p>
             <p className="text-2xl font-bold text-slate-900 dark:text-white">
               {currencySymbol}{labCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
@@ -180,7 +180,7 @@ export default function ProductionCostingPage() {
             <p className="text-xs text-slate-400">Operator wages & shift labor hours</p>
           </div>
 
-          <div className="card p-6 border-l-4 border-l-purple-600 space-y-2 shadow-sm">
+          <div className="card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-smoky-card hover:shadow-smoky-lg transition-all space-y-2">
             <p className="text-xs font-bold text-slate-500 uppercase">Machine & Equipment Cost</p>
             <p className="text-2xl font-bold text-slate-900 dark:text-white">
               {currencySymbol}{macCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
@@ -188,7 +188,7 @@ export default function ProductionCostingPage() {
             <p className="text-xs text-slate-400">Power, fuel & machine depreciation</p>
           </div>
 
-          <div className="card p-6 border-l-4 border-l-emerald-600 space-y-2 shadow-sm">
+          <div className="card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-smoky-card hover:shadow-smoky-lg transition-all space-y-2">
             <p className="text-xs font-bold text-slate-500 uppercase">Total Production Cost</p>
             <p className="text-2xl font-bold text-emerald-600">
               {currencySymbol}{totCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}

@@ -67,16 +67,25 @@ export default function CompanyForm() {
   }, [id]);
 
   async function fetchCountries() {
+    const fallbackCountries = [
+      "Ghana", "Nigeria", "United States", "United Kingdom", "Canada",
+      "Germany", "France", "China", "India", "South Africa", "Kenya",
+      "Australia", "United Arab Emirates", "Japan", "Brazil"
+    ];
     try {
       const resp = await fetch("https://restcountries.com/v3.1/all?fields=name");
-      const data = await resp.json();
-      if (Array.isArray(data)) {
-        const list = data.map(c => c.name.common).sort();
-        setCountries(list);
+      if (resp.ok) {
+        const data = await resp.json();
+        if (Array.isArray(data)) {
+          const list = data.map(c => c.name.common).sort();
+          setCountries(list);
+          return;
+        }
       }
-    } catch (err) {
-      console.error("Failed to fetch countries", err);
+    } catch (_) {
+      // Graceful offline/CORS fallback
     }
+    setCountries(fallbackCountries.sort());
   }
 
   useEffect(() => {

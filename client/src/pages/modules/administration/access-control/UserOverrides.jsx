@@ -13,7 +13,7 @@ import { toast } from "react-toastify";
  * 
  * @returns {JSX.Element} The rendered component
  */
-export default function UserOverrides() {
+export default function UserOverrides({ initialCreate = false }) {
   const navigate = useNavigate();
   const STANDARD_EXCEPTIONS = [
     { code: "BANKS.AI.FLOATING_WIDGET", label: "Banks AI - Floating Assistant Widget Visibility" },

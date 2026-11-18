@@ -1,0 +1,518 @@
+[
+  {
+    "name": "HR & Payroll Home Hub",
+    "path": "/human-resources"
+  },
+  {
+    "name": "Allowances",
+    "path": "/human-resources/allowances"
+  },
+  {
+    "name": "Edit / Detail (/human-resources/allowances/:id)",
+    "path": "/human-resources/allowances/1"
+  },
+  {
+    "name": "Allowances - New",
+    "path": "/human-resources/allowances/new"
+  },
+  {
+    "name": "Attendance",
+    "path": "/human-resources/attendance"
+  },
+  {
+    "name": "Attendance Policies",
+    "path": "/human-resources/attendance-policies"
+  },
+  {
+    "name": "Edit / Detail (/human-resources/attendance/:id)",
+    "path": "/human-resources/attendance/1"
+  },
+  {
+    "name": "Attendance - Bulk",
+    "path": "/human-resources/attendance/bulk"
+  },
+  {
+    "name": "Attendance - List",
+    "path": "/human-resources/attendance/list"
+  },
+  {
+    "name": "Attendance - New",
+    "path": "/human-resources/attendance/new"
+  },
+  {
+    "name": "Attendance - Timesheet",
+    "path": "/human-resources/attendance/timesheet"
+  },
+  {
+    "name": "Biometric Analytics",
+    "path": "/human-resources/biometric-analytics"
+  },
+  {
+    "name": "Biometric Clock",
+    "path": "/human-resources/biometric-clock"
+  },
+  {
+    "name": "Biometric Devices",
+    "path": "/human-resources/biometric-devices"
+  },
+  {
+    "name": "Biometric Settings",
+    "path": "/human-resources/biometric-settings"
+  },
+  {
+    "name": "Branches",
+    "path": "/human-resources/branches"
+  },
+  {
+    "name": "Bulk Attendance",
+    "path": "/human-resources/bulk-attendance"
+  },
+  {
+    "name": "Candidates",
+    "path": "/human-resources/candidates"
+  },
+  {
+    "name": "Edit / Detail (/human-resources/candidates/:id)",
+    "path": "/human-resources/candidates/1"
+  },
+  {
+    "name": "Candidates - New",
+    "path": "/human-resources/candidates/new"
+  },
+  {
+    "name": "Compliance - Policies",
+    "path": "/human-resources/compliance/policies"
+  },
+  {
+    "name": "Compliance - Policies - New",
+    "path": "/human-resources/compliance/policies/new"
+  },
+  {
+    "name": "Dashboard",
+    "path": "/human-resources/dashboard"
+  },
+  {
+    "name": "Departments",
+    "path": "/human-resources/departments"
+  },
+  {
+    "name": "Designations",
+    "path": "/human-resources/designations"
+  },
+  {
+    "name": "Employees",
+    "path": "/human-resources/employees"
+  },
+  {
+    "name": "Edit / Detail (/human-resources/employees/:id)",
+    "path": "/human-resources/employees/1"
+  },
+  {
+    "name": "Employees - New",
+    "path": "/human-resources/employees/new"
+  },
+  {
+    "name": "Exit - Clearance",
+    "path": "/human-resources/exit/clearance"
+  },
+  {
+    "name": "Exit - Offboarding",
+    "path": "/human-resources/exit/offboarding"
+  },
+  {
+    "name": "Exit - Request",
+    "path": "/human-resources/exit/request"
+  },
+  {
+    "name": "Interviews",
+    "path": "/human-resources/interviews"
+  },
+  {
+    "name": "Edit / Detail (/human-resources/interviews/:id)",
+    "path": "/human-resources/interviews/1"
+  },
+  {
+    "name": "Interviews - New",
+    "path": "/human-resources/interviews/new"
+  },
+  {
+    "name": "Job Roles",
+    "path": "/human-resources/job-roles"
+  },
+  {
+    "name": "Leave",
+    "path": "/human-resources/leave"
+  },
+  {
+    "name": "Leave Balances",
+    "path": "/human-resources/leave-balances"
+  },
+  {
+    "name": "Leave Balances - New",
+    "path": "/human-resources/leave-balances/new"
+  },
+  {
+    "name": "Leave Roster",
+    "path": "/human-resources/leave-roster"
+  },
+  {
+    "name": "Leave Roster - New",
+    "path": "/human-resources/leave-roster/new"
+  },
+  {
+    "name": "Leave Scheduling",
+    "path": "/human-resources/leave-scheduling"
+  },
+  {
+    "name": "Leave Scheduling - New",
+    "path": "/human-resources/leave-scheduling/new"
+  },
+  {
+    "name": "Leave Setup",
+    "path": "/human-resources/leave-setup"
+  },
+  {
+    "name": "Edit / Detail (/human-resources/leave-setup/:id)",
+    "path": "/human-resources/leave-setup/1"
+  },
+  {
+    "name": "Leave Setup - New",
+    "path": "/human-resources/leave-setup/new"
+  },
+  {
+    "name": "Leave - Apply",
+    "path": "/human-resources/leave/apply"
+  },
+  {
+    "name": "Leave - Apply - New",
+    "path": "/human-resources/leave/apply/new"
+  },
+  {
+    "name": "Leave - Balances",
+    "path": "/human-resources/leave/balances"
+  },
+  {
+    "name": "Leave - Calendar",
+    "path": "/human-resources/leave/calendar"
+  },
+  {
+    "name": "Leave - Records",
+    "path": "/human-resources/leave/records"
+  },
+  {
+    "name": "Leave - Records - New",
+    "path": "/human-resources/leave/records/new"
+  },
+  {
+    "name": "Leave - Request",
+    "path": "/human-resources/leave/request"
+  },
+  {
+    "name": "Leave - Roster",
+    "path": "/human-resources/leave/roster"
+  },
+  {
+    "name": "Leave - Scheduling",
+    "path": "/human-resources/leave/scheduling"
+  },
+  {
+    "name": "Leave - Types",
+    "path": "/human-resources/leave/types"
+  },
+  {
+    "name": "Loan Requests",
+    "path": "/human-resources/loan-requests"
+  },
+  {
+    "name": "Edit / Detail (/human-resources/loan-requests/:id)",
+    "path": "/human-resources/loan-requests/1"
+  },
+  {
+    "name": "Loan Requests - New",
+    "path": "/human-resources/loan-requests/new"
+  },
+  {
+    "name": "Loans",
+    "path": "/human-resources/loans"
+  },
+  {
+    "name": "Edit / Detail (/human-resources/loans/:id)",
+    "path": "/human-resources/loans/1"
+  },
+  {
+    "name": "Edit / Detail (/human-resources/loans/:id/disburse)",
+    "path": "/human-resources/loans/1/disburse"
+  },
+  {
+    "name": "Loans - New",
+    "path": "/human-resources/loans/new"
+  },
+  {
+    "name": "Medical Policies",
+    "path": "/human-resources/medical-policies"
+  },
+  {
+    "name": "Edit / Detail (/human-resources/medical-policies/:id)",
+    "path": "/human-resources/medical-policies/1"
+  },
+  {
+    "name": "Medical Policies - New",
+    "path": "/human-resources/medical-policies/new"
+  },
+  {
+    "name": "Offers",
+    "path": "/human-resources/offers"
+  },
+  {
+    "name": "Edit / Detail (/human-resources/offers/:id)",
+    "path": "/human-resources/offers/1"
+  },
+  {
+    "name": "Offers - New",
+    "path": "/human-resources/offers/new"
+  },
+  {
+    "name": "Organogram",
+    "path": "/human-resources/organogram"
+  },
+  {
+    "name": "Payroll",
+    "path": "/human-resources/payroll"
+  },
+  {
+    "name": "Payroll - Elements",
+    "path": "/human-resources/payroll/elements"
+  },
+  {
+    "name": "Payroll - Manual Components",
+    "path": "/human-resources/payroll/manual-components"
+  },
+  {
+    "name": "Payroll - Process",
+    "path": "/human-resources/payroll/process"
+  },
+  {
+    "name": "Payroll - Process - New",
+    "path": "/human-resources/payroll/process/new"
+  },
+  {
+    "name": "Payroll - Salary Exemptions",
+    "path": "/human-resources/payroll/salary-exemptions"
+  },
+  {
+    "name": "Payroll - Salary Posting",
+    "path": "/human-resources/payroll/salary-posting"
+  },
+  {
+    "name": "Payroll - Salary Posting - New",
+    "path": "/human-resources/payroll/salary-posting/new"
+  },
+  {
+    "name": "Payslips",
+    "path": "/human-resources/payslips"
+  },
+  {
+    "name": "Edit / Detail (/human-resources/payslips/:id)",
+    "path": "/human-resources/payslips/1"
+  },
+  {
+    "name": "Payslips - New",
+    "path": "/human-resources/payslips/new"
+  },
+  {
+    "name": "Performance - Appraisal",
+    "path": "/human-resources/performance/appraisal"
+  },
+  {
+    "name": "Edit / Detail (/human-resources/performance/appraisal/:id)",
+    "path": "/human-resources/performance/appraisal/1"
+  },
+  {
+    "name": "Performance - Appraisal - New",
+    "path": "/human-resources/performance/appraisal/new"
+  },
+  {
+    "name": "Performance - Kpis",
+    "path": "/human-resources/performance/kpis"
+  },
+  {
+    "name": "Performance - Kpis - New",
+    "path": "/human-resources/performance/kpis/new"
+  },
+  {
+    "name": "Performance - Submit",
+    "path": "/human-resources/performance/submit"
+  },
+  {
+    "name": "Performance - Submit - New",
+    "path": "/human-resources/performance/submit/new"
+  },
+  {
+    "name": "Policies",
+    "path": "/human-resources/policies"
+  },
+  {
+    "name": "Edit / Detail (/human-resources/policies/:id)",
+    "path": "/human-resources/policies/1"
+  },
+  {
+    "name": "Policies - New",
+    "path": "/human-resources/policies/new"
+  },
+  {
+    "name": "Policies - View",
+    "path": "/human-resources/policies/view"
+  },
+  {
+    "name": "Promotions",
+    "path": "/human-resources/promotions"
+  },
+  {
+    "name": "Edit / Detail (/human-resources/promotions/:id)",
+    "path": "/human-resources/promotions/1"
+  },
+  {
+    "name": "Promotions - New",
+    "path": "/human-resources/promotions/new"
+  },
+  {
+    "name": "Reports",
+    "path": "/human-resources/reports"
+  },
+  {
+    "name": "Reports - Allowances",
+    "path": "/human-resources/reports/allowances"
+  },
+  {
+    "name": "Reports - Employees",
+    "path": "/human-resources/reports/employees"
+  },
+  {
+    "name": "Reports - Loans",
+    "path": "/human-resources/reports/loans"
+  },
+  {
+    "name": "Reports - Monthly Payroll",
+    "path": "/human-resources/reports/monthly-payroll"
+  },
+  {
+    "name": "Reports - Paye",
+    "path": "/human-resources/reports/paye"
+  },
+  {
+    "name": "Reports - Salaries",
+    "path": "/human-resources/reports/salaries"
+  },
+  {
+    "name": "Reports - Ssf",
+    "path": "/human-resources/reports/ssf"
+  },
+  {
+    "name": "Requisitions",
+    "path": "/human-resources/requisitions"
+  },
+  {
+    "name": "Edit / Detail (/human-resources/requisitions/:id)",
+    "path": "/human-resources/requisitions/1"
+  },
+  {
+    "name": "Requisitions - New",
+    "path": "/human-resources/requisitions/new"
+  },
+  {
+    "name": "Roster",
+    "path": "/human-resources/roster"
+  },
+  {
+    "name": "Roster - New",
+    "path": "/human-resources/roster/new"
+  },
+  {
+    "name": "Salary Config",
+    "path": "/human-resources/salary-config"
+  },
+  {
+    "name": "Edit / Detail (/human-resources/salary-config/:id)",
+    "path": "/human-resources/salary-config/1"
+  },
+  {
+    "name": "Salary Config - Base Salaries",
+    "path": "/human-resources/salary-config/base-salaries"
+  },
+  {
+    "name": "Salary Config - New",
+    "path": "/human-resources/salary-config/new"
+  },
+  {
+    "name": "Salary Config - Structure",
+    "path": "/human-resources/salary-config/structure"
+  },
+  {
+    "name": "Setup",
+    "path": "/human-resources/setup"
+  },
+  {
+    "name": "Shifts",
+    "path": "/human-resources/shifts"
+  },
+  {
+    "name": "Edit / Detail (/human-resources/shifts/:id)",
+    "path": "/human-resources/shifts/1"
+  },
+  {
+    "name": "Shifts - New",
+    "path": "/human-resources/shifts/new"
+  },
+  {
+    "name": "Tax Config",
+    "path": "/human-resources/tax-config"
+  },
+  {
+    "name": "Edit / Detail (/human-resources/tax-config/:id)",
+    "path": "/human-resources/tax-config/1"
+  },
+  {
+    "name": "Tax Config - New",
+    "path": "/human-resources/tax-config/new"
+  },
+  {
+    "name": "Tax Reliefs",
+    "path": "/human-resources/tax-reliefs"
+  },
+  {
+    "name": "Timesheet",
+    "path": "/human-resources/timesheet"
+  },
+  {
+    "name": "Timesheet Report",
+    "path": "/human-resources/timesheet-report"
+  },
+  {
+    "name": "Timesheet - New",
+    "path": "/human-resources/timesheet/new"
+  },
+  {
+    "name": "Training",
+    "path": "/human-resources/training"
+  },
+  {
+    "name": "Training - History",
+    "path": "/human-resources/training/history"
+  },
+  {
+    "name": "Training - History - New",
+    "path": "/human-resources/training/history/new"
+  },
+  {
+    "name": "Training - New",
+    "path": "/human-resources/training/new"
+  },
+  {
+    "name": "Work Schedules",
+    "path": "/human-resources/work-schedules"
+  },
+  {
+    "name": "Work Schedules - New",
+    "path": "/human-resources/work-schedules/new"
+  }
+]

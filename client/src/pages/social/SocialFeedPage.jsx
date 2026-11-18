@@ -334,15 +334,7 @@ export default function SocialFeedPage({ isModal = false, onClose = null, focusP
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={fetchPosts}
-              disabled={loading}
-              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer"
-              title="Refresh Feed"
-            >
-              <span className={loading ? "animate-spin" : ""}>🔄</span>
-              Refresh
-            </button>
+            
             {isModal ? (
               <button
                 type="button"

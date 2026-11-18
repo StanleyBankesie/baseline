@@ -63,7 +63,7 @@ export default function MaterialReceiptList() {
             </div>
             <div className="flex gap-2">
               <button onClick={() => window.history.back()} className="btn btn-secondary">Back</button>
-              <button onClick={loadData} className="btn btn-secondary p-2" title="Refresh"><RefreshCw size={16} /></button>
+              
               <Link to="/production/execution/material-receipt/new" className="btn-success flex items-center gap-2">
                 <Plus size={16} />Receive{pendingIssues > 0 ? ` (${pendingIssues})` : ""}
               </Link>

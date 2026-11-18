@@ -319,10 +319,6 @@ export default function MaterialRequirementPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button onClick={fetchData} className="btn btn-secondary flex items-center gap-2 text-xs font-semibold">
-            <RefreshCw size={16} /> Refresh Stock
-          </button>
-          
           <Link 
             to="/production/execution/material-requisition/new"
             className="btn btn-primary bg-brand-900 hover:bg-brand-950 text-white flex items-center gap-2 text-xs font-bold shadow-md"

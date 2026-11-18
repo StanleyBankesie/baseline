@@ -960,13 +960,6 @@ function LowStockNotificationSection() {
               {assignedRecipients.length}
             </span>
           </div>
-          <button
-            type="button"
-            onClick={loadAssigned}
-            className="text-xs text-brand hover:underline font-semibold"
-          >
-            Refresh List
-          </button>
         </div>
 
         {loadingAssigned ? (

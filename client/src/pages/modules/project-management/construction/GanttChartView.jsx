@@ -1163,7 +1163,7 @@ export default function GanttChartView() {
             {/* Project Picker Dropdown */}
             <div className="pl-3 border-l border-slate-200 dark:border-slate-800">
               <select
-                className="h-9 px-3 text-xs font-semibold rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 shadow-2xs focus:outline-none focus:ring-1 focus:ring-brand-500 cursor-pointer min-w-[220px] max-w-[340px] truncate transition-all"
+                className="h-9 px-3 text-sm font-semibold rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 shadow-2xs focus:outline-none focus:ring-1 focus:ring-brand-500 cursor-pointer min-w-[220px] max-w-[340px] truncate transition-all"
                 value={selectedProjectId}
                 onChange={(e) => setSelectedProjectId(e.target.value)}
               >
@@ -1350,7 +1350,7 @@ export default function GanttChartView() {
             <input
               type="text"
               placeholder="Search Work Plan/WBS..."
-              className="w-full h-9 pl-9 pr-7 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all"
+              className="w-full h-9 pl-9 pr-7 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -1368,7 +1368,7 @@ export default function GanttChartView() {
           {/* Scope Dropdown */}
           <div className="w-40 sm:w-44 shrink-0">
             <select
-              className="w-full h-9 px-3 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer truncate"
+              className="w-full h-9 px-3 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer truncate"
               value={scopeFilter}
               onChange={(e) => setScopeFilter(e.target.value)}
             >
@@ -1384,7 +1384,7 @@ export default function GanttChartView() {
           {/* Status Dropdown */}
           <div className="w-36 shrink-0">
             <select
-              className="w-full h-9 px-3 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer"
+              className="w-full h-9 px-3 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -1400,7 +1400,7 @@ export default function GanttChartView() {
           {/* Grouping Dropdown */}
           <div className="w-40 shrink-0">
             <select
-              className="w-full h-9 px-3 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer"
+              className="w-full h-9 px-3 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer"
               value={groupBy}
               onChange={(e) => setGroupBy(e.target.value)}
             >
@@ -1437,7 +1437,7 @@ export default function GanttChartView() {
           <button
             type="button"
             onClick={handleScrollToToday}
-            className="btn btn-secondary text-xs h-9 px-3 rounded-xl font-bold text-brand-700 dark:text-brand-300"
+            className="btn btn-secondary text-sm h-9 px-3 rounded-xl font-bold text-brand-700 dark:text-brand-300"
             title="Scroll timeline to current date"
           >
             Today
@@ -1447,7 +1447,7 @@ export default function GanttChartView() {
           <button
             type="button"
             onClick={handleFitToScreen}
-            className="btn btn-secondary text-xs h-9 px-3 rounded-xl font-semibold"
+            className="btn btn-secondary text-sm h-9 px-3 rounded-xl font-semibold"
             title="Fit timeline to project duration"
           >
             Fit
@@ -1560,7 +1560,7 @@ export default function GanttChartView() {
             <button
               type="button"
               onClick={handleResetFilters}
-              className="btn btn-secondary text-xs mt-3"
+              className="btn btn-secondary text-sm mt-3"
             >
               Reset Filters
             </button>
@@ -2094,7 +2094,7 @@ export default function GanttChartView() {
                     </label>
                     <input
                       type="text"
-                      className="text-xs h-9 w-full px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                      className="text-sm h-9 w-full px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                       value={selectedTaskDetails.task_title || selectedTaskDetails.title || ""}
                       onChange={(e) =>
                         setSelectedTaskDetails({
@@ -2113,7 +2113,7 @@ export default function GanttChartView() {
                       </label>
                       <input
                         type="text"
-                        className="text-xs h-9 w-full px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono text-slate-900 dark:text-white"
+                        className="text-sm h-9 w-full px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono text-slate-900 dark:text-white"
                         value={selectedTaskDetails.wbs_code || ""}
                         onChange={(e) =>
                           setSelectedTaskDetails({ ...selectedTaskDetails, wbs_code: e.target.value })
@@ -2126,7 +2126,7 @@ export default function GanttChartView() {
                       </label>
                       <input
                         type="text"
-                        className="text-xs h-9 w-full px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                        className="text-sm h-9 w-full px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                         value={selectedTaskDetails.scope_name || ""}
                         onChange={(e) =>
                           setSelectedTaskDetails({ ...selectedTaskDetails, scope_name: e.target.value })
@@ -2141,7 +2141,7 @@ export default function GanttChartView() {
                     </label>
                     <textarea
                       rows={3}
-                      className="text-xs w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                      className="text-sm w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                       value={selectedTaskDetails.task_description || selectedTaskDetails.description || ""}
                       onChange={(e) =>
                         setSelectedTaskDetails({
@@ -2159,7 +2159,7 @@ export default function GanttChartView() {
                         Responsible Assignee
                       </label>
                       <select
-                        className="text-xs h-9 w-full px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                        className="text-sm h-9 w-full px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                         value={selectedTaskDetails.assigned_to_id || ""}
                         onChange={(e) => {
                           const uId = e.target.value;
@@ -2183,7 +2183,7 @@ export default function GanttChartView() {
                         Priority
                       </label>
                       <select
-                        className="text-xs h-9 w-full px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium text-slate-900 dark:text-white"
+                        className="text-sm h-9 w-full px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium text-slate-900 dark:text-white"
                         value={selectedTaskDetails.priority || "MEDIUM"}
                         onChange={(e) =>
                           setSelectedTaskDetails({ ...selectedTaskDetails, priority: e.target.value })
@@ -2203,7 +2203,7 @@ export default function GanttChartView() {
                         Execution Status
                       </label>
                       <select
-                        className="text-xs h-9 w-full px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium text-slate-900 dark:text-white"
+                        className="text-sm h-9 w-full px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium text-slate-900 dark:text-white"
                         value={selectedTaskDetails.status || "PENDING"}
                         onChange={(e) =>
                           setSelectedTaskDetails({ ...selectedTaskDetails, status: e.target.value })
@@ -2268,7 +2268,7 @@ export default function GanttChartView() {
                       </label>
                       <input
                         type="date"
-                        className="text-xs h-9 w-full px-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono text-slate-900 dark:text-white"
+                        className="text-sm h-9 w-full px-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono text-slate-900 dark:text-white"
                         value={selectedTaskDetails.start_date ? String(selectedTaskDetails.start_date).split("T")[0] : ""}
                         onChange={(e) =>
                           setSelectedTaskDetails({ ...selectedTaskDetails, start_date: e.target.value })
@@ -2281,7 +2281,7 @@ export default function GanttChartView() {
                       </label>
                       <input
                         type="date"
-                        className="text-xs h-9 w-full px-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono text-slate-900 dark:text-white"
+                        className="text-sm h-9 w-full px-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono text-slate-900 dark:text-white"
                         value={selectedTaskDetails.end_date ? String(selectedTaskDetails.end_date).split("T")[0] : ""}
                         onChange={(e) =>
                           setSelectedTaskDetails({ ...selectedTaskDetails, end_date: e.target.value })
@@ -2295,7 +2295,7 @@ export default function GanttChartView() {
                       <input
                         type="number"
                         min="0"
-                        className="text-xs h-9 w-full px-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono text-slate-900 dark:text-white"
+                        className="text-sm h-9 w-full px-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono text-slate-900 dark:text-white"
                         value={selectedTaskDetails.duration_days ?? 1}
                         onChange={(e) =>
                           setSelectedTaskDetails({
@@ -2312,7 +2312,7 @@ export default function GanttChartView() {
                       Schedule Constraint Type
                     </label>
                     <select
-                      className="text-xs h-9 w-full px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium text-slate-900 dark:text-white"
+                      className="text-sm h-9 w-full px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium text-slate-900 dark:text-white"
                       value={selectedTaskDetails.constraint_type || "ASAP"}
                       onChange={(e) =>
                         setSelectedTaskDetails({ ...selectedTaskDetails, constraint_type: e.target.value })
@@ -2431,7 +2431,7 @@ export default function GanttChartView() {
                     <div className="font-bold text-blue-900 dark:text-blue-300">Add Predecessor Activity</div>
                     <div className="space-y-2">
                       <select
-                        className="text-xs h-8 w-full px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                        className="text-sm h-8 w-full px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                         value={inlineNewDep.predecessorId}
                         onChange={(e) => setInlineNewDep({ ...inlineNewDep, predecessorId: e.target.value })}
                       >
@@ -2447,7 +2447,7 @@ export default function GanttChartView() {
 
                       <div className="grid grid-cols-2 gap-2">
                         <select
-                          className="text-xs h-8 w-full px-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                          className="text-sm h-8 w-full px-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                           value={inlineNewDep.dependencyType}
                           onChange={(e) => setInlineNewDep({ ...inlineNewDep, dependencyType: e.target.value })}
                         >
@@ -2458,7 +2458,7 @@ export default function GanttChartView() {
                         <input
                           type="number"
                           placeholder="Lag (Days)"
-                          className="text-xs h-8 w-full px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono text-slate-900 dark:text-white"
+                          className="text-sm h-8 w-full px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono text-slate-900 dark:text-white"
                           value={inlineNewDep.lagDays}
                           onChange={(e) => setInlineNewDep({ ...inlineNewDep, lagDays: e.target.value })}
                         />
@@ -2467,7 +2467,7 @@ export default function GanttChartView() {
                       <button
                         type="button"
                         onClick={handleAddInlineDependency}
-                        className="btn btn-primary text-xs h-8 w-full rounded-lg font-bold inline-flex items-center justify-center gap-1.5"
+                        className="btn btn-primary text-sm h-8 w-full rounded-lg font-bold inline-flex items-center justify-center gap-1.5"
                       >
                         <Plus size={13} /> Add Dependency Link
                       </button>
@@ -2551,7 +2551,7 @@ export default function GanttChartView() {
                   type="button"
                   onClick={handleSaveDrawerChanges}
                   disabled={savingDrawerTask}
-                  className="btn btn-primary text-xs h-9 px-4 rounded-xl inline-flex items-center gap-1.5 font-bold"
+                  className="btn btn-primary text-sm h-9 px-4 rounded-xl inline-flex items-center gap-1.5 font-bold"
                 >
                   {savingDrawerTask && <Loader2 size={13} className="animate-spin" />}
                   Save Changes
@@ -2576,7 +2576,7 @@ export default function GanttChartView() {
             </div>
             <form onSubmit={handleSaveTaskForm} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Task Title *
                 </label>
                 <input
@@ -2591,7 +2591,7 @@ export default function GanttChartView() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Project Scope
                   </label>
                   <input
@@ -2603,7 +2603,7 @@ export default function GanttChartView() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Work Plan/WBS Code
                   </label>
                   <input
@@ -2618,7 +2618,7 @@ export default function GanttChartView() {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Start Date *
                   </label>
                   <input
@@ -2630,7 +2630,7 @@ export default function GanttChartView() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     End Date *
                   </label>
                   <input
@@ -2642,7 +2642,7 @@ export default function GanttChartView() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Duration (Days)
                   </label>
                   <input
@@ -2657,7 +2657,7 @@ export default function GanttChartView() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Assigned Owner
                   </label>
                   <select
@@ -2680,7 +2680,7 @@ export default function GanttChartView() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Priority
                   </label>
                   <select
@@ -2697,7 +2697,7 @@ export default function GanttChartView() {
               </div>
 
               <div className="flex items-center gap-4 pt-1">
-                <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-300">
+                <label className="flex items-center gap-2 cursor-pointer text-sm font-bold text-slate-700 dark:text-slate-300">
                   <input
                     type="checkbox"
                     checked={Boolean(taskForm.milestone_flag)}
@@ -2719,7 +2719,7 @@ export default function GanttChartView() {
                 <button
                   type="submit"
                   disabled={savingTask}
-                  className="btn btn-primary text-xs h-10 px-5 rounded-xl inline-flex items-center gap-1.5 font-semibold"
+                  className="btn btn-primary text-sm h-10 px-5 rounded-xl inline-flex items-center gap-1.5 font-semibold"
                 >
                   {savingTask && <Loader2 size={14} className="animate-spin" />}
                   Save Task
@@ -2746,7 +2746,7 @@ export default function GanttChartView() {
               </p>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Baseline Name *
                 </label>
                 <input
@@ -2760,13 +2760,13 @@ export default function GanttChartView() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Revision Notes / Justification
                 </label>
                 <textarea
                   rows={3}
                   placeholder="e.g. Approved baseline after initial client mobilization and scope agreement"
-                  className="text-xs w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                  className="text-sm w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                   value={baselineForm.description}
                   onChange={(e) => setBaselineForm({ ...baselineForm, description: e.target.value })}
                 />
@@ -2795,7 +2795,7 @@ export default function GanttChartView() {
                 <button
                   type="submit"
                   disabled={savingBaseline}
-                  className="btn btn-primary text-xs h-10 px-5 rounded-xl inline-flex items-center gap-1.5 font-semibold"
+                  className="btn btn-primary text-sm h-10 px-5 rounded-xl inline-flex items-center gap-1.5 font-semibold"
                 >
                   {savingBaseline && <Loader2 size={14} className="animate-spin" />}
                   Record Baseline
@@ -2844,7 +2844,7 @@ export default function GanttChartView() {
                 </button>
                 <button
                   onClick={handleConfirmImpactReschedule}
-                  className="btn btn-primary text-xs h-10 px-4 rounded-xl font-semibold flex-1"
+                  className="btn btn-primary text-sm h-10 px-4 rounded-xl font-semibold flex-1"
                 >
                   Confirm &amp; Cascade
                 </button>

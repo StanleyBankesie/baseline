@@ -99,9 +99,7 @@ export default function ChartOfAccountsReportPage() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <button className="btn-primary h-9 px-4 text-sm" onClick={load}>
-            {loading ? "Loading..." : "Refresh"}
-          </button>
+          
           <button className="btn-secondary h-9 px-4 text-sm" onClick={exportExcel}>
             Export Excel
           </button>

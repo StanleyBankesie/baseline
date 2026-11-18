@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 /**
  * @fileoverview ProjectClosurePage component.
  * Concise, industry-independent Project Handover & Closeout management in OmniSuite ERP.
@@ -424,7 +425,7 @@ export default function ProjectClosurePage() {
           <button
             onClick={handleCompleteHandover}
             disabled={!projectData || !closeoutForm || saving || closeoutForm?.closeout_status === "CLOSED"}
-            className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors"
+            className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white text-sm font-semibold flex items-center gap-1.5 shadow-xs transition-colors"
           >
             <CheckCircle2 size={15} /> Complete Handover
           </button>
@@ -509,7 +510,7 @@ export default function ProjectClosurePage() {
                 <input
                   type="text"
                   placeholder="Search project code, name, client..."
-                  className="pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs w-64 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                  className="pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm w-64 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -520,7 +521,7 @@ export default function ProjectClosurePage() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
+              <table className="w-full text-left border-collapse text-sm">
                 <thead className="bg-slate-50/70 dark:bg-slate-800/40 border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-400 font-semibold uppercase">
                   <tr>
                     <SortableHeader label="Project / Code" sortKey="project_name" currentSort={sortKey} sortDir={sortDir} onSort={toggle} />
@@ -615,9 +616,9 @@ export default function ProjectClosurePage() {
           ) : (
             <div className="space-y-4">
               {/* CONCISE 4-CARD KPI RIBBON (Matching ProjectList design) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* 1. Work Plan/WBS Scope Completion */}
-                <div className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+              <MobileMovingCarousel data-page-carousel gridColsClass="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" gapClass="gap-4">
+          {/* 1. Work Plan/WBS Scope Completion */}
+                <div className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-smoky-card hover:shadow-smoky-lg transition-all">
                   <div>
                     <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                       Work Plan/WBS Completion
@@ -639,7 +640,7 @@ export default function ProjectClosurePage() {
                 </div>
 
                 {/* 2. Handover Acceptance Status */}
-                <div className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+                <div className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-smoky-card hover:shadow-smoky-lg transition-all">
                   <div>
                     <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                       Handover Acceptance
@@ -657,7 +658,7 @@ export default function ProjectClosurePage() {
                 </div>
 
                 {/* 3. Outstanding Obligations */}
-                <div className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+                <div className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-smoky-card hover:shadow-smoky-lg transition-all">
                   <div>
                     <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                       Open Obligations
@@ -675,7 +676,7 @@ export default function ProjectClosurePage() {
                 </div>
 
                 {/* 4. Financial Reconciliation */}
-                <div className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+                <div className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-smoky-card hover:shadow-smoky-lg transition-all">
                   <div>
                     <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                       Budget Variance
@@ -695,7 +696,7 @@ export default function ProjectClosurePage() {
                     <DollarSign size={20} className="stroke-[2.5]" />
                   </div>
                 </div>
-              </div>
+              </MobileMovingCarousel>
 
               {/* CONCISE 3 TABS (Replaced 5 bloated sections & 5 sub-tabs) */}
               <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
@@ -821,14 +822,14 @@ export default function ProjectClosurePage() {
                       <button
                         type="button"
                         onClick={handleAddDeliverable}
-                        className="px-2.5 py-1 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold inline-flex items-center gap-1 shadow-xs transition-colors"
+                        className="px-2.5 py-1 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold inline-flex items-center gap-1 shadow-xs transition-colors"
                       >
                         <Plus size={13} /> Add Deliverable
                       </button>
                     </div>
 
                     <div className="overflow-x-auto">
-                      <table className="w-full text-left border-collapse text-xs">
+                      <table className="w-full text-left border-collapse text-sm">
                         <thead className="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 font-semibold">
                           <tr>
                             <th className="py-2 px-3">Deliverable Name *</th>
@@ -971,7 +972,7 @@ export default function ProjectClosurePage() {
                       <button
                         type="button"
                         onClick={handleImportSnagsToOutstanding}
-                        className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 text-slate-700 dark:text-slate-200 text-xs font-semibold inline-flex items-center gap-1 shadow-xs self-start sm:self-auto"
+                        className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 text-slate-700 dark:text-slate-200 text-sm font-semibold inline-flex items-center gap-1 shadow-xs self-start sm:self-auto"
                       >
                         <Plus size={13} /> Import Open Snags
                       </button>
@@ -992,14 +993,14 @@ export default function ProjectClosurePage() {
                       <button
                         type="button"
                         onClick={handleAddOutstandingItem}
-                        className="px-2.5 py-1 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold inline-flex items-center gap-1 shadow-xs transition-colors"
+                        className="px-2.5 py-1 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold inline-flex items-center gap-1 shadow-xs transition-colors"
                       >
                         <Plus size={13} /> Add Obligation Item
                       </button>
                     </div>
 
                     <div className="overflow-x-auto">
-                      <table className="w-full text-left border-collapse text-xs">
+                      <table className="w-full text-left border-collapse text-sm">
                         <thead className="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 font-semibold">
                           <tr>
                             <th className="py-2 px-3 w-28">Ref #</th>
@@ -1383,7 +1384,7 @@ export default function ProjectClosurePage() {
                 type="button"
                 onClick={handleMarkProjectClosed}
                 disabled={saving}
-                className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs"
+                className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold inline-flex items-center gap-1.5 shadow-xs"
               >
                 <Check size={14} /> Confirm Close
               </button>
@@ -1439,7 +1440,7 @@ export default function ProjectClosurePage() {
                 Handed Over Deliverables ({deliverables.length})
               </h4>
               <div className="border border-slate-200 rounded-lg overflow-hidden">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-sm">
                   <thead className="bg-slate-100 font-semibold border-b border-slate-200">
                     <tr>
                       <th className="p-2">Deliverable Name</th>

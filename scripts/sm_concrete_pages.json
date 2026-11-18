@@ -1,0 +1,177 @@
+[
+  {
+    "name": "Service Management Home Hub",
+    "path": "/service-management",
+    "component": "ServiceManagementLanding"
+  },
+  {
+    "name": "Facilities Dashboard",
+    "path": "/service-management/facilities-dashboard",
+    "component": "FacilitiesOperationsDashboard"
+  },
+  {
+    "name": "Properties",
+    "path": "/service-management/properties",
+    "component": "PropertiesList"
+  },
+  {
+    "name": "Fm Contracts",
+    "path": "/service-management/fm-contracts",
+    "component": "FMContractsList"
+  },
+  {
+    "name": "Field Service",
+    "path": "/service-management/field-service",
+    "component": "FieldTechnicianJobCard"
+  },
+  {
+    "name": "Checklists",
+    "path": "/service-management/checklists",
+    "component": "ChecklistTemplatesList"
+  },
+  {
+    "name": "Soft Services",
+    "path": "/service-management/soft-services",
+    "component": "SoftServicesPage"
+  },
+  {
+    "name": "Customer Service Requests",
+    "path": "/service-management/customer-service-requests",
+    "component": "CustomerServiceRequestsList"
+  },
+  {
+    "name": "Customer Service Requests - New",
+    "path": "/service-management/customer-service-requests/new",
+    "component": "CustomerServiceRequestForm"
+  },
+  {
+    "name": "Customer Service Requests - :Id",
+    "path": "/service-management/customer-service-requests/1",
+    "component": "CustomerServiceRequestForm"
+  },
+  {
+    "name": "Supplier Service Requests",
+    "path": "/service-management/supplier-service-requests",
+    "component": "SupplierServiceRequestsList"
+  },
+  {
+    "name": "Supplier Service Requests - New",
+    "path": "/service-management/supplier-service-requests/new",
+    "component": "SupplierServiceRequestForm"
+  },
+  {
+    "name": "Supplier Service Requests - :Id",
+    "path": "/service-management/supplier-service-requests/1",
+    "component": "SupplierServiceRequestForm"
+  },
+  {
+    "name": "Service Orders",
+    "path": "/service-management/service-orders",
+    "component": "ServiceOrdersList"
+  },
+  {
+    "name": "Service Orders - New",
+    "path": "/service-management/service-orders/new",
+    "component": "ServiceOrderForm"
+  },
+  {
+    "name": "Service Orders - :Id",
+    "path": "/service-management/service-orders/1",
+    "component": "ServiceOrderForm"
+  },
+  {
+    "name": "Service Executions",
+    "path": "/service-management/service-executions",
+    "component": "ServiceExecutionsList"
+  },
+  {
+    "name": "Service Executions - :Id",
+    "path": "/service-management/service-executions/1",
+    "component": "ServiceExecutionView"
+  },
+  {
+    "name": "Service Execution",
+    "path": "/service-management/service-execution",
+    "component": "ServiceExecutionForm"
+  },
+  {
+    "name": "Service Confirmations",
+    "path": "/service-management/service-confirmations",
+    "component": "ServiceConfirmationsList"
+  },
+  {
+    "name": "Service Confirmations - New",
+    "path": "/service-management/service-confirmations/new",
+    "component": "ServiceConfirmationForm"
+  },
+  {
+    "name": "Service Confirmations - :Id",
+    "path": "/service-management/service-confirmations/1",
+    "component": "ServiceConfirmationForm"
+  },
+  {
+    "name": "Service Confirmation",
+    "path": "/service-management/service-confirmation",
+    "component": "ServiceConfirmationsList"
+  },
+  {
+    "name": "Service Confirmation - New",
+    "path": "/service-management/service-confirmation/new",
+    "component": "ServiceConfirmationForm"
+  },
+  {
+    "name": "Service Confirmation - :Id",
+    "path": "/service-management/service-confirmation/1",
+    "component": "ServiceConfirmationForm"
+  },
+  {
+    "name": "Service Invoices",
+    "path": "/service-management/service-invoices",
+    "component": "ServiceInvoiceList"
+  },
+  {
+    "name": "Service Invoices - New",
+    "path": "/service-management/service-invoices/new",
+    "component": "ServiceInvoiceForm"
+  },
+  {
+    "name": "Service Invoices - :Id",
+    "path": "/service-management/service-invoices/1",
+    "component": "ServiceInvoiceForm"
+  },
+  {
+    "name": "Service Bills",
+    "path": "/service-management/service-bills",
+    "component": "ServiceBillsList"
+  },
+  {
+    "name": "Service Bills - New",
+    "path": "/service-management/service-bills/new",
+    "component": "ServiceBillForm"
+  },
+  {
+    "name": "Service Bills - :Id",
+    "path": "/service-management/service-bills/1",
+    "component": "ServiceBillForm"
+  },
+  {
+    "name": "Setup",
+    "path": "/service-management/setup",
+    "component": "ServiceParametersPage"
+  },
+  {
+    "name": "Setup - Parameters",
+    "path": "/service-management/setup/parameters",
+    "component": "ServiceParametersPage"
+  },
+  {
+    "name": "Setup - *",
+    "path": "/service-management/setup/*",
+    "component": "ServiceParametersPage"
+  },
+  {
+    "name": "Reports",
+    "path": "/service-management/reports",
+    "component": "ServiceReportsPage"
+  }
+]

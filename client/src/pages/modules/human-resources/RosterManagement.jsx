@@ -174,7 +174,6 @@ export default function RosterManagement() {
           <label className="label text-xs">Search Employee</label>
           <input className="input" placeholder="Name or code..." value={search} onChange={e => setSearch(e.target.value)} />
         </div>
-        <button onClick={load} className="btn-secondary">↻ Refresh</button>
       </div>
 
       {/* Legend */}

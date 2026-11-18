@@ -1,0 +1,11 @@
+[
+  { "name": "Executive Overview Hub", "path": "/executive-overview", "component": "ExecutiveOverviewHome" },
+  { "name": "Outstanding Receivables", "path": "/executive-overview/outstanding-receivables", "component": "ExecOutstandingReceivablesPage" },
+  { "name": "Outstanding Payables", "path": "/executive-overview/outstanding-payables", "component": "ExecOutstandingPayablesPage" },
+  { "name": "Fast Moving Items", "path": "/executive-overview/fast-moving-items", "component": "ExecFastMovingItemsPage" },
+  { "name": "Slow Moving Items", "path": "/executive-overview/slow-moving-items", "component": "ExecSlowMovingItemsPage" },
+  { "name": "Sales Today", "path": "/executive-overview/sales-today", "component": "ExecSalesTodayPage" },
+  { "name": "Sales This Month", "path": "/executive-overview/sales-this-month", "component": "ExecSalesThisMonthPage" },
+  { "name": "Sales This Week", "path": "/executive-overview/sales-this-week", "component": "ExecSalesThisWeekPage" },
+  { "name": "Supplier Outstanding", "path": "/executive-overview/supplier-outstanding", "component": "ExecSupplierOutstandingPage" }
+]

@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 /**
  * @file RiskManagementPage.jsx
  * @description Enterprise-grade Risk Management & Assessment System for OmniSuite ERP.
@@ -816,10 +817,10 @@ export default function RiskManagementPage() {
             <ArrowLeft size={16} /> Back
           </Link>
           <div>
-            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <h1 className="text-2xl font-bold font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <ShieldAlert size={24} className="text-rose-600 dark:text-rose-500" /> Risk Management & Assessment
             </h1>
-            <p className="text-slate-500 text-xs mt-0.5">
+            <p className="text-slate-500 text-xs mt-0.5 hidden">
               Identify, score, mitigate, and monitor project risks.
             </p>
           </div>
@@ -829,7 +830,7 @@ export default function RiskManagementPage() {
           <button
             onClick={handleRunMonitoringScan}
             disabled={scanningEvents}
-            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs font-semibold shadow-xs"
+            className="btn btn-secondary inline-flex items-center gap-1.5 text-sm font-semibold shadow-xs"
             title="Scan project milestones, tasks and budget for emerging risks"
           >
             <Activity size={14} className={`text-indigo-600 ${scanningEvents ? "animate-spin" : ""}`} />
@@ -838,7 +839,7 @@ export default function RiskManagementPage() {
           <button
             onClick={handleRunAiAnalysis}
             disabled={runningAi}
-            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs font-semibold shadow-xs border-indigo-200 text-indigo-700 bg-indigo-50/60 dark:bg-indigo-950/40 dark:text-indigo-300"
+            className="btn btn-secondary inline-flex items-center gap-1.5 text-sm font-semibold shadow-xs border-indigo-200 text-indigo-700 bg-indigo-50/60 dark:bg-indigo-950/40 dark:text-indigo-300"
             title="Analyze project with AI"
           >
             <Sparkles size={14} className={`text-indigo-600 ${runningAi ? "animate-spin" : ""}`} />
@@ -846,21 +847,21 @@ export default function RiskManagementPage() {
           </button>
           <button
             onClick={exportExcel}
-            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs font-semibold shadow-xs"
+            className="btn btn-secondary inline-flex items-center gap-1.5 text-sm font-semibold shadow-xs"
             title="Export to Excel"
           >
             <FileSpreadsheet size={14} /> Excel
           </button>
           <button
             onClick={exportPdf}
-            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs font-semibold shadow-xs"
+            className="btn btn-secondary inline-flex items-center gap-1.5 text-sm font-semibold shadow-xs"
             title="Export to PDF"
           >
             <Download size={14} /> PDF
           </button>
           <button
             onClick={handleOpenNewRisk}
-            className="btn btn-primary inline-flex items-center gap-1.5 text-xs font-semibold shadow-xs"
+            className="btn btn-primary inline-flex items-center gap-1.5 text-sm font-semibold shadow-xs"
           >
             <Plus size={15} /> New Risk
           </button>
@@ -868,75 +869,67 @@ export default function RiskManagementPage() {
       </div>
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* 2. DYNAMIC KPI SUMMARY CARDS (6 Canonical KPI Cards)          */}
-      {/* ───────────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6">
+      {/* Metric Stats Cards Carousel */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="xl:grid-cols-6 md:grid-cols-3 sm:grid-cols-2" gapClass="gap-4">
         {[
           {
             label: "Total Identified",
             val: stats.total_risks || 0,
             icon: ShieldAlert,
-            badgeColor: "bg-slate-900 dark:bg-slate-700 text-white",
-            sub: `${stats.open_risks || 0} active`,
+            badgeColor: "bg-sky-600 dark:bg-sky-500 text-white",
           },
           {
             label: "Critical Risks",
             val: stats.critical_risks || 0,
             icon: Flame,
             badgeColor: "bg-rose-600 text-white",
-            sub: "Score 17–25",
           },
           {
             label: "High Risks",
             val: stats.high_risks || 0,
             icon: AlertTriangle,
             badgeColor: "bg-orange-500 text-white",
-            sub: "Score 10–16",
           },
           {
             label: "Under Mitigation",
             val: stats.under_mitigation || 0,
             icon: ShieldCheck,
             badgeColor: "bg-indigo-600 text-white",
-            sub: `${stats.effective_mitigations || 0} effective`,
           },
           {
             label: "Materialised",
             val: stats.materialised || 0,
             icon: AlertOctagon,
             badgeColor: "bg-purple-600 text-white",
-            sub: "Issues",
           },
           {
             label: "Overdue Actions",
             val: stats.overdue_actions || 0,
             icon: Clock,
             badgeColor: "bg-rose-500 text-white",
-            sub: "Attention",
           },
         ].map((card, i) => {
           const Icon = card.icon;
           return (
             <div
               key={i}
-              className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs hover:border-slate-300 transition-colors"
+              className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm"
             >
               <div>
-                <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   {card.label}
                 </p>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mt-1">
+                <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
                   {card.val}
-                </h3>
-                <span className="text-[11px] text-slate-400 dark:text-slate-500">{card.sub}</span>
+                </p>
               </div>
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-xs ${card.badgeColor}`}>
-                <Icon size={17} />
+              <div className={`p-3 rounded-full flex items-center justify-center text-white shadow-sm shrink-0 ${card.badgeColor}`}>
+                <Icon size={20} className="stroke-[2.5]" />
               </div>
             </div>
           );
         })}
-      </div>
+      </MobileMovingCarousel>
 
       {/* ───────────────────────────────────────────────────────────── */}
       {/* 3. GLOBAL FILTER & TAB BAR                                     */}
@@ -977,14 +970,7 @@ export default function RiskManagementPage() {
             })}
           </div>
 
-          <button
-            onClick={fetchData}
-            disabled={loading}
-            className="btn btn-secondary btn-sm inline-flex items-center gap-1 text-xs"
-            title="Refresh Data"
-          >
-            <RefreshCw size={13} className={loading ? "animate-spin" : ""} /> Refresh
-          </button>
+          
         </div>
 
         {/* Filters Controls */}
@@ -1208,7 +1194,7 @@ export default function RiskManagementPage() {
               </button>
             </div>
             <div className="overflow-x-auto">
-              <table className="table w-full text-xs">
+              <table className="table w-full text-sm">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/60 text-slate-500">
                     <th className="py-2.5 px-3">Risk Code</th>
@@ -1298,7 +1284,7 @@ export default function RiskManagementPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleOpenNewRisk}
-                className="btn btn-primary btn-sm inline-flex items-center gap-1.5 text-xs font-semibold"
+                className="btn btn-primary btn-sm inline-flex items-center gap-1.5 text-sm font-semibold"
               >
                 <Plus size={14} /> New Risk
               </button>
@@ -1306,7 +1292,7 @@ export default function RiskManagementPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="table w-full text-xs">
+            <table className="table w-full text-sm">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 border-b border-slate-200 dark:border-slate-700">
                   <th className="py-3 px-3">Risk Code</th>
@@ -1607,7 +1593,7 @@ export default function RiskManagementPage() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="table w-full text-xs">
+              <table className="table w-full text-sm">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 border-b border-slate-200 dark:border-slate-700">
                     <th className="py-3 px-3">Action Ref</th>
@@ -1717,14 +1703,14 @@ export default function RiskManagementPage() {
               <button
                 onClick={handleRunMonitoringScan}
                 disabled={scanningEvents}
-                className="btn btn-primary btn-sm inline-flex items-center gap-1.5 text-xs font-semibold"
+                className="btn btn-primary btn-sm inline-flex items-center gap-1.5 text-sm font-semibold"
               >
                 <RefreshCw size={13} className={scanningEvents ? "animate-spin" : ""} /> Scan
               </button>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="table w-full text-xs">
+              <table className="table w-full text-sm">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 border-b border-slate-200 dark:border-slate-700">
                     <th className="py-3 px-3">Date</th>
@@ -1808,7 +1794,7 @@ export default function RiskManagementPage() {
               <button
                 onClick={handleRunAiAnalysis}
                 disabled={runningAi}
-                className="btn btn-primary inline-flex items-center gap-1.5 text-xs font-semibold"
+                className="btn btn-primary inline-flex items-center gap-1.5 text-sm font-semibold"
               >
                 <Sparkles size={14} className={runningAi ? "animate-spin" : ""} />
                 {runningAi ? "Analyzing..." : "Analyze with AI"}
@@ -1917,7 +1903,7 @@ export default function RiskManagementPage() {
               {/* Row 1: Project & Risk ID */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Project *
                   </label>
                   <select
@@ -1935,7 +1921,7 @@ export default function RiskManagementPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Risk Code
                   </label>
                   <input
@@ -1951,7 +1937,7 @@ export default function RiskManagementPage() {
               {/* Row 2: Title & Category */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Risk Title *
                   </label>
                   <input
@@ -1964,7 +1950,7 @@ export default function RiskManagementPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Risk Category
                   </label>
                   <select
@@ -1984,7 +1970,7 @@ export default function RiskManagementPage() {
               {/* Row 3: Affected Area, Cause & Consequences */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Affected Area
                   </label>
                   <select
@@ -2000,7 +1986,7 @@ export default function RiskManagementPage() {
                   </select>
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Risk Cause / Source
                   </label>
                   <input
@@ -2015,7 +2001,7 @@ export default function RiskManagementPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Risk Description
                   </label>
                   <textarea
@@ -2027,7 +2013,7 @@ export default function RiskManagementPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Potential Consequences
                   </label>
                   <textarea
@@ -2140,7 +2126,7 @@ export default function RiskManagementPage() {
               {/* Treatment Strategy & Mitigation Details */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Treatment Strategy
                   </label>
                   <select
@@ -2156,7 +2142,7 @@ export default function RiskManagementPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Risk Owner
                   </label>
                   <input
@@ -2168,7 +2154,7 @@ export default function RiskManagementPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Target Mitigation Date
                   </label>
                   <input
@@ -2182,7 +2168,7 @@ export default function RiskManagementPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Mitigation Plan
                   </label>
                   <textarea
@@ -2194,7 +2180,7 @@ export default function RiskManagementPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Contingency Plan
                   </label>
                   <textarea
@@ -2216,7 +2202,7 @@ export default function RiskManagementPage() {
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary text-xs font-semibold">
+                <button type="submit" className="btn btn-primary text-sm font-semibold">
                   {editingRisk ? "Save Changes" : "Register Risk"}
                 </button>
               </div>
@@ -2263,7 +2249,7 @@ export default function RiskManagementPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     New Residual Likelihood (1–5)
                   </label>
                   <select
@@ -2280,7 +2266,7 @@ export default function RiskManagementPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     New Residual Impact (1–5)
                   </label>
                   <select
@@ -2298,7 +2284,7 @@ export default function RiskManagementPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Trigger / Reason for Reassessment
                 </label>
                 <input
@@ -2311,7 +2297,7 @@ export default function RiskManagementPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Reassessment Notes & Justification
                 </label>
                 <textarea
@@ -2331,7 +2317,7 @@ export default function RiskManagementPage() {
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary text-xs font-semibold">
+                <button type="submit" className="btn btn-primary text-sm font-semibold">
                   Record Reassessment
                 </button>
               </div>
@@ -2363,7 +2349,7 @@ export default function RiskManagementPage() {
 
             <form onSubmit={handleSaveAction} className="p-5 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Action Title *
                 </label>
                 <input
@@ -2377,7 +2363,7 @@ export default function RiskManagementPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Description & Controls
                 </label>
                 <textarea
@@ -2391,7 +2377,7 @@ export default function RiskManagementPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Responsible Person
                   </label>
                   <input
@@ -2402,7 +2388,7 @@ export default function RiskManagementPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Due Date
                   </label>
                   <input
@@ -2416,7 +2402,7 @@ export default function RiskManagementPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Progress Percentage ({actionForm.progress_percent}%)
                   </label>
                   <input
@@ -2430,7 +2416,7 @@ export default function RiskManagementPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Status
                   </label>
                   <select
@@ -2455,7 +2441,7 @@ export default function RiskManagementPage() {
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary text-xs font-semibold">
+                <button type="submit" className="btn btn-primary text-sm font-semibold">
                   Save Action
                 </button>
               </div>
@@ -2490,7 +2476,7 @@ export default function RiskManagementPage() {
               </p>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Materialisation Date
                 </label>
                 <input
@@ -2502,7 +2488,7 @@ export default function RiskManagementPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Actual Incident & Impact Description *
                 </label>
                 <textarea
@@ -2515,7 +2501,7 @@ export default function RiskManagementPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Immediate Containment / Corrective Action
                 </label>
                 <textarea
@@ -2534,7 +2520,7 @@ export default function RiskManagementPage() {
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold">
+                <button type="submit" className="btn bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold">
                   Confirm Materialisation
                 </button>
               </div>
@@ -2569,7 +2555,7 @@ export default function RiskManagementPage() {
               </p>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Closure Justification *
                 </label>
                 <textarea
@@ -2590,7 +2576,7 @@ export default function RiskManagementPage() {
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary text-xs font-semibold">
+                <button type="submit" className="btn btn-primary text-sm font-semibold">
                   Confirm Closure
                 </button>
               </div>

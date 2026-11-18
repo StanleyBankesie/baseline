@@ -392,7 +392,7 @@ export default function ProjectQuotationForm() {
         : [];
       setCurrencies(arr);
       const baseCur = arr.find((c) => Number(c.is_base) === 1 || c.is_base === true);
-      if (isNew && !formData.currency_id && baseCur) {
+      if (!isEditMode && !formData.currency_id && baseCur) {
         setFormData((prev) => ({ ...prev, currency_id: baseCur.id }));
       }
     } catch (error) {
@@ -1073,7 +1073,7 @@ export default function ProjectQuotationForm() {
               <FileSpreadsheet size={26} className="text-brand-900 dark:text-brand-400" />
               {isEditMode ? "Edit Project Quotation" : "New Project Quotation"}
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 hidden">
               {isEditMode
                 ? "Update project quotation details"
                 : "Create a new project quotation"}
@@ -1090,7 +1090,7 @@ export default function ProjectQuotationForm() {
           <button
             type="button"
             onClick={handleDownload}
-            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs font-semibold"
+            className="btn btn-secondary inline-flex items-center gap-1.5 text-sm font-semibold"
             title="Save as PDF"
           >
             <Download size={14} /> Download PDF
@@ -1419,7 +1419,7 @@ export default function ProjectQuotationForm() {
             <div className="bg-white dark:bg-slate-900 p-4 rounded-xl mb-6 border border-slate-200 dark:border-slate-800 print:hidden">
               <div className="grid grid-cols-1 md:grid-cols-6 gap-3 mb-3">
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Phase / Milestone *
                   </label>
                   <input
@@ -1432,7 +1432,7 @@ export default function ProjectQuotationForm() {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Description
                   </label>
                   <input
@@ -1445,7 +1445,7 @@ export default function ProjectQuotationForm() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Est. Hours *
                   </label>
                   <input
@@ -1459,7 +1459,7 @@ export default function ProjectQuotationForm() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Rate ({selectedCurrencyCode || baseCurrencyCode}/hr) *
                   </label>
                   <input
@@ -1473,7 +1473,7 @@ export default function ProjectQuotationForm() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-6 gap-3 mb-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Disc %
                   </label>
                   <input
@@ -1487,7 +1487,7 @@ export default function ProjectQuotationForm() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Tax
                   </label>
                   <select
@@ -1504,7 +1504,7 @@ export default function ProjectQuotationForm() {
                   </select>
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Remarks
                   </label>
                   <input

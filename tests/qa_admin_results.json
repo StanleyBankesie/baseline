@@ -1,0 +1,297 @@
+{
+  "module": "Administration",
+  "timestamp": "2026-11-17T23:39:27.221Z",
+  "pages": [
+    {
+      "name": "Administration Home",
+      "path": "/administration",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Administration",
+      "metrics": {
+        "buttons": 33,
+        "inputs": 1,
+        "tablesOrCards": 14
+      },
+      "screenshot": "tests/screenshots/admin/administration.png"
+    },
+    {
+      "name": "Role Setup (Direct /admin/roles)",
+      "path": "/admin/roles",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Role Setup",
+      "metrics": {
+        "buttons": 10,
+        "inputs": 0,
+        "tablesOrCards": 2
+      },
+      "screenshot": "tests/screenshots/admin/admin_roles.png"
+    },
+    {
+      "name": "Role Management (/administration/access/roles)",
+      "path": "/administration/access/roles",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Role Setup",
+      "metrics": {
+        "buttons": 15,
+        "inputs": 0,
+        "tablesOrCards": 2
+      },
+      "screenshot": "tests/screenshots/admin/administration_access_roles.png"
+    },
+    {
+      "name": "Role Setup New (/administration/access/roles/new)",
+      "path": "/administration/access/roles/new",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Role Setup",
+      "metrics": {
+        "buttons": 13,
+        "inputs": 3,
+        "tablesOrCards": 0
+      },
+      "screenshot": "tests/screenshots/admin/administration_access_roles_new.png"
+    },
+    {
+      "name": "User Accounts (/administration/users)",
+      "path": "/administration/users",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "🔐 User Management System",
+      "metrics": {
+        "buttons": 8,
+        "inputs": 7,
+        "tablesOrCards": 5
+      },
+      "screenshot": "tests/screenshots/admin/administration_users.png"
+    },
+    {
+      "name": "User Creation Form (/administration/users/new)",
+      "path": "/administration/users/new",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "New User",
+      "metrics": {
+        "buttons": 13,
+        "inputs": 14,
+        "tablesOrCards": 14
+      },
+      "screenshot": "tests/screenshots/admin/administration_users_new.png"
+    },
+    {
+      "name": "Branch Management (/administration/branches)",
+      "path": "/administration/branches",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "🏢 Branch Management System",
+      "metrics": {
+        "buttons": 16,
+        "inputs": 1,
+        "tablesOrCards": 1
+      },
+      "screenshot": "tests/screenshots/admin/administration_branches.png"
+    },
+    {
+      "name": "Branch Creation Form (/administration/branches/new)",
+      "path": "/administration/branches/new",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "New Branch",
+      "metrics": {
+        "buttons": 10,
+        "inputs": 14,
+        "tablesOrCards": 16
+      },
+      "screenshot": "tests/screenshots/admin/administration_branches_new.png"
+    },
+    {
+      "name": "User Permissions Matrix (/administration/access/user-permissions)",
+      "path": "/administration/access/user-permissions",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "User Permissions",
+      "metrics": {
+        "buttons": 16,
+        "inputs": 0,
+        "tablesOrCards": 2
+      },
+      "screenshot": "tests/screenshots/admin/administration_access_user_permissions.png"
+    },
+    {
+      "name": "Exceptional Permissions (/administration/access/user-overrides)",
+      "path": "/administration/access/user-overrides",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "User Overrides",
+      "metrics": {
+        "buttons": 9,
+        "inputs": 1,
+        "tablesOrCards": 1
+      },
+      "screenshot": "tests/screenshots/admin/administration_access_user_overrides.png"
+    },
+    {
+      "name": "Exceptional Permissions List (/administration/exceptional-permissions)",
+      "path": "/administration/exceptional-permissions",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Exceptional Permissions",
+      "metrics": {
+        "buttons": 11,
+        "inputs": 0,
+        "tablesOrCards": 2
+      },
+      "screenshot": "tests/screenshots/admin/administration_exceptional_permissions.png"
+    },
+    {
+      "name": "Workflow Configurations (/administration/workflows)",
+      "path": "/administration/workflows",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "No heading",
+      "metrics": {
+        "buttons": 8,
+        "inputs": 0,
+        "tablesOrCards": 0
+      },
+      "screenshot": "tests/screenshots/admin/administration_workflows.png"
+    },
+    {
+      "name": "Workflow Creation Form (/administration/workflows/new)",
+      "path": "/administration/workflows/new",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Create Workflow",
+      "metrics": {
+        "buttons": 13,
+        "inputs": 7,
+        "tablesOrCards": 7
+      },
+      "screenshot": "tests/screenshots/admin/administration_workflows_new.png"
+    },
+    {
+      "name": "Workflow Approvals (/administration/workflows/approvals)",
+      "path": "/administration/workflows/approvals",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "My Pending Approvals",
+      "metrics": {
+        "buttons": 9,
+        "inputs": 0,
+        "tablesOrCards": 1
+      },
+      "screenshot": "tests/screenshots/admin/administration_workflows_approvals.png"
+    },
+    {
+      "name": "Approved Documents (/administration/workflows/approved)",
+      "path": "/administration/workflows/approved",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Approved Documents",
+      "metrics": {
+        "buttons": 270,
+        "inputs": 0,
+        "tablesOrCards": 1
+      },
+      "screenshot": "tests/screenshots/admin/administration_workflows_approved.png"
+    },
+    {
+      "name": "Sent Documents (/administration/workflows/sent)",
+      "path": "/administration/workflows/sent",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Sent Documents",
+      "metrics": {
+        "buttons": 274,
+        "inputs": 0,
+        "tablesOrCards": 1
+      },
+      "screenshot": "tests/screenshots/admin/administration_workflows_sent.png"
+    },
+    {
+      "name": "System Log Book Report (/administration/reports/system-log-book)",
+      "path": "/administration/reports/system-log-book",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "System Log Book",
+      "metrics": {
+        "buttons": 11,
+        "inputs": 5,
+        "tablesOrCards": 12
+      },
+      "screenshot": "tests/screenshots/admin/administration_reports_system_log_book.png"
+    },
+    {
+      "name": "User Activity & Audit Report (/administration/reports/user-login-activity)",
+      "path": "/administration/reports/user-login-activity",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "User Activity & Audit Report",
+      "metrics": {
+        "buttons": 13,
+        "inputs": 4,
+        "tablesOrCards": 12
+      },
+      "screenshot": "tests/screenshots/admin/administration_reports_user_login_activity.png"
+    },
+    {
+      "name": "User Activity Alias (/administration/reports/user-activity)",
+      "path": "/administration/reports/user-activity",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "User Activity & Audit Report",
+      "metrics": {
+        "buttons": 13,
+        "inputs": 4,
+        "tablesOrCards": 12
+      },
+      "screenshot": "tests/screenshots/admin/administration_reports_user_activity.png"
+    },
+    {
+      "name": "Diagnostics Page (/administration/diagnostics)",
+      "path": "/administration/diagnostics",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "System Diagnostics",
+      "metrics": {
+        "buttons": 10,
+        "inputs": 0,
+        "tablesOrCards": 4
+      },
+      "screenshot": "tests/screenshots/admin/administration_diagnostics.png"
+    },
+    {
+      "name": "Settings Page (/administration/settings)",
+      "path": "/administration/settings",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Administration Settings",
+      "metrics": {
+        "buttons": 18,
+        "inputs": 6,
+        "tablesOrCards": 4
+      },
+      "screenshot": "tests/screenshots/admin/administration_settings.png"
+    },
+    {
+      "name": "Document Templates (/administration/settings/templates)",
+      "path": "/administration/settings/templates",
+      "status": "PASSED",
+      "errors": [],
+      "heading": "Document Templates",
+      "metrics": {
+        "buttons": 12,
+        "inputs": 13,
+        "tablesOrCards": 13
+      },
+      "screenshot": "tests/screenshots/admin/administration_settings_templates.png"
+    }
+  ],
+  "summary": {
+    "total": 22,
+    "passed": 22,
+    "failed": 0
+  }
+}

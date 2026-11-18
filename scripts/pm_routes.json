@@ -1,0 +1,6 @@
+[
+  {
+    "path": "/project-management/*",
+    "component": "ProjectManagementHome"
+  }
+]

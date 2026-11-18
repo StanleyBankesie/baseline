@@ -226,7 +226,7 @@ export default function MilestoneEngineDrawer({
             <button
               onClick={handleRunDetection}
               disabled={detecting}
-              className="btn btn-primary text-xs h-8 px-3 rounded-xl inline-flex items-center gap-1.5 font-semibold shadow-xs"
+              className="btn btn-primary text-sm h-8 px-3 rounded-xl inline-flex items-center gap-1.5 font-semibold shadow-xs"
               title="Analyze Work Plan/WBS and detect milestones"
             >
               <RefreshCw size={13} className={detecting ? "animate-spin" : ""} />
@@ -327,7 +327,7 @@ export default function MilestoneEngineDrawer({
                   <button
                     onClick={handleRunDetection}
                     disabled={detecting}
-                    className="btn btn-primary text-xs h-8 px-4 rounded-xl font-semibold shadow-xs"
+                    className="btn btn-primary text-sm h-8 px-4 rounded-xl font-semibold shadow-xs"
                   >
                     Run Milestone Detection
                   </button>
@@ -656,7 +656,7 @@ export default function MilestoneEngineDrawer({
                       return (
                         <label
                           key={t.id}
-                          className="flex items-center gap-2 p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded-lg cursor-pointer transition text-xs"
+                          className="flex items-center gap-2 p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded-lg cursor-pointer transition text-sm"
                         >
                           <input
                             type="checkbox"
@@ -706,7 +706,7 @@ export default function MilestoneEngineDrawer({
                   </button>
                   <button
                     type="submit"
-                    className="btn btn-primary text-xs h-8 px-4 rounded-xl font-semibold shadow-xs"
+                    className="btn btn-primary text-sm h-8 px-4 rounded-xl font-semibold shadow-xs"
                   >
                     Save Milestone
                   </button>

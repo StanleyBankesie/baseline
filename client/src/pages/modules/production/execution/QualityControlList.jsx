@@ -110,14 +110,7 @@ export default function QualityControlList() {
             <Link to="/production?section=Shop%20Floor%20%26%20Execution" className="font-sans btn btn-secondary">
               Return to Menu
             </Link>
-            <button
-              type="button"
-              className="btn-success flex items-center gap-1.5"
-              onClick={fetchData}
-              disabled={loading}
-            >
-              <RotateCcw size={14} className={loading ? "animate-spin" : ""} /> Refresh
-            </button>
+            
             <Link to="/production/execution/output" className="btn-success flex items-center gap-1.5">
               <Plus size={16} /> New Inspection
             </Link>

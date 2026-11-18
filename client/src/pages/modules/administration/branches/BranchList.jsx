@@ -105,9 +105,6 @@ function UserAssignmentTab({ branches, companies, onUpdate }) {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <button className="btn btn-secondary" onClick={fetchUsers}>
-          🔄 Refresh Users
-        </button>
       </div>
 
       <div className="table-container">
@@ -464,12 +461,7 @@ export default function BranchList() {
           <Link to={moduleHome} className="btn btn-secondary">
             Return to Menu
           </Link>
-          <button
-            className="btn btn-primary"
-            onClick={() => fetchBranches()}
-          >
-            🔄 Refresh
-          </button>
+          
         </div>
       </div>
 

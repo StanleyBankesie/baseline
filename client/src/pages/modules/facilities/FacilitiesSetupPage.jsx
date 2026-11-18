@@ -1714,7 +1714,7 @@ export default function FacilitiesSetupPage() {
                 <SlidersHorizontal size={20} />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                <h1 className="text-2xl font-bold sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                   Facilities Operations Setup
                 </h1>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -1726,20 +1726,12 @@ export default function FacilitiesSetupPage() {
 
           {/* Primary Actions Strip */}
           <div className="flex items-center gap-2.5 self-start lg:self-auto">
-            <button
-              onClick={loadAllSetupData}
-              disabled={loading}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-xs active:scale-95 transition-all"
-              title="Refresh Data"
-            >
-              <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
-              <span>Refresh</span>
-            </button>
+            
 
             {currentAction && (
               <button
                 onClick={currentAction.onClick}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-brand-900 hover:bg-brand-800 text-white dark:bg-emerald-600 dark:hover:bg-emerald-500 shadow-sm active:scale-95 transition-all"
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-xl bg-brand-900 hover:bg-brand-800 text-white dark:bg-emerald-600 dark:hover:bg-emerald-500 shadow-sm active:scale-95 transition-all"
               >
                 <Plus size={14} />
                 <span>{currentAction.label}</span>
@@ -1887,7 +1879,7 @@ export default function FacilitiesSetupPage() {
 
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300">
                   <tr>
                     <th className="px-4 py-3">Client Code</th>
@@ -1983,7 +1975,7 @@ export default function FacilitiesSetupPage() {
                   })}
                   {filteredClients.length === 0 && (
                     <tr>
-                      <td colSpan="8" className="text-center py-12 text-slate-400 text-xs italic">
+                      <td colSpan="8" className="text-center py-12 text-slate-400 text-sm italic">
                         No service clients configured. Click &apos;+ Add Client&apos; above to register clients for FM service agreements.
                       </td>
                     </tr>
@@ -2036,7 +2028,7 @@ export default function FacilitiesSetupPage() {
                 <input
                   type="text"
                   placeholder="Search tenant name, units, email, contact person..."
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-200 focus:outline-none"
                   value={tenantSearchTerm}
                   onChange={(e) => setTenantSearchTerm(e.target.value)}
                 />
@@ -2090,7 +2082,7 @@ export default function FacilitiesSetupPage() {
           {/* Tenants Table */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300">
                   <tr>
                     <th className="px-4 py-3">Tenant / Company Name</th>
@@ -2194,7 +2186,7 @@ export default function FacilitiesSetupPage() {
                   ))}
                   {filteredTenants.length === 0 && (
                     <tr>
-                      <td colSpan="10" className="text-center py-12 text-slate-400 text-xs italic">
+                      <td colSpan="10" className="text-center py-12 text-slate-400 text-sm italic">
                         No tenant occupancy records found. Click &apos;+ Register Tenant&apos; above to record a new lease or site occupancy.
                       </td>
                     </tr>
@@ -2238,7 +2230,7 @@ export default function FacilitiesSetupPage() {
 
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300">
                   <tr>
                     <th className="px-4 py-3">Category Code</th>
@@ -2295,7 +2287,7 @@ export default function FacilitiesSetupPage() {
                   ))}
                   {filteredEquipmentCategories.length === 0 && (
                     <tr>
-                      <td colSpan="5" className="text-center py-12 text-slate-400 text-xs italic">
+                      <td colSpan="5" className="text-center py-12 text-slate-400 text-sm italic">
                         No asset/equipment categories found. Click &apos;+ Add Asset Category&apos; above.
                       </td>
                     </tr>
@@ -2340,7 +2332,7 @@ export default function FacilitiesSetupPage() {
 
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300">
                   <tr>
                     <th className="px-4 py-3">Category Code</th>
@@ -2397,7 +2389,7 @@ export default function FacilitiesSetupPage() {
                   ))}
                   {filteredCategories.length === 0 && (
                     <tr>
-                      <td colSpan="5" className="text-center py-12 text-slate-400 text-xs italic">
+                      <td colSpan="5" className="text-center py-12 text-slate-400 text-sm italic">
                         No service categories found. Click &apos;+ Add Service Category&apos; above.
                       </td>
                     </tr>
@@ -2454,7 +2446,7 @@ export default function FacilitiesSetupPage() {
           {/* Personnel Table */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-800 uppercase tracking-wider text-xs">
                   <tr>
                     <th className="p-3.5 pl-5">Personnel Name & HR Code</th>
@@ -2614,7 +2606,7 @@ export default function FacilitiesSetupPage() {
 
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-800 uppercase tracking-wider text-xs">
                   <tr>
                     <th className="p-3.5 pl-5 w-12 text-center">#</th>
@@ -2629,7 +2621,7 @@ export default function FacilitiesSetupPage() {
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                   {filteredPositions.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="text-center py-12 text-slate-400 text-xs italic">
+                      <td colSpan={7} className="text-center py-12 text-slate-400 text-sm italic">
                         No positions or job roles found. Click "+ Add Position" above to configure.
                       </td>
                     </tr>
@@ -2964,7 +2956,7 @@ export default function FacilitiesSetupPage() {
 
               <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <table className="w-full text-left text-sm">
                     <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300">
                       <tr>
                         <th className="px-4 py-3">Template Code</th>
@@ -3062,7 +3054,7 @@ export default function FacilitiesSetupPage() {
                         })}
                       {checklistTemplates.length === 0 && (
                         <tr>
-                          <td colSpan="6" className="text-center py-8 text-slate-400 text-xs">
+                          <td colSpan="6" className="text-center py-8 text-slate-400 text-sm">
                             No inspection checklist templates configured yet. Click "+ Create Checklist Template" to build one.
                           </td>
                         </tr>
@@ -3085,7 +3077,7 @@ export default function FacilitiesSetupPage() {
                 </Link>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-sm">
                   <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300">
                     <tr>
                       <th className="px-4 py-3">Task No / Title</th>
@@ -3146,7 +3138,7 @@ export default function FacilitiesSetupPage() {
                     ))}
                     {assignedRuns.length === 0 && (
                       <tr>
-                        <td colSpan="8" className="text-center py-8 text-slate-400 text-xs">
+                        <td colSpan="8" className="text-center py-8 text-slate-400 text-sm">
                           No daily inspection runs dispatched yet. Dispatch tasks from the Checklist Templates Register.
                         </td>
                       </tr>
@@ -3177,7 +3169,7 @@ export default function FacilitiesSetupPage() {
                 <input
                   type="text"
                   placeholder="Search contractors by company name, contact, phone..."
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-200 focus:outline-none"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -3197,7 +3189,7 @@ export default function FacilitiesSetupPage() {
 
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-800 uppercase tracking-wider text-xs">
                   <tr>
                     <th className="p-3.5 w-12 text-center">#</th>
@@ -3269,7 +3261,7 @@ export default function FacilitiesSetupPage() {
                   ))}
                   {filteredContractors.length === 0 && (
                     <tr>
-                      <td colSpan="8" className="text-center py-12 text-slate-400 text-xs italic">
+                      <td colSpan="8" className="text-center py-12 text-slate-400 text-sm italic">
                         No service contractors registered yet. Click &apos;+ Register Service Contractor&apos; above.
                       </td>
                     </tr>
@@ -3296,7 +3288,7 @@ export default function FacilitiesSetupPage() {
                 <input
                   type="text"
                   placeholder="Search rooms & spaces by name, code, floor, property..."
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-200 focus:outline-none"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -3316,7 +3308,7 @@ export default function FacilitiesSetupPage() {
 
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-800 uppercase tracking-wider text-xs">
                   <tr>
                     <th className="p-3.5 w-12 text-center">#</th>
@@ -3390,7 +3382,7 @@ export default function FacilitiesSetupPage() {
                   ))}
                   {filteredSpaces.length === 0 && (
                     <tr>
-                      <td colSpan="10" className="text-center py-12 text-slate-400 text-xs italic">
+                      <td colSpan="10" className="text-center py-12 text-slate-400 text-sm italic">
                         No rooms or spaces configured yet. Click &apos;+ Add Room / Space&apos; above.
                       </td>
                     </tr>
@@ -3416,7 +3408,7 @@ export default function FacilitiesSetupPage() {
                 <input
                   type="text"
                   placeholder="Search sanitation checkpoints by name, code, description..."
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-200 focus:outline-none"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -3439,7 +3431,7 @@ export default function FacilitiesSetupPage() {
 
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300">
                   <tr>
                     <th className="px-4 py-3">Checkpoint Name</th>
@@ -3497,7 +3489,7 @@ export default function FacilitiesSetupPage() {
                   ))}
                   {filteredSanitationCheckpoints.length === 0 && (
                     <tr>
-                      <td colSpan="5" className="text-center py-12 text-slate-400 text-xs italic">
+                      <td colSpan="5" className="text-center py-12 text-slate-400 text-sm italic">
                         No sanitation checkpoints configured yet. Click &apos;+ Add Sanitation Checkpoint&apos; above.
                       </td>
                     </tr>
@@ -3523,7 +3515,7 @@ export default function FacilitiesSetupPage() {
                 <input
                   type="text"
                   placeholder="Search waste streams by name, code, hazard level, unit..."
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-200 focus:outline-none"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -3546,7 +3538,7 @@ export default function FacilitiesSetupPage() {
 
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300">
                   <tr>
                     <th className="px-4 py-3">Waste Stream / Type</th>
@@ -3624,7 +3616,7 @@ export default function FacilitiesSetupPage() {
                   ))}
                   {filteredWasteStreams.length === 0 && (
                     <tr>
-                      <td colSpan="7" className="text-center py-12 text-slate-400 text-xs italic">
+                      <td colSpan="7" className="text-center py-12 text-slate-400 text-sm italic">
                         No waste streams configured yet. Click &apos;+ Add Waste Stream / Type&apos; above.
                       </td>
                     </tr>
@@ -3799,7 +3791,7 @@ export default function FacilitiesSetupPage() {
                     onChange={(e) => setPersonnelForm({ ...personnelForm, is_active: e.target.checked })}
                     className="w-4 h-4 text-emerald-600 rounded"
                   />
-                  <label htmlFor="pers_active" className="text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
+                  <label htmlFor="pers_active" className="text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
                     Active for task dispatch
                   </label>
                 </div>
@@ -3816,7 +3808,7 @@ export default function FacilitiesSetupPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-sm transition-all"
                 >
                   {saving ? "Saving..." : editingPersonnel ? "Update Personnel" : "Save & Register Personnel"}
                 </button>
@@ -3964,7 +3956,7 @@ export default function FacilitiesSetupPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-5 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
+                  className="px-5 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-sm font-bold shadow-sm transition-all"
                 >
                   {saving ? "Saving..." : editingSupervisor ? "Update Supervisor" : "Save Supervisor"}
                 </button>
@@ -4068,7 +4060,7 @@ export default function FacilitiesSetupPage() {
                     onChange={(e) => setShiftForm({ ...shiftForm, is_active: e.target.checked })}
                     className="w-4 h-4 text-blue-600 rounded"
                   />
-                  <label htmlFor="shift_active" className="text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
+                  <label htmlFor="shift_active" className="text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
                     Active Shift
                   </label>
                 </div>
@@ -4085,7 +4077,7 @@ export default function FacilitiesSetupPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold shadow-sm transition-all"
                 >
                   {saving ? "Saving..." : editingShift ? "Update Shift" : "Save Shift"}
                 </button>
@@ -4186,7 +4178,7 @@ export default function FacilitiesSetupPage() {
                   <button
                     type="button"
                     onClick={handleAddChecklistItem}
-                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1 shadow-sm"
+                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-semibold flex items-center gap-1 shadow-sm"
                   >
                     <Plus size={13} /> Add Check Item
                   </button>
@@ -4226,7 +4218,7 @@ export default function FacilitiesSetupPage() {
 
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pl-7 items-center">
                         <div>
-                          <label className="text-xs text-slate-400 block mb-0.5">Verification Type</label>
+                          <label className="text-sm text-slate-400 block mb-0.5">Verification Type</label>
                           <select
                             value={item.field_type}
                             onChange={(e) => handleUpdateChecklistItem(idx, "field_type", e.target.value)}
@@ -4266,7 +4258,7 @@ export default function FacilitiesSetupPage() {
                           </div>
                         ) : (
                           <div className="sm:col-span-2 flex items-center gap-2 pt-3">
-                            <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+                            <label className="flex items-center gap-1.5 cursor-pointer text-sm font-semibold text-slate-700 dark:text-slate-300">
                               <input
                                 type="checkbox"
                                 checked={Boolean(item.is_critical)}
@@ -4296,7 +4288,7 @@ export default function FacilitiesSetupPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-sm transition-all"
                 >
                   {saving ? "Saving..." : editingTemplate ? "Update Template" : "Save Checklist Template"}
                 </button>
@@ -4486,7 +4478,7 @@ export default function FacilitiesSetupPage() {
                 <button
                   type="submit"
                   disabled={dispatching}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-sm transition-all"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-semibold shadow-sm transition-all"
                 >
                   {dispatching ? "Dispatching..." : "Dispatch Task"}
                 </button>
@@ -4624,7 +4616,7 @@ export default function FacilitiesSetupPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-semibold flex items-center gap-1.5 shadow-sm"
                 >
                   <CheckCircle2 size={14} />
                   {saving ? "Saving..." : editingContractor ? "Update Contractor" : "Register Contractor"}
@@ -4789,7 +4781,7 @@ export default function FacilitiesSetupPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm"
+                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold flex items-center gap-1.5 shadow-sm"
                 >
                   <CheckCircle2 size={14} />
                   {saving ? "Saving..." : editingSpace ? "Update Space" : "Save Space"}
@@ -4891,7 +4883,7 @@ export default function FacilitiesSetupPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-5 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm"
+                  className="px-5 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-xl text-sm font-semibold flex items-center gap-1.5 shadow-sm"
                 >
                   <CheckCircle2 size={14} />
                   {saving ? "Saving..." : editingCategory ? "Update Category" : "Save Category"}
@@ -5220,7 +5212,7 @@ export default function FacilitiesSetupPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="btn btn-primary px-5 py-2 text-xs font-bold flex items-center gap-2"
+                  className="btn btn-primary px-5 py-2 text-sm font-bold flex items-center gap-2"
                 >
                   {saving && <Loader2 size={14} className="animate-spin" />}
                   {editingClient ? "Update Client" : "Register Client"}
@@ -5417,7 +5409,7 @@ export default function FacilitiesSetupPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="btn btn-primary text-xs px-5 py-2 font-bold shadow-sm bg-emerald-600 hover:bg-emerald-500 text-white"
+                  className="btn btn-primary text-sm px-5 py-2 font-bold shadow-sm bg-emerald-600 hover:bg-emerald-500 text-white"
                 >
                   {saving ? "Saving..." : editingSanitation ? "Update Checkpoint" : "Save Checkpoint"}
                 </button>
@@ -5550,7 +5542,7 @@ export default function FacilitiesSetupPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="btn btn-primary text-xs px-5 py-2 font-bold shadow-sm bg-rose-600 hover:bg-rose-500 text-white"
+                  className="btn btn-primary text-sm px-5 py-2 font-bold shadow-sm bg-rose-600 hover:bg-rose-500 text-white"
                 >
                   {saving ? "Saving..." : editingWasteStream ? "Update Stream" : "Save Stream"}
                 </button>
@@ -5663,7 +5655,7 @@ export default function FacilitiesSetupPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm"
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-semibold flex items-center gap-1.5 shadow-sm"
                 >
                   <CheckCircle2 size={14} />
                   {saving ? 'Saving...' : editingPosition ? 'Update Position' : 'Create Position'}
@@ -5695,7 +5687,7 @@ export default function FacilitiesSetupPage() {
               {/* Link Client from Client Setup */}
               <div className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50/50 dark:bg-emerald-950/20">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-1.5">
-                  <label className="font-semibold text-slate-800 dark:text-slate-200 text-xs flex items-center gap-1.5">
+                  <label className="font-semibold text-slate-800 dark:text-slate-200 text-sm flex items-center gap-1.5">
                     <Building2 size={14} className="text-emerald-600" /> Link Client from Client Setup (Optional)
                   </label>
                   <button
@@ -5902,7 +5894,7 @@ export default function FacilitiesSetupPage() {
                 <button
                   type="submit"
                   disabled={tenantSubmitting}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-semibold flex items-center gap-1.5 shadow-sm transition-all"
                 >
                   {tenantSubmitting ? "Saving..." : editingTenant ? "Update Tenant" : "Register Tenant"}
                 </button>

@@ -265,7 +265,7 @@ export default function AssetSetupPage() {
             <form onSubmit={handleSaveNomenclature} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Prefix
                   </label>
                   <input
@@ -279,7 +279,7 @@ export default function AssetSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Separator Character
                   </label>
                   <select
@@ -295,7 +295,7 @@ export default function AssetSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Sequence Zero-Padding (Digits)
                   </label>
                   <select
@@ -311,7 +311,7 @@ export default function AssetSetupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Current Sequence Start / Counter
                   </label>
                   <input
@@ -326,7 +326,7 @@ export default function AssetSetupPage() {
 
               {/* Checkbox Options */}
               <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2.5">
-                <label className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <label className="flex items-center gap-2.5 cursor-pointer text-sm font-semibold text-slate-700 dark:text-slate-300">
                   <input
                     type="checkbox"
                     checked={nomenclature.include_category}
@@ -336,7 +336,7 @@ export default function AssetSetupPage() {
                   Include Asset Category Code / Short Slug (e.g. IT, VEH, BLD)
                 </label>
 
-                <label className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <label className="flex items-center gap-2.5 cursor-pointer text-sm font-semibold text-slate-700 dark:text-slate-300">
                   <input
                     type="checkbox"
                     checked={nomenclature.include_site}
@@ -346,7 +346,7 @@ export default function AssetSetupPage() {
                   Include Facility / Site Code (e.g. HQ, PLANT)
                 </label>
 
-                <label className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <label className="flex items-center gap-2.5 cursor-pointer text-sm font-semibold text-slate-700 dark:text-slate-300">
                   <input
                     type="checkbox"
                     checked={nomenclature.include_year}
@@ -575,7 +575,7 @@ export default function AssetSetupPage() {
 
             <form onSubmit={handleSaveProp} className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Site / Property Name *
                 </label>
                 <input
@@ -590,7 +590,7 @@ export default function AssetSetupPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Property Type
                   </label>
                   <select
@@ -606,7 +606,7 @@ export default function AssetSetupPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     City
                   </label>
                   <input
@@ -620,7 +620,7 @@ export default function AssetSetupPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Street Address
                 </label>
                 <input
@@ -662,7 +662,7 @@ export default function AssetSetupPage() {
 
             <form onSubmit={handleSaveMfg} className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Manufacturer / Brand Name *
                 </label>
                 <input
@@ -676,7 +676,7 @@ export default function AssetSetupPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Country
                 </label>
                 <input

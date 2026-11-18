@@ -60,7 +60,7 @@ export default function ProjectReports() {
         </Link>
         <div>
           <h1 className="text-2xl font-bold text-brand-900 dark:text-brand-300">Analytics & Reports</h1>
-          <p className="text-slate-500 text-sm">Portfolio KPIs, operational logs, and financial intelligence</p>
+          <p className="text-slate-500 text-sm hidden">Portfolio KPIs, operational logs, and financial intelligence</p>
         </div>
       </div>
 

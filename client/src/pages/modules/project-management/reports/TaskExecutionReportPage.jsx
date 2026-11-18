@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 /**
  * @fileoverview TaskExecutionReportPage component.
  * Concise per-project Task Execution & Delay Log in Project Management.
@@ -210,7 +211,7 @@ export default function TaskExecutionReportPage({ isEmbedded = false }) {
               <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Task Execution & Delay Log
               </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 hidden">
                 Concise operational execution tracking, SLA schedule variance, and delay logs per project.
               </p>
             </div>
@@ -218,18 +219,11 @@ export default function TaskExecutionReportPage({ isEmbedded = false }) {
 
           {/* Action Controls */}
           <div className="flex items-center gap-2 print:hidden">
-            <button
-              onClick={loadReport}
-              disabled={loading}
-              className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-1.5 transition-colors disabled:opacity-50"
-            >
-              <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-              Refresh
-            </button>
+            
             <button
               onClick={handleExportCSV}
               disabled={!data || !filteredTasks.length}
-              className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-1.5 transition-colors disabled:opacity-50"
+              className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-1.5 transition-colors disabled:opacity-50"
             >
               <Download size={14} />
               Export CSV
@@ -237,7 +231,7 @@ export default function TaskExecutionReportPage({ isEmbedded = false }) {
             <button
               onClick={handlePrint}
               disabled={!data}
-              className="px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-medium flex items-center gap-1.5 shadow-sm transition-colors disabled:opacity-50"
+              className="px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium flex items-center gap-1.5 shadow-sm transition-colors disabled:opacity-50"
             >
               <Printer size={14} />
               Print
@@ -258,141 +252,58 @@ export default function TaskExecutionReportPage({ isEmbedded = false }) {
         </div>
       ) : null}
 
-      {/* Mobile KPI Summary Grid (< 768px): Apple HIG style compact 2x2 grid */}
-      <div className="grid grid-cols-2 gap-2.5 md:hidden">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 flex items-center justify-between shadow-xs">
-          <div>
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Total Tasks</span>
-            <span className="text-xl font-bold text-slate-900 dark:text-white mt-0.5 block">{loading ? "..." : analytics.totalTasks || 0}</span>
-          </div>
-          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300">
-            <CheckSquare size={14} />
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 flex items-center justify-between shadow-xs">
-          <div>
-            <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider block">In Progress</span>
-            <span className="text-xl font-bold text-blue-600 dark:text-blue-400 mt-0.5 block">{loading ? "..." : analytics.inProgressTasks || 0}</span>
-          </div>
-          <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-950/50 flex items-center justify-center text-blue-600 dark:text-blue-400">
-            <Activity size={14} />
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 flex items-center justify-between shadow-xs">
-          <div>
-            <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">Completed</span>
-            <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block">{loading ? "..." : analytics.completedTasks || 0}</span>
-          </div>
-          <div className="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-            <CheckCircle2 size={14} />
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 flex items-center justify-between shadow-xs">
-          <div>
-            <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">Delays / Overdue</span>
-            <span className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-0.5 block">{loading ? "..." : (analytics.delayedTasksCount ?? analytics.overdueTasks ?? 0)}</span>
-          </div>
-          <div className="w-8 h-8 rounded-full bg-amber-50 dark:bg-amber-950/50 flex items-center justify-center text-amber-600 dark:text-amber-400">
-            <AlertTriangle size={14} />
-          </div>
-        </div>
-      </div>
-
-      {/* Desktop KPI Strip (>= 768px): 5 Balanced Cards */}
-      <div className="hidden md:grid md:grid-cols-5 gap-3">
-        {/* Total Tasks */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm flex items-center justify-between">
-          <div>
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
-              Total Tasks
-            </span>
-            <div className="text-xl font-black text-slate-900 dark:text-white mt-0.5">
-              {loading ? "..." : analytics.totalTasks || 0}
+      {/* Metric Stats Cards Carousel */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="md:grid-cols-5" gapClass="gap-4">
+        {[
+          {
+            label: "Total Tasks",
+            val: loading ? "..." : analytics.totalTasks || 0,
+            icon: <CheckSquare size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "In Progress",
+            val: loading ? "..." : analytics.inProgressTasks || 0,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-blue-600 text-white",
+          },
+          {
+            label: "Completed",
+            val: loading ? "..." : `${analytics.completedTasks || 0}`,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+          {
+            label: "Overdue SLA",
+            val: loading ? "..." : analytics.overdueTasks || 0,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-rose-500 text-white",
+          },
+          {
+            label: "Delay Logs",
+            val: loading ? "..." : (analytics.delayedTasksCount ?? analytics.overdueTasks ?? 0),
+            icon: <AlertTriangle size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm"
+          >
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
+                {stat.val}
+              </p>
             </div>
-            <span className="text-[10px] text-slate-500">
-              Across {data?.projects?.length || 0} projects
-            </span>
-          </div>
-          <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-            <CheckSquare size={16} />
-          </div>
-        </div>
-
-        {/* In Progress */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm flex items-center justify-between">
-          <div>
-            <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider block">
-              In Progress
-            </span>
-            <div className="text-xl font-black text-blue-600 dark:text-blue-400 mt-0.5">
-              {loading ? "..." : analytics.inProgressTasks || 0}
+            <div className={`p-3 rounded-full ${stat.color} shadow-sm`}>
+              {stat.icon}
             </div>
-            <span className="text-[10px] text-slate-500">
-              {analytics.blockedTasks || 0} blocked / at risk
-            </span>
           </div>
-          <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400">
-            <Activity size={16} />
-          </div>
-        </div>
-
-        {/* Completed */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm flex items-center justify-between">
-          <div>
-            <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">
-              Completed
-            </span>
-            <div className="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
-              {loading ? "..." : `${analytics.completedTasks || 0}`}
-            </div>
-            <span className="text-[10px] text-emerald-600/90 font-medium">
-              {analytics.completionRate || 0}% overall velocity
-            </span>
-          </div>
-          <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400">
-            <CheckCircle2 size={16} />
-          </div>
-        </div>
-
-        {/* Overdue Tasks */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm flex items-center justify-between">
-          <div>
-            <span className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 uppercase tracking-wider block">
-              Overdue SLA
-            </span>
-            <div className="text-xl font-black text-rose-600 dark:text-rose-400 mt-0.5">
-              {loading ? "..." : analytics.overdueTasks || 0}
-            </div>
-            <span className="text-[10px] text-rose-600/90 font-medium">
-              {analytics.overdueRate || 0}% breach rate
-            </span>
-          </div>
-          <div className="p-2 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400">
-            <Clock size={16} />
-          </div>
-        </div>
-
-        {/* Delay Logs & Bottlenecks */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm flex items-center justify-between">
-          <div>
-            <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">
-              Delay Logs
-            </span>
-            <div className="text-xl font-black text-amber-600 dark:text-amber-400 mt-0.5">
-              {loading ? "..." : analytics.delayedTasksCount ?? (analytics.overdueTasks || 0)}
-            </div>
-            <span className="text-[10px] text-amber-600/90 font-medium">
-              Reported bottlenecks
-            </span>
-          </div>
-          <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400">
-            <AlertTriangle size={16} />
-          </div>
-        </div>
-      </div>
+        ))}
+      </MobileMovingCarousel>
 
       {/* Compact Controls & Filter Bar */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 print:hidden">
@@ -728,7 +639,7 @@ export default function TaskExecutionReportPage({ isEmbedded = false }) {
 
                     {/* 2. Desktop Full Table (>= 768px) */}
                     <div className="hidden md:block overflow-x-auto">
-                      <table className="w-full text-left border-collapse text-xs">
+                      <table className="w-full text-left border-collapse text-sm">
                         <thead>
                           <tr className="border-b border-slate-100 dark:border-slate-800 text-[11px] font-semibold text-slate-400 bg-white dark:bg-slate-900">
                             <th className="py-2.5 px-4">Task & Work Plan/WBS</th>

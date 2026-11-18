@@ -566,7 +566,7 @@ export default function ProjectOrderForm() {
                 ? "New Client's Order"
                 : `Client's Order ${formData.orderNo}`}
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 hidden">
               Create and manage items for a project
             </p>
           </div>
@@ -576,7 +576,7 @@ export default function ProjectOrderForm() {
             <button
               type="button"
               onClick={handleDelete}
-              className="btn btn-outline text-xs text-rose-600 border-rose-300 hover:bg-rose-50"
+              className="btn btn-outline text-sm text-rose-600 border-rose-300 hover:bg-rose-50"
             >
               Delete
             </button>
@@ -585,7 +585,7 @@ export default function ProjectOrderForm() {
             <button
               type="button"
               onClick={handleCancelOrder}
-              className="btn btn-outline text-xs text-amber-600 border-amber-300 hover:bg-amber-50"
+              className="btn btn-outline text-sm text-amber-600 border-amber-300 hover:bg-amber-50"
             >
               Cancel Order
             </button>
@@ -594,7 +594,7 @@ export default function ProjectOrderForm() {
             <button
               type="button"
               onClick={handlePrint}
-              className="btn btn-secondary text-xs"
+              className="btn btn-secondary text-sm"
             >
               Print
             </button>
@@ -776,7 +776,7 @@ export default function ProjectOrderForm() {
               <div className="bg-white dark:bg-slate-900 p-4 rounded-xl mb-6 border border-slate-200 dark:border-slate-800">
                 <div className="grid grid-cols-1 md:grid-cols-7 gap-3 mb-3">
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Item *
                     </label>
                     <div className="relative">
@@ -855,7 +855,7 @@ export default function ProjectOrderForm() {
                                     <button
                                       type="button"
                                       key={o.id}
-                                      className="block w-full text-left px-3 py-2 hover:bg-gray-50 text-xs"
+                                      className="block w-full text-left px-3 py-2 hover:bg-gray-50 text-sm"
                                       onClick={() => {
                                         handleNewItemChange({
                                           target: {
@@ -877,7 +877,7 @@ export default function ProjectOrderForm() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       UOM *
                     </label>
                     <select
@@ -907,7 +907,7 @@ export default function ProjectOrderForm() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Qty *
                     </label>
                     <input
@@ -920,7 +920,7 @@ export default function ProjectOrderForm() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Available
                     </label>
                     <input
@@ -935,7 +935,7 @@ export default function ProjectOrderForm() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Price *
                     </label>
                     <input
@@ -949,7 +949,7 @@ export default function ProjectOrderForm() {
                   <div
                     className={!canEditDiscount() ? "disabled-light-blue" : ""}
                   >
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Disc %
                     </label>
                     <input
@@ -964,7 +964,7 @@ export default function ProjectOrderForm() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Tax
                     </label>
                     <select
@@ -1053,7 +1053,7 @@ export default function ProjectOrderForm() {
                             <span>{item.uom || ""}</span>
                           ) : (
                             <select
-                              className="input text-xs w-full"
+                              className="input text-sm w-full"
                               value={item.uom || ""}
                               onChange={(e) =>
                                 updateItemField(item.id, "uom", e.target.value)
@@ -1083,7 +1083,7 @@ export default function ProjectOrderForm() {
                           ) : (
                             <input
                               type="number"
-                              className="input text-xs w-full text-right"
+                              className="input text-sm w-full text-right"
                               value={item.qty}
                               onChange={(e) =>
                                 updateItemField(
@@ -1111,7 +1111,7 @@ export default function ProjectOrderForm() {
                             <input
                               type="number"
                               step="0.01"
-                              className="input text-xs w-full text-right"
+                              className="input text-sm w-full text-right"
                               value={item.unitPrice}
                               onChange={(e) =>
                                 updateItemField(
@@ -1131,7 +1131,7 @@ export default function ProjectOrderForm() {
                           ) : (
                             <input
                               type="number"
-                              className="input text-xs w-full text-right"
+                              className="input text-sm w-full text-right"
                               value={item.discountPercent}
                               onChange={(e) =>
                                 updateItemField(

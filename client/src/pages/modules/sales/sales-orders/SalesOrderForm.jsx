@@ -509,7 +509,7 @@ export default function SalesOrderForm() {
         ? response.data.items
         : [];
       setPriceTypes(list);
-      if (isNew) {
+      if (!isEditMode) {
         setFormData((prev) => {
           if (prev.price_type && prev.price_type !== "RETAIL") return prev;
           const retailPt = list.find(

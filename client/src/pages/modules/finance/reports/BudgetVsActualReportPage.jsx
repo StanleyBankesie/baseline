@@ -315,13 +315,7 @@ export default function BudgetVsActualReportPage() {
           >
             <Sliders className="w-4 h-4" /> Policies
           </button>
-          <button
-            onClick={fetchReport}
-            className="btn btn-secondary inline-flex items-center gap-2"
-            title="Refresh"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} /> Refresh
-          </button>
+          
           <button
             onClick={handleExport}
             className="btn btn-secondary inline-flex items-center gap-2"

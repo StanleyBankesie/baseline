@@ -137,6 +137,41 @@ function ModuleNavDropdown({ section, location, navigate }) {
   );
 }
 
+const getResponsiveValueClass = (val) => {
+  const str = String(val ?? "").trim();
+  const numOnly = str.replace(/^[^\d]+/, "");
+  const len = numOnly.length || str.length;
+  if (len > 15) return "text-base sm:text-lg lg:text-xl leading-none";
+  if (len > 11) return "text-lg sm:text-xl lg:text-2xl leading-none";
+  if (len > 8) return "text-xl sm:text-2xl lg:text-3xl leading-tight";
+  if (len > 5) return "text-2xl sm:text-3xl lg:text-4xl leading-tight";
+  return "text-3xl sm:text-4xl lg:text-5xl leading-tight";
+};
+
+function renderMetricValue(val, responsiveClass) {
+  const str = String(val ?? "").trim();
+  const match = str.match(/^([A-Za-z₵$€£¥\s]+?)([\d,]+(?:\.\d+)?%?.*)$/);
+  if (match && match[1].trim() && match[2].trim()) {
+    const currency = match[1].trim();
+    const amount = match[2].trim();
+    return (
+      <div className="flex items-baseline flex-wrap gap-x-1.5 min-w-0" title={str}>
+        <span className="text-xs sm:text-sm font-bold text-white/80 shrink-0 uppercase tracking-wider select-none">
+          {currency}
+        </span>
+        <span className={`${responsiveClass} font-black text-white tracking-tight break-all`}>
+          {amount}
+        </span>
+      </div>
+    );
+  }
+  return (
+    <div className={`${responsiveClass} font-black text-white tracking-tight break-all`} title={str}>
+      {str}
+    </div>
+  );
+}
+
 const slug = (s) =>
   String(s || "")
     .toLowerCase()
@@ -574,7 +609,7 @@ const ModuleDashboard = ({
                   {typeof icon === "string" ? icon : (typeof moduleInfo?.icon === "string" ? moduleInfo.icon : "📂")}
                 </div>
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
                     {title}
                   </h1>
                 </div>
@@ -705,26 +740,21 @@ const ModuleDashboard = ({
                     <div
                       key={index}
                       onClick={() => isClickable && handleNavigate(stat.path)}
-                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-[0_15px_30px_-5px_rgba(178,110,23,0.3)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(178,110,23,0.5)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#b26e17] text-white ${
+                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-smoky-lg border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-smoky-lg active:scale-[0.98] transition-all duration-300 ease-out group bg-[#b26e17] text-white ${
                         isClickable ? "cursor-pointer" : ""
                       }`}
                     >
                       <div className="flex flex-col h-full justify-between">
                         <div className="flex justify-end min-h-[22px]">
                           {(stat.change || stat.trend) && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-white/15 backdrop-blur-md text-white/90 border border-white/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] leading-none flex items-center gap-1">
+                            <span className="text-xs sm:text-sm font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-white/90 border border-white/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] leading-none flex items-center gap-1">
                               {stat.change || stat.trend}
                             </span>
                           )}
                         </div>
-                        <div className="mt-4 sm:mt-6">
-                          <div 
-                            className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)] truncate"
-                            style={{ textShadow: "0 0 12px rgba(255, 255, 255, 0.45)" }}
-                          >
-                            {stat.value}
-                          </div>
-                          <div className="mt-2 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none truncate">
+                        <div className="mt-4 sm:mt-6 min-w-0">
+                          {renderMetricValue(stat.value, `${getResponsiveValueClass(stat.value)} drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)]`)}
+                          <div className="mt-2 text-xs sm:text-sm lg:text-base font-extrabold text-white/95 uppercase tracking-wider leading-snug break-words line-clamp-2" title={stat.label}>
                             {stat.label}
                           </div>
                         </div>
@@ -738,24 +768,22 @@ const ModuleDashboard = ({
                     <div
                       key={index}
                       onClick={() => isClickable && handleNavigate(stat.path)}
-                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-[0_15px_30px_-5px_rgba(36,82,109,0.3)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(36,82,109,0.5)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#24526d] text-white ${
+                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-smoky-lg border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-smoky-lg active:scale-[0.98] transition-all duration-300 ease-out group bg-[#24526d] text-white ${
                         isClickable ? "cursor-pointer" : ""
                       }`}
                     >
                       <div className="flex flex-col h-full justify-between">
                         <div className="flex justify-end min-h-[22px]">
                           {(stat.change || stat.trend) && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-amber-500/20 backdrop-blur-md text-amber-200 border border-amber-400/20 shadow-sm leading-none flex items-center gap-1">
+                            <span className="text-xs sm:text-sm font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/20 backdrop-blur-md text-amber-200 border border-amber-400/20 shadow-sm leading-none flex items-center gap-1">
                               {stat.change || stat.trend}
                             </span>
                           )}
                         </div>
-                        <div className="mt-4 sm:mt-6">
-                          <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight truncate">
-                            {stat.value}
-                          </div>
-                          <div className="mt-2 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none flex items-center justify-between">
-                            <span className="truncate">{stat.label}</span>
+                        <div className="mt-4 sm:mt-6 min-w-0">
+                          {renderMetricValue(stat.value, getResponsiveValueClass(stat.value))}
+                          <div className="mt-2 text-xs sm:text-sm lg:text-base font-extrabold text-white/95 uppercase tracking-wider leading-snug flex items-center justify-between min-w-0">
+                            <span className="break-words line-clamp-2" title={stat.label}>{stat.label}</span>
                             <svg className="w-7 sm:w-8 h-4 text-white/30 ml-2 group-hover:text-white/50 transition-colors shrink-0" viewBox="0 0 50 20" fill="none" stroke="currentColor" strokeWidth="2">
                               <path d="M0 15 L10 12 L20 18 L30 8 L40 10 L50 2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
@@ -771,26 +799,26 @@ const ModuleDashboard = ({
                     <div
                       key={index}
                       onClick={() => isClickable && handleNavigate(stat.path)}
-                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-[0_15px_30px_-5px_rgba(24,117,92,0.3)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(24,117,92,0.5)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#18755c] text-white ${
+                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-smoky-lg border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-smoky-lg active:scale-[0.98] transition-all duration-300 ease-out group bg-[#18755c] text-white ${
                         isClickable ? "cursor-pointer" : ""
                       }`}
                     >
                       <div className="flex flex-col h-full justify-between">
                         <div className="flex justify-end min-h-[22px]">
                           {(stat.change || stat.trend) && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-white/90 border border-white/15 shadow-sm leading-none flex items-center gap-1">
+                            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-white/90 border border-white/15 shadow-sm leading-none flex items-center gap-1">
                               {stat.change || stat.trend}
                             </span>
                           )}
                         </div>
-                        <div className="mt-4 sm:mt-6">
-                          <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-1.5 truncate">
-                            <span className="truncate">{stat.value}</span>
+                        <div className="mt-4 sm:mt-6 min-w-0">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            {renderMetricValue(stat.value, getResponsiveValueClass(stat.value))}
                             <svg className="w-4 sm:w-5 h-4 sm:h-5 text-white/40 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
                             </svg>
                           </div>
-                          <div className="mt-2 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none truncate">
+                          <div className="mt-2 text-xs sm:text-sm lg:text-base font-extrabold text-white/95 uppercase tracking-wider leading-snug break-words line-clamp-2" title={stat.label}>
                             {stat.label}
                           </div>
                         </div>
@@ -804,23 +832,21 @@ const ModuleDashboard = ({
                     <div
                       key={index}
                       onClick={() => isClickable && handleNavigate(stat.path)}
-                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-[0_15px_30px_-5px_rgba(0,0,0,0.2)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.5)] border border-white/5 hover:border-white/15 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#1d1f22] bg-[radial-gradient(#ffffff06_1px,transparent_1px)] [background-size:8px_8px] text-white ${
+                      className={`w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-smoky-lg border border-white/5 hover:border-white/15 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-smoky-lg active:scale-[0.98] transition-all duration-300 ease-out group bg-[#1d1f22] bg-[radial-gradient(#ffffff06_1px,transparent_1px)] [background-size:8px_8px] text-white ${
                         isClickable ? "cursor-pointer" : ""
                       }`}
                     >
                       <div className="flex flex-col h-full justify-between">
                         <div className="flex justify-end min-h-[22px]">
                           {(stat.change || stat.trend) && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-white border border-white/20 shadow-sm leading-none flex items-center gap-1">
+                            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-white border border-white/20 shadow-sm leading-none flex items-center gap-1">
                               {stat.change || stat.trend}
                             </span>
                           )}
                         </div>
-                        <div className="mt-4 sm:mt-6">
-                          <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight truncate">
-                            {stat.value}
-                          </div>
-                          <div className="mt-2 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none truncate">
+                        <div className="mt-4 sm:mt-6 min-w-0">
+                          {renderMetricValue(stat.value, getResponsiveValueClass(stat.value))}
+                          <div className="mt-2 text-xs sm:text-sm lg:text-base font-extrabold text-white/95 uppercase tracking-wider leading-snug break-words line-clamp-2" title={stat.label}>
                             {stat.label}
                           </div>
                         </div>
@@ -851,7 +877,7 @@ const ModuleDashboard = ({
               .map((action, index) => (
                 <button
                   key={index}
-                  className="flex flex-col items-center justify-center p-5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-sm hover:shadow-md hover:-translate-y-1 border border-slate-100 dark:border-slate-700/50 hover:border-brand-300 dark:hover:border-brand-700/60 hover:bg-gradient-to-br hover:from-white hover:to-brand-50/20 dark:hover:from-slate-800 dark:hover:to-slate-900/50 transition-all duration-300 group text-center h-full relative overflow-hidden"
+                  className="flex flex-col items-center justify-center p-5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-smoky-card hover:shadow-smoky hover:-translate-y-1 border border-slate-100 dark:border-slate-700/50 hover:border-brand-300 dark:hover:border-brand-700/60 hover:bg-gradient-to-br hover:from-white hover:to-brand-50/20 dark:hover:from-slate-800 dark:hover:to-slate-900/50 transition-all duration-300 group text-center h-full relative overflow-hidden"
                   onClick={() => handleNavigate(action.path)}
                 >
                   <div className="w-12 h-12 rounded-xl bg-brand-50/50 dark:bg-slate-700/50 flex items-center justify-center text-2xl mb-3 shadow-inner group-hover:scale-110 group-hover:rotate-3 group-hover:from-brand-100 group-hover:to-brand-200/50 dark:group-hover:from-slate-600 dark:group-hover:to-slate-700 transition-all duration-300">
@@ -927,7 +953,7 @@ const ModuleDashboard = ({
                         { replace: true }
                       );
                     }}
-                    className="w-full h-full relative overflow-hidden rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-5 border border-slate-200/80 dark:border-slate-800/90 shadow-sm hover:shadow-xl hover:-translate-y-1.5 hover:border-brand-400/80 dark:hover:border-brand-500/60 transition-all duration-300 group cursor-pointer flex flex-col justify-between"
+                    className="w-full h-full relative overflow-hidden rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-5 border border-slate-200/80 dark:border-slate-800/90 shadow-smoky-card hover:shadow-smoky-lg hover:-translate-y-1.5 hover:border-brand-400/80 dark:hover:border-brand-500/60 transition-all duration-300 group cursor-pointer flex flex-col justify-between"
                   >
                     {/* Ambient Hover Glow */}
                     <div className="absolute -right-10 -top-10 w-28 h-28 bg-gradient-to-br from-brand-500/10 to-indigo-500/10 group-hover:from-brand-500/25 group-hover:to-indigo-500/25 rounded-full blur-xl transition-all duration-500 pointer-events-none" />
@@ -1080,7 +1106,7 @@ const ModuleDashboard = ({
                       return (
                         <div
                           key={item.path || itemIndex}
-                          className="relative overflow-hidden rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800/90 shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-brand-300/80 dark:hover:border-brand-500/50 transition-all duration-300 group cursor-pointer flex flex-col justify-between"
+                          className="card relative overflow-hidden rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-4 sm:p-5 border border-slate-200/90 dark:border-slate-800/90 shadow-smoky-card hover:shadow-smoky-lg hover:-translate-y-1 hover:border-brand-300/80 dark:hover:border-brand-500/50 transition-all duration-300 group cursor-pointer flex flex-col justify-between"
                           onClick={() => handleNavigate(item.path)}
                         >
                           {/* Ambient Corner Glow on Hover */}

@@ -368,14 +368,14 @@ export default function PMPurchaseRequisitionForm() {
               <ClipboardCheck size={22} />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+              <h1 className="text-2xl font-bold font-bold text-slate-900 dark:text-slate-100">
                 {reqId
                   ? isEditMode
                     ? "Edit Purchase Requisition"
                     : "View Purchase Requisition"
                   : "New Purchase Requisition"}
               </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 hidden">
                 {headerData?.requisition_no
                   ? `Requisition: ${headerData.requisition_no}`
                   : "Request items or services for project procurement"}
@@ -700,7 +700,7 @@ export default function PMPurchaseRequisitionForm() {
                                     <button
                                       type="button"
                                       key={o.id}
-                                      className="block w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs border-b border-slate-100 dark:border-slate-700 last:border-0"
+                                      className="block w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm border-b border-slate-100 dark:border-slate-700 last:border-0"
                                       onClick={() => {
                                         onItemChange(i, String(o.id));
                                         setItemQueries((prev) => {
@@ -788,7 +788,7 @@ export default function PMPurchaseRequisitionForm() {
                           <td className="text-center">
                             <button
                               type="button"
-                              className="btn btn-danger text-xs px-2 py-1"
+                              className="btn btn-danger text-sm px-2 py-1"
                               onClick={() => removeLine(i)}
                             >
                               Remove
@@ -806,7 +806,7 @@ export default function PMPurchaseRequisitionForm() {
               <div className="mt-3">
                 <button
                   type="button"
-                  className="btn btn-secondary text-xs inline-flex items-center gap-1.5"
+                  className="btn btn-secondary text-sm inline-flex items-center gap-1.5"
                   onClick={addLine}
                 >
                   + Add Line

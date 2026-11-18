@@ -63,6 +63,7 @@ export default function ExecOutstandingReceivablesPage() {
   });
 
   const totalOutstanding = filteredItems.reduce((acc, curr) => acc + Number(curr.outstanding || 0), 0);
+  const totalOverdue = filteredItems.filter((r) => String(r.status || "").toUpperCase() === "OVERDUE").reduce((acc, curr) => acc + Number(curr.outstanding || 0), 0);
   const totalInvoiced = filteredItems.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
 
   async function exportExcel() {

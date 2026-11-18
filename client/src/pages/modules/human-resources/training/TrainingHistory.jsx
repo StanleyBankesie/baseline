@@ -305,12 +305,7 @@ export default function TrainingHistory() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => { loadRecords(); loadCertifications(); }}
-            className="btn-secondary text-xs px-3 py-2 flex items-center gap-1.5"
-          >
-            <RefreshCw className="w-3.5 h-3.5" /> Refresh
-          </button>
+          
           <button
             onClick={handleExport}
             className="btn-primary text-xs px-3 py-2 flex items-center gap-1.5"

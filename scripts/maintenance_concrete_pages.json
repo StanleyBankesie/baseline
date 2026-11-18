@@ -1,0 +1,352 @@
+[
+  {
+    "name": "Maintenance Home Hub",
+    "path": "/maintenance",
+    "component": "MaintenanceLanding"
+  },
+  {
+    "name": "Dashboard",
+    "path": "/maintenance/dashboard",
+    "component": "MaintenanceDashboardPage"
+  },
+  {
+    "name": "Assets",
+    "path": "/maintenance/assets",
+    "component": "EquipmentList"
+  },
+  {
+    "name": "Assets - New",
+    "path": "/maintenance/assets/new",
+    "component": "EquipmentForm"
+  },
+  {
+    "name": "Assets - :Id",
+    "path": "/maintenance/assets/1",
+    "component": "EquipmentForm"
+  },
+  {
+    "name": "Maintenance Requests",
+    "path": "/maintenance/maintenance-requests",
+    "component": "MaintenanceRequestsList"
+  },
+  {
+    "name": "Maintenance Requests - New",
+    "path": "/maintenance/maintenance-requests/new",
+    "component": "MaintenanceRequestForm"
+  },
+  {
+    "name": "Maintenance Requests - :Id",
+    "path": "/maintenance/maintenance-requests/1",
+    "component": "MaintenanceRequestForm"
+  },
+  {
+    "name": "Job Orders",
+    "path": "/maintenance/job-orders",
+    "component": "MaintenanceJobOrdersList"
+  },
+  {
+    "name": "Job Orders - New",
+    "path": "/maintenance/job-orders/new",
+    "component": "MaintenanceJobOrderForm"
+  },
+  {
+    "name": "Job Orders - :Id",
+    "path": "/maintenance/job-orders/1",
+    "component": "MaintenanceJobOrderForm"
+  },
+  {
+    "name": "Job Executions",
+    "path": "/maintenance/job-executions",
+    "component": "JobExecutionList"
+  },
+  {
+    "name": "Job Executions - New",
+    "path": "/maintenance/job-executions/new",
+    "component": "JobExecutionForm"
+  },
+  {
+    "name": "Job Executions - :Id",
+    "path": "/maintenance/job-executions/1",
+    "component": "JobExecutionForm"
+  },
+  {
+    "name": "Rfq",
+    "path": "/maintenance/rfq",
+    "component": "MaintenanceRFQList"
+  },
+  {
+    "name": "Rfq - New",
+    "path": "/maintenance/rfq/new",
+    "component": "MaintenanceRFQForm"
+  },
+  {
+    "name": "Rfq - :Id",
+    "path": "/maintenance/rfq/1",
+    "component": "MaintenanceRFQForm"
+  },
+  {
+    "name": "Rfqs",
+    "path": "/maintenance/rfqs",
+    "component": "MaintenanceRFQList"
+  },
+  {
+    "name": "Rfqs - New",
+    "path": "/maintenance/rfqs/new",
+    "component": "MaintenanceRFQForm"
+  },
+  {
+    "name": "Rfqs - :Id",
+    "path": "/maintenance/rfqs/1",
+    "component": "MaintenanceRFQForm"
+  },
+  {
+    "name": "Supplier Quotations",
+    "path": "/maintenance/supplier-quotations",
+    "component": "SupplierQuotationsList"
+  },
+  {
+    "name": "Supplier Quotations - New",
+    "path": "/maintenance/supplier-quotations/new",
+    "component": "SupplierQuotationForm"
+  },
+  {
+    "name": "Supplier Quotations - :Id",
+    "path": "/maintenance/supplier-quotations/1",
+    "component": "SupplierQuotationForm"
+  },
+  {
+    "name": "Bills",
+    "path": "/maintenance/bills",
+    "component": "MaintenanceBillList"
+  },
+  {
+    "name": "Bills - New",
+    "path": "/maintenance/bills/new",
+    "component": "MaintenanceBillForm"
+  },
+  {
+    "name": "Bills - :Id",
+    "path": "/maintenance/bills/1",
+    "component": "MaintenanceBillForm"
+  },
+  {
+    "name": "Maintenance Bills",
+    "path": "/maintenance/maintenance-bills",
+    "component": "MaintenanceBillList"
+  },
+  {
+    "name": "Maintenance Bills - New",
+    "path": "/maintenance/maintenance-bills/new",
+    "component": "MaintenanceBillForm"
+  },
+  {
+    "name": "Maintenance Bills - :Id",
+    "path": "/maintenance/maintenance-bills/1",
+    "component": "MaintenanceBillForm"
+  },
+  {
+    "name": "Schedules",
+    "path": "/maintenance/schedules",
+    "component": "MaintenanceScheduleList"
+  },
+  {
+    "name": "Schedules - New",
+    "path": "/maintenance/schedules/new",
+    "component": "MaintenanceScheduleForm"
+  },
+  {
+    "name": "Schedules - :Id",
+    "path": "/maintenance/schedules/1",
+    "component": "MaintenanceScheduleForm"
+  },
+  {
+    "name": "Rosters",
+    "path": "/maintenance/rosters",
+    "component": "MaintenanceRosterList"
+  },
+  {
+    "name": "Rosters - New",
+    "path": "/maintenance/rosters/new",
+    "component": "MaintenanceRosterForm"
+  },
+  {
+    "name": "Rosters - :Id",
+    "path": "/maintenance/rosters/1",
+    "component": "MaintenanceRosterForm"
+  },
+  {
+    "name": "Equipment",
+    "path": "/maintenance/equipment",
+    "component": "EquipmentList"
+  },
+  {
+    "name": "Equipment - New",
+    "path": "/maintenance/equipment/new",
+    "component": "EquipmentForm"
+  },
+  {
+    "name": "Equipment - :Id",
+    "path": "/maintenance/equipment/1",
+    "component": "EquipmentForm"
+  },
+  {
+    "name": "Contracts",
+    "path": "/maintenance/contracts",
+    "component": "MaintenanceContractList"
+  },
+  {
+    "name": "Contracts - New",
+    "path": "/maintenance/contracts/new",
+    "component": "MaintenanceContractForm"
+  },
+  {
+    "name": "Contracts - :Id",
+    "path": "/maintenance/contracts/1",
+    "component": "MaintenanceContractForm"
+  },
+  {
+    "name": "Material Requisitions",
+    "path": "/maintenance/material-requisitions",
+    "component": "MaintenanceMaterialRequisitionList"
+  },
+  {
+    "name": "Material Requisitions - New",
+    "path": "/maintenance/material-requisitions/new",
+    "component": "MaintenanceMaterialRequisitionForm"
+  },
+  {
+    "name": "Material Requisitions - :Id",
+    "path": "/maintenance/material-requisitions/1",
+    "component": "MaintenanceMaterialRequisitionForm"
+  },
+  {
+    "name": "Material Requisition",
+    "path": "/maintenance/material-requisition",
+    "component": "MaintenanceMaterialRequisitionList"
+  },
+  {
+    "name": "Material Requisition - New",
+    "path": "/maintenance/material-requisition/new",
+    "component": "MaintenanceMaterialRequisitionForm"
+  },
+  {
+    "name": "Material Requisition - :Id",
+    "path": "/maintenance/material-requisition/1",
+    "component": "MaintenanceMaterialRequisitionForm"
+  },
+  {
+    "name": "Material Receipts",
+    "path": "/maintenance/material-receipts",
+    "component": "MaterialReceiptList"
+  },
+  {
+    "name": "Material Receipts - New",
+    "path": "/maintenance/material-receipts/new",
+    "component": "MaterialReceiptForm"
+  },
+  {
+    "name": "Material Receipts - :Id",
+    "path": "/maintenance/material-receipts/1",
+    "component": "MaterialReceiptForm"
+  },
+  {
+    "name": "Material Receipt",
+    "path": "/maintenance/material-receipt",
+    "component": "MaterialReceiptList"
+  },
+  {
+    "name": "Material Receipt - New",
+    "path": "/maintenance/material-receipt/new",
+    "component": "MaterialReceiptForm"
+  },
+  {
+    "name": "Material Receipt - :Id",
+    "path": "/maintenance/material-receipt/1",
+    "component": "MaterialReceiptForm"
+  },
+  {
+    "name": "Pm Schedules",
+    "path": "/maintenance/pm-schedules",
+    "component": "PmScheduleList"
+  },
+  {
+    "name": "Pm Schedules - New",
+    "path": "/maintenance/pm-schedules/new",
+    "component": "PmScheduleForm"
+  },
+  {
+    "name": "Pm Schedules - :Id",
+    "path": "/maintenance/pm-schedules/1",
+    "component": "PmScheduleForm"
+  },
+  {
+    "name": "Setup",
+    "path": "/maintenance/setup",
+    "component": "MaintenanceSetupPage"
+  },
+  {
+    "name": "Reports",
+    "path": "/maintenance/reports",
+    "component": "MaintenanceReports"
+  },
+  {
+    "name": "Reports - Downtime",
+    "path": "/maintenance/reports/downtime",
+    "component": "DowntimeAnalysisReport"
+  },
+  {
+    "name": "Reports - Sla Compliance",
+    "path": "/maintenance/reports/sla-compliance",
+    "component": "FMSLAComplianceReport"
+  },
+  {
+    "name": "Reports - Property Costs",
+    "path": "/maintenance/reports/property-costs",
+    "component": "FMPropertyCostReport"
+  },
+  {
+    "name": "Reports - Contract Profitability",
+    "path": "/maintenance/reports/contract-profitability",
+    "component": "FMContractsReport"
+  },
+  {
+    "name": "Reports - Soft Services",
+    "path": "/maintenance/reports/soft-services",
+    "component": "FMSoftServicesReport"
+  },
+  {
+    "name": "Reports - Checklist Inspections",
+    "path": "/maintenance/reports/checklist-inspections",
+    "component": "FMInspectionChecklistReport"
+  },
+  {
+    "name": "Facilities Dashboard",
+    "path": "/maintenance/facilities-dashboard",
+    "component": "FacilitiesOperationsDashboard"
+  },
+  {
+    "name": "Properties",
+    "path": "/maintenance/properties",
+    "component": "PropertiesList"
+  },
+  {
+    "name": "Fm Contracts",
+    "path": "/maintenance/fm-contracts",
+    "component": "FMContractsList"
+  },
+  {
+    "name": "Field Service",
+    "path": "/maintenance/field-service",
+    "component": "FieldTechnicianJobCard"
+  },
+  {
+    "name": "Checklists",
+    "path": "/maintenance/checklists",
+    "component": "ChecklistTemplatesList"
+  },
+  {
+    "name": "Soft Services",
+    "path": "/maintenance/soft-services",
+    "component": "SoftServicesPage"
+  }
+]

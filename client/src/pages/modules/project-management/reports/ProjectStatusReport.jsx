@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 /**
  * @fileoverview ProjectStatusReport.jsx
  * Comprehensive Live Project Status & Health Report for OmniSuite ERP.
@@ -192,7 +193,7 @@ export default function ProjectStatusReport() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+              <h1 className="text-2xl font-bold sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
                 Comprehensive Project Status Report
               </h1>
             </div>
@@ -204,126 +205,82 @@ export default function ProjectStatusReport() {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2 self-start md:self-auto">
-          <button
-            onClick={fetchReport}
-            disabled={loading}
-            className="btn btn-secondary h-9 px-3 rounded-xl inline-flex items-center gap-1.5 text-xs font-semibold shrink-0"
-            title="Refresh Live Data"
-          >
-            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-            <span>Refresh</span>
-          </button>
+          
           <button
             onClick={handleExportCSV}
             disabled={!filteredProjects.length}
-            className="btn btn-secondary h-9 px-3 rounded-xl inline-flex items-center gap-1.5 text-xs font-semibold shrink-0"
+            className="btn btn-secondary h-9 px-3 rounded-xl inline-flex items-center gap-1.5 text-sm font-semibold shrink-0"
           >
             <Download size={14} />
             <span>Export CSV</span>
           </button>
           <button
             onClick={handlePrint}
-            className="btn btn-primary h-9 px-3.5 rounded-xl inline-flex items-center gap-1.5 text-xs font-semibold shadow-xs"
+            className="btn btn-primary h-9 px-3.5 rounded-xl inline-flex items-center gap-1.5 text-sm font-semibold shadow-xs"
           >
             <span>Print Report</span>
           </button>
         </div>
       </div>
 
-      {/* ── 2. Top Executive Summary KPI Bar (Live Rollups) ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
-        {/* Total Projects */}
-        <div className="card p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 mb-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Total Projects</span>
-            <Layers size={16} className="text-brand-600" />
+      {/* Metric Stats Cards Carousel */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="xl:grid-cols-6 md:grid-cols-3 sm:grid-cols-2" gapClass="gap-4">
+        {[
+          {
+            label: "Total Projects",
+            val: summary.total_projects || 0,
+            icon: <Layers size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Avg Completion",
+            val: `${summary.avg_completion || 0}%`,
+            icon: <Target size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+          {
+            label: "Total Budget",
+            val: `GH₵ ${Number(summary.total_budget || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+            icon: <Wallet size={20} className="stroke-[2.5]" />,
+            color: "bg-indigo-600 text-white",
+          },
+          {
+            label: "Actual Expenses",
+            val: `GH₵ ${Number(summary.total_expenses || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+            icon: <TrendingUp size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Schedule Status",
+            val: `${summary.on_track_projects || 0} OK`,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-blue-600 text-white",
+          },
+          {
+            label: "Work Plan/WBS Tasks",
+            val: `${summary.total_completed_tasks || 0} / ${summary.total_tasks || 0}`,
+            icon: <ListTodo size={20} className="stroke-[2.5]" />,
+            color: "bg-purple-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm"
+          >
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`p-3 rounded-full ${stat.color} shadow-sm`}>
+              {stat.icon}
+            </div>
           </div>
-          <div className="text-2xl font-black text-slate-900 dark:text-slate-100">
-            {summary.total_projects || 0}
-          </div>
-          <div className="text-[11px] text-slate-400 mt-0.5">Active portfolio count</div>
-        </div>
-
-        {/* Avg Completion */}
-        <div className="card p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 mb-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Avg Completion</span>
-            <Target size={16} className="text-emerald-600" />
-          </div>
-          <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
-            {summary.avg_completion || 0}%
-          </div>
-          <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
-            <div
-              className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-              style={{ width: `${Math.min(100, Number(summary.avg_completion || 0))}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Approved Budget */}
-        <div className="card p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 mb-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Total Budget</span>
-            <Wallet size={16} className="text-indigo-600" />
-          </div>
-          <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 truncate">
-            GH₵ {Number(summary.total_budget || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-          </div>
-          <div className="text-[11px] text-slate-400 mt-0.5">Approved capital plan</div>
-        </div>
-
-        {/* Direct Expenses */}
-        <div className="card p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 mb-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Actual Expenses</span>
-            <TrendingUp size={16} className="text-amber-600" />
-          </div>
-          <div className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400 truncate">
-            GH₵ {Number(summary.total_expenses || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-          </div>
-          <div className="text-[11px] text-slate-400 mt-0.5">Direct costs to date</div>
-        </div>
-
-        {/* Schedule Health */}
-        <div className="card p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 mb-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Schedule Status</span>
-            <Clock size={16} className="text-brand-600" />
-          </div>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300">
-              {summary.on_track_projects || 0} OK
-            </span>
-            {(summary.at_risk_projects > 0 || summary.delayed_projects > 0) && (
-              <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300">
-                {(summary.at_risk_projects || 0) + (summary.delayed_projects || 0)} Delayed
-              </span>
-            )}
-          </div>
-          <div className="text-[11px] text-slate-400 mt-1.5">SLA delivery health</div>
-        </div>
-
-        {/* Tasks SLA */}
-        <div className="card p-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 mb-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Work Plan/WBS Tasks</span>
-            <ListTodo size={16} className="text-purple-600" />
-          </div>
-          <div className="text-2xl font-black text-slate-900 dark:text-slate-100">
-            {summary.total_completed_tasks || 0} / {summary.total_tasks || 0}
-          </div>
-          <div className="text-[11px] text-slate-400 mt-0.5">
-            {summary.total_overdue_tasks > 0 ? (
-              <span className="text-rose-600 font-bold inline-flex items-center gap-1">
-                <AlertTriangle size={12} /> {summary.total_overdue_tasks} overdue
-              </span>
-            ) : (
-              <span className="text-emerald-600 font-semibold">All tasks on schedule</span>
-            )}
-          </div>
-        </div>
-      </div>
+        ))}
+      </MobileMovingCarousel>
 
       {/* ── 3. Filter & Controls Bar ── */}
       <div className="card p-3 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xs print:hidden">
@@ -334,7 +291,7 @@ export default function ProjectStatusReport() {
             <input
               type="text"
               placeholder="Search by code, project, client, or manager..."
-              className="w-full h-9 pl-8 pr-3 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all"
+              className="w-full h-9 pl-8 pr-3 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -342,7 +299,7 @@ export default function ProjectStatusReport() {
 
           {/* Project Selector */}
           <select
-            className="h-9 px-3 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 min-w-[200px] max-w-[300px] focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all shrink-0 cursor-pointer"
+            className="h-9 px-3 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 min-w-[200px] max-w-[300px] focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all shrink-0 cursor-pointer"
             value={selectedProjectId}
             onChange={(e) => setSelectedProjectId(e.target.value)}
           >
@@ -356,7 +313,7 @@ export default function ProjectStatusReport() {
 
           {/* Project Status Filter */}
           <select
-            className="h-9 px-3 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 min-w-[130px] focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all shrink-0 cursor-pointer"
+            className="h-9 px-3 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 min-w-[130px] focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all shrink-0 cursor-pointer"
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
           >
@@ -369,7 +326,7 @@ export default function ProjectStatusReport() {
 
           {/* Schedule Health Filter */}
           <select
-            className="h-9 px-3 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 min-w-[140px] focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all shrink-0 cursor-pointer"
+            className="h-9 px-3 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 min-w-[140px] focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all shrink-0 cursor-pointer"
             value={selectedHealth}
             onChange={(e) => setSelectedHealth(e.target.value)}
           >
@@ -404,7 +361,7 @@ export default function ProjectStatusReport() {
       {/* ── 4. Main Comprehensive Projects Table ── */}
       <div className="card bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full text-left border-collapse text-sm">
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[11px]">
                 <th className="py-3 px-4">Project &amp; Client</th>

@@ -87,7 +87,7 @@ export default function FixedAssetScheduleReport() {
 
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+            <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">
               As Of Date:
             </label>
             <input
@@ -129,7 +129,7 @@ export default function FixedAssetScheduleReport() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-sm border-collapse">
               <thead>
                 <tr className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border-y border-slate-300 dark:border-slate-700">
                   <th rowSpan={2} className="py-2.5 px-3 border-r border-slate-200 dark:border-slate-700">

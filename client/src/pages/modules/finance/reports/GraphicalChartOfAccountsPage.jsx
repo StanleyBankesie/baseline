@@ -245,16 +245,6 @@ export default function GraphicalChartOfAccountsPage() {
               onChange={onSearch}
               allowClear
             />
-            <div className="h-8 w-[1px] bg-slate-100 mx-2" />
-            <Button
-              type="primary"
-              onClick={() => load()}
-              loading={loading}
-              icon={<ReloadOutlined />}
-              className="h-11 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 border-none shadow-md shadow-indigo-200 font-bold flex items-center"
-            >
-              Refresh Data
-            </Button>
           </div>
         </div>
 

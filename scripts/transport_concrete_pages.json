@@ -1,0 +1,312 @@
+[
+  {
+    "name": "Transport Home Hub",
+    "path": "/transport",
+    "component": "TransportLanding"
+  },
+  {
+    "name": "Dashboard",
+    "path": "/transport/dashboard",
+    "component": "TransportDashboard"
+  },
+  {
+    "name": "Requests",
+    "path": "/transport/requests",
+    "component": "TransportRequests"
+  },
+  {
+    "name": "Requests - New",
+    "path": "/transport/requests/new",
+    "component": "TransportRequestForm"
+  },
+  {
+    "name": "Requests - :Id",
+    "path": "/transport/requests/1",
+    "component": "TransportRequestForm"
+  },
+  {
+    "name": "Vehicles",
+    "path": "/transport/vehicles",
+    "component": "VehiclesList"
+  },
+  {
+    "name": "Vehicles - New",
+    "path": "/transport/vehicles/new",
+    "component": "VehicleForm"
+  },
+  {
+    "name": "Vehicles - :Id",
+    "path": "/transport/vehicles/1",
+    "component": "VehicleForm"
+  },
+  {
+    "name": "Compliance",
+    "path": "/transport/compliance",
+    "component": "VehicleComplianceList"
+  },
+  {
+    "name": "Compliance - New",
+    "path": "/transport/compliance/new",
+    "component": "VehicleComplianceForm"
+  },
+  {
+    "name": "Compliance - :Id",
+    "path": "/transport/compliance/1",
+    "component": "VehicleComplianceForm"
+  },
+  {
+    "name": "Logbooks",
+    "path": "/transport/logbooks",
+    "component": "LogbookList"
+  },
+  {
+    "name": "Logbooks - New",
+    "path": "/transport/logbooks/new",
+    "component": "LogbookForm"
+  },
+  {
+    "name": "Logbooks - :Id",
+    "path": "/transport/logbooks/1",
+    "component": "LogbookForm"
+  },
+  {
+    "name": "Servicing",
+    "path": "/transport/servicing",
+    "component": "VehicleServicingList"
+  },
+  {
+    "name": "Servicing - New",
+    "path": "/transport/servicing/new",
+    "component": "VehicleServicingForm"
+  },
+  {
+    "name": "Servicing - :Id",
+    "path": "/transport/servicing/1",
+    "component": "VehicleServicingForm"
+  },
+  {
+    "name": "Drivers",
+    "path": "/transport/drivers",
+    "component": "DriversList"
+  },
+  {
+    "name": "Drivers - New",
+    "path": "/transport/drivers/new",
+    "component": "DriverForm"
+  },
+  {
+    "name": "Drivers - :Id",
+    "path": "/transport/drivers/1",
+    "component": "DriverForm"
+  },
+  {
+    "name": "Trips",
+    "path": "/transport/trips",
+    "component": "TripsList"
+  },
+  {
+    "name": "Trip Management",
+    "path": "/transport/trip-management",
+    "component": "TripManagementPage"
+  },
+  {
+    "name": "Trip Returns",
+    "path": "/transport/trip-returns",
+    "component": "TripReturnList"
+  },
+  {
+    "name": "Reports - Trip Execution",
+    "path": "/transport/reports/trip-execution",
+    "component": "TripExecutionReportPage"
+  },
+  {
+    "name": "Reports - Trip History",
+    "path": "/transport/reports/trip-history",
+    "component": "TripHistoryReport"
+  },
+  {
+    "name": "Reports - Revenue",
+    "path": "/transport/reports/revenue",
+    "component": "TransportRevenueReport"
+  },
+  {
+    "name": "Reports - Profitability",
+    "path": "/transport/reports/profitability",
+    "component": "TripProfitabilityReport"
+  },
+  {
+    "name": "Reports - Fuel",
+    "path": "/transport/reports/fuel",
+    "component": "FuelConsumptionReport"
+  },
+  {
+    "name": "Reports - Utilization",
+    "path": "/transport/reports/utilization",
+    "component": "VehicleUtilizationReport"
+  },
+  {
+    "name": "Reports - Driver Performance",
+    "path": "/transport/reports/driver-performance",
+    "component": "DriverPerformanceReport"
+  },
+  {
+    "name": "Reports - Delays",
+    "path": "/transport/reports/delays",
+    "component": "TripDelaysReport"
+  },
+  {
+    "name": "Trips - New",
+    "path": "/transport/trips/new",
+    "component": "TripForm"
+  },
+  {
+    "name": "Trips - :Id",
+    "path": "/transport/trips/1",
+    "component": "TripForm"
+  },
+  {
+    "name": "Tracking - :Id",
+    "path": "/transport/tracking/1",
+    "component": "TripTrackingPage"
+  },
+  {
+    "name": "Tracking",
+    "path": "/transport/tracking",
+    "component": "TripTrackingPage"
+  },
+  {
+    "name": "Fuel",
+    "path": "/transport/fuel",
+    "component": "FuelLogsList"
+  },
+  {
+    "name": "Fuel - New",
+    "path": "/transport/fuel/new",
+    "component": "FuelLogForm"
+  },
+  {
+    "name": "Fuel - :Id",
+    "path": "/transport/fuel/1",
+    "component": "FuelLogForm"
+  },
+  {
+    "name": "Fuel Expenses",
+    "path": "/transport/fuel-expenses",
+    "component": "FuelExpenseList"
+  },
+  {
+    "name": "Fuel Bills",
+    "path": "/transport/fuel-bills",
+    "component": "FuelBillsList"
+  },
+  {
+    "name": "Fuel Bills - New",
+    "path": "/transport/fuel-bills/new",
+    "component": "FuelBillForm"
+  },
+  {
+    "name": "Fuel Bills - :Id",
+    "path": "/transport/fuel-bills/1",
+    "component": "FuelBillForm"
+  },
+  {
+    "name": "Transportation Bills",
+    "path": "/transport/transportation-bills",
+    "component": "TransportationBillsList"
+  },
+  {
+    "name": "Transportation Bills - New",
+    "path": "/transport/transportation-bills/new",
+    "component": "TransportationBillForm"
+  },
+  {
+    "name": "Transportation Bills - :Id",
+    "path": "/transport/transportation-bills/1",
+    "component": "TransportationBillForm"
+  },
+  {
+    "name": "Billing",
+    "path": "/transport/billing",
+    "component": "BillingList"
+  },
+  {
+    "name": "Billing - New",
+    "path": "/transport/billing/new",
+    "component": "BillingForm"
+  },
+  {
+    "name": "Billing - :Id",
+    "path": "/transport/billing/1",
+    "component": "BillingForm"
+  },
+  {
+    "name": "Routes",
+    "path": "/transport/routes",
+    "component": "RoutesList"
+  },
+  {
+    "name": "Routes - New",
+    "path": "/transport/routes/new",
+    "component": "RouteForm"
+  },
+  {
+    "name": "Routes - :Id",
+    "path": "/transport/routes/1",
+    "component": "RouteForm"
+  },
+  {
+    "name": "Inspections",
+    "path": "/transport/inspections",
+    "component": "InspectionsList"
+  },
+  {
+    "name": "Inspections - New",
+    "path": "/transport/inspections/new",
+    "component": "InspectionForm"
+  },
+  {
+    "name": "Inspections - :Id",
+    "path": "/transport/inspections/1",
+    "component": "InspectionForm"
+  },
+  {
+    "name": "Maintenance",
+    "path": "/transport/maintenance",
+    "component": "MaintenanceList"
+  },
+  {
+    "name": "Maintenance - New",
+    "path": "/transport/maintenance/new",
+    "component": "MaintenanceForm"
+  },
+  {
+    "name": "Maintenance - :Id",
+    "path": "/transport/maintenance/1",
+    "component": "MaintenanceForm"
+  },
+  {
+    "name": "Settings",
+    "path": "/transport/settings",
+    "component": "TransportSettings"
+  },
+  {
+    "name": "Reports",
+    "path": "/transport/reports",
+    "component": "TransportReports"
+  },
+  {
+    "name": "Income",
+    "path": "/transport/income",
+    "component": "TransportIncomeList"
+  },
+  {
+    "name": "Expenses",
+    "path": "/transport/expenses",
+    "component": "TransportExpenseList"
+  },
+  {
+    "name": "Expense Logs",
+    "path": "/transport/expense-logs",
+    "component": "ExpenseLogList"
+  }
+]

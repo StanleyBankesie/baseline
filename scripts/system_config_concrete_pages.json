@@ -1,0 +1,14 @@
+[
+  { "name": "System Configuration Hub", "path": "/system-configuration", "component": "SystemConfigurationLanding" },
+  { "name": "Company Setup", "path": "/system-configuration/companies", "component": "CompanyList" },
+  { "name": "Company Setup - New", "path": "/system-configuration/companies/new", "component": "CompanyForm" },
+  { "name": "Company Setup - :Id", "path": "/system-configuration/companies/1", "component": "CompanyForm" },
+  { "name": "Branch Setup", "path": "/system-configuration/branches", "component": "BranchList" },
+  { "name": "Branch Setup - New", "path": "/system-configuration/branches/new", "component": "BranchForm" },
+  { "name": "Branch Setup - :Id", "path": "/system-configuration/branches/1", "component": "BranchForm" },
+  { "name": "Admin Permissions", "path": "/system-configuration/admin-permissions", "component": "AdminPermissionsPage" },
+  { "name": "Backup Settings", "path": "/system-configuration/backups", "component": "BackupPage" },
+  { "name": "License Management", "path": "/system-configuration/licenses", "component": "LicenseManagement" },
+  { "name": "Payment Packages", "path": "/system-configuration/payment-packages", "component": "PaymentPackages" },
+  { "name": "General Settings", "path": "/system-configuration/general-settings", "component": "GeneralSettingsPage" }
+]

@@ -176,7 +176,7 @@ export default function SLAPoliciesPage() {
             <ArrowLeft size={14} /> Back
           </button>
           <div>
-            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <h1 className="text-2xl font-bold font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Gauge className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               SLA Policies &amp; Performance Management
             </h1>
@@ -187,7 +187,7 @@ export default function SLAPoliciesPage() {
         </div>
         <button
           onClick={openCreateModal}
-          className="btn btn-primary inline-flex items-center gap-1.5 text-xs py-2 px-3.5 shadow-sm active:scale-95"
+          className="btn btn-primary inline-flex items-center gap-1.5 text-sm py-2 px-3.5 shadow-sm active:scale-95"
         >
           <Plus size={15} /> Add SLA Policy
         </button>
@@ -200,15 +200,10 @@ export default function SLAPoliciesPage() {
             <Gauge size={14} />
             SLA Policy Configuration
           </h3>
-          <button
-            onClick={fetchPolicies}
-            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs py-1.5 px-3"
-          >
-            <RefreshCw size={12} /> Refresh
-          </button>
+          
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300">
               <tr>
                 <th className="px-4 py-3">Policy Name</th>
@@ -305,7 +300,7 @@ export default function SLAPoliciesPage() {
           </h3>
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
-              <label className="text-xs font-semibold text-slate-500 whitespace-nowrap">From</label>
+              <label className="text-sm font-semibold text-slate-500 whitespace-nowrap">From</label>
               <input
                 type="date"
                 value={startDate}
@@ -314,7 +309,7 @@ export default function SLAPoliciesPage() {
               />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-xs font-semibold text-slate-500 whitespace-nowrap">To</label>
+              <label className="text-sm font-semibold text-slate-500 whitespace-nowrap">To</label>
               <input
                 type="date"
                 value={endDate}
@@ -324,7 +319,7 @@ export default function SLAPoliciesPage() {
             </div>
             <button
               onClick={fetchSlaReport}
-              className="btn btn-secondary inline-flex items-center gap-1.5 text-xs py-1.5 px-3"
+              className="btn btn-secondary inline-flex items-center gap-1.5 text-sm py-1.5 px-3"
             >
               <RefreshCw size={12} /> Load
             </button>
@@ -367,7 +362,7 @@ export default function SLAPoliciesPage() {
             </h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300">
                 <tr>
                   <th className="px-4 py-3">Request No</th>
@@ -550,7 +545,7 @@ export default function SLAPoliciesPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-sm flex items-center gap-1.5"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-semibold shadow-sm flex items-center gap-1.5"
                 >
                   <CheckCircle size={14} />
                   {submitting ? "Saving..." : editingPolicy ? "Update Policy" : "Create Policy"}

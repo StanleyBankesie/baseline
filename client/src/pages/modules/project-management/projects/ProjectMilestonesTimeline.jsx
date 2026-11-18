@@ -91,7 +91,7 @@ export default function ProjectMilestonesTimeline() {
               <Layers size={26} className="text-brand-900 dark:text-brand-400" />
               Project Scope & Project Work Plan/WBS
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 hidden">
               Project work plan/wbs, project scopes, and task timeline
             </p>
           </div>

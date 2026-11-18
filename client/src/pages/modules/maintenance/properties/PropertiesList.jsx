@@ -519,9 +519,7 @@ export default function PropertiesList() {
                 <option value="">All Stages</option>
                 {STAGES.map(s => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
               </select>
-              <button onClick={fetchOnboardings} className="btn btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5">
-                <RefreshCw size={13} /> Refresh
-              </button>
+              
             </div>
           </div>
 

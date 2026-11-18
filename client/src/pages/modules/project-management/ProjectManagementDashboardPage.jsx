@@ -1062,13 +1062,7 @@ export default function ProjectManagementDashboardPage() {
             <ShieldAlert size={14} className="text-rose-600" />
             Risk Register ({data.riskStats?.total_risks || 0})
           </Link>
-          <button
-            onClick={loadData}
-            disabled={loading}
-            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs font-semibold shadow-xs"
-          >
-            <RefreshCw size={13} className={loading ? "animate-spin" : ""} /> Refresh
-          </button>
+          
         </div>
       </div>
 

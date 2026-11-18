@@ -168,9 +168,7 @@ export default function UserList() {
           <Link to="/administration/users/new" className="btn btn-success">
             ➕ Create New User
           </Link>
-          <button className="btn btn-primary" onClick={fetchUsers}>
-            🔄 Refresh
-          </button>
+          
         </div>
       </div>
 

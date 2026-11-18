@@ -93,6 +93,41 @@ function renderFavIcon(iconKey) {
  * 
  * @returns {JSX.Element} The home page view.
  */
+const getResponsiveValueClass = (val) => {
+  const str = String(val ?? "").trim();
+  const numOnly = str.replace(/^[^\d]+/, "");
+  const len = numOnly.length || str.length;
+  if (len > 15) return "text-base sm:text-lg lg:text-xl leading-none";
+  if (len > 11) return "text-lg sm:text-xl lg:text-2xl leading-none";
+  if (len > 8) return "text-xl sm:text-2xl lg:text-3xl leading-tight";
+  if (len > 5) return "text-2xl sm:text-3xl lg:text-4xl leading-tight";
+  return "text-3xl sm:text-4xl lg:text-5xl leading-tight";
+};
+
+function renderMetricValue(val, responsiveClass) {
+  const str = String(val ?? "").trim();
+  const match = str.match(/^([A-Za-z₵$€£¥\s]+?)([\d,]+(?:\.\d+)?%?.*)$/);
+  if (match && match[1].trim() && match[2].trim()) {
+    const currency = match[1].trim();
+    const amount = match[2].trim();
+    return (
+      <div className="flex items-baseline flex-wrap gap-x-1.5 min-w-0" title={str}>
+        <span className="text-xs sm:text-sm font-bold text-white/80 shrink-0 uppercase tracking-wider select-none">
+          {currency}
+        </span>
+        <span className={`${responsiveClass} font-black text-white tracking-tight break-all`}>
+          {amount}
+        </span>
+      </div>
+    );
+  }
+  return (
+    <div className={`${responsiveClass} font-black text-white tracking-tight break-all`} title={str}>
+      {str}
+    </div>
+  );
+}
+
 export default function HomePage() {
   const { user, token, scope } = useAuth();
   const perm = usePermission();
@@ -1179,6 +1214,7 @@ export default function HomePage() {
     }
   };
 
+  const username = user?.username || user?.user_name || user?.name || user?.full_name || "User";
   const fullName = user?.full_name || user?.name || user?.username || "User";
 
   const handlePhotoUpload = async (e) => {
@@ -1275,7 +1311,7 @@ export default function HomePage() {
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2.5">
                 <h1 className="text-2xl sm:text-[26px] font-bold text-white tracking-tight">
-                  Welcome back, {fullName}
+                  Welcome back, {username}
                 </h1>
                 {(profileData?.role_name || user?.role_name) && (
                   <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-semibold bg-white/15 backdrop-blur-md text-white border border-white/20 shadow-2xs">
@@ -1338,26 +1374,19 @@ export default function HomePage() {
               return (
                 <div
                   key={index}
-                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-smoky-lg border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(178,110,23,0.55)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#b26e17] text-white"
+                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-smoky-lg border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-smoky-lg active:scale-[0.98] transition-all duration-300 ease-out group bg-[#b26e17] text-white"
                 >
                   <div className="flex flex-col h-full justify-between">
                     <div className="flex justify-end min-h-[22px]">
                       {metric.badge ? (
-                        <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-white/15 backdrop-blur-md text-white/90 border border-white/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] leading-none flex items-center gap-1">
+                        <span className="text-xs sm:text-sm font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-white/90 border border-white/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] leading-none flex items-center gap-1">
                           {metric.badge}
                         </span>
                       ) : null}
                     </div>
-                    <div className="mt-4 sm:mt-6">
-                      <div
-                        className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)] truncate"
-                        style={{
-                          textShadow: "0 0 12px rgba(255, 255, 255, 0.45)",
-                        }}
-                      >
-                        {metric.value}
-                      </div>
-                      <div className="mt-2 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none truncate">
+                    <div className="mt-4 sm:mt-6 min-w-0">
+                      {renderMetricValue(metric.value, `${getResponsiveValueClass(metric.value)} drop-shadow-[0_2px_8px_rgba(255,255,255,0.35)]`)}
+                      <div className="mt-2 text-xs sm:text-sm lg:text-base font-extrabold text-white/95 uppercase tracking-wider leading-snug break-words line-clamp-2" title={metric.label}>
                         {metric.label}
                       </div>
                     </div>
@@ -1370,22 +1399,20 @@ export default function HomePage() {
               return (
                 <div
                   key={index}
-                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-smoky-lg border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(36,82,109,0.55)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#24526d] text-white"
+                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-smoky-lg border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-smoky-lg active:scale-[0.98] transition-all duration-300 ease-out group bg-[#24526d] text-white"
                 >
                   <div className="flex flex-col h-full justify-between">
                     <div className="flex justify-end min-h-[22px]">
                       {metric.badge ? (
-                        <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-amber-500/20 backdrop-blur-md text-amber-200 border border-amber-400/20 shadow-sm leading-none flex items-center gap-1">
+                        <span className="text-xs sm:text-sm font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/20 backdrop-blur-md text-amber-200 border border-amber-400/20 shadow-sm leading-none flex items-center gap-1">
                           {metric.badge}
                         </span>
                       ) : null}
                     </div>
-                    <div className="mt-4 sm:mt-6">
-                      <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight truncate">
-                        {metric.value}
-                      </div>
-                      <div className="mt-2 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none flex items-center justify-between">
-                        <span className="truncate">{metric.label}</span>
+                    <div className="mt-4 sm:mt-6 min-w-0">
+                      {renderMetricValue(metric.value, getResponsiveValueClass(metric.value))}
+                      <div className="mt-2 text-xs sm:text-sm lg:text-base font-extrabold text-white/95 uppercase tracking-wider leading-snug flex items-center justify-between min-w-0">
+                        <span className="break-words line-clamp-2" title={metric.label}>{metric.label}</span>
                         <svg
                           className="w-7 sm:w-8 h-4 text-white/20 ml-2 group-hover:text-white/40 transition-colors shrink-0"
                           viewBox="0 0 50 20"
@@ -1410,19 +1437,19 @@ export default function HomePage() {
               return (
                 <div
                   key={index}
-                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-smoky-lg border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(24,117,92,0.55)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#18755c] text-white"
+                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-smoky-lg border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-smoky-lg active:scale-[0.98] transition-all duration-300 ease-out group bg-[#18755c] text-white"
                 >
                   <div className="flex flex-col h-full justify-between">
                     <div className="flex justify-end min-h-[22px]">
                       {metric.badge ? (
-                        <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-white/15 backdrop-blur-md text-white/90 border border-white/15 shadow-sm leading-none flex items-center gap-1">
+                        <span className="text-xs sm:text-sm font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-white/90 border border-white/15 shadow-sm leading-none flex items-center gap-1">
                           {metric.badge}
                         </span>
                       ) : null}
                     </div>
-                    <div className="mt-4 sm:mt-6">
-                      <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-1.5 truncate">
-                        <span className="truncate">{metric.value}</span>
+                    <div className="mt-4 sm:mt-6 min-w-0">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        {renderMetricValue(metric.value, getResponsiveValueClass(metric.value))}
                         <svg
                           className="w-4 sm:w-5 h-4 sm:h-5 text-white/40 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0"
                           fill="none"
@@ -1437,7 +1464,7 @@ export default function HomePage() {
                           />
                         </svg>
                       </div>
-                      <div className="mt-2 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none truncate">
+                      <div className="mt-2 text-xs sm:text-sm lg:text-base font-extrabold text-white/95 uppercase tracking-wider leading-snug break-words line-clamp-2" title={metric.label}>
                         {metric.label}
                       </div>
                     </div>
@@ -1450,21 +1477,19 @@ export default function HomePage() {
               return (
                 <div
                   key={index}
-                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-smoky-lg border border-white/5 hover:border-white/15 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.55)] active:scale-[0.98] transition-all duration-300 ease-out group bg-[#1d1f22] bg-[radial-gradient(#ffffff06_1px,transparent_1px)] [background-size:8px_8px] text-white"
+                  className="w-full h-full relative overflow-hidden rounded-2xl sm:rounded-[24px] min-h-[185px] sm:min-h-[210px] lg:min-h-0 p-5 sm:p-7 shadow-smoky-lg border border-white/5 hover:border-white/15 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-smoky-lg active:scale-[0.98] transition-all duration-300 ease-out group bg-[#1d1f22] bg-[radial-gradient(#ffffff06_1px,transparent_1px)] [background-size:8px_8px] text-white"
                 >
                   <div className="flex flex-col h-full justify-between">
                     <div className="flex justify-end min-h-[22px]">
                       {metric.badge ? (
-                        <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-white/15 backdrop-blur-md text-white border border-white/20 shadow-sm leading-none flex items-center gap-1">
+                        <span className="text-xs sm:text-sm font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-white border border-white/20 shadow-sm leading-none flex items-center gap-1">
                           {metric.badge}
                         </span>
                       ) : null}
                     </div>
-                    <div className="mt-4 sm:mt-6">
-                      <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight truncate">
-                        {metric.value}
-                      </div>
-                      <div className="mt-2 text-[10px] font-bold text-white/80 uppercase tracking-widest leading-none truncate">
+                    <div className="mt-4 sm:mt-6 min-w-0">
+                      {renderMetricValue(metric.value, getResponsiveValueClass(metric.value))}
+                      <div className="mt-2 text-xs sm:text-sm lg:text-base font-extrabold text-white/95 uppercase tracking-wider leading-snug break-words line-clamp-2" title={metric.label}>
                         {metric.label}
                       </div>
                     </div>

@@ -168,13 +168,7 @@ export default function AssetTransfersPage() {
             ))}
           </select>
 
-          <button
-            onClick={fetchTransfers}
-            className="p-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-600 dark:text-slate-300 transition-colors"
-            title="Refresh List"
-          >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-          </button>
+          
         </div>
       </div>
 
@@ -266,7 +260,7 @@ export default function AssetTransfersPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Select Asset to Transfer *
                 </label>
                 <select
@@ -285,7 +279,7 @@ export default function AssetTransfersPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Destination Property / Site *
                 </label>
                 <select
@@ -304,7 +298,7 @@ export default function AssetTransfersPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Transfer Date *
                 </label>
                 <input
@@ -317,7 +311,7 @@ export default function AssetTransfersPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Reason for Transfer
                 </label>
                 <input
@@ -330,7 +324,7 @@ export default function AssetTransfersPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Transfer Notes
                 </label>
                 <textarea

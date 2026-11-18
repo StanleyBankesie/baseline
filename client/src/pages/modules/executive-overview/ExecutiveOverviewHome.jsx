@@ -575,7 +575,7 @@ export default function ExecutiveOverviewHome() {
                     <button
                       key={i}
                       onClick={() => navigate(card.path)}
-                      className="group relative overflow-hidden rounded-[24px] p-5 shadow-[0_15px_30px_-5px_rgba(178,110,23,0.25)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(178,110,23,0.4)] active:scale-[0.98] transition-all duration-300 ease-out text-left focus:outline-none focus:ring-2 focus:ring-amber-500 bg-[#b26e17] text-white flex flex-col justify-between min-h-[140px]"
+                      className="group relative overflow-hidden rounded-[24px] p-5 shadow-[0_15px_30px_-5px_rgba(178,110,23,0.25)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(178,110,23,0.4)] active:scale-[0.98] transition-all duration-300 ease-out text-left focus:outline-none focus:ring-2 focus:ring-amber-500 bg-[#b26e17] text-white flex flex-col justify-between min-h-[160px]"
                     >
                       <div className="flex justify-between items-start min-h-[22px]">
                         <p className="text-[10px] text-white/70 uppercase tracking-widest font-bold leading-none">{card.desc}</p>
@@ -605,7 +605,7 @@ export default function ExecutiveOverviewHome() {
                     <button
                       key={i}
                       onClick={() => navigate(card.path)}
-                      className="group relative overflow-hidden rounded-[24px] p-5 shadow-[0_15px_30px_-5px_rgba(36,82,109,0.25)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(36,82,109,0.4)] active:scale-[0.98] transition-all duration-300 ease-out text-left focus:outline-none focus:ring-2 focus:ring-blue-500 bg-[#24526d] text-white flex flex-col justify-between min-h-[140px]"
+                      className="group relative overflow-hidden rounded-[24px] p-5 shadow-[0_15px_30px_-5px_rgba(36,82,109,0.25)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(36,82,109,0.4)] active:scale-[0.98] transition-all duration-300 ease-out text-left focus:outline-none focus:ring-2 focus:ring-blue-500 bg-[#24526d] text-white flex flex-col justify-between min-h-[160px]"
                     >
                       <div className="flex justify-between items-start min-h-[22px]">
                         <p className="text-[10px] text-white/70 uppercase tracking-widest font-bold leading-none">{card.desc}</p>
@@ -635,7 +635,7 @@ export default function ExecutiveOverviewHome() {
                     <button
                       key={i}
                       onClick={() => navigate(card.path)}
-                      className="group relative overflow-hidden rounded-[24px] p-5 shadow-[0_15px_30px_-5px_rgba(24,117,92,0.25)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(24,117,92,0.4)] active:scale-[0.98] transition-all duration-300 ease-out text-left focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-[#18755c] text-white flex flex-col justify-between min-h-[140px]"
+                      className="group relative overflow-hidden rounded-[24px] p-5 shadow-[0_15px_30px_-5px_rgba(24,117,92,0.25)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.4)] border border-white/10 hover:border-white/20 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(24,117,92,0.4)] active:scale-[0.98] transition-all duration-300 ease-out text-left focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-[#18755c] text-white flex flex-col justify-between min-h-[160px]"
                     >
                       <div className="flex justify-between items-start min-h-[22px]">
                         <p className="text-[10px] text-white/70 uppercase tracking-widest font-bold leading-none">{card.desc}</p>
@@ -663,7 +663,7 @@ export default function ExecutiveOverviewHome() {
                     <button
                       key={i}
                       onClick={() => navigate(card.path)}
-                      className="group relative overflow-hidden rounded-[24px] p-5 shadow-[0_15px_30px_-5px_rgba(0,0,0,0.25)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.5)] border border-white/5 hover:border-white/15 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-all duration-300 ease-out text-left focus:outline-none focus:ring-2 focus:ring-slate-500 bg-[#1d1f22] bg-[radial-gradient(#ffffff06_1px,transparent_1px)] [background-size:8px_8px] text-white flex flex-col justify-between min-h-[140px]"
+                      className="group relative overflow-hidden rounded-[24px] p-5 shadow-[0_15px_30px_-5px_rgba(0,0,0,0.25)] dark:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.5)] border border-white/5 hover:border-white/15 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-all duration-300 ease-out text-left focus:outline-none focus:ring-2 focus:ring-slate-500 bg-[#1d1f22] bg-[radial-gradient(#ffffff06_1px,transparent_1px)] [background-size:8px_8px] text-white flex flex-col justify-between min-h-[160px]"
                     >
                       <div className="flex justify-between items-start min-h-[22px]">
                         <p className="text-[10px] text-white/70 uppercase tracking-widest font-bold leading-none">{card.desc}</p>

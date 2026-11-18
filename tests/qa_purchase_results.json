@@ -1,0 +1,928 @@
+[
+  {
+    "index": 1,
+    "name": "Purchase Home / Operations Dashboard",
+    "path": "/purchase",
+    "status": "PASSED",
+    "loadTimeMs": 2237,
+    "elementsCount": {
+      "buttons": 78,
+      "inputs": 1,
+      "tables": 0,
+      "cards": 40
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 2,
+    "name": "Purchase Analytics Dashboard",
+    "path": "/purchase/dashboard",
+    "status": "PASSED",
+    "loadTimeMs": 1923,
+    "elementsCount": {
+      "buttons": 9,
+      "inputs": 3,
+      "tables": 0,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_dashboard.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 3,
+    "name": "Direct Purchase List",
+    "path": "/purchase/direct-purchase",
+    "status": "PASSED",
+    "loadTimeMs": 1931,
+    "elementsCount": {
+      "buttons": 11,
+      "inputs": 0,
+      "tables": 0,
+      "cards": 8
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_direct-purchase.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 4,
+    "name": "Direct Purchase Create Form",
+    "path": "/purchase/direct-purchase/new",
+    "status": "PASSED",
+    "loadTimeMs": 1957,
+    "elementsCount": {
+      "buttons": 15,
+      "inputs": 23,
+      "tables": 1,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_direct-purchase_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 5,
+    "name": "General Requisitions List",
+    "path": "/purchase/general-requisitions",
+    "status": "PASSED",
+    "loadTimeMs": 1979,
+    "elementsCount": {
+      "buttons": 23,
+      "inputs": 2,
+      "tables": 1,
+      "cards": 9
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_general-requisitions.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 6,
+    "name": "General Requisition Create Form",
+    "path": "/purchase/general-requisitions/new",
+    "status": "PASSED",
+    "loadTimeMs": 2079,
+    "elementsCount": {
+      "buttons": 14,
+      "inputs": 13,
+      "tables": 1,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_general-requisitions_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 7,
+    "name": "Request For Quotation (RFQ) List",
+    "path": "/purchase/rfqs",
+    "status": "PASSED",
+    "loadTimeMs": 1995,
+    "elementsCount": {
+      "buttons": 21,
+      "inputs": 2,
+      "tables": 1,
+      "cards": 8
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_rfqs.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 8,
+    "name": "Request For Quotation Form",
+    "path": "/purchase/rfqs/new",
+    "status": "PASSED",
+    "loadTimeMs": 1972,
+    "elementsCount": {
+      "buttons": 17,
+      "inputs": 6,
+      "tables": 1,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_rfqs_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 9,
+    "name": "Supplier Quotations List",
+    "path": "/purchase/supplier-quotations",
+    "status": "PASSED",
+    "loadTimeMs": 2062,
+    "elementsCount": {
+      "buttons": 28,
+      "inputs": 2,
+      "tables": 1,
+      "cards": 8
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_supplier-quotations.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 10,
+    "name": "Supplier Quotation Form",
+    "path": "/purchase/supplier-quotations/new",
+    "status": "PASSED",
+    "loadTimeMs": 2251,
+    "elementsCount": {
+      "buttons": 16,
+      "inputs": 21,
+      "tables": 2,
+      "cards": 6
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_supplier-quotations_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 11,
+    "name": "Quotation Analysis Evaluation",
+    "path": "/purchase/quotation-analysis",
+    "status": "PASSED",
+    "loadTimeMs": 1974,
+    "elementsCount": {
+      "buttons": 11,
+      "inputs": 1,
+      "tables": 0,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_quotation-analysis.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 12,
+    "name": "Purchase Orders Local List",
+    "path": "/purchase/purchase-orders-local",
+    "status": "PASSED",
+    "loadTimeMs": 1942,
+    "elementsCount": {
+      "buttons": 21,
+      "inputs": 2,
+      "tables": 1,
+      "cards": 8
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_purchase-orders-local.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 13,
+    "name": "Purchase Orders Local Form",
+    "path": "/purchase/purchase-orders-local/new",
+    "status": "PASSED",
+    "loadTimeMs": 1938,
+    "elementsCount": {
+      "buttons": 17,
+      "inputs": 23,
+      "tables": 2,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_purchase-orders-local_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 14,
+    "name": "Purchase Orders Import List",
+    "path": "/purchase/purchase-orders-import",
+    "status": "PASSED",
+    "loadTimeMs": 1947,
+    "elementsCount": {
+      "buttons": 21,
+      "inputs": 2,
+      "tables": 1,
+      "cards": 8
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_purchase-orders-import.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 15,
+    "name": "Purchase Orders Import Form",
+    "path": "/purchase/purchase-orders-import/new",
+    "status": "PASSED",
+    "loadTimeMs": 2115,
+    "elementsCount": {
+      "buttons": 15,
+      "inputs": 28,
+      "tables": 2,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_purchase-orders-import_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 16,
+    "name": "Shipping Advice List",
+    "path": "/purchase/shipping-advice",
+    "status": "PASSED",
+    "loadTimeMs": 2021,
+    "elementsCount": {
+      "buttons": 28,
+      "inputs": 1,
+      "tables": 1,
+      "cards": 8
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_shipping-advice.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 17,
+    "name": "Shipping Advice Form",
+    "path": "/purchase/shipping-advice/new",
+    "status": "PASSED",
+    "loadTimeMs": 1984,
+    "elementsCount": {
+      "buttons": 12,
+      "inputs": 16,
+      "tables": 1,
+      "cards": 6
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_shipping-advice_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 18,
+    "name": "Port Clearances List",
+    "path": "/purchase/port-clearances",
+    "status": "PASSED",
+    "loadTimeMs": 2048,
+    "elementsCount": {
+      "buttons": 27,
+      "inputs": 1,
+      "tables": 1,
+      "cards": 8
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_port-clearances.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 19,
+    "name": "Port Clearances Form",
+    "path": "/purchase/port-clearances/new",
+    "status": "PASSED",
+    "loadTimeMs": 1985,
+    "elementsCount": {
+      "buttons": 12,
+      "inputs": 11,
+      "tables": 0,
+      "cards": 8
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_port-clearances_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 20,
+    "name": "Purchase Bills Local List",
+    "path": "/purchase/purchase-bills-local",
+    "status": "PASSED",
+    "loadTimeMs": 1941,
+    "elementsCount": {
+      "buttons": 31,
+      "inputs": 1,
+      "tables": 1,
+      "cards": 8
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_purchase-bills-local.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 21,
+    "name": "Purchase Bills Local Form",
+    "path": "/purchase/purchase-bills-local/new",
+    "status": "PASSED",
+    "loadTimeMs": 1997,
+    "elementsCount": {
+      "buttons": 13,
+      "inputs": 16,
+      "tables": 1,
+      "cards": 6
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_purchase-bills-local_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 22,
+    "name": "Purchase Bills Import List",
+    "path": "/purchase/purchase-bills-import",
+    "status": "PASSED",
+    "loadTimeMs": 2111,
+    "elementsCount": {
+      "buttons": 31,
+      "inputs": 1,
+      "tables": 1,
+      "cards": 8
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_purchase-bills-import.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 23,
+    "name": "Purchase Bills Import Form",
+    "path": "/purchase/purchase-bills-import/new",
+    "status": "PASSED",
+    "loadTimeMs": 2006,
+    "elementsCount": {
+      "buttons": 13,
+      "inputs": 16,
+      "tables": 1,
+      "cards": 6
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_purchase-bills-import_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 24,
+    "name": "Purchase Upload Tool",
+    "path": "/purchase/purchase-upload",
+    "status": "PASSED",
+    "loadTimeMs": 2021,
+    "elementsCount": {
+      "buttons": 11,
+      "inputs": 5,
+      "tables": 0,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_purchase-upload.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 25,
+    "name": "Purchase Returns List",
+    "path": "/purchase/purchase-returns",
+    "status": "PASSED",
+    "loadTimeMs": 2012,
+    "elementsCount": {
+      "buttons": 11,
+      "inputs": 1,
+      "tables": 0,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_purchase-returns.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 26,
+    "name": "Purchase Returns Form",
+    "path": "/purchase/purchase-returns/new",
+    "status": "PASSED",
+    "loadTimeMs": 1962,
+    "elementsCount": {
+      "buttons": 16,
+      "inputs": 16,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    ],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_purchase-returns_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 27,
+    "name": "Suppliers Directory List",
+    "path": "/purchase/suppliers",
+    "status": "PASSED",
+    "loadTimeMs": 1945,
+    "elementsCount": {
+      "buttons": 19,
+      "inputs": 1,
+      "tables": 1,
+      "cards": 9
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_suppliers.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 28,
+    "name": "Supplier Master Form",
+    "path": "/purchase/suppliers/new",
+    "status": "PASSED",
+    "loadTimeMs": 1945,
+    "elementsCount": {
+      "buttons": 14,
+      "inputs": 21,
+      "tables": 0,
+      "cards": 3
+    },
+    "consoleErrors": [
+      "Access to fetch at 'https://restcountries.com/v3.1/all?fields=name' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+      "Failed to load resource: net::ERR_FAILED",
+      "Failed to fetch countries TypeError: Failed to fetch\n    at fetchCountries (http://localhost:5173/src/pages/modules/purchase/suppliers/SupplierForm.jsx:193:28)\n    at http://localhost:5173/src/pages/modules/purchase/suppliers/SupplierForm.jsx:207:5\n    at commitHookEffectListMount (http://localhost:5173/node_modules/.vite/deps/chunk-H3PJ7QJC.js?v=56e69511:16963:34)\n    at commitPassiveMountOnFiber (http://localhost:5173/node_modules/.vite/deps/chunk-H3PJ7QJC.js?v=56e69511:18206:19)\n    at commitPassiveMountEffects_complete (http://localhost:5173/node_modules/.vite/deps/chunk-H3PJ7QJC.js?v=56e69511:18179:17)\n    at commitPassiveMountEffects_begin (http://localhost:5173/node_modules/.vite/deps/chunk-H3PJ7QJC.js?v=56e69511:18169:15)\n    at commitPassiveMountEffects (http://localhost:5173/node_modules/.vite/deps/chunk-H3PJ7QJC.js?v=56e69511:18159:11)\n    at flushPassiveEffectsImpl (http://localhost:5173/node_modules/.vite/deps/chunk-H3PJ7QJC.js?v=56e69511:19543:11)\n    at flushPassiveEffects (http://localhost:5173/node_modules/.vite/deps/chunk-H3PJ7QJC.js?v=56e69511:19500:22)\n    at http://localhost:5173/node_modules/.vite/deps/chunk-H3PJ7QJC.js?v=56e69511:19381:17",
+      "Access to fetch at 'https://restcountries.com/v3.1/all?fields=name' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+      "Failed to load resource: net::ERR_FAILED"
+    ],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_suppliers_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 29,
+    "name": "Purchase Module Setup Hub",
+    "path": "/purchase/setup",
+    "status": "PASSED",
+    "loadTimeMs": 2065,
+    "elementsCount": {
+      "buttons": 13,
+      "inputs": 2,
+      "tables": 0,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_setup.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 30,
+    "name": "Service Bills List",
+    "path": "/purchase/service-bills",
+    "status": "PASSED",
+    "loadTimeMs": 1944,
+    "elementsCount": {
+      "buttons": 13,
+      "inputs": 2,
+      "tables": 1,
+      "cards": 8
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_service-bills.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 31,
+    "name": "Service Bill Form",
+    "path": "/purchase/service-bills/new",
+    "status": "PASSED",
+    "loadTimeMs": 1923,
+    "elementsCount": {
+      "buttons": 16,
+      "inputs": 21,
+      "tables": 2,
+      "cards": 5
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_service-bills_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 32,
+    "name": "Service Requests List",
+    "path": "/purchase/service-requests",
+    "status": "PASSED",
+    "loadTimeMs": 2094,
+    "elementsCount": {
+      "buttons": 16,
+      "inputs": 1,
+      "tables": 0,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_service-requests.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 33,
+    "name": "Service Request Form",
+    "path": "/purchase/service-requests/new",
+    "status": "PASSED",
+    "loadTimeMs": 2026,
+    "elementsCount": {
+      "buttons": 12,
+      "inputs": 16,
+      "tables": 1,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_service-requests_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 34,
+    "name": "Service Confirmations List",
+    "path": "/purchase/service-confirmations",
+    "status": "PASSED",
+    "loadTimeMs": 1962,
+    "elementsCount": {
+      "buttons": 13,
+      "inputs": 1,
+      "tables": 0,
+      "cards": 8
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_service-confirmations.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 35,
+    "name": "Service Confirmation Form",
+    "path": "/purchase/service-confirmations/new",
+    "status": "PASSED",
+    "loadTimeMs": 1941,
+    "elementsCount": {
+      "buttons": 12,
+      "inputs": 17,
+      "tables": 1,
+      "cards": 10
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_service-confirmations_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 36,
+    "name": "Import Order Tracking Report",
+    "path": "/purchase/reports/import-order-tracking",
+    "status": "PASSED",
+    "loadTimeMs": 1942,
+    "elementsCount": {
+      "buttons": 16,
+      "inputs": 2,
+      "tables": 1,
+      "cards": 5
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_reports_import-order-tracking.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 37,
+    "name": "Local Order Tracking Report",
+    "path": "/purchase/reports/local-order-tracking",
+    "status": "PASSED",
+    "loadTimeMs": 2104,
+    "elementsCount": {
+      "buttons": 15,
+      "inputs": 2,
+      "tables": 1,
+      "cards": 5
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_reports_local-order-tracking.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 38,
+    "name": "Purchase Tracking Report",
+    "path": "/purchase/reports/purchase-tracking",
+    "status": "PASSED",
+    "loadTimeMs": 1908,
+    "elementsCount": {
+      "buttons": 15,
+      "inputs": 2,
+      "tables": 1,
+      "cards": 5
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_reports_purchase-tracking.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 39,
+    "name": "Supplier Quotation Analysis Report",
+    "path": "/purchase/reports/supplier-quotation-analysis",
+    "status": "PASSED",
+    "loadTimeMs": 1929,
+    "elementsCount": {
+      "buttons": 14,
+      "inputs": 2,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_reports_supplier-quotation-analysis.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 40,
+    "name": "Pending GRN to Bill (Local) Report",
+    "path": "/purchase/reports/pending-grn-to-bill-local",
+    "status": "PASSED",
+    "loadTimeMs": 1903,
+    "elementsCount": {
+      "buttons": 13,
+      "inputs": 0,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_reports_pending-grn-to-bill-local.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 41,
+    "name": "Pending GRN to Bill (Import) Report",
+    "path": "/purchase/reports/pending-grn-to-bill-import",
+    "status": "PASSED",
+    "loadTimeMs": 1933,
+    "elementsCount": {
+      "buttons": 13,
+      "inputs": 0,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_reports_pending-grn-to-bill-import.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 42,
+    "name": "Import Order List Report",
+    "path": "/purchase/reports/import-order-list",
+    "status": "PASSED",
+    "loadTimeMs": 1941,
+    "elementsCount": {
+      "buttons": 14,
+      "inputs": 2,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_reports_import-order-list.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 43,
+    "name": "Pending Shipment Details Report",
+    "path": "/purchase/reports/pending-shipments",
+    "status": "PASSED",
+    "loadTimeMs": 1919,
+    "elementsCount": {
+      "buttons": 13,
+      "inputs": 0,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_reports_pending-shipments.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 44,
+    "name": "Purchase Register Report",
+    "path": "/purchase/reports/purchase-register",
+    "status": "PASSED",
+    "loadTimeMs": 1924,
+    "elementsCount": {
+      "buttons": 14,
+      "inputs": 2,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_reports_purchase-register.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 45,
+    "name": "Department Purchase Analysis Report",
+    "path": "/purchase/reports/department-analysis",
+    "status": "PASSED",
+    "loadTimeMs": 1939,
+    "elementsCount": {
+      "buttons": 9,
+      "inputs": 0,
+      "tables": 0,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_reports_department-analysis.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 46,
+    "name": "Import Cost Breakdown Report",
+    "path": "/purchase/reports/import-cost-breakdown",
+    "status": "PASSED",
+    "loadTimeMs": 1961,
+    "elementsCount": {
+      "buttons": 9,
+      "inputs": 0,
+      "tables": 0,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_reports_import-cost-breakdown.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 47,
+    "name": "Lead Time Analysis Report",
+    "path": "/purchase/reports/lead-time-analysis",
+    "status": "PASSED",
+    "loadTimeMs": 2116,
+    "elementsCount": {
+      "buttons": 9,
+      "inputs": 0,
+      "tables": 0,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_reports_lead-time-analysis.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 48,
+    "name": "Cancelled Purchase Orders Report",
+    "path": "/purchase/reports/cancelled-pos",
+    "status": "PASSED",
+    "loadTimeMs": 1897,
+    "elementsCount": {
+      "buttons": 9,
+      "inputs": 0,
+      "tables": 0,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_reports_cancelled-pos.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 49,
+    "name": "Purchase Returns Analysis Report",
+    "path": "/purchase/reports/purchase-returns-analysis",
+    "status": "PASSED",
+    "loadTimeMs": 2165,
+    "elementsCount": {
+      "buttons": 9,
+      "inputs": 0,
+      "tables": 0,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_reports_purchase-returns-analysis.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 50,
+    "name": "Item Purchase History Report",
+    "path": "/purchase/reports/item-purchase-history",
+    "status": "PASSED",
+    "loadTimeMs": 1921,
+    "elementsCount": {
+      "buttons": 9,
+      "inputs": 0,
+      "tables": 0,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_reports_item-purchase-history.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 51,
+    "name": "Price Variance Report",
+    "path": "/purchase/reports/price-variance",
+    "status": "PASSED",
+    "loadTimeMs": 2035,
+    "elementsCount": {
+      "buttons": 9,
+      "inputs": 0,
+      "tables": 0,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_reports_price-variance.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 52,
+    "name": "Supplier Performance Report",
+    "path": "/purchase/reports/supplier-performance",
+    "status": "PASSED",
+    "loadTimeMs": 1915,
+    "elementsCount": {
+      "buttons": 9,
+      "inputs": 0,
+      "tables": 0,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_reports_supplier-performance.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 53,
+    "name": "Supplier Outstanding Payables Report",
+    "path": "/purchase/reports/supplier-outstanding-payables",
+    "status": "PASSED",
+    "loadTimeMs": 1941,
+    "elementsCount": {
+      "buttons": 9,
+      "inputs": 0,
+      "tables": 0,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_reports_supplier-outstanding-payables.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 54,
+    "name": "Purchase Aging Report",
+    "path": "/purchase/reports/purchase-aging",
+    "status": "PASSED",
+    "loadTimeMs": 1919,
+    "elementsCount": {
+      "buttons": 9,
+      "inputs": 0,
+      "tables": 0,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/purchase/purchase_reports_purchase-aging.png",
+    "errorDetails": ""
+  }
+]

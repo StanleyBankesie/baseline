@@ -139,7 +139,7 @@ export default function CostControlDashboard() {
               <TrendingUp size={26} className="text-brand-600 dark:text-brand-400" />
               Project Cost Control & Budget Management
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">
+            <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 hidden">
               Budget vs Actual expenditure, purchase commitments, variances, forecasting, and cross-module control
             </p>
           </div>
@@ -162,15 +162,6 @@ export default function CostControlDashboard() {
               ))}
             </select>
           </div>
-
-          <button
-            onClick={fetchCostControlData}
-            disabled={!selectedProjectId}
-            className="p-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-50 disabled:opacity-40 transition"
-            title="Refresh Cost Control"
-          >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-          </button>
 
           {selectedProjectId && (
             <>
@@ -613,7 +604,7 @@ export default function CostControlDashboard() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-sm">
                 <thead className="bg-slate-100/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300 uppercase tracking-wider font-bold border-b border-slate-200 dark:border-slate-700">
                   <tr>
                     <th className="p-3.5">Cost Item / Category</th>
@@ -797,7 +788,7 @@ export default function CostControlDashboard() {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-sm">
                   <thead className="bg-slate-100/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300 uppercase tracking-wider font-bold border-b border-slate-200 dark:border-slate-700">
                     <tr>
                       <th className="p-3">PO Number</th>

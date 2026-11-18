@@ -577,7 +577,7 @@ export default function FMMaterialUtilizationForm() {
                                           <button
                                             type="button"
                                             key={o.id}
-                                            className="block w-full text-left px-3 py-2 hover:bg-slate-50 text-xs"
+                                            className="block w-full text-left px-3 py-2 hover:bg-slate-50 text-sm"
                                             onClick={() =>
                                               handleSelectItem(item.id, o)
                                             }

@@ -935,7 +935,7 @@ export default function TaskForm() {
                   ? "New Task Assignment"
                   : "Edit Task"}
             </h1>
-            <p className="text-slate-500 text-sm mt-0.5">
+            <p className="text-slate-500 text-sm mt-0.5 hidden">
               Project Work Plan/WBS & Task Execution Management
             </p>
           </div>
@@ -1013,7 +1013,7 @@ export default function TaskForm() {
 
               {/* Project Selection */}
               <div>
-                <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1.5 block">
+                <label className="label font-semibold text-sm text-slate-700 dark:text-slate-300 mb-1.5 block">
                   Project <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -1060,7 +1060,7 @@ export default function TaskForm() {
               {/* Project Scope with auto-shown clickable pills */}
               <div className="space-y-1.5 pt-1">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                  <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-0 block">
+                  <label className="label font-semibold text-sm text-slate-700 dark:text-slate-300 mb-0 block">
                     Project Scope
                   </label>
                   <span className="text-[11px] text-slate-400">
@@ -1115,7 +1115,7 @@ export default function TaskForm() {
               {/* Work Plan/WBS Field with linked Start Date & End Date (exact logic from Project Scope modal) */}
               <div className="space-y-2 pt-2">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                  <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-0 block">
+                  <label className="label font-semibold text-sm text-slate-700 dark:text-slate-300 mb-0 block">
                     Project Work Plan/WBS
                   </label>
                   <span className="text-[11px] text-slate-400">
@@ -1131,7 +1131,7 @@ export default function TaskForm() {
                     </span>
                     <input
                       type="text"
-                      className="input text-xs font-semibold text-slate-800 dark:text-slate-200 flex-1 py-1.5"
+                      className="input text-sm font-semibold text-slate-800 dark:text-slate-200 flex-1 py-1.5"
                       placeholder="e.g. 1.0 Design, foundation, structural works"
                       value={formData.wbsCode}
                       onChange={(e) => {
@@ -1150,7 +1150,7 @@ export default function TaskForm() {
                     </span>
                     <input
                       type="date"
-                      className="input text-xs py-1.5 w-full"
+                      className="input text-sm py-1.5 w-full"
                       value={formData.startDate}
                       onChange={(e) =>
                         setFormData({ ...formData, startDate: e.target.value })
@@ -1165,7 +1165,7 @@ export default function TaskForm() {
                     </span>
                     <input
                       type="date"
-                      className="input text-xs py-1.5 w-full"
+                      className="input text-sm py-1.5 w-full"
                       value={formData.dueDate}
                       onChange={(e) =>
                         setFormData({ ...formData, dueDate: e.target.value })
@@ -1232,7 +1232,7 @@ export default function TaskForm() {
                   <button
                     type="button"
                     onClick={handleAddTaskRow}
-                    className="btn btn-secondary text-xs py-1.5 px-3 inline-flex items-center gap-1.5 font-semibold text-brand-600 dark:text-brand-400 border-brand-200 dark:border-brand-800 hover:bg-brand-50 dark:hover:bg-brand-950/40 shadow-2xs"
+                    className="btn btn-secondary text-sm py-1.5 px-3 inline-flex items-center gap-1.5 font-semibold text-brand-600 dark:text-brand-400 border-brand-200 dark:border-brand-800 hover:bg-brand-50 dark:hover:bg-brand-950/40 shadow-2xs"
                   >
                     <Plus size={14} /> Add Task
                   </button>
@@ -1366,7 +1366,7 @@ export default function TaskForm() {
                     <button
                       type="button"
                       onClick={handleCancelSelectExistingTask}
-                      className="btn btn-secondary text-xs py-1.5 px-3 bg-white dark:bg-slate-800 border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/50 shadow-2xs font-semibold self-start sm:self-center shrink-0 inline-flex items-center gap-1.5"
+                      className="btn btn-secondary text-sm py-1.5 px-3 bg-white dark:bg-slate-800 border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/50 shadow-2xs font-semibold self-start sm:self-center shrink-0 inline-flex items-center gap-1.5"
                     >
                       <X size={13} /> Cancel Edit / Choose Another Task
                     </button>
@@ -1414,7 +1414,7 @@ export default function TaskForm() {
                           </label>
                           <input
                             type="text"
-                            className="input w-full text-xs py-1.5"
+                            className="input w-full text-sm py-1.5"
                             placeholder="e.g. Excavate foundation, pour concrete, install electrical wiring"
                             value={taskRow.taskTitle}
                             onChange={(e) =>
@@ -1434,7 +1434,7 @@ export default function TaskForm() {
                             Assignee
                           </label>
                           <select
-                            className="input w-full text-xs py-1.5"
+                            className="input w-full text-sm py-1.5"
                             value={taskRow.assignedToId || ""}
                             onChange={(e) =>
                               handleTaskRowChange(
@@ -1466,7 +1466,7 @@ export default function TaskForm() {
                               type="number"
                               min="0"
                               step="0.5"
-                              className="w-20 px-2.5 py-1 text-xs text-right font-semibold bg-transparent border-0 outline-none text-slate-800 dark:text-slate-100 flex-1"
+                              className="w-20 px-2.5 py-1 text-sm text-right font-semibold bg-transparent border-0 outline-none text-slate-800 dark:text-slate-100 flex-1"
                               placeholder="0"
                               title="Estimated Duration Value"
                               value={taskRow.estimatedHours ?? ""}
@@ -1504,7 +1504,7 @@ export default function TaskForm() {
                             Priority
                           </label>
                           <select
-                            className="input w-full text-xs py-1.5"
+                            className="input w-full text-sm py-1.5"
                             value={taskRow.priority || "MEDIUM"}
                             onChange={(e) =>
                               handleTaskRowChange(
@@ -1557,7 +1557,7 @@ export default function TaskForm() {
                             >
                               <input
                                 type="text"
-                                className="input w-full text-xs py-1.5"
+                                className="input w-full text-sm py-1.5"
                                 placeholder="Specify checkpoint / sub-task..."
                                 value={subtask.text || ""}
                                 onChange={(e) =>
@@ -1593,7 +1593,7 @@ export default function TaskForm() {
                   <button
                     type="button"
                     onClick={handleAddTaskRow}
-                    className="text-xs px-3 py-1.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors inline-flex items-center gap-1.5 font-medium"
+                    className="text-sm px-3 py-1.5 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors inline-flex items-center gap-1.5 font-medium"
                   >
                     <Plus size={14} /> Add Another Task
                   </button>
@@ -1609,7 +1609,7 @@ export default function TaskForm() {
                 </div>
 
                 <div>
-                  <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1.5 block">
+                  <label className="label font-semibold text-sm text-slate-700 dark:text-slate-300 mb-1.5 block">
                     Task Title <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1626,11 +1626,11 @@ export default function TaskForm() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-2">
                   <div>
-                    <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1.5 block">
+                    <label className="label font-semibold text-sm text-slate-700 dark:text-slate-300 mb-1.5 block">
                       Assignee
                     </label>
                     <select
-                      className="input w-full text-xs"
+                      className="input w-full text-sm"
                       value={formData.assignedToId || ""}
                       onChange={(e) => {
                         const u = users.find(
@@ -1661,7 +1661,7 @@ export default function TaskForm() {
                   </div>
 
                   <div>
-                    <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1.5 block">
+                    <label className="label font-semibold text-sm text-slate-700 dark:text-slate-300 mb-1.5 block">
                       Est. Duration & Unit
                     </label>
                     <div className="flex rounded-lg border border-slate-300 dark:border-slate-600 overflow-hidden bg-white dark:bg-slate-800 focus-within:ring-2 focus-within:ring-brand-500/20 focus-within:border-brand-500">
@@ -1669,7 +1669,7 @@ export default function TaskForm() {
                         type="number"
                         min="0"
                         step="0.5"
-                        className="w-24 px-2.5 py-1.5 text-xs text-right font-semibold bg-transparent border-0 outline-none text-slate-800 dark:text-slate-100 flex-1"
+                        className="w-24 px-2.5 py-1.5 text-sm text-right font-semibold bg-transparent border-0 outline-none text-slate-800 dark:text-slate-100 flex-1"
                         placeholder="0"
                         value={formData.estimatedHours ?? ""}
                         onChange={(e) =>
@@ -1698,11 +1698,11 @@ export default function TaskForm() {
                   </div>
 
                   <div>
-                    <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1.5 block">
+                    <label className="label font-semibold text-sm text-slate-700 dark:text-slate-300 mb-1.5 block">
                       Priority
                     </label>
                     <select
-                      className="input w-full text-xs"
+                      className="input w-full text-sm"
                       value={formData.priority}
                       onChange={(e) =>
                         setFormData({ ...formData, priority: e.target.value })
@@ -1730,13 +1730,13 @@ export default function TaskForm() {
                 <div className="space-y-5">
                   <div>
                     <div className="flex justify-between items-center mb-2">
-                      <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-0">
+                      <label className="label font-semibold text-sm text-slate-700 dark:text-slate-300 mb-0">
                         Execution Checkpoints / Sub-tasks
                       </label>
                       <button
                         type="button"
                         onClick={handleAddScopeItem}
-                        className="text-xs text-brand-600 dark:text-brand-400 font-semibold hover:underline flex items-center gap-1"
+                        className="text-sm text-brand-600 dark:text-brand-400 font-semibold hover:underline flex items-center gap-1"
                       >
                         <Plus size={14} /> Add Checkpoint Field
                       </button>
@@ -1795,7 +1795,7 @@ export default function TaskForm() {
 
                   {!isNew && (
                     <div className="pt-3 border-t border-slate-200/60 dark:border-slate-700/60">
-                      <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
+                      <label className="label font-semibold text-sm text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
                         <span>Reason for Delay</span>
                         <span className="text-xs font-normal text-slate-400 flex items-center gap-1">
                           <Info size={12} /> Read-only (Fetched from table)
@@ -1892,7 +1892,7 @@ export default function TaskForm() {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
                       <select
-                        className="input text-xs h-9 sm:col-span-2 rounded-lg font-medium"
+                        className="input text-sm h-9 sm:col-span-2 rounded-lg font-medium"
                         value={newPredForm.predecessorId}
                         onChange={(e) => setNewPredForm({ ...newPredForm, predecessorId: e.target.value })}
                       >
@@ -1906,7 +1906,7 @@ export default function TaskForm() {
                           ))}
                       </select>
                       <select
-                        className="input text-xs h-9 rounded-lg font-medium"
+                        className="input text-sm h-9 rounded-lg font-medium"
                         value={newPredForm.dependencyType}
                         onChange={(e) => setNewPredForm({ ...newPredForm, dependencyType: e.target.value })}
                       >
@@ -1918,7 +1918,7 @@ export default function TaskForm() {
                       <input
                         type="number"
                         placeholder="Lag days (e.g. 2)"
-                        className="input text-xs h-9 rounded-lg font-mono"
+                        className="input text-sm h-9 rounded-lg font-mono"
                         value={newPredForm.lagDays}
                         onChange={(e) => setNewPredForm({ ...newPredForm, lagDays: Number(e.target.value) })}
                       />
@@ -1927,14 +1927,14 @@ export default function TaskForm() {
                       <input
                         type="text"
                         placeholder="Dependency note or rationale..."
-                        className="input text-xs h-9 flex-1 rounded-lg"
+                        className="input text-sm h-9 flex-1 rounded-lg"
                         value={newPredForm.notes}
                         onChange={(e) => setNewPredForm({ ...newPredForm, notes: e.target.value })}
                       />
                       <button
                         type="button"
                         onClick={handleAddPredecessor}
-                        className="btn btn-secondary text-xs h-9 px-3 rounded-lg font-semibold shrink-0"
+                        className="btn btn-secondary text-sm h-9 px-3 rounded-lg font-semibold shrink-0"
                       >
                         <Plus size={13} /> Add
                       </button>

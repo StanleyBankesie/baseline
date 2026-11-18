@@ -350,7 +350,7 @@ export default function ProjectExpenseIncomeReport() {
               <span className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
                 <Scale size={24} />
               </span>
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+              <h1 className="text-2xl font-bold sm:text-2xl font-bold text-slate-900 dark:text-white">
                 Project Expense and Income Report
               </h1>
             </div>
@@ -365,13 +365,13 @@ export default function ProjectExpenseIncomeReport() {
             <>
               <button
                 onClick={exportExcel}
-                className="btn btn-secondary inline-flex items-center gap-1.5 text-xs py-2 px-3 font-semibold"
+                className="btn btn-secondary inline-flex items-center gap-1.5 text-sm py-2 px-3 font-semibold"
               >
                 <Download size={15} /> Excel
               </button>
               <button
                 onClick={exportPdf}
-                className="btn btn-primary inline-flex items-center gap-1.5 text-xs py-2 px-3 font-semibold shadow-sm"
+                className="btn btn-primary inline-flex items-center gap-1.5 text-sm py-2 px-3 font-semibold shadow-sm"
               >
                 <Download size={15} /> PDF
               </button>
@@ -415,7 +415,7 @@ export default function ProjectExpenseIncomeReport() {
               <input
                 type="date"
                 disabled={!selectedProjectId}
-                className="input py-1.5 px-2.5 text-xs h-auto font-mono w-36 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="input py-1.5 px-2.5 text-sm h-auto font-mono w-36 disabled:opacity-50 disabled:cursor-not-allowed"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
               />
@@ -429,7 +429,7 @@ export default function ProjectExpenseIncomeReport() {
               <input
                 type="date"
                 disabled={!selectedProjectId}
-                className="input py-1.5 px-2.5 text-xs h-auto font-mono w-36 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="input py-1.5 px-2.5 text-sm h-auto font-mono w-36 disabled:opacity-50 disabled:cursor-not-allowed"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
               />
@@ -446,7 +446,7 @@ export default function ProjectExpenseIncomeReport() {
                   type="text"
                   disabled={!selectedProjectId}
                   placeholder="Voucher, description..."
-                  className="input pl-8 pr-2.5 py-1.5 text-xs h-auto w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="input pl-8 pr-2.5 py-1.5 text-sm h-auto w-full disabled:opacity-50 disabled:cursor-not-allowed"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -461,7 +461,7 @@ export default function ProjectExpenseIncomeReport() {
                 </label>
                 <select
                   disabled={!selectedProjectId}
-                  className="input text-xs py-1.5 h-auto w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="input text-sm py-1.5 h-auto w-full disabled:opacity-50 disabled:cursor-not-allowed"
                   value={positionFilter}
                   onChange={(e) => setPositionFilter(e.target.value)}
                 >
@@ -479,18 +479,9 @@ export default function ProjectExpenseIncomeReport() {
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="text-xs text-rose-500 hover:text-rose-700 underline px-2 py-1 flex items-center gap-1"
+                className="text-sm text-rose-500 hover:text-rose-700 underline px-2 py-1 flex items-center gap-1"
               >
                 <X size={13} /> Clear Project
-              </button>
-            )}
-            {selectedProjectId && (
-              <button
-                onClick={fetchData}
-                className="btn btn-secondary p-2 rounded-xl"
-                title="Refresh Report"
-              >
-                <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
               </button>
             )}
           </div>
@@ -639,7 +630,7 @@ export default function ProjectExpenseIncomeReport() {
           {activeTab === "pnl" && (
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-sm">
                   <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-800 uppercase tracking-wider">
                     <tr>
                       <th className="px-4 py-3.5">Project Info</th>
@@ -780,7 +771,7 @@ export default function ProjectExpenseIncomeReport() {
           {activeTab === "income" && (
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-sm">
                   <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-800 uppercase tracking-wider">
                     <tr>
                       <th className="px-4 py-3.5">Voucher No</th>
@@ -846,7 +837,7 @@ export default function ProjectExpenseIncomeReport() {
           {activeTab === "expense" && (
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-sm">
                   <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-800 uppercase tracking-wider">
                     <tr>
                       <th className="px-4 py-3.5">Voucher No</th>

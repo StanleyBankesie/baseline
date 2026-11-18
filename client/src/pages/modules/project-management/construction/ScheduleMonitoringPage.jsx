@@ -130,7 +130,7 @@ export default function ScheduleMonitoringPage() {
               <TrendingUp size={24} className="text-brand-900 dark:text-brand-400" />
               Schedule Monitoring
             </h1>
-            <p className="text-slate-500 text-sm mt-0.5">
+            <p className="text-slate-500 text-sm mt-0.5 hidden">
               Planned vs actual progress, delayed activities, upcoming deadlines and schedule variance
             </p>
           </div>
@@ -150,15 +150,7 @@ export default function ScheduleMonitoringPage() {
               </option>
             ))}
           </select>
-          <button
-            onClick={loadData}
-            disabled={!selectedProjectId}
-            className="btn btn-secondary h-10 px-3 rounded-xl inline-flex items-center gap-1.5 shrink-0"
-            title="Refresh"
-          >
-            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-            <span className="hidden sm:inline text-xs font-medium">Refresh</span>
-          </button>
+          
         </div>
       </div>
 
@@ -287,7 +279,7 @@ export default function ScheduleMonitoringPage() {
                 </h2>
               </div>
               <div className="overflow-x-auto">
-                <table className="table text-xs w-full">
+                <table className="table text-sm w-full">
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 text-slate-500 font-semibold uppercase tracking-wider">
                       <th className="py-3 px-4">Claim #</th>

@@ -1,0 +1,4 @@
+[
+  { "name": "Company Social Feed", "path": "/social-feed", "component": "SocialFeedPage" },
+  { "name": "Social Feed Post Details", "path": "/social-feed/1", "component": "SocialFeedPage" }
+]

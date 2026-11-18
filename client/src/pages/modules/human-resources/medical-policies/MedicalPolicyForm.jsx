@@ -157,7 +157,7 @@ export default function MedicalPolicyForm() {
               value={form.renewal_date} 
               onChange={(e) => update('renewal_date', e.target.value)} 
             
-              disabled={readOnly || (isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
+              disabled={(isEdit && !hasExceptional("DOCUMENT.EDIT_DATE"))}
             />
           </div>
           <div>

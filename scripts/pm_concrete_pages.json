@@ -1,0 +1,477 @@
+[
+  {
+    "name": "Project Management Home Hub",
+    "path": "/project-management",
+    "component": "ProjectManagementLanding"
+  },
+  {
+    "name": "PM Root",
+    "path": "/project-management/",
+    "component": "ProjectManagementLanding"
+  },
+  {
+    "name": "Dashboard",
+    "path": "/project-management/dashboard",
+    "component": "ProjectManagementDashboardPage"
+  },
+  {
+    "name": "Projects",
+    "path": "/project-management/projects",
+    "component": "ProjectList"
+  },
+  {
+    "name": "Projects - New",
+    "path": "/project-management/projects/new",
+    "component": "ProjectForm"
+  },
+  {
+    "name": "Projects - :Id - Edit",
+    "path": "/project-management/projects/1/edit",
+    "component": "ProjectForm"
+  },
+  {
+    "name": "Projects - :Id",
+    "path": "/project-management/projects/1",
+    "component": "ProjectForm"
+  },
+  {
+    "name": "Projects - :Id - Dashboard",
+    "path": "/project-management/projects/1/dashboard",
+    "component": "ProjectDetailDashboard"
+  },
+  {
+    "name": "Tasks",
+    "path": "/project-management/tasks",
+    "component": "TaskList"
+  },
+  {
+    "name": "Tasks - Assignment",
+    "path": "/project-management/tasks/assignment",
+    "component": "TaskAssignmentKanban"
+  },
+  {
+    "name": "Tasks - Execution",
+    "path": "/project-management/tasks/execution",
+    "component": "TaskExecution"
+  },
+  {
+    "name": "Tasks - New",
+    "path": "/project-management/tasks/new",
+    "component": "TaskForm"
+  },
+  {
+    "name": "Tasks - :Id",
+    "path": "/project-management/tasks/1",
+    "component": "TaskForm"
+  },
+  {
+    "name": "Expenses",
+    "path": "/project-management/expenses",
+    "component": "ExpenseList"
+  },
+  {
+    "name": "Expenses - New",
+    "path": "/project-management/expenses/new",
+    "component": "ExpenseList"
+  },
+  {
+    "name": "Income",
+    "path": "/project-management/income",
+    "component": "ProjectIncomeList"
+  },
+  {
+    "name": "Income - New",
+    "path": "/project-management/income/new",
+    "component": "ProjectIncomeList"
+  },
+  {
+    "name": "Reports",
+    "path": "/project-management/reports",
+    "component": "ProjectReports"
+  },
+  {
+    "name": "Reports - Task Management",
+    "path": "/project-management/reports/task-management",
+    "component": "TaskExecutionReportPage"
+  },
+  {
+    "name": "Reports - Task Management Execution",
+    "path": "/project-management/reports/task-management-execution",
+    "component": "TaskExecutionReportPage"
+  },
+  {
+    "name": "Reports - Task Management And Execution",
+    "path": "/project-management/reports/task-management-and-execution",
+    "component": "TaskExecutionReportPage"
+  },
+  {
+    "name": "Reports - Task Execution",
+    "path": "/project-management/reports/task-execution",
+    "component": "TaskExecutionReportPage"
+  },
+  {
+    "name": "Reports - Project Status",
+    "path": "/project-management/reports/project-status",
+    "component": "ProjectStatusReport"
+  },
+  {
+    "name": "Reports - Project Income",
+    "path": "/project-management/reports/project-income",
+    "component": "ProjectIncomeReport"
+  },
+  {
+    "name": "Reports - Project Expense",
+    "path": "/project-management/reports/project-expense",
+    "component": "ProjectExpenseReport"
+  },
+  {
+    "name": "Reports - Project Expense Income",
+    "path": "/project-management/reports/project-expense-income",
+    "component": "ProjectExpenseIncomeReport"
+  },
+  {
+    "name": "Reports - Temporal Warehouses",
+    "path": "/project-management/reports/temporal-warehouses",
+    "component": "TemporalWarehouseStockReport"
+  },
+  {
+    "name": "Reports - Warehouse Stock",
+    "path": "/project-management/reports/warehouse-stock",
+    "component": "TemporalWarehouseStockReport"
+  },
+  {
+    "name": "Reports - Cost Variance",
+    "path": "/project-management/reports/cost-variance",
+    "component": "ProjectCostVarianceReport"
+  },
+  {
+    "name": "Reports - Budget Variance",
+    "path": "/project-management/reports/budget-variance",
+    "component": "ProjectCostVarianceReport"
+  },
+  {
+    "name": "Reports - Resource Allocation",
+    "path": "/project-management/reports/resource-allocation",
+    "component": "ResourceStatusReport"
+  },
+  {
+    "name": "Reports - Resources",
+    "path": "/project-management/reports/resources",
+    "component": "ResourceStatusReport"
+  },
+  {
+    "name": "Setup",
+    "path": "/project-management/setup",
+    "component": "PMSetup"
+  },
+  {
+    "name": "Material Requisitions",
+    "path": "/project-management/material-requisitions",
+    "component": "PMMaterialRequisitionList"
+  },
+  {
+    "name": "Material Requisitions - New",
+    "path": "/project-management/material-requisitions/new",
+    "component": "PMMaterialRequisitionForm"
+  },
+  {
+    "name": "Material Requisitions - :Id",
+    "path": "/project-management/material-requisitions/1",
+    "component": "PMMaterialRequisitionForm"
+  },
+  {
+    "name": "Material Utilizations",
+    "path": "/project-management/material-utilizations",
+    "component": "PMMaterialUtilizationList"
+  },
+  {
+    "name": "Material Utilizations - New",
+    "path": "/project-management/material-utilizations/new",
+    "component": "PMMaterialUtilizationForm"
+  },
+  {
+    "name": "Material Utilizations - :Id",
+    "path": "/project-management/material-utilizations/1",
+    "component": "PMMaterialUtilizationForm"
+  },
+  {
+    "name": "Material Receipts",
+    "path": "/project-management/material-receipts",
+    "component": "PMMaterialReceiptList"
+  },
+  {
+    "name": "Material Receipts - New",
+    "path": "/project-management/material-receipts/new",
+    "component": "PMMaterialReceiptForm"
+  },
+  {
+    "name": "Material Receipts - :Id",
+    "path": "/project-management/material-receipts/1",
+    "component": "PMMaterialReceiptForm"
+  },
+  {
+    "name": "Project Orders",
+    "path": "/project-management/project-orders",
+    "component": "ProjectOrderList"
+  },
+  {
+    "name": "Project Orders - New",
+    "path": "/project-management/project-orders/new",
+    "component": "ProjectOrderForm"
+  },
+  {
+    "name": "Project Orders - :Id",
+    "path": "/project-management/project-orders/1",
+    "component": "ProjectOrderForm"
+  },
+  {
+    "name": "Quotations",
+    "path": "/project-management/quotations",
+    "component": "ProjectQuotationList"
+  },
+  {
+    "name": "Quotations - New",
+    "path": "/project-management/quotations/new",
+    "component": "ProjectQuotationForm"
+  },
+  {
+    "name": "Quotations - :Id",
+    "path": "/project-management/quotations/1",
+    "component": "ProjectQuotationForm"
+  },
+  {
+    "name": "Project Invoices",
+    "path": "/project-management/project-invoices",
+    "component": "ProjectInvoiceList"
+  },
+  {
+    "name": "Project Invoices - New",
+    "path": "/project-management/project-invoices/new",
+    "component": "ProjectInvoiceForm"
+  },
+  {
+    "name": "Project Invoices - :Id",
+    "path": "/project-management/project-invoices/1",
+    "component": "ProjectInvoiceForm"
+  },
+  {
+    "name": "Milestones",
+    "path": "/project-management/milestones",
+    "component": "ProjectMilestonesTimeline"
+  },
+  {
+    "name": "Scopes",
+    "path": "/project-management/scopes",
+    "component": "ProjectMilestonesTimeline"
+  },
+  {
+    "name": "Project Scope",
+    "path": "/project-management/project-scope",
+    "component": "ProjectMilestonesTimeline"
+  },
+  {
+    "name": "Milestones - New",
+    "path": "/project-management/milestones/new",
+    "component": "TaskForm"
+  },
+  {
+    "name": "Resources",
+    "path": "/project-management/resources",
+    "component": "ResourceManagement"
+  },
+  {
+    "name": "Resources - New",
+    "path": "/project-management/resources/new",
+    "component": "ResourceManagement"
+  },
+  {
+    "name": "Purchase Requisitions",
+    "path": "/project-management/purchase-requisitions",
+    "component": "PMPurchaseRequisitionList"
+  },
+  {
+    "name": "Purchase Requisitions - New",
+    "path": "/project-management/purchase-requisitions/new",
+    "component": "PMPurchaseRequisitionForm"
+  },
+  {
+    "name": "Purchase Requisitions - :Id",
+    "path": "/project-management/purchase-requisitions/1",
+    "component": "PMPurchaseRequisitionForm"
+  },
+  {
+    "name": "Purchase Requisitions - :Id - Edit",
+    "path": "/project-management/purchase-requisitions/1/edit",
+    "component": "PMPurchaseRequisitionForm"
+  },
+  {
+    "name": "Costing",
+    "path": "/project-management/costing",
+    "component": "ProjectCostingEstimationPage"
+  },
+  {
+    "name": "Boqs",
+    "path": "/project-management/boqs",
+    "component": "ProjectCostingEstimationPage"
+  },
+  {
+    "name": "Cost Categories",
+    "path": "/project-management/cost-categories",
+    "component": "CostCategoryPage"
+  },
+  {
+    "name": "Costing - Categories",
+    "path": "/project-management/costing/categories",
+    "component": "CostCategoryPage"
+  },
+  {
+    "name": "Cost Control",
+    "path": "/project-management/cost-control",
+    "component": "CostControlDashboard"
+  },
+  {
+    "name": "Gantt",
+    "path": "/project-management/gantt",
+    "component": "GanttChartView"
+  },
+  {
+    "name": "Calendar",
+    "path": "/project-management/calendar",
+    "component": "TaskCalendarView"
+  },
+  {
+    "name": "Task Calendar",
+    "path": "/project-management/task-calendar",
+    "component": "TaskCalendarView"
+  },
+  {
+    "name": "Mindmap",
+    "path": "/project-management/mindmap",
+    "component": "ProjectMindmapPage"
+  },
+  {
+    "name": "Execution Mindmap",
+    "path": "/project-management/execution-mindmap",
+    "component": "ProjectMindmapPage"
+  },
+  {
+    "name": "Daily Reports",
+    "path": "/project-management/daily-reports",
+    "component": "DailySiteReportList"
+  },
+  {
+    "name": "Daily Reports - New",
+    "path": "/project-management/daily-reports/new",
+    "component": "DailySiteReportForm"
+  },
+  {
+    "name": "Daily Reports - :Id",
+    "path": "/project-management/daily-reports/1",
+    "component": "DailySiteReportForm"
+  },
+  {
+    "name": "Subcontracts",
+    "path": "/project-management/subcontracts",
+    "component": "SubcontractorManager"
+  },
+  {
+    "name": "Client Valuations",
+    "path": "/project-management/client-valuations",
+    "component": "PaymentClaimsPage"
+  },
+  {
+    "name": "Client Progress Assessments",
+    "path": "/project-management/client-progress-assessments",
+    "component": "PaymentClaimsPage"
+  },
+  {
+    "name": "Payment Claims",
+    "path": "/project-management/payment-claims",
+    "component": "PaymentClaimsPage"
+  },
+  {
+    "name": "Claims",
+    "path": "/project-management/claims",
+    "component": "PaymentClaimsPage"
+  },
+  {
+    "name": "Variations",
+    "path": "/project-management/variations",
+    "component": "VariationRegister"
+  },
+  {
+    "name": "Quality Control",
+    "path": "/project-management/quality-control",
+    "component": "QualityControlPage"
+  },
+  {
+    "name": "Snags",
+    "path": "/project-management/snags",
+    "component": "SnagPunchListPage"
+  },
+  {
+    "name": "Snag List",
+    "path": "/project-management/snag-list",
+    "component": "SnagPunchListPage"
+  },
+  {
+    "name": "Punch List",
+    "path": "/project-management/punch-list",
+    "component": "SnagPunchListPage"
+  },
+  {
+    "name": "Issues",
+    "path": "/project-management/issues",
+    "component": "SnagPunchListPage"
+  },
+  {
+    "name": "Documents",
+    "path": "/project-management/documents",
+    "component": "DocumentRegisterPage"
+  },
+  {
+    "name": "Rfis",
+    "path": "/project-management/rfis",
+    "component": "DocumentRegisterPage"
+  },
+  {
+    "name": "Equipment Logs",
+    "path": "/project-management/equipment-logs",
+    "component": "EquipmentLogsPage"
+  },
+  {
+    "name": "Risk Management",
+    "path": "/project-management/risk-management",
+    "component": "RiskManagementPage"
+  },
+  {
+    "name": "Risks",
+    "path": "/project-management/risks",
+    "component": "RiskManagementPage"
+  },
+  {
+    "name": "Risk Assessment",
+    "path": "/project-management/risk-assessment",
+    "component": "RiskManagementPage"
+  },
+  {
+    "name": "Closure",
+    "path": "/project-management/closure",
+    "component": "ProjectClosurePage"
+  },
+  {
+    "name": "Final Accounts",
+    "path": "/project-management/final-accounts",
+    "component": "FinalAccountPage"
+  },
+  {
+    "name": "Final Account",
+    "path": "/project-management/final-account",
+    "component": "FinalAccountPage"
+  },
+  {
+    "name": "Retention Release",
+    "path": "/project-management/retention-release",
+    "component": "FinalAccountPage"
+  }
+]

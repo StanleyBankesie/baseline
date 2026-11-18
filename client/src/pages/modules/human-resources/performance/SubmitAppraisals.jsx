@@ -768,10 +768,7 @@ export default function SubmitAppraisals() {
                   </button>
                 </div>
               )}
-              <button onClick={loadAppraisals} className="btn-secondary text-sm h-9 px-3 flex items-center gap-1.5" title="Refresh">
-                <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-                <span className="hidden sm:inline">Refresh</span>
-              </button>
+              
             </div>
           </div>
         </div>

@@ -1330,7 +1330,7 @@ export default function ProjectInvoiceForm() {
               />
               {isEdit ? "Edit Invoice" : "New Invoice"}
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 hidden">
               Create and manage project invoices
             </p>
           </div>
@@ -1611,7 +1611,7 @@ export default function ProjectInvoiceForm() {
               <div className="bg-white dark:bg-slate-900 p-4 rounded-lg mb-6 border border-slate-200 dark:border-slate-800 shadow-sm">
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-3 mb-3">
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Item *
                     </label>
                     <div className="relative">
@@ -1708,7 +1708,7 @@ export default function ProjectInvoiceForm() {
                                     <button
                                       type="button"
                                       key={o.id}
-                                      className="block w-full text-left px-3 py-2 hover:bg-gray-50 text-xs"
+                                      className="block w-full text-left px-3 py-2 hover:bg-gray-50 text-sm"
                                       onClick={() => {
                                         handleNewItemChange({
                                           target: {
@@ -1734,7 +1734,7 @@ export default function ProjectInvoiceForm() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       UOM *
                     </label>
                     <select
@@ -1766,7 +1766,7 @@ export default function ProjectInvoiceForm() {
                       return showBtn ? (
                         <button
                           type="button"
-                          className="mt-2 px-2 py-1 text-xs border border-brand text-brand rounded hover:bg-brand hover:text-white transition-colors"
+                          className="mt-2 px-2 py-1 text-sm border border-brand text-brand rounded hover:bg-brand hover:text-white transition-colors"
                           onClick={() =>
                             setConvModal({
                               open: true,
@@ -1782,7 +1782,7 @@ export default function ProjectInvoiceForm() {
                     })()}
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Qty *
                     </label>
                     <input
@@ -1822,7 +1822,7 @@ export default function ProjectInvoiceForm() {
                       return hasConv ? (
                         <button
                           type="button"
-                          className="ml-2 px-2 py-1 text-xs border border-brand text-brand rounded hover:bg-brand hover:text-white transition-colors"
+                          className="ml-2 px-2 py-1 text-sm border border-brand text-brand rounded hover:bg-brand hover:text-white transition-colors"
                           onClick={() =>
                             setConvModal({
                               open: true,
@@ -1839,7 +1839,7 @@ export default function ProjectInvoiceForm() {
                     })()}
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Price *
                     </label>
                     <input
@@ -1856,7 +1856,7 @@ export default function ProjectInvoiceForm() {
                   <div
                     className={!canEditDiscount() ? "disabled-light-blue" : ""}
                   >
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Disc %
                     </label>
                     <input
@@ -1876,7 +1876,7 @@ export default function ProjectInvoiceForm() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Tax Code
                     </label>
                     <div
@@ -2088,7 +2088,7 @@ export default function ProjectInvoiceForm() {
                               return hasConv ? (
                                 <button
                                   type="button"
-                                  className="px-2 py-1 text-xs border border-brand text-brand rounded hover:bg-brand hover:text-white transition-colors"
+                                  className="px-2 py-1 text-sm border border-brand text-brand rounded hover:bg-brand hover:text-white transition-colors"
                                   onClick={() =>
                                     setConvModal({
                                       open: true,

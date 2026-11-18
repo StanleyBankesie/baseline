@@ -346,7 +346,7 @@ export default function ProductionStockJournalForm() {
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       
       {/* Top Banner & Header */}
-      <div className="card border-l-4 border-l-brand-600 bg-linear-to-r from-brand-50/60 via-slate-50 to-white dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 p-6 shadow-sm">
+      <div className="card border border-slate-200 dark:border-slate-800 rounded-2xl bg-linear-to-r from-brand-50/60 via-slate-50 to-white dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 p-6 shadow-smoky-card">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-brand-600 text-white rounded-xl shadow-md">

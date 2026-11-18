@@ -200,7 +200,7 @@ export default function DowntimeLogForm() {
           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Root Cause / Reason</label>
           <textarea 
             required
-            className="w-full px-4 py-4 bg-white dark:bg-slate-900 border-none rounded-[2rem] focus:ring-2 focus:ring-indigo-500 outline-none font-medium text-slate-700 dark:text-slate-200 min-h-[120px]"
+            className="w-full px-4 py-4 bg-white dark:bg-slate-900 border-none rounded-[2rem] focus:ring-2 focus:ring-indigo-500 outline-none font-medium text-slate-700 dark:text-slate-200 min-h-[160px]"
             value={formData.reason}
             onChange={e => setFormData({...formData, reason: e.target.value})}
             placeholder="Describe what happened (e.g., Motor burnout, Sensor failure)..."

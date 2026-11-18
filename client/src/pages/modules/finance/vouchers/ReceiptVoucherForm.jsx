@@ -4088,7 +4088,7 @@ export default function ReceiptVoucherForm() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:w-96">
                       <label className="label">Outstanding Invoices</label>
-                      <div className={`border rounded p-2 md:w-96 min-h-[120px] max-h-[160px] overflow-y-auto bg-white dark:bg-slate-900 ${disabledClass}`}>
+                      <div className={`border rounded p-2 md:w-96 min-h-[160px] max-h-[160px] overflow-y-auto bg-white dark:bg-slate-900 ${disabledClass}`}>
                         {customerInvoices.length === 0 && (
                           <div className="text-slate-500 italic p-2 text-sm">
                             No outstanding invoices

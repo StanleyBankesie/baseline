@@ -1,0 +1,1007 @@
+[
+  {
+    "index": 1,
+    "name": "Inventory Home / Operations Dashboard",
+    "path": "/inventory",
+    "status": "PASSED",
+    "loadTimeMs": 3434,
+    "elementsCount": {
+      "buttons": 9,
+      "inputs": 0,
+      "tables": 0,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 2,
+    "name": "Inventory Analytics Dashboard",
+    "path": "/inventory/dashboard",
+    "status": "PASSED",
+    "loadTimeMs": 3320,
+    "elementsCount": {
+      "buttons": 9,
+      "inputs": 4,
+      "tables": 0,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_dashboard.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 3,
+    "name": "Stock Balances Page",
+    "path": "/inventory/stock",
+    "status": "PASSED",
+    "loadTimeMs": 2400,
+    "elementsCount": {
+      "buttons": 31,
+      "inputs": 4,
+      "tables": 1,
+      "cards": 10
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_stock.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 4,
+    "name": "Stock Balances (Alias)",
+    "path": "/inventory/stock-balances",
+    "status": "PASSED",
+    "loadTimeMs": 2065,
+    "elementsCount": {
+      "buttons": 31,
+      "inputs": 4,
+      "tables": 1,
+      "cards": 10
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_stock-balances.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 5,
+    "name": "Stock Journal List",
+    "path": "/inventory/stock-journal",
+    "status": "PASSED",
+    "loadTimeMs": 2320,
+    "elementsCount": {
+      "buttons": 26,
+      "inputs": 3,
+      "tables": 1,
+      "cards": 10
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_stock-journal.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 6,
+    "name": "Stock Journal Create Form",
+    "path": "/inventory/stock-journal/new",
+    "status": "PASSED",
+    "loadTimeMs": 2078,
+    "elementsCount": {
+      "buttons": 9,
+      "inputs": 0,
+      "tables": 0,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_stock-journal_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 7,
+    "name": "Stock Operations (Ops)",
+    "path": "/inventory/stock-ops",
+    "status": "PASSED",
+    "loadTimeMs": 2046,
+    "elementsCount": {
+      "buttons": 9,
+      "inputs": 0,
+      "tables": 0,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_stock-ops.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 8,
+    "name": "Material Requisitions List",
+    "path": "/inventory/material-requisitions",
+    "status": "PASSED",
+    "loadTimeMs": 1990,
+    "elementsCount": {
+      "buttons": 20,
+      "inputs": 1,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_material-requisitions.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 9,
+    "name": "Material Requisition Create Form",
+    "path": "/inventory/material-requisitions/new",
+    "status": "PASSED",
+    "loadTimeMs": 2013,
+    "elementsCount": {
+      "buttons": 14,
+      "inputs": 13,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_material-requisitions_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 10,
+    "name": "Stock Updation List",
+    "path": "/inventory/stock-updation",
+    "status": "PASSED",
+    "loadTimeMs": 2045,
+    "elementsCount": {
+      "buttons": 25,
+      "inputs": 1,
+      "tables": 1,
+      "cards": 9
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_stock-updation.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 11,
+    "name": "Stock Updation Form",
+    "path": "/inventory/stock-updation/new",
+    "status": "PASSED",
+    "loadTimeMs": 2230,
+    "elementsCount": {
+      "buttons": 21,
+      "inputs": 10,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_stock-updation_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 12,
+    "name": "Stock Verification List",
+    "path": "/inventory/stock-verification",
+    "status": "PASSED",
+    "loadTimeMs": 1992,
+    "elementsCount": {
+      "buttons": 19,
+      "inputs": 2,
+      "tables": 1,
+      "cards": 7
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_stock-verification.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 13,
+    "name": "Stock Verification Form",
+    "path": "/inventory/stock-verification/new",
+    "status": "PASSED",
+    "loadTimeMs": 2033,
+    "elementsCount": {
+      "buttons": 13,
+      "inputs": 5,
+      "tables": 1,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_stock-verification_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 14,
+    "name": "Return to Stores List",
+    "path": "/inventory/return-to-stores",
+    "status": "PASSED",
+    "loadTimeMs": 2005,
+    "elementsCount": {
+      "buttons": 30,
+      "inputs": 1,
+      "tables": 1,
+      "cards": 12
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_return-to-stores.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 15,
+    "name": "Return to Stores Create Form",
+    "path": "/inventory/return-to-stores/new",
+    "status": "PASSED",
+    "loadTimeMs": 2068,
+    "elementsCount": {
+      "buttons": 14,
+      "inputs": 12,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_return-to-stores_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 16,
+    "name": "Stock Adjustments List",
+    "path": "/inventory/stock-adjustments",
+    "status": "PASSED",
+    "loadTimeMs": 2160,
+    "elementsCount": {
+      "buttons": 26,
+      "inputs": 1,
+      "tables": 1,
+      "cards": 9
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_stock-adjustments.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 17,
+    "name": "Stock Adjustment Create Form",
+    "path": "/inventory/stock-adjustments/new",
+    "status": "PASSED",
+    "loadTimeMs": 1987,
+    "elementsCount": {
+      "buttons": 21,
+      "inputs": 13,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_stock-adjustments_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 18,
+    "name": "Issue to Requirement List",
+    "path": "/inventory/issue-to-requirement",
+    "status": "PASSED",
+    "loadTimeMs": 2007,
+    "elementsCount": {
+      "buttons": 16,
+      "inputs": 1,
+      "tables": 1,
+      "cards": 9
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_issue-to-requirement.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 19,
+    "name": "Issue to Requirement Create Form",
+    "path": "/inventory/issue-to-requirement/new",
+    "status": "PASSED",
+    "loadTimeMs": 2025,
+    "elementsCount": {
+      "buttons": 14,
+      "inputs": 11,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_issue-to-requirement_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 20,
+    "name": "Stock Transfers List",
+    "path": "/inventory/stock-transfers",
+    "status": "PASSED",
+    "loadTimeMs": 1990,
+    "elementsCount": {
+      "buttons": 19,
+      "inputs": 1,
+      "tables": 1,
+      "cards": 9
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_stock-transfers.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 21,
+    "name": "Stock Transfer Create Form",
+    "path": "/inventory/stock-transfers/new",
+    "status": "PASSED",
+    "loadTimeMs": 2001,
+    "elementsCount": {
+      "buttons": 14,
+      "inputs": 15,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_stock-transfers_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 22,
+    "name": "Transfer Acceptance List",
+    "path": "/inventory/transfer-acceptance",
+    "status": "PASSED",
+    "loadTimeMs": 2072,
+    "elementsCount": {
+      "buttons": 19,
+      "inputs": 1,
+      "tables": 1,
+      "cards": 9
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_transfer-acceptance.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 23,
+    "name": "Transfer Acceptance Form",
+    "path": "/inventory/transfer-acceptance/new",
+    "status": "PASSED",
+    "loadTimeMs": 2276,
+    "elementsCount": {
+      "buttons": 11,
+      "inputs": 0,
+      "tables": 1,
+      "cards": 5
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_transfer-acceptance_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 24,
+    "name": "Stock Reorder Planning",
+    "path": "/inventory/stock-reorder",
+    "status": "PASSED",
+    "loadTimeMs": 1949,
+    "elementsCount": {
+      "buttons": 14,
+      "inputs": 4,
+      "tables": 1,
+      "cards": 3
+    },
+    "consoleErrors": [
+      "Warning: Invalid DOM property `%s`. Did you mean `%s`?%s colspan colSpan \n    at td\n    at tr\n    at tbody\n    at table\n    at div\n    at div\n    at div\n    at div\n    at div\n    at StockReorderPage (http://localhost:5173/src/pages/modules/inventory/StockReorderPage.jsx:40:45)\n    at RenderedRoute (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=56e69511:6669:26)\n    at Routes (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=56e69511:7604:3)\n    at div\n    at div\n    at ModuleLayout (http://localhost:5173/src/components/ModuleLayout.jsx:327:40)\n    at InventoryHome\n    at RenderedRoute (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=56e69511:6669:26)\n    at Routes (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=56e69511:7604:3)\n    at Suspense\n    at AppRoutes2 (http://localhost:5173/src/layout/AppShell.jsx?t=1794980910475:181:59)\n    at Suspense\n    at div\n    at main\n    at div\n    at div\n    at AppShell (http://localhost:5173/src/layout/AppShell.jsx?t=1794980910475:889:52)\n    at ScopedShell (http://localhost:5173/src/App.jsx?t=1794980910475:51:34)\n    at ErrorBoundary (http://localhost:5173/src/components/ErrorBoundary.jsx:7:5)\n    at ProtectedRoute (http://localhost:5173/src/auth/ProtectedRoute.jsx:22:42)\n    at RenderedRoute (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=56e69511:6669:26)\n    at Routes (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=56e69511:7604:3)\n    at Suspense\n    at GpsTrackingProvider (http://localhost:5173/src/context/GpsTrackingContext.jsx:28:39)\n    at PermissionProvider (http://localhost:5173/src/auth/PermissionContext.jsx:142:38)\n    at AuthProvider (http://localhost:5173/src/auth/AuthContext.jsx:73:32)\n    at ThemeProvider (http://localhost:5173/src/theme/ThemeContext.jsx:27:33)\n    at MotionWrapper (http://localhost:5173/node_modules/.vite/deps/antd.js?v=56e69511:10814:32)\n    at ProviderChildren (http://localhost:5173/node_modules/.vite/deps/antd.js?v=56e69511:10914:5)\n    at ConfigProvider (http://localhost:5173/node_modules/.vite/deps/antd.js?v=56e69511:11251:27)\n    at Provider (http://localhost:5173/node_modules/.vite/deps/react-redux.js?v=56e69511:924:11)\n    at Router (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=56e69511:7543:13)\n    at BrowserRouter (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=56e69511:10859:3)\n    at App"
+    ],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_stock-reorder.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 25,
+    "name": "Stock Upload Page",
+    "path": "/inventory/stock-upload",
+    "status": "PASSED",
+    "loadTimeMs": 2128,
+    "elementsCount": {
+      "buttons": 12,
+      "inputs": 3,
+      "tables": 0,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_stock-upload.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 26,
+    "name": "Daily Stock Take List",
+    "path": "/inventory/daily-stock-take",
+    "status": "PASSED",
+    "loadTimeMs": 2061,
+    "elementsCount": {
+      "buttons": 15,
+      "inputs": 3,
+      "tables": 1,
+      "cards": 9
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_daily-stock-take.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 27,
+    "name": "Daily Stock Take Form",
+    "path": "/inventory/daily-stock-take/new",
+    "status": "PASSED",
+    "loadTimeMs": 1985,
+    "elementsCount": {
+      "buttons": 13,
+      "inputs": 5,
+      "tables": 0,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_daily-stock-take_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 28,
+    "name": "Physical Stock Take List",
+    "path": "/inventory/physical-stock-take",
+    "status": "PASSED",
+    "loadTimeMs": 2003,
+    "elementsCount": {
+      "buttons": 15,
+      "inputs": 3,
+      "tables": 1,
+      "cards": 9
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_physical-stock-take.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 29,
+    "name": "Physical Stock Take Form",
+    "path": "/inventory/physical-stock-take/new",
+    "status": "PASSED",
+    "loadTimeMs": 2033,
+    "elementsCount": {
+      "buttons": 12,
+      "inputs": 5,
+      "tables": 0,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_physical-stock-take_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 30,
+    "name": "Stock Take Register List",
+    "path": "/inventory/stock-take",
+    "status": "PASSED",
+    "loadTimeMs": 2177,
+    "elementsCount": {
+      "buttons": 15,
+      "inputs": 4,
+      "tables": 1,
+      "cards": 9
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_stock-take.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 31,
+    "name": "Stock Take Form",
+    "path": "/inventory/stock-take/new",
+    "status": "PASSED",
+    "loadTimeMs": 2088,
+    "elementsCount": {
+      "buttons": 12,
+      "inputs": 4,
+      "tables": 0,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_stock-take_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 32,
+    "name": "GRN Local (Goods Receipt Note Local) List",
+    "path": "/inventory/grn-local",
+    "status": "PASSED",
+    "loadTimeMs": 1928,
+    "elementsCount": {
+      "buttons": 26,
+      "inputs": 1,
+      "tables": 1,
+      "cards": 9
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_grn-local.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 33,
+    "name": "GRN Local Create Form",
+    "path": "/inventory/grn-local/new",
+    "status": "PASSED",
+    "loadTimeMs": 2131,
+    "elementsCount": {
+      "buttons": 14,
+      "inputs": 12,
+      "tables": 1,
+      "cards": 8
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_grn-local_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 34,
+    "name": "GRN Import (Goods Receipt Note Import) List",
+    "path": "/inventory/grn-import",
+    "status": "PASSED",
+    "loadTimeMs": 2003,
+    "elementsCount": {
+      "buttons": 19,
+      "inputs": 1,
+      "tables": 1,
+      "cards": 9
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_grn-import.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 35,
+    "name": "GRN Import Create Form",
+    "path": "/inventory/grn-import/new",
+    "status": "PASSED",
+    "loadTimeMs": 2013,
+    "elementsCount": {
+      "buttons": 14,
+      "inputs": 17,
+      "tables": 1,
+      "cards": 7
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_grn-import_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 36,
+    "name": "Item Batches List",
+    "path": "/inventory/batches",
+    "status": "PASSED",
+    "loadTimeMs": 2015,
+    "elementsCount": {
+      "buttons": 12,
+      "inputs": 4,
+      "tables": 0,
+      "cards": 9
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_batches.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 37,
+    "name": "Items Catalog List",
+    "path": "/inventory/items",
+    "status": "PASSED",
+    "loadTimeMs": 2121,
+    "elementsCount": {
+      "buttons": 28,
+      "inputs": 6,
+      "tables": 1,
+      "cards": 8
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_items.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 38,
+    "name": "Item Master Create Form",
+    "path": "/inventory/items/new",
+    "status": "PASSED",
+    "loadTimeMs": 2014,
+    "elementsCount": {
+      "buttons": 12,
+      "inputs": 24,
+      "tables": 0,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_items_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 39,
+    "name": "Item Groups List",
+    "path": "/inventory/item-groups",
+    "status": "PASSED",
+    "loadTimeMs": 1971,
+    "elementsCount": {
+      "buttons": 22,
+      "inputs": 1,
+      "tables": 4,
+      "cards": 13
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_item-groups.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 40,
+    "name": "Item Group Create Form",
+    "path": "/inventory/item-groups/new",
+    "status": "PASSED",
+    "loadTimeMs": 2178,
+    "elementsCount": {
+      "buttons": 15,
+      "inputs": 1,
+      "tables": 1,
+      "cards": 3
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_item-groups_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 41,
+    "name": "Unit Conversions List",
+    "path": "/inventory/unit-conversions",
+    "status": "PASSED",
+    "loadTimeMs": 2046,
+    "elementsCount": {
+      "buttons": 20,
+      "inputs": 1,
+      "tables": 1,
+      "cards": 9
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_unit-conversions.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 42,
+    "name": "Warehouses Directory List",
+    "path": "/inventory/warehouses",
+    "status": "PASSED",
+    "loadTimeMs": 1965,
+    "elementsCount": {
+      "buttons": 19,
+      "inputs": 1,
+      "tables": 1,
+      "cards": 9
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_warehouses.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 43,
+    "name": "Warehouse Create Form",
+    "path": "/inventory/warehouses/new",
+    "status": "PASSED",
+    "loadTimeMs": 1921,
+    "elementsCount": {
+      "buttons": 12,
+      "inputs": 5,
+      "tables": 0,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_warehouses_new.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 44,
+    "name": "Inventory Reports Central Index",
+    "path": "/inventory/reports",
+    "status": "PASSED",
+    "loadTimeMs": 1932,
+    "elementsCount": {
+      "buttons": 10,
+      "inputs": 0,
+      "tables": 0,
+      "cards": 22
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_reports.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 45,
+    "name": "Inventory Health Monitor Report",
+    "path": "/inventory/reports/health-monitor",
+    "status": "PASSED",
+    "loadTimeMs": 2129,
+    "elementsCount": {
+      "buttons": 17,
+      "inputs": 2,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_reports_health-monitor.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 46,
+    "name": "Periodical Stock Summary Report",
+    "path": "/inventory/reports/periodical-stock-summary",
+    "status": "PASSED",
+    "loadTimeMs": 2034,
+    "elementsCount": {
+      "buttons": 17,
+      "inputs": 5,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_reports_periodical-stock-summary.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 47,
+    "name": "Periodical Stock Statement Report",
+    "path": "/inventory/reports/periodical-stock-statement",
+    "status": "PASSED",
+    "loadTimeMs": 2001,
+    "elementsCount": {
+      "buttons": 19,
+      "inputs": 5,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_reports_periodical-stock-statement.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 48,
+    "name": "Issue Register Report",
+    "path": "/inventory/reports/issue-register",
+    "status": "PASSED",
+    "loadTimeMs": 2347,
+    "elementsCount": {
+      "buttons": 19,
+      "inputs": 2,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_reports_issue-register.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 49,
+    "name": "Stock Transfer Register Report",
+    "path": "/inventory/reports/stock-transfer-register",
+    "status": "PASSED",
+    "loadTimeMs": 2081,
+    "elementsCount": {
+      "buttons": 18,
+      "inputs": 4,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_reports_stock-transfer-register.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 50,
+    "name": "Stock Balances Detailed Report",
+    "path": "/inventory/reports/stock-balances",
+    "status": "PASSED",
+    "loadTimeMs": 2180,
+    "elementsCount": {
+      "buttons": 18,
+      "inputs": 2,
+      "tables": 1,
+      "cards": 10
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_reports_stock-balances.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 51,
+    "name": "Stock Value Valuation Report",
+    "path": "/inventory/reports/stock-value",
+    "status": "PASSED",
+    "loadTimeMs": 1950,
+    "elementsCount": {
+      "buttons": 17,
+      "inputs": 3,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_reports_stock-value.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 52,
+    "name": "Stock Adjustments Audit Report",
+    "path": "/inventory/reports/stock-adjustments",
+    "status": "PASSED",
+    "loadTimeMs": 2078,
+    "elementsCount": {
+      "buttons": 20,
+      "inputs": 3,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_reports_stock-adjustments.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 53,
+    "name": "Material Returns Report",
+    "path": "/inventory/reports/material-returns",
+    "status": "PASSED",
+    "loadTimeMs": 2076,
+    "elementsCount": {
+      "buttons": 20,
+      "inputs": 4,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_reports_material-returns.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 54,
+    "name": "Stock Verification Variance Report",
+    "path": "/inventory/reports/stock-verification",
+    "status": "PASSED",
+    "loadTimeMs": 2000,
+    "elementsCount": {
+      "buttons": 20,
+      "inputs": 2,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_reports_stock-verification.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 55,
+    "name": "Stock Aging Analysis Report",
+    "path": "/inventory/reports/stock-aging-analysis",
+    "status": "PASSED",
+    "loadTimeMs": 1940,
+    "elementsCount": {
+      "buttons": 17,
+      "inputs": 1,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_reports_stock-aging-analysis.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 56,
+    "name": "Expired Items Report",
+    "path": "/inventory/reports/expired-items",
+    "status": "PASSED",
+    "loadTimeMs": 2039,
+    "elementsCount": {
+      "buttons": 18,
+      "inputs": 4,
+      "tables": 0,
+      "cards": 9
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_reports_expired-items.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 57,
+    "name": "Slow Moving Items Report",
+    "path": "/inventory/reports/slow-moving",
+    "status": "PASSED",
+    "loadTimeMs": 1984,
+    "elementsCount": {
+      "buttons": 15,
+      "inputs": 2,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_reports_slow-moving.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 58,
+    "name": "Fast Moving Items Report",
+    "path": "/inventory/reports/fast-moving",
+    "status": "PASSED",
+    "loadTimeMs": 2064,
+    "elementsCount": {
+      "buttons": 15,
+      "inputs": 2,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_reports_fast-moving.png",
+    "errorDetails": ""
+  },
+  {
+    "index": 59,
+    "name": "Non Moving Items Report",
+    "path": "/inventory/reports/non-moving",
+    "status": "PASSED",
+    "loadTimeMs": 2191,
+    "elementsCount": {
+      "buttons": 15,
+      "inputs": 1,
+      "tables": 1,
+      "cards": 4
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "screenshot": "tests/screenshots/inventory/inventory_reports_non-moving.png",
+    "errorDetails": ""
+  }
+]

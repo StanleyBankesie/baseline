@@ -507,7 +507,7 @@ export default function HardServicesPage() {
             <ArrowLeft size={14} /> Back
           </button>
           <div>
-            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <h1 className="text-2xl font-bold font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Wrench className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               Hard Services &amp; Technical Operations
             </h1>
@@ -600,7 +600,7 @@ export default function HardServicesPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300">
                 <tr>
                   <th className="px-4 py-3">System Name</th>
@@ -636,7 +636,7 @@ export default function HardServicesPage() {
                     <td className="px-3 py-3 text-slate-600 dark:text-slate-300">
                       {system.responsible_technician || "—"}
                     </td>
-                    <td className="px-3 py-3 text-xs whitespace-nowrap text-slate-700 dark:text-slate-300">
+                    <td className="px-3 py-3 text-sm whitespace-nowrap text-slate-700 dark:text-slate-300">
                       {system.next_service_due ? String(system.next_service_due).slice(0, 10) : "—"}
                       {isOverdue(system.next_service_due) && (
                         <span className="ml-1 text-[10px] text-slate-500 dark:text-slate-400 font-semibold uppercase">
@@ -891,7 +891,7 @@ export default function HardServicesPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="btn btn-primary px-5 py-2 text-xs font-semibold shadow-sm disabled:opacity-60 inline-flex items-center gap-1.5"
+                  className="btn btn-primary px-5 py-2 text-sm font-semibold shadow-sm disabled:opacity-60 inline-flex items-center gap-1.5"
                 >
                   <UserCheck size={13} />
                   <span>
@@ -1185,7 +1185,7 @@ export default function HardServicesPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="btn btn-primary px-5 py-2 text-xs font-semibold shadow-sm disabled:opacity-60 inline-flex items-center gap-1.5"
+                  className="btn btn-primary px-5 py-2 text-sm font-semibold shadow-sm disabled:opacity-60 inline-flex items-center gap-1.5"
                 >
                   <UserCheck size={13} />
                   <span>

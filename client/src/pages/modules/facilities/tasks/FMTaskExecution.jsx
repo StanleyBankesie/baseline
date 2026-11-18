@@ -395,7 +395,7 @@ export default function FMTaskExecution() {
         <div className="card-header bg-brand text-white p-4 sm:p-5">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+              <h1 className="text-2xl font-bold sm:text-2xl font-bold flex items-center gap-2">
                 <ListTodo className="w-6 h-6 sm:w-7 sm:h-7" /> FM Task Execution
               </h1>
               <p className="text-xs sm:text-sm mt-1 opacity-90">
@@ -430,7 +430,7 @@ export default function FMTaskExecution() {
             <input
               type="text"
               placeholder="Search task title or property..."
-              className="input w-full text-xs"
+              className="input w-full text-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -679,7 +679,7 @@ export default function FMTaskExecution() {
                   <button
                     type="button"
                     onClick={handleAddDelayReason}
-                    className="text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1 self-start sm:self-auto"
+                    className="text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1 self-start sm:self-auto"
                   >
                     <Plus size={14} /> Add Reason Field
                   </button>
@@ -724,7 +724,7 @@ export default function FMTaskExecution() {
                     type="button"
                     onClick={handleSaveDelays}
                     disabled={saving}
-                    className="btn-success text-xs px-4 py-2 flex items-center gap-1.5 w-full sm:w-auto justify-center"
+                    className="btn-success text-sm px-4 py-2 flex items-center gap-1.5 w-full sm:w-auto justify-center"
                   >
                     {saving ? (
                       <>
@@ -792,7 +792,7 @@ export default function FMTaskExecution() {
                   Select New Assignee <span className="text-red-500">*</span>
                 </label>
                 <select
-                  className="input w-full text-xs"
+                  className="input w-full text-sm"
                   value={reassignUserId}
                   onChange={(e) => setReassignUserId(e.target.value)}
                   required
@@ -819,7 +819,7 @@ export default function FMTaskExecution() {
                 type="button"
                 onClick={handleReassignTask}
                 disabled={reassigning || !reassignUserId}
-                className="btn-success text-xs px-4 py-2 flex items-center gap-1.5"
+                className="btn-success text-sm px-4 py-2 flex items-center gap-1.5"
               >
                 {reassigning ? (
                   <>

@@ -83,14 +83,7 @@ export default function MaterialRequisitionList() {
             <Link to="/production?section=Shop%20Floor%20%26%20Execution" className="font-sans btn btn-secondary">
               Return to Menu
             </Link>
-            <button
-              type="button"
-              className="btn-success"
-              onClick={fetchData}
-              disabled={loading}
-            >
-              Refresh
-            </button>
+            
             <Link to="/production/execution/material-requisition/new" className="btn-success">
               Create New
             </Link>

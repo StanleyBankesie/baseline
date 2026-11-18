@@ -411,13 +411,7 @@ export default function BudgetPage() {
           >
             <FileSpreadsheet size={16} /> Variance Report
           </Link>
-          <button
-            onClick={loadData}
-            className="btn btn-secondary p-2"
-            title="Refresh"
-          >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-          </button>
+          
           <button
             onClick={handleOpenCreate}
             className="btn btn-primary inline-flex items-center gap-2"

@@ -322,7 +322,7 @@ export default function MaterialReceiptForm() {
               />
               {isNew ? "New Materials Receipt" : "Edit Materials Receipt"}
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 hidden">
               Receive materials issued from Inventory
             </p>
           </div>
@@ -475,7 +475,7 @@ export default function MaterialReceiptForm() {
               <button
                 type="button"
                 onClick={addLine}
-                className="btn btn-secondary text-xs inline-flex items-center gap-1.5"
+                className="btn btn-secondary text-sm inline-flex items-center gap-1.5"
               >
                 <Plus size={14} /> Add Item
               </button>

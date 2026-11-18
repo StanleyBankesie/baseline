@@ -5,15 +5,15 @@ import { ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
  * MobileMovingCarousel
  * 
  * Automatically turns card children into a moving, auto-advancing, swipeable
- * horizontal carousel on small mobile devices (< md / 768px).
- * On medium screens (md) and above, transforms seamlessly into standard grid columns.
+ * horizontal carousel on small and medium devices (< lg / 1024px).
+ * On large screens (lg) and above, transforms seamlessly into standard grid columns.
  */
 export default function MobileMovingCarousel({
   children,
-  gridColsClass = "md:grid-cols-2 lg:grid-cols-4",
+  gridColsClass = "lg:grid-cols-2 xl:grid-cols-4",
   gapClass = "gap-3 sm:gap-4 md:gap-6",
   autoInterval = 3500,
-  itemWidthClass = "w-[84vw] max-w-[88vw] sm:w-[70vw] md:w-full min-w-0 md:max-w-none",
+  itemWidthClass = "w-[84vw] max-w-[88vw] sm:w-[65vw] md:w-[46vw] lg:w-full min-w-0 lg:max-w-none",
   className = "",
   containerClassName = "",
 }) {
@@ -90,16 +90,15 @@ export default function MobileMovingCarousel({
     }, 4500);
   };
 
-  // Moving Carousel Auto-Scroll Effect
+  // Moving Carousel Auto-Scroll Effect on Small & Medium Devices (< 1024px)
   useEffect(() => {
     if (count <= 1 || isUserInteracting || !isPlaying) return;
 
-    // Check if on small mobile screen (< 768px)
-    const checkIsMobile = () => typeof window !== "undefined" && window.innerWidth < 768;
-    if (!checkIsMobile()) return;
+    const checkIsSmallOrMedium = () => typeof window !== "undefined" && window.innerWidth < 1024;
+    if (!checkIsSmallOrMedium()) return;
 
     const interval = setInterval(() => {
-      if (!checkIsMobile() || !containerRef.current) return;
+      if (!checkIsSmallOrMedium()) return;
       setActiveIndex((prev) => {
         const next = (prev + 1) % count;
         scrollToCard(next);
@@ -110,7 +109,7 @@ export default function MobileMovingCarousel({
     return () => clearInterval(interval);
   }, [count, isUserInteracting, isPlaying, autoInterval, scrollToCard]);
 
-  // Cleanup timeout on unmount
+  // Clean timeouts on unmount
   useEffect(() => {
     return () => {
       if (userInteractionTimeoutRef.current) {
@@ -129,7 +128,7 @@ export default function MobileMovingCarousel({
       {/* Center Stop/Play Icon (Hidden by default, only visible when user clicks/taps carousel, opacity=50) */}
       {count > 1 && (
         <div
-          className={`absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 z-30 md:hidden pointer-events-none transition-all duration-300 ${
+          className={`absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 z-30 lg:hidden pointer-events-none transition-all duration-300 ${
             showCenterControl ? "opacity-100 scale-100" : "opacity-0 scale-75 pointer-events-none"
           }`}
         >
@@ -153,7 +152,7 @@ export default function MobileMovingCarousel({
         </div>
       )}
 
-      {/* Left and Right Manual Navigation Arrows (mobile only, opacity=50) */}
+      {/* Left and Right Manual Navigation Arrows (small & medium screens, opacity=50) */}
       {count > 1 && (
         <>
           <button
@@ -165,7 +164,7 @@ export default function MobileMovingCarousel({
               const prevIndex = (activeIndex - 1 + count) % count;
               scrollToCard(prevIndex);
             }}
-            className="absolute left-1 top-1/2 -translate-y-1/2 z-20 md:hidden w-8 h-8 rounded-full bg-slate-900/60 dark:bg-black/60 text-white backdrop-blur-md opacity-50 hover:opacity-100 active:opacity-100 transition-opacity flex items-center justify-center shadow-md active:scale-90"
+            className="absolute left-1 top-1/2 -translate-y-1/2 z-20 lg:hidden w-8 h-8 rounded-full bg-slate-900/60 dark:bg-black/60 text-white backdrop-blur-md opacity-50 hover:opacity-100 active:opacity-100 transition-opacity flex items-center justify-center shadow-md active:scale-90"
           >
             <ChevronLeft size={18} strokeWidth={2.5} />
           </button>
@@ -179,14 +178,14 @@ export default function MobileMovingCarousel({
               const nextIndex = (activeIndex + 1) % count;
               scrollToCard(nextIndex);
             }}
-            className="absolute right-1 top-1/2 -translate-y-1/2 z-20 md:hidden w-8 h-8 rounded-full bg-slate-900/60 dark:bg-black/60 text-white backdrop-blur-md opacity-50 hover:opacity-100 active:opacity-100 transition-opacity flex items-center justify-center shadow-md active:scale-90"
+            className="absolute right-1 top-1/2 -translate-y-1/2 z-20 lg:hidden w-8 h-8 rounded-full bg-slate-900/60 dark:bg-black/60 text-white backdrop-blur-md opacity-50 hover:opacity-100 active:opacity-100 transition-opacity flex items-center justify-center shadow-md active:scale-90"
           >
             <ChevronRight size={18} strokeWidth={2.5} />
           </button>
         </>
       )}
 
-      {/* Cards Container: flex-nowrap carousel on small mobile, grid on medium+ */}
+      {/* Cards Container: flex-nowrap carousel on small & medium devices, grid on large (lg+) */}
       <div
         ref={containerRef}
         data-carousel-container
@@ -194,7 +193,7 @@ export default function MobileMovingCarousel({
         onClick={triggerCenterControl}
         onTouchStart={handleUserTouchOrHover}
         onMouseDown={handleUserTouchOrHover}
-        className={`flex flex-nowrap overflow-x-auto pb-4 pt-1 snap-x snap-mandatory scrollbar-none no-scrollbar md:grid ${gridColsClass} ${gapClass} px-1 sm:px-2 md:px-0 transition-all ${className}`}
+        className={`flex flex-nowrap overflow-x-auto pb-4 pt-1 snap-x snap-mandatory scrollbar-none no-scrollbar lg:grid ${gridColsClass} ${gapClass} px-1 sm:px-2 lg:px-0 transition-all ${className}`}
         style={{
           WebkitOverflowScrolling: "touch",
           flexWrap: "nowrap",
@@ -206,16 +205,16 @@ export default function MobileMovingCarousel({
           <div
             key={index}
             data-carousel-card
-            className={`snap-center shrink-0 flex-shrink-0 md:shrink md:flex-shrink min-w-0 overflow-hidden ${itemWidthClass} [&>*]:w-full [&>*]:max-w-full transition-all`}
+            className={`snap-center shrink-0 flex-shrink-0 lg:shrink lg:flex-shrink min-w-0 overflow-visible p-1.5 lg:p-1 ${itemWidthClass} [&>*]:w-full [&>*]:max-w-full transition-all`}
           >
             {child}
           </div>
         ))}
       </div>
 
-      {/* Moving Carousel Dot Indicators (mobile only) */}
+      {/* Moving Carousel Dot Indicators (small and medium screens) */}
       {count > 1 && (
-        <div className="flex md:hidden items-center justify-center gap-1.5 mt-2">
+        <div className="flex lg:hidden items-center justify-center gap-1.5 mt-2">
           {validChildren.map((_, dotIdx) => (
             <button
               key={dotIdx}

@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 /**
  * @file FinalAccountPage.jsx
  * @description Comprehensive Final Account & Retention Release management page for OmniSuite ERP.
@@ -701,7 +702,7 @@ export default function FinalAccountPage() {
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Scale size={24} className="text-brand-900 dark:text-brand-400" /> Final Account & Retention Release
             </h1>
-            <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+            <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400 hidden">
               Reconcile final project accounts, manage retention balances, track releases and final financial settlement
             </p>
           </div>
@@ -713,7 +714,7 @@ export default function FinalAccountPage() {
             type="button"
             onClick={handleReconcile}
             disabled={saving || !selectedProjectId}
-            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs font-semibold shadow-sm hover:border-brand-500"
+            className="btn btn-secondary inline-flex items-center gap-1.5 text-sm font-semibold shadow-sm hover:border-brand-500"
             title="Auto-synchronize and recalculate live source figures from ERP"
           >
             <RefreshCw size={14} className={saving ? "animate-spin" : "text-brand-600"} /> Reconcile Account
@@ -721,21 +722,21 @@ export default function FinalAccountPage() {
           <button
             type="button"
             onClick={exportExcel}
-            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs font-semibold shadow-sm"
+            className="btn btn-secondary inline-flex items-center gap-1.5 text-sm font-semibold shadow-sm"
           >
             <FileSpreadsheet size={14} className="text-emerald-600" /> Export Excel
           </button>
           <button
             type="button"
             onClick={exportPdf}
-            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs font-semibold shadow-sm"
+            className="btn btn-secondary inline-flex items-center gap-1.5 text-sm font-semibold shadow-sm"
           >
             <Download size={14} className="text-rose-600" /> Export PDF
           </button>
           <button
             type="button"
             onClick={handlePrint}
-            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs font-semibold shadow-sm"
+            className="btn btn-secondary inline-flex items-center gap-1.5 text-sm font-semibold shadow-sm"
           >
             <Printer size={14} /> Print
           </button>
@@ -768,7 +769,7 @@ export default function FinalAccountPage() {
               Select Active Project <span className="text-red-500">*</span>
             </label>
             <select
-              className="input text-xs w-full font-semibold text-slate-900 dark:text-slate-100"
+              className="input text-sm w-full font-semibold text-slate-900 dark:text-slate-100"
               value={selectedProjectId}
               onChange={(e) => handleProjectSelect(e.target.value)}
               disabled={loadingProjects}
@@ -790,7 +791,7 @@ export default function FinalAccountPage() {
             <input
               type="text"
               readOnly
-              className="input text-xs w-full bg-slate-50 dark:bg-slate-800/60 font-mono font-semibold text-brand-900 dark:text-brand-300"
+              className="input text-sm w-full bg-slate-50 dark:bg-slate-800/60 font-mono font-semibold text-brand-900 dark:text-brand-300"
               value={finalAccount?.reference_no || `[Auto-Generated upon creation]`}
             />
           </div>
@@ -801,7 +802,7 @@ export default function FinalAccountPage() {
             </label>
             <input
               type="date"
-              className="input text-xs w-full"
+              className="input text-sm w-full"
               value={faForm.final_account_date}
               onChange={(e) => setFaForm((prev) => ({ ...prev, final_account_date: e.target.value }))}
             />
@@ -869,8 +870,8 @@ export default function FinalAccountPage() {
       ) : (
         <>
           {/* 6 Canonical Dashboard KPI Cards */}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6">
-            {[
+          <MobileMovingCarousel data-page-carousel gridColsClass="grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6" gapClass="gap-4">
+          {[
               {
                 label: "Revised Contract",
                 val: `${faForm.currency} ${Number(calculations.revisedContract).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
@@ -916,7 +917,7 @@ export default function FinalAccountPage() {
             ].map((card, i) => (
               <div
                 key={i}
-                className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm"
+                className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-smoky-card hover:shadow-smoky-lg transition-all"
               >
                 <div>
                   <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
@@ -932,7 +933,7 @@ export default function FinalAccountPage() {
                 </div>
               </div>
             ))}
-          </div>
+        </MobileMovingCarousel>
 
           {/* Concise Tabs Navigation */}
           <div className="border-b border-slate-200 dark:border-slate-800 flex overflow-x-auto gap-2 text-xs font-semibold">
@@ -985,7 +986,7 @@ export default function FinalAccountPage() {
                     <input
                       type="number"
                       step="0.01"
-                      className="input text-xs w-full text-right font-mono"
+                      className="input text-sm w-full text-right font-mono"
                       value={faForm.original_contract_value}
                       onChange={(e) => setFaForm((prev) => ({ ...prev, original_contract_value: e.target.value }))}
                     />
@@ -1002,7 +1003,7 @@ export default function FinalAccountPage() {
                     <input
                       type="number"
                       step="0.01"
-                      className="input text-xs w-full text-right font-mono text-emerald-600 font-semibold"
+                      className="input text-sm w-full text-right font-mono text-emerald-600 font-semibold"
                       value={faForm.approved_variations_value}
                       onChange={(e) => setFaForm((prev) => ({ ...prev, approved_variations_value: e.target.value }))}
                     />
@@ -1027,7 +1028,7 @@ export default function FinalAccountPage() {
                     <input
                       type="number"
                       step="0.01"
-                      className="input text-xs w-full text-right font-mono"
+                      className="input text-sm w-full text-right font-mono"
                       value={faForm.additional_approved_charges}
                       onChange={(e) => setFaForm((prev) => ({ ...prev, additional_approved_charges: e.target.value }))}
                     />
@@ -1044,7 +1045,7 @@ export default function FinalAccountPage() {
                     <input
                       type="number"
                       step="0.01"
-                      className="input text-xs w-full text-right font-mono text-rose-600"
+                      className="input text-sm w-full text-right font-mono text-rose-600"
                       value={faForm.approved_deductions}
                       onChange={(e) => setFaForm((prev) => ({ ...prev, approved_deductions: e.target.value }))}
                     />
@@ -1078,7 +1079,7 @@ export default function FinalAccountPage() {
                     <input
                       type="number"
                       step="0.01"
-                      className="input text-xs w-full text-right font-mono"
+                      className="input text-sm w-full text-right font-mono"
                       value={faForm.total_invoiced}
                       onChange={(e) => setFaForm((prev) => ({ ...prev, total_invoiced: e.target.value }))}
                     />
@@ -1095,7 +1096,7 @@ export default function FinalAccountPage() {
                     <input
                       type="number"
                       step="0.01"
-                      className="input text-xs w-full text-right font-mono font-semibold text-emerald-600"
+                      className="input text-sm w-full text-right font-mono font-semibold text-emerald-600"
                       value={faForm.total_paid}
                       onChange={(e) => setFaForm((prev) => ({ ...prev, total_paid: e.target.value }))}
                     />
@@ -1120,7 +1121,7 @@ export default function FinalAccountPage() {
                     <input
                       type="number"
                       step="0.01"
-                      className="input text-xs w-full text-right font-mono"
+                      className="input text-sm w-full text-right font-mono"
                       value={faForm.outstanding_payable}
                       onChange={(e) => setFaForm((prev) => ({ ...prev, outstanding_payable: e.target.value }))}
                     />
@@ -1137,7 +1138,7 @@ export default function FinalAccountPage() {
                       <input
                         type="text"
                         placeholder="Representative name & designation"
-                        className="input text-xs w-full"
+                        className="input text-sm w-full"
                         value={faForm.agreed_by_client}
                         onChange={(e) => setFaForm((prev) => ({ ...prev, agreed_by_client: e.target.value }))}
                       />
@@ -1148,7 +1149,7 @@ export default function FinalAccountPage() {
                       </label>
                       <input
                         type="date"
-                        className="input text-xs w-full"
+                        className="input text-sm w-full"
                         value={faForm.agreed_client_date}
                         onChange={(e) => setFaForm((prev) => ({ ...prev, agreed_client_date: e.target.value }))}
                       />
@@ -1163,7 +1164,7 @@ export default function FinalAccountPage() {
                       <input
                         type="text"
                         placeholder="Lead Project Accountant / QS"
-                        className="input text-xs w-full"
+                        className="input text-sm w-full"
                         value={faForm.reconciled_by}
                         onChange={(e) => setFaForm((prev) => ({ ...prev, reconciled_by: e.target.value }))}
                       />
@@ -1174,7 +1175,7 @@ export default function FinalAccountPage() {
                       </label>
                       <input
                         type="date"
-                        className="input text-xs w-full"
+                        className="input text-sm w-full"
                         value={faForm.reconciled_date}
                         onChange={(e) => setFaForm((prev) => ({ ...prev, reconciled_date: e.target.value }))}
                       />
@@ -1189,7 +1190,7 @@ export default function FinalAccountPage() {
                           Final Settlement Status
                         </label>
                         <select
-                          className="input text-xs w-full font-semibold"
+                          className="input text-sm w-full font-semibold"
                           value={faForm.final_settlement_status}
                           onChange={(e) => setFaForm((prev) => ({ ...prev, final_settlement_status: e.target.value }))}
                         >
@@ -1207,7 +1208,7 @@ export default function FinalAccountPage() {
                         <input
                           type="text"
                           placeholder="e.g. SETTLE-REF-2026-089"
-                          className="input text-xs w-full"
+                          className="input text-sm w-full"
                           value={faForm.settlement_reference}
                           onChange={(e) => setFaForm((prev) => ({ ...prev, settlement_reference: e.target.value }))}
                         />
@@ -1221,7 +1222,7 @@ export default function FinalAccountPage() {
                       <textarea
                         rows={2}
                         placeholder="Document final waivers, full and final discharge declarations, retention payout certificates..."
-                        className="input text-xs w-full"
+                        className="input text-sm w-full"
                         value={faForm.settlement_remarks}
                         onChange={(e) => setFaForm((prev) => ({ ...prev, settlement_remarks: e.target.value }))}
                       />
@@ -1252,14 +1253,14 @@ export default function FinalAccountPage() {
               type="button"
               onClick={handleReconcile}
               disabled={saving}
-              className="btn btn-secondary text-xs inline-flex items-center gap-1.5 shadow-sm"
+              className="btn btn-secondary text-sm inline-flex items-center gap-1.5 shadow-sm"
             >
               <RefreshCw size={13} className={saving ? "animate-spin" : ""} /> Sync Source Transactions
             </button>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 dark:bg-slate-800/60 uppercase font-semibold text-slate-600 dark:text-slate-300 border-b dark:border-slate-800">
                 <tr>
                   <th className="p-3">Date</th>
@@ -1361,7 +1362,7 @@ export default function FinalAccountPage() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Retention Applicable?</label>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Retention Applicable?</label>
                 <input
                   type="checkbox"
                   className="toggle-checkbox"
@@ -1379,7 +1380,7 @@ export default function FinalAccountPage() {
                       Retention Calculation Basis <span className="text-red-500">*</span>
                     </label>
                     <select
-                      className="input text-xs w-full"
+                      className="input text-sm w-full"
                       value={faForm.retention_basis}
                       onChange={(e) => setFaForm((prev) => ({ ...prev, retention_basis: e.target.value }))}
                     >
@@ -1400,7 +1401,7 @@ export default function FinalAccountPage() {
                       step="0.1"
                       min="0"
                       max="100"
-                      className="input text-xs w-full"
+                      className="input text-sm w-full"
                       value={faForm.retention_percent}
                       onChange={(e) => setFaForm((prev) => ({ ...prev, retention_percent: e.target.value }))}
                     />
@@ -1413,7 +1414,7 @@ export default function FinalAccountPage() {
                     <input
                       type="number"
                       step="0.01"
-                      className="input text-xs w-full font-mono"
+                      className="input text-sm w-full font-mono"
                       value={calculations.retBase}
                       onChange={(e) => setFaForm((prev) => ({ ...prev, retention_calculation_base: e.target.value }))}
                     />
@@ -1450,7 +1451,7 @@ export default function FinalAccountPage() {
                     </label>
                     <textarea
                       rows={2}
-                      className="input text-xs w-full"
+                      className="input text-sm w-full"
                       placeholder="e.g. 50% upon Practical Completion Certificate issuance; 50% upon Final Completion / Defects Liability Period expiry..."
                       value={faForm.retention_release_conditions}
                       onChange={(e) => setFaForm((prev) => ({ ...prev, retention_release_conditions: e.target.value }))}
@@ -1462,7 +1463,7 @@ export default function FinalAccountPage() {
                     </label>
                     <textarea
                       rows={2}
-                      className="input text-xs w-full"
+                      className="input text-sm w-full"
                       placeholder="Specific bank guarantee in lieu of retention, interest stipulations, escrow details..."
                       value={faForm.retention_remarks}
                       onChange={(e) => setFaForm((prev) => ({ ...prev, retention_remarks: e.target.value }))}
@@ -1494,14 +1495,14 @@ export default function FinalAccountPage() {
                 <button
                   type="button"
                   onClick={openNewReleaseModal}
-                  className="btn btn-primary text-xs inline-flex items-center gap-1.5 shadow-sm"
+                  className="btn btn-primary text-sm inline-flex items-center gap-1.5 shadow-sm"
                 >
                   <Plus size={14} /> Record Retention Release
                 </button>
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-sm">
                   <thead className="bg-slate-50 dark:bg-slate-800/60 uppercase font-semibold text-slate-600 dark:text-slate-300 border-b dark:border-slate-800">
                     <tr>
                       <th className="p-3">Reference</th>
@@ -1608,14 +1609,14 @@ export default function FinalAccountPage() {
             <button
               type="button"
               onClick={openNewAdjustmentModal}
-              className="btn btn-primary text-xs inline-flex items-center gap-1.5 shadow-sm"
+              className="btn btn-primary text-sm inline-flex items-center gap-1.5 shadow-sm"
             >
               <Plus size={14} /> Record New Adjustment
             </button>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 dark:bg-slate-800/60 uppercase font-semibold text-slate-600 dark:text-slate-300 border-b dark:border-slate-800">
                 <tr>
                   <th className="p-3">Ref</th>
@@ -1739,7 +1740,7 @@ export default function FinalAccountPage() {
                   Release Stage / Milestone <span className="text-red-500">*</span>
                 </label>
                 <select
-                  className="input text-xs w-full"
+                  className="input text-sm w-full"
                   value={releaseForm.release_stage}
                   onChange={(e) => setReleaseForm((prev) => ({ ...prev, release_stage: e.target.value }))}
                 >
@@ -1761,7 +1762,7 @@ export default function FinalAccountPage() {
                     step="0.1"
                     min="0"
                     max="100"
-                    className="input text-xs w-full"
+                    className="input text-sm w-full"
                     value={releaseForm.release_percent}
                     onChange={(e) => {
                       const pct = Number(e.target.value);
@@ -1777,7 +1778,7 @@ export default function FinalAccountPage() {
                   <input
                     type="number"
                     step="0.01"
-                    className="input text-xs w-full font-mono font-semibold"
+                    className="input text-sm w-full font-mono font-semibold"
                     value={releaseForm.release_amount}
                     onChange={(e) => setReleaseForm((prev) => ({ ...prev, release_amount: e.target.value }))}
                     required
@@ -1792,7 +1793,7 @@ export default function FinalAccountPage() {
                   </label>
                   <input
                     type="date"
-                    className="input text-xs w-full"
+                    className="input text-sm w-full"
                     value={releaseForm.expected_release_date}
                     onChange={(e) => setReleaseForm((prev) => ({ ...prev, expected_release_date: e.target.value }))}
                   />
@@ -1803,7 +1804,7 @@ export default function FinalAccountPage() {
                   </label>
                   <input
                     type="date"
-                    className="input text-xs w-full"
+                    className="input text-sm w-full"
                     value={releaseForm.actual_release_date}
                     onChange={(e) => setReleaseForm((prev) => ({ ...prev, actual_release_date: e.target.value }))}
                   />
@@ -1816,7 +1817,7 @@ export default function FinalAccountPage() {
                     Release Status
                   </label>
                   <select
-                    className="input text-xs w-full"
+                    className="input text-sm w-full"
                     value={releaseForm.release_status}
                     onChange={(e) => setReleaseForm((prev) => ({ ...prev, release_status: e.target.value }))}
                   >
@@ -1833,7 +1834,7 @@ export default function FinalAccountPage() {
                   <input
                     type="text"
                     placeholder="e.g. PV-2026-0044"
-                    className="input text-xs w-full"
+                    className="input text-sm w-full"
                     value={releaseForm.payment_voucher_ref}
                     onChange={(e) => setReleaseForm((prev) => ({ ...prev, payment_voucher_ref: e.target.value }))}
                   />
@@ -1846,7 +1847,7 @@ export default function FinalAccountPage() {
                 </label>
                 <textarea
                   rows={2}
-                  className="input text-xs w-full"
+                  className="input text-sm w-full"
                   placeholder="e.g. Issuance of Practical Completion Certificate; As-built drawings handover..."
                   value={releaseForm.release_conditions}
                   onChange={(e) => setReleaseForm((prev) => ({ ...prev, release_conditions: e.target.value }))}
@@ -1864,7 +1865,7 @@ export default function FinalAccountPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="btn btn-primary text-xs font-semibold"
+                  className="btn btn-primary text-sm font-semibold"
                 >
                   {saving ? "Saving..." : editingRelease ? "Save Milestone" : "Record Release"}
                 </button>
@@ -1901,7 +1902,7 @@ export default function FinalAccountPage() {
                     Adjustment Type <span className="text-red-500">*</span>
                   </label>
                   <select
-                    className="input text-xs w-full"
+                    className="input text-sm w-full"
                     value={adjustmentForm.adjustment_type}
                     onChange={(e) => setAdjustmentForm((prev) => ({ ...prev, adjustment_type: e.target.value }))}
                   >
@@ -1919,7 +1920,7 @@ export default function FinalAccountPage() {
                   <input
                     type="number"
                     step="0.01"
-                    className="input text-xs w-full font-mono font-semibold"
+                    className="input text-sm w-full font-mono font-semibold"
                     value={adjustmentForm.amount}
                     onChange={(e) => setAdjustmentForm((prev) => ({ ...prev, amount: e.target.value }))}
                     required
@@ -1934,7 +1935,7 @@ export default function FinalAccountPage() {
                 <input
                   type="text"
                   placeholder="e.g. Liquidated damages for 5 days unexcused delay"
-                  className="input text-xs w-full"
+                  className="input text-sm w-full"
                   value={adjustmentForm.description}
                   onChange={(e) => setAdjustmentForm((prev) => ({ ...prev, description: e.target.value }))}
                   required
@@ -1947,7 +1948,7 @@ export default function FinalAccountPage() {
                 </label>
                 <textarea
                   rows={2}
-                  className="input text-xs w-full"
+                  className="input text-sm w-full"
                   placeholder="Clause reference, contractual agreement, engineer instruction..."
                   value={adjustmentForm.reason_justification}
                   onChange={(e) => setAdjustmentForm((prev) => ({ ...prev, reason_justification: e.target.value }))}
@@ -1962,7 +1963,7 @@ export default function FinalAccountPage() {
                   <input
                     type="text"
                     placeholder="Engineer / QS / Project Manager"
-                    className="input text-xs w-full"
+                    className="input text-sm w-full"
                     value={adjustmentForm.submitted_by}
                     onChange={(e) => setAdjustmentForm((prev) => ({ ...prev, submitted_by: e.target.value }))}
                   />
@@ -1972,7 +1973,7 @@ export default function FinalAccountPage() {
                     Review / Approval Status
                   </label>
                   <select
-                    className="input text-xs w-full font-semibold"
+                    className="input text-sm w-full font-semibold"
                     value={adjustmentForm.reviewed_status}
                     onChange={(e) => setAdjustmentForm((prev) => ({ ...prev, reviewed_status: e.target.value }))}
                   >
@@ -1994,7 +1995,7 @@ export default function FinalAccountPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="btn btn-primary text-xs font-semibold"
+                  className="btn btn-primary text-sm font-semibold"
                 >
                   {saving ? "Saving..." : editingAdjustment ? "Save Adjustment" : "Record Adjustment"}
                 </button>
@@ -2036,7 +2037,7 @@ export default function FinalAccountPage() {
                   Reconciliation Status
                 </label>
                 <select
-                  className="input text-xs w-full font-semibold"
+                  className="input text-sm w-full font-semibold"
                   value={reconcileItemForm.reconciliation_status}
                   onChange={(e) => setReconcileItemForm((prev) => ({ ...prev, reconciliation_status: e.target.value }))}
                 >
@@ -2055,7 +2056,7 @@ export default function FinalAccountPage() {
                 <input
                   type="number"
                   step="0.01"
-                  className="input text-xs w-full font-mono"
+                  className="input text-sm w-full font-mono"
                   value={reconcileItemForm.approved_adjustments}
                   onChange={(e) => setReconcileItemForm((prev) => ({ ...prev, approved_adjustments: e.target.value }))}
                 />
@@ -2067,7 +2068,7 @@ export default function FinalAccountPage() {
                 </label>
                 <textarea
                   rows={3}
-                  className="input text-xs w-full"
+                  className="input text-sm w-full"
                   placeholder="Explain reconciliation findings or adjustments..."
                   value={reconcileItemForm.discrepancy_notes}
                   onChange={(e) => setReconcileItemForm((prev) => ({ ...prev, discrepancy_notes: e.target.value }))}
@@ -2085,7 +2086,7 @@ export default function FinalAccountPage() {
                 <button
                   type="button"
                   onClick={handleSaveReconcileItem}
-                  className="btn btn-primary text-xs font-semibold"
+                  className="btn btn-primary text-sm font-semibold"
                 >
                   Update Line
                 </button>

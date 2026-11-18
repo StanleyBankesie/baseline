@@ -1,0 +1,15 @@
+[
+  { "name": "Asset Management Home Hub", "path": "/assets", "component": "AssetLanding" },
+  { "name": "Asset Register", "path": "/assets/register", "component": "AssetRegisterList" },
+  { "name": "Asset Register (Alias)", "path": "/assets/list", "component": "AssetRegisterList" },
+  { "name": "Asset Register - New", "path": "/assets/new", "component": "AssetRegisterForm" },
+  { "name": "Asset Register - :Id", "path": "/assets/1", "component": "AssetRegisterForm" },
+  { "name": "Asset Categories", "path": "/assets/categories", "component": "AssetCategoriesPage" },
+  { "name": "Asset Depreciation Run", "path": "/assets/depreciation", "component": "DepreciationRunPage" },
+  { "name": "Asset Transfers", "path": "/assets/transfers", "component": "AssetTransfersPage" },
+  { "name": "Asset Disposals", "path": "/assets/disposals", "component": "AssetDisposalsPage" },
+  { "name": "Asset Revaluations", "path": "/assets/revaluations", "component": "AssetRevaluationPage" },
+  { "name": "Asset Setup", "path": "/assets/setup", "component": "AssetSetupPage" },
+  { "name": "Fixed Asset Schedule Report", "path": "/assets/reports/schedule", "component": "FixedAssetScheduleReport" },
+  { "name": "Asset Reports (Alias)", "path": "/assets/reports", "component": "FixedAssetScheduleReport" }
+]

@@ -1,172 +1,185 @@
-import MobileMovingCarousel from "@/components/MobileMovingCarousel";
-/**
- * @fileoverview MaintenanceContractList component.
- * Provides functionality for MaintenanceContractList.
- */
-
-import React, { useState, useEffect, useMemo } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { toast } from "react-toastify";
-import { api } from "../../../../api/client";
-import { Eye, ArrowLeft, Activity, Clock, CheckCircle2, FileText } from "lucide-react";
-import { ListPrintIconButton, ListPdfIconButton, ListAttachmentIconButton } from "../../../../components/list/ListDocActionIconButtons.jsx";
-import DocumentAttachmentsModal from "../../../../components/attachments/DocumentAttachmentsModal.jsx";
-import { useViewMode } from "@/hooks/useViewMode";
-import ViewToggle from "@/components/ViewToggle";
-
-const statusColors = { ACTIVE:"bg-green-100 text-green-700", EXPIRED:"bg-red-100 text-red-600", CANCELLED:"bg-slate-100 text-slate-600", PENDING:"bg-amber-100 text-amber-700" };
-
-/**
- *  component
- * 
- * @returns {JSX.Element} The rendered component
- */
-export default function MaintenanceContractList() {
-  const [viewMode, setViewMode] = useViewMode();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [showAttach, setShowAttach] = useState(false);
-  const [activeDocId, setActiveDocId] = useState(null);
-  const today = new Date().toISOString().slice(0, 10);
-
-  useEffect(() => {
-    let m = true;
-    setLoading(true);
-    api.get("/maintenance/contracts").then(r => { if (m) setItems(Array.isArray(r.data?.items) ? r.data.items : []); })
-      .catch(e => toast.error(e?.response?.data?.message || "Failed to load"))
-      .finally(() => { if (m) setLoading(false); });
-    return () => { m = false; };
-  }, [location.state?.refresh]);
-
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase();
-    if (!q) return items;
-    return items.filter(r =>
-      String(r.contract_no || "").toLowerCase().includes(q) ||
-      String(r.supplier_name || "").toLowerCase().includes(q) ||
-      String(r.status || "").toLowerCase().includes(q)
-    );
-  }, [items, search]);
-
-  function isNearExpiry(endDate, alertDays = 30) {
-    if (!endDate) return false;
-    const diff = (new Date(endDate) - new Date(today)) / (1000 * 60 * 60 * 24);
-    return diff >= 0 && diff <= alertDays;
-  }
-
-  return (
-    <div className="p-6 space-y-4">
-            
-
-      <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg">
-          <div className="flex justify-between items-center">
-            <div className="font-semibold">Maintenance Contracts</div>
-            <div className="grid grid-cols-2 sm:flex gap-2">
-              <Link to="/maintenance?section=Equipment %26 Assets" className="btn btn-secondary flex items-center gap-1.5"><ArrowLeft size={16} /> Back</Link>
-              <Link to="/maintenance/contracts/new" className="btn-success">+ New Contract</Link>
-            </div>
-          </div>
-        </div>
-        </div>
-
-      {/* Metric Stats Cards Carousel */}
-      {/* Metric Stats Cards */}
-      <MobileMovingCarousel data-page-carousel gridColsClass="md:grid-cols-4" gapClass="gap-4">
-        {[
-          {
-            label: "Active SLA Contracts",
-            val: (contracts || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
-            icon: <Activity size={20} className="stroke-[2.5]" />,
-            color: "bg-sky-600 dark:bg-sky-500 text-white",
-          },
-          {
-            label: "Total SLA Contracts",
-            val: (contracts || []).length,
-            icon: <FileText size={20} className="stroke-[2.5]" />,
-            color: "bg-brand-900 dark:bg-brand-700 text-white",
-          },
-          {
-            label: "Pending SLA Contracts",
-            val: (contracts || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
-            icon: <Clock size={20} className="stroke-[2.5]" />,
-            color: "bg-amber-500 text-white",
-          },
-          {
-            label: "Completed SLA Contracts",
-            val: (contracts || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
-            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
-            color: "bg-emerald-600 text-white",
-          },
-        ].map((stat, i) => (
-          <div key={i} className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
-            <div>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                {stat.label}
-              </p>
-              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
-                {stat.val}
-              </p>
-            </div>
-            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
-              {stat.icon}
-            </div>
-          </div>
-        ))}
-      </MobileMovingCarousel>
-
-      <div className="card">
-        <div className="card-body">
-          <div className="mb-4"><input className="input max-w-md" placeholder="Search by no, supplier, status..." value={search} onChange={e => setSearch(e.target.value)} /></div>
-          
-                <div className="flex justify-end mb-4">
-                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
-                </div>
-                <div className="overflow-x-auto">
-            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
-              <thead><tr><th className="whitespace-nowrap">Contract No</th><th className="whitespace-nowrap">Supplier</th><th className="whitespace-nowrap">Assets Covered</th><th className="whitespace-nowrap">Start</th><th className="whitespace-nowrap">End</th><th className="text-right whitespace-nowrap">Value</th><th className="whitespace-nowrap">Status</th><th className="whitespace-nowrap">Created By</th><th className="whitespace-nowrap">Created Date</th><th className="whitespace-nowrap">Actions</th></tr></thead>
-              <tbody>
-                {loading && <tr><td colSpan="10" className="text-center py-8 text-slate-500 whitespace-nowrap">Loading...</td></tr>}
-                {!loading && !filtered.length && <tr><td colSpan="10" className="text-center py-8 text-slate-500 whitespace-nowrap">No contracts found</td></tr>}
-                {!loading && filtered.map(r => (
-                  <tr key={r.id} className={isNearExpiry(r.end_date, r.renewal_alert_days) ? "bg-amber-50 dark:bg-amber-900/20" : ""}>
-                    <td className="font-mono text-sm whitespace-nowrap">{r.contract_no}</td>
-                    <td className="whitespace-nowrap">{r.supplier_name}</td>
-                    <td className="text-sm max-w-xs truncate whitespace-nowrap">{r.asset_names}</td>
-                    <td className="whitespace-nowrap">{r.start_date}</td>
-                    <td className={r.end_date < today ? "text-red-600 font-medium" : ""}>{r.end_date}</td>
-                    <td className="text-right whitespace-nowrap">{Number(r.contract_value || 0).toFixed(2)}</td>
-                    <td className="whitespace-nowrap"><span className={`inline-block px-2 py-0.5 text-xs rounded font-medium ${statusColors[String(r.status || "").toUpperCase()] || "bg-slate-100 text-slate-600"}`}>{r.status}</span></td>
-                    <td className="whitespace-nowrap">{r.created_by_name || "-"}</td>
-                    <td className="whitespace-nowrap">{r.created_at ? new Date(r.created_at).toLocaleDateString() : "-"}</td>
-                    <td className="whitespace-nowrap">
-                      <div className="flex items-center gap-1">
-                        <button type="button" className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded transition-colors" title="View" onClick={() => navigate(`/maintenance/contracts/${r.id}?mode=view`)}><Eye size={15} /></button>
-                        <ListPrintIconButton onClick={() => toast.info("Print coming soon")} />
-                        <ListPdfIconButton onClick={() => toast.info("PDF coming soon")} />
-                        <ListAttachmentIconButton onClick={() => { setActiveDocId(r.id); setShowAttach(true); }} />
-                        <Link to={`/maintenance/contracts/${r.id}`} className="btn-secondary btn-sm">Edit</Link>
-                        {isNearExpiry(r.end_date, r.renewal_alert_days) && <span className="ml-2 text-xs text-amber-700 font-medium">⚠ Expiring</span>}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      {showAttach && activeDocId && (
-        <DocumentAttachmentsModal
-          open={showAttach}
-          onClose={() => { setShowAttach(false); setActiveDocId(null); }}
-          docType="maintenance"
-          docId={activeDocId}
-        />
-      )}
-    </div>
-  );
-}
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
+/**
+ * @fileoverview MaintenanceContractList component.
+ * Provides functionality for MaintenanceContractList.
+ */
+
+import React, { useState, useEffect, useMemo } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
+import { api } from "../../../../api/client";
+import { Eye, ArrowLeft, Activity, Clock, CheckCircle2, FileText } from "lucide-react";
+import { ListPrintIconButton, ListPdfIconButton, ListAttachmentIconButton } from "../../../../components/list/ListDocActionIconButtons.jsx";
+import DocumentAttachmentsModal from "../../../../components/attachments/DocumentAttachmentsModal.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
+
+const statusColors = { ACTIVE:"bg-green-100 text-green-700", EXPIRED:"bg-red-100 text-red-600", CANCELLED:"bg-slate-100 text-slate-600", PENDING:"bg-amber-100 text-amber-700" };
+
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
+export default function MaintenanceContractList() {
+  const [viewMode, setViewMode] = useViewMode();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [showAttach, setShowAttach] = useState(false);
+  const [activeDocId, setActiveDocId] = useState(null);
+  const today = new Date().toISOString().slice(0, 10);
+
+  useEffect(() => {
+    let m = true;
+    setLoading(true);
+    api.get("/maintenance/contracts").then(r => { if (m) setItems(Array.isArray(r.data?.items) ? r.data.items : []); })
+      .catch(e => toast.error(e?.response?.data?.message || "Failed to load"))
+      .finally(() => { if (m) setLoading(false); });
+    return () => { m = false; };
+  }, [location.state?.refresh]);
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    if (!q) return items;
+    return items.filter(r =>
+      String(r.contract_no || "").toLowerCase().includes(q) ||
+      String(r.supplier_name || "").toLowerCase().includes(q) ||
+      String(r.status || "").toLowerCase().includes(q)
+    );
+  }, [items, search]);
+
+  function isNearExpiry(endDate, alertDays = 30) {
+    if (!endDate) return false;
+    const diff = (new Date(endDate) - new Date(today)) / (1000 * 60 * 60 * 24);
+    return diff >= 0 && diff <= alertDays;
+  }
+
+  return (
+    <div className="p-6 space-y-4">
+            
+
+      <div className="card">
+        <div className="card-header bg-brand text-white rounded-t-lg">
+          <div className="flex justify-between items-center">
+            <div className="font-semibold">Maintenance Contracts</div>
+            <div className="grid grid-cols-2 sm:flex gap-2">
+              <Link to="/maintenance?section=Equipment %26 Assets" className="btn btn-secondary flex items-center gap-1.5"><ArrowLeft size={16} /> Back</Link>
+              <Link to="/maintenance/contracts/new" className="btn-success">+ New Contract</Link>
+            </div>
+          </div>
+        </div>
+        </div>
+
+      {/* Metric Stats Cards Carousel */}
+      {/* Metric Stats Cards */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="md:grid-cols-4" gapClass="gap-4">
+        {[
+          {
+            label: "Active SLA Contracts",
+            val: (contracts || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Total SLA Contracts",
+            val: (contracts || []).length,
+            icon: <FileText size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+          {
+            label: "Pending SLA Contracts",
+            val: (contracts || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Completed SLA Contracts",
+            val: (contracts || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+        ].map((stat, i) => {
+          const colors = [
+            "bg-sky-600 dark:bg-sky-500 text-white",
+            "bg-brand-900 dark:bg-brand-700 text-white",
+            "bg-amber-500 text-white",
+            "bg-emerald-600 text-white",
+          ];
+          const colorClass = stat.color || colors[i % 4];
+
+          return (
+            <div
+              key={i}
+              className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm"
+            >
+              <div>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  {stat.label}
+                </p>
+                <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
+                  {stat.val}
+                </p>
+              </div>
+              <div className={`p-3 rounded-full ${colorClass} shadow-sm`}>
+                {stat.icon}
+              </div>
+            </div>
+          );
+        })}
+      </MobileMovingCarousel>
+
+      <div className="card">
+        <div className="card-body">
+          <div className="mb-4"><input className="input max-w-md" placeholder="Search by no, supplier, status..." value={search} onChange={e => setSearch(e.target.value)} /></div>
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
+              <thead><tr><th className="whitespace-nowrap">Contract No</th><th className="whitespace-nowrap">Supplier</th><th className="whitespace-nowrap">Assets Covered</th><th className="whitespace-nowrap">Start</th><th className="whitespace-nowrap">End</th><th className="text-right whitespace-nowrap">Value</th><th className="whitespace-nowrap">Status</th><th className="whitespace-nowrap">Created By</th><th className="whitespace-nowrap">Created Date</th><th className="whitespace-nowrap">Actions</th></tr></thead>
+              <tbody>
+                {loading && <tr><td colSpan="10" className="text-center py-8 text-slate-500 whitespace-nowrap">Loading...</td></tr>}
+                {!loading && !filtered.length && <tr><td colSpan="10" className="text-center py-8 text-slate-500 whitespace-nowrap">No contracts found</td></tr>}
+                {!loading && filtered.map(r => (
+                  <tr key={r.id} className={isNearExpiry(r.end_date, r.renewal_alert_days) ? "bg-amber-50 dark:bg-amber-900/20" : ""}>
+                    <td className="font-mono text-sm whitespace-nowrap">{r.contract_no}</td>
+                    <td className="whitespace-nowrap">{r.supplier_name}</td>
+                    <td className="text-sm max-w-xs truncate whitespace-nowrap">{r.asset_names}</td>
+                    <td className="whitespace-nowrap">{r.start_date}</td>
+                    <td className={r.end_date < today ? "text-red-600 font-medium" : ""}>{r.end_date}</td>
+                    <td className="text-right whitespace-nowrap">{Number(r.contract_value || 0).toFixed(2)}</td>
+                    <td className="whitespace-nowrap"><span className={`inline-block px-2 py-0.5 text-xs rounded font-medium ${statusColors[String(r.status || "").toUpperCase()] || "bg-slate-100 text-slate-600"}`}>{r.status}</span></td>
+                    <td className="whitespace-nowrap">{r.created_by_name || "-"}</td>
+                    <td className="whitespace-nowrap">{r.created_at ? new Date(r.created_at).toLocaleDateString() : "-"}</td>
+                    <td className="whitespace-nowrap">
+                      <div className="flex items-center gap-1">
+                        <button type="button" className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded transition-colors" title="View" onClick={() => navigate(`/maintenance/contracts/${r.id}?mode=view`)}><Eye size={15} /></button>
+                        <ListPrintIconButton onClick={() => toast.info("Print coming soon")} />
+                        <ListPdfIconButton onClick={() => toast.info("PDF coming soon")} />
+                        <ListAttachmentIconButton onClick={() => { setActiveDocId(r.id); setShowAttach(true); }} />
+                        <Link to={`/maintenance/contracts/${r.id}`} className="btn-secondary btn-sm">Edit</Link>
+                        {isNearExpiry(r.end_date, r.renewal_alert_days) && <span className="ml-2 text-xs text-amber-700 font-medium">⚠ Expiring</span>}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      {showAttach && activeDocId && (
+        <DocumentAttachmentsModal
+          open={showAttach}
+          onClose={() => { setShowAttach(false); setActiveDocId(null); }}
+          docType="maintenance"
+          docId={activeDocId}
+        />
+      )}
+    </div>
+  );
+}

@@ -144,13 +144,7 @@ export default function NotificationsPage() {
             <Link to="/" className="btn btn-secondary">
               Home
             </Link>
-            <button
-              className="btn btn-outline"
-              onClick={load}
-              disabled={loading}
-            >
-              Refresh
-            </button>
+            
           </div>
         </div>
       </div>

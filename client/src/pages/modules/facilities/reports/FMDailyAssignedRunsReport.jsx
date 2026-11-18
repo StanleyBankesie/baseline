@@ -242,19 +242,11 @@ export default function FMDailyAssignedRunsReport() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={loadReportData}
-            disabled={loading}
-            className="px-2.5 py-1.5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg text-xs font-medium flex items-center gap-1.5 shadow-sm transition"
-            title="Refresh Data"
-          >
-            <RefreshCw size={13} className={loading ? "animate-spin" : ""} /> Refresh
-          </button>
+          
           <button
             type="button"
             onClick={handleExportCSV}
-            className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-medium flex items-center gap-1.5 shadow-sm transition"
+            className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm font-medium flex items-center gap-1.5 shadow-sm transition"
           >
             <Download size={13} /> Export CSV
           </button>
@@ -416,7 +408,7 @@ export default function FMDailyAssignedRunsReport() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-300 text-[11px]">
               <tr>
                 <th className="px-3.5 py-2.5">Run # & Title</th>
@@ -527,7 +519,7 @@ export default function FMDailyAssignedRunsReport() {
 
               {filteredRuns.length === 0 && !loading && (
                 <tr>
-                  <td colSpan={7} className="text-center py-10 text-slate-400 text-xs">
+                  <td colSpan={7} className="text-center py-10 text-slate-400 text-sm">
                     No assigned daily inspection runs match your search filters.
                   </td>
                 </tr>

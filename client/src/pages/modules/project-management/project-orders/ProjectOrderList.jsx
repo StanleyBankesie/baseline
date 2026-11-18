@@ -1,499 +1,509 @@
-/**
- * @fileoverview ProjectOrderList component.
- * Provides functionality for ProjectOrderList.
- */
-
-import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { api } from "../../../../api/client";
-import { usePermission } from "../../../../auth/PermissionContext.jsx";
-import { toast } from "react-toastify";
-import { filterAndSort } from "../../../../utils/searchUtils.js";
-import useSort from "../../../../hooks/useSort.js";
-import SortableHeader from "../../../../components/SortableHeader.jsx";
-import { Plus, ArrowLeft, ShoppingCart, RefreshCw, Activity, Clock, CheckCircle2 } from "lucide-react";
-import { useViewMode } from "@/hooks/useViewMode";
-import ViewToggle from "@/components/ViewToggle";
-import {
-  ListPrintIconButton,
-  ListPdfIconButton,
-} from "../../../../components/list/ListDocActionIconButtons.jsx";
-
-const STATUS_CONFIG = {
-  DRAFT: "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200",
-  PENDING_APPROVAL: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
-  APPROVED: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
-  POSTED: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
-  REJECTED: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
-  CANCELLED: "bg-slate-800 text-white dark:bg-slate-900 dark:text-slate-300",
-};
-
-
-const STATUS_CONFIG_LIST = [
-  { key: "DRAFT", label: "Draft", bg: "bg-slate-100 text-slate-700 dark:bg-slate-700/60 dark:text-slate-300" },
-  { key: "PENDING_APPROVAL", label: "Pending", bg: "bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300" },
-  { key: "APPROVED", label: "Approved", bg: "bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-300" },
-  { key: "POSTED", label: "Posted", bg: "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300" },
-  { key: "REJECTED", label: "Rejected", bg: "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300" },
-  { key: "CANCELLED", label: "Cancelled", bg: "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400" },
-];
-
-const PRIORITY_CONFIG_LIST = [
-  { key: "LOW", label: "Low", bg: "bg-slate-100 text-slate-700 dark:bg-slate-700/60 dark:text-slate-300" },
-  { key: "MEDIUM", label: "Medium", bg: "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300" },
-  { key: "HIGH", label: "High", bg: "bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300" },
-  { key: "URGENT", label: "Urgent", bg: "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300" },
-];
-
-function StatusBadge({ status }) {
-  const s = String(status || "").toUpperCase();
-  const cls = STATUS_CONFIG[s] || "bg-slate-100 text-slate-500";
-  return (
-    <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest ${cls}`}>
-      {s}
-    </span>
-  );
-}
-
-/**
- *  component
- * 
- * @returns {JSX.Element} The rendered component
- */
-export default function ProjectOrderList() {
-  const [viewMode, setViewMode] = useViewMode();
-  const navigate = useNavigate();
-  const { canCreateOnPage } = usePermission();
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const fetchOrders = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const response = await api.get("/projects/project-orders");
-      const items = Array.isArray(response.data?.items)
-        ? response.data.items
-        : [];
-      setOrders(items);
-    } catch (err) {
-      setError(err?.response?.data?.message || "Error fetching client's orders");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const handleDelete = async (id, orderNo) => {
-    if (!window.confirm(`Delete Client's Order (${orderNo || id})? This cannot be undone.`)) return;
-    try {
-      await api.delete(`/projects/project-orders/${id}`);
-      toast.success("Client's order deleted");
-      setOrders((prev) => prev.filter((x) => x.id !== id));
-    } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to delete client's order");
-    }
-  };
-
-  const handleSubmit = async (order) => {
-    if (!window.confirm(`Submit Client's Order (${order.order_no}) for processing?`)) return;
-    try {
-      await api.post(`/projects/project-orders/${order.id}/submit`);
-      toast.success("Client's order submitted");
-      fetchOrders();
-    } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to submit client's order");
-    }
-  };
-
-  const handlePrint = async (id) => {
-    try {
-      const resp = await api.post(
-        `/documents/project-order/${id}/render`,
-        { format: "html", feature_name: "project-order" },
-        { headers: { "Content-Type": "application/json" } },
-      );
-      const html = typeof resp.data === "string" ? resp.data : String(resp.data || "");
-      const iframe = document.createElement("iframe");
-      iframe.style.position = "absolute";
-      iframe.style.left = "-9999px";
-      iframe.style.top = "0";
-      iframe.style.width = "800px";
-      iframe.style.height = "600px";
-      iframe.style.border = "0";
-      document.body.appendChild(iframe);
-      const doc = iframe.contentWindow?.document || iframe.contentDocument || null;
-      if (!doc) {
-        document.body.removeChild(iframe);
-        return;
-      }
-      doc.open();
-      doc.write(`<style>@media print{img{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>` + html);
-      doc.close();
-      const win = iframe.contentWindow || window;
-      const doPrint = () => {
-        win.focus();
-        try { win.print(); } catch {}
-        setTimeout(() => { document.body.removeChild(iframe); }, 100);
-      };
-      const images = doc.images || [];
-      if (images.length === 0) { doPrint(); return; }
-      let loaded = 0;
-      for (const img of images) {
-        if (img.complete && img.naturalWidth > 0) { loaded++; continue; }
-        img.onload = () => { loaded++; if (loaded === images.length) doPrint(); };
-        img.onerror = () => { loaded++; if (loaded === images.length) doPrint(); };
-      }
-      if (loaded === images.length) doPrint();
-    } catch {
-      toast.error("Failed to render template for print");
-    }
-  };
-
-  const handlePdfDownload = async (id) => {
-    try {
-      const resp = await api.post(
-        `/documents/project-order/${id}/render`,
-        { format: "html", feature_name: "project-order" },
-        { headers: { "Content-Type": "application/json" } },
-      );
-      const html = typeof resp.data === "string" ? resp.data : String(resp.data || "");
-      const { renderHtmlToPdf } = await import("../../../../utils/pdfUtils.js");
-      await renderHtmlToPdf(html, `project-order-${id}.pdf`);
-    } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to download PDF");
-    }
-  };
-
-  const filtered = useMemo(() => {
-    if (!searchTerm.trim()) return orders;
-    return filterAndSort(orders, {
-      query: searchTerm,
-      getKeys: (o) => [o.order_no, o.project_name, o.client_name, o.priority],
-    });
-  }, [orders, searchTerm]);
-
-  const { sorted: filteredOrders, sortKey, sortDir, toggle } = useSort(filtered, "order_date", "desc");
-
-  const statusCounts = useMemo(() => {
-    const counts = {
-      DRAFT: 0,
-      PENDING_APPROVAL: 0,
-      APPROVED: 0,
-      POSTED: 0,
-      REJECTED: 0,
-      CANCELLED: 0,
-    };
-    filteredOrders.forEach((o) => {
-      const s = String(o.status || "").toUpperCase();
-      if (counts[s] !== undefined) counts[s]++;
-      else counts[s] = (counts[s] || 0) + 1;
-    });
-    return counts;
-  }, [filteredOrders]);
-
-  const priorityCounts = useMemo(() => {
-    const counts = {
-      LOW: 0,
-      MEDIUM: 0,
-      HIGH: 0,
-      URGENT: 0,
-    };
-    filteredOrders.forEach((o) => {
-      const p = String(o.priority || "").toUpperCase();
-      if (counts[p] !== undefined) counts[p]++;
-      else counts[p] = (counts[p] || 0) + 1;
-    });
-    return counts;
-  }, [filteredOrders]);
-
-  const distinctProjects = useMemo(() => {
-    return new Set(
-      filteredOrders
-        .map((o) => o.project_name?.trim() || (o.project_id ? String(o.project_id) : ""))
-        .filter(Boolean)
-    ).size;
-  }, [filteredOrders]);
-
-  const totalOrderAmount = useMemo(() => {
-    return orders.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
-  }, [orders]);
-
-  return (
-    <div className="space-y-6">
-      {/* Canonical ERP Flex Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Link to="/project-management" className="btn btn-secondary inline-flex items-center gap-1.5 text-sm">
-            <ArrowLeft size={16} /> Back
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
-              <ShoppingCart size={26} className="text-brand-900 dark:text-brand-400" />
-              Client's Orders
-            </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-              Manage orders placed against projects
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2.5">
-          <button onClick={() => fetchOrders(pagination.page || 1)} className="btn btn-secondary p-2.5" title="Refresh">
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-          </button>
-          <Link
-            to="/project-management/project-orders/new"
-            className="btn btn-primary inline-flex items-center gap-2 text-sm font-semibold shadow-sm"
-          >
-            <Plus size={16} /> New Order
-          </Link>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {[
-          {
-            label: "Active Orders",
-            val: orders.filter((o) => o.status === "APPROVED" || o.status === "POSTED").length,
-            icon: <Activity size={20} className="stroke-[2.5]" />,
-            color: "bg-sky-600 dark:bg-sky-500 text-white",
-          },
-          {
-            label: "Total Orders",
-            val: orders.length,
-            icon: <ShoppingCart size={20} className="stroke-[2.5]" />,
-            color: "bg-brand-900 dark:bg-brand-700 text-white",
-          },
-          {
-            label: "Pending Approval",
-            val: orders.filter((o) => o.status === "PENDING_APPROVAL" || o.status === "DRAFT").length,
-            icon: <Clock size={20} className="stroke-[2.5]" />,
-            color: "bg-amber-500 text-white",
-          },
-          {
-            label: "Fulfilled / Closed",
-            val: orders.filter((o) => o.status === "COMPLETED" || o.status === "DELIVERED" || o.status === "POSTED").length,
-            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
-            color: "bg-emerald-600 text-white",
-          },
-        ].map((stat, i) => (
-          <div key={i} className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
-            <div>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                {stat.label}
-              </p>
-              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
-                {stat.val}
-              </p>
-            </div>
-            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
-              {stat.icon}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="card">
-        <div className="card-body">
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Search client's orders..."
-                className="input"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <button className="btn btn-secondary" onClick={fetchOrders}>
-              Refresh
-            </button>
-          </div>
-
-          {error && (
-            <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4">
-              {error}
-            </div>
-          )}
-
-          
-                <div className="flex justify-end mb-4">
-                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
-                </div>
-                <div className="overflow-x-auto">
-            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
-                <thead>
-                  <tr>
-                    <SortableHeader
-                      label="Order No"
-                      sortKey="order_no"
-                      currentKey={sortKey}
-                      direction={sortDir}
-                      onToggle={toggle}
-                    />
-                    <SortableHeader
-                      label="Order Date"
-                      sortKey="order_date"
-                      currentKey={sortKey}
-                      direction={sortDir}
-                      onToggle={toggle}
-                    />
-                    <SortableHeader
-                      label="Project"
-                      sortKey="project_name"
-                      currentKey={sortKey}
-                      direction={sortDir}
-                      onToggle={toggle}
-                    />
-                    <SortableHeader
-                      label="Client"
-                      sortKey="client_name"
-                      currentKey={sortKey}
-                      direction={sortDir}
-                      onToggle={toggle}
-                    />
-                    <SortableHeader
-                      label="Priority"
-                      sortKey="priority"
-                      currentKey={sortKey}
-                      direction={sortDir}
-                      onToggle={toggle}
-                    />
-                    <SortableHeader
-                      label="Status"
-                      sortKey="status"
-                      currentKey={sortKey}
-                      direction={sortDir}
-                      onToggle={toggle}
-                    />
-                    <SortableHeader
-                      label="Total Amount"
-                      sortKey="total_amount"
-                      currentKey={sortKey}
-                      direction={sortDir}
-                      onToggle={toggle}
-                    />
-                    <th className="text-right">Actions</th>
-                    <SortableHeader
-                      label="Created By"
-                      sortKey="created_by_name"
-                      currentKey={sortKey}
-                      direction={sortDir}
-                      onToggle={toggle}
-                    />
-                  </tr>
-                </thead>
-                <tbody>
-                  {loading ? (
-                    <tr>
-                      <td colSpan="10" className="text-center py-8 text-slate-400">
-                        Loading client's orders...
-                      </td>
-                    </tr>
-                  ) : filteredOrders.length === 0 ? (
-                    <tr>
-                      <td colSpan="10" className="text-center py-8 text-slate-400">
-                        No client's orders found.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredOrders.map((order) => {
-                      const status = String(order.status || "").toUpperCase();
-                      return (
-                        <tr key={order.id}>
-                          <td className="font-medium">{order.order_no}</td>
-                          <td>
-                            {order.order_date
-                              ? new Date(order.order_date).toLocaleDateString()
-                              : "-"}
-                          </td>
-                          <td>{order.project_name || "-"}</td>
-                          <td>{order.client_name || "-"}</td>
-                          <td>
-                            <span className="text-sm font-semibold">
-                              {order.priority || "-"}
-                            </span>
-                          </td>
-                          <td>
-                            <StatusBadge status={status} />
-                          </td>
-                          <td className="font-semibold text-right">
-                            {order.currency || "GHS"}{" "}
-                            {Number(order.total_amount || 0).toLocaleString()}
-                          </td>
-                          <td className="text-center">
-                            <div className="flex items-center justify-center gap-2">
-                              {/* actions */}
-                            </div>
-                          </td>
-                          <td className="text-center">
-                            <div className="flex items-center justify-center gap-2">
-                              <div className="min-w-[60px]">
-                                <Link
-                                  to={`/project-management/project-orders/${order.id}`}
-                                  className="w-full inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-brand bg-brand-50 rounded-lg hover:bg-brand-100 transition-colors h-9"
-                                >
-                                  View
-                                </Link>
-                              </div>
-                              {status === "DRAFT" && (
-                                <>
-                                  <div className="min-w-[40px]">
-                                    <ListPrintIconButton
-                                      onClick={() => handlePrint(order.id)}
-                                    />
-                                  </div>
-                                  <div className="min-w-[40px]">
-                                    <ListPdfIconButton
-                                      onClick={() => handlePdfDownload(order.id)}
-                                    />
-                                  </div>
-                                </>
-                              )}
-                              {status === "DRAFT" && (
-                                <div className="min-w-[100px]">
-                                  <button
-                                    type="button"
-                                    className="w-full inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors h-9"
-                                    onClick={() => handleSubmit(order)}
-                                  >
-                                    Submit
-                                  </button>
-                                </div>
-                              )}
-                              {status === "DRAFT" && (
-                                <div className="min-w-[80px]">
-                                  <button
-                                    type="button"
-                                    className="w-full inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-white bg-red-700 rounded-lg hover:bg-red-800 transition-colors h-9"
-                                    onClick={() =>
-                                      handleDelete(order.id, order.order_no)
-                                    }
-                                  >
-                                    Cancel
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                          <td>
-                            {order.created_by_name || "-"}
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
+/**
+ * @fileoverview ProjectOrderList component.
+ * Provides functionality for ProjectOrderList.
+ */
+
+import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { api } from "../../../../api/client";
+import { usePermission } from "../../../../auth/PermissionContext.jsx";
+import { toast } from "react-toastify";
+import { filterAndSort } from "../../../../utils/searchUtils.js";
+import useSort from "../../../../hooks/useSort.js";
+import SortableHeader from "../../../../components/SortableHeader.jsx";
+import { Plus, ArrowLeft, ShoppingCart, RefreshCw, Activity, Clock, CheckCircle2 } from "lucide-react";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
+import {
+  ListPrintIconButton,
+  ListPdfIconButton,
+} from "../../../../components/list/ListDocActionIconButtons.jsx";
+
+const STATUS_CONFIG = {
+  DRAFT: "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200",
+  PENDING_APPROVAL: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
+  APPROVED: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+  POSTED: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+  REJECTED: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+  CANCELLED: "bg-slate-800 text-white dark:bg-slate-900 dark:text-slate-300",
+};
+
+
+const STATUS_CONFIG_LIST = [
+  { key: "DRAFT", label: "Draft", bg: "bg-slate-100 text-slate-700 dark:bg-slate-700/60 dark:text-slate-300" },
+  { key: "PENDING_APPROVAL", label: "Pending", bg: "bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300" },
+  { key: "APPROVED", label: "Approved", bg: "bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-300" },
+  { key: "POSTED", label: "Posted", bg: "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300" },
+  { key: "REJECTED", label: "Rejected", bg: "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300" },
+  { key: "CANCELLED", label: "Cancelled", bg: "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400" },
+];
+
+const PRIORITY_CONFIG_LIST = [
+  { key: "LOW", label: "Low", bg: "bg-slate-100 text-slate-700 dark:bg-slate-700/60 dark:text-slate-300" },
+  { key: "MEDIUM", label: "Medium", bg: "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300" },
+  { key: "HIGH", label: "High", bg: "bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300" },
+  { key: "URGENT", label: "Urgent", bg: "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300" },
+];
+
+function StatusBadge({ status }) {
+  const s = String(status || "").toUpperCase();
+  const cls = STATUS_CONFIG[s] || "bg-slate-100 text-slate-500";
+  return (
+    <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest ${cls}`}>
+      {s}
+    </span>
+  );
+}
+
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
+export default function ProjectOrderList() {
+  const [viewMode, setViewMode] = useViewMode();
+  const navigate = useNavigate();
+  const { canCreateOnPage } = usePermission();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const response = await api.get("/projects/project-orders");
+      const items = Array.isArray(response.data?.items)
+        ? response.data.items
+        : [];
+      setOrders(items);
+    } catch (err) {
+      setError(err?.response?.data?.message || "Error fetching client's orders");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const handleDelete = async (id, orderNo) => {
+    if (!window.confirm(`Delete Client's Order (${orderNo || id})? This cannot be undone.`)) return;
+    try {
+      await api.delete(`/projects/project-orders/${id}`);
+      toast.success("Client's order deleted");
+      setOrders((prev) => prev.filter((x) => x.id !== id));
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to delete client's order");
+    }
+  };
+
+  const handleSubmit = async (order) => {
+    if (!window.confirm(`Submit Client's Order (${order.order_no}) for processing?`)) return;
+    try {
+      await api.post(`/projects/project-orders/${order.id}/submit`);
+      toast.success("Client's order submitted");
+      fetchOrders();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to submit client's order");
+    }
+  };
+
+  const handlePrint = async (id) => {
+    try {
+      const resp = await api.post(
+        `/documents/project-order/${id}/render`,
+        { format: "html", feature_name: "project-order" },
+        { headers: { "Content-Type": "application/json" } },
+      );
+      const html = typeof resp.data === "string" ? resp.data : String(resp.data || "");
+      const iframe = document.createElement("iframe");
+      iframe.style.position = "absolute";
+      iframe.style.left = "-9999px";
+      iframe.style.top = "0";
+      iframe.style.width = "800px";
+      iframe.style.height = "600px";
+      iframe.style.border = "0";
+      document.body.appendChild(iframe);
+      const doc = iframe.contentWindow?.document || iframe.contentDocument || null;
+      if (!doc) {
+        document.body.removeChild(iframe);
+        return;
+      }
+      doc.open();
+      doc.write(`<style>@media print{img{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>` + html);
+      doc.close();
+      const win = iframe.contentWindow || window;
+      const doPrint = () => {
+        win.focus();
+        try { win.print(); } catch {}
+        setTimeout(() => { document.body.removeChild(iframe); }, 100);
+      };
+      const images = doc.images || [];
+      if (images.length === 0) { doPrint(); return; }
+      let loaded = 0;
+      for (const img of images) {
+        if (img.complete && img.naturalWidth > 0) { loaded++; continue; }
+        img.onload = () => { loaded++; if (loaded === images.length) doPrint(); };
+        img.onerror = () => { loaded++; if (loaded === images.length) doPrint(); };
+      }
+      if (loaded === images.length) doPrint();
+    } catch {
+      toast.error("Failed to render template for print");
+    }
+  };
+
+  const handlePdfDownload = async (id) => {
+    try {
+      const resp = await api.post(
+        `/documents/project-order/${id}/render`,
+        { format: "html", feature_name: "project-order" },
+        { headers: { "Content-Type": "application/json" } },
+      );
+      const html = typeof resp.data === "string" ? resp.data : String(resp.data || "");
+      const { renderHtmlToPdf } = await import("../../../../utils/pdfUtils.js");
+      await renderHtmlToPdf(html, `project-order-${id}.pdf`);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to download PDF");
+    }
+  };
+
+  const filtered = useMemo(() => {
+    if (!searchTerm.trim()) return orders;
+    return filterAndSort(orders, {
+      query: searchTerm,
+      getKeys: (o) => [o.order_no, o.project_name, o.client_name, o.priority],
+    });
+  }, [orders, searchTerm]);
+
+  const { sorted: filteredOrders, sortKey, sortDir, toggle } = useSort(filtered, "order_date", "desc");
+
+  const statusCounts = useMemo(() => {
+    const counts = {
+      DRAFT: 0,
+      PENDING_APPROVAL: 0,
+      APPROVED: 0,
+      POSTED: 0,
+      REJECTED: 0,
+      CANCELLED: 0,
+    };
+    filteredOrders.forEach((o) => {
+      const s = String(o.status || "").toUpperCase();
+      if (counts[s] !== undefined) counts[s]++;
+      else counts[s] = (counts[s] || 0) + 1;
+    });
+    return counts;
+  }, [filteredOrders]);
+
+  const priorityCounts = useMemo(() => {
+    const counts = {
+      LOW: 0,
+      MEDIUM: 0,
+      HIGH: 0,
+      URGENT: 0,
+    };
+    filteredOrders.forEach((o) => {
+      const p = String(o.priority || "").toUpperCase();
+      if (counts[p] !== undefined) counts[p]++;
+      else counts[p] = (counts[p] || 0) + 1;
+    });
+    return counts;
+  }, [filteredOrders]);
+
+  const distinctProjects = useMemo(() => {
+    return new Set(
+      filteredOrders
+        .map((o) => o.project_name?.trim() || (o.project_id ? String(o.project_id) : ""))
+        .filter(Boolean)
+    ).size;
+  }, [filteredOrders]);
+
+  const totalOrderAmount = useMemo(() => {
+    return orders.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
+  }, [orders]);
+
+  return (
+    <div className="space-y-6">
+      {/* Canonical ERP Flex Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Link to="/project-management" className="btn btn-secondary inline-flex items-center gap-1.5 text-sm">
+            <ArrowLeft size={16} /> Back
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
+              <ShoppingCart size={26} className="text-brand-900 dark:text-brand-400" />
+              Client's Orders
+            </h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 hidden">
+              Manage orders placed against projects
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2.5">
+          
+          <Link
+            to="/project-management/project-orders/new"
+            className="btn btn-primary inline-flex items-center gap-2 text-sm font-semibold shadow-sm"
+          >
+            <Plus size={16} /> New Order
+          </Link>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="md:grid-cols-4" gapClass="gap-4">
+        {[
+          {
+            label: "Active Orders",
+            val: orders.filter((o) => o.status === "APPROVED" || o.status === "POSTED").length,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Total Orders",
+            val: orders.length,
+            icon: <ShoppingCart size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+          {
+            label: "Pending Approval",
+            val: orders.filter((o) => o.status === "PENDING_APPROVAL" || o.status === "DRAFT").length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Fulfilled / Closed",
+            val: orders.filter((o) => o.status === "COMPLETED" || o.status === "DELIVERED" || o.status === "POSTED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+        ].map((stat, i) => {
+          const colors = [
+            "bg-sky-600 dark:bg-sky-500 text-white",
+            "bg-brand-900 dark:bg-brand-700 text-white",
+            "bg-amber-500 text-white",
+            "bg-emerald-600 text-white",
+          ];
+          const colorClass = stat.color || colors[i % 4];
+
+          return (
+            <div
+              key={i}
+              className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm"
+            >
+              <div>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  {stat.label}
+                </p>
+                <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
+                  {stat.val}
+                </p>
+              </div>
+              <div className={`p-3 rounded-full ${colorClass} shadow-sm`}>
+                {stat.icon}
+              </div>
+            </div>
+          );
+        })}
+      </MobileMovingCarousel>
+
+      <div className="card">
+        <div className="card-body">
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="Search client's orders..."
+                className="input"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+          </div>
+
+          {error && (
+            <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4">
+              {error}
+            </div>
+          )}
+
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
+                <thead>
+                  <tr>
+                    <SortableHeader
+                      label="Order No"
+                      sortKey="order_no"
+                      currentKey={sortKey}
+                      direction={sortDir}
+                      onToggle={toggle}
+                    />
+                    <SortableHeader
+                      label="Order Date"
+                      sortKey="order_date"
+                      currentKey={sortKey}
+                      direction={sortDir}
+                      onToggle={toggle}
+                    />
+                    <SortableHeader
+                      label="Project"
+                      sortKey="project_name"
+                      currentKey={sortKey}
+                      direction={sortDir}
+                      onToggle={toggle}
+                    />
+                    <SortableHeader
+                      label="Client"
+                      sortKey="client_name"
+                      currentKey={sortKey}
+                      direction={sortDir}
+                      onToggle={toggle}
+                    />
+                    <SortableHeader
+                      label="Priority"
+                      sortKey="priority"
+                      currentKey={sortKey}
+                      direction={sortDir}
+                      onToggle={toggle}
+                    />
+                    <SortableHeader
+                      label="Status"
+                      sortKey="status"
+                      currentKey={sortKey}
+                      direction={sortDir}
+                      onToggle={toggle}
+                    />
+                    <SortableHeader
+                      label="Total Amount"
+                      sortKey="total_amount"
+                      currentKey={sortKey}
+                      direction={sortDir}
+                      onToggle={toggle}
+                    />
+                    <th className="text-right">Actions</th>
+                    <SortableHeader
+                      label="Created By"
+                      sortKey="created_by_name"
+                      currentKey={sortKey}
+                      direction={sortDir}
+                      onToggle={toggle}
+                    />
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan="10" className="text-center py-8 text-slate-400">
+                        Loading client's orders...
+                      </td>
+                    </tr>
+                  ) : filteredOrders.length === 0 ? (
+                    <tr>
+                      <td colSpan="10" className="text-center py-8 text-slate-400">
+                        No client's orders found.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredOrders.map((order) => {
+                      const status = String(order.status || "").toUpperCase();
+                      return (
+                        <tr key={order.id}>
+                          <td className="font-medium">{order.order_no}</td>
+                          <td>
+                            {order.order_date
+                              ? new Date(order.order_date).toLocaleDateString()
+                              : "-"}
+                          </td>
+                          <td>{order.project_name || "-"}</td>
+                          <td>{order.client_name || "-"}</td>
+                          <td>
+                            <span className="text-sm font-semibold">
+                              {order.priority || "-"}
+                            </span>
+                          </td>
+                          <td>
+                            <StatusBadge status={status} />
+                          </td>
+                          <td className="font-semibold text-right">
+                            {order.currency || "GHS"}{" "}
+                            {Number(order.total_amount || 0).toLocaleString()}
+                          </td>
+                          <td className="text-center">
+                            <div className="flex items-center justify-center gap-2">
+                              {/* actions */}
+                            </div>
+                          </td>
+                          <td className="text-center">
+                            <div className="flex items-center justify-center gap-2">
+                              <div className="min-w-[60px]">
+                                <Link
+                                  to={`/project-management/project-orders/${order.id}`}
+                                  className="w-full inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-brand bg-brand-50 rounded-lg hover:bg-brand-100 transition-colors h-9"
+                                >
+                                  View
+                                </Link>
+                              </div>
+                              {status === "DRAFT" && (
+                                <>
+                                  <div className="min-w-[40px]">
+                                    <ListPrintIconButton
+                                      onClick={() => handlePrint(order.id)}
+                                    />
+                                  </div>
+                                  <div className="min-w-[40px]">
+                                    <ListPdfIconButton
+                                      onClick={() => handlePdfDownload(order.id)}
+                                    />
+                                  </div>
+                                </>
+                              )}
+                              {status === "DRAFT" && (
+                                <div className="min-w-[100px]">
+                                  <button
+                                    type="button"
+                                    className="w-full inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors h-9"
+                                    onClick={() => handleSubmit(order)}
+                                  >
+                                    Submit
+                                  </button>
+                                </div>
+                              )}
+                              {status === "DRAFT" && (
+                                <div className="min-w-[80px]">
+                                  <button
+                                    type="button"
+                                    className="w-full inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-white bg-red-700 rounded-lg hover:bg-red-800 transition-colors h-9"
+                                    onClick={() =>
+                                      handleDelete(order.id, order.order_no)
+                                    }
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                          <td>
+                            {order.created_by_name || "-"}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+        </div>
+      </div>
+    </div>
+  );
+}

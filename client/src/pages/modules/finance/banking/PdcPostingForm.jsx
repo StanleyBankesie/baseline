@@ -141,17 +141,6 @@ export default function PdcPostingForm() {
           >
             Back to List
           </button>
-          <button
-            className="btn btn-sm bg-white/20 hover:bg-white/30 border-none text-white backdrop-blur-sm"
-            disabled={loading}
-            onClick={load}
-          >
-            {loading ? (
-              <span className="loading loading-spinner loading-xs"></span>
-            ) : (
-              "Refresh"
-            )}
-          </button>
         </div>
       </div>
 

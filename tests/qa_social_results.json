@@ -1,0 +1,32 @@
+[
+  {
+    "index": 1,
+    "name": "Company Social Feed",
+    "path": "/social-feed",
+    "component": "SocialFeedPage",
+    "status": "PASSED",
+    "durationMs": 3002,
+    "buttonsCount": 202,
+    "inputsCount": 1,
+    "cardsCount": 0,
+    "consoleErrors": [],
+    "networkErrors": [],
+    "errorDetails": "",
+    "screenshotPath": "tests/screenshots/module19_social/social_social-feed.png"
+  },
+  {
+    "index": 2,
+    "name": "Social Feed Post Details",
+    "path": "/social-feed/1",
+    "component": "SocialFeedPage",
+    "status": "PASSED",
+    "durationMs": 2756,
+    "buttonsCount": 203,
+    "inputsCount": 2,
+    "cardsCount": 0,
+    "consoleErrors": [],
+    "networkErrors": [],
+    "errorDetails": "",
+    "screenshotPath": "tests/screenshots/module19_social/social_social-feed_1.png"
+  }
+]

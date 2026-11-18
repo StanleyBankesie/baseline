@@ -15,6 +15,7 @@ import {
   ArrowUpRight,
   RotateCcw,
   RefreshCw,
+  Settings,
   Plus,
   Filter,
   Search,

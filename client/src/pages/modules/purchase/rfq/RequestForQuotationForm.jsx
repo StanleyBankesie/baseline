@@ -20,6 +20,14 @@ import { usePermission } from "@/auth/PermissionContext.jsx";
  * @returns {JSX.Element} The rendered component
  */
 export default function RequestForQuotationForm() {
+  const { id } = useParams();
+  const isEdit = Boolean(id);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isView = new URLSearchParams(location.search).get("mode") === "view" || location.pathname.includes("/view");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
   const { hasExceptional = () => false } = usePermission();
   // Form State
   const [formData, setFormData] = useState({

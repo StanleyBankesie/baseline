@@ -430,14 +430,7 @@ export default function TaskCalendarView() {
           >
             <Plus size={14} /> Add Task
           </button>
-          <button
-            onClick={loadTasks}
-            className="btn btn-secondary h-10 px-3 rounded-xl inline-flex items-center gap-1.5 shrink-0"
-            title="Refresh"
-          >
-            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-            <span className="hidden sm:inline text-xs font-semibold">Refresh</span>
-          </button>
+          
         </div>
       </div>
 
@@ -485,7 +478,7 @@ export default function TaskCalendarView() {
             </button>
             <button
               onClick={handleToday}
-              className="btn btn-secondary text-xs font-semibold h-9 px-3 rounded-xl"
+              className="btn btn-secondary text-sm font-semibold h-9 px-3 rounded-xl"
             >
               Today
             </button>
@@ -538,7 +531,7 @@ export default function TaskCalendarView() {
             <input
               type="text"
               placeholder="Search tasks, project, owner..."
-              className="w-full h-9 pl-8 pr-3 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all"
+              className="w-full h-9 pl-8 pr-3 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -547,7 +540,7 @@ export default function TaskCalendarView() {
           {/* Project Filter */}
           <div className="w-56 shrink-0">
             <select
-              className="w-full h-9 px-3 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer truncate"
+              className="w-full h-9 px-3 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer truncate"
               value={selectedProjectId}
               onChange={(e) => setSelectedProjectId(e.target.value)}
             >
@@ -563,7 +556,7 @@ export default function TaskCalendarView() {
           {/* Status Filter */}
           <div className="w-40 shrink-0">
             <select
-              className="w-full h-9 px-3 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer"
+              className="w-full h-9 px-3 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -581,7 +574,7 @@ export default function TaskCalendarView() {
           {calendarMode === "TEAM_CALENDAR" && (
             <div className="w-48 shrink-0">
               <select
-                className="w-full h-9 px-3 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer"
+                className="w-full h-9 px-3 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer"
                 value={selectedEmployeeId}
                 onChange={(e) => setSelectedEmployeeId(e.target.value)}
               >
@@ -597,7 +590,7 @@ export default function TaskCalendarView() {
           {calendarMode === "DEPT_CALENDAR" && (
             <div className="w-44 shrink-0">
               <select
-                className="w-full h-9 px-3 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer"
+                className="w-full h-9 px-3 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer"
                 value={selectedDepartment}
                 onChange={(e) => setSelectedDepartment(e.target.value)}
               >
@@ -696,7 +689,7 @@ export default function TaskCalendarView() {
                 return (
                   <div
                     key={idx}
-                    className={`min-h-[120px] p-1.5 flex flex-col group transition ${
+                    className={`min-h-[160px] p-1.5 flex flex-col group transition ${
                       !cell.isCurrent
                         ? "bg-slate-50/40 dark:bg-slate-900/30 text-slate-400"
                         : "bg-white dark:bg-slate-900 hover:bg-slate-50/70 dark:hover:bg-slate-800/30"
@@ -950,7 +943,7 @@ export default function TaskCalendarView() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="table text-xs">
+              <table className="table text-sm">
                 <thead>
                   <tr>
                     <th>Date / Schedule</th>
@@ -1084,7 +1077,7 @@ export default function TaskCalendarView() {
                     <label className="block text-[11px] text-slate-500 mb-1">Start Date</label>
                     <input
                       type="date"
-                      className="input text-xs h-9 w-full rounded-xl font-mono"
+                      className="input text-sm h-9 w-full rounded-xl font-mono"
                       value={quickReschedule.startDate}
                       onChange={(e) => setQuickReschedule({ ...quickReschedule, startDate: e.target.value })}
                     />
@@ -1093,7 +1086,7 @@ export default function TaskCalendarView() {
                     <label className="block text-[11px] text-slate-500 mb-1">End Date</label>
                     <input
                       type="date"
-                      className="input text-xs h-9 w-full rounded-xl font-mono"
+                      className="input text-sm h-9 w-full rounded-xl font-mono"
                       value={quickReschedule.endDate}
                       onChange={(e) => setQuickReschedule({ ...quickReschedule, endDate: e.target.value })}
                     />
@@ -1120,7 +1113,7 @@ export default function TaskCalendarView() {
                   <button
                     onClick={handleSaveReschedule}
                     disabled={savingReschedule}
-                    className="btn btn-primary text-xs h-10 px-4 rounded-xl inline-flex items-center gap-1.5 font-semibold"
+                    className="btn btn-primary text-sm h-10 px-4 rounded-xl inline-flex items-center gap-1.5 font-semibold"
                   >
                     {savingReschedule && <Loader2 size={14} className="animate-spin" />}
                     Save Schedule
@@ -1144,7 +1137,7 @@ export default function TaskCalendarView() {
             </div>
             <form onSubmit={handleSaveNewTask} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Task Title *
                 </label>
                 <input
@@ -1158,12 +1151,12 @@ export default function TaskCalendarView() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Project *
                 </label>
                 <select
                   required
-                  className="input text-xs h-10 w-full rounded-xl font-medium"
+                  className="input text-sm h-10 w-full rounded-xl font-medium"
                   value={newTaskForm.project_id}
                   onChange={(e) => setNewTaskForm({ ...newTaskForm, project_id: e.target.value })}
                 >
@@ -1177,11 +1170,11 @@ export default function TaskCalendarView() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Assigned Employee
                 </label>
                 <select
-                  className="input text-xs h-10 w-full rounded-xl"
+                  className="input text-sm h-10 w-full rounded-xl"
                   value={newTaskForm.assigned_to_id}
                   onChange={(e) => setNewTaskForm({ ...newTaskForm, assigned_to_id: e.target.value })}
                 >
@@ -1194,25 +1187,25 @@ export default function TaskCalendarView() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Start Date
                   </label>
                   <input
                     type="date"
                     required
-                    className="input text-xs h-10 w-full rounded-xl font-mono"
+                    className="input text-sm h-10 w-full rounded-xl font-mono"
                     value={newTaskForm.start_date}
                     onChange={(e) => setNewTaskForm({ ...newTaskForm, start_date: e.target.value })}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                     End Date
                   </label>
                   <input
                     type="date"
                     required
-                    className="input text-xs h-10 w-full rounded-xl font-mono"
+                    className="input text-sm h-10 w-full rounded-xl font-mono"
                     value={newTaskForm.end_date}
                     onChange={(e) => setNewTaskForm({ ...newTaskForm, end_date: e.target.value })}
                   />
@@ -1230,7 +1223,7 @@ export default function TaskCalendarView() {
                 <button
                   type="submit"
                   disabled={savingNewTask}
-                  className="btn btn-primary text-xs h-10 px-5 rounded-xl inline-flex items-center gap-1.5 font-semibold"
+                  className="btn btn-primary text-sm h-10 px-5 rounded-xl inline-flex items-center gap-1.5 font-semibold"
                 >
                   {savingNewTask && <Loader2 size={14} className="animate-spin" />}
                   Create Task

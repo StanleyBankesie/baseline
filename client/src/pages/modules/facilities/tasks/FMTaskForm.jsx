@@ -302,7 +302,7 @@ export default function FMTaskForm() {
                 type="button"
                 onClick={handleSubmit}
                 disabled={saving}
-                className="btn-success text-xs font-bold px-4 py-2"
+                className="btn-success text-sm font-bold px-4 py-2"
               >
                 {saving ? "Saving…" : "Save Task Assignment"}
               </button>
@@ -333,7 +333,7 @@ export default function FMTaskForm() {
 
               <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
                 <div className="md:col-span-5">
-                  <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1.5 block">
+                  <label className="label font-semibold text-sm text-slate-700 dark:text-slate-300 mb-1.5 block">
                     Property <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -364,7 +364,7 @@ export default function FMTaskForm() {
                 </div>
 
                 <div className="md:col-span-7">
-                  <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1.5 block">
+                  <label className="label font-semibold text-sm text-slate-700 dark:text-slate-300 mb-1.5 block">
                     Task Title <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -382,7 +382,7 @@ export default function FMTaskForm() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
                 <div>
-                  <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1.5 block">
+                  <label className="label font-semibold text-sm text-slate-700 dark:text-slate-300 mb-1.5 block">
                     Assignee
                   </label>
                   <select
@@ -412,7 +412,7 @@ export default function FMTaskForm() {
                 </div>
 
                 <div>
-                  <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1.5 block">
+                  <label className="label font-semibold text-sm text-slate-700 dark:text-slate-300 mb-1.5 block">
                     Priority
                   </label>
                   <select
@@ -441,7 +441,7 @@ export default function FMTaskForm() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 <div>
-                  <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1.5 block">
+                  <label className="label font-semibold text-sm text-slate-700 dark:text-slate-300 mb-1.5 block">
                     Start Date
                   </label>
                   <input
@@ -455,7 +455,7 @@ export default function FMTaskForm() {
                 </div>
 
                 <div>
-                  <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1.5 block">
+                  <label className="label font-semibold text-sm text-slate-700 dark:text-slate-300 mb-1.5 block">
                     Due Date
                   </label>
                   <input
@@ -469,7 +469,7 @@ export default function FMTaskForm() {
                 </div>
 
                 <div>
-                  <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1.5 block">
+                  <label className="label font-semibold text-sm text-slate-700 dark:text-slate-300 mb-1.5 block">
                     Estimated Hours
                   </label>
                   <input
@@ -500,13 +500,13 @@ export default function FMTaskForm() {
               <div className="space-y-5">
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-0">
+                    <label className="label font-semibold text-sm text-slate-700 dark:text-slate-300 mb-0">
                       Execution Details / Scope
                     </label>
                     <button
                       type="button"
                       onClick={handleAddScopeItem}
-                      className="text-xs text-blue-600 dark:text-blue-400 font-semibold hover:underline flex items-center gap-1"
+                      className="text-sm text-blue-600 dark:text-blue-400 font-semibold hover:underline flex items-center gap-1"
                     >
                       <Plus size={14} /> Add Scope Field
                     </button>
@@ -554,7 +554,7 @@ export default function FMTaskForm() {
                 </div>
 
                 <div className="pt-3 border-t border-slate-200/60 dark:border-slate-700/60">
-                  <label className="label font-semibold text-xs text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
+                  <label className="label font-semibold text-sm text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
                     <span>Reason for Delay</span>
                     <span className="text-xs font-normal text-slate-400 flex items-center gap-1">
                       <Info size={12} /> Read-only (Fetched from table)

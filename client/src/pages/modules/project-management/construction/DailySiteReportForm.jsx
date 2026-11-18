@@ -320,7 +320,7 @@ export default function DailySiteReportForm() {
                 ? `Daily Project Report: ${form.report_number || form.report_no || `#${id}`}`
                 : "New Daily Project Report Entry"}
             </h1>
-            <p className="text-slate-500 text-sm mt-0.5">
+            <p className="text-slate-500 text-sm mt-0.5 hidden">
               Daily project progress log, team allocation, milestones, and
               activity tracking
             </p>
@@ -573,7 +573,7 @@ export default function DailySiteReportForm() {
               </div>
 
               <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-sm">
                   <thead className="bg-slate-50 dark:bg-slate-800 font-bold uppercase">
                     <tr>
                       <th className="p-2">Category</th>
@@ -589,7 +589,7 @@ export default function DailySiteReportForm() {
                       <tr key={idx}>
                         <td className="p-1.5">
                           <select
-                            className="w-full p-1 border rounded bg-transparent text-xs"
+                            className="w-full p-1 border rounded bg-transparent text-sm"
                             value={w.trade_category || ""}
                             onChange={(e) => {
                               const copy = [...workforce];
@@ -618,7 +618,7 @@ export default function DailySiteReportForm() {
                         <td className="p-1.5">
                           <input
                             type="text"
-                            className="w-full p-1 border rounded bg-transparent text-xs"
+                            className="w-full p-1 border rounded bg-transparent text-sm"
                             placeholder="e.g. Lead Engineer, Analyst, Developer, Site Supervisor..."
                             value={w.trade_name || ""}
                             onChange={(e) => {
@@ -630,7 +630,7 @@ export default function DailySiteReportForm() {
                         </td>
                         <td className="p-1.5">
                           <select
-                            className="w-full p-1 border rounded bg-transparent text-xs"
+                            className="w-full p-1 border rounded bg-transparent text-sm"
                             value={w.subcontractor_name || ""}
                             onChange={(e) => {
                               const copy = [...workforce];
@@ -681,7 +681,7 @@ export default function DailySiteReportForm() {
                           <input
                             type="number"
                             min="0"
-                            className="w-full p-1 border rounded text-right bg-transparent font-mono text-xs"
+                            className="w-full p-1 border rounded text-right bg-transparent font-mono text-sm"
                             placeholder="0"
                             value={w.headcount ?? ""}
                             onChange={(e) => {
@@ -696,7 +696,7 @@ export default function DailySiteReportForm() {
                             }}
                           />
                         </td>
-                        <td className="p-1.5 text-right font-mono font-bold text-xs">
+                        <td className="p-1.5 text-right font-mono font-bold text-sm">
                           {w.total_hours ? `${w.total_hours} hrs` : "0 hrs"}
                         </td>
                         <td className="p-1.5 text-center">
@@ -749,7 +749,7 @@ export default function DailySiteReportForm() {
               </div>
 
               <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-sm">
                   <thead className="bg-slate-50 dark:bg-slate-800 font-bold uppercase">
                     <tr>
                       <th className="p-2 w-44">Workstream / Scope Ref</th>
@@ -765,7 +765,7 @@ export default function DailySiteReportForm() {
                       <tr key={idx}>
                         <td className="p-1.5">
                           <select
-                            className="w-full p-1 border rounded bg-transparent text-xs"
+                            className="w-full p-1 border rounded bg-transparent text-sm"
                             value={getActivityWorkPlan(act)?.key || ""}
                             onChange={(e) => {
                               const selectedPlan = projectWorkPlans.find(
@@ -799,7 +799,7 @@ export default function DailySiteReportForm() {
                         </td>
                         <td className="p-1.5">
                           <select
-                            className="w-full p-1 border rounded bg-transparent text-xs"
+                            className="w-full p-1 border rounded bg-transparent text-sm"
                             value={act.description || ""}
                             disabled={!getActivityWorkPlan(act)}
                             onChange={(e) => {
@@ -853,7 +853,7 @@ export default function DailySiteReportForm() {
                             type="number"
                             step="any"
                             min="0"
-                            className="w-full p-1 border rounded text-right bg-transparent font-mono text-xs"
+                            className="w-full p-1 border rounded text-right bg-transparent font-mono text-sm"
                             placeholder="0.00"
                             value={act.quantity_completed ?? ""}
                             onChange={(e) => {
@@ -869,7 +869,7 @@ export default function DailySiteReportForm() {
                         </td>
                         <td className="p-1.5">
                           <select
-                            className="w-full p-1 border rounded bg-transparent text-xs"
+                            className="w-full p-1 border rounded bg-transparent text-sm"
                             value={act.unit || "HRS"}
                             onChange={(e) => {
                               const copy = [...activities];
@@ -889,7 +889,7 @@ export default function DailySiteReportForm() {
                             type="number"
                             min="0"
                             max="100"
-                            className="w-full p-1 border rounded text-right bg-transparent font-mono font-semibold text-xs"
+                            className="w-full p-1 border rounded text-right bg-transparent font-mono font-semibold text-sm"
                             placeholder="0"
                             value={act.progress_percent ?? ""}
                             onChange={(e) => {

@@ -308,15 +308,7 @@ export default function ExpiredItemsReportPage() {
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 print:hidden flex-wrap">
-          <button
-            onClick={loadData}
-            disabled={loading}
-            className="btn btn-outline btn-sm border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 flex items-center gap-1.5 text-xs"
-            title="Refresh Data"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </button>
+          
           <button
             onClick={exportExcel}
             className="btn btn-outline btn-sm border-emerald-600 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-500 dark:text-emerald-400 flex items-center gap-1.5 text-xs font-semibold"

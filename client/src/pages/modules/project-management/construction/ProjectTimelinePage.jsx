@@ -566,7 +566,7 @@ export default function ProjectTimelinePage() {
               <Clock size={24} className="text-brand-900 dark:text-brand-400" />
               Project Timeline
             </h1>
-            <p className="text-slate-500 text-sm mt-0.5">
+            <p className="text-slate-500 text-sm mt-0.5 hidden">
               Master project schedule, overall duration, Project Work Plan/WBS, and Scopes
             </p>
           </div>
@@ -587,15 +587,7 @@ export default function ProjectTimelinePage() {
               </option>
             ))}
           </select>
-          <button
-            onClick={loadData}
-            disabled={!selectedProjectId}
-            className="btn btn-secondary h-10 px-3 rounded-xl inline-flex items-center gap-1.5 shrink-0"
-            title="Refresh"
-          >
-            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-            <span className="hidden sm:inline text-xs font-semibold">Refresh</span>
-          </button>
+          
         </div>
       </div>
 
@@ -755,7 +747,7 @@ export default function ProjectTimelinePage() {
                 <button
                   type="button"
                   onClick={handleOpenAdd}
-                  className="btn btn-secondary text-xs px-2.5 py-1 rounded-lg inline-flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-300"
+                  className="btn btn-secondary text-sm px-2.5 py-1 rounded-lg inline-flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-300"
                 >
                   <Plus size={13} /> Add Task
                 </button>
@@ -978,7 +970,7 @@ export default function ProjectTimelinePage() {
                 <button
                   type="button"
                   onClick={handleOpenAdd}
-                  className="btn btn-primary text-xs px-3 py-1.5 rounded-lg font-semibold inline-flex items-center gap-1 shadow-sm"
+                  className="btn btn-primary text-sm px-3 py-1.5 rounded-lg font-semibold inline-flex items-center gap-1 shadow-sm"
                 >
                   <Plus size={14} /> Add Task
                 </button>
@@ -1000,7 +992,7 @@ export default function ProjectTimelinePage() {
                   <input
                     type="text"
                     placeholder="Search tasks, work plans/wbs..."
-                    className="input pl-8 py-1.5 text-xs h-8 rounded-lg w-full font-medium"
+                    className="input pl-8 py-1.5 text-sm h-8 rounded-lg w-full font-medium"
                     value={tasksModalSearch}
                     onChange={(e) => setTasksModalSearch(e.target.value)}
                   />
@@ -1008,7 +1000,7 @@ export default function ProjectTimelinePage() {
 
                 {/* Scope selector */}
                 <select
-                  className="input text-xs h-8 rounded-lg font-medium"
+                  className="input text-sm h-8 rounded-lg font-medium"
                   value={tasksModalScopeFilter}
                   onChange={(e) => setTasksModalScopeFilter(e.target.value)}
                 >
@@ -1224,14 +1216,14 @@ export default function ProjectTimelinePage() {
                             <input
                               type="text"
                               placeholder="Add a new checklist step / milestone..."
-                              className="input flex-1 text-xs h-9 rounded-xl font-medium"
+                              className="input flex-1 text-sm h-9 rounded-xl font-medium"
                               value={newChecklistText}
                               onChange={(e) => setNewChecklistText(e.target.value)}
                             />
                             <button
                               type="submit"
                               disabled={!newChecklistText.trim()}
-                              className="btn btn-primary text-xs px-3.5 py-1.5 h-9 rounded-xl font-semibold inline-flex items-center gap-1 shadow-sm shrink-0"
+                              className="btn btn-primary text-sm px-3.5 py-1.5 h-9 rounded-xl font-semibold inline-flex items-center gap-1 shadow-sm shrink-0"
                             >
                               <Plus size={14} /> Add Step
                             </button>
@@ -1353,7 +1345,7 @@ export default function ProjectTimelinePage() {
                   type="text"
                   required
                   placeholder="e.g. Excavate foundation trench"
-                  className="input w-full text-xs font-medium"
+                  className="input w-full text-sm font-medium"
                   value={taskForm.task_title}
                   onChange={(e) => setTaskForm({ ...taskForm, task_title: e.target.value })}
                 />
@@ -1366,7 +1358,7 @@ export default function ProjectTimelinePage() {
                     Project Scope
                   </label>
                   <select
-                    className="input w-full text-xs font-medium"
+                    className="input w-full text-sm font-medium"
                     value={taskForm.scope_name}
                     onChange={(e) => {
                       const scopeVal = e.target.value;
@@ -1395,7 +1387,7 @@ export default function ProjectTimelinePage() {
                   <input
                     type="text"
                     placeholder="e.g. 1.1 Foundation"
-                    className="input w-full text-xs font-semibold"
+                    className="input w-full text-sm font-semibold"
                     value={taskForm.wbs_code}
                     onChange={(e) => setTaskForm({ ...taskForm, wbs_code: e.target.value })}
                   />
@@ -1409,7 +1401,7 @@ export default function ProjectTimelinePage() {
                     Assignee
                   </label>
                   <select
-                    className="input w-full text-xs font-medium"
+                    className="input w-full text-sm font-medium"
                     value={taskForm.assigned_to_id}
                     onChange={(e) => {
                       const uId = e.target.value;
@@ -1437,7 +1429,7 @@ export default function ProjectTimelinePage() {
                     Status
                   </label>
                   <select
-                    className="input w-full text-xs font-medium"
+                    className="input w-full text-sm font-medium"
                     value={taskForm.status}
                     onChange={(e) => setTaskForm({ ...taskForm, status: e.target.value })}
                   >
@@ -1458,7 +1450,7 @@ export default function ProjectTimelinePage() {
                   </label>
                   <input
                     type="date"
-                    className="input w-full text-xs font-medium"
+                    className="input w-full text-sm font-medium"
                     value={taskForm.start_date}
                     onChange={(e) => setTaskForm({ ...taskForm, start_date: e.target.value })}
                   />
@@ -1469,7 +1461,7 @@ export default function ProjectTimelinePage() {
                   </label>
                   <input
                     type="date"
-                    className="input w-full text-xs font-medium"
+                    className="input w-full text-sm font-medium"
                     value={taskForm.end_date}
                     onChange={(e) => setTaskForm({ ...taskForm, end_date: e.target.value })}
                   />
@@ -1482,7 +1474,7 @@ export default function ProjectTimelinePage() {
                     type="number"
                     min="0"
                     step="0.5"
-                    className="input w-full text-xs font-semibold"
+                    className="input w-full text-sm font-semibold"
                     value={taskForm.duration_days}
                     onChange={(e) => setTaskForm({ ...taskForm, duration_days: e.target.value })}
                   />
@@ -1525,7 +1517,7 @@ export default function ProjectTimelinePage() {
                 <button
                   type="submit"
                   disabled={savingTask}
-                  className="btn btn-primary text-xs px-4 py-2 font-semibold inline-flex items-center gap-1.5 shadow-sm"
+                  className="btn btn-primary text-sm px-4 py-2 font-semibold inline-flex items-center gap-1.5 shadow-sm"
                 >
                   {savingTask ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                   Save Task Schedule

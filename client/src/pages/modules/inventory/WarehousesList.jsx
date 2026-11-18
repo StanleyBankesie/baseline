@@ -1,234 +1,247 @@
-import MobileMovingCarousel from "@/components/MobileMovingCarousel";
-import { Activity, Clock, CheckCircle2, Building } from "lucide-react";
-/**
- * @fileoverview List view component for displaying all registered warehouses.
- */
-
-import React, { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-
-import { api } from "api/client";
-import { filterAndSort } from "@/utils/searchUtils.js";
-import { useViewMode } from "@/hooks/useViewMode";
-import ViewToggle from "@/components/ViewToggle";
-
-/**
- * WarehousesList component
- * Fetches and renders a searchable table of warehouses.
- * 
- * @returns {JSX.Element} The warehouse listing page.
- */
-export default function WarehousesList() {
-  const [viewMode, setViewMode] = useViewMode();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [warehouses, setWarehouses] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-    setError("");
-
-    api
-      .get("/inventory/warehouses", { params: { active: "all" } })
-      .then((res) => {
-        if (!mounted) return;
-        setWarehouses(Array.isArray(res.data?.items) ? res.data.items : []);
-      })
-      .catch((e) => {
-        if (!mounted) return;
-        setError(e?.response?.data?.message || "Failed to load warehouses");
-      })
-      .finally(() => {
-        if (!mounted) return;
-        setLoading(false);
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const filtered = useMemo(() => {
-    if (!searchTerm.trim()) return warehouses.slice();
-    return filterAndSort(warehouses, {
-      query: searchTerm,
-      getKeys: (w) => [w.warehouse_code, w.warehouse_name, w.location],
-    });
-  }, [warehouses, searchTerm]);
-
-  return (
-    <div className="space-y-6">
-            
-
-      <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg">
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 text-white">
-            <div>
-              <h1 className="text-2xl font-bold dark:text-brand-300">
-                Warehouse Setup
-              </h1>
-              <p className="hidden sm:block text-sm mt-1">
-                Configure warehouses for stock operations
-              </p>
-            </div>
-            <div className="grid grid-cols-2 sm:flex gap-2">
-              <Link to="/inventory?section=Stock%20Operations" className="btn btn-secondary">
-                Return to Menu
-              </Link>
-              <Link to="/inventory/warehouses/new" className="btn-success">
-                + New Warehouse
-              </Link>
-            </div>
-          </div>
-        </div>
-        </div>
-
-      {/* Metric Stats Cards Carousel */}
-      {/* Metric Stats Cards */}
-      <MobileMovingCarousel data-page-carousel gridColsClass="md:grid-cols-4" gapClass="gap-4">
-        {[
-          {
-            label: "Active Warehouses",
-            val: (warehouses || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
-            icon: <Activity size={20} className="stroke-[2.5]" />,
-            color: "bg-sky-600 dark:bg-sky-500 text-white",
-          },
-          {
-            label: "Total Warehouses",
-            val: (warehouses || []).length,
-            icon: <Building size={20} className="stroke-[2.5]" />,
-            color: "bg-brand-900 dark:bg-brand-700 text-white",
-          },
-          {
-            label: "Pending Warehouses",
-            val: (warehouses || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
-            icon: <Clock size={20} className="stroke-[2.5]" />,
-            color: "bg-amber-500 text-white",
-          },
-          {
-            label: "Completed Warehouses",
-            val: (warehouses || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
-            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
-            color: "bg-emerald-600 text-white",
-          },
-        ].map((stat, i) => (
-          <div key={i} className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
-            <div>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                {stat.label}
-              </p>
-              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
-                {stat.val}
-              </p>
-            </div>
-            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
-              {stat.icon}
-            </div>
-          </div>
-        ))}
-      </MobileMovingCarousel>
-
-      <div className="card">
-        <div className="card-body">
-          {error ? (
-            <div className="text-sm text-red-600 mb-4">{error}</div>
-          ) : null}
-
-          <div className="mb-4">
-            <input
-              type="text"
-              placeholder="Search by code, name, location..."
-              className="input max-w-md"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          
-                <div className="flex justify-end mb-4">
-                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
-                </div>
-                <div className="overflow-x-auto">
-            <table className={ "table table-fixed " + (viewMode === 'grid' ? 'table-grid-mode' : '') }>
-              <thead>
-                <tr>
-                  <th>Code</th>
-                  <th>Name</th>
-                  <th>Location</th>
-                  <th>Status</th>
-                  <th>Created By</th>
-                  <th>Created Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td
-                      colSpan="7"
-                      className="text-center py-8 text-slate-500 dark:text-slate-400"
-                    >
-                      Loading...
-                    </td>
-                  </tr>
-                ) : null}
-
-                {!loading && !filtered.length ? (
-                  <tr>
-                    <td
-                      colSpan="7"
-                      className="text-center py-8 text-slate-500 dark:text-slate-400"
-                    >
-                      No warehouses found
-                    </td>
-                  </tr>
-                ) : null}
-
-                {filtered.map((w) => (
-                  <tr key={w.id}>
-                    <td className="font-medium text-brand-700 dark:text-brand-300">
-                      {w.warehouse_code}
-                    </td>
-                    <td>{w.warehouse_name}</td>
-                    <td>{w.location || "-"}</td>
-                    <td>
-                      <span
-                        className={`badge ${
-                          Number(w.is_active) === 1
-                            ? "badge-success"
-                            : "badge-error"
-                        }`}
-                      >
-                        {Number(w.is_active) === 1 ? "ACTIVE" : "INACTIVE"}
-                      </span>
-                    </td>
-                    <td>{w.created_by_name || "-"}</td>
-                    <td>{w.created_at ? new Date(w.created_at).toLocaleDateString() : "-"}</td>
-                    <td>
-                      <div className="flex items-center gap-2 whitespace-nowrap">
-                        <Link
-                          to={`/inventory/warehouses/${w.id}?mode=view`}
-                          className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-full hover:bg-slate-100 hover:text-slate-900 transition-colors"
-                        >
-                          View
-                        </Link>
-                        <Link
-                          to={`/inventory/warehouses/${w.id}?mode=edit`}
-                          className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-full hover:bg-slate-100 hover:text-slate-900 transition-colors"
-                        >
-                          Edit
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
+import { Activity, Clock, CheckCircle2, Building } from "lucide-react";
+/**
+ * @fileoverview List view component for displaying all registered warehouses.
+ */
+
+import React, { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+
+import { api } from "api/client";
+import { filterAndSort } from "@/utils/searchUtils.js";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
+
+/**
+ * WarehousesList component
+ * Fetches and renders a searchable table of warehouses.
+ * 
+ * @returns {JSX.Element} The warehouse listing page.
+ */
+export default function WarehousesList() {
+  const [viewMode, setViewMode] = useViewMode();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [warehouses, setWarehouses] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    setError("");
+
+    api
+      .get("/inventory/warehouses", { params: { active: "all" } })
+      .then((res) => {
+        if (!mounted) return;
+        setWarehouses(Array.isArray(res.data?.items) ? res.data.items : []);
+      })
+      .catch((e) => {
+        if (!mounted) return;
+        setError(e?.response?.data?.message || "Failed to load warehouses");
+      })
+      .finally(() => {
+        if (!mounted) return;
+        setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const filtered = useMemo(() => {
+    if (!searchTerm.trim()) return warehouses.slice();
+    return filterAndSort(warehouses, {
+      query: searchTerm,
+      getKeys: (w) => [w.warehouse_code, w.warehouse_name, w.location],
+    });
+  }, [warehouses, searchTerm]);
+
+  return (
+    <div className="space-y-6">
+            
+
+      <div className="card">
+        <div className="card-header bg-brand text-white rounded-t-lg">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 text-white">
+            <div>
+              <h1 className="text-2xl font-bold dark:text-brand-300">
+                Warehouse Setup
+              </h1>
+              <p className="hidden sm:block text-sm mt-1">
+                Configure warehouses for stock operations
+              </p>
+            </div>
+            <div className="grid grid-cols-2 sm:flex gap-2">
+              <Link to="/inventory?section=Stock%20Operations" className="btn btn-secondary">
+                Return to Menu
+              </Link>
+              <Link to="/inventory/warehouses/new" className="btn-success">
+                + New Warehouse
+              </Link>
+            </div>
+          </div>
+        </div>
+        </div>
+
+      {/* Metric Stats Cards Carousel */}
+      {/* Metric Stats Cards */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="md:grid-cols-4" gapClass="gap-4">
+        {[
+          {
+            label: "Active Warehouses",
+            val: (warehouses || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Total Warehouses",
+            val: (warehouses || []).length,
+            icon: <Building size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+          {
+            label: "Pending Warehouses",
+            val: (warehouses || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Completed Warehouses",
+            val: (warehouses || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+        ].map((stat, i) => {
+          const colors = [
+            "bg-sky-600 dark:bg-sky-500 text-white",
+            "bg-brand-900 dark:bg-brand-700 text-white",
+            "bg-amber-500 text-white",
+            "bg-emerald-600 text-white",
+          ];
+          const colorClass = stat.color || colors[i % 4];
+
+          return (
+            <div
+              key={i}
+              className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm"
+            >
+              <div>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  {stat.label}
+                </p>
+                <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
+                  {stat.val}
+                </p>
+              </div>
+              <div className={`p-3 rounded-full ${colorClass} shadow-sm`}>
+                {stat.icon}
+              </div>
+            </div>
+          );
+        })}
+      </MobileMovingCarousel>
+
+      <div className="card">
+        <div className="card-body">
+          {error ? (
+            <div className="text-sm text-red-600 mb-4">{error}</div>
+          ) : null}
+
+          <div className="mb-4">
+            <input
+              type="text"
+              placeholder="Search by code, name, location..."
+              className="input max-w-md"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={ "table table-fixed " + (viewMode === 'grid' ? 'table-grid-mode' : '') }>
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Name</th>
+                  <th>Location</th>
+                  <th>Status</th>
+                  <th>Created By</th>
+                  <th>Created Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td
+                      colSpan="7"
+                      className="text-center py-8 text-slate-500 dark:text-slate-400"
+                    >
+                      Loading...
+                    </td>
+                  </tr>
+                ) : null}
+
+                {!loading && !filtered.length ? (
+                  <tr>
+                    <td
+                      colSpan="7"
+                      className="text-center py-8 text-slate-500 dark:text-slate-400"
+                    >
+                      No warehouses found
+                    </td>
+                  </tr>
+                ) : null}
+
+                {filtered.map((w) => (
+                  <tr key={w.id}>
+                    <td className="font-medium text-brand-700 dark:text-brand-300">
+                      {w.warehouse_code}
+                    </td>
+                    <td>{w.warehouse_name}</td>
+                    <td>{w.location || "-"}</td>
+                    <td>
+                      <span
+                        className={`badge ${
+                          Number(w.is_active) === 1
+                            ? "badge-success"
+                            : "badge-error"
+                        }`}
+                      >
+                        {Number(w.is_active) === 1 ? "ACTIVE" : "INACTIVE"}
+                      </span>
+                    </td>
+                    <td>{w.created_by_name || "-"}</td>
+                    <td>{w.created_at ? new Date(w.created_at).toLocaleDateString() : "-"}</td>
+                    <td>
+                      <div className="flex items-center gap-2 whitespace-nowrap">
+                        <Link
+                          to={`/inventory/warehouses/${w.id}?mode=view`}
+                          className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-full hover:bg-slate-100 hover:text-slate-900 transition-colors"
+                        >
+                          View
+                        </Link>
+                        <Link
+                          to={`/inventory/warehouses/${w.id}?mode=edit`}
+                          className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-full hover:bg-slate-100 hover:text-slate-900 transition-colors"
+                        >
+                          Edit
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

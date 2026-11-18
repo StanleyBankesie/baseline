@@ -332,7 +332,7 @@ export default function MaterialRequisitionForm() {
               />
               {isNew ? "New Material Requisition" : "Edit Material Requisition"}
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 hidden">
               Request materials for your project
             </p>
           </div>
@@ -478,7 +478,7 @@ export default function MaterialRequisitionForm() {
               <button
                 type="button"
                 onClick={addItem}
-                className="btn btn-secondary text-xs inline-flex items-center gap-1.5"
+                className="btn btn-secondary text-sm inline-flex items-center gap-1.5"
               >
                 <Plus size={14} /> Add Item
               </button>
@@ -570,7 +570,7 @@ export default function MaterialRequisitionForm() {
                                         <button
                                           type="button"
                                           key={o.id}
-                                          className="block w-full text-left px-3 py-2 hover:bg-slate-50 text-xs"
+                                          className="block w-full text-left px-3 py-2 hover:bg-slate-50 text-sm"
                                           onClick={() =>
                                             handleSelectItem(item.id, o)
                                           }

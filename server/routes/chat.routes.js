@@ -130,7 +130,8 @@ router.get("/conversations", async (req, res, next) => {
 
     res.json({ items: rows || [] });
   } catch (err) {
-    next(err);
+    console.warn("[Chat:Neon] Could not fetch conversations:", err.message);
+    res.json({ items: [] });
   }
 });
 
@@ -233,7 +234,8 @@ router.get("/conversations/:id/messages", async (req, res, next) => {
 
     res.json({ items: rows || [] });
   } catch (err) {
-    next(err);
+    console.warn("[Chat:Neon] Could not fetch conversations:", err.message);
+    res.json({ items: [] });
   }
 });
 
@@ -491,7 +493,8 @@ router.get("/unread-count", async (req, res, next) => {
 
     res.json({ unread: Number(rows?.[0]?.total || 0) });
   } catch (err) {
-    next(err);
+    console.warn("[Chat:Neon] Could not fetch unread count:", err.message);
+    res.json({ unread: 0 });
   }
 });
 
@@ -525,7 +528,8 @@ router.get("/unread-by-user", async (req, res, next) => {
       })),
     });
   } catch (err) {
-    next(err);
+    console.warn("[Chat:Neon] Could not fetch unread by user:", err.message);
+    res.json({ items: [] });
   }
 });
 

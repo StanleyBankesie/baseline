@@ -194,13 +194,13 @@ export default function ProjectExpenseReport() {
             <ArrowLeft size={20} />
           </Link>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <h1 className="text-2xl font-bold sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <span className="p-2 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400">
                 <CreditCard size={22} />
               </span>
               Project Expense Report
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 hidden">
               Financial payment vouchers, material bills, and disbursements linked to selected project
             </p>
           </div>
@@ -210,13 +210,13 @@ export default function ProjectExpenseReport() {
             <>
               <button
                 onClick={exportExcel}
-                className="btn btn-secondary inline-flex items-center gap-1.5 text-xs py-2 px-3 font-semibold"
+                className="btn btn-secondary inline-flex items-center gap-1.5 text-sm py-2 px-3 font-semibold"
               >
                 <Download size={15} /> Excel
               </button>
               <button
                 onClick={exportPdf}
-                className="btn btn-outline inline-flex items-center gap-1.5 text-xs py-2 px-3 font-semibold text-rose-600 border-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                className="btn btn-outline inline-flex items-center gap-1.5 text-sm py-2 px-3 font-semibold text-rose-600 border-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/30"
               >
                 <Download size={15} /> PDF
               </button>
@@ -260,7 +260,7 @@ export default function ProjectExpenseReport() {
               <input
                 type="date"
                 disabled={!selectedProjectId}
-                className="input py-1.5 px-2.5 text-xs h-auto font-mono w-36 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="input py-1.5 px-2.5 text-sm h-auto font-mono w-36 disabled:opacity-50 disabled:cursor-not-allowed"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
               />
@@ -274,7 +274,7 @@ export default function ProjectExpenseReport() {
               <input
                 type="date"
                 disabled={!selectedProjectId}
-                className="input py-1.5 px-2.5 text-xs h-auto font-mono w-36 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="input py-1.5 px-2.5 text-sm h-auto font-mono w-36 disabled:opacity-50 disabled:cursor-not-allowed"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
               />
@@ -291,7 +291,7 @@ export default function ProjectExpenseReport() {
                   type="text"
                   disabled={!selectedProjectId}
                   placeholder="Voucher #, description..."
-                  className="input pl-8 pr-2.5 py-1.5 text-xs h-auto w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="input pl-8 pr-2.5 py-1.5 text-sm h-auto w-full disabled:opacity-50 disabled:cursor-not-allowed"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -305,18 +305,9 @@ export default function ProjectExpenseReport() {
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="text-xs text-rose-500 hover:text-rose-700 underline px-2 py-1 flex items-center gap-1"
+                className="text-sm text-rose-500 hover:text-rose-700 underline px-2 py-1 flex items-center gap-1"
               >
                 <X size={13} /> Clear Project
-              </button>
-            )}
-            {selectedProjectId && (
-              <button
-                onClick={fetchData}
-                className="btn btn-secondary p-2 rounded-xl"
-                title="Refresh Report"
-              >
-                <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
               </button>
             )}
           </div>
@@ -388,7 +379,7 @@ export default function ProjectExpenseReport() {
               </span>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-semibold uppercase tracking-wider">
                     <th className="px-4 py-3 text-left">Voucher No</th>

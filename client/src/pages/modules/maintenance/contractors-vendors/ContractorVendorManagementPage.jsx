@@ -387,13 +387,7 @@ export default function ContractorVendorManagementPage() {
               className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-7 pr-3 py-1.5 text-xs text-slate-700 dark:text-slate-200"
             />
           </div>
-          <button
-            type="button"
-            onClick={fetchAllData}
-            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs py-1.5 px-3"
-          >
-            <RefreshCw size={12} /> Refresh
-          </button>
+          
         </div>
       </div>
 

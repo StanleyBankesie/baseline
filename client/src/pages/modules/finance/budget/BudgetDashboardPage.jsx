@@ -143,13 +143,6 @@ export default function BudgetDashboardPage() {
           >
             <BarChart2 size={16} /> Variance Report
           </Link>
-          <button
-            onClick={loadDashboardData}
-            className="btn btn-secondary p-2"
-            title="Refresh Dashboard"
-          >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-          </button>
         </div>
       </div>
 

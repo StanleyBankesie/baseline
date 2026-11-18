@@ -112,14 +112,7 @@ export default function FMSLAComplianceReport() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={fetchReport}
-            disabled={loading}
-            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs py-2 px-3 font-semibold rounded-xl"
-          >
-            <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
-            Refresh
-          </button>
+          
           <button
             onClick={handleExportCSV}
             className="btn btn-primary inline-flex items-center gap-1.5 text-xs py-2 px-3.5 font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl shadow-sm transition-all"

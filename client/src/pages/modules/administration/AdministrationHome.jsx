@@ -4,13 +4,15 @@
  */
 
 import React from "react";
-import { Link, Route, Routes } from "react-router-dom";
+import { Link, Navigate, Route, Routes } from "react-router-dom";
 import ModuleDashboard from "../../../components/ModuleDashboard";
 import ModuleLayout from "../../../components/ModuleLayout.jsx";
 import { api } from "../../../api/client.js";
 import { useAuth } from "../../../auth/AuthContext.jsx";
 import UserList from "./users/UserList.jsx";
 import UserForm from "./users/UserForm.jsx";
+import BranchList from "./branches/BranchList.jsx";
+import BranchForm from "./branches/BranchForm.jsx";
 import WorkflowList from "./workflows/WorkflowList.jsx";
 import WorkflowForm from "./workflows/WorkflowForm.jsx";
 import MyApprovals from "./workflows/MyApprovals.jsx";
@@ -40,26 +42,27 @@ export const administrationSections = [
         title: "Settings",
         description: "Push notifications and document templates",
         path: "/administration/settings",
-        
         icon: "⚙️",
         actions: [
-          { label: "View", path: "/administration/settings",
-        actions: [
           { label: "View", path: "/administration/settings", type: "outline" }
-        ], type: "outline" }
         ],
       },
       {
         title: "Diagnostics",
         description: "Health checks, database, and system diagnostics",
         path: "/administration/diagnostics",
-        
         icon: "🩺",
         actions: [
-          { label: "View", path: "/administration/diagnostics",
-        actions: [
           { label: "View", path: "/administration/diagnostics", type: "outline" }
-        ], type: "outline" }
+        ],
+      },
+      {
+        title: "Document Templates",
+        description: "Configure report, invoice and print templates",
+        path: "/administration/settings/templates",
+        icon: "📄",
+        actions: [
+          { label: "View", path: "/administration/settings/templates", type: "outline" }
         ],
       },
     ],
@@ -73,82 +76,48 @@ export const administrationSections = [
         title: "User Accounts",
         description: "Add, edit, or deactivate system users",
         path: "/administration/users",
-        
         icon: "👤",
         actions: [
-          {
-            label: "Add User",
-            path: "/administration/users/new",
-        actions: [
-          { label: "View", path: "/administration/users/new", type: "outline" },
-          { label: "New", path: "/administration/users/new/new", type: "primary" }
-        ],
-            type: "primary",
-          },
+          { label: "View", path: "/administration/users", type: "outline" },
+          { label: "Add User", path: "/administration/users/new", type: "primary" }
         ],
       },
       {
         title: "Role Setup",
         description: "Manage system roles and feature permissions",
         path: "/administration/access/roles",
-        
         icon: "🛡️",
         actions: [
-          { label: "View", path: "/administration/users",
-        actions: [
-          { label: "View", path: "/administration/users", type: "outline" },
-          { label: "New", path: "/administration/users/new", type: "primary" }
-        ], type: "outline" },
-          { label: "New", path: "/administration/users/new",
-        actions: [
-          { label: "View", path: "/administration/users/new", type: "outline" },
-          { label: "New", path: "/administration/users/new/new", type: "primary" }
-        ], type: "primary" }
+          { label: "View", path: "/administration/access/roles", type: "outline" },
+          { label: "New", path: "/administration/access/roles/new", type: "primary" }
         ],
       },
       {
         title: "User Permissions Matrix",
         description: "Configure direct feature permissions per user",
         path: "/administration/access/user-permissions",
-        
         icon: "🔐",
         actions: [
-          { label: "View", path: "/administration/access/user-permissions",
-        actions: [
           { label: "View", path: "/administration/access/user-permissions", type: "outline" }
-        ], type: "outline" }
         ],
       },
       {
         title: "Exceptional Permissions",
         description: "Review special permission overrides",
         path: "/administration/access/user-overrides",
-        
         icon: "⭐",
         actions: [
-          { label: "View", path: "/administration/access/user-overrides",
-        actions: [
           { label: "View", path: "/administration/access/user-overrides", type: "outline" },
-          { label: "New", path: "/administration/access/user-overrides/new", type: "primary" }
-        ], type: "outline" },
-          { label: "New", path: "/administration/access/user-overrides/new",
-        actions: [
-          { label: "View", path: "/administration/access/user-overrides/new", type: "outline" },
-          { label: "New", path: "/administration/access/user-overrides/new/new", type: "primary" }
-        ], type: "primary" }
+          { label: "Configure", path: "/administration/access/user-overrides", type: "primary" }
         ],
       },
       {
         title: "Dashboard Permissions",
         description: "Configure role and user access to dashboard analytics",
         path: "/administration/access/dashboard-permissions",
-        
         icon: "📊",
         actions: [
-          { label: "View", path: "/administration/access/dashboard-permissions",
-        actions: [
           { label: "View", path: "/administration/access/dashboard-permissions", type: "outline" }
-        ], type: "outline" }
         ],
       },
     ],
@@ -162,56 +131,28 @@ export const administrationSections = [
         title: "My Approvals",
         description: "View and process pending approval requests",
         path: "/administration/workflows/approvals",
-        
         icon: "✅",
         actions: [
-          { label: "View", path: "/administration/workflows/approvals",
-        actions: [
-          { label: "View", path: "/administration/workflows/approvals", type: "outline" },
-          { label: "New", path: "/administration/workflows/approvals/new", type: "primary" }
-        ], type: "outline" },
-          { label: "New", path: "/administration/workflows/approvals/new",
-        actions: [
-          { label: "View", path: "/administration/workflows/approvals/new", type: "outline" },
-          { label: "New", path: "/administration/workflows/approvals/new/new", type: "primary" }
-        ], type: "primary" }
+          { label: "View", path: "/administration/workflows/approvals", type: "outline" }
         ],
       },
       {
         title: "Approved Documents",
         description: "History of fully approved workflows",
         path: "/administration/workflows/approved",
-        
         icon: "📁",
         actions: [
-          { label: "View", path: "/administration/workflows/approved",
-        actions: [
-          { label: "View", path: "/administration/workflows/approved", type: "outline" },
-          { label: "New", path: "/administration/workflows/approved/new", type: "primary" }
-        ], type: "outline" },
-          { label: "New", path: "/administration/workflows/approved/new",
-        actions: [
-          { label: "View", path: "/administration/workflows/approved/new", type: "outline" },
-          { label: "New", path: "/administration/workflows/approved/new/new", type: "primary" }
-        ], type: "primary" }
+          { label: "View", path: "/administration/workflows/approved", type: "outline" }
         ],
       },
       {
         title: "Workflow Configurations",
         description: "Define multi-stage approval rules and triggers",
         path: "/administration/workflows",
-        
         icon: "🔀",
         actions: [
-          {
-            label: "Create Workflow",
-            path: "/administration/workflows/new",
-        actions: [
-          { label: "View", path: "/administration/workflows/new", type: "outline" },
-          { label: "New", path: "/administration/workflows/new/new", type: "primary" }
-        ],
-            type: "primary",
-          },
+          { label: "View", path: "/administration/workflows", type: "outline" },
+          { label: "Create Workflow", path: "/administration/workflows/new", type: "primary" }
         ],
       },
     ],
@@ -225,32 +166,18 @@ export const administrationSections = [
         title: "System Log Book",
         description: "Complete audit trail of system events",
         path: "/administration/reports/system-log-book",
-        
         icon: "📖",
         actions: [
-          { label: "View", path: "/administration/workflows",
-        actions: [
-          { label: "View", path: "/administration/workflows", type: "outline" },
-          { label: "New", path: "/administration/workflows/new", type: "primary" }
-        ], type: "outline" },
-          { label: "New", path: "/administration/workflows/new",
-        actions: [
-          { label: "View", path: "/administration/workflows/new", type: "outline" },
-          { label: "New", path: "/administration/workflows/new/new", type: "primary" }
-        ], type: "primary" }
+          { label: "View", path: "/administration/reports/system-log-book", type: "outline" }
         ],
       },
       {
-        title: "User Login Activity",
-        description: "Track user login sessions and IP addresses",
+        title: "User Activity & Audit Report",
+        description: "Track user login sessions, IP addresses and audit history",
         path: "/administration/reports/user-login-activity",
-        
         icon: "📊",
         actions: [
-          { label: "View", path: "/administration/reports/user-login-activity",
-        actions: [
           { label: "View", path: "/administration/reports/user-login-activity", type: "outline" }
-        ], type: "outline" }
         ],
       },
     ],
@@ -383,6 +310,9 @@ export default function AdministrationHome() {
       <Route path="/users" element={<UserList />} />
       <Route path="/users/new" element={<UserForm />} />
       <Route path="/users/:id" element={<UserForm />} />
+      <Route path="/branches" element={<Navigate to="/system-configuration/branches" replace />} />
+      <Route path="/branches/new" element={<Navigate to="/system-configuration/branches/new" replace />} />
+      <Route path="/branches/:id" element={<Navigate to="/system-configuration/branches" replace />} />
       <Route path="/workflows" element={<WorkflowList />} />
       <Route path="/workflows/new" element={<WorkflowForm />} />
       <Route path="/workflows/:id" element={<WorkflowForm />} />
@@ -400,10 +330,24 @@ export default function AdministrationHome() {
         path="/reports/user-login-activity"
         element={<UserLoginActivityReportPage />}
       />
+      <Route
+        path="/reports/user-activity"
+        element={<UserLoginActivityReportPage />}
+      />
+      <Route
+        path="/reports/user-activity-and-audit"
+        element={<UserLoginActivityReportPage />}
+      />
+      <Route
+        path="/reports/audit"
+        element={<UserLoginActivityReportPage />}
+      />
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="/diagnostics" element={<DiagnosticsPage />} />
       <Route path="/settings/templates" element={<DocumentTemplatesPage />} />
       <Route path="/access/roles" element={<RoleManagement />} />
+      <Route path="/access/roles/new" element={<RoleManagement initialCreate={true} />} />
+      <Route path="/access/roles/:id" element={<RoleManagement />} />
       <Route path="/access/user-permissions" element={<UserPermissions />} />
       <Route
         path="/access/user-permissions/:id"
@@ -411,8 +355,13 @@ export default function AdministrationHome() {
       />
       <Route path="/access/dashboard-permissions" element={<DashboardPermissions />} />
       <Route path="/access/user-overrides" element={<UserOverrides />} />
+      <Route path="/access/user-overrides/new" element={<UserOverrides initialCreate={true} />} />
       <Route
         path="/exceptional-permissions"
+        element={<ExceptionalPermissionsList />}
+      />
+      <Route
+        path="/access/exceptional-permissions"
         element={<ExceptionalPermissionsList />}
       />
       </Routes>

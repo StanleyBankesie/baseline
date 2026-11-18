@@ -411,9 +411,7 @@ function TerminalsTab() {
         <button type="button" className="btn-success" onClick={openAdd}>
           + Add Terminal
         </button>
-        <button type="button" className="btn btn-secondary" onClick={refresh}>
-          Refresh
-        </button>
+        
       </div>
       <div className="card">
         <div className="card-body">

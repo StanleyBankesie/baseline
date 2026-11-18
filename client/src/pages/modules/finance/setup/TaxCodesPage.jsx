@@ -687,14 +687,7 @@ export default function TaxCodesPage() {
               >
                 + Create Tax Code
               </button>
-              <button
-                type="button"
-                className="px-3.5 py-2 text-xs font-semibold bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors flex items-center gap-1.5"
-                onClick={load}
-                disabled={loading}
-              >
-                Refresh
-              </button>
+              
             </div>
           </div>
         </div>
@@ -1025,13 +1018,7 @@ export default function TaxCodesPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  className="btn btn-secondary px-3 py-1.5 text-xs font-semibold"
-                  onClick={() => loadComponents(selectedTaxId)}
-                >
-                  Refresh
-                </button>
+                
                 <button
                   type="button"
                   className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"

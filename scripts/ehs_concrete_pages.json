@@ -1,0 +1,11 @@
+[
+  { "name": "EHS Landing Hub", "path": "/environmental-health-safety", "component": "EHSLanding" },
+  { "name": "Safety Management (HSE)", "path": "/environmental-health-safety/safety", "component": "SafetyManagementPage" },
+  { "name": "Incident Register", "path": "/environmental-health-safety/incidents", "component": "IncidentRegisterPage" },
+  { "name": "Safety Incidents (Alias)", "path": "/environmental-health-safety/safety/incidents", "component": "IncidentRegisterPage" },
+  { "name": "Toolbox Talks", "path": "/environmental-health-safety/toolbox-talks", "component": "ToolboxTalksPage" },
+  { "name": "Safety Toolbox Talks (Alias)", "path": "/environmental-health-safety/safety/toolbox-talks", "component": "ToolboxTalksPage" },
+  { "name": "Health & Safety Compliance", "path": "/environmental-health-safety/hsa-compliance", "component": "HealthSafetyCompliancePage" },
+  { "name": "Statutory Obligations & Hazards", "path": "/environmental-health-safety/compliance", "component": "FMCompliancePage" },
+  { "name": "Sustainability & Environmental", "path": "/environmental-health-safety/sustainability", "component": "SustainabilityManagementPage" }
+]

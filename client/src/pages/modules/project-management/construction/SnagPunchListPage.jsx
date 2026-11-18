@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -700,21 +701,21 @@ export default function SnagPunchListPage({ embedded = false }) {
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              className="btn btn-secondary inline-flex items-center gap-2 text-xs font-semibold shadow-sm"
+              className="btn btn-secondary inline-flex items-center gap-2 text-sm font-semibold shadow-sm"
               onClick={exportExcel}
             >
               <FileSpreadsheet size={15} /> Export Excel
             </button>
             <button
               type="button"
-              className="btn btn-secondary inline-flex items-center gap-2 text-xs font-semibold shadow-sm"
+              className="btn btn-secondary inline-flex items-center gap-2 text-sm font-semibold shadow-sm"
               onClick={exportPdf}
             >
               <Download size={15} /> Export PDF
             </button>
             <button
               type="button"
-              className="btn btn-primary inline-flex items-center gap-2 text-xs font-semibold shadow-sm"
+              className="btn btn-primary inline-flex items-center gap-2 text-sm font-semibold shadow-sm"
               onClick={openNew}
             >
               <Plus size={16} /> Log New Issue
@@ -723,14 +724,14 @@ export default function SnagPunchListPage({ embedded = false }) {
         </header>
       )}
 
-      {/* KPI Cards (6 Dashboard KPI Cards) matching Project Portfolio design */}
-      <section className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6">
+      {/* Metric Stats Cards Carousel */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="xl:grid-cols-6 md:grid-cols-3 sm:grid-cols-2" gapClass="gap-4">
         {[
           {
             label: "Total Issues",
             value: kpis.total,
             icon: Layers,
-            badgeColor: "bg-brand-900 dark:bg-brand-700 text-white",
+            badgeColor: "bg-indigo-600 dark:bg-indigo-500 text-white",
             active: !statusFilter && !overdueOnly,
             onClick: () => {
               setStatusFilter("");
@@ -799,7 +800,7 @@ export default function SnagPunchListPage({ embedded = false }) {
               key={card.label}
               type="button"
               onClick={card.onClick}
-              className={`card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border rounded-xl shadow-sm text-left transition-all hover:shadow-md cursor-pointer ${
+              className={`card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border rounded-2xl shadow-sm text-left transition-all hover:shadow-md cursor-pointer ${
                 card.active
                   ? "border-brand-500 ring-2 ring-brand-500/20"
                   : "border-slate-200 dark:border-slate-800"
@@ -810,7 +811,7 @@ export default function SnagPunchListPage({ embedded = false }) {
                   {card.label}
                 </p>
                 <div className="flex items-baseline gap-1.5 mt-1">
-                  <span className="text-xl font-bold text-slate-900 dark:text-white">
+                  <span className="text-2xl font-bold text-slate-800 dark:text-slate-100">
                     {card.value}
                   </span>
                   {kpis.total > 0 && card.label !== "Total Issues" && (
@@ -821,14 +822,14 @@ export default function SnagPunchListPage({ embedded = false }) {
                 </div>
               </div>
               <div
-                className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md shrink-0 ${card.badgeColor}`}
+                className={`p-3 rounded-full flex items-center justify-center text-white shadow-sm shrink-0 ${card.badgeColor}`}
               >
                 <Icon size={20} className="stroke-[2.5]" />
               </div>
             </button>
           );
         })}
-      </section>
+      </MobileMovingCarousel>
 
       {/* Filter and Search Bar without Quick Tabs */}
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -836,7 +837,7 @@ export default function SnagPunchListPage({ embedded = false }) {
           <div className="relative lg:col-span-2">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
-              className="input w-full pl-9 text-xs"
+              className="input w-full pl-9 text-sm"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search reference, project, issue title, assignee, WBS…"
@@ -911,19 +912,12 @@ export default function SnagPunchListPage({ embedded = false }) {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              className="p-1.5 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
-              onClick={loadIssues}
-              title="Refresh register"
-            >
-              <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-            </button>
+            
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1150px] text-left text-xs">
+          <table className="w-full min-w-[1150px] text-left text-sm">
             <thead className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:bg-slate-800/80 dark:text-slate-400">
               <tr>
                 {[
@@ -1191,7 +1185,7 @@ export default function SnagPunchListPage({ embedded = false }) {
           </div>
           <div className="flex items-center gap-2">
             <select
-              className="input py-1 text-xs"
+              className="input py-1 text-sm"
               value={pageSize}
               onChange={(e) => setPageSize(Number(e.target.value))}
             >
@@ -1201,7 +1195,7 @@ export default function SnagPunchListPage({ embedded = false }) {
               <option value={100}>100 / page</option>
             </select>
             <button
-              className="btn btn-secondary py-1 text-xs"
+              className="btn btn-secondary py-1 text-sm"
               disabled={page <= 1}
               onClick={() => setPage((p) => p - 1)}
             >
@@ -1211,7 +1205,7 @@ export default function SnagPunchListPage({ embedded = false }) {
               {page} / {pageCount}
             </span>
             <button
-              className="btn btn-secondary py-1 text-xs"
+              className="btn btn-secondary py-1 text-sm"
               disabled={page >= pageCount}
               onClick={() => setPage((p) => p + 1)}
             >
@@ -1700,7 +1694,7 @@ export default function SnagPunchListPage({ embedded = false }) {
                   {formTab !== "general" && (
                     <button
                       type="button"
-                      className="btn btn-secondary text-xs"
+                      className="btn btn-secondary text-sm"
                       onClick={() => {
                         const tabs = ["general", "classification", "assignment", "resolution", "review"];
                         const idx = tabs.indexOf(formTab);
@@ -1713,7 +1707,7 @@ export default function SnagPunchListPage({ embedded = false }) {
                   {formTab !== "review" && (
                     <button
                       type="button"
-                      className="btn btn-secondary text-xs"
+                      className="btn btn-secondary text-sm"
                       onClick={() => {
                         const tabs = ["general", "classification", "assignment", "resolution", "review"];
                         const idx = tabs.indexOf(formTab);
@@ -1726,10 +1720,10 @@ export default function SnagPunchListPage({ embedded = false }) {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button type="button" className="btn btn-secondary text-xs" onClick={closeForm}>
+                  <button type="button" className="btn btn-secondary text-sm" onClick={closeForm}>
                     Cancel
                   </button>
-                  <button className="btn btn-primary text-xs" type="submit" disabled={saving}>
+                  <button className="btn btn-primary text-sm" type="submit" disabled={saving}>
                     {saving ? "Saving…" : editingId ? "Update Issue" : "Create Issue"}
                   </button>
                 </div>
@@ -1850,7 +1844,7 @@ export default function SnagPunchListPage({ embedded = false }) {
             <div className="flex justify-between border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-900">
               <button
                 type="button"
-                className="btn btn-secondary text-xs inline-flex items-center gap-1.5"
+                className="btn btn-secondary text-sm inline-flex items-center gap-1.5"
                 onClick={() => {
                   const it = viewIssue;
                   setViewIssue(null);
@@ -1862,14 +1856,14 @@ export default function SnagPunchListPage({ embedded = false }) {
               <div className="flex gap-2">
                 <button
                   type="button"
-                  className="btn btn-secondary text-xs"
+                  className="btn btn-secondary text-sm"
                   onClick={() => setViewIssue(null)}
                 >
                   Close
                 </button>
                 <button
                   type="button"
-                  className="btn btn-primary text-xs"
+                  className="btn btn-primary text-sm"
                   onClick={() => {
                     const it = viewIssue;
                     setViewIssue(null);
@@ -1918,14 +1912,14 @@ export default function SnagPunchListPage({ embedded = false }) {
             <div className="mt-5 flex justify-end gap-2">
               <button
                 type="button"
-                className="btn btn-secondary text-xs"
+                className="btn btn-secondary text-sm"
                 onClick={() => setRejectModalIssue(null)}
               >
                 Cancel
               </button>
               <button
                 type="button"
-                className="btn btn-danger text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white"
+                className="btn btn-danger text-sm font-bold bg-rose-600 hover:bg-rose-700 text-white"
                 onClick={submitRejection}
               >
                 Confirm Rejection & Return to In Progress
@@ -2002,7 +1996,7 @@ export default function SnagPunchListPage({ embedded = false }) {
             <div className="mt-5 flex justify-end border-t border-slate-200 pt-3 dark:border-slate-800">
               <button
                 type="button"
-                className="btn btn-secondary text-xs"
+                className="btn btn-secondary text-sm"
                 onClick={() => setHistoryIssue(null)}
               >
                 Close

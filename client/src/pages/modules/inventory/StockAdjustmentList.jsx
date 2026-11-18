@@ -1,876 +1,889 @@
-import { Send, X, Activity, Clock, CheckCircle2, Sliders } from "lucide-react";
-import MobileMovingCarousel from "@/components/MobileMovingCarousel";
-/**
- * @fileoverview StockAdjustmentList component.
- * Provides functionality for StockAdjustmentList.
- */
-
-import React, { useEffect, useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { api } from "api/client";
-import { toast } from "react-toastify";
-import ReverseApprovalButton from "../../../components/ReverseApprovalButton.jsx";
-import FloatingCreateButton from "@/components/FloatingCreateButton.jsx";
-import DocumentAttachmentsModal from "@/components/attachments/DocumentAttachmentsModal.jsx";
-import {
-  ListPrintIconButton,
-  ListPdfIconButton,
-  ListAttachmentIconButton,
-} from "@/components/list/ListDocActionIconButtons.jsx";
-import { filterAndSort } from "@/utils/searchUtils.js";
-import useSort from "@/hooks/useSort.js";
-import SortableHeader from "@/components/SortableHeader.jsx";
-import { useViewMode } from "@/hooks/useViewMode";
-import ViewToggle from "@/components/ViewToggle";
-
-/**
- *  component
- * 
- * @returns {JSX.Element} The rendered component
- */
-export default function StockAdjustmentList() {
-  const [viewMode, setViewMode] = useViewMode();
-  const location = useLocation();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [adjustments, setAdjustments] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const [showForwardModal, setShowForwardModal] = useState(false);
-  const [selectedDoc, setSelectedDoc] = useState(null);
-  const [wfLoading, setWfLoading] = useState(false);
-  const [wfError, setWfError] = useState("");
-  const [forwardComments, setForwardComments] = useState("");
-  const [candidateWorkflow, setCandidateWorkflow] = useState(null);
-  const [firstApprover, setFirstApprover] = useState(null);
-  const [workflowSteps, setWorkflowSteps] = useState([]);
-  const [submittingForward, setSubmittingForward] = useState(false);
-  const [workflowsCache, setWorkflowsCache] = useState(null);
-  const [targetApproverId, setTargetApproverId] = useState(null);
-  const [hasInactiveWorkflow, setHasInactiveWorkflow] = useState(false);
-  const [showAttach, setShowAttach] = useState(false);
-  const [activeDocId, setActiveDocId] = useState(null);
-
-  const fetchAdjustments = async (currentPage) => {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await api.get("/inventory/stock-adjustments", {
-        params: { page: currentPage, limit: 50 },
-      });
-      const arr = Array.isArray(res.data?.items) ? res.data.items : [];
-      setAdjustments(arr);
-      if (res.data?.pagination) {
-        setTotalPages(res.data.pagination.totalPages || 1);
-        setTotalCount(res.data.pagination.total || 0);
-      }
-    } catch (e) {
-      setError(e?.response?.data?.message || "Failed to load stock adjustments");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAdjustments(page);
-  }, [page]);
-
-  useEffect(() => {
-    const ref = location.state?.highlightRef;
-    const hid = location.state?.highlightId;
-    const refresh = location.state?.refresh;
-    if (!ref && !hid && !refresh) return;
-    fetchAdjustments(1);
-  }, [
-    location.state?.highlightRef,
-    location.state?.highlightId,
-    location.state?.refresh,
-  ]);
-  useEffect(() => {
-    function onWorkflowStatus(e) {
-      try {
-        const d = e.detail || {};
-        const id = Number(d.documentId || d.document_id);
-        const status = String(d.status || "").toUpperCase();
-        if (!id || !status) return;
-        setAdjustments((prev) =>
-          prev.map((r) =>
-            Number(r.id) === id
-              ? {
-                  ...r,
-                  status,
-                  ...(status === "DRAFT"
-                    ? { forwarded_to_username: null }
-                    : {}),
-                }
-              : r,
-          ),
-        );
-      } catch {}
-    }
-    window.addEventListener("omni.workflow.status", onWorkflowStatus);
-    return () =>
-      window.removeEventListener("omni.workflow.status", onWorkflowStatus);
-  }, []);
-
-  const getStatusBadge = (status) => {
-    const badges = {
-      DRAFT: "badge-info",
-      PENDING_APPROVAL: "badge-warning",
-      APPROVED: "badge-success",
-      POSTED: "badge-success",
-      REJECTED: "badge-error",
-      CANCELLED: "badge-error",
-      RETURNED: "badge-error",
-    };
-    return badges[status] || "badge-info";
-  };
-
-  const filteredAdjustments = useMemo(() => {
-    if (!searchTerm.trim()) return adjustments.slice();
-    return filterAndSort(adjustments, {
-      query: searchTerm,
-      getKeys: (adj) => [adj.adjustment_no, adj.status],
-    });
-  }, [adjustments, searchTerm]);
-
-  const { sorted: sortedAdjustments, sortKey, sortDir, toggle } = useSort(filteredAdjustments, "created_at", "desc");
-
-  const workflowDisabled = hasInactiveWorkflow && !candidateWorkflow;
-
-  const formatDateOnly = (v) => {
-    if (!v) return "";
-    let d = new Date(v);
-    if (isNaN(d.getTime())) {
-      if (!isNaN(Number(v))) {
-        d = new Date(Number(v));
-      }
-    }
-    if (isNaN(d.getTime())) return String(v);
-    return d.toLocaleDateString();
-  };
-
-  const openForwardModal = async (doc) => {
-    setSelectedDoc(doc);
-    setShowForwardModal(true);
-    setWfError("");
-                    setForwardComments("");
-    if (!workflowsCache) {
-      try {
-        setWfLoading(true);
-        const res = await api.get("/workflows");
-        const items = Array.isArray(res.data?.items) ? res.data.items : [];
-        setWorkflowsCache(items);
-        await computeCandidateFromList(items);
-      } catch (e) {
-        setWfError(e?.response?.data?.message || "Failed to load workflows");
-      } finally {
-        setWfLoading(false);
-      }
-    } else {
-      await computeCandidate();
-    }
-  };
-
-  const computeCandidate = async () => {
-    if (!workflowsCache || !workflowsCache.length) {
-      setCandidateWorkflow(null);
-      setFirstApprover(null);
-      setWfError("");
-                    setForwardComments("");
-      setHasInactiveWorkflow(false);
-      return;
-    }
-    const route = "/inventory/stock-adjustments";
-    const normalize = (s) =>
-      String(s || "")
-        .trim()
-        .toUpperCase()
-        .replace(/\s+/g, "_");
-    const matching = workflowsCache.filter(
-      (w) =>
-        String(w.document_route) === route ||
-        normalize(w.document_type) === "STOCK_ADJUSTMENT",
-    );
-    const hasInactive = matching.some((w) => Number(w.is_active) === 0);
-    const chosen =
-      workflowsCache.find(
-        (w) => Number(w.is_active) === 1 && String(w.document_route) === route,
-      ) ||
-      workflowsCache.find(
-        (w) =>
-          Number(w.is_active) === 1 &&
-          normalize(w.document_type) === "STOCK_ADJUSTMENT",
-      ) ||
-      null;
-    setCandidateWorkflow(chosen || null);
-    setHasInactiveWorkflow(!chosen && hasInactive);
-    setFirstApprover(null);
-    if (!chosen) return;
-    try {
-      setWfLoading(true);
-      const res = await api.get(`/workflows/${chosen.id}`);
-      const item = res.data?.item;
-      const steps = Array.isArray(item?.steps) ? item.steps : [];
-      setWorkflowSteps(steps);
-      const first = steps[0] || null;
-      setFirstApprover(
-        first
-          ? {
-              userId: first.approver_user_id,
-              name: first.approver_name,
-              stepName: first.step_name,
-              stepOrder: first.step_order,
-              approvalLimit: first.approval_limit,
-            }
-          : null,
-      );
-      if (first) {
-        const defaultTarget =
-          (Array.isArray(first.approvers) && first.approvers.length
-            ? first.approvers[0].id
-            : first.approver_user_id) || null;
-        setTargetApproverId(defaultTarget);
-      } else {
-        setTargetApproverId(null);
-      }
-    } catch (e) {
-      setWfError(
-        e?.response?.data?.message || "Failed to load workflow details",
-      );
-    } finally {
-      setWfLoading(false);
-    }
-  };
-
-  const computeCandidateFromList = async (items) => {
-    if (!items || !items.length) {
-      setCandidateWorkflow(null);
-      setFirstApprover(null);
-      setWfError("");
-                    setForwardComments("");
-      setHasInactiveWorkflow(false);
-      return;
-    }
-    const route = "/inventory/stock-adjustments";
-    const normalize = (s) =>
-      String(s || "")
-        .trim()
-        .toUpperCase()
-        .replace(/\s+/g, "_");
-    const matching = items.filter(
-      (w) =>
-        String(w.document_route) === route ||
-        normalize(w.document_type) === "STOCK_ADJUSTMENT",
-    );
-    const hasInactive = matching.some((w) => Number(w.is_active) === 0);
-    const chosen =
-      items.find(
-        (w) => Number(w.is_active) === 1 && String(w.document_route) === route,
-      ) ||
-      items.find(
-        (w) =>
-          Number(w.is_active) === 1 &&
-          normalize(w.document_type) === "STOCK_ADJUSTMENT",
-      ) ||
-      null;
-    setCandidateWorkflow(chosen || null);
-    setHasInactiveWorkflow(!chosen && hasInactive);
-    setFirstApprover(null);
-    if (!chosen) return;
-    try {
-      setWfLoading(true);
-      const res = await api.get(`/workflows/${chosen.id}`);
-      const item = res.data?.item;
-      const steps = Array.isArray(item?.steps) ? item.steps : [];
-      setWorkflowSteps(steps);
-      const first = steps[0] || null;
-      setFirstApprover(
-        first
-          ? {
-              userId: first.approver_user_id,
-              name: first.approver_name,
-              stepName: first.step_name,
-              stepOrder: first.step_order,
-              approvalLimit: first.approval_limit,
-            }
-          : null,
-      );
-    } catch (e) {
-      setWfError(
-        e?.response?.data?.message || "Failed to load workflow details",
-      );
-    } finally {
-      setWfLoading(false);
-    }
-  };
-
-  const forwardDocument = async () => {
-    if (!selectedDoc) return;
-    setSubmittingForward(true);
-    setWfError("");
-    // Optimistic update
-    let optimisticApprover = null;
-    try {
-      const first =
-        Array.isArray(workflowSteps) && workflowSteps.length
-          ? workflowSteps[0]
-          : null;
-      const opts = first
-        ? Array.isArray(first.approvers) && first.approvers.length
-          ? first.approvers.map((u) => ({ id: u.id, name: u.username }))
-          : first.approver_user_id
-            ? [
-                {
-                  id: first.approver_user_id,
-                  name: first.approver_name || String(first.approver_user_id),
-                },
-              ]
-            : []
-        : [];
-      if (targetApproverId && opts.length) {
-        const hit = opts.find((u) => Number(u.id) === Number(targetApproverId));
-        optimisticApprover = hit ? hit.name : null;
-      }
-    } catch {}
-    setAdjustments((prev) =>
-      prev.map((r) =>
-        r.id === selectedDoc.id
-          ? {
-              ...r,
-              status: "PENDING_APPROVAL",
-              forwarded_to_username:
-                optimisticApprover || r.forwarded_to_username || "Approver",
-            }
-          : r,
-      ),
-    );
-    setShowForwardModal(false);
-    setSelectedDoc(null);
-    try {
-      const res = await api.post(
-        `/inventory/stock-adjustments/${selectedDoc.id}/submit`,
-        {
-          amount: null,
-          workflow_id: candidateWorkflow ? candidateWorkflow.id : null,
-          target_user_id: targetApproverId || null,
-        comments: forwardComments,
-        },
-      );
-      const newStatus = res?.data?.status || "PENDING_APPROVAL";
-      let approverName = null;
-      try {
-        const first =
-          Array.isArray(workflowSteps) && workflowSteps.length
-            ? workflowSteps[0]
-            : null;
-        const opts = first
-          ? Array.isArray(first.approvers) && first.approvers.length
-            ? first.approvers.map((u) => ({
-                id: u.id,
-                name: u.username,
-              }))
-            : first.approver_user_id
-              ? [
-                  {
-                    id: first.approver_user_id,
-                    name: first.approver_name || String(first.approver_user_id),
-                  },
-                ]
-              : []
-          : [];
-        if (targetApproverId && opts.length) {
-          const hit = opts.find(
-            (u) => Number(u.id) === Number(targetApproverId),
-          );
-          approverName = hit ? hit.name : null;
-        }
-      } catch {}
-      setAdjustments((prev) =>
-        prev.map((r) =>
-          r.id === selectedDoc.id
-            ? {
-                ...r,
-                status: newStatus,
-                forwarded_to_username:
-                  approverName || r.forwarded_to_username || "Approver",
-              }
-            : r,
-        ),
-      );
-      try {
-        toast.success("Stock adjustment forwarded for approval");
-      } catch {}
-    } catch (e) {
-      setWfError(
-        e?.response?.data?.message || "Failed to forward for approval",
-      );
-    } finally {
-      setSubmittingForward(false);
-    }
-  };
-
-  return (
-    <div className="space-y-6">
-            
-
-      <div className="card">
-        <div className="card-header bg-brand text-white rounded-t-lg">
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 text-white">
-            <div>
-              <h1 className="text-2xl font-bold dark:text-brand-300">
-                Stock Adjustments
-              </h1>
-              <p className="hidden sm:block text-sm mt-1">
-                Adjust stock quantities for corrections and reconciliation
-              </p>
-            </div>
-            <div className="grid grid-cols-2 sm:flex gap-2">
-              <Link to="/inventory?section=Stock%20Operations" className="btn btn-secondary">
-                Return to Menu
-              </Link>
-              <Link
-                to="/inventory/stock-adjustments/new"
-                className="btn-success"
-              >
-                + New Adjustment
-              </Link>
-            </div>
-          </div>
-        </div>
-        </div>
-
-      {/* Metric Stats Cards Carousel */}
-      {/* Metric Stats Cards */}
-      <MobileMovingCarousel data-page-carousel gridColsClass="md:grid-cols-4" gapClass="gap-4">
-        {[
-          {
-            label: "Active Stock Adjustments",
-            val: (adjustments || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
-            icon: <Activity size={20} className="stroke-[2.5]" />,
-            color: "bg-sky-600 dark:bg-sky-500 text-white",
-          },
-          {
-            label: "Total Stock Adjustments",
-            val: (adjustments || []).length,
-            icon: <Sliders size={20} className="stroke-[2.5]" />,
-            color: "bg-brand-900 dark:bg-brand-700 text-white",
-          },
-          {
-            label: "Pending Stock Adjustments",
-            val: (adjustments || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
-            icon: <Clock size={20} className="stroke-[2.5]" />,
-            color: "bg-amber-500 text-white",
-          },
-          {
-            label: "Completed Stock Adjustments",
-            val: (adjustments || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
-            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
-            color: "bg-emerald-600 text-white",
-          },
-        ].map((stat, i) => (
-          <div key={i} className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
-            <div>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                {stat.label}
-              </p>
-              <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
-                {stat.val}
-              </p>
-            </div>
-            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md ${stat.color}`}>
-              {stat.icon}
-            </div>
-          </div>
-        ))}
-      </MobileMovingCarousel>
-
-      <div className="card">
-        <div className="card-body">
-          <div className="mb-4">
-            <input
-              type="text"
-              placeholder="Search by adjustment number..."
-              className="input max-w-md"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          
-                <div className="flex justify-end mb-4">
-                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
-                </div>
-                <div className="overflow-x-auto">
-            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
-              <thead>
-                <tr>
-                  <SortableHeader label="Adjustment No" sortKey="adjustment_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                  <SortableHeader label="Date" sortKey="adjustment_date" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                  <SortableHeader label="Type" sortKey="adjustment_type" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                  <SortableHeader label="Warehouse" sortKey="warehouse_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                  <SortableHeader label="Status" sortKey="status" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                  <th className="text-right">Actions</th>
-                  <SortableHeader label="Created By" sortKey="created_by_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                  <SortableHeader label="Created Date" sortKey="created_at" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td
-                      colSpan="9"
-                      className="text-center py-8 text-slate-500 dark:text-slate-400"
-                    >
-                      Loading...
-                    </td>
-                  </tr>
-                ) : error ? (
-                  <tr>
-                    <td colSpan="9" className="text-center py-8 text-red-600">
-                      {error}
-                    </td>
-                  </tr>
-                ) : null}
-                {sortedAdjustments.map((adj) => {
-                  const upperStatus = String(adj.status || "").toUpperCase();
-                  const autoApproved = workflowDisabled && upperStatus !== "CANCELLED" && upperStatus !== "REVERSED";
-                  const displayStatus = autoApproved ? "APPROVED" : upperStatus;
-                  return (
-                  <tr key={adj.id}>
-                    <td className="font-medium text-brand-700 dark:text-brand-300">
-                      {adj.adjustment_no}
-                    </td>
-                    <td>{formatDateOnly(adj.adjustment_date)}</td>
-                    <td>
-                      <span
-                        className={`badge ${
-                          adj.adjustment_type === "INCREASE"
-                            ? "badge-success"
-                            : "badge-warning"
-                        }`}
-                      >
-                        {adj.adjustment_type}
-                      </span>
-                    </td>
-                    <td>{adj.warehouse_name || "-"}</td>
-                    <td>
-                      <span className={`badge ${getStatusBadge(displayStatus)} `}>
-                        {displayStatus}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {/* Slot 1: View */}
-                        <div className="min-w-[80px]">
-                          <Link
-                            to={`/inventory/stock-adjustments/${adj.id}?mode=view`}
-                            className="w-full inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-slate-700 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors h-9"
-                          >
-                            View
-                          </Link>
-                        </div>
-
-                        {/* Slot 2: Edit */}
-                        <div className="min-w-[80px]">
-                          {!["APPROVED", "POSTED", "PENDING_APPROVAL"].includes(
-                            displayStatus,
-                          ) ? (
-                            <Link
-                              to={`/inventory/stock-adjustments/${adj.id}?mode=edit`}
-                              className="w-full inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-slate-700 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors h-9"
-                            >
-                              Edit
-                            </Link>
-                          ) : (
-                            <div className="w-full h-9" />
-                          )}
-                        </div>
-
-                        {/* Slot 3: Print */}
-                        <div className="min-w-[80px]">
-                          <ListPrintIconButton
-                            onClick={() =>
-                              window.open(
-                                `/inventory/stock-adjustments/${adj.id}?mode=view`,
-                                "_blank",
-                                "noopener,noreferrer",
-                              )
-                            }
-                          />
-                        </div>
-
-                        {/* Slot 4: PDF */}
-                        <div className="min-w-[80px]">
-                          <ListPdfIconButton
-                            onClick={() =>
-                              toast.info(
-                                "PDF export is not available for stock adjustments.",
-                              )
-                            }
-                          />
-                        </div>
-
-                        {/* Slot 5: Attachments */}
-                        <div className="w-9">
-                          <ListAttachmentIconButton
-                            onClick={() => {
-                              setActiveDocId(adj.id);
-                              setShowAttach(true);
-                            }}
-                          />
-                        </div>
-
-                        {/* Slot 6: Workflow */}
-                        <div className="min-w-[160px]">
-                          <div className="list-approval-slot">
-                            {["APPROVED", "POSTED"].includes(displayStatus) ? (
-                              <div className="flex items-center gap-2">
-                                <span className="list-approval-approved-pill">
-                                  Approved
-                                </span>
-                                {!autoApproved && (
-                                  <ReverseApprovalButton
-                                    docType="STOCK_ADJUSTMENT"
-                                    docId={adj.id}
-                                    className="list-approval-reverse-btn"
-                                    onDone={() =>
-                                      setAdjustments((prev) =>
-                                        prev.map((x) =>
-                                          x.id === adj.id
-                                            ? {
-                                                ...x,
-                                                status: "REVERSED",
-                                                forwarded_to_username: null,
-                                              }
-                                            : x,
-                                        ),
-                                      )
-                                    }
-                                  >
-                                    Reverse Approval
-                                  </ReverseApprovalButton>
-                                )}
-                              </div>
-                            ) : adj.forwarded_to_username && !["RETURNED", "DRAFT"].includes(String(adj.status || "").toUpperCase()) ? (
-                              <span className="list-approval-forwarded-pill">
-                                Forwarded to {adj.forwarded_to_username}
-                              </span>
-                            ) : ["DRAFT", "RETURNED", "REJECTED"].includes(String(adj.status || "").toUpperCase()) && adj.has_workflow ? (
-                              <button
-                                type="button"
-                                className="list-approval-forward-btn"
-                                onClick={() => openForwardModal(adj)}
-                              >
-                                Forward for Approval
-                              </button>
-                            ) : (
-                              <div className="w-full h-9" />
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>{adj.created_by_name || "-"}</td>
-                    <td>{adj.created_at ? new Date(adj.created_at).toLocaleDateString() : "-"}</td>
-                  </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-          
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div className="flex justify-between items-center mt-4 p-4 bg-base-100 rounded-lg shadow-sm border border-base-200">
-              <span className="text-sm text-base-content/70">
-                Showing page {page} of {totalPages}
-                {totalCount > 0 && ` (${totalCount} total adjustments)`}
-              </span>
-              <div className="join">
-                <button
-                  className="join-item btn btn-sm"
-                  disabled={page === 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                >
-                  «
-                </button>
-                <button className="join-item btn btn-sm">Page {page}</button>
-                <button
-                  className="join-item btn btn-sm"
-                  disabled={page === totalPages}
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                >
-                  »
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-      {showForwardModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-start p-4 sm:p-6 md:p-10 z-50 animate-fadeIn">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden my-auto sm:my-8 transition-all">
-            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/30 text-brand-900 dark:text-brand-400 flex items-center justify-center font-bold flex-shrink-0 border border-brand-200/50 dark:border-brand-800/50">
-                  <Send size={20} />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white">Forward for Approval</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Submit document into the approval workflow</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
-            <div className="p-4 space-y-3">
-              <div className="text-sm text-slate-700">
-                Document No:{" "}
-                <span className="font-semibold">
-                  {selectedDoc?.adjustment_no}
-                </span>
-              </div>
-              <div className="text-sm text-slate-700">
-                Workflow:{" "}
-                <span className="font-semibold">
-                  {candidateWorkflow
-                    ? `${candidateWorkflow.workflow_name} (${candidateWorkflow.workflow_code})`
-                    : "None (inactive)"}
-                </span>
-              </div>
-              <div>
-                {wfLoading ? (
-                  <div className="text-sm">Loading workflow...</div>
-                ) : null}
-                {wfError ? (
-                  <div className="text-sm text-red-600">{wfError}</div>
-                ) : null}
-              </div>
-              <div className="text-sm">
-                <div className="font-medium">Target Approver</div>
-                {(() => {
-                  const hasSteps =
-                    Array.isArray(workflowSteps) && workflowSteps.length > 0;
-                  const first = hasSteps ? workflowSteps[0] : null;
-                  const opts = first
-                    ? Array.isArray(first.approvers) && first.approvers.length
-                      ? first.approvers.map((u) => ({
-                          id: u.id,
-                          name: u.username,
-                        }))
-                      : first.approver_user_id
-                        ? [
-                            {
-                              id: first.approver_user_id,
-                              name:
-                                first.approver_name ||
-                                String(first.approver_user_id),
-                            },
-                          ]
-                        : []
-                    : [];
-                  return opts.length > 0 ? (
-                    <div className="mt-1">
-                      <select
-                        className="input w-full"
-                        value={targetApproverId || ""}
-                        onChange={(e) =>
-                          setTargetApproverId(
-                            e.target.value ? Number(e.target.value) : null,
-                          )
-                        }
-                      >
-                        <option value="">Select target approver</option>
-                        {opts.map((u) => (
-                          <option key={u.id} value={u.id}>
-                            {u.name}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="text-xs text-slate-600 mt-1">
-                        {firstApprover
-                          ? `Step ${firstApprover.stepOrder} • ${
-                              firstApprover.stepName
-                            }${
-                              firstApprover.approvalLimit != null
-                                ? ` • Limit: ${Number(
-                                    firstApprover.approvalLimit,
-                                  ).toLocaleString()}`
-                                : ""
-                            }`
-                          : ""}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-slate-600">
-                      {candidateWorkflow
-                        ? "No approver found in workflow definition"
-                        : "No active workflow; default behavior will apply"}
-                    </div>
-                  );
-                })()}
-              </div>
-            </div>
-            
-                <div className="mt-4 p-4 border-t border-slate-200">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Comments (Optional)</label>
-                  <textarea
-                    value={forwardComments}
-                    onChange={(e) => setForwardComments(e.target.value)}
-                    className="w-full border-slate-300 rounded-md focus:ring-brand focus:border-brand sm:text-sm"
-                    rows={3}
-                    placeholder="Add any comments for the approver..."
-                  />
-                </div>
-              <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3 bg-white dark:bg-slate-900">
-              <button
-                type="button"
-                className="btn btn-secondary px-4 py-2 text-sm font-medium"
-                onClick={() => {
-                  setShowForwardModal(false);
-                  setSelectedDoc(null);
-                  setCandidateWorkflow(null);
-                  setFirstApprover(null);
-                  setWfError("");
-                    setForwardComments("");
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary px-5 py-2 text-sm font-medium"
-                onClick={forwardDocument}
-                disabled={submittingForward}
-              >
-                {submittingForward ? "Forwarding..." : "Forward"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      <FloatingCreateButton
-        to="/inventory/stock-adjustments/new"
-        title="New Adjustment"
-      />
-      <DocumentAttachmentsModal
-        open={showAttach}
-        onClose={() => {
-          setShowAttach(false);
-          setActiveDocId(null);
-        }}
-        docType="stock-adjustment"
-        docId={activeDocId}
-      />
-    </div>
-  );
-}
+import { Send, X, Activity, Clock, CheckCircle2, Sliders } from "lucide-react";
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
+/**
+ * @fileoverview StockAdjustmentList component.
+ * Provides functionality for StockAdjustmentList.
+ */
+
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { api } from "api/client";
+import { toast } from "react-toastify";
+import ReverseApprovalButton from "../../../components/ReverseApprovalButton.jsx";
+import FloatingCreateButton from "@/components/FloatingCreateButton.jsx";
+import DocumentAttachmentsModal from "@/components/attachments/DocumentAttachmentsModal.jsx";
+import {
+  ListPrintIconButton,
+  ListPdfIconButton,
+  ListAttachmentIconButton,
+} from "@/components/list/ListDocActionIconButtons.jsx";
+import { filterAndSort } from "@/utils/searchUtils.js";
+import useSort from "@/hooks/useSort.js";
+import SortableHeader from "@/components/SortableHeader.jsx";
+import { useViewMode } from "@/hooks/useViewMode";
+import ViewToggle from "@/components/ViewToggle";
+
+/**
+ *  component
+ * 
+ * @returns {JSX.Element} The rendered component
+ */
+export default function StockAdjustmentList() {
+  const [viewMode, setViewMode] = useViewMode();
+  const location = useLocation();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [adjustments, setAdjustments] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const [showForwardModal, setShowForwardModal] = useState(false);
+  const [selectedDoc, setSelectedDoc] = useState(null);
+  const [wfLoading, setWfLoading] = useState(false);
+  const [wfError, setWfError] = useState("");
+  const [forwardComments, setForwardComments] = useState("");
+  const [candidateWorkflow, setCandidateWorkflow] = useState(null);
+  const [firstApprover, setFirstApprover] = useState(null);
+  const [workflowSteps, setWorkflowSteps] = useState([]);
+  const [submittingForward, setSubmittingForward] = useState(false);
+  const [workflowsCache, setWorkflowsCache] = useState(null);
+  const [targetApproverId, setTargetApproverId] = useState(null);
+  const [hasInactiveWorkflow, setHasInactiveWorkflow] = useState(false);
+  const [showAttach, setShowAttach] = useState(false);
+  const [activeDocId, setActiveDocId] = useState(null);
+
+  const fetchAdjustments = async (currentPage) => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await api.get("/inventory/stock-adjustments", {
+        params: { page: currentPage, limit: 50 },
+      });
+      const arr = Array.isArray(res.data?.items) ? res.data.items : [];
+      setAdjustments(arr);
+      if (res.data?.pagination) {
+        setTotalPages(res.data.pagination.totalPages || 1);
+        setTotalCount(res.data.pagination.total || 0);
+      }
+    } catch (e) {
+      setError(e?.response?.data?.message || "Failed to load stock adjustments");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAdjustments(page);
+  }, [page]);
+
+  useEffect(() => {
+    const ref = location.state?.highlightRef;
+    const hid = location.state?.highlightId;
+    const refresh = location.state?.refresh;
+    if (!ref && !hid && !refresh) return;
+    fetchAdjustments(1);
+  }, [
+    location.state?.highlightRef,
+    location.state?.highlightId,
+    location.state?.refresh,
+  ]);
+  useEffect(() => {
+    function onWorkflowStatus(e) {
+      try {
+        const d = e.detail || {};
+        const id = Number(d.documentId || d.document_id);
+        const status = String(d.status || "").toUpperCase();
+        if (!id || !status) return;
+        setAdjustments((prev) =>
+          prev.map((r) =>
+            Number(r.id) === id
+              ? {
+                  ...r,
+                  status,
+                  ...(status === "DRAFT"
+                    ? { forwarded_to_username: null }
+                    : {}),
+                }
+              : r,
+          ),
+        );
+      } catch {}
+    }
+    window.addEventListener("omni.workflow.status", onWorkflowStatus);
+    return () =>
+      window.removeEventListener("omni.workflow.status", onWorkflowStatus);
+  }, []);
+
+  const getStatusBadge = (status) => {
+    const badges = {
+      DRAFT: "badge-info",
+      PENDING_APPROVAL: "badge-warning",
+      APPROVED: "badge-success",
+      POSTED: "badge-success",
+      REJECTED: "badge-error",
+      CANCELLED: "badge-error",
+      RETURNED: "badge-error",
+    };
+    return badges[status] || "badge-info";
+  };
+
+  const filteredAdjustments = useMemo(() => {
+    if (!searchTerm.trim()) return adjustments.slice();
+    return filterAndSort(adjustments, {
+      query: searchTerm,
+      getKeys: (adj) => [adj.adjustment_no, adj.status],
+    });
+  }, [adjustments, searchTerm]);
+
+  const { sorted: sortedAdjustments, sortKey, sortDir, toggle } = useSort(filteredAdjustments, "created_at", "desc");
+
+  const workflowDisabled = hasInactiveWorkflow && !candidateWorkflow;
+
+  const formatDateOnly = (v) => {
+    if (!v) return "";
+    let d = new Date(v);
+    if (isNaN(d.getTime())) {
+      if (!isNaN(Number(v))) {
+        d = new Date(Number(v));
+      }
+    }
+    if (isNaN(d.getTime())) return String(v);
+    return d.toLocaleDateString();
+  };
+
+  const openForwardModal = async (doc) => {
+    setSelectedDoc(doc);
+    setShowForwardModal(true);
+    setWfError("");
+                    setForwardComments("");
+    if (!workflowsCache) {
+      try {
+        setWfLoading(true);
+        const res = await api.get("/workflows");
+        const items = Array.isArray(res.data?.items) ? res.data.items : [];
+        setWorkflowsCache(items);
+        await computeCandidateFromList(items);
+      } catch (e) {
+        setWfError(e?.response?.data?.message || "Failed to load workflows");
+      } finally {
+        setWfLoading(false);
+      }
+    } else {
+      await computeCandidate();
+    }
+  };
+
+  const computeCandidate = async () => {
+    if (!workflowsCache || !workflowsCache.length) {
+      setCandidateWorkflow(null);
+      setFirstApprover(null);
+      setWfError("");
+                    setForwardComments("");
+      setHasInactiveWorkflow(false);
+      return;
+    }
+    const route = "/inventory/stock-adjustments";
+    const normalize = (s) =>
+      String(s || "")
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, "_");
+    const matching = workflowsCache.filter(
+      (w) =>
+        String(w.document_route) === route ||
+        normalize(w.document_type) === "STOCK_ADJUSTMENT",
+    );
+    const hasInactive = matching.some((w) => Number(w.is_active) === 0);
+    const chosen =
+      workflowsCache.find(
+        (w) => Number(w.is_active) === 1 && String(w.document_route) === route,
+      ) ||
+      workflowsCache.find(
+        (w) =>
+          Number(w.is_active) === 1 &&
+          normalize(w.document_type) === "STOCK_ADJUSTMENT",
+      ) ||
+      null;
+    setCandidateWorkflow(chosen || null);
+    setHasInactiveWorkflow(!chosen && hasInactive);
+    setFirstApprover(null);
+    if (!chosen) return;
+    try {
+      setWfLoading(true);
+      const res = await api.get(`/workflows/${chosen.id}`);
+      const item = res.data?.item;
+      const steps = Array.isArray(item?.steps) ? item.steps : [];
+      setWorkflowSteps(steps);
+      const first = steps[0] || null;
+      setFirstApprover(
+        first
+          ? {
+              userId: first.approver_user_id,
+              name: first.approver_name,
+              stepName: first.step_name,
+              stepOrder: first.step_order,
+              approvalLimit: first.approval_limit,
+            }
+          : null,
+      );
+      if (first) {
+        const defaultTarget =
+          (Array.isArray(first.approvers) && first.approvers.length
+            ? first.approvers[0].id
+            : first.approver_user_id) || null;
+        setTargetApproverId(defaultTarget);
+      } else {
+        setTargetApproverId(null);
+      }
+    } catch (e) {
+      setWfError(
+        e?.response?.data?.message || "Failed to load workflow details",
+      );
+    } finally {
+      setWfLoading(false);
+    }
+  };
+
+  const computeCandidateFromList = async (items) => {
+    if (!items || !items.length) {
+      setCandidateWorkflow(null);
+      setFirstApprover(null);
+      setWfError("");
+                    setForwardComments("");
+      setHasInactiveWorkflow(false);
+      return;
+    }
+    const route = "/inventory/stock-adjustments";
+    const normalize = (s) =>
+      String(s || "")
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, "_");
+    const matching = items.filter(
+      (w) =>
+        String(w.document_route) === route ||
+        normalize(w.document_type) === "STOCK_ADJUSTMENT",
+    );
+    const hasInactive = matching.some((w) => Number(w.is_active) === 0);
+    const chosen =
+      items.find(
+        (w) => Number(w.is_active) === 1 && String(w.document_route) === route,
+      ) ||
+      items.find(
+        (w) =>
+          Number(w.is_active) === 1 &&
+          normalize(w.document_type) === "STOCK_ADJUSTMENT",
+      ) ||
+      null;
+    setCandidateWorkflow(chosen || null);
+    setHasInactiveWorkflow(!chosen && hasInactive);
+    setFirstApprover(null);
+    if (!chosen) return;
+    try {
+      setWfLoading(true);
+      const res = await api.get(`/workflows/${chosen.id}`);
+      const item = res.data?.item;
+      const steps = Array.isArray(item?.steps) ? item.steps : [];
+      setWorkflowSteps(steps);
+      const first = steps[0] || null;
+      setFirstApprover(
+        first
+          ? {
+              userId: first.approver_user_id,
+              name: first.approver_name,
+              stepName: first.step_name,
+              stepOrder: first.step_order,
+              approvalLimit: first.approval_limit,
+            }
+          : null,
+      );
+    } catch (e) {
+      setWfError(
+        e?.response?.data?.message || "Failed to load workflow details",
+      );
+    } finally {
+      setWfLoading(false);
+    }
+  };
+
+  const forwardDocument = async () => {
+    if (!selectedDoc) return;
+    setSubmittingForward(true);
+    setWfError("");
+    // Optimistic update
+    let optimisticApprover = null;
+    try {
+      const first =
+        Array.isArray(workflowSteps) && workflowSteps.length
+          ? workflowSteps[0]
+          : null;
+      const opts = first
+        ? Array.isArray(first.approvers) && first.approvers.length
+          ? first.approvers.map((u) => ({ id: u.id, name: u.username }))
+          : first.approver_user_id
+            ? [
+                {
+                  id: first.approver_user_id,
+                  name: first.approver_name || String(first.approver_user_id),
+                },
+              ]
+            : []
+        : [];
+      if (targetApproverId && opts.length) {
+        const hit = opts.find((u) => Number(u.id) === Number(targetApproverId));
+        optimisticApprover = hit ? hit.name : null;
+      }
+    } catch {}
+    setAdjustments((prev) =>
+      prev.map((r) =>
+        r.id === selectedDoc.id
+          ? {
+              ...r,
+              status: "PENDING_APPROVAL",
+              forwarded_to_username:
+                optimisticApprover || r.forwarded_to_username || "Approver",
+            }
+          : r,
+      ),
+    );
+    setShowForwardModal(false);
+    setSelectedDoc(null);
+    try {
+      const res = await api.post(
+        `/inventory/stock-adjustments/${selectedDoc.id}/submit`,
+        {
+          amount: null,
+          workflow_id: candidateWorkflow ? candidateWorkflow.id : null,
+          target_user_id: targetApproverId || null,
+        comments: forwardComments,
+        },
+      );
+      const newStatus = res?.data?.status || "PENDING_APPROVAL";
+      let approverName = null;
+      try {
+        const first =
+          Array.isArray(workflowSteps) && workflowSteps.length
+            ? workflowSteps[0]
+            : null;
+        const opts = first
+          ? Array.isArray(first.approvers) && first.approvers.length
+            ? first.approvers.map((u) => ({
+                id: u.id,
+                name: u.username,
+              }))
+            : first.approver_user_id
+              ? [
+                  {
+                    id: first.approver_user_id,
+                    name: first.approver_name || String(first.approver_user_id),
+                  },
+                ]
+              : []
+          : [];
+        if (targetApproverId && opts.length) {
+          const hit = opts.find(
+            (u) => Number(u.id) === Number(targetApproverId),
+          );
+          approverName = hit ? hit.name : null;
+        }
+      } catch {}
+      setAdjustments((prev) =>
+        prev.map((r) =>
+          r.id === selectedDoc.id
+            ? {
+                ...r,
+                status: newStatus,
+                forwarded_to_username:
+                  approverName || r.forwarded_to_username || "Approver",
+              }
+            : r,
+        ),
+      );
+      try {
+        toast.success("Stock adjustment forwarded for approval");
+      } catch {}
+    } catch (e) {
+      setWfError(
+        e?.response?.data?.message || "Failed to forward for approval",
+      );
+    } finally {
+      setSubmittingForward(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+            
+
+      <div className="card">
+        <div className="card-header bg-brand text-white rounded-t-lg">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 text-white">
+            <div>
+              <h1 className="text-2xl font-bold dark:text-brand-300">
+                Stock Adjustments
+              </h1>
+              <p className="hidden sm:block text-sm mt-1">
+                Adjust stock quantities for corrections and reconciliation
+              </p>
+            </div>
+            <div className="grid grid-cols-2 sm:flex gap-2">
+              <Link to="/inventory?section=Stock%20Operations" className="btn btn-secondary">
+                Return to Menu
+              </Link>
+              <Link
+                to="/inventory/stock-adjustments/new"
+                className="btn-success"
+              >
+                + New Adjustment
+              </Link>
+            </div>
+          </div>
+        </div>
+        </div>
+
+      {/* Metric Stats Cards Carousel */}
+      {/* Metric Stats Cards */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="md:grid-cols-4" gapClass="gap-4">
+        {[
+          {
+            label: "Active Stock Adjustments",
+            val: (adjustments || []).filter((x) => x.status === "ACTIVE" || x.status === "IN_PROGRESS" || x.status === "OPEN").length,
+            icon: <Activity size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Total Stock Adjustments",
+            val: (adjustments || []).length,
+            icon: <Sliders size={20} className="stroke-[2.5]" />,
+            color: "bg-brand-900 dark:bg-brand-700 text-white",
+          },
+          {
+            label: "Pending Stock Adjustments",
+            val: (adjustments || []).filter((x) => x.status === "PENDING" || x.status === "DRAFT" || x.status === "SUBMITTED" || x.status === "PENDING_APPROVAL").length,
+            icon: <Clock size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Completed Stock Adjustments",
+            val: (adjustments || []).filter((x) => x.status === "COMPLETED" || x.status === "APPROVED" || x.status === "CLOSED" || x.status === "POSTED").length,
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+        ].map((stat, i) => {
+          const colors = [
+            "bg-sky-600 dark:bg-sky-500 text-white",
+            "bg-brand-900 dark:bg-brand-700 text-white",
+            "bg-amber-500 text-white",
+            "bg-emerald-600 text-white",
+          ];
+          const colorClass = stat.color || colors[i % 4];
+
+          return (
+            <div
+              key={i}
+              className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm"
+            >
+              <div>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  {stat.label}
+                </p>
+                <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
+                  {stat.val}
+                </p>
+              </div>
+              <div className={`p-3 rounded-full ${colorClass} shadow-sm`}>
+                {stat.icon}
+              </div>
+            </div>
+          );
+        })}
+      </MobileMovingCarousel>
+
+      <div className="card">
+        <div className="card-body">
+          <div className="mb-4">
+            <input
+              type="text"
+              placeholder="Search by adjustment number..."
+              className="input max-w-md"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          
+                <div className="flex justify-end mb-4">
+                  <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+                </div>
+                <div className="overflow-x-auto">
+            <table className={"table " + (viewMode === 'grid' ? 'table-grid-mode' : '')}>
+              <thead>
+                <tr>
+                  <SortableHeader label="Adjustment No" sortKey="adjustment_no" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                  <SortableHeader label="Date" sortKey="adjustment_date" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                  <SortableHeader label="Type" sortKey="adjustment_type" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                  <SortableHeader label="Warehouse" sortKey="warehouse_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                  <SortableHeader label="Status" sortKey="status" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                  <th className="text-right">Actions</th>
+                  <SortableHeader label="Created By" sortKey="created_by_name" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                  <SortableHeader label="Created Date" sortKey="created_at" currentKey={sortKey} direction={sortDir} onToggle={toggle} />
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td
+                      colSpan="9"
+                      className="text-center py-8 text-slate-500 dark:text-slate-400"
+                    >
+                      Loading...
+                    </td>
+                  </tr>
+                ) : error ? (
+                  <tr>
+                    <td colSpan="9" className="text-center py-8 text-red-600">
+                      {error}
+                    </td>
+                  </tr>
+                ) : null}
+                {sortedAdjustments.map((adj) => {
+                  const upperStatus = String(adj.status || "").toUpperCase();
+                  const autoApproved = workflowDisabled && upperStatus !== "CANCELLED" && upperStatus !== "REVERSED";
+                  const displayStatus = autoApproved ? "APPROVED" : upperStatus;
+                  return (
+                  <tr key={adj.id}>
+                    <td className="font-medium text-brand-700 dark:text-brand-300">
+                      {adj.adjustment_no}
+                    </td>
+                    <td>{formatDateOnly(adj.adjustment_date)}</td>
+                    <td>
+                      <span
+                        className={`badge ${
+                          adj.adjustment_type === "INCREASE"
+                            ? "badge-success"
+                            : "badge-warning"
+                        }`}
+                      >
+                        {adj.adjustment_type}
+                      </span>
+                    </td>
+                    <td>{adj.warehouse_name || "-"}</td>
+                    <td>
+                      <span className={`badge ${getStatusBadge(displayStatus)} `}>
+                        {displayStatus}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {/* Slot 1: View */}
+                        <div className="min-w-[80px]">
+                          <Link
+                            to={`/inventory/stock-adjustments/${adj.id}?mode=view`}
+                            className="w-full inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-slate-700 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors h-9"
+                          >
+                            View
+                          </Link>
+                        </div>
+
+                        {/* Slot 2: Edit */}
+                        <div className="min-w-[80px]">
+                          {!["APPROVED", "POSTED", "PENDING_APPROVAL"].includes(
+                            displayStatus,
+                          ) ? (
+                            <Link
+                              to={`/inventory/stock-adjustments/${adj.id}?mode=edit`}
+                              className="w-full inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-slate-700 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors h-9"
+                            >
+                              Edit
+                            </Link>
+                          ) : (
+                            <div className="w-full h-9" />
+                          )}
+                        </div>
+
+                        {/* Slot 3: Print */}
+                        <div className="min-w-[80px]">
+                          <ListPrintIconButton
+                            onClick={() =>
+                              window.open(
+                                `/inventory/stock-adjustments/${adj.id}?mode=view`,
+                                "_blank",
+                                "noopener,noreferrer",
+                              )
+                            }
+                          />
+                        </div>
+
+                        {/* Slot 4: PDF */}
+                        <div className="min-w-[80px]">
+                          <ListPdfIconButton
+                            onClick={() =>
+                              toast.info(
+                                "PDF export is not available for stock adjustments.",
+                              )
+                            }
+                          />
+                        </div>
+
+                        {/* Slot 5: Attachments */}
+                        <div className="w-9">
+                          <ListAttachmentIconButton
+                            onClick={() => {
+                              setActiveDocId(adj.id);
+                              setShowAttach(true);
+                            }}
+                          />
+                        </div>
+
+                        {/* Slot 6: Workflow */}
+                        <div className="min-w-[160px]">
+                          <div className="list-approval-slot">
+                            {["APPROVED", "POSTED"].includes(displayStatus) ? (
+                              <div className="flex items-center gap-2">
+                                <span className="list-approval-approved-pill">
+                                  Approved
+                                </span>
+                                {!autoApproved && (
+                                  <ReverseApprovalButton
+                                    docType="STOCK_ADJUSTMENT"
+                                    docId={adj.id}
+                                    className="list-approval-reverse-btn"
+                                    onDone={() =>
+                                      setAdjustments((prev) =>
+                                        prev.map((x) =>
+                                          x.id === adj.id
+                                            ? {
+                                                ...x,
+                                                status: "REVERSED",
+                                                forwarded_to_username: null,
+                                              }
+                                            : x,
+                                        ),
+                                      )
+                                    }
+                                  >
+                                    Reverse Approval
+                                  </ReverseApprovalButton>
+                                )}
+                              </div>
+                            ) : adj.forwarded_to_username && !["RETURNED", "DRAFT"].includes(String(adj.status || "").toUpperCase()) ? (
+                              <span className="list-approval-forwarded-pill">
+                                Forwarded to {adj.forwarded_to_username}
+                              </span>
+                            ) : ["DRAFT", "RETURNED", "REJECTED"].includes(String(adj.status || "").toUpperCase()) && adj.has_workflow ? (
+                              <button
+                                type="button"
+                                className="list-approval-forward-btn"
+                                onClick={() => openForwardModal(adj)}
+                              >
+                                Forward for Approval
+                              </button>
+                            ) : (
+                              <div className="w-full h-9" />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{adj.created_by_name || "-"}</td>
+                    <td>{adj.created_at ? new Date(adj.created_at).toLocaleDateString() : "-"}</td>
+                  </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex justify-between items-center mt-4 p-4 bg-base-100 rounded-lg shadow-sm border border-base-200">
+              <span className="text-sm text-base-content/70">
+                Showing page {page} of {totalPages}
+                {totalCount > 0 && ` (${totalCount} total adjustments)`}
+              </span>
+              <div className="join">
+                <button
+                  className="join-item btn btn-sm"
+                  disabled={page === 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  «
+                </button>
+                <button className="join-item btn btn-sm">Page {page}</button>
+                <button
+                  className="join-item btn btn-sm"
+                  disabled={page === totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                >
+                  »
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      {showForwardModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-start p-4 sm:p-6 md:p-10 z-50 animate-fadeIn">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden my-auto sm:my-8 transition-all">
+            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/30 text-brand-900 dark:text-brand-400 flex items-center justify-center font-bold flex-shrink-0 border border-brand-200/50 dark:border-brand-800/50">
+                  <Send size={20} />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">Forward for Approval</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Submit document into the approval workflow</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-4 space-y-3">
+              <div className="text-sm text-slate-700">
+                Document No:{" "}
+                <span className="font-semibold">
+                  {selectedDoc?.adjustment_no}
+                </span>
+              </div>
+              <div className="text-sm text-slate-700">
+                Workflow:{" "}
+                <span className="font-semibold">
+                  {candidateWorkflow
+                    ? `${candidateWorkflow.workflow_name} (${candidateWorkflow.workflow_code})`
+                    : "None (inactive)"}
+                </span>
+              </div>
+              <div>
+                {wfLoading ? (
+                  <div className="text-sm">Loading workflow...</div>
+                ) : null}
+                {wfError ? (
+                  <div className="text-sm text-red-600">{wfError}</div>
+                ) : null}
+              </div>
+              <div className="text-sm">
+                <div className="font-medium">Target Approver</div>
+                {(() => {
+                  const hasSteps =
+                    Array.isArray(workflowSteps) && workflowSteps.length > 0;
+                  const first = hasSteps ? workflowSteps[0] : null;
+                  const opts = first
+                    ? Array.isArray(first.approvers) && first.approvers.length
+                      ? first.approvers.map((u) => ({
+                          id: u.id,
+                          name: u.username,
+                        }))
+                      : first.approver_user_id
+                        ? [
+                            {
+                              id: first.approver_user_id,
+                              name:
+                                first.approver_name ||
+                                String(first.approver_user_id),
+                            },
+                          ]
+                        : []
+                    : [];
+                  return opts.length > 0 ? (
+                    <div className="mt-1">
+                      <select
+                        className="input w-full"
+                        value={targetApproverId || ""}
+                        onChange={(e) =>
+                          setTargetApproverId(
+                            e.target.value ? Number(e.target.value) : null,
+                          )
+                        }
+                      >
+                        <option value="">Select target approver</option>
+                        {opts.map((u) => (
+                          <option key={u.id} value={u.id}>
+                            {u.name}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="text-xs text-slate-600 mt-1">
+                        {firstApprover
+                          ? `Step ${firstApprover.stepOrder} • ${
+                              firstApprover.stepName
+                            }${
+                              firstApprover.approvalLimit != null
+                                ? ` • Limit: ${Number(
+                                    firstApprover.approvalLimit,
+                                  ).toLocaleString()}`
+                                : ""
+                            }`
+                          : ""}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-slate-600">
+                      {candidateWorkflow
+                        ? "No approver found in workflow definition"
+                        : "No active workflow; default behavior will apply"}
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+            
+                <div className="mt-4 p-4 border-t border-slate-200">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Comments (Optional)</label>
+                  <textarea
+                    value={forwardComments}
+                    onChange={(e) => setForwardComments(e.target.value)}
+                    className="w-full border-slate-300 rounded-md focus:ring-brand focus:border-brand sm:text-sm"
+                    rows={3}
+                    placeholder="Add any comments for the approver..."
+                  />
+                </div>
+              <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3 bg-white dark:bg-slate-900">
+              <button
+                type="button"
+                className="btn btn-secondary px-4 py-2 text-sm font-medium"
+                onClick={() => {
+                  setShowForwardModal(false);
+                  setSelectedDoc(null);
+                  setCandidateWorkflow(null);
+                  setFirstApprover(null);
+                  setWfError("");
+                    setForwardComments("");
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary px-5 py-2 text-sm font-medium"
+                onClick={forwardDocument}
+                disabled={submittingForward}
+              >
+                {submittingForward ? "Forwarding..." : "Forward"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <FloatingCreateButton
+        to="/inventory/stock-adjustments/new"
+        title="New Adjustment"
+      />
+      <DocumentAttachmentsModal
+        open={showAttach}
+        onClose={() => {
+          setShowAttach(false);
+          setActiveDocId(null);
+        }}
+        docType="stock-adjustment"
+        docId={activeDocId}
+      />
+    </div>
+  );
+}

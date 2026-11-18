@@ -209,7 +209,7 @@ export default function CostCategoryPage({ embedded = false }) {
                 <div className="w-9 h-9 rounded-xl bg-brand-50 dark:bg-brand-900/40 text-brand-600 dark:text-brand-400 flex items-center justify-center font-bold">
                   <Tag size={20} />
                 </div>
-                <h1 className="text-xl font-extrabold text-slate-900 dark:text-white">
+                <h1 className="text-2xl font-bold font-extrabold text-slate-900 dark:text-white">
                   Project Cost Categories
                 </h1>
               </div>
@@ -228,7 +228,7 @@ export default function CostCategoryPage({ embedded = false }) {
             </Link>
             <button
               onClick={openCreateModal}
-              className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5"
+              className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-sm font-bold shadow-sm transition flex items-center gap-1.5"
             >
               <Plus size={16} /> New Cost Category
             </button>
@@ -257,7 +257,7 @@ export default function CostCategoryPage({ embedded = false }) {
             </Link>
             <button
               onClick={openCreateModal}
-              className="px-3.5 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5"
+              className="px-3.5 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-sm font-bold shadow-sm transition flex items-center gap-1.5"
             >
               <Plus size={15} /> Add Cost Category
             </button>
@@ -273,7 +273,7 @@ export default function CostCategoryPage({ embedded = false }) {
             <input
               type="text"
               placeholder="Search by code, category name, or description..."
-              className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl pl-9 pr-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -282,7 +282,7 @@ export default function CostCategoryPage({ embedded = false }) {
           <div className="flex items-center gap-1.5">
             <span className="text-xs text-slate-500 font-medium">Type:</span>
             <select
-              className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-sm font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
             >
@@ -298,7 +298,7 @@ export default function CostCategoryPage({ embedded = false }) {
           <div className="flex items-center gap-1.5">
             <span className="text-xs text-slate-500 font-medium">Status:</span>
             <select
-              className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-sm font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
             >
@@ -313,20 +313,14 @@ export default function CostCategoryPage({ embedded = false }) {
           <span className="text-xs font-semibold text-slate-500">
             {filteredCategories.length} Categories
           </span>
-          <button
-            onClick={fetchCategories}
-            className="p-2 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition"
-            title="Refresh list"
-          >
-            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-          </button>
+          
         </div>
       </div>
 
       {/* Categories Table Grid */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-sm border-collapse">
             <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 uppercase tracking-wider font-bold border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="p-3 w-12 text-center">#</th>
@@ -481,7 +475,7 @@ export default function CostCategoryPage({ embedded = false }) {
             <form onSubmit={handleSave} className="p-5 space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Category Code *
                   </label>
                   <input
@@ -498,11 +492,11 @@ export default function CostCategoryPage({ embedded = false }) {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Cost Type *
                   </label>
                   <select
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     value={form.cost_type}
                     onChange={(e) => setForm({ ...form, cost_type: e.target.value })}
                   >
@@ -516,27 +510,27 @@ export default function CostCategoryPage({ embedded = false }) {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                   Category Display Name *
                 </label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Personnel & Direct Labour"
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
                   value={form.category_name}
                   onChange={(e) => setForm({ ...form, category_name: e.target.value })}
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                   Description / Inclusions
                 </label>
                 <textarea
                   rows={2}
                   placeholder="Scope inclusions, work types, or trade categories..."
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                 />
@@ -544,11 +538,11 @@ export default function CostCategoryPage({ embedded = false }) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Badge Color Theme
                   </label>
                   <select
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     value={form.color_code}
                     onChange={(e) => setForm({ ...form, color_code: e.target.value })}
                   >
@@ -561,7 +555,7 @@ export default function CostCategoryPage({ embedded = false }) {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Badge Preview
                   </label>
                   <div className="p-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/40 flex items-center justify-center">
@@ -578,7 +572,7 @@ export default function CostCategoryPage({ embedded = false }) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Default Overhead (%)
                   </label>
                   <div className="relative">
@@ -587,7 +581,7 @@ export default function CostCategoryPage({ embedded = false }) {
                       step="0.5"
                       min="0"
                       max="100"
-                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
                       value={form.default_overhead_percent}
                       onChange={(e) =>
                         setForm({
@@ -601,7 +595,7 @@ export default function CostCategoryPage({ embedded = false }) {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                     Default Profit Margin (%)
                   </label>
                   <div className="relative">
@@ -610,7 +604,7 @@ export default function CostCategoryPage({ embedded = false }) {
                       step="0.5"
                       min="0"
                       max="100"
-                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
                       value={form.default_profit_percent}
                       onChange={(e) =>
                         setForm({
@@ -625,7 +619,7 @@ export default function CostCategoryPage({ embedded = false }) {
               </div>
 
               <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800">
-                <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-slate-700 dark:text-slate-300">
                   <input
                     type="checkbox"
                     className="rounded border-slate-300 text-brand-600 focus:ring-brand-500"
@@ -648,7 +642,7 @@ export default function CostCategoryPage({ embedded = false }) {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-sm transition disabled:opacity-50"
+                    className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-sm font-bold shadow-sm transition disabled:opacity-50"
                   >
                     {saving ? "Saving..." : editingCategory ? "Update Category" : "Create Category"}
                   </button>

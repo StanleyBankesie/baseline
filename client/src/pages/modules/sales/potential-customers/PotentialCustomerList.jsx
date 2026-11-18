@@ -157,9 +157,7 @@ export default function PotentialCustomerList() {
               />
               Show Inactive
             </label>
-            <button className="btn btn-outline" onClick={refresh}>
-              Refresh
-            </button>
+            
           </div>
 
           

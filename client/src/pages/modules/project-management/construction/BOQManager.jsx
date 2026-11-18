@@ -2623,14 +2623,6 @@ export default function BOQManager() {
             </select>
           </div>
 
-          <button
-            onClick={fetchBOQs}
-            className="p-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition"
-            title="Refresh Cost Sheets"
-          >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-          </button>
-
           <Link
             to="/project-management/costing"
             className="px-3.5 py-2 border border-emerald-200 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl text-xs font-semibold text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 transition flex items-center gap-1.5 shadow-sm"
@@ -2823,7 +2815,7 @@ export default function BOQManager() {
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     onClick={addItemRow}
-                    className="px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1 transition"
+                    className="px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-sm font-bold shadow-sm flex items-center gap-1 transition"
                   >
                     <Plus size={14} /> Add Cost Item
                   </button>
@@ -2847,14 +2839,14 @@ export default function BOQManager() {
                   <button
                     onClick={exportExcel}
                     disabled={!boqItems.length}
-                    className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-750 flex items-center gap-1.5 transition disabled:opacity-50"
+                    className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-750 flex items-center gap-1.5 transition disabled:opacity-50"
                     title="Export Costing Schedule to Excel (.xlsx)"
                   >
                     <Download size={14} /> Export Excel
                   </button>
                   <button
                     onClick={handlePrint}
-                    className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-750 flex items-center gap-1.5 transition"
+                    className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-750 flex items-center gap-1.5 transition"
                     title="Print Preview Costing Schedule"
                   >
                     <Printer size={14} /> Print
@@ -2871,7 +2863,7 @@ export default function BOQManager() {
 
               {/* Line Items Table */}
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
+                <table className="w-full text-left text-sm border-collapse">
                   <thead className="bg-slate-100 dark:bg-slate-900/90 text-slate-600 dark:text-slate-300 uppercase tracking-wider font-bold border-b border-slate-200 dark:border-slate-800">
                     <tr>
                       <th className="p-3 w-12 text-center">#</th>
@@ -2911,7 +2903,7 @@ export default function BOQManager() {
                               type="text"
                               required
                               placeholder="e.g. ITM-001"
-                              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono"
                               value={item.item_code}
                               onChange={(e) =>
                                 updateItem(idx, "item_code", e.target.value)
@@ -2925,7 +2917,7 @@ export default function BOQManager() {
                               rows={2}
                               required
                               placeholder="Detailed deliverable, specification or scope element..."
-                              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 leading-relaxed resize-y"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 leading-relaxed resize-y"
                               value={
                                 item.item_description || item.description || ""
                               }
@@ -2942,7 +2934,7 @@ export default function BOQManager() {
                           {/* Cost Category */}
                           <td className="p-2.5">
                             <select
-                              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-sm font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500"
                               value={item.cost_category || "LABOUR"}
                               onChange={(e) =>
                                 updateItem(idx, "cost_category", e.target.value)
@@ -2959,7 +2951,7 @@ export default function BOQManager() {
                           {/* WBS / Scope Selection */}
                           <td className="p-2.5">
                             <select
-                              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono"
                               value={item.wbs_code || ""}
                               onChange={(e) => {
                                 const code = e.target.value;
@@ -3001,7 +2993,7 @@ export default function BOQManager() {
                           {/* Unit of Measurement */}
                           <td className="p-2.5">
                             <select
-                              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-sm font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500"
                               value={item.uom || item.unit || "EA"}
                               onChange={(e) =>
                                 updateItem(idx, "uom", e.target.value)
@@ -3028,7 +3020,7 @@ export default function BOQManager() {
                               step="any"
                               required
                               min="0"
-                              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-normal text-right text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-normal text-right text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono"
                               value={item.quantity}
                               onChange={(e) =>
                                 updateItem(idx, "quantity", e.target.value)
@@ -3043,7 +3035,7 @@ export default function BOQManager() {
                               step="any"
                               required
                               min="0"
-                              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-normal text-right text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-normal text-right text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono"
                               value={item.unit_rate}
                               onChange={(e) =>
                                 updateItem(idx, "unit_rate", e.target.value)
@@ -3116,7 +3108,7 @@ export default function BOQManager() {
                     <textarea
                       rows={4}
                       placeholder="Specification standard (SMM7/POMI/CESMM), tender exclusions, mobilization terms..."
-                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
                       value={remarks}
                       onChange={(e) => setRemarks(e.target.value)}
                     />
@@ -3158,7 +3150,7 @@ export default function BOQManager() {
                               step="0.5"
                               min="0"
                               max="100"
-                              className="w-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs font-normal text-right"
+                              className="w-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-sm font-normal text-right"
                               value={contingencyPercent}
                               onChange={(e) =>
                                 setContingencyPercent(e.target.value)
@@ -3183,7 +3175,7 @@ export default function BOQManager() {
                             Tax Code & Levies:
                           </span>
                           <select
-                            className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1 text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 max-w-[210px]"
+                            className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 max-w-[210px]"
                             value={selectedTaxCodeId}
                             onChange={(e) =>
                               handleTaxCodeSelect(e.target.value)
@@ -3214,7 +3206,7 @@ export default function BOQManager() {
                                 step="0.1"
                                 min="0"
                                 max="100"
-                                className="w-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs font-normal text-right"
+                                className="w-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-sm font-normal text-right"
                                 value={taxPercent}
                                 onChange={(e) => {
                                   setTaxPercent(e.target.value);
@@ -3257,7 +3249,7 @@ export default function BOQManager() {
                             type="number"
                             step="any"
                             min="0"
-                            className="w-28 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs font-normal text-right"
+                            className="w-28 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1 text-sm font-normal text-right"
                             value={otherCharges}
                             onChange={(e) => setOtherCharges(e.target.value)}
                           />
@@ -3325,7 +3317,7 @@ export default function BOQManager() {
               </div>
               <button
                 onClick={openCreateModal}
-                className="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-500/20 inline-flex items-center gap-2 transition"
+                className="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-sm font-bold shadow-md shadow-brand-500/20 inline-flex items-center gap-2 transition"
               >
                 <Plus size={16} /> Create First BOQ for Project
               </button>
@@ -3347,14 +3339,14 @@ export default function BOQManager() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Cost Sheet Title <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 required
                 placeholder="e.g. Phase 1 Cost Sheet / Architecture & Delivery Budget"
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
                 value={newBOQ.boq_title}
                 onChange={(e) =>
                   setNewBOQ({ ...newBOQ, boq_title: e.target.value })
@@ -3362,7 +3354,7 @@ export default function BOQManager() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Cost Sheet Reference Number{" "}
                 <span className="text-red-500">*</span>
               </label>
@@ -3370,7 +3362,7 @@ export default function BOQManager() {
                 type="text"
                 required
                 placeholder="e.g. CST-PRJ01-2026-001"
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono"
                 value={newBOQ.boq_reference}
                 onChange={(e) =>
                   setNewBOQ({ ...newBOQ, boq_reference: e.target.value })
@@ -3381,13 +3373,13 @@ export default function BOQManager() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Client / Sponsor Name
               </label>
               <input
                 type="text"
                 placeholder="e.g. Ministry / Corporate Client / Sponsor"
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
                 value={newBOQ.client_name}
                 onChange={(e) =>
                   setNewBOQ({ ...newBOQ, client_name: e.target.value })
@@ -3395,13 +3387,13 @@ export default function BOQManager() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Site / Delivery Location
               </label>
               <input
                 type="text"
                 placeholder="e.g. Accra Central / Cloud Virtual / Head Office"
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
                 value={newBOQ.site_location}
                 onChange={(e) =>
                   setNewBOQ({ ...newBOQ, site_location: e.target.value })
@@ -3412,13 +3404,13 @@ export default function BOQManager() {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Date of Issue
               </label>
               <input
                 type="date"
                 required
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono"
                 value={newBOQ.boq_date}
                 onChange={(e) =>
                   setNewBOQ({ ...newBOQ, boq_date: e.target.value })
@@ -3426,11 +3418,11 @@ export default function BOQManager() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Currency
               </label>
               <select
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-semibold"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-semibold"
                 value={newBOQ.currency}
                 onChange={(e) =>
                   setNewBOQ({ ...newBOQ, currency: e.target.value })
@@ -3444,7 +3436,7 @@ export default function BOQManager() {
               </select>
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Contingency Rate (%)
               </label>
               <input
@@ -3453,7 +3445,7 @@ export default function BOQManager() {
                 min="0"
                 max="100"
                 placeholder="5"
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono"
                 value={newBOQ.contingency_percent}
                 onChange={(e) =>
                   setNewBOQ({ ...newBOQ, contingency_percent: e.target.value })
@@ -3461,11 +3453,11 @@ export default function BOQManager() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
                 Applicable Tax Code
               </label>
               <select
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
                 value={newBOQ.tax_code_id || ""}
                 onChange={(e) => {
                   const val = e.target.value;
@@ -3491,11 +3483,11 @@ export default function BOQManager() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Remarks, Specifications & Preliminaries
             </label>
             <textarea
-              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 min-h-[80px]"
+              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 min-h-[80px]"
               placeholder="Scope deliverables, methodologies, quality guidelines, contract clauses..."
               value={newBOQ.remarks}
               onChange={(e) =>
@@ -3525,7 +3517,7 @@ export default function BOQManager() {
             <button
               type="button"
               onClick={applyRateAnalysis}
-              className="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-2"
+              className="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-sm font-bold shadow-sm transition-all flex items-center gap-2"
             >
               <Check size={15} /> Apply Rate to Item
             </button>
@@ -3636,7 +3628,7 @@ export default function BOQManager() {
                           </span>
                         )}
                       </div>
-                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block line-clamp-1">
+                      <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block line-clamp-1">
                         {cat.label}
                       </label>
                       <div className="relative">
@@ -3647,7 +3639,7 @@ export default function BOQManager() {
                           type="number"
                           step="any"
                           min="0"
-                          className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg pl-11 pr-2.5 py-1.5 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono text-right"
+                          className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg pl-11 pr-2.5 py-1.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono text-right"
                           value={val || ""}
                           placeholder="0.00"
                           onChange={(e) => {
@@ -3689,7 +3681,7 @@ export default function BOQManager() {
                     <input
                       type="text"
                       placeholder="e.g. Mason Grade 1, 50kg Cement..."
-                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500"
                       value={newResourceItem.description}
                       onChange={(e) => setNewResourceItem({ ...newResourceItem, description: e.target.value })}
                     />
@@ -3697,7 +3689,7 @@ export default function BOQManager() {
                   <div className="sm:col-span-3">
                     <label className="text-[11px] font-medium text-slate-500 block mb-0.5">Category</label>
                     <select
-                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500"
                       value={newResourceItem.category}
                       onChange={(e) => setNewResourceItem({ ...newResourceItem, category: e.target.value })}
                     >
@@ -3722,7 +3714,7 @@ export default function BOQManager() {
                       type="number"
                       step="any"
                       min="0"
-                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-mono text-right text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-right text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500"
                       value={newResourceItem.quantity}
                       onChange={(e) => setNewResourceItem({ ...newResourceItem, quantity: e.target.value })}
                     />
@@ -3734,14 +3726,14 @@ export default function BOQManager() {
                         type="number"
                         step="any"
                         min="0"
-                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-mono text-right text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-right text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500"
                         value={newResourceItem.unit_cost}
                         onChange={(e) => setNewResourceItem({ ...newResourceItem, unit_cost: e.target.value })}
                       />
                       <button
                         type="button"
                         onClick={addResourceItem}
-                        className="p-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-bold transition flex-shrink-0"
+                        className="p-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-sm font-bold transition flex-shrink-0"
                         title="Add Resource Item"
                       >
                         <Plus size={14} />
@@ -3753,7 +3745,7 @@ export default function BOQManager() {
 
               {/* Resource Table */}
               <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-sm">
                   <thead className="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-700">
                     <tr>
                       <th className="p-2.5">Resource / Description</th>
@@ -3793,7 +3785,7 @@ export default function BOQManager() {
                     ))}
                     {(!rateForm.resource_items || rateForm.resource_items.length === 0) && (
                       <tr>
-                        <td colSpan={7} className="p-4 text-center text-slate-400 text-xs">
+                        <td colSpan={7} className="p-4 text-center text-slate-400 text-sm">
                           No resource takeoff items entered yet. You can enter them above or adjust direct category values in the Category Rate Build tab.
                         </td>
                       </tr>
@@ -3823,7 +3815,7 @@ export default function BOQManager() {
                   step="0.5"
                   min="0"
                   max="50"
-                  className="w-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-right"
+                  className="w-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-sm font-mono text-right"
                   value={rateForm.wastage_percent}
                   onChange={(e) => setRateForm({ ...rateForm, wastage_percent: Number(e.target.value) })}
                 />
@@ -3841,7 +3833,7 @@ export default function BOQManager() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Site & General Overhead (%)
                 </label>
                 <span className="text-xs font-mono font-semibold text-slate-500">
@@ -3854,7 +3846,7 @@ export default function BOQManager() {
                   step="0.5"
                   min="0"
                   max="100"
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono"
                   value={rateForm.overhead_percent}
                   onChange={(e) =>
                     setRateForm({
@@ -3869,7 +3861,7 @@ export default function BOQManager() {
 
             <div className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Profit Margin / Markup (%)
                 </label>
                 <span className="text-xs font-mono font-semibold text-slate-500">
@@ -3882,7 +3874,7 @@ export default function BOQManager() {
                   step="0.5"
                   min="0"
                   max="100"
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono"
                   value={rateForm.profit_percent}
                   onChange={(e) =>
                     setRateForm({
@@ -3898,13 +3890,13 @@ export default function BOQManager() {
 
           {/* Rate Build Notes / Technical Assumptions */}
           <div>
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Rate Build-Up Notes & Technical Assumptions
             </label>
             <input
               type="text"
               placeholder="e.g. Based on standard 8-hr shift, includes safety gear, site diesel generator..."
-              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500"
+              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500"
               value={rateForm.notes}
               onChange={(e) => setRateForm({ ...rateForm, notes: e.target.value })}
             />
@@ -3947,25 +3939,25 @@ export default function BOQManager() {
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-semibold text-slate-500 block mb-1">
+                <label className="text-sm font-semibold text-slate-500 block mb-1">
                   New Version Number
                 </label>
                 <input
                   type="text"
                   placeholder="e.g. 2.0"
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs font-mono font-semibold"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-sm font-mono font-semibold"
                   value={newVersionLabel}
                   onChange={(e) => setNewVersionLabel(e.target.value)}
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-500 block mb-1">
+                <label className="text-sm font-semibold text-slate-500 block mb-1">
                   Revision Remarks
                 </label>
                 <input
                   type="text"
                   placeholder="e.g. Revised based on structural engineer addendum 3"
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-sm"
                   value={newVersionRemarks}
                   onChange={(e) => setNewVersionRemarks(e.target.value)}
                 />
@@ -3975,7 +3967,7 @@ export default function BOQManager() {
               <button
                 type="button"
                 onClick={handleCreateRevision}
-                className="btn btn-primary text-xs font-semibold flex items-center gap-1.5"
+                className="btn btn-primary text-sm font-semibold flex items-center gap-1.5"
               >
                 <History size={14} /> Commit New Revision
               </button>
@@ -3989,7 +3981,7 @@ export default function BOQManager() {
             </h4>
 
             <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden max-h-64 overflow-y-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-sm">
                 <thead className="bg-slate-100 dark:bg-slate-900 border-b font-bold text-slate-600 dark:text-slate-300">
                   <tr>
                     <th className="p-2.5">Rev</th>
@@ -4067,12 +4059,12 @@ export default function BOQManager() {
       >
         <div className="space-y-4">
           <div>
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Select Target Workflow Status{" "}
               <span className="text-red-500">*</span>
             </label>
             <select
-              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500"
+              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500"
               value={targetStatus}
               onChange={(e) => setTargetStatus(e.target.value)}
             >
@@ -4095,26 +4087,26 @@ export default function BOQManager() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Approving Authority / Reviewer Name
             </label>
             <input
               type="text"
               placeholder="e.g. Ing. Kwame Mensah (Project Director)"
-              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200"
+              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200"
               value={approvedByName}
               onChange={(e) => setApprovedByName(e.target.value)}
             />
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
               Approval / Status Remarks
             </label>
             <textarea
               rows={3}
               placeholder="Enter determination notes, tender committee reference, or conditions of approval..."
-              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200"
+              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200"
               value={approvalRemarks}
               onChange={(e) => setApprovalRemarks(e.target.value)}
             />
@@ -4172,7 +4164,7 @@ export default function BOQManager() {
                     Select Target Approver:
                   </label>
                   <select
-                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium"
+                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium"
                     value={targetApproverId}
                     onChange={(e) => setTargetApproverId(e.target.value)}
                   >
@@ -4199,7 +4191,7 @@ export default function BOQManager() {
                   <textarea
                     rows={3}
                     placeholder="Add cover notes or instructions for the reviewing authority..."
-                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     value={forwardComments}
                     onChange={(e) => setForwardComments(e.target.value)}
                   />
@@ -4219,7 +4211,7 @@ export default function BOQManager() {
                 type="button"
                 onClick={handleForwardSubmit}
                 disabled={submittingForward}
-                className="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-500/20 flex items-center gap-1.5 transition-all disabled:opacity-50"
+                className="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-sm font-bold shadow-md shadow-brand-500/20 flex items-center gap-1.5 transition-all disabled:opacity-50"
               >
                 {submittingForward ? (
                   <>
@@ -4262,7 +4254,7 @@ export default function BOQManager() {
               <textarea
                 rows={3}
                 placeholder="Approved based on tender scope and QS verification..."
-                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
                 value={approveComments}
                 onChange={(e) => setApproveComments(e.target.value)}
               />
@@ -4278,7 +4270,7 @@ export default function BOQManager() {
               <button
                 type="button"
                 onClick={handleApproveSubmit}
-                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-500/20 flex items-center gap-1.5 transition-all"
+                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-md shadow-emerald-500/20 flex items-center gap-1.5 transition-all"
               >
                 <CheckCircle size={14} /> Confirm Approval
               </button>
@@ -4312,7 +4304,7 @@ export default function BOQManager() {
               <textarea
                 rows={3}
                 placeholder="Rate discrepancies, missing specifications, budget exceeded..."
-                className="w-full bg-white dark:bg-slate-800 border border-rose-300 dark:border-rose-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full bg-white dark:bg-slate-800 border border-rose-300 dark:border-rose-700 rounded-xl p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500"
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
               />
@@ -4328,7 +4320,7 @@ export default function BOQManager() {
               <button
                 type="button"
                 onClick={handleRejectSubmit}
-                className="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-500/20 flex items-center gap-1.5 transition-all"
+                className="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-sm font-bold shadow-md shadow-rose-500/20 flex items-center gap-1.5 transition-all"
               >
                 <X size={14} /> Confirm Rejection
               </button>

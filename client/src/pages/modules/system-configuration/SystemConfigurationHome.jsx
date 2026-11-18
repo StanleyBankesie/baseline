@@ -19,151 +19,92 @@ import PaymentPackages from "../../admin/PaymentPackages.jsx";
 import GeneralSettingsPage from "./GeneralSettingsPage.jsx";
 
 export const systemConfigurationSections = [
-    {
-      title: "System Configuration",
-      badge: "Core",
-      items: [
-        {
-          title: "Company Setup",
-          description: "Manage company information and settings",
-          path: "/system-configuration/companies",
-        
-          icon: "🏢",
-          hidden: false,
-          actions: [
-          { label: "View", path: "/system-configuration/companies",
+  {
+    title: "System Configuration",
+    badge: "Core",
+    items: [
+      {
+        title: "Company Setup",
+        description: "Manage company information and settings",
+        path: "/system-configuration/companies",
+        icon: "🏢",
         actions: [
           { label: "View", path: "/system-configuration/companies", type: "outline" },
           { label: "New", path: "/system-configuration/companies/new", type: "primary" }
-        ], type: "outline" },
-          { label: "New", path: "/system-configuration/companies/new",
-        actions: [
-          { label: "View", path: "/system-configuration/companies/new", type: "outline" },
-          { label: "New", path: "/system-configuration/companies/new/new", type: "primary" }
-        ], type: "primary" }
         ],
-        },
-        {
-          title: "Branch Setup",
-          description: "Configure and manage company branches",
-          path: "/system-configuration/branches",
-        
-          icon: "🏪",
-          actions: [
-            {
-              label: "View List",
-              path: "/system-configuration/branches",
+      },
+      {
+        title: "Branch Setup",
+        description: "Configure and manage company branches",
+        path: "/system-configuration/branches",
+        icon: "🏪",
         actions: [
           { label: "View", path: "/system-configuration/branches", type: "outline" },
-          { label: "New", path: "/system-configuration/branches/new", type: "primary" }
+          { label: "New Branch", path: "/system-configuration/branches/new", type: "primary" }
         ],
-              type: "outline",
-            },
-          ],
-        },
-        {
-          title: "General Settings",
-          description: "Global configurations and SMS/WhatsApp APIs",
-          path: "/system-configuration/general-settings",
-        
-          icon: "⚙️",
-          actions: [
-          { label: "View", path: "/system-configuration/branches",
+      },
+      {
+        title: "General Settings",
+        description: "Global configurations and SMS/WhatsApp APIs",
+        path: "/system-configuration/general-settings",
+        icon: "⚙️",
         actions: [
-          { label: "View", path: "/system-configuration/branches", type: "outline" },
-          { label: "New", path: "/system-configuration/branches/new", type: "primary" }
-        ], type: "outline" },
-          { label: "New", path: "/system-configuration/branches/new",
-        actions: [
-          { label: "View", path: "/system-configuration/branches/new", type: "outline" },
-          { label: "New", path: "/system-configuration/branches/new/new", type: "primary" }
-        ], type: "primary" }
+          { label: "View", path: "/system-configuration/general-settings", type: "outline" }
         ],
-        },
-      ],
-    },
-    {
-      icon: "🛡️",
+      },
+    ],
+  },
+  {
+    icon: "🛡️",
     title: "Access & Security",
-      items: [
-        {
-          title: "Admin Permissions",
-          description: "Configure system-wide admin permissions",
-          path: "/system-configuration/admin-permissions",
-        
-          icon: "🔒",
-          actions: [
-          { label: "View", path: "/system-configuration/admin-permissions",
+    items: [
+      {
+        title: "Admin Permissions",
+        description: "Configure system-wide admin permissions",
+        path: "/system-configuration/admin-permissions",
+        icon: "🔒",
         actions: [
           { label: "View", path: "/system-configuration/admin-permissions", type: "outline" }
-        ], type: "outline" }
         ],
-        },
-        {
-          title: "Backup Settings",
-          description: "Configure automated database backups",
-          path: "/system-configuration/backups",
-        
-          icon: "💾",
-          actions: [
-          { label: "View", path: "/system-configuration/backups",
+      },
+      {
+        title: "Backup Settings",
+        description: "Configure automated database backups",
+        path: "/system-configuration/backups",
+        icon: "💾",
         actions: [
           { label: "View", path: "/system-configuration/backups", type: "outline" },
           { label: "New", path: "/system-configuration/backups/new", type: "primary" }
-        ], type: "outline" },
-          { label: "New", path: "/system-configuration/backups/new",
-        actions: [
-          { label: "View", path: "/system-configuration/backups/new", type: "outline" },
-          { label: "New", path: "/system-configuration/backups/new/new", type: "primary" }
-        ], type: "primary" }
         ],
-        },
-      ],
-    },
-    {
-      title: "Licensing & Billing",
-      items: [
-        {
-          title: "License Management",
-          description: "Manage system licensing",
-          path: "/system-configuration/licenses",
-        
-          icon: "🔑",
-          actions: [
-          { label: "View", path: "/system-configuration/licenses",
+      },
+    ],
+  },
+  {
+    title: "Licensing & Billing",
+    items: [
+      {
+        title: "License Management",
+        description: "Manage system licensing",
+        path: "/system-configuration/licenses",
+        icon: "🔑",
         actions: [
           { label: "View", path: "/system-configuration/licenses", type: "outline" },
           { label: "New", path: "/system-configuration/licenses/new", type: "primary" }
-        ], type: "outline" },
-          { label: "New", path: "/system-configuration/licenses/new",
-        actions: [
-          { label: "View", path: "/system-configuration/licenses/new", type: "outline" },
-          { label: "New", path: "/system-configuration/licenses/new/new", type: "primary" }
-        ], type: "primary" }
         ],
-        },
-        {
-          title: "Payment Packages",
-          description: "Manage subscription and payment packages",
-          path: "/system-configuration/payment-packages",
-        
-          icon: "💳",
-          actions: [
-          { label: "View", path: "/system-configuration/payment-packages",
+      },
+      {
+        title: "Payment Packages",
+        description: "Manage subscription and payment packages",
+        path: "/system-configuration/payment-packages",
+        icon: "💳",
         actions: [
           { label: "View", path: "/system-configuration/payment-packages", type: "outline" },
           { label: "New", path: "/system-configuration/payment-packages/new", type: "primary" }
-        ], type: "outline" },
-          { label: "New", path: "/system-configuration/payment-packages/new",
-        actions: [
-          { label: "View", path: "/system-configuration/payment-packages/new", type: "outline" },
-          { label: "New", path: "/system-configuration/payment-packages/new/new", type: "primary" }
-        ], type: "primary" }
         ],
-        },
-      ],
-    },
-  ];
+      },
+    ],
+  },
+];
 
 function SystemConfigurationLanding() {
   return (

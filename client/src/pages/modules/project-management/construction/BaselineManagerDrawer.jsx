@@ -289,14 +289,6 @@ export default function BaselineManagerDrawer({
 
           <div className="flex items-center gap-2">
             <button
-              onClick={loadBaselineData}
-              disabled={loading}
-              className="p-2 rounded-xl text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-              title="Refresh Baseline Data"
-            >
-              <RefreshCw size={16} className={loading ? "animate-spin text-indigo-600" : ""} />
-            </button>
-            <button
               onClick={onClose}
               className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
@@ -459,7 +451,7 @@ export default function BaselineManagerDrawer({
                     <button
                       onClick={handleGenerateProposed}
                       disabled={loading || !analysis?.is_ready}
-                      className="btn btn-primary text-xs h-9 px-4 rounded-xl inline-flex items-center gap-1.5 font-semibold"
+                      className="btn btn-primary text-sm h-9 px-4 rounded-xl inline-flex items-center gap-1.5 font-semibold"
                     >
                       <Sparkles size={14} />
                       {analysis?.active_baseline ? "Generate New Proposed Baseline" : "Auto-Generate Proposed Baseline"}
@@ -596,7 +588,7 @@ export default function BaselineManagerDrawer({
                       <button
                         onClick={handleSaveProposedChanges}
                         disabled={savingEdit}
-                        className="btn btn-secondary text-xs h-9 px-3 rounded-xl inline-flex items-center gap-1.5 font-semibold text-indigo-700 dark:text-indigo-300"
+                        className="btn btn-secondary text-sm h-9 px-3 rounded-xl inline-flex items-center gap-1.5 font-semibold text-indigo-700 dark:text-indigo-300"
                       >
                         {savingEdit ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
                         Save Draft
@@ -644,7 +636,7 @@ export default function BaselineManagerDrawer({
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <table className="w-full text-left text-sm">
                     <thead>
                       <tr className="border-b border-slate-100 dark:border-slate-800 text-[11px] uppercase tracking-wider text-slate-400 bg-slate-50/30 dark:bg-slate-800/20 font-bold">
                         <th className="py-2.5 px-4 w-24">Work Plan/WBS</th>
@@ -678,7 +670,7 @@ export default function BaselineManagerDrawer({
                             ) : (
                               <input
                                 type="date"
-                                className="input text-xs h-8 px-2 w-full rounded-lg font-mono"
+                                className="input text-sm h-8 px-2 w-full rounded-lg font-mono"
                                 value={t.start_date || ""}
                                 onChange={(e) => updateEditableTaskField(t.id, "start_date", e.target.value)}
                               />
@@ -690,7 +682,7 @@ export default function BaselineManagerDrawer({
                             ) : (
                               <input
                                 type="date"
-                                className="input text-xs h-8 px-2 w-full rounded-lg font-mono"
+                                className="input text-sm h-8 px-2 w-full rounded-lg font-mono"
                                 value={t.end_date || ""}
                                 onChange={(e) => updateEditableTaskField(t.id, "end_date", e.target.value)}
                               />
@@ -703,7 +695,7 @@ export default function BaselineManagerDrawer({
                               <input
                                 type="number"
                                 min={1}
-                                className="input text-xs h-8 px-2 w-16 text-center rounded-lg font-mono font-bold mx-auto"
+                                className="input text-sm h-8 px-2 w-16 text-center rounded-lg font-mono font-bold mx-auto"
                                 value={t.duration_days || 1}
                                 onChange={(e) => updateEditableTaskField(t.id, "duration_days", Number(e.target.value))}
                               />
@@ -787,7 +779,7 @@ export default function BaselineManagerDrawer({
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <table className="w-full text-left text-sm">
                     <thead>
                       <tr className="border-b border-slate-100 dark:border-slate-800 text-[11px] uppercase tracking-wider text-slate-400 bg-slate-50/30 dark:bg-slate-800/20 font-bold">
                         <th className="py-2.5 px-4 w-20">Work Plan/WBS</th>
@@ -915,27 +907,27 @@ export default function BaselineManagerDrawer({
 
                   <form onSubmit={handleInitiateRebaseline} className="space-y-3">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                         Rebaseline Version Name
                       </label>
                       <input
                         type="text"
                         placeholder={`e.g. Approved Rebaseline Rev ${(baselines.length || 0) + 1}`}
-                        className="input text-xs h-9 w-full rounded-xl"
+                        className="input text-sm h-9 w-full rounded-xl"
                         value={rebaselineName}
                         onChange={(e) => setRebaselineName(e.target.value)}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                         Reason / Justification for Rebaseline *
                       </label>
                       <textarea
                         rows={3}
                         required
                         placeholder="e.g. Scope extension approved by client; revised structural drawings issued with additional foundation activities."
-                        className="input text-xs w-full rounded-xl p-2.5"
+                        className="input text-sm w-full rounded-xl p-2.5"
                         value={rebaselineReason}
                         onChange={(e) => setRebaselineReason(e.target.value)}
                       />
@@ -952,7 +944,7 @@ export default function BaselineManagerDrawer({
                       <button
                         type="submit"
                         disabled={rebaselining}
-                        className="btn btn-primary text-xs h-9 px-4 rounded-xl inline-flex items-center gap-1.5 font-semibold"
+                        className="btn btn-primary text-sm h-9 px-4 rounded-xl inline-flex items-center gap-1.5 font-semibold"
                       >
                         {rebaselining && <Loader2 size={13} className="animate-spin" />}
                         Generate Rebaseline
@@ -1057,7 +1049,7 @@ export default function BaselineManagerDrawer({
           </div>
           <button
             onClick={onClose}
-            className="btn btn-secondary text-xs h-9 px-4 rounded-xl font-semibold"
+            className="btn btn-secondary text-sm h-9 px-4 rounded-xl font-semibold"
           >
             Close Workspace
           </button>

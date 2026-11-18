@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 /**
  * @fileoverview TemporalWarehouseStockReport.jsx
  * Displays real-time material stock availability and chronological stock movement journals
@@ -239,10 +240,10 @@ export default function TemporalWarehouseStockReport() {
               <Warehouse size={24} />
             </div>
             <div>
-              <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
+              <h1 className="text-2xl font-bold md:text-2xl font-bold text-slate-900 dark:text-white">
                 Temporal Warehouses Stock & Movement Report
               </h1>
-              <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5 hidden">
                 Site warehouse inventory availability, receipt inward deliveries, and project material utilizations
               </p>
             </div>
@@ -251,18 +252,10 @@ export default function TemporalWarehouseStockReport() {
 
         {/* Global Actions */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => (activeTab === "availability" ? fetchStockData() : fetchJournalData())}
-            disabled={loading}
-            className="btn btn-secondary text-xs flex items-center gap-1.5 px-3 py-2"
-            title="Refresh Report Data"
-          >
-            <RotateCcw size={14} className={loading ? "animate-spin" : ""} />
-            Refresh
-          </button>
+          
           <button
             onClick={exportExcel}
-            className="btn btn-secondary text-xs flex items-center gap-1.5 px-3 py-2"
+            className="btn btn-secondary text-sm flex items-center gap-1.5 px-3 py-2"
             title="Export to Excel"
           >
             <FileSpreadsheet size={14} className="text-emerald-600" />
@@ -270,7 +263,7 @@ export default function TemporalWarehouseStockReport() {
           </button>
           <button
             onClick={exportPDF}
-            className="btn btn-secondary text-xs flex items-center gap-1.5 px-3 py-2"
+            className="btn btn-secondary text-sm flex items-center gap-1.5 px-3 py-2"
             title="Export to PDF"
           >
             <Download size={14} className="text-rose-600" />
@@ -286,59 +279,58 @@ export default function TemporalWarehouseStockReport() {
         </div>
       </div>
 
-      {/* KPI Overview Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Site Stores</span>
-            <Warehouse size={16} className="text-brand-500" />
+      {/* Metric Stats Cards Carousel */}
+      <MobileMovingCarousel data-page-carousel gridColsClass="md:grid-cols-5" gapClass="gap-4">
+        {[
+          {
+            label: "Site Stores",
+            val: summary.totalWarehouses,
+            icon: <Warehouse size={20} className="stroke-[2.5]" />,
+            color: "bg-sky-600 dark:bg-sky-500 text-white",
+          },
+          {
+            label: "Materials",
+            val: summary.totalMaterials,
+            icon: <Boxes size={20} className="stroke-[2.5]" />,
+            color: "bg-indigo-600 text-white",
+          },
+          {
+            label: "Total Received",
+            val: Number(summary.totalReceivedQty).toLocaleString(),
+            icon: <ArrowDownLeft size={20} className="stroke-[2.5]" />,
+            color: "bg-emerald-600 text-white",
+          },
+          {
+            label: "Total Utilized",
+            val: Number(summary.totalUtilizedQty).toLocaleString(),
+            icon: <ArrowUpRight size={20} className="stroke-[2.5]" />,
+            color: "bg-amber-500 text-white",
+          },
+          {
+            label: "Available Qty",
+            val: Number(summary.totalAvailableQty).toLocaleString(),
+            icon: <CheckCircle2 size={20} className="stroke-[2.5]" />,
+            color: "bg-blue-600 text-white",
+          },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm"
+          >
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
+                {stat.val}
+              </p>
+            </div>
+            <div className={`p-3 rounded-full ${stat.color} shadow-sm`}>
+              {stat.icon}
+            </div>
           </div>
-          <p className="text-xl font-bold text-slate-900 dark:text-white mt-1.5">{summary.totalWarehouses}</p>
-          <p className="text-[11px] text-slate-400 mt-0.5">Temporal storage hubs</p>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Materials</span>
-            <Boxes size={16} className="text-blue-500" />
-          </div>
-          <p className="text-xl font-bold text-slate-900 dark:text-white mt-1.5">{summary.totalMaterials}</p>
-          <p className="text-[11px] text-slate-400 mt-0.5">Tracked catalogue items</p>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Received</span>
-            <ArrowDownLeft size={16} className="text-emerald-500" />
-          </div>
-          <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1.5">
-            {Number(summary.totalReceivedQty).toLocaleString()}
-          </p>
-          <p className="text-[11px] text-slate-400 mt-0.5">Inward receipts (IN)</p>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Utilized</span>
-            <ArrowUpRight size={16} className="text-amber-500" />
-          </div>
-          <p className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-1.5">
-            {Number(summary.totalUtilizedQty).toLocaleString()}
-          </p>
-          <p className="text-[11px] text-slate-400 mt-0.5">Site consumption (OUT)</p>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm col-span-2 md:col-span-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Available Qty</span>
-            <CheckCircle2 size={16} className="text-brand-600" />
-          </div>
-          <p className="text-xl font-bold text-brand-900 dark:text-brand-300 mt-1.5">
-            {Number(summary.totalAvailableQty).toLocaleString()}
-          </p>
-          <p className="text-[11px] text-slate-400 mt-0.5">Current on-site balance</p>
-        </div>
-      </div>
+        ))}
+      </MobileMovingCarousel>
 
       {/* Segmented View Control (Tab Toggle) */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -375,9 +367,9 @@ export default function TemporalWarehouseStockReport() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {/* Warehouse Selector */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Temporal Warehouse</label>
+            <label className="text-sm font-semibold text-slate-600 dark:text-slate-300">Temporal Warehouse</label>
             <select
-              className="input w-full text-xs"
+              className="input w-full text-sm"
               value={selectedWarehouse}
               onChange={(e) => setSelectedWarehouse(e.target.value)}
             >
@@ -392,9 +384,9 @@ export default function TemporalWarehouseStockReport() {
 
           {/* Project Selector */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Project / Scope</label>
+            <label className="text-sm font-semibold text-slate-600 dark:text-slate-300">Project / Scope</label>
             <select
-              className="input w-full text-xs"
+              className="input w-full text-sm"
               value={selectedProject}
               onChange={(e) => setSelectedProject(e.target.value)}
             >
@@ -410,9 +402,9 @@ export default function TemporalWarehouseStockReport() {
           {/* Status or Movement Type Filter */}
           {activeTab === "availability" ? (
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Stock Availability</label>
+              <label className="text-sm font-semibold text-slate-600 dark:text-slate-300">Stock Availability</label>
               <select
-                className="input w-full text-xs"
+                className="input w-full text-sm"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
@@ -423,9 +415,9 @@ export default function TemporalWarehouseStockReport() {
             </div>
           ) : (
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Movement Type</label>
+              <label className="text-sm font-semibold text-slate-600 dark:text-slate-300">Movement Type</label>
               <select
-                className="input w-full text-xs"
+                className="input w-full text-sm"
                 value={journalTypeFilter}
                 onChange={(e) => setJournalTypeFilter(e.target.value)}
               >
@@ -438,10 +430,10 @@ export default function TemporalWarehouseStockReport() {
 
           {/* From Date */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">From Date</label>
+            <label className="text-sm font-semibold text-slate-600 dark:text-slate-300">From Date</label>
             <input
               type="date"
-              className="input w-full text-xs"
+              className="input w-full text-sm"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
             />
@@ -449,10 +441,10 @@ export default function TemporalWarehouseStockReport() {
 
           {/* To Date */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">To Date</label>
+            <label className="text-sm font-semibold text-slate-600 dark:text-slate-300">To Date</label>
             <input
               type="date"
-              className="input w-full text-xs"
+              className="input w-full text-sm"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
             />
@@ -464,7 +456,7 @@ export default function TemporalWarehouseStockReport() {
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            className="input w-full pl-9 text-xs"
+            className="input w-full pl-9 text-sm"
             placeholder={
               activeTab === "availability"
                 ? "Search by item code, material name, or warehouse..."
@@ -481,7 +473,7 @@ export default function TemporalWarehouseStockReport() {
         {activeTab === "availability" ? (
           /* TAB 1: STOCK AVAILABILITY & BALANCES */
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
                 <tr>
                   <th className="px-4 py-3 font-bold text-slate-600 dark:text-slate-300">Temporal Warehouse</th>
@@ -572,7 +564,7 @@ export default function TemporalWarehouseStockReport() {
         ) : (
           /* TAB 2: STOCK MOVEMENTS JOURNAL */
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
                 <tr>
                   <th className="px-4 py-3 font-bold text-slate-600 dark:text-slate-300">Date</th>

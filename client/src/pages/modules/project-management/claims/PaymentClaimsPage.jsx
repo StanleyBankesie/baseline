@@ -1,3 +1,4 @@
+import MobileMovingCarousel from "@/components/MobileMovingCarousel";
 /**
  * @file PaymentClaimsPage.jsx
  * @description General-Purpose Project Payment Claims & Client Progress Assessment Page
@@ -774,7 +775,7 @@ export default function PaymentClaimsPage() {
               <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 <Calculator size={24} className="text-brand-900 dark:text-brand-400" /> Project Payment Claims
               </h1>
-              <p className="text-slate-500 text-sm mt-0.5">
+              <p className="text-slate-500 text-sm mt-0.5 hidden">
                 Client progress assessments, milestone deliverables, contractual payment claims, and invoice reconciliation across all project types.
               </p>
             </div>
@@ -783,21 +784,21 @@ export default function PaymentClaimsPage() {
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={exportExcel}
-              className="btn btn-secondary inline-flex items-center gap-1.5 text-xs font-semibold shadow-sm"
+              className="btn btn-secondary inline-flex items-center gap-1.5 text-sm font-semibold shadow-sm"
               title="Export to Excel"
             >
               <FileSpreadsheet size={15} /> Excel
             </button>
             <button
               onClick={exportPdf}
-              className="btn btn-secondary inline-flex items-center gap-1.5 text-xs font-semibold shadow-sm"
+              className="btn btn-secondary inline-flex items-center gap-1.5 text-sm font-semibold shadow-sm"
               title="Export to PDF"
             >
               <Download size={15} /> PDF
             </button>
             <button
               onClick={handleOpenNewClaim}
-              className="btn btn-primary inline-flex items-center gap-2 text-xs font-semibold shadow-sm"
+              className="btn btn-primary inline-flex items-center gap-2 text-sm font-semibold shadow-sm"
             >
               <Plus size={16} /> New Payment Claim
             </button>
@@ -805,7 +806,7 @@ export default function PaymentClaimsPage() {
         </div>
 
         {/* KPI Summary Cards (6 Canonical Cards) */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6">
+        <MobileMovingCarousel data-page-carousel gridColsClass="grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6" gapClass="gap-4">
           {[
             {
               label: "Total Claims",
@@ -854,7 +855,7 @@ export default function PaymentClaimsPage() {
             return (
               <div
                 key={i}
-                className="card p-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm"
+                className="card p-6 min-h-[160px] flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-smoky-card hover:shadow-smoky-lg transition-all"
               >
                 <div>
                   <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
@@ -870,14 +871,14 @@ export default function PaymentClaimsPage() {
               </div>
             );
           })}
-        </div>
+        </MobileMovingCarousel>
 
         {/* Search and Filter Bar (Clean Single-Row Horizontal Layout) */}
         <div className="flex flex-wrap lg:flex-nowrap items-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-sm w-full overflow-x-auto scrollbar-none">
           {/* Project Filter */}
           <div className="w-56 shrink-0">
             <select
-              className="w-full h-9 px-3 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer truncate"
+              className="w-full h-9 px-3 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer truncate"
               value={selectedProjectId}
               onChange={(e) => setSelectedProjectId(e.target.value)}
             >
@@ -893,7 +894,7 @@ export default function PaymentClaimsPage() {
           {/* Status Filter */}
           <div className="w-40 shrink-0">
             <select
-              className="w-full h-9 px-3 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer"
+              className="w-full h-9 px-3 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -906,7 +907,7 @@ export default function PaymentClaimsPage() {
           {/* Claim Type Filter */}
           <div className="w-44 shrink-0">
             <select
-              className="w-full h-9 px-3 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer"
+              className="w-full h-9 px-3 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all cursor-pointer"
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
             >
@@ -923,7 +924,7 @@ export default function PaymentClaimsPage() {
             <input
               type="text"
               placeholder="Search ref, title, project, client..."
-              className="w-full h-9 pl-8 pr-3 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all"
+              className="w-full h-9 pl-8 pr-3 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -931,13 +932,7 @@ export default function PaymentClaimsPage() {
 
           {/* Refresh Button */}
           <div className="shrink-0">
-            <button
-              onClick={fetchClaims}
-              className="btn btn-secondary h-9 px-3 rounded-xl inline-flex items-center gap-1.5 text-xs font-semibold"
-              title="Refresh"
-            >
-              <RefreshCw size={13} className={loading ? "animate-spin" : ""} /> Refresh
-            </button>
+            
           </div>
         </div>
 
@@ -951,7 +946,7 @@ export default function PaymentClaimsPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="table w-full text-xs">
+            <table className="table w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 font-semibold uppercase tracking-wider">
                   <th className="py-3 px-3 text-left">Claim Ref #</th>
@@ -1094,7 +1089,7 @@ export default function PaymentClaimsPage() {
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={handlePrintStatement}
-            className="btn btn-secondary inline-flex items-center gap-1 text-xs font-semibold"
+            className="btn btn-secondary inline-flex items-center gap-1 text-sm font-semibold"
             title="Print Claim Statement"
           >
             <Printer size={14} /> Print
@@ -1112,7 +1107,7 @@ export default function PaymentClaimsPage() {
           <button
             onClick={openInvoiceModal}
             disabled={!activeClaimId}
-            className="btn btn-secondary inline-flex items-center gap-1 text-xs font-semibold disabled:opacity-50"
+            className="btn btn-secondary inline-flex items-center gap-1 text-sm font-semibold disabled:opacity-50"
             title="Generate or Link Invoice in Sales / Finance"
           >
             <Receipt size={14} /> {claimForm.invoice_no ? `Invoice: ${claimForm.invoice_no}` : "Generate/Link Invoice"}
@@ -1121,7 +1116,7 @@ export default function PaymentClaimsPage() {
           <button
             onClick={openAssessmentModal}
             disabled={!activeClaimId}
-            className="btn btn-secondary inline-flex items-center gap-1 text-xs font-semibold disabled:opacity-50"
+            className="btn btn-secondary inline-flex items-center gap-1 text-sm font-semibold disabled:opacity-50"
             title="Record Client Assessment & Adjustments"
           >
             <Scale size={14} /> Record Assessment
@@ -1131,7 +1126,7 @@ export default function PaymentClaimsPage() {
             <button
               onClick={handleSubmitToClient}
               disabled={saving}
-              className="btn btn-secondary text-sky-700 bg-sky-50 border-sky-200 hover:bg-sky-100 inline-flex items-center gap-1 text-xs font-bold"
+              className="btn btn-secondary text-sky-700 bg-sky-50 border-sky-200 hover:bg-sky-100 inline-flex items-center gap-1 text-sm font-bold"
               title="Submit directly to client for payment review"
             >
               <Send size={14} /> Submit to Client
@@ -1276,7 +1271,7 @@ export default function PaymentClaimsPage() {
                   Project <span className="text-rose-500">*</span>
                 </label>
                 <select
-                  className="input text-xs w-full"
+                  className="input text-sm w-full"
                   value={claimForm.project_id}
                   onChange={(e) => {
                     const pId = e.target.value;
@@ -1310,7 +1305,7 @@ export default function PaymentClaimsPage() {
                 </label>
                 <input
                   type="text"
-                  className="input text-xs w-full font-mono font-semibold"
+                  className="input text-sm w-full font-mono font-semibold"
                   value={claimForm.claim_reference}
                   onChange={(e) => updateClaimField("claim_reference", e.target.value)}
                   placeholder="e.g. CLM-PRJ001-001"
@@ -1322,7 +1317,7 @@ export default function PaymentClaimsPage() {
                   Claim Type
                 </label>
                 <select
-                  className="input text-xs w-full"
+                  className="input text-sm w-full"
                   value={claimForm.claim_type}
                   onChange={(e) => updateClaimField("claim_type", e.target.value)}
                 >
@@ -1338,7 +1333,7 @@ export default function PaymentClaimsPage() {
                 </label>
                 <input
                   type="text"
-                  className="input text-xs w-full"
+                  className="input text-sm w-full"
                   value={claimForm.claim_title}
                   onChange={(e) => updateClaimField("claim_title", e.target.value)}
                   placeholder="e.g. Progress Claim #2 - System Integration &amp; Milestone 3 Delivery"
@@ -1351,7 +1346,7 @@ export default function PaymentClaimsPage() {
                 </label>
                 <input
                   type="text"
-                  className="input text-xs w-full font-mono"
+                  className="input text-sm w-full font-mono"
                   value={claimForm.currency}
                   onChange={(e) => updateClaimField("currency", e.target.value)}
                 />
@@ -1363,7 +1358,7 @@ export default function PaymentClaimsPage() {
                 </label>
                 <input
                   type="date"
-                  className="input text-xs w-full"
+                  className="input text-sm w-full"
                   value={claimForm.claim_period_from ? String(claimForm.claim_period_from).slice(0, 10) : ""}
                   onChange={(e) => updateClaimField("claim_period_from", e.target.value)}
                 />
@@ -1375,7 +1370,7 @@ export default function PaymentClaimsPage() {
                 </label>
                 <input
                   type="date"
-                  className="input text-xs w-full"
+                  className="input text-sm w-full"
                   value={claimForm.claim_period_to ? String(claimForm.claim_period_to).slice(0, 10) : ""}
                   onChange={(e) => updateClaimField("claim_period_to", e.target.value)}
                 />
@@ -1387,7 +1382,7 @@ export default function PaymentClaimsPage() {
                 </label>
                 <input
                   type="date"
-                  className="input text-xs w-full font-medium"
+                  className="input text-sm w-full font-medium"
                   value={claimForm.claim_date ? String(claimForm.claim_date).slice(0, 10) : ""}
                   onChange={(e) => updateClaimField("claim_date", e.target.value)}
                 />
@@ -1399,7 +1394,7 @@ export default function PaymentClaimsPage() {
                 </label>
                 <input
                   type="date"
-                  className="input text-xs w-full"
+                  className="input text-sm w-full"
                   value={claimForm.payment_due_date ? String(claimForm.payment_due_date).slice(0, 10) : ""}
                   onChange={(e) => updateClaimField("payment_due_date", e.target.value)}
                 />
@@ -1411,7 +1406,7 @@ export default function PaymentClaimsPage() {
                 </label>
                 <textarea
                   rows={3}
-                  className="input text-xs w-full"
+                  className="input text-sm w-full"
                   value={claimForm.claim_description || ""}
                   onChange={(e) => updateClaimField("claim_description", e.target.value)}
                   placeholder="Describe scope completed, deliverables achieved, and agreed terms under this claim..."
@@ -1424,7 +1419,7 @@ export default function PaymentClaimsPage() {
                 </label>
                 <textarea
                   rows={2}
-                  className="input text-xs w-full"
+                  className="input text-sm w-full"
                   value={claimForm.supporting_remarks || ""}
                   onChange={(e) => updateClaimField("supporting_remarks", e.target.value)}
                   placeholder="Reference contractual clauses, inspection certificates, or payment provisions..."
@@ -1449,14 +1444,14 @@ export default function PaymentClaimsPage() {
             </div>
             <button
               onClick={addClaimItem}
-              className="btn btn-primary inline-flex items-center gap-1.5 text-xs font-semibold shadow-sm"
+              className="btn btn-primary inline-flex items-center gap-1.5 text-sm font-semibold shadow-sm"
             >
               <Plus size={14} /> Add Claim Item
             </button>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="table w-full text-xs">
+            <table className="table w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 font-semibold uppercase tracking-wider">
                   <th className="py-2.5 px-3 w-10 text-center">#</th>
@@ -1479,7 +1474,7 @@ export default function PaymentClaimsPage() {
                     <td className="py-2 px-3">
                       <input
                         type="text"
-                        className="input text-xs w-full font-mono py-1"
+                        className="input text-sm w-full font-mono py-1"
                         value={item.item_reference || ""}
                         onChange={(e) => updateClaimItem(idx, "item_reference", e.target.value)}
                       />
@@ -1487,7 +1482,7 @@ export default function PaymentClaimsPage() {
                     <td className="py-2 px-3">
                       <input
                         type="text"
-                        className="input text-xs w-full py-1 font-medium"
+                        className="input text-sm w-full py-1 font-medium"
                         placeholder="Description of completed work, deliverable, service..."
                         value={item.item_description || ""}
                         onChange={(e) => updateClaimItem(idx, "item_description", e.target.value)}
@@ -1511,7 +1506,7 @@ export default function PaymentClaimsPage() {
                     </td>
                     <td className="py-2 px-3">
                       <select
-                        className="input text-xs w-full py-1"
+                        className="input text-sm w-full py-1"
                         value={item.billing_method}
                         onChange={(e) => updateClaimItem(idx, "billing_method", e.target.value)}
                       >
@@ -1524,14 +1519,14 @@ export default function PaymentClaimsPage() {
                       <input
                         type="number"
                         step="any"
-                        className="input text-xs w-full text-right font-mono py-1"
+                        className="input text-sm w-full text-right font-mono py-1"
                         value={item.current_claim_qty}
                         onChange={(e) => updateClaimItem(idx, "current_claim_qty", e.target.value)}
                       />
                     </td>
                     <td className="py-2 px-3">
                       <select
-                        className="input text-xs w-full py-1 font-mono"
+                        className="input text-sm w-full py-1 font-mono"
                         value={item.unit_of_measure}
                         onChange={(e) => updateClaimItem(idx, "unit_of_measure", e.target.value)}
                       >
@@ -1551,7 +1546,7 @@ export default function PaymentClaimsPage() {
                       <input
                         type="number"
                         step="0.01"
-                        className="input text-xs w-full text-right font-mono py-1"
+                        className="input text-sm w-full text-right font-mono py-1"
                         value={item.unit_rate}
                         onChange={(e) => updateClaimItem(idx, "unit_rate", e.target.value)}
                       />
@@ -1563,7 +1558,7 @@ export default function PaymentClaimsPage() {
                       <input
                         type="number"
                         step="0.01"
-                        className="input text-xs w-full text-right font-mono font-semibold py-1 bg-brand-50/40 dark:bg-slate-800"
+                        className="input text-sm w-full text-right font-mono font-semibold py-1 bg-brand-50/40 dark:bg-slate-800"
                         value={item.current_claim_amount}
                         onChange={(e) => updateClaimItem(idx, "current_claim_amount", e.target.value)}
                       />
@@ -1675,7 +1670,7 @@ export default function PaymentClaimsPage() {
                   <input
                     type="number"
                     step="0.1"
-                    className="input text-xs w-full font-mono"
+                    className="input text-sm w-full font-mono"
                     value={claimForm.retention_percent}
                     onChange={(e) => updateClaimField("retention_percent", e.target.value)}
                   />
@@ -1685,7 +1680,7 @@ export default function PaymentClaimsPage() {
                   <input
                     type="number"
                     step="0.01"
-                    className="input text-xs w-full font-mono text-rose-600 font-semibold"
+                    className="input text-sm w-full font-mono text-rose-600 font-semibold"
                     value={claimForm.retention_deduction}
                     onChange={(e) => updateClaimField("retention_deduction", e.target.value)}
                   />
@@ -1697,7 +1692,7 @@ export default function PaymentClaimsPage() {
                 <input
                   type="number"
                   step="0.01"
-                  className="input text-xs w-full font-mono"
+                  className="input text-sm w-full font-mono"
                   value={claimForm.other_deductions}
                   onChange={(e) => updateClaimField("other_deductions", e.target.value)}
                 />
@@ -1709,7 +1704,7 @@ export default function PaymentClaimsPage() {
                   <input
                     type="number"
                     step="0.1"
-                    className="input text-xs w-full font-mono"
+                    className="input text-sm w-full font-mono"
                     value={claimForm.tax_rate}
                     onChange={(e) => updateClaimField("tax_rate", e.target.value)}
                   />
@@ -1719,7 +1714,7 @@ export default function PaymentClaimsPage() {
                   <input
                     type="number"
                     step="0.01"
-                    className="input text-xs w-full font-mono text-emerald-600 font-semibold"
+                    className="input text-sm w-full font-mono text-emerald-600 font-semibold"
                     value={claimForm.tax_amount}
                     onChange={(e) => updateClaimField("tax_amount", e.target.value)}
                   />
@@ -1767,7 +1762,7 @@ export default function PaymentClaimsPage() {
                 </Link>
                 <button
                   onClick={openInvoiceModal}
-                  className="btn btn-secondary inline-flex items-center gap-1.5 text-xs font-semibold"
+                  className="btn btn-secondary inline-flex items-center gap-1.5 text-sm font-semibold"
                 >
                   <Receipt size={14} /> {claimForm.invoice_no ? "Relink / Change Invoice" : "Generate / Link Invoice"}
                 </button>
@@ -1817,7 +1812,7 @@ export default function PaymentClaimsPage() {
               </div>
               <button
                 onClick={openAssessmentModal}
-                className="btn btn-secondary inline-flex items-center gap-1.5 text-xs font-semibold"
+                className="btn btn-secondary inline-flex items-center gap-1.5 text-sm font-semibold"
               >
                 <Scale size={14} /> Update Assessment
               </button>
@@ -1868,7 +1863,7 @@ export default function PaymentClaimsPage() {
             </h3>
 
             <div className="overflow-x-auto">
-              <table className="table w-full text-xs">
+              <table className="table w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 font-semibold uppercase tracking-wider">
                     <th className="py-2.5 px-3">Date &amp; Time</th>
@@ -1948,7 +1943,7 @@ export default function PaymentClaimsPage() {
                   </label>
                   <input
                     type="text"
-                    className="input text-xs w-full font-mono"
+                    className="input text-sm w-full font-mono"
                     value={assessmentForm.client_assessment_ref}
                     onChange={(e) => setAssessmentForm((prev) => ({ ...prev, client_assessment_ref: e.target.value }))}
                   />
@@ -1959,7 +1954,7 @@ export default function PaymentClaimsPage() {
                   </label>
                   <input
                     type="date"
-                    className="input text-xs w-full"
+                    className="input text-sm w-full"
                     value={assessmentForm.client_assessment_date}
                     onChange={(e) => setAssessmentForm((prev) => ({ ...prev, client_assessment_date: e.target.value }))}
                   />
@@ -1974,7 +1969,7 @@ export default function PaymentClaimsPage() {
                   <input
                     type="number"
                     step="0.01"
-                    className="input text-xs w-full font-mono"
+                    className="input text-sm w-full font-mono"
                     value={assessmentForm.client_assessed_amount}
                     onChange={(e) => setAssessmentForm((prev) => ({ ...prev, client_assessed_amount: e.target.value }))}
                   />
@@ -1986,7 +1981,7 @@ export default function PaymentClaimsPage() {
                   <input
                     type="number"
                     step="0.01"
-                    className="input text-xs w-full font-mono font-semibold text-emerald-600"
+                    className="input text-sm w-full font-mono font-semibold text-emerald-600"
                     value={assessmentForm.client_accepted_amount}
                     onChange={(e) => setAssessmentForm((prev) => ({ ...prev, client_accepted_amount: e.target.value }))}
                   />
@@ -2001,7 +1996,7 @@ export default function PaymentClaimsPage() {
                   <input
                     type="number"
                     step="0.01"
-                    className="input text-xs w-full font-mono text-orange-600"
+                    className="input text-sm w-full font-mono text-orange-600"
                     value={assessmentForm.client_disputed_amount}
                     onChange={(e) => setAssessmentForm((prev) => ({ ...prev, client_disputed_amount: e.target.value }))}
                   />
@@ -2013,7 +2008,7 @@ export default function PaymentClaimsPage() {
                   <input
                     type="number"
                     step="0.01"
-                    className="input text-xs w-full font-mono text-rose-600"
+                    className="input text-sm w-full font-mono text-rose-600"
                     value={assessmentForm.client_rejected_amount}
                     onChange={(e) => setAssessmentForm((prev) => ({ ...prev, client_rejected_amount: e.target.value }))}
                   />
@@ -2026,7 +2021,7 @@ export default function PaymentClaimsPage() {
                 </label>
                 <input
                   type="text"
-                  className="input text-xs w-full"
+                  className="input text-sm w-full"
                   placeholder="e.g. Ing. Kwame Mensah (Client Lead Consultant)"
                   value={assessmentForm.client_representative}
                   onChange={(e) => setAssessmentForm((prev) => ({ ...prev, client_representative: e.target.value }))}
@@ -2039,7 +2034,7 @@ export default function PaymentClaimsPage() {
                 </label>
                 <textarea
                   rows={3}
-                  className="input text-xs w-full"
+                  className="input text-sm w-full"
                   placeholder="Details of client determination, deduction reasons, or agreed milestones..."
                   value={assessmentForm.client_assessment_remarks}
                   onChange={(e) => setAssessmentForm((prev) => ({ ...prev, client_assessment_remarks: e.target.value }))}
@@ -2057,7 +2052,7 @@ export default function PaymentClaimsPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="btn btn-primary text-xs font-semibold"
+                  className="btn btn-primary text-sm font-semibold"
                 >
                   {saving ? "Saving..." : "Record Assessment"}
                 </button>
@@ -2126,7 +2121,7 @@ export default function PaymentClaimsPage() {
                     Select Existing Project Invoice <span className="text-rose-500">*</span>
                   </label>
                   <select
-                    className="input text-xs w-full"
+                    className="input text-sm w-full"
                     value={invoiceModalForm.existing_invoice_id}
                     onChange={(e) => setInvoiceModalForm((p) => ({ ...p, existing_invoice_id: e.target.value }))}
                     required
@@ -2147,7 +2142,7 @@ export default function PaymentClaimsPage() {
                 </label>
                 <textarea
                   rows={3}
-                  className="input text-xs w-full"
+                  className="input text-sm w-full"
                   value={invoiceModalForm.invoice_notes}
                   onChange={(e) => setInvoiceModalForm((p) => ({ ...p, invoice_notes: e.target.value }))}
                 />
@@ -2164,7 +2159,7 @@ export default function PaymentClaimsPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="btn btn-primary text-xs font-semibold"
+                  className="btn btn-primary text-sm font-semibold"
                 >
                   {saving ? "Processing..." : invoiceModalForm.mode === "GENERATE" ? "Generate Invoice" : "Link Invoice"}
                 </button>
@@ -2196,7 +2191,7 @@ export default function PaymentClaimsPage() {
               <h1 className="text-xl font-bold uppercase tracking-wider text-slate-900">
                 Project Payment Claim Statement
               </h1>
-              <p className="text-slate-500">OmniSuite ERP Project Management System</p>
+              <p className="text-slate-500 hidden">OmniSuite ERP Project Management System</p>
             </div>
             <div className="text-right font-mono">
               <div className="font-bold text-sm">Ref: {claimForm.claim_reference}</div>
@@ -2221,7 +2216,7 @@ export default function PaymentClaimsPage() {
             </div>
           </div>
 
-          <table className="w-full border-collapse border border-slate-300 text-xs mb-6">
+          <table className="w-full border-collapse border border-slate-300 text-sm mb-6">
             <thead>
               <tr className="bg-slate-100 font-bold border-b border-slate-300">
                 <th className="border border-slate-300 p-2 text-left">#</th>

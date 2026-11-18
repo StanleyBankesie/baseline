@@ -276,13 +276,7 @@ export default function CreditorsLedgerReportPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={run}
-                className="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5"
-              >
-                <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
-              </button>
+              
               <button
                 type="button"
                 onClick={handleExportExcel}

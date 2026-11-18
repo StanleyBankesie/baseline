@@ -682,7 +682,7 @@ export default function ServiceBillingForm() {
                             <button
                               key={s.id}
                               type="button"
-                              className="w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-b-0 text-xs"
+                              className="w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-b-0 text-sm"
                               onMouseDown={(e) => e.preventDefault()}
                               onClick={() => {
                                 update("supplier_id", String(s.id));
@@ -826,14 +826,14 @@ export default function ServiceBillingForm() {
                   <div className="text-xs font-bold text-brand uppercase tracking-wider">Add Service Item</div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-3 items-end">
                     <div className="md:col-span-4">
-                      <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                         Service Item *
                       </label>
                       <div className="relative">
                         <input
                           id="fm-service-item-search"
                           autoComplete="off"
-                          className="input w-full text-xs"
+                          className="input w-full text-sm"
                           placeholder="Search or enter service..."
                           value={itemQuery}
                           onFocus={() => {
@@ -866,7 +866,7 @@ export default function ServiceBillingForm() {
                                 <button
                                   type="button"
                                   key={o.id}
-                                  className="block w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs border-b border-slate-100 dark:border-slate-800 last:border-b-0"
+                                  className="block w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm border-b border-slate-100 dark:border-slate-800 last:border-b-0"
                                   onMouseDown={(e) => e.preventDefault()}
                                   onClick={() => {
                                     handleNewItemChange({ target: { name: "item_id", value: String(o.id) } });
@@ -883,12 +883,12 @@ export default function ServiceBillingForm() {
                     </div>
 
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                         Category
                       </label>
                       <select
                         name="category"
-                        className="input w-full text-xs"
+                        className="input w-full text-sm"
                         value={newItem.category}
                         onChange={handleNewItemChange}
                       >
@@ -904,7 +904,7 @@ export default function ServiceBillingForm() {
                     </div>
 
                     <div className="md:col-span-1">
-                      <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                         Qty *
                       </label>
                       <input
@@ -912,28 +912,28 @@ export default function ServiceBillingForm() {
                         name="qty"
                         min="1"
                         step="1"
-                        className="input w-full text-xs text-right"
+                        className="input w-full text-sm text-right"
                         value={newItem.qty}
                         onChange={handleNewItemChange}
                       />
                     </div>
 
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                         Rate / Price *
                       </label>
                       <input
                         type="number"
                         name="rate"
                         step="0.01"
-                        className="input w-full text-xs text-right"
+                        className="input w-full text-sm text-right"
                         value={newItem.rate}
                         onChange={handleNewItemChange}
                       />
                     </div>
 
                     <div className="md:col-span-1">
-                      <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                         Disc %
                       </label>
                       <input
@@ -941,14 +941,14 @@ export default function ServiceBillingForm() {
                         name="discount_percent"
                         min="0"
                         max="100"
-                        className="input w-full text-xs text-right"
+                        className="input w-full text-sm text-right"
                         value={newItem.discount_percent}
                         onChange={handleNewItemChange}
                       />
                     </div>
 
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                         Tax Code
                       </label>
                       <div
@@ -978,7 +978,7 @@ export default function ServiceBillingForm() {
                       <button
                         type="button"
                         onClick={addItemToLines}
-                        className="btn-brand text-xs px-4 py-2 flex items-center gap-1.5"
+                        className="btn-brand text-sm px-4 py-2 flex items-center gap-1.5"
                       >
                         <Plus className="w-4 h-4" /> Add Item
                       </button>
@@ -989,7 +989,7 @@ export default function ServiceBillingForm() {
 
               {/* Table of Line Items */}
               <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 mt-4">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-sm">
                   <thead className="bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-800 uppercase tracking-wider text-xs">
                     <tr>
                       <th className="p-3 w-12 text-center">#</th>
@@ -1039,7 +1039,7 @@ export default function ServiceBillingForm() {
                                 <input
                                   type="number"
                                   min="1"
-                                  className="input text-right text-xs w-20 p-1"
+                                  className="input text-right text-sm w-20 p-1"
                                   value={row.qty}
                                   onChange={(e) => handleLineChange(row.id, "qty", Number(e.target.value))}
                                 />
@@ -1052,7 +1052,7 @@ export default function ServiceBillingForm() {
                                 <input
                                   type="number"
                                   step="0.01"
-                                  className="input text-right text-xs w-24 p-1"
+                                  className="input text-right text-sm w-24 p-1"
                                   value={row.rate}
                                   onChange={(e) => handleLineChange(row.id, "rate", Number(e.target.value))}
                                 />
@@ -1201,7 +1201,7 @@ export default function ServiceBillingForm() {
                       <input
                         type="number"
                         step="0.01"
-                        className="input w-28 text-right text-xs p-1 font-mono"
+                        className="input w-28 text-right text-sm p-1 font-mono"
                         value={bill.other_charges}
                         onChange={(e) => update("other_charges", Number(e.target.value))}
                       />
@@ -1234,7 +1234,7 @@ export default function ServiceBillingForm() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="btn-success px-6 py-2 text-xs font-semibold shadow-sm flex items-center gap-2"
+                  className="btn-success px-6 py-2 text-sm font-semibold shadow-sm flex items-center gap-2"
                 >
                   <CheckCircle2 size={16} />
                   {saving ? "Saving Bill..." : "Save Service Bill"}

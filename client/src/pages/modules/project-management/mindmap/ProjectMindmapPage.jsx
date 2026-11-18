@@ -1357,7 +1357,7 @@ export default function ProjectMindmapPage() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+              <h1 className="text-2xl font-bold sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
                 Execution Mindmap &amp; Thought Canvas
               </h1>
             </div>
@@ -1372,7 +1372,7 @@ export default function ProjectMindmapPage() {
           {/* Project Dropdown */}
           <div className="flex items-center gap-2">
             <select
-              className="input text-xs h-9 rounded-xl min-w-[210px] max-w-[290px] border-slate-200 dark:border-slate-700 font-medium"
+              className="input text-sm h-9 rounded-xl min-w-[210px] max-w-[290px] border-slate-200 dark:border-slate-700 font-medium"
               value={selectedProjectId}
               onChange={(e) => {
                 setSelectedProjectId(e.target.value);
@@ -1394,7 +1394,7 @@ export default function ProjectMindmapPage() {
             {selectedProjectId && (
               <div className="flex items-center gap-1.5">
                 <select
-                  className="input text-xs h-9 rounded-xl min-w-[150px] max-w-[220px] font-semibold border-slate-200 dark:border-slate-700 bg-purple-50/40 dark:bg-purple-950/20 text-purple-900 dark:text-purple-200"
+                  className="input text-sm h-9 rounded-xl min-w-[150px] max-w-[220px] font-semibold border-slate-200 dark:border-slate-700 bg-purple-50/40 dark:bg-purple-950/20 text-purple-900 dark:text-purple-200"
                   value={currentMindmapId || ""}
                   onChange={(e) => {
                     const mm = projectMindmaps.find((m) => m.id === e.target.value);
@@ -1422,7 +1422,7 @@ export default function ProjectMindmapPage() {
                 <button
                   type="button"
                   onClick={handleCreateNewMindmap}
-                  className="btn btn-secondary inline-flex items-center gap-1 h-9 px-2.5 rounded-xl text-xs font-semibold shadow-sm shrink-0"
+                  className="btn btn-secondary inline-flex items-center gap-1 h-9 px-2.5 rounded-xl text-sm font-semibold shadow-sm shrink-0"
                   title="Create an additional mindmap for this project"
                 >
                   <Plus size={13} />
@@ -1444,7 +1444,7 @@ export default function ProjectMindmapPage() {
 
             {tasks.length > 0 && (
               <select
-                className="input text-xs h-9 rounded-xl min-w-[190px] max-w-[250px] border-slate-200 dark:border-slate-700"
+                className="input text-sm h-9 rounded-xl min-w-[190px] max-w-[250px] border-slate-200 dark:border-slate-700"
                 value={selectedTaskId}
                 onChange={(e) => {
                   setSelectedTaskId(e.target.value);
@@ -1523,7 +1523,7 @@ export default function ProjectMindmapPage() {
             type="button"
             onClick={handleUndo}
             disabled={!canUndo}
-            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs h-8 px-2.5 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed shadow-sm font-semibold transition-all"
+            className="btn btn-secondary inline-flex items-center gap-1.5 text-sm h-8 px-2.5 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed shadow-sm font-semibold transition-all"
             title="Move back to previous change (Undo - Ctrl+Z)"
           >
             <Undo2 size={13} />
@@ -1535,7 +1535,7 @@ export default function ProjectMindmapPage() {
             type="button"
             onClick={handleRedo}
             disabled={!canRedo}
-            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs h-8 px-2.5 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed shadow-sm font-semibold transition-all"
+            className="btn btn-secondary inline-flex items-center gap-1.5 text-sm h-8 px-2.5 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed shadow-sm font-semibold transition-all"
             title="Move forward to next change (Redo - Ctrl+Y)"
           >
             <Redo2 size={13} />
@@ -1545,7 +1545,7 @@ export default function ProjectMindmapPage() {
           <button
             type="button"
             onClick={resetMindmap}
-            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs h-8 px-2.5 rounded-xl text-slate-500 hover:text-rose-600"
+            className="btn btn-secondary inline-flex items-center gap-1.5 text-sm h-8 px-2.5 rounded-xl text-slate-500 hover:text-rose-600"
             title="Clear canvas back to empty starter"
           >
             <RefreshCw size={12} /> Clear
@@ -1557,7 +1557,7 @@ export default function ProjectMindmapPage() {
           <button
             type="button"
             onClick={copyThoughtsToClipboard}
-            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs h-8 px-3 rounded-xl shadow-sm text-slate-600 dark:text-slate-300"
+            className="btn btn-secondary inline-flex items-center gap-1.5 text-sm h-8 px-3 rounded-xl shadow-sm text-slate-600 dark:text-slate-300"
             title="Copy thoughts as formatted execution checklist/deliverables"
           >
             <Copy size={13} />
@@ -1681,7 +1681,7 @@ export default function ProjectMindmapPage() {
                 </label>
                 <input
                   type="text"
-                  className="input w-full text-xs rounded-xl"
+                  className="input w-full text-sm rounded-xl"
                   placeholder="e.g. Safety &amp; Compliance, Design Review, Milestones..."
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
@@ -1719,14 +1719,14 @@ export default function ProjectMindmapPage() {
               <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
-                  className="btn btn-secondary text-xs h-9 px-4 rounded-xl"
+                  className="btn btn-secondary text-sm h-9 px-4 rounded-xl"
                   onClick={() => setShowCategoryModal(false)}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="btn btn-primary text-xs h-9 px-4 rounded-xl flex items-center gap-1.5"
+                  className="btn btn-primary text-sm h-9 px-4 rounded-xl flex items-center gap-1.5"
                 >
                   <Plus size={14} /> Create Category
                 </button>

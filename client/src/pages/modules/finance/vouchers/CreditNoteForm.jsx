@@ -3586,8 +3586,8 @@ export default function CreditNoteForm() {
                           type="number"
                           min="0"
                           step="any"
-                          value={cnTotalAmount}
-                          onChange={(e) => setCnTotalAmount(e.target.value)}
+                          value={cnAmount}
+                          onChange={(e) => setCnAmount(e.target.value)}
                           placeholder="Amount"
                           required
                           disabled={readOnly}
@@ -3605,7 +3605,7 @@ export default function CreditNoteForm() {
                         <label className="label">Total Amount</label>
                         <input
                           className="input bg-white dark:bg-slate-900 font-semibold text-brand"
-                          value={`GH₵ ${(Number(cnTotalAmount || 0) * Number(dncnExchangeRate || 1)).toFixed(2)}`}
+                          value={`GH₵ ${(Number(cnAmount || 0) * Number(dncnExchangeRate || 1)).toFixed(2)}`}
                           readOnly
                         />
                       </div>
@@ -3619,8 +3619,9 @@ export default function CreditNoteForm() {
                           <input
                             className="input font-medium"
                             value={
-                              payees.find((p) => String(p.id) === String(selectedPayeeId))?.name ||
-                              (accounts.find((a) => String(a.id) === String(cnPayerAccountId))?.name) ||
+                              payees.find((p) => String(p.id) === String(cnCustomerId))?.name ||
+                              (accounts.find((a) => String(a.id) === String(cnCustomerId))?.name) ||
+                              cnCustomerName ||
                               "-"
                             }
                             disabled
@@ -3628,9 +3629,15 @@ export default function CreditNoteForm() {
                         ) : (
                           <select
                             className="input"
-                            value={selectedPayeeId}
+                            value={cnCustomerId}
                             onChange={(e) => {
-                              setSelectedPayeeId(e.target.value);
+                              const val = e.target.value;
+                              setCnCustomerId(val);
+                              const selected = payees.find((p) => String(p.id) === String(val));
+                              if (selected) {
+                                setCnCustomerCode(selected.code || "");
+                                setCnCustomerName(selected.name || "");
+                              }
                             }}
                             required
                           >
@@ -3648,14 +3655,14 @@ export default function CreditNoteForm() {
                         {readOnly ? (
                           <input
                             className="input"
-                            value={accounts.find((a) => String(a.id) === String(cnPayerAccountId))?.name || "-"}
+                            value={accounts.find((a) => String(a.id) === String(cnSalesAccountId))?.name || "-"}
                             disabled
                           />
                         ) : (
                           <select
                             className="input"
-                            value={cnPayerAccountId}
-                            onChange={(e) => setCnPayerAccountId(e.target.value)}
+                            value={cnSalesAccountId}
+                            onChange={(e) => setCnSalesAccountId(e.target.value)}
                             required
                           >
                             <option value="">Select ledger account</option>

@@ -175,13 +175,7 @@ export default function AssetDisposalsPage() {
             <option value="OTHER">Other</option>
           </select>
 
-          <button
-            onClick={fetchDisposals}
-            className="p-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-600 dark:text-slate-300 transition-colors"
-            title="Refresh List"
-          >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-          </button>
+          
         </div>
       </div>
 
@@ -289,7 +283,7 @@ export default function AssetDisposalsPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Select Active Asset to Dispose *
                 </label>
                 <select
@@ -326,7 +320,7 @@ export default function AssetDisposalsPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Disposal Type *
                   </label>
                   <select
@@ -342,7 +336,7 @@ export default function AssetDisposalsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Disposal Date *
                   </label>
                   <input
@@ -357,7 +351,7 @@ export default function AssetDisposalsPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Gross Sale Proceeds
                   </label>
                   <input
@@ -370,7 +364,7 @@ export default function AssetDisposalsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Disposal / Removal Cost
                   </label>
                   <input
@@ -396,7 +390,7 @@ export default function AssetDisposalsPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Buyer or Recipient Name
                 </label>
                 <input
